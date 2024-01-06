@@ -15,34 +15,6 @@ export class TableButtonPlugin implements IEditorModule {
     });
   }
 
-  // public reloadTables(core: EditorCore): void {
-  //   const editor = core.editor.getEditorElement();
-  //   if (!editor) return;
-  //
-  //   const tables = editor.querySelectorAll('table');
-  //   tables.forEach((table: HTMLTableElement) => {
-  //     // Проверяем, есть ли у таблицы уже обработчики
-  //     const listener = table.getAttribute('listener')
-  //     console.log(listener)
-  //     if (!table.onclick) {
-  //       Array.from(table.querySelectorAll('td')).forEach(cell => {
-  //         this.addResizeHandleToCell(cell as HTMLElement);
-  //       });
-  //
-  //       table.onclick = () => {}
-  //
-  //       table.addEventListener('contextmenu', (event: MouseEvent) => {
-  //         if (event.target instanceof HTMLTableCellElement) {
-  //           this.currentCell = event.target;
-  //         }
-  //         event.preventDefault(); // Предотвращение стандартного контекстного меню
-  //         this.showPopup(event.pageX, event.pageY, table, core);
-  //       });
-  //     }
-  //   });
-  // }
-
-
   public reloadTables(core: EditorCore): void {
     const editor = core.editor.getEditorElement();
     if (!editor) return;
