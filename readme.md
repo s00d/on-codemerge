@@ -66,6 +66,41 @@ class CustomPlugin implements IEditorModule {
 editor.registerModule(new CustomPlugin());
 ```
 
+## Plugins Description
+
+### BoldButton Plugin
+- **Purpose**: Adds bold text functionality to the editor.
+
+### TableButton Plugin
+- **Purpose**: Allows users to insert and manage tables within the editor.
+
+### UndoButton Plugin
+- **Purpose**: Provides undo functionality.
+
+### ListButton Plugin
+- **Purpose**: Enables creating and editing ordered and unordered lists.
+
+### SpacerButton Plugin
+- **Purpose**: Allows adding space between toolbar buttons for better UI organization.
+
+### TextDecorationButton Plugin
+- **Purpose**: Provides options for text decoration like underline, strikethrough, etc.
+
+### TextStylingButton Plugin
+- **Purpose**: Adds styling options such as font size, font family, text color, and background color.
+
+### UndoRedoButton Plugin
+- **Purpose**: Implements both undo and redo functionalities.
+
+### AlignButton Plugin
+- **Purpose**: Offers text alignment options including left, center, right, and justify.
+
+## Usage
+Each plugin can be imported and added to the editor core based on the specific requirements of your application. They are designed to be modular and flexible, allowing for a custom-tailored editor experience.
+
+For more detailed usage and configuration options, refer to the individual plugin documentation.
+
+
 #### Contribution
 
 Contributions to the editor are welcome. Please ensure that custom plugins and features adhere to the project's architecture and coding standards.
