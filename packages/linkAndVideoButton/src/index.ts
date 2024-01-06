@@ -1,6 +1,7 @@
 import {EditorCore, IEditorModule} from "@/index";
 
 export class LinkAndVideoPlugin implements IEditorModule {
+  private links: Map<string, HTMLElement>  = new Map();
   initialize(core: EditorCore): void {
     this.createButton(core, 'Insert Link', () => this.insertLink(core));
     this.createButton(core, 'Insert Video', () => this.insertVideo(core));
@@ -42,6 +43,37 @@ export class LinkAndVideoPlugin implements IEditorModule {
     styleSheet.type = "text/css";
     styleSheet.innerText = css;
     document.head.appendChild(styleSheet);
+
+    core.subscribeToContentChange((newContent: string) => {
+      const editor = core.editor.getEditorElement();
+      if (!editor) return;
+
+      editor.querySelectorAll('a, iframe').forEach((element: any) => {
+        const url = element.tagName === 'A' ? element.getAttribute('href') : element.getAttribute('src');
+        const isUrl = element.tagName === 'A';
+
+        console.log(url, this.links.has(url))
+
+        // if (!this.links.has(url)) {
+        //   this.links.set(element, element);
+        //
+        //   if(isUrl) {
+        //     element.addEventListener('click', () => {
+        //       this.createModal((url, text) => {
+        //         element.src = url;
+        //       }, element.src)
+        //     })
+        //   } else {
+        //     element.addEventListener('click', () => {
+        //       this.createModal((url, text) => {
+        //         element.href = url;
+        //         element.textContent = text || url;
+        //       }, element.href, element.textContent?.toString())
+        //     })
+        //   }
+        // }
+      });
+    });
   }
 
   private createButton(core: EditorCore, title: string, action: () => void): void {
@@ -67,9 +99,11 @@ export class LinkAndVideoPlugin implements IEditorModule {
         this.createModal((url, text) => {
           link.href = url;
           link.textContent = text || url;
+          this.links.set(url, link);
         }, link.href, link.textContent?.toString())
       })
       this.insertHTMLIntoEditor(core, link);
+      this.links.set(url, link);
     });
   }
 
@@ -87,9 +121,11 @@ export class LinkAndVideoPlugin implements IEditorModule {
       iframe.addEventListener('click', (e) => {
         this.createModal((url, text) => {
           iframe.src = url;
+          this.links.set(url, iframe);
         }, iframe.src)
       })
       this.insertHTMLIntoEditor(core, iframe);
+      this.links.set(url, iframe);
     });
   }
 

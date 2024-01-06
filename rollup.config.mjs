@@ -44,9 +44,9 @@ async function getConfig() {
     return entryPoints.map(entry => ({
         input: path.resolve(dirname, entry === 'main' ? `src/index.ts` : `packages/${entry}/src/index.ts`),
         output: [
-            { file: `dist/${entry}.esm.js`, format: 'esm', sourcemap: true },
-            { file: `dist/${entry}.iife.js`, format: 'iife', sourcemap: true, name: entry },
-            { file: `dist/${entry}.umd.js`, format: 'umd', name: 'AllofMerge', sourcemap: true }
+            { file: `dist/${entry}.esm.js`, format: 'esm', sourcemap: true, exports: 'named' },
+            { file: `dist/${entry}.iife.js`, format: 'iife', sourcemap: true, name: entry, exports: 'named' },
+            { file: `dist/${entry}.umd.js`, format: 'umd', name: 'AllofMerge', sourcemap: true, exports: 'named' }
         ],
         plugins: [
             resolve({ extensions }),
@@ -58,7 +58,7 @@ async function getConfig() {
                 tsconfig: './tsconfig.json',
                 clean: true,
                 useTsconfigDeclarationDir: true,
-                objectHashIgnoreUnknownHack: true,
+                objectHashIgnoreUnknownHack: false,
                 declarationDir: `dist/${entry}`
 
             }),

@@ -34,6 +34,42 @@
       "require": "./dist/plugins/undoButton.cjs.js",
       "browser": "./dist/plugins/undoButton.browser.js",
       "types": "./dist/types/packages/undoButton/src/index.d.ts"
+    },
+    "./listButton": {
+      "import": "./dist/plugins/listButton.esm.js",
+      "require": "./dist/plugins/listButton.cjs.js",
+      "browser": "./dist/plugins/listButton.browser.js",
+      "types": "./dist/types/packages/listButton/src/index.d.ts"
+    },
+    "./spacerButton": {
+      "import": "./dist/plugins/spacerButton.esm.js",
+      "require": "./dist/plugins/spacerButton.cjs.js",
+      "browser": "./dist/plugins/spacerButton.browser.js",
+      "types": "./dist/types/packages/spacerButton/src/index.d.ts"
+    },
+    "./textDecorationButton": {
+      "import": "./dist/plugins/textDecorationButton.esm.js",
+      "require": "./dist/plugins/textDecorationButton.cjs.js",
+      "browser": "./dist/plugins/textDecorationButton.browser.js",
+      "types": "./dist/types/packages/textDecorationButton/src/index.d.ts"
+    },
+    "./textStylingButton": {
+      "import": "./dist/plugins/textStylingButton.esm.js",
+      "require": "./dist/plugins/textStylingButton.cjs.js",
+      "browser": "./dist/plugins/textStylingButton.browser.js",
+      "types": "./dist/types/packages/textStylingButton/src/index.d.ts"
+    },
+    "./undoRedoButton": {
+      "import": "./dist/plugins/undoRedoButton.esm.js",
+      "require": "./dist/plugins/undoRedoButton.cjs.js",
+      "browser": "./dist/plugins/undoRedoButton.browser.js",
+      "types": "./dist/types/packages/undoRedoButton/src/index.d.ts"
+    },
+    "./alignButton": {
+      "import": "./dist/plugins/alignButton.esm.js",
+      "require": "./dist/plugins/alignButton.cjs.js",
+      "browser": "./dist/plugins/alignButton.browser.js",
+      "types": "./dist/types/packages/alignButton/src/index.d.ts"
     }
   },
   "workspaces": [
