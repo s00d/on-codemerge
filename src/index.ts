@@ -5,14 +5,59 @@ import './styles.scss';
 
 export class EditorState {
   private content: string = '';
+  private history: string[] = [];
+  private future: string[] = [];
+  private readonly limit = 30;
 
   getContent(): string {
     return this.content;
   }
 
   setContent(newContent: string): void {
+    this.future = []; // Очистить будущее при каждом новом изменении
+    this.history.push(this.content); // Сохраняем текущее состояние в историю
+
+    if (this.history.length > this.limit) {
+      this.history.shift(); // Удаляем самый старый элемент, если превышен лимит
+    }
+
     this.content = newContent;
-    // Триггер событий, если необходимо
+  }
+
+  isUndo() {
+    return this.history.length > 0
+  }
+
+  isRedo() {
+    return this.future.length > 0
+  }
+
+  undo(): string {
+    if (this.history.length > 0) {
+      const state = this.history.pop();
+      this.future.push(this.content);
+
+      if (this.future.length > this.limit) {
+        this.future.shift(); // Аналогично для массива future
+      }
+
+      return this.content = state || '';
+    }
+    return this.getContent()
+  }
+
+  redo(): string {
+    if (this.future.length > 0) {
+      const state = this.future.pop();
+      this.history.push(this.content);
+
+      if (this.history.length > this.limit) {
+        this.history.shift(); // Аналогично для массива history
+      }
+
+      return this.content = state || '';
+    }
+    return this.getContent()
   }
 
   // Другие методы для управления состоянием
@@ -53,6 +98,7 @@ export class EditorCore {
   public popup: SelectionPopupPlugin;
   public editor: EditorPlugin;
   public history: string[] = []
+  public currentSelectionRange: Range | null = null;
 
   constructor(appElement: HTMLElement) {
     this.state = new EditorState();
@@ -70,6 +116,58 @@ export class EditorCore {
     this.registerModule(this.toolbar);
     this.registerModule(this.popup);
     this.registerModule(this.editor);
+
+    this.generalElement.addEventListener('keydown', this.handleKeydown);
+  }
+
+  saveCurrentSelection() {
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      this.currentSelectionRange = selection.getRangeAt(0);
+    } else {
+      this.currentSelectionRange = null;
+    }
+  }
+
+  restoreCurrentSelection() {
+    if (this.currentSelectionRange) {
+      const selection = window.getSelection();
+      if(!selection) return;
+      selection.removeAllRanges();
+      selection.addRange(this.currentSelectionRange);
+      this.appElement.focus();
+    }
+  }
+
+  private handleKeydown = (event: KeyboardEvent): void => {
+    const isUndo = (event.ctrlKey || event.metaKey) && event.key === 'z' && !event.shiftKey;
+    const isRedo = (event.ctrlKey || event.metaKey) && event.key === 'z' && event.shiftKey;
+
+    if (isUndo) {
+      this.undo();
+    } else if (isRedo) {
+      this.redo();
+    }
+  }
+
+  undo() {
+    const newContent = this.state.undo();
+    this.setContent(this.state.getContent());
+    this.eventManager.publish('contentChanged', newContent);
+  }
+
+  redo() {
+    const newContent = this.state.redo();
+    this.setContent(this.state.getContent());
+    this.eventManager.publish('contentChanged', newContent);
+  }
+
+  isUndo() {
+    return this.state.isUndo()
+  }
+
+  isRedo() {
+    return this.state.isRedo()
   }
 
   private applyStyles(): void {

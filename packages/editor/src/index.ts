@@ -10,7 +10,6 @@ export class EditorPlugin implements IEditorModule {
     this.editorElement.contentEditable = 'true';
     this.editorElement.innerText = core.getContent();
     core.appElement.appendChild(this.editorElement);
-    console.log(this.editorElement)
 
     this.applyStyles();
 

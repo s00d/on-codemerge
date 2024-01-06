@@ -1,23 +1,28 @@
-import {EditorCore} from "../../../src";
+import {EditorCore} from "@/index";
 
 export default class TableManager {
   private table: HTMLTableElement;
   private core: EditorCore;
   private popupElement: HTMLDivElement;
   private currentCell: HTMLTableCellElement | null = null; // Добавляем текущую выбранную ячейку
-  private onRemove: () => void;
+  private selectedCells: HTMLTableCellElement[] = [];
 
-  constructor(table: HTMLTableElement, core: EditorCore, onRemove: () => void) {
+  private onRemove: () => void;
+  private onUpdate: () => void;
+
+  constructor(table: HTMLTableElement, core: EditorCore, onRemove: () => void, onUpdate: () => any) {
     this.table = table;
     this.core = core;
     this.popupElement = this.createPopup();
     this.initializeTable();
     this.onRemove = onRemove;
+    this.onUpdate = onUpdate;
   }
 
   private initializeTable(): void {
     Array.from(this.table.querySelectorAll('td')).forEach(cell => {
       this.addResizeHandleToCell(cell);
+      cell.addEventListener('click', this.onCellClick);
     });
 
     this.table.addEventListener('contextmenu', (event: MouseEvent) => {
@@ -28,6 +33,22 @@ export default class TableManager {
       }
     });
   }
+
+  private onCellClick = (event: MouseEvent): void => {
+    const cell = event.target as HTMLTableCellElement;
+    if (event.shiftKey) {
+      // Если нажата клавиша Ctrl, добавляем/удаляем ячейку из списка выбранных
+      const cellIndex = this.selectedCells.indexOf(cell);
+      if (cellIndex === -1) {
+        this.selectedCells.push(cell);
+        // Можно добавить визуальное выделение ячейки
+        cell.classList.add('selected');
+      } else {
+        this.selectedCells.splice(cellIndex, 1);
+        cell.classList.remove('selected');
+      }
+    }
+  };
 
   private createPopup(): HTMLDivElement {
     const popup = document.createElement('div');
@@ -46,13 +67,29 @@ export default class TableManager {
     this.createButton('Remove Row', () => this.removeRow(), popup);
     this.createButton('Remove Column', () => this.removeColumn(), popup);
     this.createButton('Delete Table', () => this.removeTable(), popup);
+    this.createButton('Merge Cells', () => this.mergeCells(), popup);
+
+    const bgColorInput = document.createElement('input');
+    bgColorInput.type = 'color';
+    bgColorInput.addEventListener('input', () => {
+      this.setStyleToSelectedCells('backgroundColor', bgColorInput.value);
+      this.onUpdate()
+    });
+    popup.appendChild(bgColorInput);
 
     return popup;
+  }
+
+  private setStyleToSelectedCells(styleProperty: string, value: string): void {
+    this.selectedCells.forEach(cell => {
+      cell.style[styleProperty as any] = value;
+    });
   }
 
   private createButton(text: string, action: () => void, popup: HTMLElement) {
     const button = document.createElement('button');
     button.textContent = text;
+    button.classList.add('on-codemerge-button');
     button.addEventListener('click', () => {
       action();
       this.hidePopup();
@@ -64,17 +101,31 @@ export default class TableManager {
     event.preventDefault();
     this.currentCell = cell; // Устанавливаем текущую ячейку
     this.showPopup(event.pageX, event.pageY, cell);
+
+    if (this.selectedCells.indexOf(cell) === -1) {
+      this.selectedCells.push(cell);
+    }
   }
 
   private showPopup(x: number, y: number, cell: HTMLTableCellElement): void {
     this.popupElement.style.left = `${x}px`;
     this.popupElement.style.top = `${y}px`;
     this.popupElement.style.display = 'block';
+
+    document.addEventListener('click', this.onDocumentClick);
   }
 
   private hidePopup(): void {
     this.popupElement.style.display = 'none';
+    document.removeEventListener('click', this.onDocumentClick);
   }
+
+  private onDocumentClick = (event: MouseEvent): void => {
+    // Проверяем, что клик произошел вне попапа
+    if (!this.popupElement.contains(event.target as Node)) {
+      this.hidePopup();
+    }
+  };
 
   private addResizeHandleToCell(cell: HTMLElement): void {
     const resizer = document.createElement('div');
@@ -99,10 +150,60 @@ export default class TableManager {
     const stopDrag = () => {
       document.documentElement.removeEventListener('mousemove', doDrag, false);
       document.documentElement.removeEventListener('mouseup', stopDrag, false);
+      this.onUpdate();
     };
 
     document.documentElement.addEventListener('mousemove', doDrag, false);
     document.documentElement.addEventListener('mouseup', stopDrag, false);
+  }
+
+
+  private mergeCells(): void {
+    if (this.selectedCells.length >= 1) {
+      const firstCell = this.selectedCells[0];
+      // Проверяем, объединены ли ячейки
+      if (firstCell.colSpan > 1 || firstCell.rowSpan > 1) {
+        const colSpan = firstCell.colSpan;
+        const rowSpan = firstCell.rowSpan;
+        // Разъединяем ячейки
+        firstCell.colSpan = 1;
+        firstCell.rowSpan = 1;
+        // Воссоздаем ячейки, которые были объединены
+        // Воссоздание горизонтально объединенных ячеек
+        for (let i = 1; i < colSpan; i++) {
+          const raw = firstCell.parentElement! as HTMLTableRowElement
+          const newCell = raw.insertCell(firstCell.cellIndex + 1);
+          // Установите начальное содержимое и другие атрибуты для newCell
+        }
+
+        // Воссоздание вертикально объединенных ячеек
+        if (rowSpan > 1) {
+          const raw = firstCell.parentElement! as HTMLTableRowElement
+          const rowIndex = raw.rowIndex;
+          for (let i = 1; i < rowSpan; i++) {
+            const newRow = this.table.insertRow(rowIndex + i);
+            const newCell = newRow.insertCell(0);
+            newCell.colSpan = colSpan;
+            // Установите начальное содержимое и другие атрибуты для newCell
+          }
+        }
+      } else {
+        // Объединяем ячейки
+        firstCell.colSpan = this.selectedCells.length;
+        this.selectedCells.slice(1).forEach(cell => {
+          // @ts-ignore
+          firstCell.appendChild(...Array.from(cell.childNodes) as Node[]);
+          cell.remove();
+        });
+      }
+
+      this.selectedCells.forEach(cell => cell.classList.remove('selected'));
+
+      // Очищаем массив выбранных ячеек после объединения или разъединения
+      this.selectedCells = [];
+    }
+
+    this.onUpdate();
   }
 
   public createHeaders(cols: number): void {
@@ -133,6 +234,7 @@ export default class TableManager {
         this.addResizeHandleToCell(newCell);
       }
     }
+    this.onUpdate();
   }
 
   private addColumn(): void {
@@ -151,6 +253,7 @@ export default class TableManager {
     const parent =  this.currentCell.parentElement as any
     const rowIndex = parent.rowIndex;
     this.table.deleteRow(rowIndex); // Удаляем текущую выбранную строку
+    this.onUpdate();
   }
 
   private removeColumn(): void {
@@ -160,6 +263,7 @@ export default class TableManager {
     Array.from(this.table.rows).forEach((row: any) => {
       if (row.cells.length > 1) row.deleteCell(colIndex); // Удаляем текущую выбранную колонку
     });
+    this.onUpdate();
   }
 
   private removeTable(): void {

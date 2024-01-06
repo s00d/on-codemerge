@@ -28,6 +28,12 @@
       "require": "./dist/plugins/tableButton.cjs.js",
       "browser": "./dist/plugins/tableButton.browser.js",
       "types": "./dist/types/packages/tableButton/src/index.d.ts"
+    },
+    "./undoButton": {
+      "import": "./dist/plugins/undoButton.esm.js",
+      "require": "./dist/plugins/undoButton.cjs.js",
+      "browser": "./dist/plugins/undoButton.browser.js",
+      "types": "./dist/types/packages/undoButton/src/index.d.ts"
     }
   },
   "workspaces": [

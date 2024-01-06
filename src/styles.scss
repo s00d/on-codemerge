@@ -40,6 +40,11 @@ body {
       text-align: center;
       position: relative;
 
+      &.selected {
+        border: 2px solid gray;
+        background-color: rgb(225, 225, 225);
+      }
+
       &:after {
 
       }

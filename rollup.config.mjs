@@ -39,7 +39,7 @@ async function getConfig() {
         ]
         : [];
 
-    const entryPoints = ['main', 'boldButton', 'tableButton']; // Добавьте сюда другие точки входа
+    const entryPoints = ['main', 'textDecorationButton', 'tableButton', 'undoRedoButton', 'listButton', 'alignButton', 'spacerButton', 'textStylingButton', 'linkAndVideoButton']; // Добавьте сюда другие точки входа
 
     return entryPoints.map(entry => ({
         input: path.resolve(dirname, entry === 'main' ? `src/index.ts` : `packages/${entry}/src/index.ts`),

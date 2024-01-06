@@ -1,4 +1,4 @@
-import { EditorCore, IEditorModule } from "../../../src";
+import { EditorCore, IEditorModule } from "@/index";
 import TableManager from './TableManager';
 
 export class TableButtonPlugin implements IEditorModule {
@@ -23,7 +23,12 @@ export class TableButtonPlugin implements IEditorModule {
     tables.forEach((table: HTMLTableElement) => {
       if (!this.tableManagerMap.has(table)) {
         // Если для этой таблицы еще нет TableManager, создаем его
-        const tableManager = new TableManager(table, core, () => this.removeTableManager(table));
+        const tableManager = new TableManager(
+          table,
+          core,
+          () => this.removeTableManager(table),
+          () => core.setContent(editor.innerHTML)
+        );
         this.tableManagerMap.set(table, tableManager);
       }
     });
@@ -65,8 +70,14 @@ export class TableButtonPlugin implements IEditorModule {
     const table = document.createElement('table');
     table.classList.add('on-codemerge-table');
 
+    const editor = this.core?.editor.getEditorElement();
     // Создаем экземпляр TableManager для управления таблицей
-    const manager = new TableManager(table, this.core, () => this.removeTableManager(table));
+    const manager = new TableManager(
+      table,
+      this.core,
+      () => this.removeTableManager(table),
+      () => editor && this.core ? this.core.setContent(editor.innerHTML) : null,
+    );
     manager.createHeaders(cols);
 
     for (let i = 0; i < rows; i++) {
