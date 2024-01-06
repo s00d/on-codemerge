@@ -1,0 +1,64 @@
+{
+  "name": "editor-project",
+  "version": "0.0.1",
+  "author": "Pavel Juzmin",
+  "type": "module",
+  "module": "dist/index.esm.js",
+  "main": "dist/index.cjs",
+  "browser": "dist/index.iife.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "import": "./dist/main.esm.js",
+      "require": "./dist/main.cjs.js",
+      "browser": "./dist/main.browser.js",
+      "types": "./dist/types/index.d.ts"
+    },
+    "./boldButton": {
+      "import": "./dist/plugins/boldButton.esm.js",
+      "require": "./dist/plugins/boldButton.cjs.js",
+      "browser": "./dist/plugins/boldButton.browser.js",
+      "types": "./dist/types/packages/boldButton/src/index.d.ts"
+    },
+    "./tableButton": {
+      "import": "./dist/plugins/tableButton.esm.js",
+      "require": "./dist/plugins/tableButton.cjs.js",
+      "browser": "./dist/plugins/tableButton.browser.js",
+      "types": "./dist/types/packages/tableButton/src/index.d.ts"
+    }
+  },
+  "workspaces": [
+    "app"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.4",
+    "@rollup/plugin-commonjs": "^25.0.7",
+    "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.10.6",
+    "rollup": "^4.9.3",
+    "rollup-plugin-filesize": "^10.0.0",
+    "rollup-plugin-livereload": "^2.0.5",
+    "rollup-plugin-postcss": "^4.0.2",
+    "rollup-plugin-progress": "^1.1.2",
+    "rollup-plugin-serve": "^1.1.1",
+    "rollup-plugin-typescript2": "^0.36.0",
+    "sass": "^1.69.7",
+    "tslib": "^2.6.2",
+    "tslint": "^6.1.3",
+    "typescript": "^5.3.3",
+    "vite": "^5.0.11"
+  },
+  "dependencies": {
+    "handsontable": "^14.0.0"
+  }
+}

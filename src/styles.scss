@@ -1,0 +1,48 @@
+// Пример содержимого src/styles.scss
+$body-color: #333;
+
+body {
+  font-family: Arial, sans-serif;
+  color: $body-color;
+}
+
+
+.on-codemerge-button {
+  background-color: #f0f0f0;
+  border: 1px solid #ddd;
+  padding: 5px 10px;
+  margin: 5px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: #e2e2e2;
+  }
+}
+
+.bold {
+  font-weight: bold;
+  color: black; // Пример дополнительного стиля
+}
+
+
+.on-codemerge-table {
+  border-collapse: collapse;
+  width: 100%;
+  tr {
+    th {
+      border: 1px solid black;
+      padding: 8px;
+      background-color: rgb(225, 225, 225);
+    }
+    td {
+      border: 1px solid black;
+      padding: 3px;
+      text-align: center;
+      position: relative;
+
+      &:after {
+
+      }
+    }
+  }
+}
