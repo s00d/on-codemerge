@@ -70,6 +70,36 @@
       "require": "./dist/plugins/alignButton.cjs.js",
       "browser": "./dist/plugins/alignButton.browser.js",
       "types": "./dist/types/packages/alignButton/src/index.d.ts"
+    },
+    "./editor": {
+      "import": "./dist/plugins/editor.esm.js",
+      "require": "./dist/plugins/editor.cjs.js",
+      "browser": "./dist/plugins/editor.browser.js",
+      "types": "./dist/types/packages/editor/src/index.d.ts"
+    },
+    "./linkAndVideoButton": {
+      "import": "./dist/plugins/linkAndVideoButton.esm.js",
+      "require": "./dist/plugins/linkAndVideoButton.cjs.js",
+      "browser": "./dist/plugins/linkAndVideoButton.browser.js",
+      "types": "./dist/types/packages/linkAndVideoButton/src/index.d.ts"
+    },
+    "./popup": {
+      "import": "./dist/plugins/popup.esm.js",
+      "require": "./dist/plugins/popup.cjs.js",
+      "browser": "./dist/plugins/popup.browser.js",
+      "types": "./dist/types/packages/popup/src/index.d.ts"
+    },
+    "./templateButton": {
+      "import": "./dist/plugins/templateButton.esm.js",
+      "require": "./dist/plugins/templateButton.cjs.js",
+      "browser": "./dist/plugins/templateButton.browser.js",
+      "types": "./dist/types/packages/templateButton/src/index.d.ts"
+    },
+    "./toolbar": {
+      "import": "./dist/plugins/toolbar.esm.js",
+      "require": "./dist/plugins/toolbar.cjs.js",
+      "browser": "./dist/plugins/toolbar.browser.js",
+      "types": "./dist/types/packages/toolbar/src/index.d.ts"
     }
   },
   "workspaces": [
@@ -78,6 +108,7 @@
   "scripts": {
     "build": "rollup -c",
     "dev": "vite --config vite.config.ts",
+    "update:exports": "npx tsx ./update_exports.ts ",
     "docs": "vite build"
   },
   "devDependencies": {
@@ -102,8 +133,5 @@
     "tslint": "^6.1.3",
     "typescript": "^5.3.3",
     "vite": "^5.0.11"
-  },
-  "dependencies": {
-    "handsontable": "^14.0.0"
   }
 }

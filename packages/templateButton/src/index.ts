@@ -10,10 +10,10 @@ export class TemplateButtonPlugin implements IEditorModule {
 
   initialize(core: EditorCore): void {
     this.core = core;
-    this.createTemplateButton(core);
+    this.createTemplateButton();
   }
 
-  private createTemplateButton(core: EditorCore): void {
+  private createTemplateButton(): void {
     const button = document.createElement('button');
     button.textContent = 'Choose Template';
     button.classList.add('on-codemerge-button');
@@ -21,11 +21,12 @@ export class TemplateButtonPlugin implements IEditorModule {
     const toolbar = this.core?.toolbar.getToolbarElement();
     toolbar?.appendChild(button);
 
-    const dropdown = this.createDropdown(core);
+    const dropdown = this.createDropdown();
     toolbar?.appendChild(dropdown); // Добавляем выпадающий список в тулбар, а не в кнопку
 
     button.addEventListener('click', () => {
-      core.saveCurrentSelection();
+      this.core?.saveCurrentSelection();
+      this.core?.popup.hidePopup();
       const rect = button.getBoundingClientRect();
       dropdown.style.left = `${rect.left}px`;
       dropdown.style.top = `${rect.bottom}px`;
@@ -40,7 +41,7 @@ export class TemplateButtonPlugin implements IEditorModule {
     });
   }
 
-  private createDropdown(core: EditorCore): HTMLElement {
+  private createDropdown(): HTMLElement {
     const dropdown = document.createElement('div');
     dropdown.classList.add('dropdown-content');
     dropdown.style.position = 'absolute';
@@ -60,7 +61,7 @@ export class TemplateButtonPlugin implements IEditorModule {
       templateOption.style.border = '1px solid #dcdcdc';
       templateOption.textContent = i;
       templateOption.addEventListener('click', () => {
-        core.insertHTMLIntoEditor(this.templates[i]);
+        this.core?.insertHTMLIntoEditor(this.templates[i]);
         dropdown.style.display = 'none';
       });
       dropdown.appendChild(templateOption);
