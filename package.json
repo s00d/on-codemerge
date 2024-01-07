@@ -14,91 +14,79 @@
     ".": {
       "import": "./dist/main.esm.js",
       "require": "./dist/main.cjs.js",
-      "browser": "./dist/main.browser.js",
+      "browser": "./dist/main.iife.js",
       "types": "./dist/types/index.d.ts"
     },
-    "./boldButton": {
-      "import": "./dist/plugins/boldButton.esm.js",
-      "require": "./dist/plugins/boldButton.cjs.js",
-      "browser": "./dist/plugins/boldButton.browser.js",
-      "types": "./dist/types/packages/boldButton/src/index.d.ts"
-    },
     "./tableButton": {
-      "import": "./dist/plugins/tableButton.esm.js",
-      "require": "./dist/plugins/tableButton.cjs.js",
-      "browser": "./dist/plugins/tableButton.browser.js",
+      "import": "./dist/tableButton.esm.js",
+      "require": "./dist/tableButton.cjs.js",
+      "browser": "./dist/tableButton.iife.js",
       "types": "./dist/types/packages/tableButton/src/index.d.ts"
     },
-    "./undoButton": {
-      "import": "./dist/plugins/undoButton.esm.js",
-      "require": "./dist/plugins/undoButton.cjs.js",
-      "browser": "./dist/plugins/undoButton.browser.js",
-      "types": "./dist/types/packages/undoButton/src/index.d.ts"
-    },
     "./listButton": {
-      "import": "./dist/plugins/listButton.esm.js",
-      "require": "./dist/plugins/listButton.cjs.js",
-      "browser": "./dist/plugins/listButton.browser.js",
+      "import": "./dist/listButton.esm.js",
+      "require": "./dist/listButton.cjs.js",
+      "browser": "./dist/listButton.iife.js",
       "types": "./dist/types/packages/listButton/src/index.d.ts"
     },
     "./spacerButton": {
-      "import": "./dist/plugins/spacerButton.esm.js",
-      "require": "./dist/plugins/spacerButton.cjs.js",
-      "browser": "./dist/plugins/spacerButton.browser.js",
+      "import": "./dist/spacerButton.esm.js",
+      "require": "./dist/spacerButton.cjs.js",
+      "browser": "./dist/spacerButton.iife.js",
       "types": "./dist/types/packages/spacerButton/src/index.d.ts"
     },
     "./textDecorationButton": {
-      "import": "./dist/plugins/textDecorationButton.esm.js",
-      "require": "./dist/plugins/textDecorationButton.cjs.js",
-      "browser": "./dist/plugins/textDecorationButton.browser.js",
+      "import": "./dist/textDecorationButton.esm.js",
+      "require": "./dist/textDecorationButton.cjs.js",
+      "browser": "./dist/textDecorationButton.iife.js",
       "types": "./dist/types/packages/textDecorationButton/src/index.d.ts"
     },
     "./textStylingButton": {
-      "import": "./dist/plugins/textStylingButton.esm.js",
-      "require": "./dist/plugins/textStylingButton.cjs.js",
-      "browser": "./dist/plugins/textStylingButton.browser.js",
+      "import": "./dist/textStylingButton.esm.js",
+      "require": "./dist/textStylingButton.cjs.js",
+      "browser": "./dist/textStylingButton.iife.js",
       "types": "./dist/types/packages/textStylingButton/src/index.d.ts"
     },
     "./undoRedoButton": {
-      "import": "./dist/plugins/undoRedoButton.esm.js",
-      "require": "./dist/plugins/undoRedoButton.cjs.js",
-      "browser": "./dist/plugins/undoRedoButton.browser.js",
+      "import": "./dist/undoRedoButton.esm.js",
+      "require": "./dist/undoRedoButton.cjs.js",
+      "browser": "./dist/undoRedoButton.iife.js",
       "types": "./dist/types/packages/undoRedoButton/src/index.d.ts"
     },
     "./alignButton": {
-      "import": "./dist/plugins/alignButton.esm.js",
-      "require": "./dist/plugins/alignButton.cjs.js",
-      "browser": "./dist/plugins/alignButton.browser.js",
+      "import": "./dist/alignButton.esm.js",
+      "require": "./dist/alignButton.cjs.js",
+      "browser": "./dist/alignButton.iife.js",
       "types": "./dist/types/packages/alignButton/src/index.d.ts"
     },
     "./editor": {
-      "import": "./dist/plugins/editor.esm.js",
-      "require": "./dist/plugins/editor.cjs.js",
-      "browser": "./dist/plugins/editor.browser.js",
+      "import": "./dist/editor.esm.js",
+      "require": "./dist/editor.cjs.js",
+      "browser": "./dist/editor.iife.js",
       "types": "./dist/types/packages/editor/src/index.d.ts"
     },
     "./linkAndVideoButton": {
-      "import": "./dist/plugins/linkAndVideoButton.esm.js",
-      "require": "./dist/plugins/linkAndVideoButton.cjs.js",
-      "browser": "./dist/plugins/linkAndVideoButton.browser.js",
+      "import": "./dist/linkAndVideoButton.esm.js",
+      "require": "./dist/linkAndVideoButton.cjs.js",
+      "browser": "./dist/linkAndVideoButton.iife.js",
       "types": "./dist/types/packages/linkAndVideoButton/src/index.d.ts"
     },
     "./popup": {
-      "import": "./dist/plugins/popup.esm.js",
-      "require": "./dist/plugins/popup.cjs.js",
-      "browser": "./dist/plugins/popup.browser.js",
+      "import": "./dist/popup.esm.js",
+      "require": "./dist/popup.cjs.js",
+      "browser": "./dist/popup.iife.js",
       "types": "./dist/types/packages/popup/src/index.d.ts"
     },
     "./templateButton": {
-      "import": "./dist/plugins/templateButton.esm.js",
-      "require": "./dist/plugins/templateButton.cjs.js",
-      "browser": "./dist/plugins/templateButton.browser.js",
+      "import": "./dist/templateButton.esm.js",
+      "require": "./dist/templateButton.cjs.js",
+      "browser": "./dist/templateButton.iife.js",
       "types": "./dist/types/packages/templateButton/src/index.d.ts"
     },
     "./toolbar": {
-      "import": "./dist/plugins/toolbar.esm.js",
-      "require": "./dist/plugins/toolbar.cjs.js",
-      "browser": "./dist/plugins/toolbar.browser.js",
+      "import": "./dist/toolbar.esm.js",
+      "require": "./dist/toolbar.cjs.js",
+      "browser": "./dist/toolbar.iife.js",
       "types": "./dist/types/packages/toolbar/src/index.d.ts"
     }
   },

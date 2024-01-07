@@ -15,9 +15,9 @@ function generateExports() {
       const pluginName = file.name;
       // @ts-ignore
       exports[`./${pluginName}`] = {
-        import: `./dist/plugins/${pluginName}.esm.js`,
-        require: `./dist/plugins/${pluginName}.cjs.js`,
-        browser: `./dist/plugins/${pluginName}.iife.js`,
+        import: `./dist/${pluginName}.esm.js`,
+        require: `./dist/${pluginName}.cjs.js`,
+        browser: `./dist/${pluginName}.iife.js`,
         types: `./dist/types/packages/${pluginName}/src/index.d.ts`
       };
     }
