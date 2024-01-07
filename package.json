@@ -7,8 +7,17 @@
   "main": "dist/main.cjs",
   "browser": "dist/main.iife.js",
   "typings": "dist/types/index.d.ts",
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "vite --config vite.config.ts",
+    "update:exports": "npx tsx ./update_exports.ts ",
+    "docs": "vite build"
+  },
   "files": [
     "dist"
+  ],
+  "workspaces": [
+    "app"
   ],
   "exports": {
     ".": {
@@ -88,16 +97,13 @@
       "require": "./dist/toolbar.cjs.js",
       "browser": "./dist/toolbar.iife.js",
       "types": "./dist/types/packages/toolbar/src/index.d.ts"
+    },
+    "./blockButton": {
+      "import": "./dist/blockButton.esm.js",
+      "require": "./dist/blockButton.cjs.js",
+      "browser": "./dist/blockButton.iife.js",
+      "types": "./dist/types/packages/blockButton/src/index.d.ts"
     }
-  },
-  "workspaces": [
-    "app"
-  ],
-  "scripts": {
-    "build": "rollup -c",
-    "dev": "vite --config vite.config.ts",
-    "update:exports": "npx tsx ./update_exports.ts ",
-    "docs": "vite build"
   },
   "devDependencies": {
     "@rollup/plugin-babel": "^6.0.4",

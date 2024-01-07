@@ -1,4 +1,4 @@
-import {EditorCore, IEditorModule} from "../../../src";
+import {EditorCore, IEditorModule} from "@/index";
 
 export class EditorPlugin implements IEditorModule {
   private editorElement: HTMLDivElement|null = null;
@@ -7,6 +7,7 @@ export class EditorPlugin implements IEditorModule {
   initialize(core: EditorCore): void {
     // Создание и настройка элемента редактора
     this.editorElement = document.createElement('div');
+    this.editorElement.classList.add('on-codemerge')
     this.editorElement.contentEditable = 'true';
     this.editorElement.innerText = core.getContent();
     core.appElement.appendChild(this.editorElement);

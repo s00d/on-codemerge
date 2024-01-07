@@ -13,12 +13,13 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@root/*": ["./*"]
     },
     "lib": ["dom", "es5", "es6", "dom.iterable", "scripthost"],
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "packages/**/*.ts", "index.ts"],
+  "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "packages/**/*.ts", "helpers/**/*.ts", "index.ts"],
   "exclude": ["node_modules"]
 }

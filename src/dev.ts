@@ -8,12 +8,14 @@ import { SpacerButtonPlugin } from '../packages/spacerButton/src';
 import { TextDecorationButtonPlugin } from '../packages/textDecorationButton/src';
 import { LinkAndVideoPlugin } from '../packages/linkAndVideoButton/src';
 import { TemplateButtonPlugin } from '../packages/templateButton/src';
+import { BlockButtonPlugin } from '../packages/blockButton/src';
 
 document.addEventListener('DOMContentLoaded', () => {
   const appElement = document.getElementById('app');
   if (appElement) {
     const editor = new EditorCore(appElement);
     editor.registerModule(new UndoRedoButtonPlugin);
+    editor.registerModule(new BlockButtonPlugin);
     editor.registerModule(new SpacerButtonPlugin);
     editor.registerModule(new TextDecorationButtonPlugin);
     editor.registerModule(new TextStylingPlugin);
