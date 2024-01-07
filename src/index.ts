@@ -118,6 +118,10 @@ export class EditorCore {
     this.registerModule(this.editor);
 
     this.generalElement.addEventListener('keydown', this.handleKeydown);
+
+    setTimeout(() => {
+      this.saveCurrentSelection();
+    }, 10);
   }
 
   saveCurrentSelection() {
@@ -125,8 +129,27 @@ export class EditorCore {
     if (selection && selection.rangeCount > 0) {
       this.currentSelectionRange = selection.getRangeAt(0);
     } else {
-      this.currentSelectionRange = null;
+      // this.currentSelectionRange = null;
+      const editorElement = this.editor.getEditorElement();
+      if (editorElement) {
+        const range = document.createRange();
+        const selection = window.getSelection();
+
+        range.selectNodeContents(editorElement); // Выбрать все содержимое
+        range.collapse(false); // Коллапсировать Range в конец содержимого
+
+        this.currentSelectionRange = range;
+
+        if(!selection) return;
+        // Очистить и установить новое выделение
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
     }
+  }
+
+  getCurrentSelection() {
+    return this.currentSelectionRange;
   }
 
   restoreCurrentSelection() {

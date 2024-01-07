@@ -7,6 +7,7 @@ import { AlignButtonPlugin } from '../packages/alignButton/src';
 import { SpacerButtonPlugin } from '../packages/spacerButton/src';
 import { TextDecorationButtonPlugin } from '../packages/textDecorationButton/src';
 import { LinkAndVideoPlugin } from '../packages/linkAndVideoButton/src';
+import { TemplateButtonPlugin } from '../packages/templateButton/src';
 
 document.addEventListener('DOMContentLoaded', () => {
   const appElement = document.getElementById('app');
@@ -22,6 +23,11 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.registerModule(new AlignButtonPlugin);
     editor.registerModule(new SpacerButtonPlugin);
     editor.registerModule(new LinkAndVideoPlugin);
+    editor.registerModule(new SpacerButtonPlugin);
+    editor.registerModule(new TemplateButtonPlugin({
+      test: 'sssssss ssss ssss',
+      html: '<table class="on-codemerge-table"><thead><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr></thead><tbody><tr><td style="position: relative;">Row 1 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 2 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 3 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 3<div class="on-codemerge-resizer"></div></td></tr></tbody></table>',
+    }));
 
     editor.subscribeToContentChange((newContent: string) => {
 

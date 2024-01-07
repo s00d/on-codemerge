@@ -20,9 +20,12 @@ export default class TableManager {
   }
 
   private initializeTable(): void {
-    Array.from(this.table.querySelectorAll('td')).forEach(cell => {
-      this.addResizeHandleToCell(cell);
-      cell.addEventListener('click', this.onCellClick);
+    Array.from(this.table.querySelectorAll('td, th')).forEach((cell) => {
+      const selectCell = cell as HTMLTableCellElement
+      selectCell.setAttribute('tabindex', '0');
+      this.addResizeHandleToCell(selectCell);
+      selectCell.addEventListener('click', this.onCellClick);
+      selectCell.addEventListener('keydown', this.handleKeyDown);
     });
 
     this.table.addEventListener('contextmenu', (event: MouseEvent) => {
@@ -34,8 +37,32 @@ export default class TableManager {
     });
   }
 
+  private handleKeyDown = (event: KeyboardEvent): void => {
+    if(this.currentCell) {
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'a') {
+        if (this.currentCell) {
+          event.preventDefault();
+          event.stopPropagation();
+          this.selectText(this.currentCell);
+        }
+      }
+    }
+  };
+
+  private selectText(cell: HTMLTableCellElement): void {
+    const range = document.createRange();
+    range.selectNodeContents(cell);
+    const selection = window.getSelection();
+    if(selection) {
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+
   private onCellClick = (event: MouseEvent): void => {
     const cell = event.target as HTMLTableCellElement;
+    cell.focus();
+    this.currentCell = cell;
     if (event.shiftKey) {
       // Если нажата клавиша Ctrl, добавляем/удаляем ячейку из списка выбранных
       const cellIndex = this.selectedCells.indexOf(cell);
@@ -81,9 +108,9 @@ export default class TableManager {
   }
 
   private setStyleToSelectedCells(styleProperty: string, value: string): void {
-    this.selectedCells.forEach(cell => {
-      cell.style[styleProperty as any] = value;
-    });
+    if(this.currentCell) {
+      this.currentCell.style[styleProperty as any] = value;
+    }
   }
 
   private createButton(text: string, action: () => void, popup: HTMLElement) {
