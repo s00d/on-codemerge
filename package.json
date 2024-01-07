@@ -77,7 +77,8 @@
   ],
   "scripts": {
     "build": "rollup -c",
-    "dev": "rollup -c -w"
+    "dev": "vite --config vite.config.ts",
+    "docs": "vite build"
   },
   "devDependencies": {
     "@rollup/plugin-babel": "^6.0.4",
@@ -87,7 +88,9 @@
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/node": "^20.10.6",
+    "lite-server": "^2.6.1",
     "rollup": "^4.9.3",
+    "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-filesize": "^10.0.0",
     "rollup-plugin-livereload": "^2.0.5",
     "rollup-plugin-postcss": "^4.0.2",

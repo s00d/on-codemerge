@@ -52,9 +52,6 @@ export class TextDecorationButtonPlugin implements IEditorModule {
     input.min = '1';
     input.max = '20'; // Устанавливаем разумный диапазон размеров шрифта
 
-    let selection: any = null;
-    let range: any = null;
-
     input.addEventListener('mousedown', () => {
       core.saveCurrentSelection()
     })

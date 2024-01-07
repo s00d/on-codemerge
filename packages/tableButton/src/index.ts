@@ -43,8 +43,8 @@ export class TableButtonPlugin implements IEditorModule {
     style.type = 'text/css';
     style.innerHTML = `
             .on-codemerge-resizer {
-                width: 10px;
-                height: 10px;
+                width: 5px;
+                height: 5px;
                 background: gray;
                 position: absolute;
                 right: 0;

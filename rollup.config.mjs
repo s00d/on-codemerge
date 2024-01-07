@@ -8,8 +8,6 @@ import json from '@rollup/plugin-json';
 import terser from '@rollup/plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 import progress from 'rollup-plugin-progress';
-import serve from 'rollup-plugin-serve';
-import livereload from 'rollup-plugin-livereload';
 import postcss from 'rollup-plugin-postcss';
 import sass from 'sass';
 
@@ -24,20 +22,6 @@ async function getConfig() {
     * Copyright (C) (C) 2012-${new Date().getFullYear()} ${pkg.author}
     * Date: ${new Date().toUTCString()}
     */`;
-
-
-    const devMode = process.env.ROLLUP_WATCH;
-    const devPlugins = devMode
-        ? [
-            serve({
-                // open: true,
-                contentBase: ['dist', 'public'],
-                host: 'localhost',
-                port: 3000
-            }),
-            livereload({ watch: 'dist' })
-        ]
-        : [];
 
     const entryPoints = ['main', 'textDecorationButton', 'tableButton', 'undoRedoButton', 'listButton', 'alignButton', 'spacerButton', 'textStylingButton', 'linkAndVideoButton']; // Добавьте сюда другие точки входа
 
@@ -78,7 +62,6 @@ async function getConfig() {
                 inject: false,
                 extract: true,
             }),
-            ...devPlugins
         ]
     }));
 }
