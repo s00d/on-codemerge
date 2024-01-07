@@ -18,7 +18,8 @@ export class BlockManager {
     this.block = block;
     this.core = core;
     this.onUpdate = onUpdate;
-    this.contextMenu = new ContextMenu();
+    this.contextMenu = new ContextMenu(core);
+    this.contextMenu.setOrientation('horizontal')
     this.modal = new Modal();
     this.styleManager = new StyleManager();
 

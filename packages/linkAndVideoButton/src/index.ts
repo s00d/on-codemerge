@@ -133,7 +133,7 @@ export class LinkAndVideoPlugin implements IEditorModule {
 
   createModal(callback: (url: string, text: string) => void, url = '', text = '') {
     this.core?.saveCurrentSelection();
-    this.core?.popup.hidePopup();
+    this.core?.popup.hide();
 
     // Создаем элементы модального окна
     const modal = document.createElement('div');

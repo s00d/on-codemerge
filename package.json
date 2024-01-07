@@ -80,12 +80,6 @@
       "browser": "./dist/linkAndVideoButton.iife.js",
       "types": "./dist/types/packages/linkAndVideoButton/src/index.d.ts"
     },
-    "./popup": {
-      "import": "./dist/popup.esm.js",
-      "require": "./dist/popup.cjs.js",
-      "browser": "./dist/popup.iife.js",
-      "types": "./dist/types/packages/popup/src/index.d.ts"
-    },
     "./templateButton": {
       "import": "./dist/templateButton.esm.js",
       "require": "./dist/templateButton.cjs.js",

@@ -11,10 +11,8 @@ export class TextStylingPlugin implements IEditorModule {
   }
 
   private createButton(core: EditorCore, title: string, command: string): void {
-    const button = document.createElement('button');
-    button.classList.add('on-codemerge-button');
-    button.textContent = title;
-    button.addEventListener('click', () => {
+    core.popup.addItem(title, () => {
+      core.restoreCurrentSelection();
       const selection = window.getSelection();
       const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
 
@@ -29,11 +27,8 @@ export class TextStylingPlugin implements IEditorModule {
 
       document.execCommand(command, false);
 
-      core.popup.hidePopup();
+      core.popup.hide();
     });
-
-    const popup = core.popup.getPopupElement();
-    if (popup) popup.appendChild(button);
   }
 }
 

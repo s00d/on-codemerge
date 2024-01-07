@@ -3,7 +3,6 @@ import { EditorCore, IEditorModule } from "@/index";
 export class AlignButtonPlugin implements IEditorModule {
   initialize(core: EditorCore): void {
     const toolbar = core.toolbar.getToolbarElement();
-    const popup = core.popup.getPopupElement();
 
     const alignButtons = [
       { align: 'left', text: 'Align Left' },
@@ -13,22 +12,12 @@ export class AlignButtonPlugin implements IEditorModule {
     ];
 
     alignButtons.forEach(({ align, text }) => {
-      const createButton = () => {
-        const button = document.createElement('button');
-        button.classList.add('on-codemerge-button');
-        button.textContent = text;
-        button.addEventListener('click', () => {
-          this.applyAlignment(core, align);
-        });
-        return button;
-      }
-
-      if (toolbar) toolbar.appendChild(createButton());
-      if (popup) popup.appendChild(createButton());
+      core.popup.addItem(text, () => this.applyAlignment(core, align));
     });
   }
 
   private applyAlignment(core: EditorCore, align: string): void {
+    core.restoreCurrentSelection();
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 

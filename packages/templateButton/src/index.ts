@@ -26,7 +26,7 @@ export class TemplateButtonPlugin implements IEditorModule {
 
     button.addEventListener('click', () => {
       this.core?.saveCurrentSelection();
-      this.core?.popup.hidePopup();
+      this.core?.popup.hide();
       const rect = button.getBoundingClientRect();
       dropdown.style.left = `${rect.left}px`;
       dropdown.style.top = `${rect.bottom}px`;

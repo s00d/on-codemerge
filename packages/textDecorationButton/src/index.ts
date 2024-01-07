@@ -16,14 +16,13 @@ export class TextDecorationButtonPlugin implements IEditorModule {
   private createButton(core: EditorCore, title: string, command: string): void {
     const input = document.createElement('input');
     input.type = 'color';
+    input.style.height = '36px';
     input.title = title;
     input.addEventListener('input', () => {
       document.execCommand(command, false, input.value);
     });
 
-
-    const popup = core.popup.getPopupElement();
-    if (popup) popup.appendChild(input);
+    core.popup.addHtmlItem(input);
   }
 
   private createFontPicker(core: EditorCore, title: string): void {
@@ -40,8 +39,7 @@ export class TextDecorationButtonPlugin implements IEditorModule {
       document.execCommand('fontName', false, select.value);
     });
 
-    const popup = core.popup.getPopupElement();
-    if (popup) popup.appendChild(select);
+    core.popup.addHtmlItem(select);
   }
 
   private createFontSizePicker(core: EditorCore, title: string): void {
@@ -63,8 +61,7 @@ export class TextDecorationButtonPlugin implements IEditorModule {
       document.execCommand('fontSize', false, input.value);
     });
 
-    const popup = core.popup.getPopupElement();
-    if (popup) popup.appendChild(input);
+    core.popup.addHtmlItem(input);
   }
 }
 
