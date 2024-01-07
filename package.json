@@ -1,7 +1,7 @@
 {
-  "name": "editor-project",
+  "name": "on-codemerge",
   "version": "0.0.1",
-  "author": "Pavel Juzmin",
+  "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
   "main": "dist/main.cjs",
