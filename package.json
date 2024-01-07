@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "author": "Pavel Juzmin",
   "type": "module",
-  "module": "dist/index.esm.js",
-  "main": "dist/index.cjs",
-  "browser": "dist/index.iife.js",
-  "typings": "dist/index.d.ts",
+  "module": "dist/main.esm.js",
+  "main": "dist/main.cjs",
+  "browser": "dist/main.iife.js",
+  "typings": "dist/types/index.d.ts",
   "files": [
     "dist"
   ],
