@@ -2,7 +2,9 @@ import {EditorCore, IEditorModule} from "@/index";
 
 export class LinkAndVideoPlugin implements IEditorModule {
   private links: Map<string, HTMLElement>  = new Map();
+  private core: EditorCore | undefined;
   initialize(core: EditorCore): void {
+    this.core = core;
     this.createButton(core, 'Insert Link', () => this.insertLink(core));
     this.createButton(core, 'Insert Video', () => this.insertVideo(core));
 
@@ -102,7 +104,7 @@ export class LinkAndVideoPlugin implements IEditorModule {
           this.links.set(url, link);
         }, link.href, link.textContent?.toString())
       })
-      this.insertHTMLIntoEditor(core, link);
+      core.insertHTMLIntoEditor(link);
       this.links.set(url, link);
     });
   }
@@ -124,42 +126,15 @@ export class LinkAndVideoPlugin implements IEditorModule {
           this.links.set(url, iframe);
         }, iframe.src)
       })
-      this.insertHTMLIntoEditor(core, iframe);
+      core.insertHTMLIntoEditor(iframe);
       this.links.set(url, iframe);
     });
   }
 
-  private insertHTMLIntoEditor(core: EditorCore, html: HTMLElement): void {
-    const editor = core.editor.getEditorElement();
-    const selection = window.getSelection();
-
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      let container = range.commonAncestorContainer;
-
-      while (container && container !== editor) {
-        if (!container.parentNode) {
-          editor?.appendChild(html);
-          return;
-        }
-        container = container.parentNode;
-      }
-
-      if (container) {
-        range.deleteContents(); // Удаляем текущее содержимое в выделенном диапазоне
-        range.insertNode(html); // Вставляем таблицу в выделенный диапазон
-      }
-      selection.removeAllRanges();
-    } else if (editor) {
-      // Если нет выделения, вставляем контент в конец редактора
-      editor.appendChild(html);
-    }
-
-    // Обновляем содержимое редактора
-    if (core && editor) core.setContent(editor.innerHTML);
-  }
-
   createModal(callback: (url: string, text: string) => void, url = '', text = '') {
+    this.core?.saveCurrentSelection();
+    this.core?.popup.hidePopup();
+
     // Создаем элементы модального окна
     const modal = document.createElement('div');
     modal.className = 'modal';

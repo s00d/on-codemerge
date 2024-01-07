@@ -21,8 +21,10 @@ export class ListButtonPlugin implements IEditorModule {
   private createList(): void {
     if (!this.core) return;
 
+    this.core.saveCurrentSelection();
+
     const ul = document.createElement('ul');
-    ul.classList.add('on-codemerge-list')
+    ul.classList.add('on-codemerge-list');
     for (let i = 0; i < 3; i++) {
       const li = document.createElement('li');
       li.textContent = `Item ${i + 1}`;
@@ -30,12 +32,7 @@ export class ListButtonPlugin implements IEditorModule {
       ul.appendChild(li);
     }
 
-    const editor = this.core?.editor.getEditorElement();
-    editor?.appendChild(ul);
-    this.core?.setContent(editor?.innerHTML || '');
-
-    const listManager = new ListManager(ul, this.core);
-    this.listManagerMap.set(ul, listManager);
+    this.core.insertHTMLIntoEditor(ul);
   }
 }
 

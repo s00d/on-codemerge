@@ -84,39 +84,10 @@ export class TableButtonPlugin implements IEditorModule {
       manager.addRow(); // Используем TableManager для добавления строк
     }
 
-    this.insertTableIntoEditor(table);
+    this.core.saveCurrentSelection();
+    this.core.insertHTMLIntoEditor(table);
 
     this.tableManagerMap.set(table, manager);
-  }
-
-  private insertTableIntoEditor(table: HTMLTableElement): void {
-    const editor = this.core?.editor.getEditorElement();
-    const selection = window.getSelection();
-
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      let container = range.commonAncestorContainer;
-
-      // Проверяем, что выделение находится внутри редактора
-      while (container && container !== editor) {
-        if (!container.parentNode) {
-          editor?.appendChild(table);
-          return;
-        }
-        container = container.parentNode;
-      }
-
-      if (container) {
-        range.deleteContents(); // Удаляем текущее содержимое в выделенном диапазоне
-        range.insertNode(table); // Вставляем таблицу в выделенный диапазон
-      }
-      selection.removeAllRanges();
-    } else if (editor) {
-      // Если нет выделения, вставляем таблицу в конец редактора
-      editor.appendChild(table);
-    }
-
-    if (this.core && editor) this.core.setContent(editor.innerHTML); // Обновляем содержимое редактора
   }
 }
 

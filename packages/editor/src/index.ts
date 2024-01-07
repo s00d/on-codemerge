@@ -29,6 +29,10 @@ export class EditorPlugin implements IEditorModule {
       this.saveCaretPosition();
       core.setContent(this.editorElement!.innerHTML);
     });
+
+    this.editorElement.addEventListener('blur', () => {
+      core.saveCurrentSelection();
+    });
   }
 
   private applyStyles(): void {

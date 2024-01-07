@@ -125,13 +125,31 @@ export class EditorCore {
   }
 
   saveCurrentSelection() {
-    const selection = window.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      this.currentSelectionRange = selection.getRangeAt(0);
-    } else {
-      // this.currentSelectionRange = null;
-      const editorElement = this.editor.getEditorElement();
-      if (editorElement) {
+    const editorElement = this.editor.getEditorElement();
+    if (editorElement) {
+      const selection = window.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
+        const editorElement = this.editor.getEditorElement();
+
+        let container = range.commonAncestorContainer;
+        // Проверяем, находится ли контейнер выделения в пределах редактора
+        while (container && container !== editorElement) {
+          if (!container.parentNode) {
+            return;
+          }
+          container = container.parentNode;
+        }
+
+        // Если контейнер находится в пределах редактора, сохраняем диапазон
+        if (container) {
+          this.currentSelectionRange = range;
+        } else {
+          this.currentSelectionRange = null;
+        }
+      } else {
+        // this.currentSelectionRange = null;
+
         const range = document.createRange();
         const selection = window.getSelection();
 
@@ -160,6 +178,35 @@ export class EditorCore {
       selection.addRange(this.currentSelectionRange);
       this.appElement.focus();
     }
+  }
+
+  insertHTMLIntoEditor(htmlContent: HTMLElement | string): void {
+    const editor = this.editor.getEditorElement();
+    const currentRange = this.getCurrentSelection();
+
+    // Создаем HTML-элемент, если передана строка
+    const html = typeof htmlContent === 'string' ? (() => {
+      const div = document.createElement('div');
+      div.innerHTML = htmlContent;
+      return div;
+    })() : htmlContent;
+
+    if (currentRange) {
+      currentRange.deleteContents();
+      currentRange.insertNode(html);
+
+      // Обновляем диапазон выделения
+      const selection = window.getSelection();
+      if(selection) {
+        selection.removeAllRanges();
+        selection.addRange(currentRange);
+      }
+    } else if (editor) {
+      editor.appendChild(html);
+    }
+
+    // Обновляем содержимое редактора
+    if(editor) this.setContent(editor.innerHTML);
   }
 
   private handleKeydown = (event: KeyboardEvent): void => {

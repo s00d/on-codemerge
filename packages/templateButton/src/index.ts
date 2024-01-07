@@ -60,36 +60,12 @@ export class TemplateButtonPlugin implements IEditorModule {
       templateOption.style.border = '1px solid #dcdcdc';
       templateOption.textContent = i;
       templateOption.addEventListener('click', () => {
-        this.insertTemplate(this.templates[i], core);
+        core.insertHTMLIntoEditor(this.templates[i]);
         dropdown.style.display = 'none';
       });
       dropdown.appendChild(templateOption);
     }
     return dropdown;
-  }
-
-  private insertTemplate(template: string, core: EditorCore): void {
-    const editor = core.editor.getEditorElement();
-    const currentRange = core.getCurrentSelection();
-
-
-    if (!editor) return;
-
-    if (currentRange) {
-      // Есть сохраненное выделение, вставляем шаблон на это место
-      currentRange.deleteContents();
-
-      const div = document.createElement('div');
-      div.innerHTML = template;
-      currentRange.insertNode(div);
-    } else {
-      // Сохраненного выделения нет, добавляем шаблон в конец редактора
-      editor.innerHTML += template;
-    }
-
-    // Обновление содержимого редактора
-    core.restoreCurrentSelection();
-    core.setContent(editor.innerHTML);
   }
 }
 
