@@ -3,7 +3,7 @@ import TableManager from './TableManager';
 
 export class TableButtonPlugin implements IEditorModule {
   private core: EditorCore | null = null;
-  private tableManagerMap: Map<HTMLTableElement, TableManager> = new Map();
+  private tableManagerMap: Map<string, TableManager> = new Map();
 
   initialize(core: EditorCore): void {
     this.core = core;
@@ -21,7 +21,12 @@ export class TableButtonPlugin implements IEditorModule {
 
     const tables = editor.querySelectorAll('table');
     tables.forEach((table: HTMLTableElement) => {
-      if (!this.tableManagerMap.has(table)) {
+      let blockId = table.id;
+      if (!blockId || blockId === '' || !blockId.startsWith('table-')) {
+        table.id = blockId = 'table-' + Math.random().toString(36).substring(2, 11)
+      }
+
+      if (!this.tableManagerMap.has(blockId)) {
         // Если для этой таблицы еще нет TableManager, создаем его
         const tableManager = new TableManager(
           table,
@@ -29,13 +34,16 @@ export class TableButtonPlugin implements IEditorModule {
           () => this.removeTableManager(table),
           () => core.setContent(editor.innerHTML)
         );
-        this.tableManagerMap.set(table, tableManager);
+        this.tableManagerMap.set(blockId, tableManager);
       }
     });
   }
 
   private removeTableManager(table: HTMLTableElement): void {
-    this.tableManagerMap.delete(table);
+    const tableId = table.id;
+    if (tableId) {
+      this.tableManagerMap.delete(tableId);
+    }
   }
 
   private injectStyles(): void {
@@ -69,6 +77,7 @@ export class TableButtonPlugin implements IEditorModule {
 
     const table = document.createElement('table');
     table.classList.add('on-codemerge-table');
+    table.id = 'table-' + Math.random().toString(36).substring(2, 11)
 
     const editor = this.core?.editor.getEditorElement();
     // Создаем экземпляр TableManager для управления таблицей
@@ -86,8 +95,9 @@ export class TableButtonPlugin implements IEditorModule {
 
     this.core.saveCurrentSelection();
     this.core.insertHTMLIntoEditor(table);
+    this.core.moveCursorToStartOfInsertedContent();
 
-    this.tableManagerMap.set(table, manager);
+    this.tableManagerMap.set(table.id, manager);
   }
 }
 

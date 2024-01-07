@@ -21,7 +21,10 @@ export class BlockButtonPlugin implements IEditorModule {
     const blocks = editor.querySelectorAll('.editor-block');
     blocks.forEach((element: Element) => {
       const block = element as HTMLElement;
-      const blockId = block.id;
+      let blockId = block.id;
+      if (!blockId || blockId === '' || !blockId.startsWith('block-')) {
+        block.id = blockId = 'block-' + Math.random().toString(36).substring(2, 11)
+      }
 
       if (blockId && !this.blockManagerMap.has(blockId)) { // Проверка по идентификатору
         const blockManager = new BlockManager(

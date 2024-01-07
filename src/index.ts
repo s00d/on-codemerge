@@ -206,6 +206,19 @@ export class EditorCore {
     }
   }
 
+  moveCursorToStartOfInsertedContent() {
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    const editor = this.editor.getEditorElement();
+    if (selection && editor?.firstChild) {
+      range.setStartBefore(editor.firstChild);
+      range.collapse(true);
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
   insertHTMLIntoEditor(htmlContent: HTMLElement | string): void {
     const editor = this.editor.getEditorElement();
     const currentRange = this.getCurrentSelection();

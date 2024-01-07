@@ -1,7 +1,6 @@
 import {EditorCore} from "@/index";
 import {ContextMenu} from "@root/helpers/contextMenu";
 import {Modal} from "@root/helpers/modal";
-import {StyleManager} from "@root/packages/tableButton/src/StyleManager";
 
 export class BlockManager {
   private block: HTMLElement;
@@ -12,7 +11,6 @@ export class BlockManager {
   private contextMenu: ContextMenu;
   private modal: Modal;
   private placeholder: HTMLDivElement|null = null;
-  private styleManager: StyleManager;
 
   constructor(block: HTMLElement, core: EditorCore, onUpdate: () => void) {
     this.block = block;
@@ -21,7 +19,6 @@ export class BlockManager {
     this.contextMenu = new ContextMenu(core);
     this.contextMenu.setOrientation('horizontal')
     this.modal = new Modal();
-    this.styleManager = new StyleManager();
 
     this.initContextMenu();
     this.addInitialSections(2); // Начнем с двух секций

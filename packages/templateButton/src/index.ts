@@ -62,6 +62,8 @@ export class TemplateButtonPlugin implements IEditorModule {
       templateOption.textContent = i;
       templateOption.addEventListener('click', () => {
         this.core?.insertHTMLIntoEditor(this.templates[i]);
+        // Перемещаем курсор в начало вставленного контента
+        this.core?.moveCursorToStartOfInsertedContent();
         dropdown.style.display = 'none';
       });
       dropdown.appendChild(templateOption);
