@@ -1,17 +1,13 @@
 import {EditorCore, IEditorModule} from "@/index";
-import CodeMirror from 'codemirror';
 
-// Подключение стилей и аддонов CodeMirror
-import 'codemirror/lib/codemirror.css';
-import 'codemirror/theme/material-darker.css';
-import 'codemirror/mode/htmlmixed/htmlmixed.js';
-import 'codemirror/addon/edit/closetag';
-import 'codemirror/addon/edit/matchtags';
-import 'codemirror/addon/edit/matchbrackets';
+import ace from "brace";
+
+import "brace/mode/html";
+import "brace/theme/github";
 
 export class CodeEditorPlugin implements IEditorModule {
   private core: EditorCore | null = null;
-  private editor: CodeMirror.EditorFromTextArea | null = null;
+  private editor: any | null = null;
   private modal: HTMLDivElement | null = null;
   private overlay: HTMLDivElement | null = null;
 
@@ -27,6 +23,8 @@ export class CodeEditorPlugin implements IEditorModule {
   }
 
   private createModal(): void {
+    // ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/');
+
     this.modal = document.createElement('div');
     this.modal.classList.add('code-editor-modal');
     this.modal.style.display = 'none';
@@ -42,24 +40,19 @@ export class CodeEditorPlugin implements IEditorModule {
     closeButton.classList.add('modal-close-button');
     closeButton.onclick = () => this.closeModal();
 
-    const textarea = document.createElement('textarea');
-    this.modal.appendChild(textarea);
     this.modal.appendChild(closeButton); // Добавляем кнопку закрытия в модальное окно
     document.body.appendChild(this.modal);
     document.body.appendChild(this.overlay);
 
+    const editorDiv = document.createElement('div');
+    editorDiv.style.height = '300px'; // Установите высоту редактора
+    editorDiv.style.width = '100%'; // Установите ширину редактора
+    this.modal.appendChild(editorDiv);
 
-    this.editor = CodeMirror.fromTextArea(textarea, {
-      mode: 'htmlmixed',
-      theme: 'material-darker',
-      lineNumbers: true,
-      autoCloseTags: true,
-      matchTags: {bothTags: true},
-      matchBrackets: true,
-      tabSize: 2,
-      indentWithTabs: false,
-      lineWrapping: true,
-    });
+    this.editor = ace.edit(editorDiv);
+    this.editor.getSession().setMode('ace/mode/html');
+    this.editor.setTheme('ace/theme/github');
+    this.editor.$blockScrolling = Infinity
 
     document.body.appendChild(this.modal);
   }

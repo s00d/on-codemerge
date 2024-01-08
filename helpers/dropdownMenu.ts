@@ -13,7 +13,7 @@ export class DropdownMenu {
     this.button = document.createElement('div');
     this.button.textContent = buttonText + ' ';
     this.button.classList.add('on-codemerge-button');
-    this.button.style.padding = '8px 12px';
+    // this.button.style.padding = '8px 12px';
     this.button.style.cursor = 'pointer';
 
     // Добавляем элемент для стрелки
