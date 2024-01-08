@@ -204,7 +204,7 @@ export class EditorCore {
     }
   }
 
-  moveCursorToStartOfInsertedContent() {
+  moveCursorToStart() {
     const range = document.createRange();
     const selection = window.getSelection();
 
@@ -217,7 +217,34 @@ export class EditorCore {
       selection.addRange(range);
     }
   }
-  insertHTMLIntoEditor(htmlContent: HTMLElement | string): void {
+  moveCursorToEnd() {
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    const editor = this.editor.getEditorElement();
+    if (selection && editor?.lastChild) {
+      range.selectNodeContents(editor.lastChild); // Выбираем содержимое последнего дочернего элемента
+      range.collapse(false); // false означает, что диапазон схлопнется к конечной точке
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+
+  moveCursorAfterElement(element: HTMLElement|DocumentFragment) {
+    const range = document.createRange();
+    const selection = window.getSelection();
+
+    if (selection && element.parentNode) {
+      range.setStartAfter(element); // Устанавливаем начало диапазона сразу после элемента
+      range.collapse(false);
+
+      selection.removeAllRanges();
+      selection.addRange(range);
+    }
+  }
+
+  insertHTMLIntoEditor(htmlContent: HTMLElement | DocumentFragment | string): void {
     const editor = this.editor.getEditorElement();
     const currentRange = this.getCurrentSelection();
 

@@ -17,7 +17,7 @@ export class TemplateButton implements IEditorModule {
     for (const i in this.templates) {
       this.dropdown.addItem(i, () => {
         this.core?.insertHTMLIntoEditor(this.templates[i]);
-        this.core?.moveCursorToStartOfInsertedContent();
+        this.core?.moveCursorToStart();
       })
     }
     const toolbar = this.core?.toolbar.getToolbarElement();

@@ -55,13 +55,18 @@ export class CodeEditorButton implements IEditorModule {
     this.editor.lineWrapping
   }
 
+  formatHtml(html: string) {
+    // Простой пример форматирования: добавление переноса строки после каждого закрывающего тега
+    return html.replace(/>\s*</g, '>\n<');
+  }
+
   private openModal(): void {
     if(this.modal && this.core) {
       this.modal.style.display = 'block';
       if(this.overlay) this.overlay.style.display = 'block';
 
       this.editor?.dispatch({
-        changes: {from: 0, to: this.editor?.state.doc.length, insert: this.core?.getContent() ?? ''}
+        changes: {from: 0, to: this.editor?.state.doc.length, insert: this.formatHtml(this.core?.getContent() ?? '')}
       });
     }
   }

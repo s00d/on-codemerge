@@ -34,7 +34,7 @@ export class ListButton implements IEditorModule {
     }
 
     this.core.insertHTMLIntoEditor(ul);
-    this.core.moveCursorToStartOfInsertedContent()
+    this.core.moveCursorToStart()
   }
 
   private createNumberedList(): void {
@@ -52,7 +52,7 @@ export class ListButton implements IEditorModule {
     }
 
     this.core.insertHTMLIntoEditor(ol);
-    this.core.moveCursorToStartOfInsertedContent();
+    this.core.moveCursorToStart();
   }
 
   private createTodoList(): void {
@@ -67,7 +67,7 @@ export class ListButton implements IEditorModule {
     div.appendChild(li);
 
     this.core.insertHTMLIntoEditor(div);
-    this.core.moveCursorToStartOfInsertedContent()
+    this.core.moveCursorToStart()
   }
 
   private createTodoListItem(): HTMLElement {

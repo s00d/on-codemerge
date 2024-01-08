@@ -15,6 +15,7 @@ import { PreviewButton } from "@root/packages/previewButton/src";
 import { FullscreenButton } from "@root/packages/fullscreenButton/src";
 import { PrintButton } from "@root/packages/printButton/src";
 import { ParagraphButton } from "@root/packages/paragraphButton/src";
+import { HorizontalLineButton } from "@root/packages/horizontalLineButton/src";
 
 document.addEventListener('DOMContentLoaded', () => {
   const appElement = document.getElementById('app');
@@ -30,6 +31,7 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.registerModule(new TextStylingButton);
     editor.registerModule(new TableButton);
     editor.registerModule(new ListButton);
+    editor.registerModule(new HorizontalLineButton);
     editor.registerModule(new SpacerButton);
     editor.registerModule(new ImageButton);
     editor.registerModule(new LinkAndVideo);

@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
@@ -122,6 +122,12 @@
       "require": "./dist/printButton.cjs.js",
       "browser": "./dist/printButton.iife.js",
       "types": "./dist/types/packages/printButton/src/index.d.ts"
+    },
+    "./horizontalLineButton": {
+      "import": "./dist/horizontalLineButton.esm.js",
+      "require": "./dist/horizontalLineButton.cjs.js",
+      "browser": "./dist/horizontalLineButton.iife.js",
+      "types": "./dist/types/packages/horizontalLineButton/src/index.d.ts"
     }
   },
   "devDependencies": {

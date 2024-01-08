@@ -86,7 +86,7 @@ export class TableButton implements IEditorModule {
 
     this.core.saveCurrentSelection();
     this.core.insertHTMLIntoEditor(table);
-    this.core.moveCursorToStartOfInsertedContent();
+    this.core.moveCursorToStart();
 
     this.tableManagerMap.set(table.id, manager);
   }
