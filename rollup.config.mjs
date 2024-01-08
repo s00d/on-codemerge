@@ -10,10 +10,13 @@ import filesize from 'rollup-plugin-filesize';
 import progress from 'rollup-plugin-progress';
 import postcss from 'rollup-plugin-postcss';
 import sass from 'sass';
+import fs from "fs";
 
 const dirname = path.dirname(fileURLToPath(import.meta.url));
 const inputPath = './src';
 const extensions = ['.ts', '.js'];
+
+const distFolderPath = './packages';
 
 async function getConfig() {
     const pkg = await import('./package.json', { assert: { type: 'json' } });
@@ -23,7 +26,14 @@ async function getConfig() {
     * Date: ${new Date().toUTCString()}
     */`;
 
-    const entryPoints = ['main', 'textDecorationButton', 'tableButton', 'undoRedoButton', 'listButton', 'alignButton', 'spacerButton', 'textStylingButton', 'linkAndVideoButton']; // Добавьте сюда другие точки входа
+    const entryPoints = ['main'];
+    const files = fs.readdirSync(distFolderPath, { withFileTypes: true });
+
+    files.forEach(file => {
+        if (file.isDirectory()) {
+            entryPoints.push(file.name)
+        }
+    });
 
     return entryPoints.map(entry => ({
         input: path.resolve(dirname, entry === 'main' ? `src/index.ts` : `packages/${entry}/src/index.ts`),

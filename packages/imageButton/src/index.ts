@@ -1,7 +1,7 @@
 import { EditorCore, IEditorModule } from "@/index";
 import { ImageManager } from './ImageManager';
 
-export default class ImageButtonPlugin implements IEditorModule {
+export class ImageButtonPlugin implements IEditorModule {
   private core: EditorCore | null = null;
   private imageManagerMap: Map<string, ImageManager> = new Map();
 
