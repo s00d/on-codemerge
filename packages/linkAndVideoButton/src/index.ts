@@ -1,19 +1,17 @@
 import {EditorCore, IEditorModule} from "@/index";
 import {Modal} from "@root/helpers/modal";
 
-export class LinkAndVideoPlugin implements IEditorModule {
+export class LinkAndVideo implements IEditorModule {
   private links: Map<string, HTMLElement>  = new Map();
   private core: EditorCore | undefined;
-  private modal: Modal;
+  private modal: Modal | undefined;
 
-  constructor() {
-    this.modal = new Modal();
-  }
 
   initialize(core: EditorCore): void {
     this.core = core;
-    core.toolbar.addButton('Insert Link', () => this.insertLink(core));
-    core.toolbar.addButton('Insert Video', () => this.insertVideo(core));
+    this.modal = new Modal(core);
+    core.toolbar.addButton('Link', () => this.insertLink(core));
+    core.toolbar.addButton('Video', () => this.insertVideo(core));
 
     core.subscribeToContentChange((newContent: string) => {
       const editor = core.editor.getEditorElement();
@@ -42,7 +40,7 @@ export class LinkAndVideoPlugin implements IEditorModule {
   }
 
   private showEditLink(element: any) {
-    this.modal.open([
+    this.modal?.open([
       { label: "href", value: element.href, type: 'text' },
       { label: "text", value: element.text, type: 'text' },
     ], (data) => {
@@ -59,7 +57,7 @@ export class LinkAndVideoPlugin implements IEditorModule {
   }
 
   private showEditVideo(element: any) {
-    this.modal.open([
+    this.modal?.open([
       { label: "src", value: element.src, type: 'text' },
     ], (data) => {
 
@@ -75,7 +73,7 @@ export class LinkAndVideoPlugin implements IEditorModule {
   private insertLink(core: EditorCore): void {
     core.saveCurrentSelection();
 
-    this.modal.open([
+    this.modal?.open([
       { label: "href", value: '', type: 'text' },
       { label: "text", value: '', type: 'text' },
     ], (data) => {
@@ -101,7 +99,7 @@ export class LinkAndVideoPlugin implements IEditorModule {
   private insertVideo(core: EditorCore): void {
     core.saveCurrentSelection();
 
-    this.modal.open([
+    this.modal?.open([
       { label: "src", value: '', type: 'text' },
     ], (data) => {
       console.log("Modal closed with data:", data);
@@ -127,4 +125,4 @@ export class LinkAndVideoPlugin implements IEditorModule {
   }
 }
 
-export default LinkAndVideoPlugin;
+export default LinkAndVideo;

@@ -1,13 +1,13 @@
 import { EditorCore, IEditorModule } from "@/index";
 import { ImageManager } from './ImageManager';
 
-export class ImageButtonPlugin implements IEditorModule {
+export class ImageButton implements IEditorModule {
   private core: EditorCore | null = null;
   private imageManagerMap: Map<string, ImageManager> = new Map();
 
   initialize(core: EditorCore): void {
     this.core = core;
-    core.toolbar.addButton('Insert Image', () => this.onInsertImageClick())
+    core.toolbar.addButton('Image', () => this.onInsertImageClick())
   }
 
   private onInsertImageClick = (): void => {

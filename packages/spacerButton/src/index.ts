@@ -1,6 +1,6 @@
 import { EditorCore, IEditorModule } from "@/index";
 
-export class SpacerButtonPlugin implements IEditorModule {
+export class SpacerButton implements IEditorModule {
   initialize(core: EditorCore): void {
     const toolbar = core.toolbar.getToolbarElement();
 
@@ -16,4 +16,4 @@ export class SpacerButtonPlugin implements IEditorModule {
   }
 }
 
-export default SpacerButtonPlugin;
+export default SpacerButton;

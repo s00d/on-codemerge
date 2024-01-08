@@ -1,6 +1,6 @@
 import { EditorCore, IEditorModule } from "@/index";
 import {DropdownMenu} from "@root/helpers/dropdownMenu";
-export class ListButtonPlugin implements IEditorModule {
+export class ListButton implements IEditorModule {
   private core: EditorCore | null = null;
   private last = 1;
   private dropdown: DropdownMenu;
@@ -93,4 +93,4 @@ export class ListButtonPlugin implements IEditorModule {
 
 }
 
-export default ListButtonPlugin;
+export default ListButton;

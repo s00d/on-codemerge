@@ -1,7 +1,7 @@
 import { EditorCore, IEditorModule } from "@/index";
 import {DropdownMenu} from "@root/helpers/dropdownMenu";
 
-export class TextStylingPlugin implements IEditorModule {
+export class TextStylingButton implements IEditorModule {
   private dropdown: DropdownMenu;
   constructor() {
     this.dropdown = new DropdownMenu('Text Styling')
@@ -40,4 +40,4 @@ export class TextStylingPlugin implements IEditorModule {
   }
 }
 
-export default TextStylingPlugin;
+export default TextStylingButton;

@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "0.0.7",
+  "version": "0.0.9",
   "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
@@ -104,10 +104,30 @@
       "require": "./dist/previewButton.cjs.js",
       "browser": "./dist/previewButton.iife.js",
       "types": "./dist/types/packages/previewButton/src/index.d.ts"
+    },
+    "./fullscreenButton": {
+      "import": "./dist/fullscreenButton.esm.js",
+      "require": "./dist/fullscreenButton.cjs.js",
+      "browser": "./dist/fullscreenButton.iife.js",
+      "types": "./dist/types/packages/fullscreenButton/src/index.d.ts"
+    },
+    "./paragraphButton": {
+      "import": "./dist/paragraphButton.esm.js",
+      "require": "./dist/paragraphButton.cjs.js",
+      "browser": "./dist/paragraphButton.iife.js",
+      "types": "./dist/types/packages/paragraphButton/src/index.d.ts"
+    },
+    "./printButton": {
+      "import": "./dist/printButton.esm.js",
+      "require": "./dist/printButton.cjs.js",
+      "browser": "./dist/printButton.iife.js",
+      "types": "./dist/types/packages/printButton/src/index.d.ts"
     }
   },
   "devDependencies": {
+    "@codemirror/highlight": "^0.19.8",
     "@codemirror/lang-html": "^6.4.7",
+    "@codemirror/matchbrackets": "^0.19.4",
     "@rollup/plugin-babel": "^6.0.4",
     "@rollup/plugin-commonjs": "^25.0.7",
     "@rollup/plugin-json": "^6.1.0",

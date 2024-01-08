@@ -18,7 +18,7 @@ export class BlockManager {
     this.onUpdate = onUpdate;
     this.contextMenu = new ContextMenu(core);
     this.contextMenu.setOrientation('horizontal')
-    this.modal = new Modal();
+    this.modal = new Modal(core);
 
     this.initContextMenu();
     this.addInitialSections(2); // Начнем с двух секций

@@ -13,6 +13,7 @@ body {
   padding: 5px 10px;
   margin: 5px;
   cursor: pointer;
+  white-space: nowrap;
 
   &:hover {
     background-color: #e2e2e2;
@@ -96,5 +97,4 @@ body {
     left: 0;
   }
 }
-
 

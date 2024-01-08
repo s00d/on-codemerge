@@ -1,13 +1,13 @@
 import { EditorCore, IEditorModule } from "@/index";
 import { BlockManager } from "./BlockManager";
 
-export class BlockButtonPlugin implements IEditorModule {
+export class BlockButton implements IEditorModule {
   private core: EditorCore | null = null;
   private blockManagerMap: Map<string, BlockManager> = new Map();
 
   initialize(core: EditorCore): void {
     this.core = core;
-    core.toolbar.addButton('Add Block', () => this.createBlock())
+    core.toolbar.addButton('Block', () => this.createBlock())
 
     this.core.subscribeToContentChange((newContent: string) => {
       this.reloadBlocks(core);
@@ -83,4 +83,4 @@ export class BlockButtonPlugin implements IEditorModule {
   // Другие методы плагина...
 }
 
-export default BlockButtonPlugin;
+export default BlockButton;

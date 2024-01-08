@@ -3,8 +3,7 @@ import {EditorCore, IEditorModule} from "@/index";
 import {EditorView, basicSetup} from "codemirror"
 import {html} from "@codemirror/lang-html"
 
-
-export class CodeEditorPlugin implements IEditorModule {
+export class CodeEditorButton implements IEditorModule {
   private core: EditorCore | null = null;
   private editor: EditorView | null = null;
   private modal: HTMLDivElement | null = null;
@@ -15,7 +14,7 @@ export class CodeEditorPlugin implements IEditorModule {
     this.injectStyles();
 
     // Создаем кнопку на панели инструментов
-    core.toolbar.addButton('Edit HTML', () => this.openModal());
+    core.toolbar.addButton('HTML', () => this.openModal());
 
     // Создаем модальное окно
     this.createModal();
@@ -40,22 +39,30 @@ export class CodeEditorPlugin implements IEditorModule {
     const textblock = document.createElement('div');
     this.modal.appendChild(textblock);
     this.modal.appendChild(closeButton); // Добавляем кнопку закрытия в модальное окно
-    document.body.appendChild(this.modal);
-    document.body.appendChild(this.overlay);
+    this.core?.generalElement.appendChild(this.modal);
+    this.core?.generalElement.appendChild(this.overlay);
 
     this.editor = new EditorView({
-      extensions: [basicSetup, html()],
+      extensions: [
+        basicSetup,
+        EditorView.lineWrapping,
+        EditorView.theme({}, { dark: true }),
+        html(),
+      ],
       parent: textblock,
       doc: this.core?.getContent() ?? '',
     });
-
-    document.body.appendChild(this.modal);
+    this.editor.lineWrapping
   }
 
   private openModal(): void {
     if(this.modal && this.core) {
       this.modal.style.display = 'block';
       if(this.overlay) this.overlay.style.display = 'block';
+
+      this.editor?.dispatch({
+        changes: {from: 0, to: this.editor?.state.doc.length, insert: this.core?.getContent() ?? ''}
+      });
     }
   }
 
@@ -109,4 +116,4 @@ export class CodeEditorPlugin implements IEditorModule {
   }
 }
 
-export default CodeEditorPlugin;
+export default CodeEditorButton;

@@ -1,7 +1,7 @@
 import { EditorCore, IEditorModule } from "@/index";
 import {DropdownMenu} from "@root/helpers/dropdownMenu";
 
-export class AlignButtonPlugin implements IEditorModule {
+export class AlignButton implements IEditorModule {
   private dropdown: DropdownMenu;
 
   constructor() {
@@ -41,4 +41,4 @@ export class AlignButtonPlugin implements IEditorModule {
   }
 }
 
-export default AlignButtonPlugin;
+export default AlignButton;

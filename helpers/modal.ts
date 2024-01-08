@@ -1,3 +1,5 @@
+import {EditorCore} from "@/index";
+
 type InputType = 'button' | 'checkbox' | 'color' | 'date' | 'datetime-local' |
   'email' | 'file' | 'hidden' | 'image' | 'month' | 'number' |
   'password' | 'radio' | 'range' | 'reset' | 'search' |
@@ -10,7 +12,7 @@ export class Modal {
   private inputElements: Map<string, HTMLInputElement> = new Map();
   private closeCallback: (data: {[key: string]: string | boolean}) => void = () => {};
 
-  constructor() {
+  constructor(core: EditorCore) {
     this.modalElement = document.createElement('div');
     this.modalElement.className = 'on-modal';
     this.applyStyles(this.modalElement, {
@@ -60,7 +62,8 @@ export class Modal {
 
     this.modalElement.appendChild(this.contentElement);
 
-    document.body.appendChild(this.modalElement);
+    // document.body.appendChild(this.modalElement);
+    core.generalElement.appendChild(this.modalElement);
   }
 
   private applyStyles(element: HTMLElement, styles: {[key: string]: string}): void {

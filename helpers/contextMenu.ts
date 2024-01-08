@@ -27,7 +27,7 @@ export class ContextMenu {
       // Дополнительные стили
     });
 
-    document.body.appendChild(this.menuElement);
+    this.core?.generalElement.appendChild(this.menuElement);
 
     // document.addEventListener('click', this.handleDocumentClick.bind(this));
   }

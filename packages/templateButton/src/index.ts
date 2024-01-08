@@ -1,14 +1,14 @@
 import { EditorCore, IEditorModule } from "@/index";
 import {DropdownMenu} from "@root/helpers/dropdownMenu";
 
-export class TemplateButtonPlugin implements IEditorModule {
+export class TemplateButton implements IEditorModule {
   private core: EditorCore | null = null;
   private readonly templates: {[key: string]: string};
   private dropdown: DropdownMenu;
 
   constructor(templates: {[key: string]: string}) {
     this.templates = templates;
-    this.dropdown = new DropdownMenu('Choose Template')
+    this.dropdown = new DropdownMenu('Template')
   }
 
   initialize(core: EditorCore): void {
@@ -26,4 +26,4 @@ export class TemplateButtonPlugin implements IEditorModule {
   }
 }
 
-export default TemplateButtonPlugin;
+export default TemplateButton;

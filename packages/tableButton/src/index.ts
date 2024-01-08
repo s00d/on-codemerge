@@ -1,14 +1,14 @@
 import { EditorCore, IEditorModule } from "@/index";
 import TableManager from './TableManager';
 
-export class TableButtonPlugin implements IEditorModule {
+export class TableButton implements IEditorModule {
   private core: EditorCore | null = null;
   private tableManagerMap: Map<string, TableManager> = new Map();
 
   initialize(core: EditorCore): void {
     this.core = core;
     this.injectStyles();
-    core.toolbar.addButton('Create 3x3 Table', () => this.createTable(3, 3))
+    core.toolbar.addButton('Table', () => this.createTable(3, 3))
 
     core.subscribeToContentChange((newContent: string) => {
       this.reloadTables(core)
@@ -92,4 +92,4 @@ export class TableButtonPlugin implements IEditorModule {
   }
 }
 
-export default TableButtonPlugin;
+export default TableButton;

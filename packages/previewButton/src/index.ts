@@ -1,6 +1,6 @@
 import {EditorCore, IEditorModule} from "@/index";
 
-export class PreviewPlugin implements IEditorModule {
+export class PreviewButton implements IEditorModule {
   private core: EditorCore | null = null;
   private modal: HTMLDivElement | null = null;
   private overlay: HTMLDivElement | null = null;
@@ -11,7 +11,7 @@ export class PreviewPlugin implements IEditorModule {
     this.injectStyles();
 
     // Создаем кнопку на панели инструментов
-    core.toolbar.addButton('Preview HTML', () => this.openModal());
+    core.toolbar.addButton('Preview', () => this.openModal());
 
     // Создаем модальное окно для предпросмотра
     this.createModal();
@@ -40,8 +40,8 @@ export class PreviewPlugin implements IEditorModule {
 
     this.modal.appendChild(closeButton);
     this.modal.appendChild(this.previewContainer);
-    document.body.appendChild(this.modal);
-    document.body.appendChild(this.overlay);
+    this.core?.generalElement.appendChild(this.modal);
+    this.core?.generalElement.appendChild(this.overlay);
   }
 
   private openModal(): void {
@@ -108,4 +108,4 @@ export class PreviewPlugin implements IEditorModule {
   }
 }
 
-export default PreviewPlugin;
+export default PreviewButton;

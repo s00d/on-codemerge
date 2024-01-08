@@ -1,6 +1,6 @@
 import { EditorCore, IEditorModule } from "@/index";
 
-export class UndoRedoButtonPlugin implements IEditorModule {
+export class UndoRedoButton implements IEditorModule {
   initialize(core: EditorCore): void {
     const createUndoButton = () => {
       const button = document.createElement('button');
@@ -42,4 +42,4 @@ export class UndoRedoButtonPlugin implements IEditorModule {
   }
 }
 
-export default UndoRedoButtonPlugin;
+export default UndoRedoButton;

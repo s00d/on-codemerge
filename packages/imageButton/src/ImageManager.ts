@@ -16,7 +16,7 @@ export class ImageManager {
   constructor(core: EditorCore, img: HTMLImageElement, onRemove: (id: string) => void) {
     this.img = img;
     this.imgId = img.id;
-    this.modal = new Modal();
+    this.modal = new Modal(core);
     this.onRemove = onRemove;
     this.core = core;
     this.contextMenu = new ContextMenu(core);
