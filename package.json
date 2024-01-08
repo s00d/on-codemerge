@@ -8,10 +8,10 @@
   "browser": "dist/main.iife.js",
   "typings": "dist/types/index.d.ts",
   "scripts": {
-    "prepublish": "rollup -c",
+    "prepublish": "npm run build && npm run exports",
     "build": "rollup -c",
     "dev": "vite --config vite.config.ts",
-    "update:exports": "npx tsx ./update_exports.ts ",
+    "exports": "npx tsx ./update_exports.ts",
     "docs": "vite build"
   },
   "files": [
