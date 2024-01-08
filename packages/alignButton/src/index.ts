@@ -2,13 +2,10 @@ import type { EditorCore, IEditorModule } from "@/index";
 import { DropdownMenu } from "@root/helpers/dropdownMenu";
 
 export class AlignButton implements IEditorModule {
-  private dropdown: DropdownMenu;
-
-  constructor() {
-    this.dropdown = new DropdownMenu('Align')
-  }
+  private dropdown: DropdownMenu|null = null;
 
   initialize(core: EditorCore): void {
+    this.dropdown = new DropdownMenu(core, 'Align')
     const alignButtons = [
       { align: 'left', text: 'Left' },
       { align: 'right', text: 'Right' },
@@ -17,10 +14,10 @@ export class AlignButton implements IEditorModule {
     ];
 
     alignButtons.forEach(({ align, text }) => {
-      this.dropdown.addItem(text, () => this.applyAlignment(core, align))
+      this.dropdown?.addItem(text, () => this.applyAlignment(core, align))
     });
 
-    core.popup.addHtmlItem(this.dropdown.getButton());
+    core.popup.addHtmlItem(this.dropdown?.getButton());
   }
 
   private applyAlignment(core: EditorCore, align: string): void {

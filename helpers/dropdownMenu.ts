@@ -1,11 +1,15 @@
+import type { EditorCore } from "@/index";
+
 export class DropdownMenu {
   private menuElement: HTMLElement;
   private visible: boolean = false;
   private arrow: HTMLElement;
   private button: HTMLDivElement;
   private dropdown: HTMLDivElement;
+  private core: EditorCore;
 
-  constructor(buttonText: string) {
+  constructor(core: EditorCore, buttonText: string) {
+    this.core = core;
     this.dropdown = document.createElement('div');
     this.dropdown.className = 'dropdown';
 
@@ -89,6 +93,7 @@ export class DropdownMenu {
     this.menuElement.style.opacity = '1';
     this.menuElement.style.transform = 'scaleY(1)';
     this.arrow.style.transform = 'rotate(180deg)';
+    this.core.restoreCurrentSelection();
   }
 
   hide(): void {

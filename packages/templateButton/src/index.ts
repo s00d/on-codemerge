@@ -4,14 +4,14 @@ import { DropdownMenu } from "@root/helpers/dropdownMenu";
 export class TemplateButton implements IEditorModule {
   private core: EditorCore | null = null;
   private readonly templates: {[key: string]: string};
-  private dropdown: DropdownMenu;
+  private dropdown: DropdownMenu | null = null;
 
   constructor(templates: {[key: string]: string}) {
     this.templates = templates;
-    this.dropdown = new DropdownMenu('Template')
   }
 
   initialize(core: EditorCore): void {
+    this.dropdown = new DropdownMenu(core, 'Template')
     this.core = core;
 
     for (const i in this.templates) {

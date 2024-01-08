@@ -3,13 +3,10 @@ import { DropdownMenu } from "@root/helpers/dropdownMenu";
 
 export class ParagraphButton implements IEditorModule {
   private core: EditorCore | null = null;
-  private dropdown: DropdownMenu;
-
-  constructor() {
-    this.dropdown = new DropdownMenu('Paragraph');
-  }
+  private dropdown: DropdownMenu | null = null;
 
   initialize(core: EditorCore): void {
+    this.dropdown = new DropdownMenu(core, 'Paragraph');
     this.core = core;
     this.dropdown.addItem('Normal', () => this.insertParagraph('normal'));
     this.dropdown.addItem('Heading 1', () => this.insertParagraph('h1'));

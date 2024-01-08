@@ -45,14 +45,14 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.registerModule(new FullscreenButton);
     editor.registerModule(new PrintButton);
 
-    editor.subscribeToContentChange((newContent: string) => {
+    editor.subscribeToContentChange((newContent?: string) => {
 
       const resultElement = document.getElementById('result');
-      if (resultElement) resultElement.innerText = newContent;
+      if (resultElement && newContent) resultElement.innerText = newContent;
       // console.log(newContent)
 
       const previewElement = document.getElementById('preview');
-      if (previewElement) previewElement.innerHTML = newContent;
+      if (previewElement && newContent) previewElement.innerHTML = newContent;
     });
 
     // editor.setContent("\n" +

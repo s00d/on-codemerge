@@ -20,7 +20,7 @@ export class ImageManager {
     this.onRemove = onRemove;
     this.core = core;
     this.contextMenu = new ContextMenu(core);
-    this.dropdown = new DropdownMenu('Align')
+    this.dropdown = new DropdownMenu(core, 'Align')
     this.dropdown.addItem('Left', () => this.applyAlignment(core, 'left'))
     this.dropdown.addItem('Right', () => this.applyAlignment(core, 'right'))
     this.dropdown.addItem('Center', () => this.applyAlignment(core, 'center'))

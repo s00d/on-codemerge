@@ -3,13 +3,10 @@ import { DropdownMenu } from "@root/helpers/dropdownMenu";
 export class ListButton implements IEditorModule {
   private core: EditorCore | null = null;
   private last = 1;
-  private dropdown: DropdownMenu;
-
-  constructor() {
-    this.dropdown = new DropdownMenu('List items')
-  }
+  private dropdown: DropdownMenu | null = null;
 
   initialize(core: EditorCore): void {
+    this.dropdown = new DropdownMenu(core, 'List items')
     this.core = core;
     this.dropdown.addItem('Dot', () => this.createList())
     this.dropdown.addItem('Numbered', () => this.createNumberedList());
