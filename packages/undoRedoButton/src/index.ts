@@ -1,4 +1,4 @@
-import { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore, IEditorModule } from "@/index";
 
 export class UndoRedoButton implements IEditorModule {
   initialize(core: EditorCore): void {
@@ -34,7 +34,7 @@ export class UndoRedoButton implements IEditorModule {
     if(toolbar) toolbar.appendChild(undo);
     if(toolbar) toolbar.appendChild(redo);
 
-    core.subscribeToContentChange((newContent: string) => {
+    core.subscribeToContentChange(() => {
       console.log(core.isUndo(), core.isRedo())
       undo.disabled = !core.isUndo();
       redo.disabled = !core.isRedo();

@@ -1,4 +1,4 @@
-import {EditorCore, IEditorModule} from "@/index";
+import type { EditorCore } from "@/index";
 
 export class Editor {
   private editorElement: HTMLDivElement|null = null;
@@ -18,8 +18,8 @@ export class Editor {
     this.editorElement.innerHTML = core.getContent();
 
     // Подписка на изменения содержимого и обновление интерфейса
-    core.subscribeToContentChange((newContent: string) => {
-      if (this.editorElement?.innerHTML !== newContent) {
+    core.subscribeToContentChange((newContent?: string) => {
+      if (newContent && this.editorElement?.innerHTML !== newContent) {
         this.editorElement!.innerHTML = newContent;
         this.restoreCaretPosition();
       }

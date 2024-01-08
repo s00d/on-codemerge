@@ -1,4 +1,4 @@
-import { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore, IEditorModule } from "@/index";
 import { BlockManager } from "./BlockManager";
 
 export class BlockButton implements IEditorModule {
@@ -9,7 +9,7 @@ export class BlockButton implements IEditorModule {
     this.core = core;
     core.toolbar.addButton('Block', () => this.createBlock())
 
-    this.core.subscribeToContentChange((newContent: string) => {
+    this.core.subscribeToContentChange(() => {
       this.reloadBlocks(core);
     });
   }

@@ -1,7 +1,9 @@
 import './styles.scss';
-import {ContextMenu} from "@root/helpers/contextMenu";
+import { ContextMenu } from "@root/helpers/contextMenu";
 import Toolbar from "@/toolbar";
 import Editor from "@/editor";
+
+export type Hook = (data?: string) => void
 
 export class EditorState {
   private content: string = '';
@@ -64,16 +66,16 @@ export class EditorState {
 }
 
 export class EventManager {
-  private listeners: { [event: string]: Function[] } = {};
+  private listeners: { [event: string]: Hook[] } = {};
 
-  subscribe(event: string, callback: Function): void {
+  subscribe(event: string, callback: Hook): void {
     if (!this.listeners[event]) {
       this.listeners[event] = [];
     }
     this.listeners[event].push(callback);
   }
 
-  publish(event: string, data?: any): void {
+  publish(event: string, data?: string): void {
     if (this.listeners[event]) {
       this.listeners[event].forEach(callback => callback(data));
     }
@@ -123,7 +125,7 @@ export class EditorCore {
     }, 10);
   }
 
-  private handleTextSelection(event: MouseEvent): void {
+  private handleTextSelection(): void {
     setTimeout(() => {
       const selection = window.getSelection();
       const editorElement = this.editor.getEditorElement();
@@ -312,7 +314,6 @@ export class EditorCore {
       this.appElement.style.overflow = 'auto'; // Прокрутка при необходимости
       this.appElement.style.padding = '10px'; // Отступы внутри блока
       this.appElement.style.boxSizing = 'border-box'; // Чтобы размеры включали padding и border
-      // Другие необходимые стили...
     }
   }
 
@@ -335,7 +336,7 @@ export class EditorCore {
   }
 
   // Методы для работы с событиями
-  subscribeToContentChange(callback: Function): void {
+  subscribeToContentChange(callback: Hook): void {
     this.eventManager.subscribe('contentChanged', callback);
   }
 }

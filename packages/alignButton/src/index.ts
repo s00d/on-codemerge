@@ -1,5 +1,5 @@
-import { EditorCore, IEditorModule } from "@/index";
-import {DropdownMenu} from "@root/helpers/dropdownMenu";
+import type { EditorCore, IEditorModule } from "@/index";
+import { DropdownMenu } from "@root/helpers/dropdownMenu";
 
 export class AlignButton implements IEditorModule {
   private dropdown: DropdownMenu;
@@ -32,7 +32,7 @@ export class AlignButton implements IEditorModule {
     const container = range.commonAncestorContainer;
 
     // Найти или создать элемент для применения стиля выравнивания
-    let element = container.nodeType === 3 ? container.parentNode : container;
+    const element = container.nodeType === 3 ? container.parentNode : container;
     if (element && element.nodeType === 1) {
       (element as HTMLElement).style.textAlign = align;
       const editor = core.editor.getEditorElement();

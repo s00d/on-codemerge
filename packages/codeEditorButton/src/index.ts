@@ -1,7 +1,7 @@
-import {EditorCore, IEditorModule} from "@/index";
+import type { EditorCore, IEditorModule } from "@/index";
 
-import {EditorView, basicSetup} from "codemirror"
-import {html} from "@codemirror/lang-html"
+import { EditorView, basicSetup } from "codemirror"
+import { html } from "@codemirror/lang-html"
 
 export class CodeEditorButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -66,7 +66,7 @@ export class CodeEditorButton implements IEditorModule {
       if(this.overlay) this.overlay.style.display = 'block';
 
       this.editor?.dispatch({
-        changes: {from: 0, to: this.editor?.state.doc.length, insert: this.formatHtml(this.core?.getContent() ?? '')}
+        changes: { from: 0, to: this.editor?.state.doc.length, insert: this.formatHtml(this.core?.getContent() ?? '') }
       });
     }
   }

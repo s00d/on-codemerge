@@ -1,4 +1,4 @@
-import {EditorCore} from "@/index";
+import type { EditorCore } from "@/index";
 
 type MenuOrientation = 'vertical' | 'horizontal';
 

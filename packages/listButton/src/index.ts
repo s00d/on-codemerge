@@ -1,5 +1,5 @@
-import { EditorCore, IEditorModule } from "@/index";
-import {DropdownMenu} from "@root/helpers/dropdownMenu";
+import type { EditorCore, IEditorModule } from "@/index";
+import { DropdownMenu } from "@root/helpers/dropdownMenu";
 export class ListButton implements IEditorModule {
   private core: EditorCore | null = null;
   private last = 1;

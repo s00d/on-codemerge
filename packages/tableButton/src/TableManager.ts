@@ -1,4 +1,4 @@
-import {EditorCore} from "@/index";
+import type { EditorCore } from "@/index";
 
 export default class TableManager {
   private table: HTMLTableElement;
@@ -127,14 +127,14 @@ export default class TableManager {
   private handleContextMenu(event: MouseEvent, cell: HTMLTableCellElement): void {
     event.preventDefault();
     this.currentCell = cell; // Устанавливаем текущую ячейку
-    this.showPopup(event.pageX, event.pageY, cell);
+    this.showPopup(event.pageX, event.pageY);
 
     if (this.selectedCells.indexOf(cell) === -1) {
       this.selectedCells.push(cell);
     }
   }
 
-  private showPopup(x: number, y: number, cell: HTMLTableCellElement): void {
+  private showPopup(x: number, y: number): void {
     this.popupElement.style.left = `${x}px`;
     this.popupElement.style.top = `${y}px`;
     this.popupElement.style.display = 'block';
@@ -199,7 +199,7 @@ export default class TableManager {
         // Воссоздание горизонтально объединенных ячеек
         for (let i = 1; i < colSpan; i++) {
           const raw = firstCell.parentElement! as HTMLTableRowElement
-          const newCell = raw.insertCell(firstCell.cellIndex + 1);
+          raw.insertCell(firstCell.cellIndex + 1);
           // Установите начальное содержимое и другие атрибуты для newCell
         }
 

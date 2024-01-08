@@ -1,5 +1,5 @@
-import {EditorCore, IEditorModule} from "@/index";
-import {Modal} from "@root/helpers/modal";
+import type { EditorCore, IEditorModule } from "@/index";
+import { Modal } from "@root/helpers/modal";
 
 export class LinkAndVideo implements IEditorModule {
   private links: Map<string, HTMLElement>  = new Map();
@@ -13,12 +13,11 @@ export class LinkAndVideo implements IEditorModule {
     core.toolbar.addButton('Link', () => this.insertLink(core));
     core.toolbar.addButton('Video', () => this.insertVideo(core));
 
-    core.subscribeToContentChange((newContent: string) => {
+    core.subscribeToContentChange(() => {
       const editor = core.editor.getEditorElement();
       if (!editor) return;
 
       editor.querySelectorAll('a, iframe').forEach((element: any) => {
-        const url = element.tagName === 'A' ? element.getAttribute('href') : element.getAttribute('src');
         const isUrl = element.tagName === 'A';
 
         let blockId = element.id;
@@ -113,7 +112,7 @@ export class LinkAndVideo implements IEditorModule {
       iframe.width = '560'; // Установите желаемую ширину
       iframe.height = '315'; // Установите желаемую высоту
 
-      iframe.addEventListener('click', (e) => {
+      iframe.addEventListener('click', () => {
         this.showEditVideo(iframe)
       })
       core.insertHTMLIntoEditor(iframe);

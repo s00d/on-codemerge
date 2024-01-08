@@ -1,6 +1,6 @@
-import {EditorCore} from "@/index";
-import {ContextMenu} from "@root/helpers/contextMenu";
-import {Modal} from "@root/helpers/modal";
+import type { EditorCore } from "@/index";
+import { ContextMenu } from "@root/helpers/contextMenu";
+import { Modal } from "@root/helpers/modal";
 
 export class BlockManager {
   private block: HTMLElement;
@@ -78,7 +78,7 @@ export class BlockManager {
       resizer.style.display = 'none'
       e.preventDefault();
       let isResizing = true;
-      let initialX = e.clientX;
+      const initialX = e.clientX;
 
       let prevSection: HTMLElement|null = resizer.previousElementSibling as HTMLElement;
       let nextSection: HTMLElement|null = resizer.nextElementSibling as HTMLElement;
@@ -88,8 +88,8 @@ export class BlockManager {
       if(nextSection.classList.contains('editor-block-height-resizer')) {
         nextSection = null;
       }
-      let initialLeftWidth = prevSection?.offsetWidth ?? 0;
-      let initialRightWidth = nextSection?.offsetWidth ?? 0;
+      const initialLeftWidth = prevSection?.offsetWidth ?? 0;
+      const initialRightWidth = nextSection?.offsetWidth ?? 0;
 
 
       this.placeholder = document.createElement('div');

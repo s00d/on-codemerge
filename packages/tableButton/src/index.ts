@@ -1,4 +1,4 @@
-import { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore, IEditorModule } from "@/index";
 import TableManager from './TableManager';
 
 export class TableButton implements IEditorModule {
@@ -10,7 +10,7 @@ export class TableButton implements IEditorModule {
     this.injectStyles();
     core.toolbar.addButton('Table', () => this.createTable(3, 3))
 
-    core.subscribeToContentChange((newContent: string) => {
+    core.subscribeToContentChange(() => {
       this.reloadTables(core)
     });
   }

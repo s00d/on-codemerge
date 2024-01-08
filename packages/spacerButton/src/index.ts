@@ -1,4 +1,4 @@
-import { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore, IEditorModule } from "@/index";
 
 export class SpacerButton implements IEditorModule {
   initialize(core: EditorCore): void {

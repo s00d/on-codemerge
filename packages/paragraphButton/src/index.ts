@@ -1,4 +1,4 @@
-import { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore, IEditorModule } from "@/index";
 import { DropdownMenu } from "@root/helpers/dropdownMenu";
 
 export class ParagraphButton implements IEditorModule {

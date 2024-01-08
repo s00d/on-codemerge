@@ -1,4 +1,4 @@
-import {EditorCore} from "@/index";
+import type { EditorCore } from "@/index";
 
 export class Toolbar {
   private toolbarElement: HTMLDivElement|null = null;

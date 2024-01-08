@@ -1,0 +1,14 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended"
+    ],
+    "rules": {
+        "@typescript-eslint/ban-ts-comment": 0,
+        "@typescript-eslint/no-explicit-any": 0,
+        "object-curly-spacing": ["error", "always"],
+        "@typescript-eslint/consistent-type-imports": "error"
+    }
+}

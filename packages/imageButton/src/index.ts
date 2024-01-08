@@ -1,4 +1,4 @@
-import { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore, IEditorModule } from "@/index";
 import { ImageManager } from './ImageManager';
 
 export class ImageButton implements IEditorModule {
