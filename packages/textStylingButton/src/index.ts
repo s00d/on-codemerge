@@ -27,8 +27,6 @@ export class TextStylingButton implements IEditorModule {
         // Получение самых глубоких узлов в выделении
         let deepestNodes = this.getDeepestNodes(range);
 
-        console.log(deepestNodes);
-
         deepestNodes = deepestNodes.map(node => {
           if (node.nodeType === Node.TEXT_NODE && node.parentNode) {
             const span = document.createElement('span');
@@ -53,6 +51,9 @@ export class TextStylingButton implements IEditorModule {
       }
 
       core.popup.hide();
+
+      const editor = core.editor.getEditorElement();
+      if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
     });
   }
 
