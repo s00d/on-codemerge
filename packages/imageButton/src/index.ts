@@ -7,17 +7,7 @@ export default class ImageButtonPlugin implements IEditorModule {
 
   initialize(core: EditorCore): void {
     this.core = core;
-    this.createImageButton();
-  }
-
-  private createImageButton(): void {
-    const button = document.createElement('button');
-    button.textContent = 'Insert Image';
-    button.classList.add('on-codemerge-button');
-    button.addEventListener('click', this.onInsertImageClick);
-
-    const toolbar = this.core?.toolbar.getToolbarElement();
-    toolbar?.appendChild(button);
+    core.toolbar.addButton('Insert Image', () => this.onInsertImageClick())
   }
 
   private onInsertImageClick = (): void => {

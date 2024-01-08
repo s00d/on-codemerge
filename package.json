@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
@@ -69,12 +69,6 @@
       "browser": "./dist/alignButton.iife.js",
       "types": "./dist/types/packages/alignButton/src/index.d.ts"
     },
-    "./editor": {
-      "import": "./dist/editor.esm.js",
-      "require": "./dist/editor.cjs.js",
-      "browser": "./dist/editor.iife.js",
-      "types": "./dist/types/packages/editor/src/index.d.ts"
-    },
     "./linkAndVideoButton": {
       "import": "./dist/linkAndVideoButton.esm.js",
       "require": "./dist/linkAndVideoButton.cjs.js",
@@ -86,12 +80,6 @@
       "require": "./dist/templateButton.cjs.js",
       "browser": "./dist/templateButton.iife.js",
       "types": "./dist/types/packages/templateButton/src/index.d.ts"
-    },
-    "./toolbar": {
-      "import": "./dist/toolbar.esm.js",
-      "require": "./dist/toolbar.cjs.js",
-      "browser": "./dist/toolbar.iife.js",
-      "types": "./dist/types/packages/toolbar/src/index.d.ts"
     },
     "./blockButton": {
       "import": "./dist/blockButton.esm.js",

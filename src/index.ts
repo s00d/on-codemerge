@@ -1,7 +1,7 @@
-import EditorPlugin from "../packages/editor/src";
-import ToolbarPlugin from "../packages/toolbar/src";
 import './styles.scss';
 import {ContextMenu} from "@root/helpers/contextMenu";
+import Toolbar from "@/toolbar";
+import Editor from "@/editor";
 
 export class EditorState {
   private content: string = '';
@@ -94,9 +94,9 @@ export class EditorCore {
   public modules: IEditorModule[] = [];
   public appElement: HTMLElement;
   public generalElement: HTMLElement;
-  public toolbar: ToolbarPlugin;
+  public toolbar: Toolbar;
   public popup: ContextMenu;
-  public editor: EditorPlugin;
+  public editor: Editor;
   public history: string[] = []
   public currentSelectionRange: Range | null = null;
 
@@ -110,11 +110,9 @@ export class EditorCore {
     this.generalElement.appendChild(this.appElement)
     this.applyStyles();
 
-    this.toolbar = new ToolbarPlugin;
+    this.toolbar = new Toolbar(this);
     this.popup = new ContextMenu(this);
-    this.editor = new EditorPlugin;
-    this.registerModule(this.toolbar);
-    this.registerModule(this.editor);
+    this.editor = new Editor(this);
 
     this.generalElement.addEventListener('keydown', this.handleKeydown);
 

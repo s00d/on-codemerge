@@ -12,9 +12,8 @@ export class LinkAndVideoPlugin implements IEditorModule {
 
   initialize(core: EditorCore): void {
     this.core = core;
-    this.createButton(core, 'Insert Link', () => this.insertLink(core));
-    this.createButton(core, 'Insert Video', () => this.insertVideo(core));
-
+    core.toolbar.addButton('Insert Link', () => this.insertLink(core));
+    core.toolbar.addButton('Insert Video', () => this.insertVideo(core));
 
     core.subscribeToContentChange((newContent: string) => {
       const editor = core.editor.getEditorElement();
@@ -71,16 +70,6 @@ export class LinkAndVideoPlugin implements IEditorModule {
       const editor = this.core?.editor.getEditorElement();
       if(editor) this.core?.setContent(editor?.innerHTML)
     });
-  }
-
-  private createButton(core: EditorCore, title: string, action: () => void): void {
-    const button = document.createElement('button');
-    button.classList.add('on-codemerge-button');
-    button.textContent = title;
-    button.addEventListener('click', action);
-
-    const toolbar = core.toolbar.getToolbarElement();
-    if (toolbar) toolbar.appendChild(button);
   }
 
   private insertLink(core: EditorCore): void {

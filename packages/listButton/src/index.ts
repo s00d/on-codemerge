@@ -6,16 +6,7 @@ export class ListButtonPlugin implements IEditorModule {
 
   initialize(core: EditorCore): void {
     this.core = core;
-    this.createListButton();
-  }
-
-  private createListButton(): void {
-    const button = document.createElement('button');
-    button.textContent = 'Create List';
-    button.classList.add('on-codemerge-button');
-    button.addEventListener('click', () => this.createList());
-    const toolbar = this.core?.toolbar.getToolbarElement();
-    toolbar?.appendChild(button);
+    core.toolbar.addButton('Create List', () => this.createList())
   }
 
   private createList(): void {

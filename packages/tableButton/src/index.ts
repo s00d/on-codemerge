@@ -8,7 +8,7 @@ export class TableButtonPlugin implements IEditorModule {
   initialize(core: EditorCore): void {
     this.core = core;
     this.injectStyles();
-    this.createTableButton();
+    core.toolbar.addButton('Create 3x3 Table', () => this.createTable(3, 3))
 
     core.subscribeToContentChange((newContent: string) => {
       this.reloadTables(core)
@@ -61,15 +61,6 @@ export class TableButtonPlugin implements IEditorModule {
             }
         `;
     document.head.appendChild(style);
-  }
-
-  private createTableButton(): void {
-    const button = document.createElement('button');
-    button.textContent = 'Create 3x3 Table';
-    button.classList.add('on-codemerge-button');
-    button.addEventListener('click', () => this.createTable(3, 3));
-    const toolbar = this.core?.toolbar.getToolbarElement();
-    toolbar?.appendChild(button);
   }
 
   private createTable(rows: number, cols: number): void {

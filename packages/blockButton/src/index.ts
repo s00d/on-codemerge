@@ -7,7 +7,7 @@ export class BlockButtonPlugin implements IEditorModule {
 
   initialize(core: EditorCore): void {
     this.core = core;
-    this.createBlockButton();
+    core.toolbar.addButton('Add Block', () => this.createBlock())
 
     this.core.subscribeToContentChange((newContent: string) => {
       this.reloadBlocks(core);
@@ -38,15 +38,6 @@ export class BlockButtonPlugin implements IEditorModule {
         blockManager.attachEventsToExistingResizers();
       }
     });
-  }
-
-  private createBlockButton(): void {
-    const button = document.createElement('button');
-    button.textContent = 'Add Block';
-    button.classList.add('on-codemerge-button');
-    button.addEventListener('click', () => this.createBlock());
-    const toolbar = this.core?.toolbar.getToolbarElement();
-    toolbar?.appendChild(button);
   }
 
   private createBlock(): void {

@@ -1,9 +1,9 @@
-import { EditorCore, IEditorModule } from "../../../src";
+import {EditorCore} from "@/index";
 
-export class ToolbarPlugin implements IEditorModule {
+export class Toolbar {
   private toolbarElement: HTMLDivElement|null = null;
 
-  initialize(core: EditorCore): void {
+  constructor(core: EditorCore) {
     // Создание панели инструментов
     this.toolbarElement = document.createElement('div');
     this.toolbarElement.className = 'editor-toolbar';
@@ -19,9 +19,18 @@ export class ToolbarPlugin implements IEditorModule {
     return this.toolbarElement;
   }
 
+  addButton(title: string, action: () => void) {
+    const button = document.createElement('div');
+    button.classList.add('on-codemerge-button');
+    button.textContent = title;
+    button.addEventListener('click', action);
+
+    this.toolbarElement?.appendChild(button);
+    return button;
+  }
+
   private applyStyles(): void {
     if (this.toolbarElement) {
-      this.toolbarElement.style.padding = '10px';
       this.toolbarElement.style.borderBottom = '1px solid #ccc';
       this.toolbarElement.style.backgroundColor = '#f9f9f9';
       this.toolbarElement.style.display = 'flex';
@@ -31,4 +40,4 @@ export class ToolbarPlugin implements IEditorModule {
   }
 }
 
-export default ToolbarPlugin;
+export default Toolbar;
