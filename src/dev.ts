@@ -9,6 +9,7 @@ import { TextDecorationButtonPlugin } from '../packages/textDecorationButton/src
 import { LinkAndVideoPlugin } from '../packages/linkAndVideoButton/src';
 import { TemplateButtonPlugin } from '../packages/templateButton/src';
 import { BlockButtonPlugin } from '../packages/blockButton/src';
+import ImageButtonPlugin from "@root/packages/imageButton/src";
 
 document.addEventListener('DOMContentLoaded', () => {
   const appElement = document.getElementById('app');
@@ -18,11 +19,11 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.registerModule(new BlockButtonPlugin);
     editor.registerModule(new SpacerButtonPlugin);
     editor.registerModule(new TextDecorationButtonPlugin);
+    editor.registerModule(new AlignButtonPlugin);
     editor.registerModule(new TextStylingPlugin);
     editor.registerModule(new TableButtonPlugin);
     editor.registerModule(new ListButtonPlugin);
-    editor.registerModule(new SpacerButtonPlugin);
-    editor.registerModule(new AlignButtonPlugin);
+    editor.registerModule(new ImageButtonPlugin);
     editor.registerModule(new SpacerButtonPlugin);
     editor.registerModule(new LinkAndVideoPlugin);
     editor.registerModule(new SpacerButtonPlugin);

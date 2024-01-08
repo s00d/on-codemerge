@@ -1,19 +1,26 @@
 import { EditorCore, IEditorModule } from "@/index";
+import {DropdownMenu} from "@root/helpers/dropdownMenu";
 
 export class AlignButtonPlugin implements IEditorModule {
-  initialize(core: EditorCore): void {
-    const toolbar = core.toolbar.getToolbarElement();
+  private dropdown: DropdownMenu;
 
+  constructor() {
+    this.dropdown = new DropdownMenu('Align')
+  }
+
+  initialize(core: EditorCore): void {
     const alignButtons = [
-      { align: 'left', text: 'Align Left' },
-      { align: 'right', text: 'Align Right' },
-      { align: 'center', text: 'Align Center' },
-      { align: 'justifyFull', text: 'Justify' }
+      { align: 'left', text: 'Left' },
+      { align: 'right', text: 'Right' },
+      { align: 'center', text: 'Center' },
+      { align: 'justify', text: 'Justify' }
     ];
 
     alignButtons.forEach(({ align, text }) => {
-      core.popup.addItem(text, () => this.applyAlignment(core, align));
+      this.dropdown.addItem(text, () => this.applyAlignment(core, align))
     });
+
+    core.popup.addHtmlItem(this.dropdown.getButton());
   }
 
   private applyAlignment(core: EditorCore, align: string): void {

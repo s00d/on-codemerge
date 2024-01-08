@@ -1,11 +1,8 @@
 import { EditorCore, IEditorModule } from "@/index";
+import {DropdownMenu} from "@root/helpers/dropdownMenu";
 
 export class TextDecorationButtonPlugin implements IEditorModule {
   initialize(core: EditorCore): void {
-    this.createStyleButtons(core);
-  }
-
-  private createStyleButtons(core: EditorCore): void {
     this.createButton(core, 'Text Color', 'foreColor');
     this.createButton(core, 'Background Color', 'backColor');
 

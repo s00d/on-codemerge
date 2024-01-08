@@ -22,7 +22,7 @@ export class ContextMenu {
       border: '1px solid #ccc',
       boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
       zIndex: '1000',
-      maxWidth: '400px',
+      maxWidth: '500px',
       flexFlow: 'wrap',
       // Дополнительные стили
     });

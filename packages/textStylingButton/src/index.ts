@@ -1,6 +1,12 @@
 import { EditorCore, IEditorModule } from "@/index";
+import {DropdownMenu} from "@root/helpers/dropdownMenu";
 
 export class TextStylingPlugin implements IEditorModule {
+  private dropdown: DropdownMenu;
+  constructor() {
+    this.dropdown = new DropdownMenu('Text Styling')
+  }
+
   initialize(core: EditorCore): void {
     this.createButton(core, 'Bold', 'bold');
     this.createButton(core, 'Italic', 'italic');
@@ -8,10 +14,12 @@ export class TextStylingPlugin implements IEditorModule {
     this.createButton(core, 'StrikeThrough', 'strikeThrough');
     this.createButton(core, 'Superscript', 'superscript');
     this.createButton(core, 'Subscript', 'subscript');
+
+    core.popup.addHtmlItem(this.dropdown.getButton());
   }
 
   private createButton(core: EditorCore, title: string, command: string): void {
-    core.popup.addItem(title, () => {
+    this.dropdown.addItem(title, () => {
       core.restoreCurrentSelection();
       const selection = window.getSelection();
       const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
@@ -28,7 +36,7 @@ export class TextStylingPlugin implements IEditorModule {
       document.execCommand(command, false);
 
       core.popup.hide();
-    });
+    })
   }
 }
 

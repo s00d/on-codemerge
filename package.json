@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
@@ -8,6 +8,7 @@
   "browser": "dist/main.iife.js",
   "typings": "dist/types/index.d.ts",
   "scripts": {
+    "prepublish": "rollup -c",
     "build": "rollup -c",
     "dev": "vite --config vite.config.ts",
     "update:exports": "npx tsx ./update_exports.ts ",
@@ -97,6 +98,12 @@
       "require": "./dist/blockButton.cjs.js",
       "browser": "./dist/blockButton.iife.js",
       "types": "./dist/types/packages/blockButton/src/index.d.ts"
+    },
+    "./imageButton": {
+      "import": "./dist/imageButton.esm.js",
+      "require": "./dist/imageButton.cjs.js",
+      "browser": "./dist/imageButton.iife.js",
+      "types": "./dist/types/packages/imageButton/src/index.d.ts"
     }
   },
   "devDependencies": {
@@ -108,7 +115,7 @@
     "@rollup/plugin-typescript": "^11.1.5",
     "@types/node": "^20.10.6",
     "lite-server": "^2.6.1",
-    "rollup": "^4.9.3",
+    "rollup": "^4.9.4",
     "rollup-plugin-dts": "^6.1.0",
     "rollup-plugin-filesize": "^10.0.0",
     "rollup-plugin-livereload": "^2.0.5",

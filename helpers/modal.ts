@@ -125,17 +125,6 @@ export class Modal {
     this.overlayElement.style.display = 'block';
   }
 
-  rgbToHex(rgb: string): string {
-    const rgbMatch = rgb.match(/\d+/g);
-    if (!rgbMatch) {
-      return rgb; // Возвращаем исходную строку, если не соответствует ожидаемому формату
-    }
-    return '#' + rgbMatch.map(x => {
-      const hex = parseInt(x).toString(16);
-      return hex.length === 1 ? '0' + hex : hex;
-    }).join('');
-  }
-
   close(): void {
     const data: {[key: string]: string | boolean} = {};
 

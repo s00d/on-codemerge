@@ -289,7 +289,6 @@ export class BlockManager {
     const padding = style.padding === '' ? '0' : style.padding.replace('px', '');
     const margin = style.margin === '' ? '0' : style.margin.replace('px', '');
     const fontSize = style.fontSize === '' ? '16' : style.fontSize.replace('px', '');
-    console.log(backgroundColor)
     this.modal.open([
       { label: "color", value: color, type: 'color' },
       { label: "backgroundColor", value: backgroundColor, type: 'color' },
