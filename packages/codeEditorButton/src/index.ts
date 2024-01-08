@@ -1,13 +1,12 @@
 import {EditorCore, IEditorModule} from "@/index";
 
-import ace from "brace";
+import {EditorView, basicSetup} from "codemirror"
+import {html} from "@codemirror/lang-html"
 
-import "brace/mode/html";
-import "brace/theme/github";
 
 export class CodeEditorPlugin implements IEditorModule {
   private core: EditorCore | null = null;
-  private editor: any | null = null;
+  private editor: EditorView | null = null;
   private modal: HTMLDivElement | null = null;
   private overlay: HTMLDivElement | null = null;
 
@@ -23,8 +22,6 @@ export class CodeEditorPlugin implements IEditorModule {
   }
 
   private createModal(): void {
-    // ace.config.set('basePath', 'https://cdnjs.cloudflare.com/ajax/libs/ace/1.4.13/');
-
     this.modal = document.createElement('div');
     this.modal.classList.add('code-editor-modal');
     this.modal.style.display = 'none';
@@ -40,19 +37,17 @@ export class CodeEditorPlugin implements IEditorModule {
     closeButton.classList.add('modal-close-button');
     closeButton.onclick = () => this.closeModal();
 
+    const textblock = document.createElement('div');
+    this.modal.appendChild(textblock);
     this.modal.appendChild(closeButton); // Добавляем кнопку закрытия в модальное окно
     document.body.appendChild(this.modal);
     document.body.appendChild(this.overlay);
 
-    const editorDiv = document.createElement('div');
-    editorDiv.style.height = '300px'; // Установите высоту редактора
-    editorDiv.style.width = '100%'; // Установите ширину редактора
-    this.modal.appendChild(editorDiv);
-
-    this.editor = ace.edit(editorDiv);
-    this.editor.getSession().setMode('ace/mode/html');
-    this.editor.setTheme('ace/theme/github');
-    this.editor.$blockScrolling = Infinity
+    this.editor = new EditorView({
+      extensions: [basicSetup, html()],
+      parent: textblock,
+      doc: this.core?.getContent() ?? '',
+    });
 
     document.body.appendChild(this.modal);
   }
@@ -61,7 +56,6 @@ export class CodeEditorPlugin implements IEditorModule {
     if(this.modal && this.core) {
       this.modal.style.display = 'block';
       if(this.overlay) this.overlay.style.display = 'block';
-      this.editor?.setValue(this.core.getContent());
     }
   }
 
@@ -69,7 +63,7 @@ export class CodeEditorPlugin implements IEditorModule {
     if(this.modal && this.core && this.editor) {
       this.modal.style.display = 'none';
       if(this.overlay) this.overlay.style.display = 'none';
-      this.core.setContent(this.editor.getValue());
+      this.core.setContent(this.editor?.state.doc.toString());
     }
   }
 
