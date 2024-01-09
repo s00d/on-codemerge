@@ -1,12 +1,12 @@
 {
   "name": "on-codemerge",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
   "main": "dist/main.cjs",
   "browser": "dist/main.iife.js",
-  "typings": "dist/types/index.d.ts",
+  "typings": "dist/types/src/index.d.ts",
   "scripts": {
     "prepublish": "npm run lint:fix && npm run build && npm run exports",
     "build": "rollup -c",
@@ -27,7 +27,7 @@
       "import": "./dist/main.esm.js",
       "require": "./dist/main.cjs.js",
       "browser": "./dist/main.iife.js",
-      "types": "./dist/types/index.d.ts"
+      "types": "./dist/types/src/index.d.ts"
     },
     "./tableButton": {
       "import": "./dist/tableButton.esm.js",
