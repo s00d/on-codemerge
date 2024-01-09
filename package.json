@@ -130,6 +130,12 @@
       "require": "./dist/horizontalLineButton.cjs.js",
       "browser": "./dist/horizontalLineButton.iife.js",
       "types": "./dist/types/packages/horizontalLineButton/src/index.d.ts"
+    },
+    "./clearStylesButton": {
+      "import": "./dist/clearStylesButton.esm.js",
+      "require": "./dist/clearStylesButton.cjs.js",
+      "browser": "./dist/clearStylesButton.iife.js",
+      "types": "./dist/types/packages/clearStylesButton/src/index.d.ts"
     }
   },
   "devDependencies": {

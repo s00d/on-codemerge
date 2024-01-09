@@ -41,7 +41,7 @@ export class ClearStylesButton implements IEditorModule {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
-    let originalRange = selection.getRangeAt(0);
+    const originalRange = selection.getRangeAt(0);
     const parentElement = originalRange.commonAncestorContainer.nodeType === Node.ELEMENT_NODE
       ? originalRange.commonAncestorContainer
       : originalRange.commonAncestorContainer.parentNode;
