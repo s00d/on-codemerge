@@ -1,6 +1,7 @@
-import type { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore } from "@/index";
 import rotateCcw from "../../../icons/rotate-ccw.svg";
 import rotateCw from "../../../icons/rotate-cw.svg";
+import type { IEditorModule } from "@/types";
 
 export class UndoRedoButton implements IEditorModule {
   initialize(core: EditorCore): void {

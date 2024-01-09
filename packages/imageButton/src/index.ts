@@ -1,6 +1,7 @@
-import type { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore } from "@/index";
 import { ImageManager } from './ImageManager';
 import image from "../../../icons/image.svg";
+import type { IEditorModule } from "@/types";
 
 export class ImageButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -50,3 +51,5 @@ export class ImageButton implements IEditorModule {
 
   // Дополнительные методы, если они вам нужны
 }
+
+export default ImageButton

@@ -1,5 +1,6 @@
-import type { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore } from "@/index";
 import minus from "../../../icons/minus.svg";
+import type { IEditorModule } from "@/types";
 
 export class HorizontalLineButton implements IEditorModule {
   private core: EditorCore | null = null;

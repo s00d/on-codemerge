@@ -1,6 +1,7 @@
-import type { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore } from "@/index";
 import TableManager from './TableManager';
 import table from "../../../icons/table.svg";
+import type { IEditorModule } from "@/types";
 
 export class TableButton implements IEditorModule {
   private core: EditorCore | null = null;

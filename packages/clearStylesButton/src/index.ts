@@ -1,6 +1,7 @@
-import type { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore } from "@/index";
 import { DomUtils } from "@root/helpers/DomUtils";
 import trash from "../../../icons/trash.svg";
+import type { IEditorModule } from "@/types";
 
 export class ClearStylesButton implements IEditorModule {
   private domUtils: DomUtils;

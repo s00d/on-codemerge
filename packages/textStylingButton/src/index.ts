@@ -1,9 +1,10 @@
-import type { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore } from "@/index";
 import { DropdownMenu } from "@root/helpers/dropdownMenu";
 import { DomUtils } from "@root/helpers/DomUtils";
 import type { StyleConfig } from "@root/helpers/StyleManager";
 import { StyleManager } from "@root/helpers/StyleManager";
 import type from "../../../icons/type.svg";
+import type { IEditorModule } from "@/types";
 
 const styleConfig: StyleConfig = {
   'bold': {

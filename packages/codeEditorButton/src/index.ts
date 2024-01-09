@@ -1,8 +1,8 @@
-import type { EditorCore, IEditorModule } from "@/index";
-
+import type { EditorCore } from "@/index";
 import { EditorView, basicSetup } from "codemirror"
 import { html } from "@codemirror/lang-html"
 import code from "../../../icons/code.svg";
+import type { IEditorModule } from "@/types";
 
 export class CodeEditorButton implements IEditorModule {
   private core: EditorCore | null = null;

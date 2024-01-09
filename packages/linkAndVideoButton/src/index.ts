@@ -1,7 +1,8 @@
-import type { EditorCore, IEditorModule } from "@/index";
+import type { EditorCore } from "@/index";
 import { Modal } from "@root/helpers/modal";
 import link from "../../../icons/link.svg";
 import video from "../../../icons/video.svg";
+import type { IEditorModule } from "@/types";
 
 export class LinkAndVideo implements IEditorModule {
   private links: Map<string, HTMLElement>  = new Map();
