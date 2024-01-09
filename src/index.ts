@@ -31,10 +31,110 @@ export class EditorCore {
     this.editor = new Editor(this);
 
     this.generalElement.addEventListener('keydown', this.handleKeydown);
+    this.injectStyles();
 
     setTimeout(() => {
       this.saveCurrentSelection();
     }, 10);
+  }
+
+
+  private injectStyles(): void {
+    const style = document.createElement('style');
+    style.type = 'text/css';
+    style.innerHTML = `
+    .editor-block {
+        position: relative;
+        display: flex;
+        min-height: 100px;
+      }
+      
+      .editor-block-section {
+        flex: 1;
+        padding: 10px;
+      }
+      
+      .editor-block-resizer, .editor-block-height-resizer {
+        display: none;
+      }
+      
+      .on-codemerge-icon {
+        vertical-align: sub;
+      }
+
+      .on-codemerge-button {
+        background-color: #f0f0f0;
+        border: 1px solid #ddd;
+        padding: 5px 10px;
+        margin: 5px;
+        cursor: pointer;
+        white-space: nowrap;
+      
+        &:hover {
+          background-color: #e2e2e2;
+          opacity: 0.8;
+        }
+      }
+      .on-codemerge {
+        svg {
+          vertical-align: sub;
+        }
+        .editor-block {
+          border: 1px solid #ccc;
+        }
+      
+        .editor-block-section {
+          border: 1px solid #ddd;
+        }
+      
+        .editor-block-resizer {
+          display: unset;
+          width: 1px;
+          background: #ccc;
+          cursor: col-resize;
+          padding: 3px;
+        }
+      
+        .editor-block-height-resizer {
+          display: unset;
+          width: 100%;
+          height: 5px;
+          background-color: #ccc;
+          cursor: ns-resize;
+          position: absolute;
+          bottom: 0;
+          left: 0;
+        }
+      }
+      .on-codemerge-table {
+        border-collapse: collapse;
+        width: 100%;
+        tr {
+          th {
+            border: 1px solid black;
+            padding: 8px;
+            background-color: rgb(225, 225, 225);
+          }
+          td {
+            border: 1px solid black;
+            padding: 3px;
+            text-align: center;
+            position: relative;
+      
+            &.selected {
+              border: 2px solid gray;
+              background-color: rgb(225, 225, 225);
+            }
+      
+            &:after {
+      
+            }
+          }
+        }
+      }
+
+    `;
+    document.head.appendChild(style);
   }
 
   saveCurrentSelection() {
