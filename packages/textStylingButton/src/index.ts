@@ -10,39 +10,33 @@ const styleConfig: StyleConfig = {
     name: 'Bold',
     property: 'fontWeight',
     enabledValue: 'bold',
-    disabledValue: 'normal'
   },
   'italic': {
     name: 'Italic',
     property: 'fontStyle',
     enabledValue: 'italic',
-    disabledValue: 'normal'
   },
   'underline': {
     name: 'Underline',
     property: 'textDecoration',
     enabledValue: 'underline',
-    disabledValue: 'none',
     isComplex: true
   },
   'strikeThrough': {
     name: 'Strike Through',
     property: 'textDecoration',
     enabledValue: 'line-through',
-    disabledValue: 'none',
     isComplex: true
   },
   'superscript': {
     name: 'Superscript',
     property: 'verticalAlign',
     enabledValue: 'super',
-    disabledValue: 'baseline'
   },
   'subscript': {
     name: 'Sub',
     property: 'verticalAlign',
     enabledValue: 'sub',
-    disabledValue: 'baseline'
   },
 };
 
@@ -64,46 +58,42 @@ export class TextStylingButton implements IEditorModule {
       this.createButton(core, styleConfig[i].name, i);
     }
 
-    core.popup.addHtmlItem(this.dropdown.getButton());
+    core.toolbar.addHtmlItem(this.dropdown.getButton());
   }
 
   private createButton(core: EditorCore, title: string, styleCommand: string): void {
     this.dropdown?.addItem(title, () => {
       core.restoreCurrentSelection();
+
       const selection = window.getSelection();
+      if(!selection) return;
 
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
+      const nodesToStyle = this.domUtils.getSelectedRoot(selection) ?? [];
 
-        // Получение самых глубоких узлов в выделении
-        const deepestNodes = this.domUtils.getDeepestNodes(range);
+      nodesToStyle.forEach(node => {
+        const isFormatted = this.domUtils.isStyleApplied(
+          node as HTMLElement,
+          selection.rangeCount > 0 ? selection.getRangeAt(0) : document.createRange(),
+          styleCommand,
+          this.styleManager.has.bind(this.styleManager)
+        )
 
-        deepestNodes.forEach(node => {
-          const isFormatted = this.domUtils.isStyleApplied(
-            node as HTMLElement,
-            range,
+        if (isFormatted) {
+          this.domUtils.removeStyleFromDeepestNodes(
+            node,
             styleCommand,
-            this.styleManager.has.bind(this.styleManager)
-          )
-          if (isFormatted) {
-            this.domUtils.removeStyleFromDeepestNodes(
-              node,
-              styleCommand,
-              this.styleManager.remove.bind(this.styleManager)
-            );
-          } else {
-            this.domUtils.applyStyleToDeepestNodes(
-              node,
-              styleCommand,
-              this.styleManager.set.bind(this.styleManager)
-            );
-          }
-        })
+            this.styleManager.remove.bind(this.styleManager)
+          );
+        } else {
+          this.domUtils.applyStyleToDeepestNodes(
+            node,
+            styleCommand,
+            this.styleManager.set.bind(this.styleManager)
+          );
+        }
+      })
 
-        core.appElement.focus();
-      }
-
-      core.popup.hide();
+      core.appElement.focus();
 
       const editor = core.editor.getEditorElement();
       if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора

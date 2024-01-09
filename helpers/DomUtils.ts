@@ -51,7 +51,60 @@ export class DomUtils {
     return deepestNodes;
   }
 
-  private createSpanIfNeeded(node: Node, range: Range) {
+  getSelectedRoot(selection: Selection) {
+    let nodesToStyle: Node[] = [];
+
+    const range = selection.getRangeAt(0);
+    if (!range.collapsed) {
+      // Обработка случая с выделением
+      const range = selection.getRangeAt(0);
+      nodesToStyle = this.getDeepestNodes(range);
+    } else {
+
+      // Обработка случая без выделения, но с курсором
+
+      const currentNode = selection.anchorNode;
+      if (currentNode) {
+        let span: HTMLElement = document.createElement('span');
+        if(currentNode && (currentNode as Element).tagName === 'SPAN') {
+          span = currentNode as HTMLElement
+        } else {
+          const element = currentNode.parentNode as Element;
+
+          if(element && element.tagName === 'SPAN') {
+            span = currentNode.parentNode as HTMLElement
+          } else {
+            span.textContent = ' \u200B';
+
+            if (currentNode.nodeType === Node.TEXT_NODE) {
+              // Вставка span непосредственно после текущего текстового узла
+              currentNode.parentNode?.insertBefore(span, currentNode.nextSibling);
+            } else if (currentNode.nodeType === Node.ELEMENT_NODE) {
+              // Вставка span внутрь элемента, если currentNode является элементом
+              currentNode.appendChild(span);
+            }
+          }
+        }
+
+        nodesToStyle = [span];
+
+
+        let nextNode = range.endContainer.nextSibling;
+        while (nextNode && nextNode.nodeType !== Node.TEXT_NODE) {
+          nextNode = nextNode.nextSibling;
+        }
+
+        range.setStart(span, 1);
+        range.setEnd(span, 1);
+        selection.removeAllRanges();
+        selection.addRange(range);
+      }
+    }
+
+    return nodesToStyle;
+  }
+
+  createSpanIfNeeded(node: Node, range: Range) {
     if (node.nodeType !== Node.TEXT_NODE || !node.textContent) {
       return null;
     }
@@ -97,12 +150,7 @@ export class DomUtils {
     styleCommand: string,
     checkStyle: (element: HTMLElement, styleCommand: string) => boolean
   ): boolean {
-    if (!range.collapsed) {
-      if (checkStyle(spanElements, styleCommand)) {
-        return true;
-      }
-    }
-    return false;
+    return (checkStyle(spanElements, styleCommand));
   }
 
   applyStyleToDeepestNodes(
@@ -128,7 +176,7 @@ export class DomUtils {
       if (this.isStyledTextNode(element)) {
         removeStyle(element, styleCommand);
 
-        if (!element.getAttribute('style')  && element.tagName === 'SPAN') {
+        if (!element.getAttribute('style') && element.tagName === 'SPAN') {
           const fragment = document.createDocumentFragment();
           while (element.firstChild) {
             fragment.appendChild(element.firstChild);

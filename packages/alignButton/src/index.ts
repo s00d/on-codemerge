@@ -47,57 +47,52 @@ export class AlignButton implements IEditorModule {
         this.setStyle('textAlign');
 
         core.appElement.focus();
-        core.popup.hide();
 
         const editor = core.editor.getEditorElement();
         if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
       })
     });
 
-    core.popup.addHtmlItem(this.dropdown?.getButton());
+    core.toolbar.addHtmlItem(this.dropdown.getButton());
   }
 
   private setStyle(command: string) {
     const selection = window.getSelection();
+    if(!selection) return;
 
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
+    const nodesToStyle = this.domUtils.getSelectedRoot(selection) ?? [];
 
-      // Получение самых глубоких узлов в выделении
-      const deepestNodes = this.domUtils.getDeepestNodes(range);
-
-      deepestNodes.forEach(node => {
-        const isFormatted = this.domUtils.isStyleApplied(
-          node as HTMLElement,
-          range,
+    nodesToStyle.forEach(node => {
+      const isFormatted = this.domUtils.isStyleApplied(
+        node as HTMLElement,
+        selection.rangeCount > 0 ? selection.getRangeAt(0) : document.createRange(),
+        command,
+        this.styleManager.has.bind(this.styleManager)
+      )
+      if (isFormatted) {
+        this.domUtils.removeStyleFromDeepestNodes(
+          node,
           command,
-          this.styleManager.has.bind(this.styleManager)
-        )
-        if (isFormatted) {
-          this.domUtils.removeStyleFromDeepestNodes(
-            node,
-            command,
-            this.styleManager.remove.bind(this.styleManager)
-          );
-          this.domUtils.removeStyleFromDeepestNodes(
-            node,
-            'display',
-            this.styleManager.remove.bind(this.styleManager)
-          );
-        } else {
-          this.domUtils.applyStyleToDeepestNodes(
-            node,
-            command,
-            this.styleManager.set.bind(this.styleManager)
-          );
-          this.domUtils.removeStyleFromDeepestNodes(
-            node,
-            'display',
-            this.styleManager.set.bind(this.styleManager)
-          );
-        }
-      })
-    }
+          this.styleManager.remove.bind(this.styleManager)
+        );
+        this.domUtils.removeStyleFromDeepestNodes(
+          node,
+          'display',
+          this.styleManager.remove.bind(this.styleManager)
+        );
+      } else {
+        this.domUtils.applyStyleToDeepestNodes(
+          node,
+          command,
+          this.styleManager.set.bind(this.styleManager)
+        );
+        this.domUtils.removeStyleFromDeepestNodes(
+          node,
+          'display',
+          this.styleManager.set.bind(this.styleManager)
+        );
+      }
+    })
   }
 }
 

@@ -67,59 +67,18 @@ export class TextDecorationButton implements IEditorModule {
     input.addEventListener('input', (e) => {
       styleConfig[command].enabledValue = (e.target as HTMLInputElement).value
       const selection = window.getSelection();
+      if(!selection) return;
 
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
+      const nodesToStyle = this.domUtils.getSelectedRoot(selection) ?? [];
 
-        // Получение самых глубоких узлов в выделении
-        const deepestNodes = this.domUtils.getDeepestNodes(range);
-
-        deepestNodes.forEach(node => {
-          const isFormatted = this.domUtils.isStyleApplied(
-            node as HTMLElement,
-            range,
-            command,
-            this.styleManager.has.bind(this.styleManager)
-          )
-          if (isFormatted) {
-            this.domUtils.removeStyleFromDeepestNodes(
-              node,
-              command,
-              this.styleManager.remove.bind(this.styleManager)
-            );
-          } else {
-            this.domUtils.applyStyleToDeepestNodes(
-              node,
-              command,
-              this.styleManager.set.bind(this.styleManager)
-            );
-          }
-        })
-      }
-
-      const editor = core.editor.getEditorElement();
-      if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
-    });
-
-    core.popup.addHtmlItem(input);
-  }
-
-  private setStyle(command: string) {
-    const selection = window.getSelection();
-
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-
-      // Получение самых глубоких узлов в выделении
-      const deepestNodes = this.domUtils.getDeepestNodes(range);
-
-      deepestNodes.forEach(node => {
+      nodesToStyle.forEach(node => {
         const isFormatted = this.domUtils.isStyleApplied(
           node as HTMLElement,
-          range,
+          selection.rangeCount > 0 ? selection.getRangeAt(0) : document.createRange(),
           command,
           this.styleManager.has.bind(this.styleManager)
         )
+
         if (isFormatted) {
           this.domUtils.removeStyleFromDeepestNodes(
             node,
@@ -134,12 +93,50 @@ export class TextDecorationButton implements IEditorModule {
           );
         }
       })
-    }
+
+      const editor = core.editor.getEditorElement();
+      if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
+
+      // core.saveCurrentSelection();
+      core.appElement.focus();
+    });
+
+    core.toolbar.addHtmlItem(input);
+  }
+
+  private setStyle(command: string) {
+    const selection = window.getSelection();
+    if(!selection) return;
+
+    const nodesToStyle = this.domUtils.getSelectedRoot(selection) ?? [];
+
+    nodesToStyle.forEach(node => {
+      const isFormatted = this.domUtils.isStyleApplied(
+        node as HTMLElement,
+        selection.rangeCount > 0 ? selection.getRangeAt(0) : document.createRange(),
+        command,
+        this.styleManager.has.bind(this.styleManager)
+      )
+      if (isFormatted) {
+        this.domUtils.removeStyleFromDeepestNodes(
+          node,
+          command,
+          this.styleManager.remove.bind(this.styleManager)
+        );
+      } else {
+        this.domUtils.applyStyleToDeepestNodes(
+          node,
+          command,
+          this.styleManager.set.bind(this.styleManager)
+        );
+      }
+    })
   }
 
   private createFontPicker(core: EditorCore, title: string): void {
     const select = document.createElement('select');
     select.title = title;
+    select.style.height = '35px';
     const fonts = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'];
     fonts.forEach(font => {
       const option = document.createElement('option');
@@ -154,18 +151,19 @@ export class TextDecorationButton implements IEditorModule {
       this.setStyle(command);
 
       core.appElement.focus();
-      core.popup.hide();
 
       const editor = core.editor.getEditorElement();
       if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
+
     });
 
-    core.popup.addHtmlItem(select);
+    core.toolbar.addHtmlItem(select);
   }
 
   private createInputPicker(core: EditorCore, title: string, command: string): void {
     const select = document.createElement('select');
     select.title = title;
+    select.style.height = '35px';
     select.value = ''
 
     // Заполняем выпадающий список значениями от 10 до 50
@@ -179,18 +177,16 @@ export class TextDecorationButton implements IEditorModule {
     select.addEventListener('change', (e) => {
       core.restoreCurrentSelection()
       styleConfig[command].enabledValue = (e.target as HTMLSelectElement).value
-      select.value = ''
 
       this.setStyle(command);
 
       core.appElement.focus();
-      core.popup.hide();
 
       const editor = core.editor.getEditorElement();
       if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
     });
 
-    core.popup.addHtmlItem(select);
+    core.toolbar.addHtmlItem(select);
   }
 }
 

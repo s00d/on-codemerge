@@ -29,6 +29,10 @@ export class Toolbar {
     return button;
   }
 
+  addHtmlItem(item: HTMLElement): void {
+    this.toolbarElement?.appendChild(item);
+  }
+
   addButtonIcon(title: string, icon: string, action: () => void) {
     const button = document.createElement('div');
     button.classList.add('on-codemerge-button');

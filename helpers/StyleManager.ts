@@ -32,7 +32,9 @@ export class StyleManager {
       } else if(config.disabledValue) {
         element.style[config.property as any] = config.disabledValue;
       } else {
-        element.style.removeProperty(config.property as string);
+        // @ts-ignore
+        element.style[config.property as any] = null;
+        // element.style.removeProperty(config.property as string);
       }
     }
   }

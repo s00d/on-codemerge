@@ -1,5 +1,4 @@
 import './styles.scss';
-import { ContextMenu } from "@root/helpers/contextMenu";
 import Toolbar from "@/toolbar";
 import Editor from "@/editor";
 
@@ -97,7 +96,6 @@ export class EditorCore {
   public appElement: HTMLElement;
   public generalElement: HTMLElement;
   public toolbar: Toolbar;
-  public popup: ContextMenu;
   public editor: Editor;
   public history: string[] = []
   public currentSelectionRange: Range | null = null;
@@ -114,40 +112,12 @@ export class EditorCore {
     this.applyStyles();
 
     this.toolbar = new Toolbar(this);
-    this.popup = new ContextMenu(this);
     this.editor = new Editor(this);
 
     this.generalElement.addEventListener('keydown', this.handleKeydown);
 
-    this.appElement.addEventListener('mouseup', this.handleTextSelection.bind(this));
-
     setTimeout(() => {
       this.saveCurrentSelection();
-    }, 10);
-  }
-
-  private handleTextSelection(): void {
-    setTimeout(() => {
-      const selection = window.getSelection();
-      const editorElement = this.editor.getEditorElement();
-
-      if (selection && selection.rangeCount > 0 && !selection.isCollapsed) {
-        const range = selection.getRangeAt(0);
-        const selectedContent = range.commonAncestorContainer;
-
-        // Проверяем, находится ли выделенный текст внутри редактора
-        if (editorElement && editorElement.contains(selectedContent)) {
-          // Выделенный текст существует и находится в области редактора
-          const rect = range.getBoundingClientRect();
-          this.popup.show(rect.x, rect.y + 20);
-        } else {
-          // Текст выделен вне редактора
-          this.popup.hide();
-        }
-      } else {
-        // Текст не выделен
-        this.popup.hide();
-      }
     }, 10);
   }
 

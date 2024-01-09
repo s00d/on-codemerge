@@ -30,6 +30,7 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.registerModule(new TextDecorationButton);
     editor.registerModule(new AlignButton);
     editor.registerModule(new TextStylingButton);
+    editor.registerModule(new SpacerButton);
     editor.registerModule(new TableButton);
     editor.registerModule(new ListButton);
     editor.registerModule(new HorizontalLineButton);
