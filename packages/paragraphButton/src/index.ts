@@ -6,7 +6,7 @@ export class ParagraphButton implements IEditorModule {
   private dropdown: DropdownMenu | null = null;
 
   initialize(core: EditorCore): void {
-    this.dropdown = new DropdownMenu(core, 'Paragraph');
+    this.dropdown = new DropdownMenu(core, '¶ ', 'Paragraph');
     this.core = core;
     this.dropdown.addItem('Normal', () => this.insertParagraph('normal'));
     this.dropdown.addItem('Heading 1', () => this.insertParagraph('h1'));

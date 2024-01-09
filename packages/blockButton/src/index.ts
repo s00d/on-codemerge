@@ -1,5 +1,6 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import { BlockManager } from "./BlockManager";
+import feather from "feather-icons";
 
 export class BlockButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -7,7 +8,8 @@ export class BlockButton implements IEditorModule {
 
   initialize(core: EditorCore): void {
     this.core = core;
-    core.toolbar.addButton('Block', () => this.createBlock())
+    const icon = feather.icons.columns.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+    core.toolbar.addButtonIcon('Block', icon, () => this.createBlock())
 
     this.core.subscribeToContentChange(() => {
       this.reloadBlocks(core);

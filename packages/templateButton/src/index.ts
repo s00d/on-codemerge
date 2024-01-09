@@ -1,5 +1,6 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import { DropdownMenu } from "@root/helpers/dropdownMenu";
+import feather from "feather-icons";
 
 export class TemplateButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -11,12 +12,13 @@ export class TemplateButton implements IEditorModule {
   }
 
   initialize(core: EditorCore): void {
-    this.dropdown = new DropdownMenu(core, 'Template')
+    const icon = feather.icons.layers.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+    this.dropdown = new DropdownMenu(core, icon, 'Template')
     this.core = core;
 
     for (const i in this.templates) {
       this.dropdown.addItem(i, () => {
-        this.core?.insertHTMLIntoEditor(this.templates[i]);
+        this.core?.insertHTMLIntoEditor(core.contentCleanup(this.templates[i]));
         this.core?.moveCursorToStart();
       })
     }

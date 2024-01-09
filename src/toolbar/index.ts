@@ -29,6 +29,17 @@ export class Toolbar {
     return button;
   }
 
+  addButtonIcon(title: string, icon: string, action: () => void) {
+    const button = document.createElement('div');
+    button.classList.add('on-codemerge-button');
+    button.innerHTML = icon;
+    button.title = title;
+    button.addEventListener('click', action);
+
+    this.toolbarElement?.appendChild(button);
+    return button;
+  }
+
   private applyStyles(): void {
     if (this.toolbarElement) {
       this.toolbarElement.style.borderBottom = '1px solid #ccc';

@@ -1,4 +1,5 @@
 import type { EditorCore, IEditorModule } from "@/index";
+import feather from "feather-icons";
 
 export class PreviewButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -11,7 +12,8 @@ export class PreviewButton implements IEditorModule {
     this.injectStyles();
 
     // Создаем кнопку на панели инструментов
-    core.toolbar.addButton('Preview', () => this.openModal());
+    const icon = feather.icons.eye.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+    core.toolbar.addButtonIcon('Preview', icon, () => this.openModal());
 
     // Создаем модальное окно для предпросмотра
     this.createModal();

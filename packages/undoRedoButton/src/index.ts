@@ -5,7 +5,8 @@ export class UndoRedoButton implements IEditorModule {
     const createUndoButton = () => {
       const button = document.createElement('button');
       button.classList.add('on-codemerge-button');
-      button.textContent = 'Undo';
+      button.textContent = '↺';
+      button.title = 'Undo';
       button.disabled = true;
       button.addEventListener('click', () => {
         core.undo()
@@ -16,7 +17,8 @@ export class UndoRedoButton implements IEditorModule {
     const createRedoButton = () => {
       const button = document.createElement('button');
       button.classList.add('on-codemerge-button');
-      button.textContent = 'Redo';
+      button.textContent = '↻';
+      button.title = 'Redo';
       button.disabled = true;
       button.addEventListener('click', () => {
         core.redo()

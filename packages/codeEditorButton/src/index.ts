@@ -2,6 +2,7 @@ import type { EditorCore, IEditorModule } from "@/index";
 
 import { EditorView, basicSetup } from "codemirror"
 import { html } from "@codemirror/lang-html"
+import feather from "feather-icons";
 
 export class CodeEditorButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -14,7 +15,8 @@ export class CodeEditorButton implements IEditorModule {
     this.injectStyles();
 
     // Создаем кнопку на панели инструментов
-    core.toolbar.addButton('HTML', () => this.openModal());
+    const icon = feather.icons.code.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+    core.toolbar.addButtonIcon('HTML', icon, () => this.openModal());
 
     // Создаем модальное окно
     this.createModal();

@@ -8,14 +8,15 @@ export class DropdownMenu {
   private dropdown: HTMLDivElement;
   private core: EditorCore;
 
-  constructor(core: EditorCore, buttonText: string) {
+  constructor(core: EditorCore, buttonText: string, title?: string) {
     this.core = core;
     this.dropdown = document.createElement('div');
     this.dropdown.className = 'dropdown';
 
     // Создаем кнопку для управления выпадающим списком
     this.button = document.createElement('div');
-    this.button.textContent = buttonText + ' ';
+    this.button.innerHTML = buttonText + ' ';
+    if(title) this.button.title = title;
     this.button.classList.add('on-codemerge-button');
     // this.button.style.padding = '8px 12px';
     this.button.style.cursor = 'pointer';
@@ -42,6 +43,7 @@ export class DropdownMenu {
       boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
       zIndex: '1000',
       maxHeight: '200px',
+      minWidth: '150px',
       overflowY: 'auto',
 
       opacity: '0',

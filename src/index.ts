@@ -336,6 +336,18 @@ export class EditorCore {
     }
   }
 
+  contentCleanup(newContent: string): string {
+    return newContent
+      .replace(/\sid\s*=\s*["']?[^"']*["']?/gi, "")
+      .replace(/<meta\s+charset=["']utf-8["']\s*\/?>/gi, "");
+  }
+
+  setContentCleanup(newContent: string): void {
+    // Отчищаем все атрибуты id из HTML строки
+    const cleanedContent = this.contentCleanup(newContent);
+    this.setContent(cleanedContent)
+  }
+
   // Методы для работы с событиями
   subscribeToContentChange(callback: Hook): void {
     this.eventManager.subscribe('contentChanged', callback);

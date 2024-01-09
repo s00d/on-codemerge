@@ -16,14 +16,15 @@ import { FullscreenButton } from "@root/packages/fullscreenButton/src";
 import { PrintButton } from "@root/packages/printButton/src";
 import { ParagraphButton } from "@root/packages/paragraphButton/src";
 import { HorizontalLineButton } from "@root/packages/horizontalLineButton/src";
+import ClearStylesButton from "@root/packages/clearStylesButton/src";
 
 document.addEventListener('DOMContentLoaded', () => {
   const appElement = document.getElementById('app');
   if (appElement) {
     const editor = new EditorCore(appElement);
     editor.registerModule(new UndoRedoButton);
-    editor.registerModule(new BlockButton);
     editor.registerModule(new SpacerButton);
+    editor.registerModule(new BlockButton);
     editor.registerModule(new ParagraphButton);
     editor.registerModule(new SpacerButton);
     editor.registerModule(new TextDecorationButton);
@@ -40,11 +41,12 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.registerModule(new PreviewButton);
     editor.registerModule(new TemplateButton({
       text: 'sssssss ssss ssss',
-      html: 'aaaa bbbb cccc <span style="font-weight: bold;">dddd</span> eeeee ffffff',
+      html: 'aaaa bbbb cccc <span id="test" style="font-weight: bold;">dddd</span> eeeee ffffff',
       table: '<table class="on-codemerge-table"><thead><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr></thead><tbody><tr><td style="position: relative;">Row 1 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 2 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 3 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 3<div class="on-codemerge-resizer"></div></td></tr></tbody></table>',
     }));
     editor.registerModule(new FullscreenButton);
     editor.registerModule(new PrintButton);
+    editor.registerModule(new ClearStylesButton);
 
     editor.subscribeToContentChange((newContent?: string) => {
 

@@ -34,6 +34,55 @@ export class Editor {
     this.editorElement.addEventListener('blur', () => {
       core.saveCurrentSelection();
     });
+
+    this.editorElement.addEventListener('paste', (event) => {
+      this.handlePaste(event, core);
+    });
+  }
+
+  private handlePaste(event: ClipboardEvent, core: EditorCore) {
+    event.preventDefault();
+    core.saveCurrentSelection();
+
+    // @ts-ignore
+    const clipboardData = event.clipboardData || window.clipboardData;
+    let pastedData = clipboardData.getData('text/html');
+
+    // Очистка HTML от атрибутов id
+    pastedData = core.contentCleanup(pastedData);
+
+    console.log(pastedData);
+    // core.insertHTMLIntoEditor(pastedData)
+
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = pastedData;
+
+    const selection = window.getSelection();
+    if (!selection) {
+      return;
+    }
+
+    // Если есть что-то выбрано, сначала удалим выбранное
+    if (!selection.isCollapsed) {
+      selection.deleteFromDocument();
+    }
+
+    // Сохраняем текущее положение курсора
+    const range = selection.rangeCount > 0 ? selection.getRangeAt(0) : document.createRange();
+
+    while (tempDiv.firstChild) {
+      range.insertNode(tempDiv.firstChild);
+      range.collapse(false); // Перемещаем курсор в конец только что вставленного узла
+    }
+
+    // Обновляем положение курсора в редакторе
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    const editor = this.getEditorElement();
+    if(editor) core.setContent(editor.innerHTML)
+    // Вставка очищенного HTML
+    // document.execCommand('insertHTML', false, pastedData);
   }
 
   private applyStyles(): void {

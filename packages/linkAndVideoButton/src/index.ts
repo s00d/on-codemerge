@@ -1,5 +1,6 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import { Modal } from "@root/helpers/modal";
+import feather from "feather-icons";
 
 export class LinkAndVideo implements IEditorModule {
   private links: Map<string, HTMLElement>  = new Map();
@@ -10,8 +11,11 @@ export class LinkAndVideo implements IEditorModule {
   initialize(core: EditorCore): void {
     this.core = core;
     this.modal = new Modal(core);
-    core.toolbar.addButton('Link', () => this.insertLink(core));
-    core.toolbar.addButton('Video', () => this.insertVideo(core));
+    const icon1 = feather.icons.link.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+    const icon2 = feather.icons.video.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+
+    core.toolbar.addButtonIcon('Link', icon1, () => this.insertLink(core));
+    core.toolbar.addButtonIcon('Video', icon2, () => this.insertVideo(core));
 
     core.subscribeToContentChange(() => {
       const editor = core.editor.getEditorElement();
@@ -21,7 +25,8 @@ export class LinkAndVideo implements IEditorModule {
         const isUrl = element.tagName === 'A';
 
         let blockId = element.id;
-        if (!blockId || blockId === '' || !blockId.startsWith('block-')) {
+
+        if (!blockId || blockId === '' || !blockId.startsWith('link-')) {
           element.id = blockId = 'link-' + Math.random().toString(36).substring(2, 11)
         }
 
@@ -33,6 +38,8 @@ export class LinkAndVideo implements IEditorModule {
           } else {
             element.addEventListener('click', () => this.showEditVideo(element))
           }
+          const editor = core.editor.getEditorElement();
+          if(editor) core.setContent(editor.innerHTML)
         }
       });
     });
