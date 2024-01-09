@@ -3,6 +3,7 @@ import { DropdownMenu } from "@root/helpers/dropdownMenu";
 import { DomUtils } from "@root/helpers/DomUtils";
 import type { StyleConfig } from "@root/helpers/StyleManager";
 import { StyleManager } from "@root/helpers/StyleManager";
+import feather from "feather-icons";
 
 const styleConfig: StyleConfig = {
   'bold': {
@@ -57,7 +58,8 @@ export class TextStylingButton implements IEditorModule {
   }
 
   initialize(core: EditorCore): void {
-    this.dropdown = new DropdownMenu(core, 'Styling')
+    const icon = feather.icons.type.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+    this.dropdown = new DropdownMenu(core, icon, 'Styling')
     for (const i in styleConfig) {
       this.createButton(core, styleConfig[i].name, i);
     }
