@@ -1,6 +1,6 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import { ImageManager } from './ImageManager';
-import feather from "feather-icons";
+import image from "../../../icons/image.svg";
 
 export class ImageButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -8,8 +8,7 @@ export class ImageButton implements IEditorModule {
 
   initialize(core: EditorCore): void {
     this.core = core;
-    const icon = feather.icons.image.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    core.toolbar.addButtonIcon('Image', icon, () => this.onInsertImageClick())
+    core.toolbar.addButtonIcon('Image', image, () => this.onInsertImageClick())
   }
 
   private onInsertImageClick = (): void => {

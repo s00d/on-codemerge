@@ -1,14 +1,14 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import { DropdownMenu } from "@root/helpers/dropdownMenu";
-import feather from "feather-icons";
+import list from "../../../icons/list.svg";
+
 export class ListButton implements IEditorModule {
   private core: EditorCore | null = null;
   private last = 1;
   private dropdown: DropdownMenu | null = null;
 
   initialize(core: EditorCore): void {
-    const icon = feather.icons.list.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    this.dropdown = new DropdownMenu(core, icon, 'List items')
+    this.dropdown = new DropdownMenu(core, list, 'List items')
     this.core = core;
     this.dropdown.addItem('Dot', () => this.createList())
     this.dropdown.addItem('Numbered', () => this.createNumberedList());

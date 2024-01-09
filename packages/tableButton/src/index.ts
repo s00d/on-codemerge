@@ -1,6 +1,6 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import TableManager from './TableManager';
-import feather from "feather-icons";
+import table from "../../../icons/table.svg";
 
 export class TableButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -9,8 +9,7 @@ export class TableButton implements IEditorModule {
   initialize(core: EditorCore): void {
     this.core = core;
     this.injectStyles();
-    const icon = feather.icons.table.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    core.toolbar.addButtonIcon('Table', icon, () => this.createTable(3, 3))
+    core.toolbar.addButtonIcon('Table', table, () => this.createTable(3, 3))
 
     core.subscribeToContentChange(() => {
       this.reloadTables(core)

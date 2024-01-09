@@ -1,6 +1,7 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import { Modal } from "@root/helpers/modal";
-import feather from "feather-icons";
+import link from "../../../icons/link.svg";
+import video from "../../../icons/video.svg";
 
 export class LinkAndVideo implements IEditorModule {
   private links: Map<string, HTMLElement>  = new Map();
@@ -11,11 +12,8 @@ export class LinkAndVideo implements IEditorModule {
   initialize(core: EditorCore): void {
     this.core = core;
     this.modal = new Modal(core);
-    const icon1 = feather.icons.link.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    const icon2 = feather.icons.video.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-
-    core.toolbar.addButtonIcon('Link', icon1, () => this.insertLink(core));
-    core.toolbar.addButtonIcon('Video', icon2, () => this.insertVideo(core));
+    core.toolbar.addButtonIcon('Link', link, () => this.insertLink(core));
+    core.toolbar.addButtonIcon('Video', video, () => this.insertVideo(core));
 
     core.subscribeToContentChange(() => {
       const editor = core.editor.getEditorElement();

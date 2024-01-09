@@ -1,12 +1,11 @@
 import type { EditorCore, IEditorModule } from "@/index";
-import feather from "feather-icons";
+import minus from "../../../icons/minus.svg";
 
 export class HorizontalLineButton implements IEditorModule {
   private core: EditorCore | null = null;
   initialize(core: EditorCore): void {
     this.core = core;
-    const icon = feather.icons.minus.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    core.toolbar.addButtonIcon('Line', icon, () => this.insertHorizontalLine())
+    core.toolbar.addButtonIcon('Line', minus, () => this.insertHorizontalLine())
   }
 
   private insertHorizontalLine(): void {

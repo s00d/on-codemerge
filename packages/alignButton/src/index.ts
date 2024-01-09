@@ -3,8 +3,7 @@ import { DropdownMenu } from "@root/helpers/dropdownMenu";
 import type { StyleConfig } from "@root/helpers/StyleManager";
 import { StyleManager } from "@root/helpers/StyleManager";
 import { DomUtils } from "@root/helpers/DomUtils";
-import feather from "feather-icons";
-
+import alignCenter from "../../../icons/align-center.svg";
 
 const styleConfig: StyleConfig = {
   'textAlign': {
@@ -30,8 +29,8 @@ export class AlignButton implements IEditorModule {
     this.styleManager = new StyleManager(styleConfig);
   }
   initialize(core: EditorCore): void {
-    const icon = feather.icons["align-center"].toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    this.dropdown = new DropdownMenu(core, icon, 'Align')
+    // const icon = alignCenter.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
+    this.dropdown = new DropdownMenu(core, alignCenter, 'Align')
     const alignButtons = [
       { align: 'left', text: 'Left' },
       { align: 'right', text: 'Right' },

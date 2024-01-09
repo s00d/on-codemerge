@@ -9,6 +9,7 @@ import terser from '@rollup/plugin-terser';
 import filesize from 'rollup-plugin-filesize';
 import progress from 'rollup-plugin-progress';
 import postcss from 'rollup-plugin-postcss';
+import svg from 'rollup-plugin-svg-import';
 import sass from 'sass';
 import fs from "fs";
 
@@ -62,6 +63,7 @@ async function getConfig() {
                 include: [`${inputPath}/**/*`],
                 extensions
             }),
+            svg(),
             terser({ format: { preamble, comments: false } }),
             postcss({
                 // Для инлайнинга стилей в JavaScript используйте следующие опции:

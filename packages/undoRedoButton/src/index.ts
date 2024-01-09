@@ -1,13 +1,13 @@
 import type { EditorCore, IEditorModule } from "@/index";
-import feather from "feather-icons";
+import rotateCcw from "../../../icons/rotate-ccw.svg";
+import rotateCw from "../../../icons/rotate-cw.svg";
 
 export class UndoRedoButton implements IEditorModule {
   initialize(core: EditorCore): void {
     const createUndoButton = () => {
-      const icon = feather.icons["rotate-ccw"].toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
       const button = document.createElement('button');
       button.classList.add('on-codemerge-button');
-      button.innerHTML = icon;
+      button.innerHTML = rotateCcw;
       button.title = 'Undo';
       button.disabled = true;
       button.addEventListener('click', () => {
@@ -17,10 +17,9 @@ export class UndoRedoButton implements IEditorModule {
     };
 
     const createRedoButton = () => {
-      const icon = feather.icons["rotate-cw"].toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
       const button = document.createElement('button');
       button.classList.add('on-codemerge-button');
-      button.innerHTML = icon;
+      button.innerHTML = rotateCw;
       button.title = 'Redo';
       button.disabled = true;
       button.addEventListener('click', () => {

@@ -1,6 +1,6 @@
 import type { EditorCore, IEditorModule } from "@/index";
 import { DomUtils } from "@root/helpers/DomUtils";
-import feather from "feather-icons";
+import trash from "../../../icons/trash.svg";
 
 export class ClearStylesButton implements IEditorModule {
   private domUtils: DomUtils;
@@ -10,8 +10,7 @@ export class ClearStylesButton implements IEditorModule {
   }
 
   initialize(core: EditorCore): void {
-    const icon = feather.icons.trash.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    core.toolbar.addButtonIcon('Clear Styles', icon, () => {
+    core.toolbar.addButtonIcon('Clear Styles', trash, () => {
       core.restoreCurrentSelection();
       if (this.isInEditor(core)) {
         this.clearStyles(core);

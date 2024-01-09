@@ -1,5 +1,5 @@
 import type { EditorCore, IEditorModule } from "@/index";
-import feather from "feather-icons";
+import maximize from "../../../icons/maximize.svg";
 
 export class FullscreenButton implements IEditorModule {
   private core: EditorCore | null = null;
@@ -8,8 +8,7 @@ export class FullscreenButton implements IEditorModule {
     this.core = core;
 
     // Добавляем кнопку для переключения полноэкранного режима
-    const icon = feather.icons.maximize.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    core.toolbar.addButtonIcon('Fullscreen', icon, () => this.toggleFullscreen());
+    core.toolbar.addButtonIcon('Fullscreen', maximize, () => this.toggleFullscreen());
   }
 
   private toggleFullscreen(): void {

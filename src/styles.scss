@@ -27,6 +27,11 @@ body {
 }
 
 
+.on-codemerge {
+  svg {
+    vertical-align: sub;
+  }
+}
 .on-codemerge-table {
   border-collapse: collapse;
   width: 100%;
