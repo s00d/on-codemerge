@@ -8,7 +8,7 @@
   "browser": "dist/main.iife.js",
   "typings": "dist/types/index.d.ts",
   "scripts": {
-    "prepublish": "npm run build && npm run exports",
+    "prepublish": "npm run lint:fix && npm run build && npm run exports",
     "build": "rollup -c",
     "dev": "vite --config vite.config.ts",
     "exports": "npx tsx ./update_exports.ts",

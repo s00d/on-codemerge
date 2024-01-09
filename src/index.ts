@@ -109,6 +109,7 @@ export class EditorCore {
     this.generalElement.innerHTML = "";
 
     this.appElement = document.createElement('div');
+    this.appElement.classList.add('on-codemerge')
     this.generalElement.appendChild(this.appElement)
     this.applyStyles();
 

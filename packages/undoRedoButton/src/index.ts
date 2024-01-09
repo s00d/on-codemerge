@@ -35,7 +35,6 @@ export class UndoRedoButton implements IEditorModule {
     if(toolbar) toolbar.appendChild(redo);
 
     core.subscribeToContentChange(() => {
-      console.log(core.isUndo(), core.isRedo())
       undo.disabled = !core.isUndo();
       redo.disabled = !core.isRedo();
     });

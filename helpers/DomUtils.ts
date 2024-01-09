@@ -1,41 +1,5 @@
 export class DomUtils {
-  get(range: Range): Node[] {
-    return this.getDeepestNodes(range);
-  }
-
-  private createSpanIfNeeded(node: Node, range: Range): Node | null {
-    if (node.nodeType !== Node.TEXT_NODE) {
-      return null;
-    }
-
-    const text = node.textContent || '';
-    const startOffset = node === range.startContainer ? range.startOffset : 0;
-    const endOffset = node === range.endContainer ? range.endOffset : text.length;
-
-    // Если узел полностью вне выделенной области, возвращаем null
-    if (endOffset === 0 || startOffset === text.length || startOffset === endOffset) {
-      return null;
-    }
-
-    const selectedText = text.substring(startOffset, endOffset);
-
-    const span = document.createElement('span');
-    span.textContent = selectedText;
-
-    const parent = node.parentNode;
-    if (parent) {
-      const beforeText = document.createTextNode(text.substring(0, startOffset));
-      const afterText = document.createTextNode(text.substring(endOffset));
-      parent.insertBefore(beforeText, node);
-      parent.insertBefore(span, node);
-      parent.insertBefore(afterText, node);
-      parent.removeChild(node);
-    }
-
-    return span;
-  }
-
-  private getDeepestNodes(range: Range): Node[] {
+  getDeepestNodes(range: Range): Node[] {
     const nodesToProcess = [];
     const deepestNodes: Node[] = [];
     if (!range.collapsed) {
@@ -76,7 +40,7 @@ export class DomUtils {
         currentNode = treeWalker.nextNode();
       }
 
-      for (let node of nodesToProcess) {
+      for (const node of nodesToProcess) {
         const newSpan = this.createSpanIfNeeded(node, range);
         if (newSpan && !deepestNodes.includes(newSpan)) {
           deepestNodes.push(newSpan);
@@ -85,6 +49,41 @@ export class DomUtils {
     }
 
     return deepestNodes;
+  }
+
+  private createSpanIfNeeded(node: Node, range: Range) {
+    if (node.nodeType !== Node.TEXT_NODE || !node.textContent) {
+      return null;
+    }
+
+    const { textContent: text } = node;
+    const startOffset = node === range.startContainer ? range.startOffset : 0;
+    const endOffset = node === range.endContainer ? range.endOffset : text.length;
+
+    if (endOffset === 0 || startOffset === text.length || startOffset === endOffset) {
+      return null;
+    }
+
+    const span = document.createElement('span');
+    span.textContent = text.substring(startOffset, endOffset);
+    this.replaceNodeWithSpan(node, span, startOffset, endOffset);
+
+    return span;
+  }
+
+
+  private replaceNodeWithSpan(node: Node, span: HTMLElement, startOffset: number, endOffset: number) {
+    const { textContent: text } = node;
+    const parent = node.parentNode;
+
+    if (!parent || !text) return;
+
+    const beforeText = document.createTextNode(text.substring(0, startOffset));
+    const afterText = document.createTextNode(text.substring(endOffset));
+    parent.insertBefore(beforeText, node);
+    parent.insertBefore(span, node);
+    parent.insertBefore(afterText, node);
+    parent.removeChild(node);
   }
 
   private isStyledTextNode(node: HTMLElement|null): boolean {
@@ -109,16 +108,12 @@ export class DomUtils {
   applyStyleToDeepestNodes(
     node: Node,
     styleCommand: string,
-    apply: boolean,
-    checkStyle: (element: HTMLElement, styleCommand: string) => boolean,
-    setStyle: (element: HTMLElement, styleCommand: string, apply: boolean) => void
+    setStyle: (element: HTMLElement, styleCommand: string) => void
   ) {
     const fragment = document.createDocumentFragment();
 
     const element = node as HTMLElement;
-    if (checkStyle(element, styleCommand) !== apply) {
-      setStyle(element, styleCommand, apply);
-    }
+    setStyle(element, styleCommand);
 
     node?.parentNode?.insertBefore(fragment, node);
   }
@@ -126,12 +121,11 @@ export class DomUtils {
   removeStyleFromDeepestNodes(
     node: Node,
     styleCommand: string,
-    checkStyle: (element: HTMLElement, styleCommand: string) => boolean,
     removeStyle: (element: HTMLElement, styleCommand: string) => void
   ) {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as HTMLElement;
-      if (this.isStyledTextNode(element) && checkStyle(element, styleCommand)) {
+      if (this.isStyledTextNode(element)) {
         removeStyle(element, styleCommand);
 
         if (!element.getAttribute('style')  && element.tagName === 'SPAN') {

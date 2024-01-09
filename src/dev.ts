@@ -39,8 +39,9 @@ document.addEventListener('DOMContentLoaded', () => {
     editor.registerModule(new CodeEditorButton);
     editor.registerModule(new PreviewButton);
     editor.registerModule(new TemplateButton({
-      test: 'sssssss ssss ssss',
-      html: '<table class="on-codemerge-table"><thead><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr></thead><tbody><tr><td style="position: relative;">Row 1 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 2 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 3 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 3<div class="on-codemerge-resizer"></div></td></tr></tbody></table>',
+      text: 'sssssss ssss ssss',
+      html: 'aaaa bbbb cccc <span style="font-weight: bold;">dddd</span> eeeee ffffff',
+      table: '<table class="on-codemerge-table"><thead><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr></thead><tbody><tr><td style="position: relative;">Row 1 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 2 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 3 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 3<div class="on-codemerge-resizer"></div></td></tr></tbody></table>',
     }));
     editor.registerModule(new FullscreenButton);
     editor.registerModule(new PrintButton);
@@ -49,11 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const resultElement = document.getElementById('result');
       if (resultElement && newContent) resultElement.innerText = newContent;
-      // console.log(newContent)
 
       const previewElement = document.getElementById('preview');
       if (previewElement && newContent) previewElement.innerHTML = newContent;
     });
+
+    // editor.setContent("aaaa bbbb cccc <span style=\"font-weight: bold;\">dddd</span> eeeee ffffff")
 
     // editor.setContent("\n" +
     //     "<table class=\"on-codemerge-table\"><thead><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr></thead><tbody><tr><td style=\"position: relative;\">Row 1 Col 1<div class=\"on-codemerge-resizer\"></div></td><td style=\"position: relative;\">Row 1 Col 2<div class=\"on-codemerge-resizer\"></div></td><td style=\"position: relative;\">Row 1 Col 3<div class=\"on-codemerge-resizer\"></div></td></tr><tr><td style=\"position: relative;\">Row 2 Col 1<div class=\"on-codemerge-resizer\"></div></td><td style=\"position: relative;\">Row 2 Col 2<div class=\"on-codemerge-resizer\"></div></td><td style=\"position: relative;\">Row 2 Col 3<div class=\"on-codemerge-resizer\"></div></td></tr><tr><td style=\"position: relative;\">Row 3 Col 1<div class=\"on-codemerge-resizer\"></div></td><td style=\"position: relative;\">Row 3 Col 2<div class=\"on-codemerge-resizer\"></div></td><td style=\"position: relative;\">Row 3 Col 3<div class=\"on-codemerge-resizer\"></div></td></tr></tbody></table>")
