@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
