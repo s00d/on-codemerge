@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "author": "Pavel Kuzmin",
   "type": "module",
   "module": "dist/main.esm.js",
@@ -20,6 +20,17 @@
   ],
   "workspaces": [
     "app"
+  ],
+  "keywords": [
+    "JavaScript",
+    "text",
+    "editor",
+    "code",
+    "panel",
+    "admin",
+    "indo",
+    "generator",
+    "typescript"
   ],
   "exports": {
     ".": {
