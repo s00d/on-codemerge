@@ -1,8 +1,18 @@
+[![npm version](https://badge.fury.io/js/on-codemerge.svg)](https://badge.fury.io/js/on-codemerge)
+[![npm downloads](https://img.shields.io/npm/dw/on-codemerge)](https://badge.fury.io/js/on-codemerge)
+[![NPM license](https://img.shields.io/npm/l/on-codemerge)](https://github.com/on-org/on-codemerge/blob/master/LICENSE)
+[![npm type definitions](https://img.shields.io/npm/types/on-codemerge)](https://github.com/on-org/on-codemerge)
+[![GitHub Repo stars](https://img.shields.io/github/stars/s00d/on-codemerge?style=social)](https://github.com/s00d/on-codemerge)
+
 # on-codemerge
 
 zero dependencies editor
 
 [Docs](https://s00d.github.io/on-codemerge/)
+
+<img src="https://github.com/s00d/on-codemerge/blob/main/branding/repository-open-graph-template_long.png?raw=true" alt="logo">
+<img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot1.png?raw=true" alt="logo">
+<img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot2.png?raw=true" alt="logo">
 
 ## Description
 
