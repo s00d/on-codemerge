@@ -90,6 +90,9 @@ export default function EditorComponent({ activePlugins }) {
 
   return (
     <div>
+      <h1>on-CodeMerge</h1>
+      <div>A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product. This intuitive tool supports various programming languages, offers syntax highlighting and easy integration with coding projects, enhancing productivity and accuracy for developers of all skill levels.</div>
+      <hr/>
       <div ref={editorContainerRef} className={styles.editorBlock}>
         {/* Редактор будет инициализирован в этом div */}
       </div>
