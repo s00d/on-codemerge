@@ -1,7 +1,7 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "0.4.3",
+  "version": "0.4.5",
   "author": "Pavel Kuzmin",
   "license": "MIT",
   "type": "module",
@@ -35,7 +35,7 @@
     "typescript",
     "WYSIWYG"
   ],
-  "homepage": "https://github.com/s00d/on-codemerge",
+  "homepage": "https://s00d.github.io/on-codemerge/",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/s00d/on-codemerge.git"
