@@ -16,7 +16,7 @@ zero dependencies editor
 
 ## Description
 
-A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product. This intuitive tool supports various programming languages, offers syntax highlighting and easy integration with coding projects, enhancing productivity and accuracy for developers of all skill levels.
+A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product. This intuitive tool for developers of all skill levels.
 
 ## Installation
 
