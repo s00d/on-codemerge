@@ -1,0 +1,183 @@
+---
+sidebar_position: 4
+---
+
+# Developing Plugins
+
+On-Codemerge's flexible architecture allows for the development of custom plugins to extend the editor's functionality. This guide will walk you through the process of creating a new plugin.
+
+## Overview
+
+A plugin in On-Codemerge is an independent module that interacts with the `EditorCore` to provide additional functionalities or customizations. Each plugin must implement the `IEditorModule` interface.
+
+## Implementing IEditorModule Interface
+
+The `IEditorModule` interface ensures that your plugin has the necessary structure to integrate with the editor core. It typically includes initialization and other essential methods.
+
+### Example Interface Implementation
+
+```ts
+import EditorCore from "on-codemerge";
+import { IEditorModule } from "on-codemerge/dist/types/src/types";
+
+export class MyCustomPlugin implements IEditorModule {
+  private core: EditorCore;
+
+  initialize(core: EditorCore): void {
+    this.core = core;
+    // Initialization logic here
+  }
+
+  // Additional methods specific to your plugin
+}
+```
+
+## Creating a Basic Plugin
+
+Let's create a simple plugin that adds a custom button to the editor's toolbar.
+
+### Step 1: Define Your Plugin Class
+
+```ts
+export class MyCustomButton implements IEditorModule {
+  private core: EditorCore;
+
+  initialize(core: EditorCore): void {
+    this.core = core;
+    this.addButton();
+  }
+
+  private addButton(): void {
+    const button = document.createElement("button");
+    button.textContent = "My Button";
+    button.addEventListener("click", this.onButtonClick);
+
+    this.core.toolbar.addElement(button);
+  }
+
+  private onButtonClick = (): void => {
+    console.log("Button clicked!");
+    // Your button logic here
+  }
+}
+```
+
+### Step 2: Register Your Plugin with the Editor
+
+```javascript
+import EditorCore from '@/index';
+import { MyCustomButton } from 'path_to_my_custom_button';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new MyCustomButton());
+    // ... other configurations and module registrations
+  }
+});
+```
+
+## Modifying Text and Inserting Content
+
+Plugins can also modify the editor's text or insert new content. Below are examples illustrating these capabilities.
+
+### Text Modification
+
+To modify text, you can manipulate the DOM elements within the editor. Here’s an example of a plugin that converts selected text to uppercase:
+
+```ts
+export class UppercaseTextButton implements IEditorModule {
+  private core: EditorCore;
+
+  initialize(core: EditorCore): void {
+    this.core = core;
+    this.addButton();
+  }
+
+  private addButton(): void {
+    const button = document.createElement("button");
+    button.textContent = "Uppercase";
+    button.addEventListener("click", this.onButtonClick);
+
+    this.core.toolbar.addElement(button);
+  }
+
+  private onButtonClick = (): void => {
+    const selectionRange = this.core.getCurrentSelection();
+    if (selectionRange && !selectionRange.collapsed) {
+      const selectedText = selectionRange.toString();
+      const uppercasedText = selectedText.toUpperCase();
+
+      const textNode = document.createTextNode(uppercasedText);
+      selectionRange.deleteContents();
+      selectionRange.insertNode(textNode);
+
+      // Update the editor content
+      this.core.setContent(this.core.editor.getEditorElement().innerHTML);
+    }
+  }
+}
+```
+
+### Content Insertion
+
+For inserting new content, like an image or a custom HTML element, you can use the `insertHTMLIntoEditor` method of `EditorCore`. Here's an example of inserting an image:
+
+```ts
+export class InsertImageButton implements IEditorModule {
+  private core: EditorCore;
+
+  initialize(core: EditorCore): void {
+    this.core = core;
+    this.addButton();
+  }
+
+  private addButton(): void {
+    const button = document.createElement("button");
+    button.textContent = "Insert Image";
+    button.addEventListener("click", this.onButtonClick);
+
+    this.core.toolbar.addElement(button);
+  }
+
+  private onButtonClick = (): void => {
+    const imageUrl = 'path_to_your_image.jpg'; // Replace with your image URL
+    const imgElement = `<img src="${imageUrl}" alt="Inserted Image"/>`;
+
+    this.core.insertHTMLIntoEditor(imgElement);
+  }
+}
+```
+
+In these examples, the `UppercaseTextButton` plugin modifies the selected text to uppercase, and the `InsertImageButton` plugin inserts an image at the current cursor position. These examples demonstrate how plugins can interact with the editor's content and extend its functionality.
+
+Remember, these plugins should be registered with the editor core, similar to the previous examples:
+
+```ts
+const editor = new EditorCore(appElement);
+editor.registerModule(new UppercaseTextButton());
+editor.registerModule(new InsertImageButton());
+```
+
+With these enhancements, the documentation now provides a more complete guide on creating plugins that can modify and insert content in the On-Codemerge editor. This will be immensely helpful for developers looking to extend the editor's capabilities.
+
+## Best Practices
+
+- **Encapsulation**: Keep your plugin's internal logic encapsulated to avoid conflicts with other plugins or the core editor.
+- **State Management**: If your plugin maintains state, ensure it's managed efficiently to avoid performance issues.
+- **Event Handling**: Use the `EventManager` for handling and broadcasting events within the editor.
+- **UI Consistency**: Maintain UI consistency with the core editor. Use existing styles and UI elements where possible.
+- **Performance**: Optimize for performance, especially if your plugin interacts frequently with the editor's DOM.
+
+## Testing Your Plugin
+
+- Thoroughly test your plugin in various scenarios to ensure it behaves as expected.
+- Consider edge cases, such as how your plugin behaves with large texts or interacts with other plugins.
+
+## Documentation
+
+- Document your plugin's functionality, methods, and usage.
+- Provide examples and usage guides to help other developers integrate your plugin.
+
+By following these guidelines, you can develop efficient and effective plugins that enhance the capabilities of the On-Codemerge editor. Your custom plugins can range from simple UI enhancements to complex features that significantly augment the editor's functionality.

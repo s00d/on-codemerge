@@ -1,7 +1,7 @@
 import type { EditorCore } from "@/index";
-import { Modal } from "@root/helpers/modal";
-import link from "../../../icons/link.svg";
-import video from "../../../icons/video.svg";
+import { Modal } from "../../../helpers/modal";
+
+import { link, video } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class LinkAndVideo implements IEditorModule {

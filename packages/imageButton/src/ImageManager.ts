@@ -1,7 +1,7 @@
-import { Modal } from "@root/helpers/modal";
+import { Modal } from "../../../helpers/modal";
 import type { EditorCore } from "@/index";
-import { ContextMenu } from "@root/helpers/contextMenu";
-import { DropdownMenu } from "@root/helpers/dropdownMenu";
+import { ContextMenu } from "../../../helpers/contextMenu";
+import { DropdownMenu } from "../../../helpers/dropdownMenu";
 
 export class ImageManager {
   private img: HTMLImageElement;

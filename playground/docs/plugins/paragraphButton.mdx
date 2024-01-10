@@ -1,0 +1,36 @@
+---
+sidebar_position: 11
+---
+
+# ParagraphButton Plugin
+
+The `ParagraphButton` plugin introduces versatile paragraph styling options to the On-Codemerge editor, enabling users to easily format text as different headings, quotes, or code blocks.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['ParagraphButton']} />
+
+## Integration
+
+To add the `ParagraphButton` plugin to the On-Codemerge editor, import and register it with `EditorCore`:
+
+```jsx title="Initialize and Register ParagraphButton"
+import EditorCore from 'on-codemerge';
+import { ParagraphButton } from 'on-codemerge/paragraphButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new ParagraphButton());
+  }
+});
+```
+
+## Features
+
+The `ParagraphButton` plugin provides the following capabilities:
+
+- **Multiple Styles:** Offers options for normal text, various heading levels (H1 to H4), blockquotes, and code blocks.
+- **Dropdown Menu:** A dropdown menu in the toolbar allows users to select the desired paragraph style.
+- **Ease of Use:** Streamlines the process of applying different text formats.

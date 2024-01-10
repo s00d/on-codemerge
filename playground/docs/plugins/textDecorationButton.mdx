@@ -1,0 +1,71 @@
+---
+sidebar_position: 14
+---
+
+# TextDecorationButton Plugin
+
+The `TextDecorationButton` plugin is a feature-rich addition to the On-Codemerge editor, designed to allow users to apply various text decorations and styles to their content. It provides options for changing text color, background color, font, font size, line height, and text alignment. Users can easily customize the appearance of their text within the editor.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['TextDecorationButton']} />
+
+## Key Features
+
+### 1. Text Color and Background Color
+
+The plugin offers color pickers for both text color and background color. Users can choose from a wide range of colors to apply to their text and background with a single click.
+
+### 2. Font Selection
+
+The font picker allows users to select the font for their text. A dropdown menu provides a list of available fonts, making it easy to change the font style.
+
+### 3. Font Size
+
+Users can select the font size from a dropdown list that ranges from 10px to 50px. This provides precise control over the text's size within the editor.
+
+### 4. Line Height
+
+The line height dropdown enables users to set the spacing between lines of text. This is useful for adjusting the text's vertical alignment and readability.
+
+### 5. Text Alignment
+
+Users can align their text to the left, right, center, or justify it using the text alignment dropdown. This feature enhances the presentation and layout of text within the editor.
+
+### 6. Dynamic Styling
+
+The plugin dynamically updates the styling of selected text. Users can apply and remove text decorations and styles as needed, providing flexibility and control over their content's appearance.
+
+## Integration
+
+To integrate the `TextDecorationButton` plugin with the On-Codemerge editor, follow these steps:
+
+1. Import the `TextDecorationButton` class from the plugin package.
+2. Initialize an instance of `EditorCore`.
+3. Create an instance of `TextDecorationButton` and pass it to the `registerModule` method.
+
+Here's an example of how to integrate the `TextDecorationButton` plugin:
+
+```javascript
+import EditorCore from 'on-codemerge';
+import { TextDecorationButton } from 'on-codemerge/textDecorationButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+
+    // Create and register the TextDecorationButton module
+    const textDecorationButton = new TextDecorationButton();
+    editor.registerModule(textDecorationButton);
+  }
+});
+```
+
+## Customization
+
+You can customize the available fonts and font sizes by modifying the `fonts` and `fontSizes` arrays in the `TextDecorationButton` class.
+
+## Usage
+
+The `TextDecorationButton` plugin enhances the On-Codemerge editor's text editing capabilities, allowing users to style and format their content with ease. Whether you need to change text color, adjust font size, or modify line spacing, this plugin provides a comprehensive set of tools for text decoration and styling.

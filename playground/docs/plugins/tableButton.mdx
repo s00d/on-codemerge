@@ -1,0 +1,70 @@
+---
+sidebar_position: 12
+---
+
+# TableButton Plugin
+
+The `TableButton` plugin enhances the On-Codemerge editor by providing the ability to insert and manage tables within the editor's content. It allows users to create tables with a specified number of rows and columns, and it offers various table management features.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['TableButton']} />
+
+## Integration
+
+To integrate the `TableButton` plugin with the On-Codemerge editor, follow these steps:
+
+1. Import the `TableButton` class from the plugin package.
+2. Initialize an instance of `EditorCore`.
+3. Register the `TableButton` as a module using the `registerModule` method.
+
+Here's an example of how to integrate the `TableButton` plugin:
+
+```javascript
+import EditorCore from 'on-codemerge';
+import { TableButton } from 'on-codemerge/tableButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new TableButton());
+  }
+});
+```
+
+## Features
+
+- **Table Creation:** Insert tables into the editor's content with a specified number of rows and columns.
+- **Table Management:** Tables are fully editable, resizable, and can be customized.
+- **Headers:** Easily create table headers for rows and columns.
+- **Dynamic Sizing:** Resize table rows and columns by dragging the edges.
+- **Data Retention:** The plugin retains table data even when the editor's content is modified or reloaded.
+- **Customization:** Customize the appearance of tables with CSS styles.
+
+## How it Works
+
+The `TableButton` plugin enhances the editor's toolbar by adding a "Table" button that allows users to create tables. When the button is clicked, users can specify the number of rows and columns for the table they want to create. The table is inserted into the editor's content, and users can interact with it.
+
+### Table Creation
+
+- Users click the "Table" button in the editor's toolbar.
+- A dialog prompts users to specify the number of rows and columns for the table.
+- The table is created with the specified dimensions and inserted into the editor.
+
+### Table Management
+
+- Tables are fully editable, allowing users to input text and make changes.
+- Users can resize tables by dragging the edges of rows and columns.
+- Tables support headers for both rows and columns.
+- The plugin retains table data and settings even if the editor's content is modified or reloaded.
+
+### Customization
+
+The appearance and styling of tables can be customized using CSS styles. You can apply custom styles to tables to match your application's design.
+
+## Example Usage
+
+The `TableButton` plugin is valuable when you want to allow users to create and manage tables within your application's editor. It provides an intuitive interface for inserting and working with tables, making it easier for users to organize and present data.
+
+By integrating this plugin, you can enhance the functionality of your On-Codemerge editor, making it more versatile and user-friendly for tasks that involve tables.

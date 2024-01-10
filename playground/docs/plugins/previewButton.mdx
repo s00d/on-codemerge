@@ -1,0 +1,37 @@
+---
+sidebar_position: 12
+---
+
+# PreviewButton Plugin
+
+The `PreviewButton` plugin enhances the On-Codemerge editor by adding a feature to preview the current content in a modal window.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['PreviewButton']} />
+
+## Integration
+
+To integrate the `PreviewButton` plugin with the On-Codemerge editor, import and register it with `EditorCore`:
+
+```jsx title="Initialize and Register PreviewButton"
+import EditorCore from 'on-codemerge';
+import { PreviewButton } from 'on-codemerge/previewButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new PreviewButton());
+  }
+});
+```
+
+## Features
+
+- **Content Preview:** Provides a button to preview the current editor content in a modal window.
+- **Modal Interface:** Displays the preview in a separate, overlayed window for a clear and isolated view.
+
+## How it Works
+
+Upon clicking the 'Preview' button in the toolbar, the plugin opens a modal window showing the current content of the editor:

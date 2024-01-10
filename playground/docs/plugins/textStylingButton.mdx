@@ -1,0 +1,68 @@
+---
+sidebar_position: 15
+---
+
+# TextStylingButton Plugin
+
+The `TextStylingButton` plugin extends the capabilities of the On-Codemerge editor by allowing users to apply various text styles and decorations to their content. It provides a wide range of styling options, including bold, italic, underline, strike-through, superscript, and subscript.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['TextStylingButton']} />
+
+## Key Features
+
+### 1. Text Styles
+
+- **Bold:** Make text bold.
+- **Italic:** Apply italic formatting to text.
+
+### 2. Text Decorations
+
+- **Underline:** Add an underline to text.
+- **Strike Through:** Apply a strike-through to text.
+
+### 3. Superscript and Subscript
+
+- **Superscript:** Format text as superscript.
+- **Subscript:** Format text as subscript.
+
+### 4. Easy Application
+
+Users can easily apply these styles and decorations to their selected text within the editor. The plugin provides a user-friendly interface for text styling.
+
+## Integration
+
+To integrate the `TextStylingButton` plugin with the On-Codemerge editor, follow these steps:
+
+1. Import the `TextStylingButton` class from the plugin package.
+2. Initialize an instance of `EditorCore`.
+3. Create an instance of `TextStylingButton` and register it as a module using the `registerModule` method.
+
+Here's an example of how to integrate the `TextStylingButton` plugin:
+
+```javascript
+import EditorCore from 'on-codemerge';
+import { TextStylingButton } from 'on-codemerge/textStylingButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+
+    // Create and register the TextStylingButton module
+    const textStylingButton = new TextStylingButton();
+    editor.registerModule(textStylingButton);
+  }
+});
+```
+
+## Usage
+
+The `TextStylingButton` plugin enhances the On-Codemerge editor's text editing capabilities, allowing users to style and format their content with ease. Whether you need to make text bold, italicize it, underline, strike through, or apply superscript and subscript, this plugin provides a comprehensive set of tools for text styling and decoration.
+
+## Example Usage
+
+The `TextStylingButton` plugin is a valuable addition to your On-Codemerge editor when you want to give users the ability to format text within their content. It offers an intuitive interface for applying text styles and decorations, enhancing the text editing experience within your application.
+
+By integrating this plugin, you can make your editor more versatile and user-friendly for tasks that involve text formatting and styling.

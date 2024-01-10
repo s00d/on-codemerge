@@ -1,0 +1,45 @@
+---
+sidebar_position: 4
+---
+
+# ClearStylesButton Plugin
+
+The `ClearStylesButton` plugin offers functionality to clear styling from selected text within the On-Codemerge editor. This plugin is ideal for resetting text formatting to its default state.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['ClearStylesButton']} />
+
+
+## Integration
+
+To integrate the `ClearStylesButton` plugin with the `EditorCore`, follow these steps:
+
+```jsx title="Initialize and Register ClearStylesButton"
+import EditorCore from 'on-codemerge';
+import { ClearStylesButton } from 'on-codemerge/clearStylesButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new ClearStylesButton());
+  }
+});
+```
+
+## Features
+
+The `ClearStylesButton` plugin provides the following functionalities:
+
+- **Clear Text Styles:** Removes all inline styles and class attributes from the selected text.
+- **Restore Default Formatting:** Converts formatted text (like bold, italic) back to plain text.
+
+Upon activation, the plugin adds a button to the editor's toolbar. When clicked, it checks if the current selection is within the editor and clears the styles if it is.
+
+## How it Works
+
+The plugin operates as follows:
+
+- **Selection Validation:** Validates whether the current selection is within the editor's content area.
+- **Style Removal:** Iterates through the deepest nodes in the selection and removes their styles and classes.

@@ -1,6 +1,6 @@
 import type { EditorCore } from "@/index";
-import { DropdownMenu } from "@root/helpers/dropdownMenu";
-import layers from "../../../icons/layers.svg";
+import { DropdownMenu } from "../../../helpers/dropdownMenu";
+import { layers } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class TemplateButton implements IEditorModule {

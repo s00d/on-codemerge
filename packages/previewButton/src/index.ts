@@ -1,5 +1,5 @@
 import type { EditorCore } from "@/index";
-import eye from "../../../icons/eye.svg";
+import { eye } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class PreviewButton implements IEditorModule {

@@ -1,6 +1,6 @@
 import type { EditorCore } from "@/index";
 import TableManager from './TableManager';
-import table from "../../../icons/table.svg";
+import { table } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class TableButton implements IEditorModule {

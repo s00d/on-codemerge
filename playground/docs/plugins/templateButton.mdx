@@ -1,0 +1,67 @@
+---
+sidebar_position: 13
+---
+
+# TemplateButton Plugin
+
+The `TemplateButton` plugin enhances the On-Codemerge editor by providing the ability to insert predefined templates into the editor's content. It allows users to easily insert commonly used templates, such as code snippets, text blocks, or formatted content, with a single click.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['TemplateButton']} />
+
+## Integration
+
+To integrate the `TemplateButton` plugin with the On-Codemerge editor, follow these steps:
+
+1. Import the `TemplateButton` class from the plugin package.
+2. Initialize an instance of `EditorCore`.
+3. Create an object containing the templates you want to make available.
+4. Register the `TemplateButton` as a module using the `registerModule` method.
+
+Here's an example of how to integrate the `TemplateButton` plugin:
+
+```javascript
+import EditorCore from 'on-codemerge';
+import { TemplateButton } from 'on-codemerge/templateButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+
+    // Define templates
+    const templates = {
+      'Code Block': '<pre><code>Insert your code here</code></pre>',
+      'Note': '<div class="note">This is a note</div>',
+      'Heading 2': '<h2>Heading 2</h2>',
+    };
+
+    editor.registerModule(new TemplateButton(templates));
+  }
+});
+```
+
+## Features
+
+- **Template Selection:** Insert predefined templates into the editor's content.
+- **Custom Templates:** Define your own templates to suit your application's needs.
+- **Template Cleanup:** Templates can be automatically cleaned up to ensure they fit seamlessly into the editor's content.
+
+## How it Works
+
+The `TemplateButton` plugin adds a dropdown menu to the editor's toolbar with a "Template" icon. When users click the dropdown, they can select from a list of predefined templates. When a template is selected, it is inserted into the editor's content at the current cursor position.
+
+### Custom Templates
+
+You can define custom templates as key-value pairs, where the key is the template name that appears in the dropdown menu, and the value is the HTML content of the template. You can create templates for various purposes, such as code blocks, notes, headings, or any other structured content.
+
+### Template Cleanup
+
+Before inserting a template into the editor, the `TemplateButton` plugin can clean up the template's HTML to ensure it fits seamlessly into the existing content. This cleanup process helps maintain consistent formatting and structure within the editor.
+
+## Example Usage
+
+The `TemplateButton` plugin is valuable when you want to provide users with a convenient way to insert predefined content templates into your application's editor. It simplifies the process of adding commonly used elements, such as code blocks or notes, and improves the overall editing experience.
+
+By integrating this plugin, you can enhance the functionality of your On-Codemerge editor, making it more versatile and user-friendly for tasks that involve inserting structured content templates.

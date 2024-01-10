@@ -1,0 +1,15 @@
+
+.editor-block {
+    position: relative;
+    display: flex;
+    min-height: 100px;
+}
+
+.editor-block-section {
+    flex: 1;
+    padding: 10px;
+}
+
+.editor-block-resizer, .editor-block-height-resizer {
+    display: none;
+}

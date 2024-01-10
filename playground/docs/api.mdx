@@ -1,0 +1,173 @@
+---
+sidebar_position: 4
+---
+
+# API Documentation
+
+## Overview
+
+The `EditorCore` class is the central component of the On-Codemerge editor. It manages the editor's state, handles events, and coordinates the interaction between different editor modules.
+
+## Constructor
+
+- **`EditorCore(appElement: HTMLElement)`**
+
+Initializes a new instance of the editor.
+
+- `appElement`: The HTML element where the editor will be mounted.
+
+## Properties
+
+- **`state: EditorState`**
+
+An instance of `EditorState` that manages the content of the editor.
+
+- **`eventManager: EventManager`**
+
+An instance of `EventManager` used for handling events.
+
+- **`modules: IEditorModule[]`**
+
+An array of modules registered with the editor.
+
+- **`appElement: HTMLElement`**
+
+The HTML element of the editor.
+
+- **`generalElement: HTMLElement`**
+
+The general HTML element that wraps the editor.
+
+- **`toolbar: Toolbar`**
+
+An instance of `Toolbar` managing the editor's toolbar.
+
+- **`editor: Editor`**
+
+An instance of `Editor` managing the editable content.
+
+- **`history: string[]`**
+
+The history of content changes for undo/redo functionality.
+
+- **`currentSelectionRange: Range | null`**
+
+The current text selection range in the editor.
+
+## Methods
+
+- **`saveCurrentSelection(): void`**
+
+Saves the current text selection in the editor.
+
+- **`getCurrentSelection(): Range | null`**
+
+Returns the current text selection range.
+
+- **`restoreCurrentSelection(): void`**
+
+Restores the previously saved text selection.
+
+- **`moveCursorToStart(): void`**
+
+Moves the cursor to the start of the editor content.
+
+- **`moveCursorToEnd(): void`**
+
+Moves the cursor to the end of the editor content.
+
+- **`moveCursorAfterElement(element: HTMLElement | DocumentFragment): void`**
+
+Moves the cursor immediately after the specified element.
+
+- **`insertHTMLIntoEditor(htmlContent: HTMLElement | DocumentFragment | string): void`**
+
+Inserts HTML content into the editor at the current cursor position.
+
+- **`undo(): void`**
+
+Undoes the last change made to the editor's content.
+
+- **`redo(): void`**
+
+Redoes the last undone change in the editor's content.
+
+- **`isUndo(): boolean`**
+
+Returns true if there is an action to undo.
+
+- **`isRedo(): boolean`**
+
+Returns true if there is an action to redo.
+
+- **`registerModule(module: IEditorModule): void`**
+
+Registers a module with the editor.
+
+- **`getContent(): string`**
+
+Returns the current content of the editor.
+
+- **`setContent(newContent: string): void`**
+
+Sets the content of the editor.
+
+- **`contentCleanup(newContent: string): string`**
+
+Cleans up the provided content (e.g., removes IDs).
+
+- **`setContentCleanup(newContent: string): void`**
+
+Cleans and sets the editor content.
+
+- **`subscribeToContentChange(callback: Hook): void`**
+
+Subscribes to content change events.
+
+## EventManager
+
+Handles event subscriptions and publications.
+
+### Methods
+
+- **`subscribe(event: string, callback: Hook): void`**
+
+Subscribes to a specific event.
+
+- **`publish(event: string, data?: string): void`**
+
+Publishes an event to all subscribers.
+
+## EditorState
+
+Manages the editor's content and history.
+
+### Methods
+
+- **`getContent(): string`**
+
+Gets the current content.
+
+- **`setContent(newContent: string): void`**
+
+Sets the content.
+
+- **`undo(): string`**
+
+Undoes the last change.
+
+- **`redo(): string`**
+
+Redoes the last undone change.
+
+- **`isUndo(): boolean`**
+
+Checks if undo is possible.
+
+- **`isRedo(): boolean`**
+
+Checks if redo is possible.
+
+---
+
+This documentation provides a comprehensive overview of the `EditorCore` class, including its methods for managing the editor's content, handling events, and interacting with editor modules. Each method is briefly described, giving developers a clear understanding of the class's capabilities.

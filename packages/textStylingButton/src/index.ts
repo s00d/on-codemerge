@@ -1,9 +1,9 @@
 import type { EditorCore } from "@/index";
-import { DropdownMenu } from "@root/helpers/dropdownMenu";
-import { DomUtils } from "@root/helpers/DomUtils";
-import type { StyleConfig } from "@root/helpers/StyleManager";
-import { StyleManager } from "@root/helpers/StyleManager";
-import type from "../../../icons/type.svg";
+import { DropdownMenu } from "../../../helpers/dropdownMenu";
+import { DomUtils } from "../../../helpers/DomUtils";
+import type { StyleConfig } from "../../../helpers/StyleManager";
+import { StyleManager } from "../../../helpers/StyleManager";
+import { type } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 const styleConfig: StyleConfig = {

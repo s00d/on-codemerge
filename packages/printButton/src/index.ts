@@ -1,5 +1,5 @@
 import type { EditorCore } from "@/index";
-import printer from "../../../icons/printer.svg";
+import { printer } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class PrintButton implements IEditorModule {

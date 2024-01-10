@@ -1,9 +1,8 @@
-import './styles.scss';
-import Toolbar from "@/toolbar";
-import Editor from "@/editor";
-import { EditorState } from "@/EditorState";
-import { EventManager } from "@/EventManager";
-import type { Hook, IEditorModule } from "@/types";
+import Toolbar from "./toolbar";
+import Editor from "./editor";
+import { EditorState } from "./EditorState";
+import { EventManager } from "./EventManager";
+import type { Hook, IEditorModule } from "./types";
 
 export class EditorCore {
   public state: EditorState;

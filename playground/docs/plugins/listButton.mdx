@@ -1,0 +1,38 @@
+---
+sidebar_position: 10
+---
+
+# ListButton Plugin
+
+The `ListButton` plugin for On-Codemerge offers easy list creation, including bulleted, numbered, and todo lists. This versatile plugin enhances the content structuring capabilities of the editor.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['ListButton']} />
+
+## Integration
+
+Integrate the `ListButton` plugin with the On-Codemerge editor by importing and registering it with `EditorCore`:
+
+```jsx title="Initialize and Register ListButton"
+import EditorCore from 'on-codemerge';
+import { ListButton } from 'on-codemerge/listButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new ListButton());
+  }
+});
+```
+
+## Features
+
+- **List Types:** Provides options to insert bulleted, numbered, or todo lists.
+- **Dropdown Menu:** Includes a dropdown in the toolbar for selecting the type of list to insert.
+- **Customizable:** Allows further customization of list styles and behaviors.
+
+## How it Works
+
+The plugin adds a dropdown menu to the toolbar with different list options. Selecting an option inserts the corresponding list type into the editor's content.

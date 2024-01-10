@@ -1,0 +1,39 @@
+---
+sidebar_position: 6
+---
+
+# FullscreenButton Plugin
+
+The `FullscreenButton` plugin adds a full-screen editing experience to the On-Codemerge editor, allowing users to toggle between normal and full-screen modes seamlessly.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['FullscreenButton']} />
+
+## Integration
+
+To integrate the `FullscreenButton` plugin, import and register it with the `EditorCore`. The following steps outline the process:
+
+```jsx title="Initialize and Register FullscreenButton"
+import EditorCore from 'on-codemerge';
+import { FullscreenButton } from 'on-codemerge/fullscreenButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new FullscreenButton());
+  }
+});
+```
+
+## Features
+
+The `FullscreenButton` plugin offers the following key features:
+
+- **Toggle Full-Screen Mode:** Provides a button to switch the editor to full-screen mode and back to normal mode.
+- **Enhanced User Experience:** Offers users a distraction-free environment to focus on their content editing.
+
+## How it Works
+
+The plugin functions by toggling the full-screen state of the editor's container element:

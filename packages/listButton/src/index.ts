@@ -1,6 +1,6 @@
 import type { EditorCore } from "@/index";
-import { DropdownMenu } from "@root/helpers/dropdownMenu";
-import list from "../../../icons/list.svg";
+import { DropdownMenu } from "../../../helpers/dropdownMenu";
+import { list } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class ListButton implements IEditorModule {

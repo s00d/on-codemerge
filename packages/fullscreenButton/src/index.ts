@@ -1,5 +1,5 @@
 import type { EditorCore } from "@/index";
-import maximize from "../../../icons/maximize.svg";
+import { maximize } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class FullscreenButton implements IEditorModule {

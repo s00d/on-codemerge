@@ -1,0 +1,37 @@
+---
+sidebar_position: 14
+---
+
+# SpacerButton Plugin
+
+The `SpacerButton` plugin enhances the On-Codemerge editor's toolbar by allowing you to insert a visual spacer element between other toolbar items. This spacer element helps improve the layout and organization of the toolbar, making it more user-friendly.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['SpacerButton']} />
+
+## Integration
+
+Integrating the `SpacerButton` plugin with the On-Codemerge editor is simple. Import and register it with `EditorCore` as shown below:
+
+```jsx title="Initialize and Register SpacerButton"
+import EditorCore from 'on-codemerge';
+import { SpacerButton } from 'on-codemerge/spacerButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new SpacerButton());
+  }
+});
+```
+
+## Features
+
+- **Spacer Element:** Inserts a visual spacer element (horizontal line) between other toolbar items.
+- **Customizable:** You can adjust the spacer's appearance by modifying its width, height, or border style to fit your toolbar design.
+
+## How it Works
+
+The `SpacerButton` plugin adds a spacer element to the toolbar. This spacer is an inline-block element with a specific width, height, and border style, creating a visual separation between toolbar items.

@@ -1,6 +1,6 @@
 import type { EditorCore } from "@/index";
 import { ImageManager } from './ImageManager';
-import image from "../../../icons/image.svg";
+import { image } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class ImageButton implements IEditorModule {
@@ -10,6 +10,29 @@ export class ImageButton implements IEditorModule {
   initialize(core: EditorCore): void {
     this.core = core;
     core.toolbar.addButtonIcon('Image', image, () => this.onInsertImageClick())
+
+    core.subscribeToContentChange(() => {
+      this.reloadImages(core)
+    });
+  }
+
+  public reloadImages(core: EditorCore): void {
+    const editor = core.editor.getEditorElement();
+    if (!editor) return;
+
+    const tables = editor.querySelectorAll('img');
+    tables.forEach((image: HTMLImageElement) => {
+      let blockId = image.id;
+      if (!blockId || blockId === '' || !blockId.startsWith('table-')) {
+        image.id = blockId = 'img-' + Math.random().toString(36).substring(2, 11)
+      }
+
+      if (!this.imageManagerMap.has(blockId)) {
+        // Если для этой таблицы еще нет TableManager, создаем его
+        const imageManager = new ImageManager(this.core!, image, this.removeImage.bind(this));
+        this.imageManagerMap.set(blockId, imageManager);
+      }
+    });
   }
 
   private onInsertImageClick = (): void => {
@@ -48,8 +71,6 @@ export class ImageButton implements IEditorModule {
   private removeImage(id: string) {
     this.imageManagerMap.delete(id);
   }
-
-  // Дополнительные методы, если они вам нужны
 }
 
 export default ImageButton

@@ -1,6 +1,6 @@
 import type { EditorCore } from "@/index";
 import { BlockManager } from "./BlockManager";
-import columns from "../../../icons/columns.svg";
+import { columns } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class BlockButton implements IEditorModule {

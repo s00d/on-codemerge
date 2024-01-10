@@ -1,5 +1,5 @@
 import type { EditorCore } from "@/index";
-import { DropdownMenu } from "@root/helpers/dropdownMenu";
+import { DropdownMenu } from "../../../helpers/dropdownMenu";
 import type { IEditorModule } from "@/types";
 
 export class ParagraphButton implements IEditorModule {

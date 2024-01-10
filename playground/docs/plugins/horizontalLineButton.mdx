@@ -1,0 +1,37 @@
+---
+sidebar_position: 7
+---
+
+# HorizontalLineButton Plugin
+
+The `HorizontalLineButton` plugin is designed for the On-Codemerge editor to facilitate the insertion of horizontal lines (`<hr>`) into the editor's content, enhancing content separation and organization.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['HorizontalLineButton']} />
+
+## Integration
+
+Integrating the `HorizontalLineButton` plugin into the On-Codemerge editor involves importing and registering it with the `EditorCore`. Here’s how you can do it:
+
+```jsx title="Initialize and Register HorizontalLineButton"
+import EditorCore from 'on-codemerge';
+import { HorizontalLineButton } from 'on-codemerge/horizontalLineButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new HorizontalLineButton());
+  }
+});
+```
+
+## Features
+
+- **Insert Horizontal Line:** Adds a button to the toolbar for inserting a horizontal line (`<hr>`) into the content.
+- **Content Separation:** Allows users to visually separate content sections within the editor.
+
+## How it Works
+
+The plugin adds a 'Line' icon to the toolbar. When clicked, it inserts a horizontal line followed by a paragraph with a non-breaking space at the cursor position or replaces the current selection.

@@ -1,0 +1,42 @@
+---
+sidebar_position: 5
+---
+
+# CodeEditorButton Plugin
+
+The `CodeEditorButton` plugin integrates a CodeMirror-based HTML editor into the On-Codemerge editor, providing an enhanced interface for editing HTML content directly.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['CodeEditorButton']} />
+
+## Integration
+
+To use the `CodeEditorButton` plugin, you need to import and register it with the `EditorCore`. The integration process is as follows:
+
+```jsx title="Initialize and Register CodeEditorButton"
+import EditorCore from 'on-codemerge';
+import { CodeEditorButton } from 'on-codemerge/codeEditorButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new CodeEditorButton());
+  }
+});
+```
+
+## Features
+
+The `CodeEditorButton` plugin offers the following features:
+
+- **HTML Editor Integration:** Incorporates a CodeMirror editor for direct HTML editing within the On-Codemerge editor.
+- **Modal Window:** Presents the HTML editor in a modal window for focused editing.
+- **Customizable Styles:** Includes CSS styles that can be customized as per the application's design requirements.
+
+When activated, the plugin adds an 'HTML' button to the toolbar. Clicking this button opens the modal with the HTML editor.
+
+## How it Works
+
+The plugin operates by creating a modal window and initializing a CodeMirror editor instance within it:

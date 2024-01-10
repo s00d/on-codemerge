@@ -1,6 +1,6 @@
 import type { EditorCore } from "@/index";
-import { ContextMenu } from "@root/helpers/contextMenu";
-import { Modal } from "@root/helpers/modal";
+import { ContextMenu } from "../../../helpers/contextMenu";
+import { Modal } from "../../../helpers/modal";
 
 export class BlockManager {
   private block: HTMLElement;

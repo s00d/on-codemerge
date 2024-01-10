@@ -1,0 +1,81 @@
+---
+sidebar_position: 1
+---
+
+# Introduction
+
+Welcome to the documentation for **On-Codemerge**, a versatile web editor designed for seamless integration and functionality.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['TextStylingButton', 'TableButton']} />
+
+## Getting Started
+
+Start by installing **On-Codemerge** in your project.
+
+### Installation
+
+To install `on-codemerge`, run the following command in your project directory:
+
+```bash
+npm i --save on-codemerge
+```
+
+## Integration Example
+
+Here's a basic example of integrating On-Codemerge into a vanilla JavaScript project:
+
+```
+import EditorCore from 'on-codemerge';
+// Import all necessary modules...
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+// ... other imports
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new TextStylingButton);
+    editor.registerModule(new TableButton);
+    // ... register other modules
+
+    editor.subscribeToContentChange((newContent?: string) => {
+      const resultElement = document.getElementById('result');
+      if (resultElement && newContent) resultElement.innerText = newContent;
+
+      const previewElement = document.getElementById('preview');
+      if (previewElement && newContent) previewElement.innerHTML = newContent;
+    });
+
+    // Optional: Set initial content
+    // editor.setContent("Your initial content here");
+  }
+});
+```
+
+## List of Available Plugins
+
+On-Codemerge comes with a variety of plugins to enhance your editing experience. Below is a list of available plugins:
+
+- [TextStylingButton](#) - Adds text styling capabilities.
+- [TableButton](#) - Enables table creation and editing.
+- [UndoRedoButton](#) - Provides undo and redo functionality.
+- [ListButton](#) - Allows creating and managing lists.
+- [AlignButton](#) - Offers text alignment options.
+- [SpacerButton](#) - Insert space elements.
+- [TextDecorationButton](#) - Apply text decorations like bold, italic, etc.
+- [LinkAndVideo](#) - Embed links and videos.
+- [TemplateButton](#) - Use predefined templates.
+- [BlockButton](#) - Manage block-level elements.
+- [ImageButton](#) - Insert and manage images.
+- [CodeEditorButton](#) - Edit and insert code snippets.
+- [PreviewButton](#) - Preview the edited content.
+- [FullscreenButton](#) - Toggle fullscreen mode.
+- [PrintButton](#) - Print the edited content.
+- [ParagraphButton](#) - Work with paragraphs.
+- [HorizontalLineButton](#) - Insert horizontal lines.
+- [ClearStylesButton](#) - Clear formatting styles.
+
+Each plugin adds unique functionality to the On-Codemerge editor, making it a powerful tool for web content creation and editing.
