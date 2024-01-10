@@ -1,5 +1,6 @@
 {
   "name": "on-codemerge",
+  "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product. This intuitive tool supports various programming languages, offers syntax highlighting and easy integration with coding projects, enhancing productivity and accuracy for developers of all skill levels.",
   "version": "0.4.2",
   "author": "Pavel Kuzmin",
   "type": "module",
@@ -30,7 +31,8 @@
     "admin",
     "indo",
     "generator",
-    "typescript"
+    "typescript",
+    "WYSIWYG"
   ],
   "exports": {
     ".": {
