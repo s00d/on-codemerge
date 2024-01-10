@@ -40,15 +40,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // ... register other modules
 
     editor.subscribeToContentChange((newContent?: string) => {
-      const resultElement = document.getElementById('result');
-      if (resultElement && newContent) resultElement.innerText = newContent;
-
-      const previewElement = document.getElementById('preview');
-      if (previewElement && newContent) previewElement.innerHTML = newContent;
+      console.log(newContent)
     });
 
     // Optional: Set initial content
-    // editor.setContent("Your initial content here");
+    editor.setContent("Your initial content here");
   }
 });
 ```
