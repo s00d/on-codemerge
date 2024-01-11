@@ -55,16 +55,14 @@ export default function EditorComponent({ activePlugins }) {
 
   useEffect(() => {
     if (editorContainerRef.current) {
-      const registerPlugin = (Plugin, params = {}) => {
+      const registerPlugin = (Plugin, params = null) => {
         if (Plugin) editor.registerModule(new Plugin(params));
       };
       // Инициализация редактора
       const editor = new EditorCore(editorContainerRef.current);
 
-      console.log(activePlugins)
       if (activePlugins && activePlugins.length > 0) {
         activePlugins.forEach(pluginName => {
-          console.log(pluginName)
           if (pluginName === 'TemplateButton') {
             registerPlugin(allPlugins[pluginName], {
               text: 'sssssss ssss ssss',
