@@ -50,6 +50,7 @@ export class Toolbar {
       this.toolbarElement.style.backgroundColor = '#f9f9f9';
       this.toolbarElement.style.display = 'flex';
       this.toolbarElement.style.alignItems = 'center';
+      this.toolbarElement.style.overflow = 'scroll';
       // Другие стили...
     }
   }

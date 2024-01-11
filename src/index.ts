@@ -298,8 +298,9 @@ export class EditorCore {
       this.appElement.style.minHeight = '140px'; // Высота для 10 строк примерно
       this.appElement.style.resize = 'both'; // Возможность изменять размер
       this.appElement.style.overflow = 'auto'; // Прокрутка при необходимости
-      this.appElement.style.padding = '10px'; // Отступы внутри блока
+      // this.appElement.style.padding = '10px'; // Отступы внутри блока
       this.appElement.style.boxSizing = 'border-box'; // Чтобы размеры включали padding и border
+      this.appElement.style.background = '#e9e9e9'; // Чтобы размеры включали padding и border
     }
   }
 

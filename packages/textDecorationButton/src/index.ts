@@ -66,6 +66,8 @@ export class TextDecorationButton implements IEditorModule {
     const input = document.createElement('input');
     input.type = 'color';
     input.style.height = '36px';
+    input.style.minWidth = '36px';
+    input.style.width = '36px';
     input.title = title;
     input.addEventListener('input', (e) => {
       styleConfig[command].enabledValue = (e.target as HTMLInputElement).value

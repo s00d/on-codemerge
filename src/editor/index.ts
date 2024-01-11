@@ -109,6 +109,7 @@ export class Editor {
       this.editorElement.style.overflow = 'auto'; // Прокрутка при необходимости
       this.editorElement.style.padding = '10px'; // Отступы внутри блока
       this.editorElement.style.boxSizing = 'border-box'; // Чтобы размеры включали padding и border
+      this.editorElement.style.background = 'white'; // Чтобы размеры включали padding и border
       // Другие необходимые стили...
     }
   }
