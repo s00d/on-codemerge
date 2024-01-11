@@ -1,18 +1,19 @@
 ---
-sidebar_position: 2
+
+sidebar_position: 3
 ---
 
 # Vue 3
 
-Welcome to the documentation for **On-Codemerge**, a versatile web editor designed for seamless integration and functionality in various JavaScript frameworks.
+Welcome to the Vue-specific documentation for **On-Codemerge**, a versatile web editor designed for seamless integration into Vue.js projects.
 
-## Getting Started with Vue Integration
+## Getting Started with Vue
 
-To integrate On-Codemerge into a Vue.js project, follow these steps.
+To use On-Codemerge in a Vue.js application, you'll first need to install it.
 
 ### Installation
 
-First, install `on-codemerge` in your project:
+Run the following command in your Vue.js project directory to install `on-codemerge`:
 
 ```bash
 npm i --save on-codemerge
@@ -20,47 +21,58 @@ npm i --save on-codemerge
 
 ## Vue Integration Example
 
-Here’s an example of how you can integrate On-Codemerge into a Vue.js component:
+Below is a basic example of how to integrate On-Codemerge into a Vue.js project, including a `value` prop for initial content:
 
-```vue title="OnCodemergeEditor.vue"
+```vue title="MyEditorComponent.vue"
 <template>
-  <div ref="editorContainer"></div>
+  <div ref="editorRef"></div>
 </template>
 
-<script lang="ts">
-import { onMounted, ref } from 'vue';
+<script>
+import { onMounted, ref, watch } from 'vue';
 import EditorCore from 'on-codemerge';
 import TextStylingButton from 'on-codemerge/textStylingButton';
 import TableButton from 'on-codemerge/tableButton';
 
 export default {
-  name: 'OnCodemergeEditor',
-  setup() {
-    const editorContainer = ref(null);
-    const editorInstance = ref(null);
+  name: 'MyEditorComponent',
+  props: {
+    value: String
+  },
+  setup(props) {
+    const editorRef = ref(null);
+    const editor = ref(null);
 
     onMounted(() => {
-      if (editorContainer.value) {
-        editorInstance.value = new EditorCore(editorContainer.value);
-        editorInstance.value.registerModule(new TextStylingButton());
-        editorInstance.value.registerModule(new TableButton());
+      if (editorRef.value) {
+        editor.value = new EditorCore(editorRef.value);
+        editor.value.registerModule(new TextStylingButton());
+        editor.value.registerModule(new TableButton());
         // ... register other modules
 
-        editorInstance.value.subscribeToContentChange((newContent?: string) => {
-          console.log(newContent);
-        })
+        editor.value.setContent(props.value || "Initial content goes here");
 
-        // Optional: Set initial content
-        editorInstance.value.setContent("Your initial content here");
+        editor.value.subscribeToContentChange((newContent) => {
+          this.$emit('update:value', newContent);
+        });
+      }
+    });
+
+    // Watch for changes in value prop and update the editor content
+    watch(() => props.value, (newValue) => {
+      if (editor.value && editor.value !== newValue) {
+        editor.value.setContent(newValue);
       }
     });
 
     return {
-      editorContainer
+      editorRef
     };
   }
 };
 </script>
 ```
 
-In this example, we use Vue's `ref` and `onMounted` lifecycle hook to initialize and attach the editor to a div element. Each plugin, like `TextStylingButton` and `TableButton`, is registered to add its functionality to the On-Codemerge editor, making it a powerful tool for web content creation and editing within Vue applications.
+In this updated component, the `value` prop is used to pass initial content to the editor. A watcher is added to update the editor's content whenever the `value` prop changes. This allows the parent component to control the content of the editor dynamically.
+
+This setup enhances the flexibility of the editor within your Vue.js applications, making it responsive to changes in content from the parent component while leveraging On-Codemerge's capabilities.

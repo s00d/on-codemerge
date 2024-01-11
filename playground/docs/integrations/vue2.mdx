@@ -1,68 +1,76 @@
 ---
-sidebar_position: 3
+sidebar_position: 2
 ---
 
 # Vue 2
 
-Welcome to the Vue-specific documentation for **On-Codemerge**, a versatile web editor designed for seamless integration into Vue.js projects.
+Welcome to the Vue 2-specific documentation for **On-Codemerge**, a versatile web editor designed for seamless integration with Vue.js 2 projects.
 
-## Getting Started with Vue
+## Getting Started with Vue 2 Integration
 
-To use On-Codemerge in a Vue.js application, you'll first need to install it.
+To integrate On-Codemerge into a Vue.js 2 project, follow these steps.
 
 ### Installation
 
-Run the following command in your Vue.js project directory to install `on-codemerge`:
+Install `on-codemerge` in your project:
 
 ```bash
 npm i --save on-codemerge
 ```
 
-## Vue Integration Example
+## Vue 2 Integration Example
 
-Below is a basic example of how to integrate On-Codemerge into a Vue.js project:
+Here’s an example of how to integrate On-Codemerge into a Vue.js 2 component, including the use of a `value` prop and emitting an event for updates:
 
-```vue title="MyEditorComponent.vue"
+```vue title="OnCodemergeEditor.vue"
 <template>
-  <div ref="editorRef"></div>
+  <div ref="editorContainer"></div>
 </template>
 
 <script>
-import { onMounted, ref } from 'vue';
+import Vue from 'vue';
 import EditorCore from 'on-codemerge';
 import TextStylingButton from 'on-codemerge/textStylingButton';
 import TableButton from 'on-codemerge/tableButton';
 
 export default {
-  name: 'MyEditorComponent',
-  setup() {
-    const editorRef = ref(null);
-    const editor = ref(null);
-
-    onMounted(() => {
-      if (editorRef.value) {
-        editor.value = new EditorCore(editorRef.value);
-        editor.value.registerModule(new TextStylingButton());
-        editor.value.registerModule(new TableButton());
-        // ... register other modules
-
-        editor.value.subscribeToContentChange((newContent) => {
-          console.log('Content changed:', newContent);
-        });
-
-        // Optional: Set initial content
-        editor.value.setContent("Initial content goes here");
-      }
-    });
-
+  name: 'OnCodemergeEditor',
+  props: {
+    value: String
+  },
+  data() {
     return {
-      editorRef
+      editor: null
     };
+  },
+  mounted() {
+    this.editor = new EditorCore(this.$refs.editorContainer);
+    this.editor.registerModule(new TextStylingButton());
+    this.editor.registerModule(new TableButton());
+    // ... additional module registrations
+
+    this.editor.setContent(this.value || 'Your initial content here');
+
+    this.editor.subscribeToContentChange((newContent) => {
+      this.$emit('input', newContent);
+    });
+  },
+  watch: {
+    value(newValue) {
+      if (this.editor && this.editor.getContent() !== newValue) {
+        this.editor.setContent(newValue);
+      }
+    }
   }
 };
 </script>
 ```
 
-This component uses Vue 3's Composition API. The editor is initialized in the `onMounted` lifecycle hook and attached to a div element referenced by `ref`. The `EditorCore` class is used to create an editor instance, and modules such as `TextStylingButton` and `TableButton` are registered to enhance the editor's functionality. The `subscribeToContentChange` method allows you to handle content changes.
+In this Vue 2 component:
 
-This setup provides a powerful and flexible editor within your Vue.js applications, leveraging On-Codemerge's capabilities.
+- The `mounted` lifecycle hook is used to initialize On-Codemerge when the component mounts.
+- The `value` prop is used to set the initial content of the editor.
+- The `watch` property is used to react to changes in the `value` prop and update the editor content accordingly.
+- The `editor.subscribeToContentChange` method is used to emit an `input` event whenever the content changes. This allows the parent component to update its data that's bound to the `value` prop.
+
+With this setup, you can integrate On-Codemerge in a Vue 2 application, providing a dynamic and powerful editor while maintaining reactivity and data binding consistent with Vue 2's architecture.
