@@ -19,8 +19,10 @@ import PrintButton from "../../../../packages/printButton/src";
 import ParagraphButton from "../../../../packages/paragraphButton/src";
 import HorizontalLineButton from "../../../../packages/horizontalLineButton/src";
 import ClearStylesButton from "../../../../packages/clearStylesButton/src";
+import MarkdownImportExportButton from "../../../../packages/markdownimportexportbutton/src";
+import ResizeEditorButton from "../../../../packages/resizeEditorButton/src";
 
-import styles from './styles.module.css'; // Путь к вашему CSS файлу
+import styles from './styles.module.css';
 
 export default function EditorComponent({ activePlugins }) {
   const editorContainerRef = useRef(null);
@@ -46,6 +48,8 @@ export default function EditorComponent({ activePlugins }) {
     'FullscreenButton': FullscreenButton,
     'PrintButton': PrintButton,
     'ClearStylesButton': ClearStylesButton,
+    'MarkdownImportExportButton': MarkdownImportExportButton,
+    'ResizeEditorButton': ResizeEditorButton,
   };
 
 

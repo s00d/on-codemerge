@@ -85,6 +85,22 @@ export class Editor {
     // document.execCommand('insertHTML', false, pastedData);
   }
 
+  setScreenSize(width: number, height: number): void {
+    if (this.editorElement) {
+      this.editorElement.style.width = `${width}px`;
+      this.editorElement.style.height = `${height}px`;
+      this.editorElement.style.margin = `auto`;
+    }
+  }
+
+  clearScreenSize(): void {
+    if (this.editorElement) {
+      this.editorElement.style.width = `unset`;
+      this.editorElement.style.height = `unset`;
+      this.editorElement.style.margin = `unset`;
+    }
+  }
+
   private applyStyles(): void {
     if (this.editorElement) {
       this.editorElement.style.border = '1px solid #ccc'; // Рамка

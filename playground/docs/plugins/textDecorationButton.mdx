@@ -18,7 +18,24 @@ The plugin offers color pickers for both text color and background color. Users 
 
 ### 2. Font Selection
 
-The font picker allows users to select the font for their text. A dropdown menu provides a list of available fonts, making it easy to change the font style.
+- Customizable Font List: Users can select the font for their text from a dropdown menu. The plugin can be customized to include a list of specific fonts, providing flexibility in font style choices.
+- Custom Font Support: The plugin allows for the integration of custom fonts, enabling users to utilize their preferred font styles beyond the default options.
+
+```jsx title="Custom fonts example"
+import EditorCore from 'on-codemerge';
+import { TextDecorationButton } from 'on-codemerge/textDecorationButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+
+    // Create and register the TextDecorationButton module
+    const textDecorationButton = new TextDecorationButton(['Arial']);
+    editor.registerModule(textDecorationButton);
+  }
+});
+```
 
 ### 3. Font Size
 

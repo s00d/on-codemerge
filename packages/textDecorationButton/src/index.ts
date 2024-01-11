@@ -45,10 +45,12 @@ const styleConfig: StyleConfig = {
 export class TextDecorationButton implements IEditorModule {
   private domUtils: DomUtils;
   private styleManager: StyleManager;
+  private fonts: string[];
 
-  constructor() {
+  constructor(fonts: string[] = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana']) {
     this.domUtils = new DomUtils();
     this.styleManager = new StyleManager(styleConfig);
+    this.fonts = fonts;
   }
 
   initialize(core: EditorCore): void {
@@ -138,8 +140,7 @@ export class TextDecorationButton implements IEditorModule {
     const select = document.createElement('select');
     select.title = title;
     select.style.height = '35px';
-    const fonts = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'];
-    fonts.forEach(font => {
+    this.fonts.forEach(font => {
       const option = document.createElement('option');
       option.value = font;
       option.textContent = font;

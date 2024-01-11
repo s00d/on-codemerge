@@ -1,0 +1,16 @@
+{
+  "name": "markdownimportexportbutton",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "/src/index.ts",
+  "dependencies": {
+    "showdown": "^2.1.0",
+    "turndown": "^7.1.2"
+  },
+  "devDependencies": {
+    "@types/showdown": "^2.0.6",
+    "@types/turndown": "^5.0.4"
+  }
+}

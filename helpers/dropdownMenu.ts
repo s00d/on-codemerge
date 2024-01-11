@@ -7,9 +7,11 @@ export class DropdownMenu {
   private button: HTMLDivElement;
   private dropdown: HTMLDivElement;
   private core: EditorCore;
+  private onOpen: (() => void) | undefined;
 
-  constructor(core: EditorCore, buttonText: string, title?: string) {
+  constructor(core: EditorCore, buttonText: string, title?: string, onOpen?: () => void) {
     this.core = core;
+    this.onOpen = onOpen;
     this.dropdown = document.createElement('div');
     this.dropdown.className = 'dropdown';
 
@@ -69,7 +71,7 @@ export class DropdownMenu {
     return this.dropdown;
   }
 
-  addItem(label: string, action: () => void): void {
+  addItem(label: string, action: () => void, disabled = () => true): void {
     const item = document.createElement('div');
     item.textContent = label;
 
@@ -80,6 +82,17 @@ export class DropdownMenu {
       border: '1px solid #dcdcdc',
       // Дополнительные стили для пунктов меню
     });
+
+    if(disabled()) {
+      this.applyStyles(item, {
+        padding: '10px 16px',
+        cursor: 'not-allowed',
+        border: '1px solid #dcdcdc',
+        color: '#a0a0a0', // Серый цвет для текста отключенного элемента
+        backgroundColor: '#f0f0f0', // Светло-серый фон для отключенного элемента
+        // Дополнительные стили для пунктов меню
+      });
+    }
 
     item.addEventListener('click', () => {
       action();
@@ -110,6 +123,8 @@ export class DropdownMenu {
     this.core.restoreCurrentSelection();
 
     document.addEventListener('click', this.handleOutsideClick);
+
+    if(this.onOpen) this.onOpen();
   }
 
   hide(): void {

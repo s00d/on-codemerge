@@ -1,0 +1,17 @@
+{
+  "name": "codeeditorbutton",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "ISC",
+  "main": "/src/index.ts",
+  "dependencies": {
+    "@codemirror/highlight": "^0.19.8",
+    "@codemirror/lang-html": "^6.4.7",
+    "@codemirror/matchbrackets": "^0.19.4",
+    "codemirror": "^6.0.1"
+  },
+  "devDependencies": {
+    "@types/codemirror": "^5.60.15"
+  }
+}
