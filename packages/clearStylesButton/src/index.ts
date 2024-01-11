@@ -92,6 +92,12 @@ export class ClearStylesButton implements IEditorModule {
     }
     element.parentNode?.replaceChild(newElement, element);
   }
+
+  public destroy(): void {
+    // Очистите ресурсы или выполняйте другие необходимые действия при уничтожении модуля
+    // @ts-ignore
+    this.domUtils = null;
+  }
 }
 
 export default ClearStylesButton;

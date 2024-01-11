@@ -94,6 +94,16 @@ export class AlignButton implements IEditorModule {
       }
     })
   }
+
+  public destroy(): void {
+    // Очистите ресурсы или выполняйте другие необходимые действия при уничтожении модуля
+    this.dropdown?.destroy();
+    this.dropdown = null;
+    // @ts-ignore
+    this.domUtils = null;
+    // @ts-ignore
+    this.styleManager = null;
+  }
 }
 
 export default AlignButton;

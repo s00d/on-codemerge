@@ -142,4 +142,14 @@ export class ContextMenu {
   clearItems(): void {
     this.menuElement.innerHTML = '';
   }
+
+  destroy(): void {
+    // Удаляем обработчик клика за пределами меню
+    document.removeEventListener('click', this.handleDocumentClick);
+
+    // Удаляем DOM элементы, созданные для меню
+    this.menuElement.remove();
+    // @ts-ignore
+    this.menuElement = null;
+  }
 }

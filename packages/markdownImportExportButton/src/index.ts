@@ -34,6 +34,15 @@ export class MarkdownImportExportButton implements IEditorModule {
       }
     }, 'Markdown');
   }
+
+  destroy(): void {
+    // Cleanup any resources or event listeners here
+    if (this.modal) {
+      this.modal.destroy();
+      this.modal = null;
+    }
+    this.core = null;
+  }
 }
 
 export default MarkdownImportExportButton;

@@ -29,15 +29,17 @@ export class ImageManager {
     this.contextMenu.addItem('Change Style', () => this.showImageModal());
     this.contextMenu.addHtmlItem(this.dropdown.getButton());
 
-    this.img.addEventListener('contextmenu', (event: MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
-
-      this.contextMenu.show(event.clientX, event.clientY);
-    });
+    this.img.addEventListener('contextmenu', this.handleContextMenu.bind(this));
     this.resizeHandle = document.createElement('div');
     this.addResizeHandle();
     this.observeImageRemoval();
+  }
+
+  private handleContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
+
+    this.contextMenu.show(event.clientX, event.clientY);
   }
 
   private observeImageRemoval() {
@@ -175,5 +177,41 @@ export class ImageManager {
     this.onRemove(this.imgId);
   }
 
-  // Другие методы управления изображением
+  destroy(): void {
+    // Remove any event listeners or perform other cleanup as needed
+    this.img.removeEventListener('contextmenu', this.handleContextMenu);
+    window.removeEventListener('scroll', this.updateResizeHandlePosition);
+    this.resizeHandle.removeEventListener('mousedown', this.startResizing);
+
+    if (this.contextMenu) {
+      this.contextMenu.destroy();
+      // @ts-ignore
+      this.contextMenu = null;
+    }
+
+    if (this.dropdown) {
+      this.dropdown.destroy();
+      // @ts-ignore
+      this.dropdown = null;
+    }
+
+    // Remove the resize handle
+    if (this.resizeHandle && this.resizeHandle.parentElement) {
+      this.resizeHandle.parentElement.removeChild(this.resizeHandle);
+    }
+
+    // Set other properties to null to release references
+    // @ts-ignore
+    this.img = null;
+    // @ts-ignore
+    this.imgId = null;
+    // @ts-ignore
+    this.modal = null;
+    // @ts-ignore
+    this.core = null;
+    // @ts-ignore
+    this.onRemove = null;
+    // @ts-ignore
+    this.resizeHandle = null;
+  }
 }

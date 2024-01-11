@@ -40,6 +40,11 @@ export class FullscreenButton implements IEditorModule {
       document.exitFullscreen();
     }
   }
+
+  destroy(): void {
+    // You can perform any necessary cleanup here
+    this.core = null;
+  }
 }
 
 export default FullscreenButton;

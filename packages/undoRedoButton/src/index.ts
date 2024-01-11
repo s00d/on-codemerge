@@ -3,45 +3,77 @@ import { rotateCcw, rotateCw } from "../../../src/icons";
 import type { IEditorModule } from "@/types";
 
 export class UndoRedoButton implements IEditorModule {
+  private undo: HTMLDivElement | null = null;
+  private redo: HTMLDivElement | null = null;
+  private core: EditorCore  | null = null;
   initialize(core: EditorCore): void {
+    this.core = core
     const createUndoButton = () => {
-      const button = document.createElement('button');
+      const button = document.createElement('div');
       button.classList.add('on-codemerge-button');
+      button.classList.add('disabled');
       button.innerHTML = rotateCcw;
       button.title = 'Undo';
-      button.disabled = true;
-      button.addEventListener('click', () => {
-        core.undo()
-      });
+      button.addEventListener('click', this.handleUndoClick.bind(this));
       return button;
     };
 
     const createRedoButton = () => {
-      const button = document.createElement('button');
+      const button = document.createElement('div');
       button.classList.add('on-codemerge-button');
       button.innerHTML = rotateCw;
       button.title = 'Redo';
-      button.disabled = true;
-      button.addEventListener('click', () => {
-        core.redo()
-      });
+      button.classList.add('disabled');
+      button.addEventListener('click', this.handleRedoClick.bind(this));
       return button;
     };
 
     // Получаем панель инструментов и попап
     const toolbar = core.toolbar.getToolbarElement();
 
-    const undo = createUndoButton()
-    const redo = createRedoButton()
+    this.undo = createUndoButton()
+    this.redo = createRedoButton()
 
     // Добавляем кнопку на панель инструментов и в попап
-    if(toolbar) toolbar.appendChild(undo);
-    if(toolbar) toolbar.appendChild(redo);
+    if(toolbar) toolbar.appendChild(this.undo);
+    if(toolbar) toolbar.appendChild(this.redo);
 
     core.subscribeToContentChange(() => {
-      undo.disabled = !core.isUndo();
-      redo.disabled = !core.isRedo();
+      if(this.undo) {
+        if (core.isUndo()) {
+          this.undo.classList.remove('disabled')
+        } else {
+          this.undo.classList.add('disabled')
+        }
+      }
+      if(this.redo) {
+        if (core.isRedo()) {
+          this.redo.classList.remove('disabled')
+        } else {
+          this.redo.classList.add('disabled')
+        }
+      }
     });
+  }
+
+  private handleUndoClick() {
+    this.core?.undo();
+  }
+
+  private handleRedoClick() {
+    this.core?.redo();
+  }
+
+  destroy(): void {
+    // Remove event listeners and references to DOM elements to prevent memory leaks
+    if (this.undo) {
+      this.undo.removeEventListener('click', this.handleUndoClick);
+      this.undo = null;
+    }
+    if (this.redo) {
+      this.redo.removeEventListener('click', this.handleRedoClick);
+      this.redo = null;
+    }
   }
 }
 

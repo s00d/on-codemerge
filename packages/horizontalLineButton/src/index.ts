@@ -22,6 +22,11 @@ export class HorizontalLineButton implements IEditorModule {
     fragment.appendChild(breakElement);
     this.core.insertHTMLIntoEditor(fragment);
   }
+
+  destroy(): void {
+    // You can perform any necessary cleanup here
+    this.core = null;
+  }
 }
 
 export default HorizontalLineButton;

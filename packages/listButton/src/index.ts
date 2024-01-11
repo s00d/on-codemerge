@@ -90,7 +90,14 @@ export class ListButton implements IEditorModule {
     return div;
   }
 
-
+  destroy(): void {
+    // Cleanup any resources or event listeners here
+    if (this.dropdown) {
+      this.dropdown.destroy();
+      this.dropdown = null;
+    }
+    this.core = null;
+  }
 }
 
 export default ListButton;

@@ -20,7 +20,8 @@ export class BlockManager {
     this.contextMenu.setOrientation('horizontal')
     this.modal = new Modal(core);
 
-    this.initContextMenu();
+    this.block.addEventListener('contextmenu', this.handleContextMenu.bind(this));
+    window.addEventListener('click', this.handleWindowClick.bind(this));
     this.addInitialSections(2); // Начнем с двух секций
 
     const heightResizer = this.createHeightResizer();
@@ -145,33 +146,31 @@ export class BlockManager {
     return heightResizer;
   }
 
-  private initContextMenu(): void {
-    this.block.addEventListener('contextmenu', (event: MouseEvent) => {
-      event.preventDefault();
-      event.stopPropagation();
+  private handleContextMenu(event: MouseEvent) {
+    event.preventDefault();
+    event.stopPropagation();
 
-      const target = event.target as HTMLElement;
-      const section = target.closest('.section'); // Предполагаем, что у секций есть класс 'editor-section'
-      if (section) {
-        this.currentActiveSection = section as HTMLElement;
-      }
+    const target = event.target as HTMLElement;
+    const section = target.closest('.section'); // Предполагаем, что у секций есть класс 'editor-section'
+    if (section) {
+      this.currentActiveSection = section as HTMLElement;
+    }
 
-      this.contextMenu.clearItems();
-      this.contextMenu.addItem('Add Section', () => this.addSection());
-      this.sections.forEach((section, index) => {
-        if (this.sections.length > 1) {
-          this.contextMenu.addItem(`Remove Section ${index + 1}`, () => this.removeSection(section));
-        }
-      });
-      this.contextMenu.addItem('Change Style', () => this.openSectionSettings());
-      this.contextMenu.show(event.clientX, event.clientY);
-    });
-
-    window.addEventListener('click', (event: MouseEvent) => {
-      if (!this.block.contains(event.target as Node)) {
-        this.contextMenu.hide();
+    this.contextMenu.clearItems();
+    this.contextMenu.addItem('Add Section', () => this.addSection());
+    this.sections.forEach((section, index) => {
+      if (this.sections.length > 1) {
+        this.contextMenu.addItem(`Remove Section ${index + 1}`, () => this.removeSection(section));
       }
     });
+    this.contextMenu.addItem('Change Style', () => this.openSectionSettings());
+    this.contextMenu.show(event.clientX, event.clientY);
+  }
+
+  private handleWindowClick(event: MouseEvent) {
+    if (!this.block.contains(event.target as Node)) {
+      this.contextMenu.hide();
+    }
   }
 
   private applyStyles(element: HTMLElement, styles: {[key: string]: string}): void {
@@ -318,5 +317,36 @@ export class BlockManager {
     this.attachWidthResizerEvents(resizer);
 
     return resizer;
+  }
+
+  destroy(): void {
+    // Remove any event listeners or perform other cleanup as needed
+    this.block.removeEventListener('contextmenu', this.handleContextMenu);
+    window.removeEventListener('click', this.handleWindowClick);
+
+    if (this.contextMenu) {
+      this.contextMenu.destroy();
+      // @ts-ignore
+      this.contextMenu = null;
+    }
+
+    if (this.modal) {
+      this.modal.destroy();
+      // @ts-ignore
+      this.modal = null;
+    }
+
+    // Additional cleanup for sections and resizers if necessary
+
+    // Set other properties to null to release references
+    // @ts-ignore
+    this.block = null;
+    // @ts-ignore
+    this.core = null;
+    // @ts-ignore
+    this.onUpdate = null;
+    this.sections = [];
+    this.currentActiveSection = null;
+    this.placeholder = null;
   }
 }

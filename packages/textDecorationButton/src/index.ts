@@ -45,6 +45,7 @@ const styleConfig: StyleConfig = {
 export class TextDecorationButton implements IEditorModule {
   private domUtils: DomUtils;
   private styleManager: StyleManager;
+  private inputElements: HTMLElement[] = [];
   private fonts: string[] = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'];
 
   constructor(fonts?: string[]) {
@@ -107,6 +108,7 @@ export class TextDecorationButton implements IEditorModule {
     });
 
     core.toolbar.addHtmlItem(input);
+    this.inputElements.push(input);
   }
 
   private setStyle(command: string) {
@@ -162,6 +164,7 @@ export class TextDecorationButton implements IEditorModule {
     });
 
     core.toolbar.addHtmlItem(select);
+    this.inputElements.push(select);
   }
 
   private createInputPicker(core: EditorCore, title: string, command: string): void {
@@ -191,6 +194,19 @@ export class TextDecorationButton implements IEditorModule {
     });
 
     core.toolbar.addHtmlItem(select);
+    this.inputElements.push(select);
+  }
+
+  destroy(): void {
+    // @ts-ignore
+    this.domUtils = null
+    // @ts-ignore
+    this.styleManager = null
+
+    this.inputElements.forEach((input) => {
+      input.remove();
+    });
+    this.inputElements = [];
   }
 }
 

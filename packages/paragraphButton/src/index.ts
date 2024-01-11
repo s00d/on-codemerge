@@ -57,6 +57,15 @@ export class ParagraphButton implements IEditorModule {
     this.core.insertHTMLIntoEditor(p);
     this.core.setContent(editor.innerHTML);
   }
+
+  destroy(): void {
+    // Cleanup any resources or event listeners here
+    if (this.dropdown) {
+      this.dropdown.destroy();
+      this.dropdown = null;
+    }
+    this.core = null;
+  }
 }
 
 export default ParagraphButton;

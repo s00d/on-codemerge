@@ -128,6 +128,13 @@ export class LinkAndVideo implements IEditorModule {
       if(editor) this.core?.setContent(editor?.innerHTML)
     });
   }
+
+  destroy(): void {
+    // Cleanup any resources or event listeners here
+    this.links.clear();
+    this.modal = undefined;
+    this.core = undefined;
+  }
 }
 
 export default LinkAndVideo;

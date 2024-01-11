@@ -108,6 +108,22 @@ export class PreviewButton implements IEditorModule {
     `;
     document.head.appendChild(style);
   }
+
+  destroy(): void {
+    // Cleanup any resources or event listeners here
+    if (this.modal) {
+      this.modal.remove();
+      this.modal = null;
+    }
+    if (this.overlay) {
+      this.overlay.remove();
+      this.overlay = null;
+    }
+    if (this.previewContainer) {
+      this.previewContainer = null;
+    }
+    this.core = null;
+  }
 }
 
 export default PreviewButton;

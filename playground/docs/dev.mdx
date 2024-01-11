@@ -28,9 +28,39 @@ export class MyCustomPlugin implements IEditorModule {
     // Initialization logic here
   }
 
+  destroy(): void {
+
+  }
+
   // Additional methods specific to your plugin
 }
 ```
+
+### `initialize(core: EditorCore): void`
+
+The `initialize` method is a required method in a custom plugin class. It is called when the plugin is being initialized and provides access to the `EditorCore` instance, allowing the plugin to integrate with the editor and perform any necessary setup. Here's what this method typically does:
+
+- Receives the `EditorCore` instance as a parameter, which provides access to the editor's functionality and elements.
+
+- Sets up the plugin by configuring buttons, event listeners, or any other components necessary for its functionality within the editor.
+
+- Performs any initializations, such as creating UI elements, adding buttons to the toolbar, or registering event handlers.
+
+- This method is where you can define the behavior of your custom plugin within the editor.
+
+### `destroy(): void`
+
+The `destroy` method is also a required method in a custom plugin class. It is called when the plugin needs to be removed or cleaned up, ensuring that it doesn't leave any lingering resources or event listeners. Here's what this method typically does:
+
+- Removes any event listeners that the plugin added to prevent memory leaks and unwanted behavior after the plugin is removed.
+
+- Cleans up any resources or DOM elements created by the plugin during its initialization.
+
+- Performs any necessary cleanup to revert any changes or configurations made by the plugin within the editor.
+
+- This method ensures that the plugin is properly disposed of when it's no longer needed in the editor.
+
+Custom plugins in an editor framework often follow this `initialize` and `destroy` pattern to seamlessly integrate and remove their functionality from the editor. It's essential to implement these methods correctly to ensure that your plugin behaves as expected and doesn't cause issues when enabled or disabled in the editor.
 
 ## Creating a Basic Plugin
 
@@ -39,8 +69,12 @@ Let's create a simple plugin that adds a custom button to the editor's toolbar.
 ### Step 1: Define Your Plugin Class
 
 ```ts
+import EditorCore from "on-codemerge";
+import { IEditorModule } from "on-codemerge/dist/types/src/types";
+
 export class MyCustomButton implements IEditorModule {
   private core: EditorCore;
+  private button: HTMLButtonElement | null = null;
 
   initialize(core: EditorCore): void {
     this.core = core;
@@ -48,17 +82,25 @@ export class MyCustomButton implements IEditorModule {
   }
 
   private addButton(): void {
-    const button = document.createElement("button");
-    button.textContent = "My Button";
-    button.addEventListener("click", this.onButtonClick);
-
-    this.core.toolbar.addElement(button);
+    this.button = document.createElement("button");
+    this.button.textContent = "My Button";
+    this.button.addEventListener("click", this.onButtonClick);
   }
 
   private onButtonClick = (): void => {
     console.log("Button clicked!");
     // Your button logic here
   }
+
+  destroy(): void {
+    if (this.button) {
+      // Remove the event listener to prevent memory leaks
+      this.button.removeEventListener("click", this.onButtonClick);
+      // Set the button reference to null
+      this.button = null;
+    }
+  }
+
 }
 ```
 
@@ -87,8 +129,12 @@ Plugins can also modify the editor's text or insert new content. Below are examp
 To modify text, you can manipulate the DOM elements within the editor. Here’s an example of a plugin that converts selected text to uppercase:
 
 ```ts
+import EditorCore from "on-codemerge";
+import { IEditorModule } from "on-codemerge/dist/types/src/types";
+
 export class UppercaseTextButton implements IEditorModule {
   private core: EditorCore;
+  private button: HTMLButtonElement | null = null;
 
   initialize(core: EditorCore): void {
     this.core = core;
@@ -96,11 +142,11 @@ export class UppercaseTextButton implements IEditorModule {
   }
 
   private addButton(): void {
-    const button = document.createElement("button");
-    button.textContent = "Uppercase";
-    button.addEventListener("click", this.onButtonClick);
+    this.button = document.createElement("button");
+    this.button.textContent = "Uppercase";
+    this.button.addEventListener("click", this.onButtonClick);
 
-    this.core.toolbar.addElement(button);
+    this.core.toolbar.addElement(this.button);
   }
 
   private onButtonClick = (): void => {
@@ -117,6 +163,15 @@ export class UppercaseTextButton implements IEditorModule {
       this.core.setContent(this.core.editor.getEditorElement().innerHTML);
     }
   }
+
+  destroy(): void {
+    if (this.button) {
+      // Remove the event listener to prevent memory leaks
+      this.button.removeEventListener("click", this.onButtonClick);
+      // Set the button reference to null
+      this.button = null;
+    }
+  }
 }
 ```
 
@@ -125,8 +180,11 @@ export class UppercaseTextButton implements IEditorModule {
 For inserting new content, like an image or a custom HTML element, you can use the `insertHTMLIntoEditor` method of `EditorCore`. Here's an example of inserting an image:
 
 ```ts
+import EditorCore from "on-codemerge";
+import { IEditorModule } from "on-codemerge/dist/types/src/types";
 export class InsertImageButton implements IEditorModule {
   private core: EditorCore;
+  private button: HTMLButtonElement | null = null;
 
   initialize(core: EditorCore): void {
     this.core = core;
@@ -134,11 +192,11 @@ export class InsertImageButton implements IEditorModule {
   }
 
   private addButton(): void {
-    const button = document.createElement("button");
-    button.textContent = "Insert Image";
-    button.addEventListener("click", this.onButtonClick);
+    this.button = document.createElement("button");
+    this.button.textContent = "Insert Image";
+    this.button.addEventListener("click", this.onButtonClick);
 
-    this.core.toolbar.addElement(button);
+    this.core.toolbar.addElement(this.button);
   }
 
   private onButtonClick = (): void => {
@@ -146,6 +204,15 @@ export class InsertImageButton implements IEditorModule {
     const imgElement = `<img src="${imageUrl}" alt="Inserted Image"/>`;
 
     this.core.insertHTMLIntoEditor(imgElement);
+  }
+
+  destroy(): void {
+    if (this.button) {
+      // Remove the event listener to prevent memory leaks
+      this.button.removeEventListener("click", this.onButtonClick);
+      // Set the button reference to null
+      this.button = null;
+    }
   }
 }
 ```

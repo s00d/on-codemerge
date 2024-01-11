@@ -19,16 +19,6 @@ export class Toolbar {
     return this.toolbarElement;
   }
 
-  addButton(title: string, action: () => void) {
-    const button = document.createElement('div');
-    button.classList.add('on-codemerge-button');
-    button.textContent = title;
-    button.addEventListener('click', action);
-
-    this.toolbarElement?.appendChild(button);
-    return button;
-  }
-
   addHtmlItem(item: HTMLElement): void {
     this.toolbarElement?.appendChild(item);
   }
@@ -53,6 +43,16 @@ export class Toolbar {
       this.toolbarElement.style.overflow = 'scroll';
       // Другие стили...
     }
+  }
+
+  destroy(): void {
+    // Удаление панели инструментов из DOM
+    if (this.toolbarElement && this.toolbarElement.parentNode) {
+      this.toolbarElement.parentNode.removeChild(this.toolbarElement);
+    }
+
+    // Очистка ссылок для предотвращения утечек памяти
+    this.toolbarElement = null;
   }
 }
 

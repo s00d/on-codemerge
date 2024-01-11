@@ -42,6 +42,12 @@ export class ResizeEditorButton implements IEditorModule {
     core.toolbar.addHtmlItem(this.dropdown.getButton());
   }
 
+  destroy(): void {
+    this.dropdown?.destroy();
+    this.dropdown = null;
+    this.core = null;
+    this.active = null;
+  }
 }
 
 export default ResizeEditorButton;

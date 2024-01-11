@@ -3,8 +3,10 @@ import type { EditorCore } from "@/index";
 export class Editor {
   private editorElement: HTMLDivElement|null = null;
   private savedRange: Range | null = null;
+  private core: EditorCore;
 
   constructor(core: EditorCore) {
+    this.core = core;
     // Создание и настройка элемента редактора
     this.editorElement = document.createElement('div');
     this.editorElement.classList.add('on-codemerge')
@@ -26,33 +28,30 @@ export class Editor {
     });
 
     // Обработчик для обновления содержимого в ядре
-    this.editorElement.addEventListener('input', () => {
-      this.saveCaretPosition();
-      core.setContent(this.editorElement!.innerHTML);
-    });
-
-    this.editorElement.addEventListener('blur', () => {
-      core.saveCurrentSelection();
-    });
-
-    this.editorElement.addEventListener('paste', (event) => {
-      this.handlePaste(event, core);
-    });
+    this.editorElement.addEventListener('input', this.handleInput.bind(this));
+    this.editorElement.addEventListener('blur', this.handleBlur.bind(this));
+    this.editorElement.addEventListener('paste', this.handlePaste.bind(this));
   }
 
-  private handlePaste(event: ClipboardEvent, core: EditorCore) {
+  private handleBlur(event: Event) {
+    this.core.saveCurrentSelection();
+  }
+
+  private handleInput(event: Event) {
+    this.saveCaretPosition();
+    this.core.setContent(this.editorElement!.innerHTML);
+  }
+
+  private handlePaste(event: ClipboardEvent) {
     event.preventDefault();
-    core.saveCurrentSelection();
+    this.core.saveCurrentSelection();
 
     // @ts-ignore
     const clipboardData = event.clipboardData || window.clipboardData;
     let pastedData = clipboardData.getData('text/html');
 
     // Очистка HTML от атрибутов id
-    pastedData = core.contentCleanup(pastedData);
-
-    console.log(pastedData);
-    // core.insertHTMLIntoEditor(pastedData)
+    pastedData = this.core.contentCleanup(pastedData);
 
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = pastedData;
@@ -80,9 +79,7 @@ export class Editor {
     selection.addRange(range);
 
     const editor = this.getEditorElement();
-    if(editor) core.setContent(editor.innerHTML)
-    // Вставка очищенного HTML
-    // document.execCommand('insertHTML', false, pastedData);
+    if(editor) this.core.setContent(editor.innerHTML)
   }
 
   setScreenSize(width: number, height: number): void {
@@ -131,6 +128,23 @@ export class Editor {
 
   getEditorElement(): HTMLDivElement|null {
     return this.editorElement;
+  }
+
+
+  destroy(): void {
+    // Удаление всех обработчиков событий
+    this.editorElement?.removeEventListener('input', this.handleInput);
+    this.editorElement?.removeEventListener('blur', this.handleBlur);
+    this.editorElement?.removeEventListener('paste', this.handlePaste);
+
+    // Удаление элемента редактора из DOM
+    if (this.editorElement && this.editorElement.parentNode) {
+      this.editorElement.parentNode.removeChild(this.editorElement);
+    }
+
+    // Очистка ссылок для предотвращения утечек памяти
+    this.editorElement = null;
+    this.savedRange = null;
   }
 }
 

@@ -25,6 +25,11 @@ export class PrintButton implements IEditorModule {
     printWindow.document.close();
     printWindow.print();
   }
+
+  destroy(): void {
+    // Cleanup any resources or event listeners here
+    this.core = null;
+  }
 }
 
 export default PrintButton;

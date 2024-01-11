@@ -68,70 +68,62 @@ export class EditorCore {
         margin: 5px;
         cursor: pointer;
         white-space: nowrap;
-      
-        &:hover {
-          background-color: #e2e2e2;
-          opacity: 0.8;
-        }
       }
-      .on-codemerge {
-        svg {
-          vertical-align: sub;
-        }
-        .editor-block {
-          border: 1px solid #ccc;
-        }
-      
-        .editor-block-section {
-          border: 1px solid #ddd;
-        }
-      
-        .editor-block-resizer {
-          display: unset;
-          width: 1px;
-          background: #ccc;
-          cursor: col-resize;
-          padding: 3px;
-        }
-      
-        .editor-block-height-resizer {
-          display: unset;
-          width: 100%;
-          height: 5px;
-          background-color: #ccc;
-          cursor: ns-resize;
-          position: absolute;
-          bottom: 0;
-          left: 0;
-        }
+      .on-codemerge-button:hover {
+        background-color: #e2e2e2;
+        opacity: 0.8;
+      }
+      .on-codemerge-button.disabled {
+        background-color: #ccc;
+        border-color: #999;
+        cursor: not-allowed;
+        opacity: 0.6;
+      }
+      .on-codemerge svg {
+         vertical-align: sub;
+      }
+      .on-codemerge .editor-block {
+         border: 1px solid #ccc;
+      }
+      .on-codemerge .editor-block-section {
+         border: 1px solid #ddd;
+      }
+      .on-codemerge .editor-block-resizer {
+         display: unset;
+         width: 1px;
+         background: #ccc;
+         cursor: col-resize;
+         padding: 3px;
+      }
+      .on-codemerge .editor-block-height-resizer {
+         display: unset;
+         width: 100%;
+         height: 5px;
+         background-color: #ccc;
+         cursor: ns-resize;
+         position: absolute;
+         bottom: 0;
+         left: 0;
       }
       .on-codemerge-table {
-        border-collapse: collapse;
-        width: 100%;
-        tr {
-          th {
-            border: 1px solid black;
-            padding: 8px;
-            background-color: rgb(225, 225, 225);
-          }
-          td {
-            border: 1px solid black;
-            padding: 3px;
-            text-align: center;
-            position: relative;
-      
-            &.selected {
-              border: 2px solid gray;
-              background-color: rgb(225, 225, 225);
-            }
-      
-            &:after {
-      
-            }
-          }
-        }
+         border-collapse: collapse;
+         width: 100%;
       }
-
+      .on-codemerge-table tr th {
+         border: 1px solid black;
+         padding: 8px;
+         background-color: #e1e1e1;
+      }
+      .on-codemerge-table tr td {
+         border: 1px solid black;
+         padding: 3px;
+         text-align: center;
+         position: relative;
+      }
+      .on-codemerge-table tr td.selected {
+         border: 2px solid gray;
+         background-color: #e1e1e1;
+      }
     `;
     document.head.appendChild(style);
   }
@@ -337,6 +329,43 @@ export class EditorCore {
   // Методы для работы с событиями
   subscribeToContentChange(callback: Hook): void {
     this.eventManager.subscribe('contentChanged', callback);
+  }
+
+  destroy(): void {
+    // Удаление всех обработчиков событий
+    this.generalElement.removeEventListener('keydown', this.handleKeydown);
+
+    // Уничтожение всех модулей
+    this.modules.forEach(module => {
+      module.destroy();
+    });
+
+    // Удаление элементов интерфейса
+    if (this.generalElement) {
+      this.generalElement.innerHTML = '';
+    }
+
+    this.toolbar.destroy();
+    this.editor.destroy();
+    this.state.destroy();
+    this.eventManager.destroy();
+
+    // Очистка ссылок для предотвращения утечек памяти
+    // @ts-ignore
+    this.state = null;
+    // @ts-ignore
+    this.eventManager = null;
+    this.modules = [];
+    // @ts-ignore
+    this.appElement = null;
+    // @ts-ignore
+    this.generalElement = null;
+    // @ts-ignore
+    this.toolbar = null;
+    // @ts-ignore
+    this.editor = null;
+    this.history = [];
+    this.currentSelectionRange = null;
   }
 }
 

@@ -99,6 +99,12 @@ export class TextStylingButton implements IEditorModule {
       if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
     });
   }
+
+  destroy(): void {
+    // Cleanup tasks as needed
+    this.dropdown?.destroy();
+    this.dropdown = null;
+  }
 }
 
 export default TextStylingButton;

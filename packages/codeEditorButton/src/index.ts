@@ -120,6 +120,21 @@ export class CodeEditorButton implements IEditorModule {
     `;
     document.head.appendChild(style);
   }
+
+  destroy(): void {
+    // Уничтожьте ресурсы, остановите таймеры, если есть, и выполните другие необходимые действия при уничтожении модуля.
+    this.closeModal(); // Закрыть модальное окно
+    try {
+      this.editor?.destroy(); // Уничтожить редактор CodeMirror
+    } catch (e) {}
+    this.modal?.remove(); // Удалить модальное окно из DOM
+    this.overlay?.remove(); // Удалить оверлей из DOM
+    this.core = null; // Сбросить ссылку на ядро редактора
+    this.editor = null; // Сбросить ссылку на редактор CodeMirror
+    this.modal = null; // Сбросить ссылку на модальное окно
+    this.overlay = null; // Сбросить ссылку на оверлей
+  }
+
 }
 
 export default CodeEditorButton;

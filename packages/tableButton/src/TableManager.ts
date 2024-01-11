@@ -301,4 +301,20 @@ export default class TableManager {
     this.onRemove();
   }
 
+  destroy(): void {
+    // Remove event listeners and perform any other necessary cleanup
+    Array.from(this.table.querySelectorAll('td, th')).forEach((cell) => {
+      const selectCell = cell as HTMLTableCellElement
+      selectCell.removeEventListener('click', this.onCellClick);
+      selectCell.removeEventListener('keydown', this.handleKeyDown);
+    });
+
+    document.removeEventListener('click', this.onDocumentClick);
+
+    // Remove the popup element from the DOM
+    if (this.popupElement && this.popupElement.parentNode) {
+      this.popupElement.parentNode.removeChild(this.popupElement);
+    }
+  }
+
 }

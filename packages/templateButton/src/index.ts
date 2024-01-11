@@ -24,7 +24,14 @@ export class TemplateButton implements IEditorModule {
     }
     const toolbar = this.core?.toolbar.getToolbarElement();
     toolbar?.appendChild(this.dropdown.getButton());
+  }
 
+  destroy(): void {
+    // Remove any event listeners or perform other cleanup as needed
+    if (this.dropdown) {
+      this.dropdown.destroy();
+      this.dropdown = null;
+    }
   }
 }
 

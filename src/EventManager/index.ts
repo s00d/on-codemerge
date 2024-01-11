@@ -16,7 +16,11 @@ export class EventManager {
     }
   }
 
-  // Другие методы для управления событиями
+  destroy(): void {
+    for (let i in this.listeners) {
+      delete this.listeners[i];
+    }
+  }
 }
 
 export default EventManager

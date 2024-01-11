@@ -147,4 +147,23 @@ export class DropdownMenu {
   clearItems(): void {
     this.menuElement.innerHTML = '';
   }
+
+  destroy(): void {
+    this.hide(); // Закрываем выпадающее меню (если оно открыто)
+
+    // Удаляем обработчик клика за пределами меню
+    document.removeEventListener('click', this.handleOutsideClick);
+
+    // Удаляем DOM элементы, созданные для меню
+    this.menuElement.remove();
+    this.button.remove();
+    // @ts-ignore
+    this.menuElement = null;
+    // @ts-ignore
+    this.button = null;
+    // @ts-ignore
+    this.arrow = null;
+    // @ts-ignore
+    this.onOpen = null;
+  }
 }

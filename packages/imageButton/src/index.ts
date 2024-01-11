@@ -71,6 +71,12 @@ export class ImageButton implements IEditorModule {
   private removeImage(id: string) {
     this.imageManagerMap.delete(id);
   }
+
+  destroy(): void {
+    // Cleanup any resources or event listeners here
+    this.core = null;
+    this.imageManagerMap.clear();
+  }
 }
 
 export default ImageButton

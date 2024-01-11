@@ -92,6 +92,14 @@ export class TableButton implements IEditorModule {
 
     this.tableManagerMap.set(table.id, manager);
   }
+
+  destroy(): void {
+    // Remove all TableManager instances and clean up references
+    this.tableManagerMap.forEach((manager) => {
+      manager.destroy();
+    });
+    this.tableManagerMap.clear();
+  }
 }
 
 export default TableButton;

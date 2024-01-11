@@ -82,7 +82,14 @@ export class BlockButton implements IEditorModule {
     }
   }
 
-  // Другие методы плагина...
+  public destroy(): void {
+    // Очистите ресурсы или выполняйте другие необходимые действия при уничтожении модуля
+    this.core = null;
+    this.blockManagerMap.forEach((manager) => {
+      manager.destroy();
+    });
+    this.blockManagerMap.clear();
+  }
 }
 
 export default BlockButton;

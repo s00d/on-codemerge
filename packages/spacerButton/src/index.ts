@@ -15,6 +15,10 @@ export class SpacerButton implements IEditorModule {
     // Добавляем разделитель на панель инструментов
     if (toolbar) toolbar.appendChild(spacer);
   }
+
+  destroy(): void {
+
+  }
 }
 
 export default SpacerButton;

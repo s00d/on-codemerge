@@ -201,4 +201,20 @@ export class Modal {
       this.closeCallback(data);
     }
   }
+
+  destroy(): void {
+    // Добавьте здесь код для уничтожения ресурсов, закрытия модального окна и очистки ссылок.
+    this.close(); // Закрыть модальное окно
+    this.inputElements.clear(); // Очистить коллекцию элементов ввода
+    this.modalElement.remove(); // Удалить модальное окно из DOM
+    this.overlayElement.remove(); // Удалить оверлей из DOM
+    // @ts-ignore
+    this.modalElement = null; // Сбросить ссылку на модальное окно
+    // @ts-ignore
+    this.overlayElement = null; // Сбросить ссылку на оверлей
+    // @ts-ignore
+    this.contentElement = null; // Сбросить ссылку на контент модального окна
+    // @ts-ignore
+    this.closeCallback = null; // Сбросить коллбэк для закрытия
+  }
 }
