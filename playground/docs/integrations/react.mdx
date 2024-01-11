@@ -23,30 +23,37 @@ npm i --save on-codemerge
 Here is a straightforward example demonstrating how to integrate On-Codemerge into a React project:
 
 ```jsx title="MyEditorComponent.jsx"
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import EditorCore from 'on-codemerge';
 import TextStylingButton from 'on-codemerge/textStylingButton';
 import TableButton from 'on-codemerge/tableButton';
 
-const MyEditorComponent = () => {
+const MyEditorComponent = ({ value, onValueChange }) => {
   const editorRef = useRef(null);
-  let editor;
+  const [editor, setEditor] = useState(null);
 
   useEffect(() => {
-    if (editorRef.current) {
-      editor = new EditorCore(editorRef.current);
-      editor.registerModule(new TextStylingButton());
-      editor.registerModule(new TableButton());
+    if (editorRef.current && !editor) {
+      const newEditor = new EditorCore(editorRef.current);
+      newEditor.registerModule(new TextStylingButton());
+      newEditor.registerModule(new TableButton());
       // ... register other modules
 
-      editor.subscribeToContentChange((newContent) => {
+      newEditor.subscribeToContentChange((newContent) => {
         console.log('Content changed:', newContent);
+        if (onValueChange) {
+          onValueChange(newContent);
+        }
       });
 
-      // Optional: Set initial content
-      editor.setContent("Initial content goes here");
+      setEditor(newEditor);
     }
-  }, []);
+
+    // Set initial content
+    if (editor && value) {
+      editor.setContent(value);
+    }
+  }, [editor, value]);
 
   return <div ref={editorRef}></div>;
 };

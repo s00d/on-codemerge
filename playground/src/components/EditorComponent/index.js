@@ -57,8 +57,10 @@ export default function EditorComponent({ activePlugins }) {
       // Инициализация редактора
       const editor = new EditorCore(editorContainerRef.current);
 
+      console.log(activePlugins)
       if (activePlugins && activePlugins.length > 0) {
         activePlugins.forEach(pluginName => {
+          console.log(pluginName)
           if (pluginName === 'TemplateButton') {
             registerPlugin(allPlugins[pluginName], {
               text: 'sssssss ssss ssss',
@@ -71,7 +73,17 @@ export default function EditorComponent({ activePlugins }) {
         });
       } else {
         // Если не переданы пропсы, регистрируем все плагины
-        Object.values(allPlugins).forEach(registerPlugin);
+        for (let i in allPlugins) {
+          if (i === 'TemplateButton') {
+            registerPlugin(allPlugins[i], {
+              text: 'sssssss ssss ssss',
+              html: 'aaaa bbbb cccc <span id="test" style="font-weight: bold;">dddd</span> eeeee ffffff',
+              table: '<table class="on-codemerge-table"><thead><tr><th>Header 1</th><th>Header 2</th><th>Header 3</th></tr></thead><tbody><tr><td style="position: relative;">Row 1 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 1 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 2 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 2 Col 3<div class="on-codemerge-resizer"></div></td></tr><tr><td style="position: relative;">Row 3 Col 1<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 2<div class="on-codemerge-resizer"></div></td><td style="position: relative;">Row 3 Col 3<div class="on-codemerge-resizer"></div></td></tr></tbody></table>',
+            });
+          } else {
+            registerPlugin(allPlugins[i])
+          }
+        }
       }
 
       editor.subscribeToContentChange((newContent) => {

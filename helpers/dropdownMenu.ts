@@ -50,13 +50,20 @@ export class DropdownMenu {
       transform: 'scaleY(0)',
       transformOrigin: 'top',
       transition: 'opacity 0.3s, transform 0.3s',
+      top: '45px',
       // Дополнительные стили
     });
 
     this.dropdown.appendChild(this.button)
-    this.dropdown.appendChild(this.menuElement)
 
+    document.body.appendChild(this.menuElement);
   }
+
+  handleOutsideClick = (event: MouseEvent) => {
+    if (!this.dropdown.contains(event.target as HTMLElement) && this.visible) {
+      this.hide();
+    }
+  };
 
   getButton() {
     return this.dropdown;
@@ -91,11 +98,18 @@ export class DropdownMenu {
     const buttonWidth = this.button.offsetWidth;
     this.menuElement.style.width = `${buttonWidth}px`;
 
-    // Анимация при открытии
+
+    const rect = this.button.getBoundingClientRect();
+    this.menuElement.style.top = `${rect.bottom + window.scrollY}px`;
+    this.menuElement.style.left = `${rect.left + window.scrollX}px`;
+
+    // Анимация и стили при открытии
     this.menuElement.style.opacity = '1';
     this.menuElement.style.transform = 'scaleY(1)';
     this.arrow.style.transform = 'rotate(180deg)';
     this.core.restoreCurrentSelection();
+
+    document.addEventListener('click', this.handleOutsideClick);
   }
 
   hide(): void {
@@ -103,6 +117,8 @@ export class DropdownMenu {
     this.menuElement.style.opacity = '0';
     this.menuElement.style.transform = 'scaleY(0)';
     this.arrow.style.transform = '';
+
+    document.removeEventListener('click', this.handleOutsideClick);
   }
 
   toggleDropdown(): void {
