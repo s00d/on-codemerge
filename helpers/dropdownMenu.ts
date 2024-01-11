@@ -56,7 +56,7 @@ export class DropdownMenu {
 
     this.dropdown.appendChild(this.button)
 
-    document.body.appendChild(this.menuElement);
+    this.core?.generalElement.appendChild(this.menuElement);
   }
 
   handleOutsideClick = (event: MouseEvent) => {
