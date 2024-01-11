@@ -1,0 +1,66 @@
+---
+sidebar_position: 2
+---
+
+# Vue 3
+
+Welcome to the documentation for **On-Codemerge**, a versatile web editor designed for seamless integration and functionality in various JavaScript frameworks.
+
+## Getting Started with Vue Integration
+
+To integrate On-Codemerge into a Vue.js project, follow these steps.
+
+### Installation
+
+First, install `on-codemerge` in your project:
+
+```bash
+npm i --save on-codemerge
+```
+
+## Vue Integration Example
+
+Here’s an example of how you can integrate On-Codemerge into a Vue.js component:
+
+```vue title="OnCodemergeEditor.vue"
+<template>
+  <div ref="editorContainer"></div>
+</template>
+
+<script lang="ts">
+import { onMounted, ref } from 'vue';
+import EditorCore from 'on-codemerge';
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+
+export default {
+  name: 'OnCodemergeEditor',
+  setup() {
+    const editorContainer = ref(null);
+    const editorInstance = ref(null);
+
+    onMounted(() => {
+      if (editorContainer.value) {
+        editorInstance.value = new EditorCore(editorContainer.value);
+        editorInstance.value.registerModule(new TextStylingButton());
+        editorInstance.value.registerModule(new TableButton());
+        // ... register other modules
+
+        editorInstance.value.subscribeToContentChange((newContent?: string) => {
+          console.log(newContent);
+        })
+
+        // Optional: Set initial content
+        editorInstance.value.setContent("Your initial content here");
+      }
+    });
+
+    return {
+      editorContainer
+    };
+  }
+};
+</script>
+```
+
+In this example, we use Vue's `ref` and `onMounted` lifecycle hook to initialize and attach the editor to a div element. Each plugin, like `TextStylingButton` and `TableButton`, is registered to add its functionality to the On-Codemerge editor, making it a powerful tool for web content creation and editing within Vue applications.

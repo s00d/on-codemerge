@@ -1,0 +1,82 @@
+---
+sidebar_position: 11
+---
+
+# Django
+
+Welcome to the Django-specific documentation for **On-Codemerge**, a versatile web editor designed for easy integration with Django applications, bringing advanced editing capabilities to Django's robust backend system.
+
+## Getting Started with Django
+
+To use On-Codemerge in your Django project, you will need to set up the frontend environment where the editor will be utilized.
+
+### Installation
+
+1. **Prepare Your JavaScript File**: You can either use a JavaScript bundler like Webpack or include a simple JavaScript file in your Django project. For simplicity, this example will use a plain JavaScript file.
+
+2. **Download or Install `on-codemerge`**: You can either download the `on-codemerge` package and its dependencies and include them in your project's static files, or if you're using a JavaScript bundler, install it via npm or yarn.
+
+```bash
+npm install --save on-codemerge
+```
+
+or
+
+```bash
+yarn add on-codemerge
+   ```
+
+## Django Integration Example
+
+Here's how to integrate On-Codemerge into a Django application:
+
+1. **Create Your JavaScript File**: Create a new JavaScript file in your Django static files. This file will initialize On-Codemerge.
+
+```javascript title="static/js/editor.js"
+import EditorCore from 'on-codemerge';
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+   const editorElement = document.getElementById('editor');
+   if (editorElement) {
+      const editor = new EditorCore(editorElement);
+      editor.registerModule(new TextStylingButton());
+      editor.registerModule(new TableButton());
+      // ... additional configuration
+
+      editor.subscribeToContentChange((newContent) => {
+         console.log('Content changed:', newContent);
+      });
+
+      editor.setContent("Initial content goes here");
+   }
+});
+```
+
+2. **Include the JavaScript in Your Django Template**: In your Django template, include the JavaScript file.
+
+```html title="templates/your_template.html"
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head Contents -->
+</head>
+<body>
+    <div id="editor"></div>
+    <script src="{% static 'js/editor.js' %}"></script>
+</body>
+</html>
+```
+
+Make sure the path to the JavaScript file is correct, and use Django's `{% static %}` template tag to correctly reference static files.
+
+3. **Collect Static Files**: If you haven't already, run Django's `collectstatic` command to ensure all static files are gathered in the static files directory.
+
+```bash
+python manage.py collectstatic
+```
+
+By following these steps, you can integrate On-Codemerge into a Django application, allowing you to enhance your web projects with rich text editing features. This integration involves setting up the editor in a JavaScript file and then embedding it within Django's templating system, ensuring a seamless combination of Django's powerful backend capabilities with advanced frontend text editing.

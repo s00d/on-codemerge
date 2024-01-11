@@ -1,0 +1,57 @@
+---
+sidebar_position: 4
+---
+
+# React
+
+Welcome to the React-specific documentation for **On-Codemerge**, a flexible web editor designed for smooth integration into React applications.
+
+## Getting Started with React
+
+To incorporate On-Codemerge into your React project, begin by installing it.
+
+### Installation
+
+Execute the following command in your React project directory to install `on-codemerge`:
+
+```bash
+npm i --save on-codemerge
+```
+
+## React Integration Example
+
+Here is a straightforward example demonstrating how to integrate On-Codemerge into a React project:
+
+```jsx title="MyEditorComponent.jsx"
+import React, { useEffect, useRef } from 'react';
+import EditorCore from 'on-codemerge';
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+
+const MyEditorComponent = () => {
+  const editorRef = useRef(null);
+  let editor;
+
+  useEffect(() => {
+    if (editorRef.current) {
+      editor = new EditorCore(editorRef.current);
+      editor.registerModule(new TextStylingButton());
+      editor.registerModule(new TableButton());
+      // ... register other modules
+
+      editor.subscribeToContentChange((newContent) => {
+        console.log('Content changed:', newContent);
+      });
+
+      // Optional: Set initial content
+      editor.setContent("Initial content goes here");
+    }
+  }, []);
+
+  return <div ref={editorRef}></div>;
+};
+
+export default MyEditorComponent;
+```
+
+In this React component, we use the `useRef` hook to create a reference to the DOM element that will host the editor. The `useEffect` hook is then utilized to instantiate the editor with `EditorCore` and attach it to the referenced element. Modules such as `TextStylingButton` and `TableButton` are registered to add functionality to the On-Codemerge editor. The `subscribeToContentChange` method is used to handle content changes, allowing for responsive and dynamic content editing within your React application.

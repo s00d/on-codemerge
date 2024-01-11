@@ -1,0 +1,73 @@
+---
+sidebar_position: 7
+---
+
+# Backbone.js
+
+Welcome to the Backbone.js-specific documentation for **On-Codemerge**, a versatile web editor designed for integration with Backbone.js, a framework known for its lightweight and straightforward approach to building web applications.
+
+## Getting Started with Backbone.js
+
+To integrate On-Codemerge into your Backbone.js project, start with installing the package.
+
+### Installation
+
+Execute the following command in your Backbone.js project directory:
+
+```bash
+npm i --save on-codemerge
+```
+
+## Backbone.js Integration Example
+
+Integrating On-Codemerge in a Backbone.js application can be done by creating a custom view:
+
+1. **Create a Backbone View**: You will need to create a Backbone view for the On-Codemerge editor. This view will handle initializing and rendering the editor.
+
+ ```javascript title="OnCodemergeView.js"
+ import Backbone from 'backbone';
+ import EditorCore from 'on-codemerge';
+ import TextStylingButton from 'on-codemerge/textStylingButton';
+ import TableButton from 'on-codemerge/tableButton';
+
+ const OnCodemergeView = Backbone.View.extend({
+   initialize: function() {
+     this.editor = new EditorCore(this.el);
+     this.editor.registerModule(new TextStylingButton());
+     this.editor.registerModule(new TableButton());
+     // ... register other modules
+
+     this.editor.subscribeToContentChange((newContent) => {
+       console.log('Content changed:', newContent);
+     });
+   },
+
+   render: function() {
+     // Optional: Set initial content
+     this.editor.setContent("Initial content goes here");
+     return this;
+   },
+
+   remove: function() {
+     this.editor.destroy();
+     Backbone.View.prototype.remove.call(this);
+   }
+ });
+
+ export default OnCodemergeView;
+```
+
+This Backbone view initializes the editor in the `initialize` method and sets the initial content in the `render` method. The `remove` method ensures proper cleanup.
+
+2. **Instantiate and Render the View**: In your application, create an instance of this view and render it.
+
+ ```javascript title="app.js"
+ import OnCodemergeView from './OnCodemergeView';
+
+ const editorView = new OnCodemergeView({ el: '#editorContainer' });
+ editorView.render();
+```
+
+Here, you're attaching the OnCodemerge editor to a specific DOM element (`#editorContainer`) and then calling the `render` method to initialize the editor's content.
+
+This setup provides a Backbone.js-centric way of integrating On-Codemerge, allowing you to utilize this advanced web editor within the context of a Backbone.js application. The approach leverages Backbone's View system to encapsulate the editor's initialization and management, fitting well with Backbone's overall architectural style.

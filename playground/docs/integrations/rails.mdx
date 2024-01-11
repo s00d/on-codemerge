@@ -1,0 +1,90 @@
+---
+sidebar_position: 12
+---
+
+# Rails
+
+Welcome to the Ruby on Rails-specific documentation for **On-Codemerge**, a dynamic web editor designed for seamless integration with Ruby on Rails, enhancing Rails applications with advanced frontend editing capabilities.
+
+## Getting Started with Ruby on Rails
+
+To use On-Codemerge in your Ruby on Rails project, you'll need to set up the frontend environment where the editor will be utilized.
+
+### Installation
+
+1. **Using Webpacker (Rails 6 and later)**: If you are using Rails 6 or later, you likely have Webpacker installed. You can add `on-codemerge` to your JavaScript bundle.
+
+```bash
+yarn add on-codemerge
+```
+
+2. **Using the Asset Pipeline (Older Rails Versions)**: If you're using an older version of Rails or prefer the asset pipeline, you'll need to manually download `on-codemerge` and its dependencies, and include them in your app's assets.
+
+## Ruby on Rails Integration Example
+
+### Webpacker Integration (Rails 6+)
+
+1. **Create a JavaScript Pack**: In `app/javascript/packs`, create a new file (e.g., `editor.js`).
+
+```javascript title="app/javascript/packs/editor.js"
+import EditorCore from 'on-codemerge';
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+   const editorElement = document.getElementById('editor');
+   if (editorElement) {
+      const editor = new EditorCore(editorElement);
+      editor.registerModule(new TextStylingButton());
+      editor.registerModule(new TableButton());
+      // ... additional configuration
+
+      editor.subscribeToContentChange((newContent) => {
+         console.log('Content changed:', newContent);
+      });
+
+      editor.setContent("Initial content goes here");
+   }
+});
+```
+
+2. **Include the Pack in Your View**: Use the `javascript_pack_tag` helper in your Rails view to include the editor pack.
+
+```erb title="app/views/layouts/application.html.erb"
+<!DOCTYPE html>
+<html>
+<head>
+  <%= javascript_pack_tag 'editor', 'data-turbolinks-track': 'reload' %>
+  <!-- Other head elements -->
+</head>
+<body>
+  <%= yield %>
+</body>
+</html>
+```
+
+### Asset Pipeline Integration
+
+1. **Add JavaScript Files**: Place your JavaScript files, including `on-codemerge` and its dependencies, in `app/assets/javascripts`.
+
+2. **Require Files in Application.js**: Make sure to require `on-codemerge` and its dependencies in your `application.js`.
+
+```javascript title="app/assets/javascripts/application.js"
+//= require on-codemerge
+//= require textStylingButton
+//= require tableButton
+// Other requires
+```
+
+3. **Initialize On-Codemerge in Your View**: You can write inline JavaScript in your view file or create a separate JavaScript file to initialize On-Codemerge.
+
+```erb title="app/views/your_view.html.erb"
+<div id="editor"></div>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Initialization code as shown above
+  });
+</script>
+```
+
+By following these steps, you can integrate On-Codemerge into a Ruby on Rails application, providing an enhanced text editing experience in both newer and older Rails applications. This integration allows you to leverage On-Codemerge's capabilities within the Rails asset management system, whether that's through Webpacker or the traditional asset pipeline.

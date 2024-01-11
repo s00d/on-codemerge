@@ -1,0 +1,91 @@
+---
+sidebar_position: 15
+---
+
+# Electron
+
+Welcome to the Electron-specific documentation for **On-Codemerge**, an advanced web editor designed for seamless integration with Electron applications, enhancing desktop apps with sophisticated text editing capabilities.
+
+## Getting Started with Electron
+
+To integrate On-Codemerge into your Electron application, you'll be embedding it into the HTML pages that your Electron app renders, much like integrating it into a standard web page.
+
+### Installation
+
+1. **Install `on-codemerge`**: If your Electron project uses npm for package management, you can install On-Codemerge directly.
+
+```bash
+npm install --save on-codemerge
+   ```
+
+## Electron Integration Example
+
+Here's how to integrate On-Codemerge into an Electron application:
+
+1. **Create or Modify Your Electron HTML Page**: Open or create an HTML file that will be loaded by your Electron application. This could typically be your `index.html` file.
+
+```html title="index.html"
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Electron App</title>
+</head>
+<body>
+  <div id="editor"></div>
+  <script src="path/to/on-codemerge.js"></script>
+  <script src="path/to/your/javascript/file.js"></script>
+</body>
+</html>
+   ```
+
+Ensure you include the On-Codemerge JavaScript file, either from a local copy or via a CDN.
+
+2. **Initialize On-Codemerge in Your JavaScript File**: Create or modify a JavaScript file that initializes On-Codemerge. This file is referenced in your HTML file.
+
+```javascript title="path/to/your/javascript/file.js"
+const EditorCore = require('on-codemerge');
+const TextStylingButton = require('on-codemerge/textStylingButton');
+const TableButton = require('on-codemerge/tableButton');
+
+document.addEventListener('DOMContentLoaded', () => {
+   const editorElement = document.getElementById('editor');
+   if (editorElement) {
+      const editor = new EditorCore(editorElement);
+      editor.registerModule(new TextStylingButton());
+      editor.registerModule(new TableButton());
+      // ... additional configuration
+
+      editor.subscribeToContentChange((newContent) => {
+         console.log('Content changed:', newContent);
+      });
+
+      editor.setContent("Initial content goes here");
+   }
+});
+   ```
+
+3. **Load the HTML Page in Electron**: In your main Electron JavaScript file, load the HTML page as you would normally.
+
+```javascript title="main.js"
+const { app, BrowserWindow } = require('electron');
+
+function createWindow () {
+  // Create the browser window.
+  let win = new BrowserWindow({
+    width: 800,
+    height: 600,
+    webPreferences: {
+      nodeIntegration: true
+    }
+  });
+
+  // and load the index.html of the app.
+  win.loadFile('path/to/index.html');
+}
+
+app.on('ready', createWindow);
+   ```
+
+Make sure the `webPreferences.nodeIntegration` option is set appropriately if your setup requires it.
+
+By following these steps, you can integrate On-Codemerge into an Electron application, providing a powerful text editing tool in your desktop applications. This approach leverages Electron's ability to render web-based content, allowing you to include sophisticated web technologies like On-Codemerge in your cross-platform desktop applications.

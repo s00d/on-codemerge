@@ -1,0 +1,75 @@
+---
+
+sidebar_position: 5
+---
+
+# Nuxt.js 3
+
+Welcome to the Nuxt 3-specific documentation for **On-Codemerge**, an advanced web editor designed for seamless integration with Nuxt 3, the latest version of the popular Vue.js framework.
+
+## Getting Started with Nuxt 3
+
+To integrate On-Codemerge into your Nuxt 3 project, begin by installing the package.
+
+### Installation
+
+Run the following command in your Nuxt 3 project directory to install `on-codemerge`:
+
+```bash
+npm i --save on-codemerge
+```
+
+## Nuxt 3 Integration Example
+
+Integrating On-Codemerge in a Nuxt 3 project involves these steps:
+
+1. **Create a Composable**: In Nuxt 3, it's recommended to use composables for reusable functionality. Create a composable for initializing On-Codemerge.
+
+ ```javascript title="composables/useEditor.js"
+ import { onBeforeUnmount, onMounted, ref } from 'vue';
+ import EditorCore from 'on-codemerge';
+ import TextStylingButton from 'on-codemerge/textStylingButton';
+ import TableButton from 'on-codemerge/tableButton';
+
+ export default function useEditor() {
+   const editorRef = ref(null);
+   let editor;
+
+   onMounted(() => {
+     editor = new EditorCore(editorRef.value);
+     editor.registerModule(new TextStylingButton());
+     editor.registerModule(new TableButton());
+     // ... register other modules
+   });
+
+   onBeforeUnmount(() => {
+     if (editor) {
+       editor.destroy();
+     }
+   });
+
+   return {
+     editorRef
+   };
+ }
+```
+
+2. **Use the Composable in a Component**: Implement the composable in a Vue component.
+
+```vue title="components/MyEditor.vue"
+ <template>
+   <div ref="editorRef"></div>
+ </template>
+
+ <script setup>
+ import useEditor from '~/composables/useEditor';
+
+ const { editorRef } = useEditor();
+ </script>
+```
+
+In this component, `useEditor` composable is used to manage the editor lifecycle. The `editorRef` ref is passed to the `div` element to bind the editor to the DOM.
+
+3. **Handling Server-Side Rendering (SSR)**: Since Nuxt 3 supports SSR by default, make sure that On-Codemerge is only initialized on the client side. Nuxt 3's composables and lifecycle hooks handle this naturally.
+
+This approach leverages Nuxt 3's composition API, ensuring that On-Codemerge is integrated efficiently, taking advantage of Nuxt 3's advanced features and Vue 3's reactivity system. This setup provides a robust and flexible text editing experience within modern Vue.js applications using Nuxt 3.

@@ -81,6 +81,7 @@ const config = {
           },
           {to: 'docs/api', label: 'Api', position: 'left'},
           {to: 'docs/dev', label: 'Developing Plugins', position: 'left'},
+          {to: 'docs/category/tutorial---integrations', label: 'Integrations', position: 'left'},
 
           {
             href: 'https://github.com/s00d/on-codemerge',

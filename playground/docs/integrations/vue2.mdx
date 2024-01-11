@@ -1,0 +1,68 @@
+---
+sidebar_position: 3
+---
+
+# Vue 2
+
+Welcome to the Vue-specific documentation for **On-Codemerge**, a versatile web editor designed for seamless integration into Vue.js projects.
+
+## Getting Started with Vue
+
+To use On-Codemerge in a Vue.js application, you'll first need to install it.
+
+### Installation
+
+Run the following command in your Vue.js project directory to install `on-codemerge`:
+
+```bash
+npm i --save on-codemerge
+```
+
+## Vue Integration Example
+
+Below is a basic example of how to integrate On-Codemerge into a Vue.js project:
+
+```vue title="MyEditorComponent.vue"
+<template>
+  <div ref="editorRef"></div>
+</template>
+
+<script>
+import { onMounted, ref } from 'vue';
+import EditorCore from 'on-codemerge';
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+
+export default {
+  name: 'MyEditorComponent',
+  setup() {
+    const editorRef = ref(null);
+    const editor = ref(null);
+
+    onMounted(() => {
+      if (editorRef.value) {
+        editor.value = new EditorCore(editorRef.value);
+        editor.value.registerModule(new TextStylingButton());
+        editor.value.registerModule(new TableButton());
+        // ... register other modules
+
+        editor.value.subscribeToContentChange((newContent) => {
+          console.log('Content changed:', newContent);
+        });
+
+        // Optional: Set initial content
+        editor.value.setContent("Initial content goes here");
+      }
+    });
+
+    return {
+      editorRef
+    };
+  }
+};
+</script>
+```
+
+This component uses Vue 3's Composition API. The editor is initialized in the `onMounted` lifecycle hook and attached to a div element referenced by `ref`. The `EditorCore` class is used to create an editor instance, and modules such as `TextStylingButton` and `TableButton` are registered to enhance the editor's functionality. The `subscribeToContentChange` method allows you to handle content changes.
+
+This setup provides a powerful and flexible editor within your Vue.js applications, leveraging On-Codemerge's capabilities.

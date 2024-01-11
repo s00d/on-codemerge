@@ -1,0 +1,93 @@
+---
+sidebar_position: 16
+---
+
+# Express
+
+Welcome to the Express.js-specific documentation for **On-Codemerge**, a sophisticated web editor designed for easy integration with Express.js applications, enhancing your Node.js server applications with powerful frontend editing capabilities.
+
+## Getting Started with Express.js
+
+To integrate On-Codemerge into your Express.js application, you'll be embedding it into the HTML pages that your Express.js server renders.
+
+### Installation
+
+1. **Install `on-codemerge`**: If you're using a modern frontend build system like Webpack or Browserify in your Express.js project, you can install On-Codemerge directly via npm.
+
+```bash
+npm install --save on-codemerge
+   ```
+
+2. **Without a Frontend Build System**: If you're not using a frontend build system, you might need to include On-Codemerge directly in your HTML via a CDN or by hosting the files yourself.
+
+## Express.js Integration Example
+
+Here's how to integrate On-Codemerge into an Express.js application:
+
+1. **Set Up Your Express.js Server**: If you haven't already, set up your Express.js application. Here's a basic setup:
+
+```javascript title="app.js"
+const express = require('express');
+const app = express();
+const port = 3000;
+
+app.use(express.static('public'));
+
+app.get('/', (req, res) => {
+   res.sendFile(__dirname + '/index.html');
+});
+
+app.listen(port, () => {
+   console.log(`Server running at http://localhost:${port}`);
+});
+   ```
+
+2. **Create Your HTML File**: In your `public` directory, create an HTML file (e.g., `index.html`). This is where you'll include On-Codemerge.
+
+```html title="public/index.html"
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Express App</title>
+</head>
+<body>
+  <div id="editor"></div>
+  <script src="path/to/on-codemerge.js"></script>
+  <script src="path/to/your/javascript/file.js"></script>
+</body>
+</html>
+   ```
+
+Make sure to include the On-Codemerge JavaScript file, either as a local file in your `public` directory or via a CDN.
+
+3. **Initialize On-Codemerge in a JavaScript File**: Create a JavaScript file in your `public` directory to initialize On-Codemerge.
+
+```javascript title="public/path/to/your/javascript/file.js"
+// If On-Codemerge is installed via npm and using a build system
+import EditorCore from 'on-codemerge';
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+
+// If On-Codemerge is included via a script tag, access it via global scope
+const EditorCore = window.OnCodemerge.EditorCore;
+const TextStylingButton = window.OnCodemerge.TextStylingButton;
+const TableButton = window.OnCodemerge.TableButton;
+
+document.addEventListener('DOMContentLoaded', () => {
+   const editorElement = document.getElementById('editor');
+   if (editorElement) {
+      const editor = new EditorCore(editorElement);
+      editor.registerModule(new TextStylingButton());
+      editor.registerModule(new TableButton());
+      // ... additional configuration
+
+      editor.subscribeToContentChange((newContent) => {
+         console.log('Content changed:', newContent);
+      });
+
+      editor.setContent("Initial content goes here");
+   }
+});
+   ```
+
+By following these steps, you can integrate On-Codemerge into an Express.js application, providing a sophisticated text editing tool in your web applications. This integration allows you to leverage Express.js's capabilities for server-side logic while incorporating advanced web technologies like On-Codemerge in the frontend.

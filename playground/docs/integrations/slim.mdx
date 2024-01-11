@@ -1,0 +1,77 @@
+---
+sidebar_position: 9
+---
+
+# Slim
+
+Welcome to the Slim framework-specific documentation for **On-Codemerge**, a versatile web editor that can be easily integrated into Slim applications, enhancing the capabilities of Slim's PHP backend with rich text editing on the frontend.
+
+## Getting Started with Slim
+
+Integrating On-Codemerge in a Slim application involves setting up the frontend environment where the editor will be used.
+
+### Installation
+
+1. **Prepare Your Frontend Environment**: Ensure you have a JavaScript build system (like Webpack, Parcel, etc.) if you plan to use modern JavaScript or compile assets. Alternatively, you can use vanilla JavaScript if your application is simple.
+
+2. **Install `on-codemerge`**: If you're using a build system, install the package via npm or yarn in your project's frontend directory.
+
+```bash
+npm install --save on-codemerge
+   ```
+
+## Slim Integration Example
+
+Here's how to integrate On-Codemerge into a Slim application:
+
+1. **Frontend Setup**: Create your JavaScript file where you'll initialize On-Codemerge.
+
+```javascript title="public/js/app.js"
+import EditorCore from 'on-codemerge';
+import TextStylingButton from 'on-codemerge/textStylingButton';
+import TableButton from 'on-codemerge/tableButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+   const editorElement = document.getElementById('editor');
+   if (editorElement) {
+      const editor = new EditorCore(editorElement);
+      editor.registerModule(new TextStylingButton());
+      editor.registerModule(new TableButton());
+      // ... additional configuration
+
+      editor.subscribeToContentChange((newContent) => {
+         console.log('Content changed:', newContent);
+      });
+
+      editor.setContent("Initial content goes here");
+   }
+});
+```
+
+2. **Include the Script in Your Slim View**: In your Slim PHP view file, include the JavaScript file.
+
+```php title="templates/home.php"
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Head Contents -->
+</head>
+<body>
+    <div id="editor"></div>
+
+    <script src="/js/app.js"></script>
+</body>
+</html>
+```
+
+Ensure that the path to the JavaScript file is correct based on how your Slim application serves static files.
+
+3. **Routing and Rendering the View**: In your Slim PHP application, set up a route to render the view that includes the On-Codemerge editor.
+
+```php title="routes.php"
+$app->get('/', function ($request, $response, $args) {
+    return $this->get('view')->render($response, 'home.php');
+});
+   ```
+
+By following these steps, you can integrate On-Codemerge into a Slim application, providing a powerful editing tool in your PHP-based web projects. The process mainly involves setting up the editor in the frontend JavaScript file and then embedding it into Slim's PHP views. This allows for rich text editing capabilities to be included in web applications built with the Slim framework.
