@@ -19,7 +19,7 @@ import PrintButton from "../../../../packages/printButton/src";
 import ParagraphButton from "../../../../packages/paragraphButton/src";
 import HorizontalLineButton from "../../../../packages/horizontalLineButton/src";
 import ClearStylesButton from "../../../../packages/clearStylesButton/src";
-import MarkdownImportExportButton from "../../../../packages/markdownimportexportbutton/src";
+import MarkdownImportExportButton from "../../../../packages/markdownImportExportButton/src";
 import ResizeEditorButton from "../../../../packages/resizeEditorButton/src";
 
 import styles from './styles.module.css';
