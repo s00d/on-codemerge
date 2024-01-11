@@ -1,11 +1,11 @@
-import type { EditorCore } from "@/index";
+import type { EditorCoreInterface } from "../types";
 
 export class Footer {
   private element: HTMLDivElement|null = null;
-  private core: EditorCore;
+  private core: EditorCoreInterface;
   private enabled = false;
 
-  constructor(core: EditorCore) {
+  constructor(core: EditorCoreInterface) {
     this.core = core;
     // Создание панели инструментов
     this.element = document.createElement('div');

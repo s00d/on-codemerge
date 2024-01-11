@@ -1,4 +1,4 @@
-import type { EditorCore } from "@/index";
+import type { EditorCoreInterface } from "../src/types";
 
 type MenuOrientation = 'vertical' | 'horizontal';
 
@@ -6,9 +6,9 @@ export class ContextMenu {
   private menuElement: HTMLElement;
   private orientation: MenuOrientation = 'vertical';
   private visible: boolean = false;
-  private core: EditorCore;
+  private core: EditorCoreInterface;
 
-  constructor(core: EditorCore) {
+  constructor(core: EditorCoreInterface) {
     this.core = core;
     this.menuElement = document.createElement('div');
     this.menuElement.className = 'context-menu';
@@ -29,7 +29,7 @@ export class ContextMenu {
 
     this.core?.generalElement.appendChild(this.menuElement);
 
-    // document.addEventListener('click', this.handleDocumentClick.bind(this));
+    document.addEventListener('click', this.handleDocumentClick.bind(this));
   }
 
   private handleDocumentClick(event: MouseEvent): void {
@@ -91,7 +91,7 @@ export class ContextMenu {
     this.menuElement.appendChild(item);
   }
 
-  private applyStyles(element: HTMLElement, styles: {[key: string]: string}): void {
+  private applyStyles(element: HTMLElement, styles: {[key: string]: string}) {
     Object.assign(element.style, styles);
   }
 

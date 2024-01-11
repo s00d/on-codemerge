@@ -1,14 +1,20 @@
-import type { EditorCore } from "@/index";
 import { printer } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class PrintButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class PrintButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
+  private button: HTMLDivElement | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
     // Добавляем кнопку для печати
-    core.toolbar.addButtonIcon('Print', printer, () => this.printContent());
+    this.button = core.toolbar.addButtonIcon('Print', printer, this.printContent.bind(this));
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Print');
   }
 
   private printContent(): void {
@@ -29,6 +35,9 @@ export class PrintButton implements IEditorModule {
   destroy(): void {
     // Cleanup any resources or event listeners here
     this.core = null;
+
+    this.button?.removeEventListener('click', this.printContent);
+    this.button = null;
   }
 }
 

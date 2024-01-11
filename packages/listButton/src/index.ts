@@ -1,22 +1,28 @@
-import type { EditorCore } from "@/index";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
 import { list } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class ListButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class ListButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private last = 1;
   private dropdown: DropdownMenu | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.dropdown = new DropdownMenu(core, list, 'List items')
     this.core = core;
-    this.dropdown.addItem('Dot', () => this.createList())
-    this.dropdown.addItem('Numbered', () => this.createNumberedList());
-    this.dropdown.addItem('Todo', () => this.createTodoList())
 
     const toolbar = this.core?.toolbar.getToolbarElement();
     toolbar?.appendChild(this.dropdown.getButton());
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    this.dropdown?.setTitle(this.core!.i18n.translate('List items'))
+    this.dropdown?.clearItems()
+    this.dropdown?.addItem(this.core!.i18n.translate('Dot'), () => this.createList())
+    this.dropdown?.addItem(this.core!.i18n.translate('Numbered'), () => this.createNumberedList())
+    this.dropdown?.addItem(this.core!.i18n.translate('Todo'), () => this.createTodoList())
   }
 
   private createList(): void {

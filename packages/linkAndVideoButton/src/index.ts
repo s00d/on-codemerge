@@ -1,20 +1,21 @@
-import type { EditorCore } from "@/index";
 import { Modal } from "../../../helpers/modal";
 
 import { link, video } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class LinkAndVideo implements IEditorModule {
+export class LinkAndVideo implements IEditorModule, Observer {
   private links: Map<string, HTMLElement>  = new Map();
-  private core: EditorCore | undefined;
+  private core: EditorCoreInterface | undefined;
   private modal: Modal | undefined;
+  private buttonLink: HTMLDivElement|null = null;
+  private buttonVideo: HTMLDivElement|null = null;
 
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
     this.modal = new Modal(core);
-    core.toolbar.addButtonIcon('Link', link, () => this.insertLink(core));
-    core.toolbar.addButtonIcon('Video', video, () => this.insertVideo(core));
+    this.buttonLink = core.toolbar.addButtonIcon('Link', link, () => this.insertLink(core));
+    this.buttonVideo = core.toolbar.addButtonIcon('Video', video, () => this.insertVideo(core));
 
     core.subscribeToContentChange(() => {
       const editor = core.editor.getEditorElement();
@@ -42,6 +43,13 @@ export class LinkAndVideo implements IEditorModule {
         }
       });
     });
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(this.buttonLink) this.buttonLink.title = this.core!.i18n.translate('Link');
+    if(this.buttonVideo) this.buttonVideo.title = this.core!.i18n.translate('Video');
   }
 
   private showEditLink(element: any) {
@@ -75,7 +83,7 @@ export class LinkAndVideo implements IEditorModule {
     });
   }
 
-  private insertLink(core: EditorCore): void {
+  private insertLink(core: EditorCoreInterface): void {
     core.saveCurrentSelection();
 
     this.modal?.open([
@@ -101,7 +109,7 @@ export class LinkAndVideo implements IEditorModule {
     });
   }
 
-  private insertVideo(core: EditorCore): void {
+  private insertVideo(core: EditorCoreInterface): void {
     core.saveCurrentSelection();
 
     this.modal?.open([

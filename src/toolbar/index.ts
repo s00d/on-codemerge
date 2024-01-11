@@ -1,9 +1,9 @@
-import type { EditorCore } from "@/index";
+import type { EditorCoreInterface } from "../types";
 
 export class Toolbar {
   private toolbarElement: HTMLDivElement|null = null;
 
-  constructor(core: EditorCore) {
+  constructor(core: EditorCoreInterface) {
     // Создание панели инструментов
     this.toolbarElement = document.createElement('div');
     this.toolbarElement.className = 'editor-toolbar';

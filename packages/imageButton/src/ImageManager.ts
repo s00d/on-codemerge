@@ -1,5 +1,5 @@
 import { Modal } from "../../../helpers/modal";
-import type { EditorCore } from "@/index";
+import type { EditorCoreInterface } from "../../../src/types";
 import { ContextMenu } from "../../../helpers/contextMenu";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
 
@@ -7,13 +7,13 @@ export class ImageManager {
   private img: HTMLImageElement;
   private imgId: string;
   private modal: Modal;
-  private core: EditorCore;
+  private core: EditorCoreInterface;
   private contextMenu: ContextMenu;
   private dropdown: DropdownMenu;
   private resizeHandle: HTMLDivElement;
   private onRemove: (id: string) => void;
 
-  constructor(core: EditorCore, img: HTMLImageElement, onRemove: (id: string) => void) {
+  constructor(core: EditorCoreInterface, img: HTMLImageElement, onRemove: (id: string) => void) {
     this.img = img;
     this.imgId = img.id;
     this.modal = new Modal(core);
@@ -60,7 +60,7 @@ export class ImageManager {
     if(editor) observer.observe(editor, { childList: true, subtree: true });
   }
 
-  private applyAlignment(core: EditorCore, align: string): void {
+  private applyAlignment(core: EditorCoreInterface, align: string): void {
     switch (align) {
       case 'left':
       case 'right':

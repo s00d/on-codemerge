@@ -1,4 +1,4 @@
-import type { EditorCore } from "@/index";
+import type { EditorCoreInterface } from "../src/types";
 
 type InputType = 'button' | 'checkbox' | 'color' | 'date' | 'datetime-local' |
   'email' | 'file' | 'hidden' | 'image' | 'month' | 'number' |
@@ -12,7 +12,7 @@ export class Modal {
   private inputElements: Map<string, HTMLInputElement|HTMLTextAreaElement> = new Map();
   private closeCallback: (data: {[key: string]: string | boolean}) => void = () => {};
 
-  constructor(core: EditorCore, width?: string) {
+  constructor(core: EditorCoreInterface, width?: string) {
     this.modalElement = document.createElement('div');
     this.modalElement.className = 'on-modal';
     this.applyStyles(this.modalElement, {

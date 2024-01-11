@@ -1,15 +1,14 @@
-import type { EditorCore } from "@/index";
-
+import type { EditorCoreInterface } from "../src/types";
 export class DropdownMenu {
   private menuElement: HTMLElement;
   private visible: boolean = false;
   private arrow: HTMLElement;
   private button: HTMLDivElement;
   private dropdown: HTMLDivElement;
-  private core: EditorCore;
+  private core: EditorCoreInterface;
   private onOpen: (() => void) | undefined;
 
-  constructor(core: EditorCore, buttonText: string, title?: string, onOpen?: () => void) {
+  constructor(core: EditorCoreInterface, buttonText: string, title?: string, onOpen?: () => void) {
     this.core = core;
     this.onOpen = onOpen;
     this.dropdown = document.createElement('div');
@@ -61,6 +60,10 @@ export class DropdownMenu {
     this.core?.generalElement.appendChild(this.menuElement);
   }
 
+  setTitle(title: string) {
+    this.button.title = title;
+  }
+
   handleOutsideClick = (event: MouseEvent) => {
     if (!this.dropdown.contains(event.target as HTMLElement) && this.visible) {
       this.hide();
@@ -71,7 +74,7 @@ export class DropdownMenu {
     return this.dropdown;
   }
 
-  addItem(label: string, action: () => void, disabled = () => true): void {
+  addItem(label: string, action: () => void, disabled = () => false): void {
     const item = document.createElement('div');
     item.textContent = label;
 

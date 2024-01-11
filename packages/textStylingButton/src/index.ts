@@ -1,10 +1,9 @@
-import type { EditorCore } from "@/index";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
 import { DomUtils } from "../../../helpers/DomUtils";
 import type { StyleConfig } from "../../../helpers/StyleManager";
 import { StyleManager } from "../../../helpers/StyleManager";
 import { type } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
 const styleConfig: StyleConfig = {
   'bold': {
@@ -35,14 +34,15 @@ const styleConfig: StyleConfig = {
     enabledValue: 'super',
   },
   'subscript': {
-    name: 'Sub',
+    name: 'Subscript',
     property: 'verticalAlign',
     enabledValue: 'sub',
   },
 };
 
 
-export class TextStylingButton implements IEditorModule {
+export class TextStylingButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface|null = null;
   private dropdown: DropdownMenu|null = null;
   private domUtils: DomUtils;
   private styleManager: StyleManager;
@@ -52,16 +52,37 @@ export class TextStylingButton implements IEditorModule {
     this.styleManager = new StyleManager(styleConfig);
   }
 
-  initialize(core: EditorCore): void {
-    this.dropdown = new DropdownMenu(core, type, 'Styling')
-    for (const i in styleConfig) {
-      this.createButton(core, styleConfig[i].name, i);
-    }
+  initialize(core: EditorCoreInterface): void {
+    this.core = core;
+    this.dropdown = new DropdownMenu(core, type, 'Styling', () => {
+      this.createButtons();
+    })
 
     core.toolbar.addHtmlItem(this.dropdown.getButton());
+
+    core.i18n.addObserver(this);
   }
 
-  private createButton(core: EditorCore, title: string, styleCommand: string): void {
+  update(): void {
+    this.dropdown?.setTitle(this.core!.i18n.translate('Styling'))
+
+    styleConfig.bold.name = this.core!.i18n.translate('Bold')
+    styleConfig.italic.name = this.core!.i18n.translate('Italic')
+    styleConfig.underline.name = this.core!.i18n.translate('Underline')
+    styleConfig.strikeThrough.name = this.core!.i18n.translate('Strike Through')
+    styleConfig.superscript.name = this.core!.i18n.translate('Superscript')
+    styleConfig.subscript.name = this.core!.i18n.translate('Subscript')
+  }
+
+  private createButtons() {
+    if(!this.core) return;
+    this.dropdown?.clearItems();
+    for (const i in styleConfig) {
+      this.createButton(this.core, styleConfig[i].name, i);
+    }
+  }
+
+  private createButton(core: EditorCoreInterface, title: string, styleCommand: string): void {
     this.dropdown?.addItem(title, () => {
       core.restoreCurrentSelection();
 

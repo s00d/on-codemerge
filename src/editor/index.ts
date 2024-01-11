@@ -1,11 +1,11 @@
-import type { EditorCore } from "@/index";
+import type { EditorCoreInterface } from "../types";
 
 export class Editor {
   private editorElement: HTMLDivElement|null = null;
   private savedRange: Range | null = null;
-  private core: EditorCore;
+  private core: EditorCoreInterface;
 
-  constructor(core: EditorCore) {
+  constructor(core: EditorCoreInterface) {
     this.core = core;
     // Создание и настройка элемента редактора
     this.editorElement = document.createElement('div');

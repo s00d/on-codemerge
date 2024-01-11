@@ -1,24 +1,29 @@
-import type { EditorCore } from "@/index";
 import { EditorView, basicSetup } from "codemirror"
 import { html } from "@codemirror/lang-html"
 import { code } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class CodeEditorButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class CodeEditorButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private editor: EditorView | null = null;
   private modal: HTMLDivElement | null = null;
   private overlay: HTMLDivElement | null = null;
+  private button: HTMLDivElement | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
     this.injectStyles();
 
     // Создаем кнопку на панели инструментов
-    core.toolbar.addButtonIcon('HTML', code, () => this.openModal());
+    this.button = core.toolbar.addButtonIcon('HTML', code, this.openModal.bind(this));
 
     // Создаем модальное окно
     this.createModal();
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('HTML');
   }
 
   private createModal(): void {
@@ -129,6 +134,9 @@ export class CodeEditorButton implements IEditorModule {
     } catch (e) {
       this.editor = null;
     }
+    this.button?.removeEventListener('click', this.openModal)
+    this.button = null;
+
     this.modal?.remove(); // Удалить модальное окно из DOM
     this.overlay?.remove(); // Удалить оверлей из DOM
     this.core = null; // Сбросить ссылку на ядро редактора

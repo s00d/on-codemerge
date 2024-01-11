@@ -1,12 +1,18 @@
-import type { EditorCore } from "@/index";
 import { minus } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class HorizontalLineButton implements IEditorModule {
-  private core: EditorCore | null = null;
-  initialize(core: EditorCore): void {
+export class HorizontalLineButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
+  private button: HTMLDivElement | null = null;
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
-    core.toolbar.addButtonIcon('Line', minus, () => this.insertHorizontalLine())
+    this.button = core.toolbar.addButtonIcon('Line', minus, this.insertHorizontalLine.bind(this))
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Line');
   }
 
   private insertHorizontalLine(): void {
@@ -26,6 +32,8 @@ export class HorizontalLineButton implements IEditorModule {
   destroy(): void {
     // You can perform any necessary cleanup here
     this.core = null;
+    this.button?.removeEventListener('click', this.insertHorizontalLine)
+    this.button = null;
   }
 }
 

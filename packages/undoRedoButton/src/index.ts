@@ -1,12 +1,11 @@
-import type { EditorCore } from "@/index";
 import { rotateCcw, rotateCw } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class UndoRedoButton implements IEditorModule {
+export class UndoRedoButton implements IEditorModule, Observer {
   private undo: HTMLDivElement | null = null;
   private redo: HTMLDivElement | null = null;
-  private core: EditorCore  | null = null;
-  initialize(core: EditorCore): void {
+  private core: EditorCoreInterface | null = null;
+  initialize(core: EditorCoreInterface): void {
     this.core = core
     const createUndoButton = () => {
       const button = document.createElement('div');
@@ -54,6 +53,14 @@ export class UndoRedoButton implements IEditorModule {
         }
       }
     });
+
+    core.i18n.addObserver(this);
+  }
+
+
+  update(): void {
+    if(this.undo) this.undo.title = this.core!.i18n.translate('Undo')
+    if(this.redo) this.redo.title = this.core!.i18n.translate('Redo')
   }
 
   private handleUndoClick() {

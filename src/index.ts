@@ -2,20 +2,23 @@ import Toolbar from "./toolbar";
 import Editor from "./editor";
 import { EditorState } from "./EditorState";
 import { EventManager } from "./EventManager";
-import type { Hook, IEditorModule } from "./types";
+import type { EditorCoreInterface, Hook, IEditorModule } from "./types";
 import Footer from "./footer";
+import { I18n } from "./i18n";
 
-export class EditorCore {
+export class EditorCore implements EditorCoreInterface {
   public state: EditorState;
   public eventManager: EventManager;
   public modules: IEditorModule[] = [];
   public appElement: HTMLElement;
   public generalElement: HTMLElement;
+  public i18n: I18n;
   public toolbar: Toolbar;
   public editor: Editor;
   public footer: Footer;
   public history: string[] = []
   public currentSelectionRange: Range | null = null;
+
 
   constructor(appElement: HTMLElement) {
     this.state = new EditorState();
@@ -28,6 +31,8 @@ export class EditorCore {
     this.generalElement.appendChild(this.appElement)
     this.applyStyles();
 
+    this.i18n = new I18n(this);
+    this.i18n.loadLanguage('en');
     this.toolbar = new Toolbar(this);
     this.editor = new Editor(this);
     this.footer = new Footer(this);
@@ -155,8 +160,6 @@ export class EditorCore {
           this.currentSelectionRange = null;
         }
       } else {
-        // this.currentSelectionRange = null;
-
         const range = document.createRange();
         const selection = window.getSelection();
 

@@ -1,22 +1,28 @@
-import type { EditorCore } from "@/index";
 import { eye } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class PreviewButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class PreviewButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private modal: HTMLDivElement | null = null;
   private overlay: HTMLDivElement | null = null;
   private previewContainer: HTMLDivElement | null = null;
+  private button: HTMLDivElement | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
     this.injectStyles();
 
     // Создаем кнопку на панели инструментов
-    core.toolbar.addButtonIcon('Preview', eye, () => this.openModal());
+    this.button = core.toolbar.addButtonIcon('Preview', eye, this.openModal.bind(this));
 
     // Создаем модальное окно для предпросмотра
     this.createModal();
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Preview');
   }
 
   private createModal(): void {
@@ -122,6 +128,10 @@ export class PreviewButton implements IEditorModule {
     if (this.previewContainer) {
       this.previewContainer = null;
     }
+
+    this.button?.removeEventListener('click', this.openModal)
+    this.button = null;
+
     this.core = null;
   }
 }

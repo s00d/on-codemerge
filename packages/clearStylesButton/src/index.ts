@@ -1,28 +1,38 @@
-import type { EditorCore } from "@/index";
 import { DomUtils } from "../../../helpers/DomUtils";
 import { trash } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class ClearStylesButton implements IEditorModule {
+export class ClearStylesButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface|null = null;
   private domUtils: DomUtils;
+  private button: HTMLDivElement|null = null;
 
   constructor() {
     this.domUtils = new DomUtils();
   }
 
-  initialize(core: EditorCore): void {
-    core.toolbar.addButtonIcon('Clear Styles', trash, () => {
-      core.restoreCurrentSelection();
-      if (this.isInEditor(core)) {
-        this.clearStyles(core);
-        core.appElement.focus();
-      } else {
-        console.log('The selection is not within the editor');
-      }
-    });
+  initialize(core: EditorCoreInterface): void {
+    this.core = core;
+    this.button = core.toolbar.addButtonIcon('Clear Styles', trash, this.clearStylesEvent.bind(this));
+    core.i18n.addObserver(this);
   }
 
-  private isInEditor(core: EditorCore): boolean|null {
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Clear Styles');
+  }
+
+  private clearStylesEvent() {
+    if(!this.core) return;
+    this.core.restoreCurrentSelection();
+    if (this.isInEditor(this.core)) {
+      this.clearStyles(this.core);
+      this.core.appElement.focus();
+    } else {
+      console.log('The selection is not within the editor');
+    }
+  }
+
+  private isInEditor(core: EditorCoreInterface): boolean|null {
     const selection = window.getSelection();
     console.log(selection);
     if (!selection) return false;
@@ -37,7 +47,7 @@ export class ClearStylesButton implements IEditorModule {
     return false;
   }
 
-  private clearStyles(core: EditorCore) {
+  private clearStyles(core: EditorCoreInterface) {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
@@ -97,6 +107,9 @@ export class ClearStylesButton implements IEditorModule {
     // Очистите ресурсы или выполняйте другие необходимые действия при уничтожении модуля
     // @ts-ignore
     this.domUtils = null;
+
+    this.button?.removeEventListener('click', this.clearStylesEvent)
+    this.button = null;
   }
 }
 

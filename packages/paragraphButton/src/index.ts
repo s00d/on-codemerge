@@ -1,25 +1,33 @@
-import type { EditorCore } from "@/index";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class ParagraphButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class ParagraphButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private dropdown: DropdownMenu | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.dropdown = new DropdownMenu(core, '¶ ', 'Paragraph');
     this.core = core;
-    this.dropdown.addItem('Normal', () => this.insertParagraph('normal'));
-    this.dropdown.addItem('Heading 1', () => this.insertParagraph('h1'));
-    this.dropdown.addItem('Heading 2', () => this.insertParagraph('h2'));
-    this.dropdown.addItem('Heading 3', () => this.insertParagraph('h3'));
-    this.dropdown.addItem('Heading 4', () => this.insertParagraph('h4'));
-    this.dropdown.addItem('Quote', () => this.insertParagraph('blockquote'));
-    this.dropdown.addItem('Code', () => this.insertParagraph('code'));
+
 
     const toolbar = this.core?.toolbar.getToolbarElement();
     toolbar?.appendChild(this.dropdown.getButton());
+
+    core.i18n.addObserver(this);
   }
+
+  update(): void {
+    this.dropdown?.setTitle(this.core!.i18n.translate('Paragraph'));
+    this.dropdown?.clearItems();
+    this.dropdown?.addItem(this.core!.i18n.translate('Normal'), () => this.insertParagraph('normal'));
+    this.dropdown?.addItem(this.core!.i18n.translate('Heading 1'), () => this.insertParagraph('h1'));
+    this.dropdown?.addItem(this.core!.i18n.translate('Heading 2'), () => this.insertParagraph('h2'));
+    this.dropdown?.addItem(this.core!.i18n.translate('Heading 3'), () => this.insertParagraph('h3'));
+    this.dropdown?.addItem(this.core!.i18n.translate('Heading 4'), () => this.insertParagraph('h4'));
+    this.dropdown?.addItem(this.core!.i18n.translate('Quote'), () => this.insertParagraph('blockquote'));
+    this.dropdown?.addItem(this.core!.i18n.translate('Code'), () => this.insertParagraph('code'));
+  }
+
 
   private insertParagraph(style: string): void {
     if (!this.core) return;

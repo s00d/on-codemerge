@@ -1,4 +1,4 @@
-import type { Hook } from "@/types";
+import type { Hook } from "../types";
 
 export class EventManager {
   private listeners: { [event: string]: Hook[] } = {};

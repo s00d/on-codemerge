@@ -1,22 +1,27 @@
-import type { EditorCore } from "@/index";
 import { BlockManager } from "./BlockManager";
 import { columns } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class BlockButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class BlockButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private blockManagerMap: Map<string, BlockManager> = new Map();
+  private button: HTMLDivElement|null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
-    core.toolbar.addButtonIcon('Block', columns, () => this.createBlock())
-
-    this.core.subscribeToContentChange(() => {
-      this.reloadBlocks(core);
+    this.button = this.core!.toolbar.addButtonIcon('Block', columns, this.createBlock.bind(this))
+    this.core!.subscribeToContentChange(() => {
+      this.reloadBlocks(this.core!);
     });
+
+    core.i18n.addObserver(this);
   }
 
-  private reloadBlocks(core: EditorCore): void {
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Block');
+  }
+
+  private reloadBlocks(core: EditorCoreInterface): void {
     const editor = core.editor.getEditorElement();
     if (!editor) return;
 
@@ -85,6 +90,8 @@ export class BlockButton implements IEditorModule {
   public destroy(): void {
     // Очистите ресурсы или выполняйте другие необходимые действия при уничтожении модуля
     this.core = null;
+    this.button?.removeEventListener('click', this.createBlock)
+    this.button = null;
     this.blockManagerMap.forEach((manager) => {
       manager.destroy();
     });

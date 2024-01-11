@@ -1,7 +1,6 @@
-import type { EditorCore } from "@/index";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
 import { smartphone } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
 const popularScreenSizes = [
   { width: 360, height: 640, deviceType: "Phone (360x640)" },
@@ -19,11 +18,11 @@ const popularScreenSizes = [
   { width: 2560, height: 1440, deviceType: "Desktop (2560x1440)" }
 ];
 
-export class ResizeEditorButton implements IEditorModule {
+export class ResizeEditorButton implements IEditorModule, Observer {
   private dropdown: DropdownMenu|null = null;
-  private core: EditorCore|null = null;
+  private core: EditorCoreInterface|null = null;
   private active: string|null = null;
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
     this.dropdown = new DropdownMenu(core, smartphone, 'Styling', () => {
       this.dropdown?.clearItems();
@@ -40,6 +39,12 @@ export class ResizeEditorButton implements IEditorModule {
     })
 
     core.toolbar.addHtmlItem(this.dropdown.getButton());
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    this.dropdown?.setTitle(this.core!.i18n.translate('Styling'))
   }
 
   destroy(): void {

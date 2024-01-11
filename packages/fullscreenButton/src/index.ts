@@ -1,15 +1,20 @@
-import type { EditorCore } from "@/index";
 import { maximize } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class FullscreenButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class FullscreenButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
+  private button: HTMLDivElement | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
 
     // Добавляем кнопку для переключения полноэкранного режима
-    core.toolbar.addButtonIcon('Fullscreen', maximize, () => this.toggleFullscreen());
+    this.button = core.toolbar.addButtonIcon('Fullscreen', maximize, this.toggleFullscreen.bind(this));
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Fullscreen');
   }
 
   private toggleFullscreen(): void {
@@ -44,6 +49,8 @@ export class FullscreenButton implements IEditorModule {
   destroy(): void {
     // You can perform any necessary cleanup here
     this.core = null;
+    this.button?.removeEventListener('click', this.toggleFullscreen)
+    this.button = null;
   }
 }
 

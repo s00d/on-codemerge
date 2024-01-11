@@ -1,10 +1,10 @@
-import type { EditorCore } from "@/index";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
 import type { StyleConfig } from "../../../helpers/StyleManager";
 import { StyleManager } from "../../../helpers/StyleManager";
 import { DomUtils } from "../../../helpers/DomUtils";
 import { alignCenter } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
+
 
 const styleConfig: StyleConfig = {
   'textAlign': {
@@ -20,40 +20,54 @@ const styleConfig: StyleConfig = {
   // Добавьте здесь другие стили для шрифтов и размеров
 };
 
-export class AlignButton implements IEditorModule {
+export class AlignButton implements IEditorModule, Observer {
   private dropdown: DropdownMenu|null = null;
   private domUtils: DomUtils;
   private styleManager: StyleManager;
+  private core: EditorCoreInterface|null = null;
 
   constructor() {
     this.domUtils = new DomUtils();
     this.styleManager = new StyleManager(styleConfig);
   }
-  initialize(core: EditorCore): void {
-    // const icon = alignCenter.toSvg({  width: '16px', height: '16px', class: 'on-codemerge-icon', 'stroke-width': 3 });
-    this.dropdown = new DropdownMenu(core, alignCenter, 'Align')
+  initialize(core: EditorCoreInterface): void {
+    this.core = core;
+    this.dropdown = new DropdownMenu(this.core, alignCenter);
+    if(this.dropdown) this.core.toolbar.addHtmlItem(this.dropdown.getButton());
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(!this.core) return;
+    styleConfig.textAlign.name = this.core.i18n.translate('Text Align');
+    styleConfig.display.name = this.core.i18n.translate('Display');
+
+    this.dropdown?.setTitle(this.core.i18n.translate('Align'));
+
+    this.dropdown?.clearItems();
+
     const alignButtons = [
-      { align: 'left', text: 'Left' },
-      { align: 'right', text: 'Right' },
-      { align: 'center', text: 'Center' },
-      { align: 'justify', text: 'Justify' }
+      { align: 'left', text: this.core.i18n.translate('Left') },
+      { align: 'right', text: this.core.i18n.translate('Right') },
+      { align: 'center', text: this.core.i18n.translate('Center') },
+      { align: 'justify', text: this.core.i18n.translate('Justify') }
     ];
 
     alignButtons.forEach(({ align, text }) => {
       this.dropdown?.addItem(text, () => {
-        core.restoreCurrentSelection()
+        this.core!.restoreCurrentSelection()
         styleConfig['textAlign'].enabledValue = align
 
         this.setStyle('textAlign');
 
-        core.appElement.focus();
+        this.core!.appElement.focus();
 
-        const editor = core.editor.getEditorElement();
-        if(editor) core.setContent(editor.innerHTML); // Обновить состояние редактора
+        const editor = this.core!.editor.getEditorElement();
+        if(editor) this.core!.setContent(editor.innerHTML); // Обновить состояние редактора
       })
     });
 
-    core.toolbar.addHtmlItem(this.dropdown.getButton());
   }
 
   private setStyle(command: string) {

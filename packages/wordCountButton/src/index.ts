@@ -1,11 +1,10 @@
-import type { EditorCore } from "@/index";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class WordCountButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class WordCountButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private wordsDiv: HTMLDivElement | null = null;
   private charDiv: HTMLDivElement | null = null;
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core
 
     this.wordsDiv = document.createElement('div');
@@ -16,20 +15,26 @@ export class WordCountButton implements IEditorModule {
     core.footer.addHtmlItem(this.wordsDiv)
     core.footer.addHtmlItem(this.charDiv)
 
-    this.update();
+    this.updateCount();
     core.subscribeToContentChange(() => {
-      this.update();
+      this.updateCount();
     });
+
+    core.i18n.addObserver(this);
   }
 
-  update() {
+  update(): void {
+    this.updateCount()
+  }
+
+  updateCount() {
     if(!this.core) return;
     const editorContent = this.core.editor.getEditorElement()?.innerText || '';
     const wordCount = this.countWords(editorContent);
     const charCount = editorContent.length;
 
-    if(this.wordsDiv) this.wordsDiv.innerText = 'Words: ' + wordCount
-    if(this.charDiv) this.charDiv.innerText = 'Chars: ' + charCount
+    if(this.wordsDiv) this.wordsDiv.innerText = this.core!.i18n.translate('Words') + ': ' + wordCount
+    if(this.charDiv) this.charDiv.innerText = this.core!.i18n.translate('Chars') + ': ' + charCount
   }
 
   private countWords(text: string): number {

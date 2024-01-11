@@ -1,8 +1,7 @@
-import type { EditorCore } from "@/index";
 import type { StyleConfig } from "../../../helpers/StyleManager";
 import { StyleManager } from "../../../helpers/StyleManager";
 import { DomUtils } from "../../../helpers/DomUtils";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
 const styleConfig: StyleConfig = {
   'foreColor': {
@@ -42,11 +41,17 @@ const styleConfig: StyleConfig = {
   // Добавьте здесь другие стили для шрифтов и размеров
 };
 
-export class TextDecorationButton implements IEditorModule {
+export class TextDecorationButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private domUtils: DomUtils;
   private styleManager: StyleManager;
   private inputElements: HTMLElement[] = [];
   private fonts: string[] = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'];
+  private textColorButton: HTMLInputElement | null = null;
+  private backgroundColorButton: HTMLInputElement | null = null;
+  private fontPicker: HTMLSelectElement | null = null;
+  private fontSizePicker: HTMLSelectElement | null = null;
+  private lineHeightPicker: HTMLSelectElement | null = null;
 
   constructor(fonts?: string[]) {
     this.domUtils = new DomUtils();
@@ -54,16 +59,28 @@ export class TextDecorationButton implements IEditorModule {
     if(fonts) this.fonts = fonts;
   }
 
-  initialize(core: EditorCore): void {
-    this.createButton(core, 'Text Color', 'foreColor');
-    this.createButton(core, 'Background Color', 'backColor');
+  initialize(core: EditorCoreInterface): void {
+    this.core = core;
+    this.textColorButton = this.createButton(core, 'Text Color', 'foreColor');
+    this.backgroundColorButton = this.createButton(core, 'Background Color', 'backColor');
 
-    this.createFontPicker(core, 'Font');
-    this.createInputPicker(core, 'Font Size', 'fontSize');
-    this.createInputPicker(core, 'Line Height', 'lineHeight');
+    this.fontPicker = this.createFontPicker(core, 'Font');
+    this.fontSizePicker = this.createInputPicker(core, 'Font Size', 'fontSize');
+    this.lineHeightPicker = this.createInputPicker(core, 'Line Height', 'lineHeight');
+
+    core.i18n.addObserver(this);
   }
 
-  private createButton(core: EditorCore, title: string, command: string): void {
+  update(): void {
+    if(this.textColorButton) this.textColorButton.title = this.core!.i18n.translate('Text Color');
+    if(this.backgroundColorButton) this.backgroundColorButton.title = this.core!.i18n.translate('Background Color');
+
+    if(this.fontPicker) this.fontPicker.title = this.core!.i18n.translate('Font');
+    if(this.fontSizePicker) this.fontSizePicker.title = this.core!.i18n.translate('Font Size');
+    if(this.lineHeightPicker) this.lineHeightPicker.title = this.core!.i18n.translate('Line Height');
+  }
+
+  private createButton(core: EditorCoreInterface, title: string, command: string) {
     const input = document.createElement('input');
     input.type = 'color';
     input.style.height = '36px';
@@ -109,6 +126,8 @@ export class TextDecorationButton implements IEditorModule {
 
     core.toolbar.addHtmlItem(input);
     this.inputElements.push(input);
+
+    return input;
   }
 
   private setStyle(command: string) {
@@ -140,7 +159,7 @@ export class TextDecorationButton implements IEditorModule {
     })
   }
 
-  private createFontPicker(core: EditorCore, title: string): void {
+  private createFontPicker(core: EditorCoreInterface, title: string) {
     const select = document.createElement('select');
     select.title = title;
     select.style.height = '35px';
@@ -165,9 +184,11 @@ export class TextDecorationButton implements IEditorModule {
 
     core.toolbar.addHtmlItem(select);
     this.inputElements.push(select);
+
+    return select;
   }
 
-  private createInputPicker(core: EditorCore, title: string, command: string): void {
+  private createInputPicker(core: EditorCoreInterface, title: string, command: string) {
     const select = document.createElement('select');
     select.title = title;
     select.style.height = '35px';
@@ -195,6 +216,7 @@ export class TextDecorationButton implements IEditorModule {
 
     core.toolbar.addHtmlItem(select);
     this.inputElements.push(select);
+    return select;
   }
 
   destroy(): void {
@@ -202,6 +224,8 @@ export class TextDecorationButton implements IEditorModule {
     this.domUtils = null
     // @ts-ignore
     this.styleManager = null
+
+    this.core = null
 
     this.inputElements.forEach((input) => {
       input.remove();

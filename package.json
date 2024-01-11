@@ -1,14 +1,14 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "0.5.5",
+  "version": "0.6.1",
   "author": "Pavel Kuzmin",
   "license": "MIT",
   "type": "module",
   "module": "dist/main.esm.js",
   "main": "dist/main.cjs",
   "browser": "dist/main.iife.js",
-  "typings": "dist/types/src/index.d.ts",
+  "typings": "dist/types/src/types.d.ts",
   "scripts": {
     "prepublish": "npm run lint:fix && npm run build && npm run exports",
     "build": "rollup -c",
@@ -19,7 +19,8 @@
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
   },
   "files": [
-    "dist"
+    "dist",
+    "locales"
   ],
   "workspaces": [
     "app",
@@ -50,7 +51,7 @@
       "import": "./dist/main.esm.js",
       "require": "./dist/main.cjs.js",
       "browser": "./dist/main.iife.js",
-      "types": "./dist/types/src/index.d.ts"
+      "types": "./dist/types/src/types.d.ts"
     },
     "./tableButton": {
       "import": "./dist/tableButton.esm.js",

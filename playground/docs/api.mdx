@@ -206,6 +206,72 @@ Creates and adds a clickable button with an icon to the footer panel.
 
 This method simplifies the process of adding interactive buttons with icons to the footer panel. It returns the created button element.
 
+
+To integrate the `I18n` class into the API documentation for **On-Codemerge**, we can add a new section that explains its purpose, usage, and methods. Here's how you might structure this addition:
+
 ---
 
-This documentation provides a comprehensive overview of the `EditorCore` class, including its methods for managing the editor's content, handling events, and interacting with editor modules. Each method is briefly described, giving developers a clear understanding of the class's capabilities.
+sidebar_position: 4
+---
+
+# API Documentation
+
+## Overview
+
+The `EditorCore` class is the central component of the On-Codemerge editor. It manages the editor's state, handles events, and coordinates the interaction between different editor modules.
+
+...
+
+## I18n
+
+The `I18n` class in On-Codemerge provides robust support for internationalization, allowing you to easily manage and implement multiple languages within the editor.
+
+
+### Constructor
+
+- **`I18n(core: EditorCore, locale: string = 'en')`**
+
+Initializes a new instance of the internationalization class.
+
+- `core`: The instance of `EditorCore`.
+- `locale`: The default language code (e.g., 'en' for English).
+
+### Methods
+
+- **`addObserver(observer: Observer): void`**
+
+Registers an observer that will be notified of language changes.
+
+- **`notifyObservers(): void`**
+
+Notifies all registered observers of the current language.
+
+- **`loadLanguage(lang: string): Promise<void>`**
+
+Loads the specified language asynchronously.
+
+- **`setCurrentLanguage(lang: string): Promise<void>`**
+
+Sets and loads the specified language.
+
+- **`merge(newTranslations: LanguagePack): void`**
+
+Merges new translations into the current language pack.
+
+- **`translate(key: string): string`**
+
+Translates a given key based on the current language.
+
+### Interfaces
+
+- **`LanguagePack`**
+
+A key-value mapping of translation strings.
+
+- **`Languages`**
+
+A mapping of language codes to their respective `LanguagePack`.
+
+- **`Observer`**
+
+An interface for observers that need to react to language changes.

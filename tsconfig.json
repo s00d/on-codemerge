@@ -13,7 +13,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
+
     },
     "lib": ["dom", "es5", "es6", "dom.iterable", "scripthost"],
     "skipLibCheck": true,

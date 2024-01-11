@@ -25,7 +25,7 @@ import MarkdownImportExportButton from "../../../../packages/markdownImportExpor
 import ResizeEditorButton from "../../../../packages/resizeEditorButton/src";
 import WordCountButton from "../../../../packages/wordCountButton/src";
 
-export default function EditorComponent({ activePlugins }) {
+export default function EditorComponent({ activePlugins, language }) {
   const editorContainerRef = useRef(null);
   const [editorContent, setEditorContent] = useState('');
   const [previewContent, setPreviewContent] = useState('');
@@ -88,6 +88,10 @@ export default function EditorComponent({ activePlugins }) {
             registerPlugin(allPlugins[i])
           }
         }
+      }
+
+      if (language) {
+        editor.i18n.setCurrentLanguage(language);
       }
 
       editor.subscribeToContentChange((newContent) => {

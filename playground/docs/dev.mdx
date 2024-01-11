@@ -17,8 +17,7 @@ The `IEditorModule` interface ensures that your plugin has the necessary structu
 ### Example Interface Implementation
 
 ```ts
-import EditorCore from "on-codemerge";
-import { IEditorModule } from "on-codemerge/dist/types/src/types";
+import type EditorCore, { IEditorModule } from 'on-codemerge';
 
 export class MyCustomPlugin implements IEditorModule {
   private core: EditorCore;
@@ -69,8 +68,8 @@ Let's create a simple plugin that adds a custom button to the editor's toolbar.
 ### Step 1: Define Your Plugin Class
 
 ```ts
-import EditorCore from "on-codemerge";
-import { IEditorModule } from "on-codemerge/dist/types/src/types";
+import type EditorCore, { IEditorModule } from 'on-codemerge';
+
 
 export class MyCustomButton implements IEditorModule {
   private core: EditorCore;
@@ -106,8 +105,8 @@ export class MyCustomButton implements IEditorModule {
 
 ### Step 2: Register Your Plugin with the Editor
 
-```javascript
-import EditorCore from '@/index';
+```ts
+import EditorCore from 'on-codemerge';
 import { MyCustomButton } from 'path_to_my_custom_button';
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -129,8 +128,7 @@ Plugins can also modify the editor's text or insert new content. Below are examp
 To modify text, you can manipulate the DOM elements within the editor. Here’s an example of a plugin that converts selected text to uppercase:
 
 ```ts
-import EditorCore from "on-codemerge";
-import { IEditorModule } from "on-codemerge/dist/types/src/types";
+import type EditorCore, { IEditorModule } from 'on-codemerge';
 
 export class UppercaseTextButton implements IEditorModule {
   private core: EditorCore;
@@ -180,8 +178,7 @@ export class UppercaseTextButton implements IEditorModule {
 For inserting new content, like an image or a custom HTML element, you can use the `insertHTMLIntoEditor` method of `EditorCore`. Here's an example of inserting an image:
 
 ```ts
-import EditorCore from "on-codemerge";
-import { IEditorModule } from "on-codemerge/dist/types/src/types";
+import type EditorCore, { IEditorModule } from 'on-codemerge';
 export class InsertImageButton implements IEditorModule {
   private core: EditorCore;
   private button: HTMLButtonElement | null = null;
@@ -241,8 +238,9 @@ The `Footer` class is a fundamental component of the On-Codemerge editor that ma
 ## Example Usage
 
 ```tsx
-export class Plugin {
-  constructor(core: EditorCore) {
+import type EditorCore, { IEditorModule } from 'on-codemerge';
+export class Plugin implements IEditorModule {
+  initialize(core: EditorCore): void {
     const footer = core.footer;
     footer.addButtonIcon('Click Me', '<i class="fas fa-check"></i>', () => {
       // Handle button click action
@@ -259,8 +257,9 @@ The `Toolbar` class is a fundamental component of the On-Codemerge editor that m
 ## Example Usage
 
 ```tsx
-export class Plugin {
-  constructor(core: EditorCore) {
+import type EditorCore, { IEditorModule } from 'on-codemerge';
+export class Plugin implements IEditorModule {
+  initialize(core: EditorCore): void {
     const toolbar = core.toolbar;
     toolbar.addButtonIcon('Click Me', '<i class="fas fa-check"></i>', () => {
       // Handle button click action
@@ -277,8 +276,9 @@ The `Editor` class is a core component of the On-Codemerge editor responsible fo
 ## Example Usage
 
 ```tsx
-export class Plugin {
-  constructor(core: EditorCore) {
+import type EditorCore, { IEditorModule } from 'on-codemerge';
+export class Plugin implements IEditorModule {
+  initialize(core: EditorCore): void {
     const editor = core.editor;
     editor.setContent('<p>Hello, On-Codemerge editor!</p>');
     core.subscribeToContentChange((text) => {
@@ -296,8 +296,9 @@ The `EditorState` class is responsible for managing the state and history of the
 ## Example Usage
 
 ```tsx
-export class Plugin {
-  constructor(core: EditorCore) {
+import type EditorCore, { IEditorModule } from 'on-codemerge';
+export class Plugin implements IEditorModule {
+  initialize(core: EditorCore): void {
     const editorState = core.state;
     editorState.setContent('<p>Hello, On-Codemerge editor!</p>');
     editorState.setContent('<p>Updated content</p>');
@@ -325,8 +326,9 @@ Certainly, here's the documentation for the `EventManager` class you provided:
 ## Example Usage
 
 ```tsx
-export class Plugin {
-  constructor(core: EditorCore) {
+import type EditorCore, { IEditorModule } from 'on-codemerge';
+export class Plugin implements IEditorModule {
+  initialize(core: EditorCore): void {
     const eventManager = core.eventManager;
 
     // Subscribe to an event
@@ -346,8 +348,118 @@ export class Plugin {
     eventManager.publish('myEvent', 'This won\'t be logged.');
 
   }
+
 }
 ```
+
+To integrate the use of `I18n` and asynchronous loading of translations into your documentation, you can add a section in the **Developing Plugins** part. This section will guide developers on how to effectively utilize the internationalization capabilities of On-Codemerge in their custom plugins.
+
+# Utilizing Internationalization (I18n)
+
+On-Codemerge's `I18n` class provides a robust internationalization framework, enabling plugins to support multiple languages. Here's how you can use `I18n` in your custom plugin for asynchronous loading and adding translations.
+
+### Example: Asynchronous Language Loading
+
+```ts
+import type EditorCore, { Observer, IEditorModule } from 'on-codemerge';
+
+export class MyCustomPlugin implements IEditorModule, Observer {
+  private core: EditorCore;
+
+  initialize(core: EditorCore): void {
+    this.core = core;
+    this.loadLanguages();
+  }
+
+  async loadLanguages() {
+    await this.i18n.loadLanguage('en');
+    await this.i18n.loadLanguage('es');
+    // Set the default language
+    await this.i18n.setCurrentLanguage('en');
+  }
+
+  // Rest of your plugin implementation...
+}
+```
+
+## Example: Adding and Merging Translations
+
+```ts
+import type EditorCore, { Observer, IEditorModule } from 'on-codemerge';
+
+export class MyCustomPlugin implements IEditorModule, Observer {
+  private core: EditorCore;
+
+  initialize(core: EditorCore): void {
+    this.core = core;
+    this.addTranslations();
+  }
+
+  addTranslations() {
+    // Custom translations for 'en'
+    const customEnTranslations = {
+      'my.custom.key': 'Custom English Text'
+    };
+
+    // Merge custom translations into the existing 'en' language pack
+    this.core.i18n.merge(customEnTranslations);
+    // You can repeat the above steps for other languages
+  }
+
+  public myPluginMethod() {
+    // Access the translation for a specific key
+    const translatedText = this.core.i18n.translate('my.custom.key');
+    console.log(translatedText); // Output will depend on the current language
+  }
+
+  // Rest of your plugin implementation...
+}
+```
+
+Certainly! To demonstrate the asynchronous loading of translations using dynamic imports in the context of the On-Codemerge editor, you can include an example that showcases how to load language files dynamically based on user selection or application requirements. This approach is particularly useful for optimizing load times and resource management, as it allows for loading only the necessary translations on demand.
+
+Here's an example you can include in the documentation:
+
+---
+
+## Asynchronous Loading of Translations
+
+In some scenarios, you may want to load translation files dynamically to reduce the initial load time or to load languages based on user preferences. The `I18n` class in On-Codemerge supports asynchronous loading of translation files using dynamic imports.
+
+### Example: Dynamic Import of Language Files
+
+```ts
+import type EditorCore, { Observer, IEditorModule } from 'on-codemerge';
+
+export class MyCustomPlugin implements IEditorModule, Observer {
+  private core: EditorCore;
+
+  initialize(core: EditorCore): void {
+    this.core = core;
+    this.initialize();
+  }
+
+  async initialize() {
+    // Dynamically load the language based on user preference or other logic
+    const userLanguage = 'es'; // Example user language
+    await this.loadLanguage(userLanguage);
+  }
+
+  async loadLanguage(lang: string) {
+    try {
+      const languagePack = await import(`../locales/${lang}.json`);
+      this.core.i18n.languages[lang] = languagePack.default;
+      this.core.i18n.setCurrentLanguage(lang);
+    } catch (error) {
+      console.error(`Error loading language pack for ${lang}:`, error);
+    }
+  }
+
+  // Rest of your plugin implementation...
+}
+```
+
+
 
 ## Best Practices
 

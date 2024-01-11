@@ -1,23 +1,33 @@
-import type { EditorCore } from "@/index";
 import TableManager from './TableManager';
 import { table } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class TableButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class TableButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private tableManagerMap: Map<string, TableManager> = new Map();
+  private button: HTMLDivElement | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
     this.injectStyles();
-    core.toolbar.addButtonIcon('Table', table, () => this.createTable(3, 3))
+    this.button = core.toolbar.addButtonIcon('Table', table, () => this.createTableEvent.bind(this))
 
     core.subscribeToContentChange(() => {
       this.reloadTables(core)
     });
+
+    core.i18n.addObserver(this);
   }
 
-  public reloadTables(core: EditorCore): void {
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Table');
+  }
+
+  private createTableEvent() {
+    return this.createTable(3, 3);
+  }
+
+  public reloadTables(core: EditorCoreInterface): void {
     const editor = core.editor.getEditorElement();
     if (!editor) return;
 
@@ -99,6 +109,9 @@ export class TableButton implements IEditorModule {
       manager.destroy();
     });
     this.tableManagerMap.clear();
+
+    this.button?.removeEventListener('click', this.createTableEvent);
+    this.button = null;
   }
 }
 

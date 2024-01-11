@@ -1,21 +1,27 @@
-import type { EditorCore } from "@/index";
 import { terminal } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
 import TurndownService from 'turndown';
 import Showdown from 'showdown';
 import { Modal } from "../../../helpers/modal";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
 
-export class MarkdownImportExportButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class MarkdownImportExportButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private turndownService = new TurndownService();
   private showdownConverter = new Showdown.Converter();
   private modal: Modal | null = null;
+  private button: HTMLDivElement | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
-    core.toolbar.addButtonIcon('Markdown', terminal, () => this.toMarkdown());
+    this.button = core.toolbar.addButtonIcon('Markdown', terminal, this.toMarkdown.bind(this));
     this.modal = new Modal(core, '600px');
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Markdown');
   }
 
   private toMarkdown(): void {
@@ -42,6 +48,10 @@ export class MarkdownImportExportButton implements IEditorModule {
       this.modal = null;
     }
     this.core = null;
+
+
+    this.button?.removeEventListener('click', this.toMarkdown)
+    this.button = null;
   }
 }
 

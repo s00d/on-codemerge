@@ -1,10 +1,10 @@
-import type { EditorCore } from "@/index";
 import { ContextMenu } from "../../../helpers/contextMenu";
 import { Modal } from "../../../helpers/modal";
+import type { EditorCoreInterface } from "../../../src/types";
 
 export class BlockManager {
   private block: HTMLElement;
-  private core: EditorCore;
+  private core: EditorCoreInterface;
   private onUpdate: () => void;
   private sections: HTMLElement[] = [];
   private currentActiveSection: HTMLElement|null = null;
@@ -12,12 +12,11 @@ export class BlockManager {
   private modal: Modal;
   private placeholder: HTMLDivElement|null = null;
 
-  constructor(block: HTMLElement, core: EditorCore, onUpdate: () => void) {
+  constructor(block: HTMLElement, core: EditorCoreInterface, onUpdate: () => void) {
     this.block = block;
     this.core = core;
     this.onUpdate = onUpdate;
     this.contextMenu = new ContextMenu(core);
-    this.contextMenu.setOrientation('horizontal')
     this.modal = new Modal(core);
 
     this.block.addEventListener('contextmenu', this.handleContextMenu.bind(this));
@@ -157,13 +156,14 @@ export class BlockManager {
     }
 
     this.contextMenu.clearItems();
-    this.contextMenu.addItem('Add Section', () => this.addSection());
+    this.contextMenu.setOrientation('vertical')
+    this.contextMenu.addItem(this.core.i18n.translate('Add Section'), () => this.addSection());
     this.sections.forEach((section, index) => {
       if (this.sections.length > 1) {
-        this.contextMenu.addItem(`Remove Section ${index + 1}`, () => this.removeSection(section));
+        this.contextMenu.addItem(this.core.i18n.translate('Remove Section') + ` ${index + 1}`, () => this.removeSection(section));
       }
     });
-    this.contextMenu.addItem('Change Style', () => this.openSectionSettings());
+    this.contextMenu.addItem(this.core.i18n.translate('Change Section'), () => this.openSectionSettings());
     this.contextMenu.show(event.clientX, event.clientY);
   }
 

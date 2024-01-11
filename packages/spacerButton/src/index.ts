@@ -1,8 +1,9 @@
-import type { EditorCore } from "@/index";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class SpacerButton implements IEditorModule {
-  initialize(core: EditorCore): void {
+export class SpacerButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface|null = null;
+  initialize(core: EditorCoreInterface): void {
+    this.core = core;
     const toolbar = core.toolbar.getToolbarElement();
 
     // Создаем элемент-разделитель
@@ -14,6 +15,12 @@ export class SpacerButton implements IEditorModule {
 
     // Добавляем разделитель на панель инструментов
     if (toolbar) toolbar.appendChild(spacer);
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+
   }
 
   destroy(): void {

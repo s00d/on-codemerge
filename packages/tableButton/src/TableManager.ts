@@ -1,8 +1,7 @@
-import type { EditorCore } from "@/index";
-
+import type { EditorCoreInterface } from "../../../src/types";
 export default class TableManager {
   private table: HTMLTableElement;
-  private core: EditorCore;
+  private core: EditorCoreInterface;
   private popupElement: HTMLDivElement;
   private currentCell: HTMLTableCellElement | null = null; // Добавляем текущую выбранную ячейку
   private selectedCells: HTMLTableCellElement[] = [];
@@ -10,7 +9,7 @@ export default class TableManager {
   private onRemove: () => void;
   private onUpdate: () => void;
 
-  constructor(table: HTMLTableElement, core: EditorCore, onRemove: () => void, onUpdate: () => any) {
+  constructor(table: HTMLTableElement, core: EditorCoreInterface, onRemove: () => void, onUpdate: () => any) {
     this.table = table;
     this.core = core;
     this.popupElement = this.createPopup();
@@ -88,13 +87,14 @@ export default class TableManager {
     popup.style.padding = '5px';
     document.body.appendChild(popup);
 
+
     // Кнопки и действия
-    this.createButton('Add Row', () => this.addRow(), popup);
-    this.createButton('Add Column', () => this.addColumn(), popup);
-    this.createButton('Remove Row', () => this.removeRow(), popup);
-    this.createButton('Remove Column', () => this.removeColumn(), popup);
-    this.createButton('Delete Table', () => this.removeTable(), popup);
-    this.createButton('Merge Cells', () => this.mergeCells(), popup);
+    this.createButton(this.core!.i18n.translate('Add Row'), () => this.addRow(), popup);
+    this.createButton(this.core!.i18n.translate('Add Column'), () => this.addColumn(), popup);
+    this.createButton(this.core!.i18n.translate('Remove Row'), () => this.removeRow(), popup);
+    this.createButton(this.core!.i18n.translate('Remove Column'), () => this.removeColumn(), popup);
+    this.createButton(this.core!.i18n.translate('Delete Table'), () => this.removeTable(), popup);
+    this.createButton( this.core!.i18n.translate('Merge Cells'), () => this.mergeCells(), popup);
 
     const bgColorInput = document.createElement('input');
     bgColorInput.type = 'color';

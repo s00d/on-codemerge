@@ -1,22 +1,28 @@
-import type { EditorCore } from "@/index";
 import { ImageManager } from './ImageManager';
 import { image } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class ImageButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class ImageButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private imageManagerMap: Map<string, ImageManager> = new Map();
+  private button: HTMLDivElement | null = null;
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.core = core;
-    core.toolbar.addButtonIcon('Image', image, () => this.onInsertImageClick())
+    this.button = core.toolbar.addButtonIcon('Image', image, this.onInsertImageClick.bind(this))
 
     core.subscribeToContentChange(() => {
       this.reloadImages(core)
     });
+
+    core.i18n.addObserver(this);
   }
 
-  public reloadImages(core: EditorCore): void {
+  update(): void {
+    if(this.button) this.button.title = this.core!.i18n.translate('Line');
+  }
+
+  public reloadImages(core: EditorCoreInterface): void {
     const editor = core.editor.getEditorElement();
     if (!editor) return;
 
@@ -76,6 +82,9 @@ export class ImageButton implements IEditorModule {
     // Cleanup any resources or event listeners here
     this.core = null;
     this.imageManagerMap.clear();
+
+    this.button?.removeEventListener('click', this.onInsertImageClick)
+    this.button = null;
   }
 }
 

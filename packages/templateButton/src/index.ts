@@ -1,10 +1,9 @@
-import type { EditorCore } from "@/index";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
 import { layers } from "../../../src/icons";
-import type { IEditorModule } from "@/types";
+import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
 
-export class TemplateButton implements IEditorModule {
-  private core: EditorCore | null = null;
+export class TemplateButton implements IEditorModule, Observer {
+  private core: EditorCoreInterface | null = null;
   private readonly templates: {[key: string]: string};
   private dropdown: DropdownMenu | null = null;
 
@@ -12,7 +11,7 @@ export class TemplateButton implements IEditorModule {
     this.templates = templates;
   }
 
-  initialize(core: EditorCore): void {
+  initialize(core: EditorCoreInterface): void {
     this.dropdown = new DropdownMenu(core, layers, 'Template')
     this.core = core;
 
@@ -24,6 +23,12 @@ export class TemplateButton implements IEditorModule {
     }
     const toolbar = this.core?.toolbar.getToolbarElement();
     toolbar?.appendChild(this.dropdown.getButton());
+
+    core.i18n.addObserver(this);
+  }
+
+  update(): void {
+    this.dropdown?.setTitle(this.core!.i18n.translate('Template'))
   }
 
   destroy(): void {
