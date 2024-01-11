@@ -2,7 +2,7 @@ import type { EditorCore } from "@/index";
 import type { IEditorModule } from "@/types";
 
 export class WordCountButton implements IEditorModule {
-  private core: EditorCore  | null = null;
+  private core: EditorCore | null = null;
   private wordsDiv: HTMLDivElement | null = null;
   private charDiv: HTMLDivElement | null = null;
   initialize(core: EditorCore): void {
