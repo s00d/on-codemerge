@@ -1,7 +1,7 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "author": "Pavel Kuzmin",
   "license": "MIT",
   "type": "module",
@@ -13,6 +13,7 @@
     "prepublish": "npm run lint:fix && npm run build && npm run exports",
     "build": "rollup -c",
     "dev": "cd playground && npm run start",
+    "playground": "cd playground && npm run start",
     "exports": "npx tsx ./update_exports.ts",
     "lint": "eslint . --ext .ts,.tsx",
     "lint:fix": "eslint . --ext .ts,.tsx --fix"
@@ -170,6 +171,12 @@
       "require": "./dist/resizeEditorButton.cjs.js",
       "browser": "./dist/resizeEditorButton.iife.js",
       "types": "./dist/types/packages/resizeEditorButton/src/index.d.ts"
+    },
+    "./wordCountButton": {
+      "import": "./dist/wordCountButton.esm.js",
+      "require": "./dist/wordCountButton.cjs.js",
+      "browser": "./dist/wordCountButton.iife.js",
+      "types": "./dist/types/packages/wordCountButton/src/index.d.ts"
     }
   },
   "devDependencies": {

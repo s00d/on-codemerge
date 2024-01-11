@@ -3,6 +3,7 @@ import Editor from "./editor";
 import { EditorState } from "./EditorState";
 import { EventManager } from "./EventManager";
 import type { Hook, IEditorModule } from "./types";
+import Footer from "./footer";
 
 export class EditorCore {
   public state: EditorState;
@@ -12,6 +13,7 @@ export class EditorCore {
   public generalElement: HTMLElement;
   public toolbar: Toolbar;
   public editor: Editor;
+  public footer: Footer;
   public history: string[] = []
   public currentSelectionRange: Range | null = null;
 
@@ -28,6 +30,7 @@ export class EditorCore {
 
     this.toolbar = new Toolbar(this);
     this.editor = new Editor(this);
+    this.footer = new Footer(this);
 
     this.generalElement.addEventListener('keydown', this.handleKeydown);
     this.injectStyles();
@@ -349,6 +352,7 @@ export class EditorCore {
     this.editor.destroy();
     this.state.destroy();
     this.eventManager.destroy();
+    this.footer.destroy();
 
     // Очистка ссылок для предотвращения утечек памяти
     // @ts-ignore
@@ -364,6 +368,8 @@ export class EditorCore {
     this.toolbar = null;
     // @ts-ignore
     this.editor = null;
+    // @ts-ignore
+    this.footer = null;
     this.history = [];
     this.currentSelectionRange = null;
   }

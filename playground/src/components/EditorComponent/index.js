@@ -1,6 +1,8 @@
 import React, { useEffect, useRef, useState } from 'react';
 import EditorCore from '../../../../src/index'; // Путь к вашему EditorCore
 
+import styles from './styles.module.css';
+
 import TextStylingButton from '../../../../packages/textStylingButton/src';
 import TableButton from '../../../../packages/tableButton/src';
 import UndoRedoButton from '../../../../packages/undoRedoButton/src';
@@ -21,8 +23,7 @@ import HorizontalLineButton from "../../../../packages/horizontalLineButton/src"
 import ClearStylesButton from "../../../../packages/clearStylesButton/src";
 import MarkdownImportExportButton from "../../../../packages/markdownImportExportButton/src";
 import ResizeEditorButton from "../../../../packages/resizeEditorButton/src";
-
-import styles from './styles.module.css';
+import WordCountButton from "../../../../packages/wordCountButton/src";
 
 export default function EditorComponent({ activePlugins }) {
   const editorContainerRef = useRef(null);
@@ -50,6 +51,7 @@ export default function EditorComponent({ activePlugins }) {
     'ClearStylesButton': ClearStylesButton,
     'MarkdownImportExportButton': MarkdownImportExportButton,
     'ResizeEditorButton': ResizeEditorButton,
+    'WordCountButton': WordCountButton,
   };
 
 

@@ -172,6 +172,40 @@ Checks if undo is possible.
 
 Checks if redo is possible.
 
+# Footer
+
+The `Footer` class is a component of the On-Codemerge editor responsible for managing the footer panel that may contain various UI elements and controls. It provides an easy way to enhance the editor's user interface and interact with its functionality.
+
+## Methods
+
+### `getElement(): HTMLDivElement|null`
+
+Returns the footer element if it exists; otherwise, returns `null`.
+
+This method allows other plugins to access and manipulate the footer's HTML element.
+
+### `enable()`
+
+Enables the footer panel if it is currently disabled. It ensures that the footer is displayed in the editor.
+
+### `addHtmlItem(item: HTMLElement): void`
+
+Adds an HTML element to the footer panel.
+
+- `item` (HTMLElement): The HTML element to be added to the footer.
+
+This method enables the addition of custom UI elements, controls, or content to the footer panel.
+
+### `addButtonIcon(title: string, icon: string, action: () => void): HTMLDivElement`
+
+Creates and adds a clickable button with an icon to the footer panel.
+
+- `title` (string): The title or tooltip text displayed when hovering over the button.
+- `icon` (string): The HTML code or icon representation to be displayed on the button.
+- `action` (function): A callback function that is executed when the button is clicked.
+
+This method simplifies the process of adding interactive buttons with icons to the footer panel. It returns the created button element.
+
 ---
 
 This documentation provides a comprehensive overview of the `EditorCore` class, including its methods for managing the editor's content, handling events, and interacting with editor modules. Each method is briefly described, giving developers a clear understanding of the class's capabilities.

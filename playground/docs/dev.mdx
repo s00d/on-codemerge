@@ -229,6 +229,126 @@ editor.registerModule(new InsertImageButton());
 
 With these enhancements, the documentation now provides a more complete guide on creating plugins that can modify and insert content in the On-Codemerge editor. This will be immensely helpful for developers looking to extend the editor's capabilities.
 
+
+
+Certainly, here's the part of the documentation related to the `Footer` class:
+
+
+# Footer Class Documentation
+
+The `Footer` class is a fundamental component of the On-Codemerge editor that manages the footer panel's functionality and appearance. This documentation provides an overview of the `Footer` class and its usage within the editor.
+
+## Example Usage
+
+```tsx
+export class Plugin {
+  constructor(core: EditorCore) {
+    const footer = core.footer;
+    footer.addButtonIcon('Click Me', '<i class="fas fa-check"></i>', () => {
+      // Handle button click action
+      alert('Button clicked!');
+    });
+  }
+}
+```
+
+# Toolbar Class Documentation
+
+The `Toolbar` class is a fundamental component of the On-Codemerge editor that manages the toolbar's functionality and appearance. This documentation provides an overview of the `Toolbar` class and its usage within the editor.
+
+## Example Usage
+
+```tsx
+export class Plugin {
+  constructor(core: EditorCore) {
+    const toolbar = core.toolbar;
+    toolbar.addButtonIcon('Click Me', '<i class="fas fa-check"></i>', () => {
+      // Handle button click action
+      alert('Button clicked!');
+    });
+  }
+}
+```
+
+# Editor Class Documentation
+
+The `Editor` class is a core component of the On-Codemerge editor responsible for managing the editor's content and user interactions. This documentation provides an overview of the `Editor` class and its usage within the editor.
+
+## Example Usage
+
+```tsx
+export class Plugin {
+  constructor(core: EditorCore) {
+    const editor = core.editor;
+    editor.setContent('<p>Hello, On-Codemerge editor!</p>');
+    core.subscribeToContentChange((text) => {
+      console.log(text)
+    });
+  }
+}
+```
+
+
+# EditorState Class Documentation
+
+The `EditorState` class is responsible for managing the state and history of the editor's content, enabling undo and redo functionality. This documentation provides an overview of the `EditorState` class and its methods.
+
+## Example Usage
+
+```tsx
+export class Plugin {
+  constructor(core: EditorCore) {
+    const editorState = core.state;
+    editorState.setContent('<p>Hello, On-Codemerge editor!</p>');
+    editorState.setContent('<p>Updated content</p>');
+    console.log(editorState.getContent()); // Output: <p>Updated content</p>
+
+    // Perform undo operation
+    editorState.undo();
+    console.log(editorState.getContent()); // Output: <p>Hello, On-Codemerge editor!</p>
+
+    // Perform redo operation
+    editorState.redo();
+    console.log(editorState.getContent()); // Output: <p>Updated content</p>
+
+    // Check if undo and redo are available
+    console.log(editorState.isUndo()); // Output: true
+    console.log(editorState.isRedo()); // Output: true
+  }
+}
+```
+
+Certainly, here's the documentation for the `EventManager` class you provided:
+
+# EventManager Class Documentation
+
+## Example Usage
+
+```tsx
+export class Plugin {
+  constructor(core: EditorCore) {
+    const eventManager = core.eventManager;
+
+    // Subscribe to an event
+    const myCallback = (data) => {
+    console.log(`Event occurred with data: ${data}`);
+    };
+
+    eventManager.subscribe('myEvent', myCallback);
+
+    // Publish the event with optional data
+    eventManager.publish('myEvent', 'Hello, Event!'); // Output: Event occurred with data: Hello, Event!
+
+    // Unsubscribe from the event
+    eventManager.destroy();
+
+    // Attempt to trigger the event after unsubscribing (no output)
+    eventManager.publish('myEvent', 'This won\'t be logged.');
+
+  }
+}
+```
+
 ## Best Practices
 
 - **Encapsulation**: Keep your plugin's internal logic encapsulated to avoid conflicts with other plugins or the core editor.

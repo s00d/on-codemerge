@@ -17,7 +17,7 @@ export class EventManager {
   }
 
   destroy(): void {
-    for (let i in this.listeners) {
+    for (const i in this.listeners) {
       delete this.listeners[i];
     }
   }

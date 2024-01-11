@@ -33,11 +33,11 @@ export class Editor {
     this.editorElement.addEventListener('paste', this.handlePaste.bind(this));
   }
 
-  private handleBlur(event: Event) {
+  private handleBlur() {
     this.core.saveCurrentSelection();
   }
 
-  private handleInput(event: Event) {
+  private handleInput() {
     this.saveCaretPosition();
     this.core.setContent(this.editorElement!.innerHTML);
   }
