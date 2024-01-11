@@ -45,12 +45,12 @@ const styleConfig: StyleConfig = {
 export class TextDecorationButton implements IEditorModule {
   private domUtils: DomUtils;
   private styleManager: StyleManager;
-  private fonts: string[];
+  private fonts: string[] = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana'];
 
-  constructor(fonts: string[] = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana']) {
+  constructor(fonts?: string[]) {
     this.domUtils = new DomUtils();
     this.styleManager = new StyleManager(styleConfig);
-    this.fonts = fonts;
+    if(fonts) this.fonts = fonts;
   }
 
   initialize(core: EditorCore): void {
