@@ -1,6 +1,6 @@
 import type { EditorCoreInterface } from "../src/types";
 
-type InputType = 'button' | 'checkbox' | 'color' | 'date' | 'datetime-local' |
+type InputType = 'block'  | 'checkbox' | 'color' | 'date' | 'datetime-local' |
   'email' | 'file' | 'hidden' | 'image' | 'month' | 'number' |
   'password' | 'radio' | 'range' | 'reset' | 'search' |
   'submit' | 'tel' | 'text' | 'time' | 'url' | 'week' | 'textarea' | 'select';
@@ -12,7 +12,9 @@ interface openParams {
   type?: InputType,
   rows?: number,
   options?: {value: string, label: string}[]
-  data?: {name: string, value: string}[];
+  data?: {name: string, value: string}[]
+  div?: HTMLDivElement
+  onChange?: (val: any) => void
 }
 
 export class Modal {
@@ -21,9 +23,9 @@ export class Modal {
   private contentElement: HTMLElement;
   private closeButton: HTMLButtonElement|null = null;
   private saveButton: HTMLButtonElement|null = null;
-  private inputElements: Map<string, HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement|HTMLButtonElement> = new Map();
-  private lastAdded = 0;
-  private closeCallback: (data: {[key: string]: string | boolean}) => void = () => {};
+  private inputElements: Map<string, HTMLInputElement|HTMLTextAreaElement|HTMLSelectElement|HTMLButtonElement|HTMLDivElement> = new Map();
+  private saveCallback: (data: {[key: string]: string | boolean}) => void = () => {};
+  private onClose: () => void = () => {};
 
 
   constructor(core: EditorCoreInterface, width?: string) {
@@ -155,6 +157,12 @@ export class Modal {
       input.appendChild(optionElement);
     });
 
+    if(field.onChange) {
+      input.addEventListener('input', (e) => {
+        field.onChange!((e.target as HTMLInputElement).value)
+      })
+    }
+
     this.applyStyles(input, {
       flex: '1',
       padding: '5px',
@@ -169,6 +177,11 @@ export class Modal {
     const input = document.createElement('textarea');
     input.rows = field.rows ?? 5;
     input.placeholder = field.label;
+    if(field.onChange) {
+      input.addEventListener('input', (e) => {
+        field.onChange!((e.target as HTMLInputElement).value)
+      })
+    }
 
     this.applyStyles(input, {
       flex: '1',
@@ -186,6 +199,11 @@ export class Modal {
     input.type = field.type ?? 'text';
     input.value = field.value || '';
     input.placeholder = field.label;
+    if(field.onChange) {
+      input.addEventListener('input', (e) => {
+        field.onChange!((e.target as HTMLInputElement).value)
+      })
+    }
     this.applyStyles(input, {
       flex: '1',
       padding: '5px',
@@ -194,65 +212,6 @@ export class Modal {
     });
     return input;
   }
-
-  private addField(value: string, button: HTMLButtonElement, inputNameVal = '', inputVal = '') {
-    const inputWrapper = this.createInputWrapper();
-    const label = document.createElement('label');
-    label.textContent = value;
-    this.applyStyles(label, {
-      marginRight: '10px',
-    });
-
-    const inputBlock = document.createElement('div');
-    this.applyStyles(inputBlock, {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-    });
-
-    const input = this.createInputFieldOfType({
-      label: 'name'
-    })
-    input.id = 'input-' + Math.random().toString(36).substring(2, 11)
-    input.value = inputNameVal;
-    const input2 = this.createInputFieldOfType({
-      label: 'value'
-    })
-    input2.id = 'input-' + Math.random().toString(36).substring(2, 11)
-    input2.value = inputVal;
-    this.lastAdded++;
-
-    inputBlock.appendChild(input)
-    inputBlock.appendChild(input2)
-
-    inputWrapper.appendChild(label);
-    inputWrapper.appendChild(inputBlock);
-
-    if(button.parentElement) this.contentElement.insertBefore(inputWrapper, button.parentElement);
-    this.inputElements.set(value + '_name_' + this.lastAdded, input);
-    this.inputElements.set(value + '_value_' + this.lastAdded, input2);
-  }
-
-  private createButtonField(field: openParams) {
-    const button = document.createElement('button');
-    button.textContent = field.label;
-    this.applyStyles(button, {
-      padding: '10px 20px',
-      backgroundColor: '#377cff',
-      color: 'white',
-      border: 'none',
-      borderRadius: '4px',
-      cursor: 'pointer',
-      marginTop: '20px',
-    });
-
-    if (field.value) {
-      button.addEventListener('click', () => this.addField(field.value!, button));
-    }
-
-    return button;
-  }
-
 
   private createSaveButton() {
     const saveButton = document.createElement('button');
@@ -267,16 +226,16 @@ export class Modal {
       marginTop: '20px',
     });
 
-    saveButton.addEventListener('click', this.close.bind(this));
+    saveButton.addEventListener('click', this.save.bind(this));
 
     return saveButton;
   }
 
 
-  open(fields: openParams[], callback: (data: {[key: string]: string | boolean}) => void, title?: string): void {
-    this.closeCallback = callback;
+  open(fields: openParams[], saveCallback: (data: {[key: string]: string | boolean}) => void, title?: string, onClose = () => {}): void {
+    this.saveCallback = saveCallback;
+    this.onClose = onClose;
 
-    this.lastAdded = 0;
     this.inputElements.clear();
     this.contentElement.innerHTML = '';
 
@@ -293,9 +252,9 @@ export class Modal {
         });
       }
 
-      let input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLButtonElement;
-      if (field.type === 'button') {
-        input = this.createButtonField(field);
+      let input: HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement | HTMLButtonElement | HTMLDivElement;
+      if (field.type === 'block') {
+        input = field.div!;
       } else if (field.type === 'select') {
        input = this.createSelectField(field);
       } else if (field.type === 'textarea') {
@@ -313,14 +272,6 @@ export class Modal {
       inputWrapper.appendChild(input);
       this.contentElement.appendChild(inputWrapper);
 
-      if (field.type === 'button') {
-        if (field.data) {
-          for (let i in field.data) {
-            this.addField(field.value!, input as HTMLButtonElement, field.data[i].name, field.data[i].value)
-          }
-        }
-      }
-
       this.inputElements.set(field.label, input);
     });
 
@@ -332,19 +283,27 @@ export class Modal {
     this.overlayElement.style.display = 'block';
   }
 
-  close(): void {
+  save(): void {
     const data: {[key: string]: string | boolean} = {};
 
     this.inputElements.forEach((input, label) => {
+      if(input instanceof HTMLDivElement) return;
       data[label] = input.type === 'checkbox' ? (input as HTMLInputElement).checked : input.value;
     });
 
     this.modalElement.style.display = 'none';
     this.overlayElement.style.display = 'none';
 
-    if (this.closeCallback) {
-      this.closeCallback(data);
+    if (this.saveCallback) {
+      this.saveCallback(data);
     }
+  }
+
+  close() {
+    this.modalElement.style.display = 'none';
+    this.overlayElement.style.display = 'none';
+
+    this.onClose()
   }
 
   destroy(): void {
@@ -355,11 +314,11 @@ export class Modal {
     this.overlayElement.remove(); // Удалить оверлей из DOM
 
     if(this.closeButton) {
-      this.closeButton.removeEventListener('click', this.close);
+      this.closeButton.removeEventListener('click', this.save);
       this.closeButton = null;
     }
     if(this.saveButton) {
-      this.saveButton.removeEventListener('click', this.close);
+      this.saveButton.removeEventListener('click', this.save);
       this.saveButton = null;
     }
     // @ts-ignore
@@ -369,6 +328,6 @@ export class Modal {
     // @ts-ignore
     this.contentElement = null; // Сбросить ссылку на контент модального окна
     // @ts-ignore
-    this.closeCallback = null; // Сбросить коллбэк для закрытия
+    this.saveCallback = null; // Сбросить коллбэк для закрытия
   }
 }

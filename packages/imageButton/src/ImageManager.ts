@@ -2,7 +2,7 @@ import { Modal } from "../../../helpers/modal";
 import type { EditorCoreInterface } from "../../../src/types";
 import { ContextMenu } from "../../../helpers/contextMenu";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
-import {ResizableElement} from "../../../helpers/ResizableElement";
+import { ResizableElement } from "../../../helpers/ResizableElement";
 
 export class ImageManager {
   private img: HTMLImageElement;

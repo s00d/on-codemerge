@@ -1,5 +1,5 @@
-import {EditorCoreInterface, IEditorModule} from "../../../src/types";
-import {new_line} from "../../../src/icons";
+import type { EditorCoreInterface, IEditorModule } from "../../../src/types";
+import { new_line } from "../../../src/icons";
 
 export class LineBreakButton implements IEditorModule {
   private core: EditorCoreInterface|null = null;

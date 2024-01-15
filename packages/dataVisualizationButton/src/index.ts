@@ -1,20 +1,17 @@
 import type { IEditorModule, Observer, EditorCoreInterface } from "../../../src/types";
-import {Modal} from "../../../helpers/modal";
 
 import 'chartist/dist/index.css';
-import {DiagramManager} from "./DiagramManager";
-import {diagram} from "../../../src/icons";
+import { DiagramManager } from "./DiagramManager";
+import { diagram } from "../../../src/icons";
 
 export class DataVisualizationButton implements IEditorModule, Observer {
   private core: EditorCoreInterface | null = null;
   private chartMap: Map<string, DiagramManager> = new Map();
   private button: HTMLDivElement | null = null;
-  private modal: Modal | null = null;
 
   initialize(core: EditorCoreInterface): void {
     this.core = core;
     this.button = core.toolbar.addButtonIcon('Chart', diagram, this.createChartEvent.bind(this));
-    this.modal = new Modal(this.core, '600px')
     core.subscribeToContentChange(() => {
       this.reloadCharts(core)
     });
@@ -38,8 +35,8 @@ export class DataVisualizationButton implements IEditorModule, Observer {
         const chartType = this.retrieveChartType(chartDiv);
         const { labels, dataset } = this.retrieveChartData(chartDiv);
 
-        const chartManager = new DiagramManager(this.core!);
-        chartManager.show(chartId, chartType, labels, dataset);
+        const chartManager = new DiagramManager(this.core!, labels, dataset);
+        chartManager.show(chartId, chartType);
         this.chartMap.set(chartId, chartManager);
       }
     });
@@ -50,52 +47,25 @@ export class DataVisualizationButton implements IEditorModule, Observer {
     return chartDiv.getAttribute('data-chart-type') || 'line'; // Default to 'line' if not found
   }
 
-  private retrieveChartData(chartDiv: Element): { labels: string[], dataset: string[] } {
+  private retrieveChartData(chartDiv: Element): { labels: string[], dataset: number[][] } {
     // Retrieve and parse the chart data from the data attributes
     const labels = JSON.parse(chartDiv.getAttribute('data-chart-labels') || '[]');
-    const dataset = JSON.parse(chartDiv.getAttribute('data-chart-dataset') || '[]');
+    const dataset = JSON.parse(chartDiv.getAttribute('data-chart-dataset') || '[[]]');
 
     return { labels, dataset };
   }
 
   private createChartEvent() {
-    this.modal?.open([
-      { label: 'Chart Type', type: 'select', value: 'line', options: [
-          { value: 'line', label: 'Line' },
-          { value: 'bar', label: 'Bar' },
-          { value: 'pie', label: 'Pie' },
-          // Добавьте другие типы графиков
-        ]},
-      { label: 'dataset', type: 'button', value: 'dataset'},
-      // Добавьте другие поля, такие как данные для графика
-    ], (data) => {
-      console.log(data)
-
-      const dataset: {[key: string]: string} = {};
-      const labels: string[] = []
-      const datas: string[] = []
-
-      for (const key in data) {
-        if (key.startsWith('dataset_name_')) {
-          const index = key.split('_')[2]; // Получаем индекс из ключа
-          const valueKey = `dataset_value_${index}`;
-          if (data[valueKey]) {
-            const dkey = data[key].toString() as string;
-            const dval = data[valueKey] as string;
-            // @ts-ignore
-            dataset[dkey] = data[valueKey];
-            labels.push(dkey)
-            datas.push(dval)
-          }
-        }
-      }
-
       const id = 'chart-' + Math.random().toString(36).substring(2, 11);
       const char = new DiagramManager(this.core!)
-      this.chartMap.set(id, char)
-
-      char.show(id, data['Chart Type'] as string, labels, datas)
-    }, 'dataset');
+      char.create((type) => {
+        this.chartMap.set(id, char)
+        char.show(id, type)
+        return;
+      }, () => {
+        // char.destroy();
+        return;
+      })
   }
 
   destroy(): void {

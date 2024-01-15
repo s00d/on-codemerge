@@ -1,29 +1,182 @@
 import { BarChart, LineChart, PieChart } from 'chartist';
 import type { EditorCoreInterface } from "../../../src/types";
 import { Modal } from "../../../helpers/modal";
-import {ResizableElement} from "../../../helpers/ResizableElement";
+import { ResizableElement } from "../../../helpers/ResizableElement";
 
 export class DiagramManager {
   private core: EditorCoreInterface;
   private div: HTMLDivElement | null = null;
   private chart: BarChart | LineChart | PieChart | null = null;
   private modal: Modal | null = null;
+  private divEditBlock: HTMLDivElement | null = null;
   private resizer: ResizableElement|null = null;
+  private labels: string[] = []
+  private dataset: number[][] = []
+  private addRowButton: HTMLButtonElement|null = null;
+  private addDataButton: HTMLButtonElement|null = null;
 
-  constructor(core: EditorCoreInterface) {
+  constructor(core: EditorCoreInterface, labels: string[]|null = null, dataset: number[][]|null = null) {
     this.core = core;
     this.modal = new Modal(this.core, '600px');
+    if(labels) this.labels = labels
+    if(dataset) this.dataset = dataset
+  }
+
+  private createEditor() {
+    this.divEditBlock = document.createElement('div');
+
+    this.initializeButtons();
+
+    const inputsBlock = document.createElement('div');
+    this.divEditBlock.appendChild(inputsBlock);
+
+    this.initializeRows(inputsBlock);
+    return this.divEditBlock;
+  }
+
+  private initializeRows(inputsBlock: HTMLDivElement) {
+    if (!this.labels.length) {
+      this.addRow(inputsBlock, 0);
+    } else {
+      this.labels.forEach((_, index) => this.addRow(inputsBlock, index, false));
+    }
+  }
+
+  private addRow(inputsBlock: HTMLDivElement, index: number, init: boolean = true) {
+  // Если это инициализация, устанавливаем значение по умолчанию для labels и dataset
+    if(init) {
+      this.labels[index] = this.labels[index] ?? 'name';
+      this.dataset[index] = this.dataset[index] ?? [0];
+    }
+
+    const row = this.createRow(index);
+    inputsBlock.appendChild(row);
+  }
+
+  private createRow(index: number): HTMLDivElement {
+    const row = document.createElement('div');
+    row.classList.add('input-row');
+    row.style.overflow = 'scroll';
+    row.id = `row-${index}`;
+
+    const labelInput = this.createLabelInput(index);
+    row.appendChild(labelInput);
+
+  // Создание инпутов для данных на основе текущего размера dataset
+    this.dataset[0].forEach((_, dataIndex) => {
+      const dataInput = this.createDataInput(index, dataIndex);
+      row.appendChild(dataInput);
+    });
+
+    return row;
+  }
+
+  private createLabelInput(index: number): HTMLInputElement {
+    const labelInput = document.createElement('input');
+    labelInput.type = 'text';
+    labelInput.value = this.labels[index] ?? 'name';
+    labelInput.placeholder = 'Enter label';
+    labelInput.id = `label-${index}`;
+    labelInput.addEventListener('input', (e) => {
+      this.labels[index] = (e.target as HTMLInputElement).value;
+    });
+    return labelInput;
+  }
+
+  private createDataInput(index: number, dataIndex: number): HTMLInputElement {
+    const dataInput = document.createElement('input');
+    dataInput.type = 'number';
+    dataInput.value = (this.dataset[index][dataIndex] ?? '0').toString();
+    dataInput.placeholder = `Enter data ${dataIndex + 1}`;
+    dataInput.id = `data-${index}-${dataIndex}`;
+    dataInput.addEventListener('input', (e) => {
+      this.dataset[index][dataIndex] = parseInt((e.target as HTMLInputElement).value);
+    });
+    return dataInput;
+  }
+
+  private initializeButtons() {
+    const buttonsBlock = this.createButtonsBlock();
+    this.divEditBlock?.appendChild(buttonsBlock);
+  }
+
+  private createButtonsBlock(): HTMLDivElement {
+    const buttonsBlock = document.createElement('div');
+
+    this.addRowButton = document.createElement('button');
+    this.addRowButton.textContent = 'Add New Dataset';
+    this.addRowButton.onclick = () => this.addRow(this.divEditBlock!, this.labels.length);
+    buttonsBlock.appendChild(this.addRowButton);
+
+    this.addDataButton = document.createElement('button');
+    this.addDataButton.textContent = 'Add Data Column';
+    this.addDataButton.onclick = this.addDataColumn.bind(this);
+    buttonsBlock.appendChild(this.addDataButton);
+
+    return buttonsBlock;
+  }
+
+  private addDataColumn() {
+    const rows = document.querySelectorAll('.input-row');
+    const newDataIndex = this.dataset[0].length; // Берем количество столбцов из первой строки
+
+    rows.forEach((row, index) => {
+      if (index >= this.dataset.length) {
+        // Для новых строк, которые не имеют данных
+        this.dataset.push(new Array(newDataIndex + 1).fill(0));
+      } else {
+        // Добавляем новые данные в существующие строки
+        this.dataset[index].push(0);
+      }
+
+      const dataInput = this.createDataInput(index, newDataIndex);
+      row.appendChild(dataInput);
+    });
 
   }
 
-  show(charId: string, chartType: string, labels: string[], dataset: string[]) {
+
+  private changeEdit(val: string) {
+    if(!this.divEditBlock) return;
+    const parent = this.divEditBlock.parentElement as HTMLElement;
+    this.divEditBlock?.remove();
+    this.divEditBlock = null;
+    this.labels = [];
+    this.dataset = [];
+    const inputWrapper = this.createEditor();
+    parent.appendChild(inputWrapper);
+    if(this.addDataButton) {
+      if (val === 'pie') {
+        this.addDataButton.style.display = 'none'
+      } else {
+        this.addDataButton.style.display = 'unset'
+      }
+    }
+  }
+
+
+  create(onSave: (type: string) => void, onClose: () => void) {
+    this.modal?.open([
+      { label: 'Chart Type', type: 'select', value: 'line', options: [
+          { value: 'line', label: 'Line' },
+          { value: 'bar', label: 'Bar' },
+          { value: 'pie', label: 'Pie' },
+          // Добавьте другие типы графиков
+        ], onChange: this.changeEdit.bind(this) },
+      { label: 'dataset', type: 'block', div: this.createEditor() },
+    ], (data) => {
+      onSave(data['Chart Type'] as string);
+    }, 'Char Data', onClose)
+  }
+
+  show(charId: string, chartType: string) {
     // Создание элемента canvas для графика
     this.div = document.createElement('div');
     this.div.id = 'block-' + charId;
     this.div.contentEditable = 'false';
     this.div.setAttribute('data-chart-type', chartType);
-    this.div.setAttribute('data-chart-labels', JSON.stringify(labels));
-    this.div.setAttribute('data-chart-dataset', JSON.stringify(dataset));
+    this.div.setAttribute('data-chart-labels', JSON.stringify(this.labels));
+    this.div.setAttribute('data-chart-dataset', JSON.stringify(this.dataset));
 
     this.core.insertHTMLIntoEditor(this.div.outerHTML);
 
@@ -31,8 +184,8 @@ export class DiagramManager {
 
 
     const chartData = {
-      labels: labels,
-      series: [dataset.map(Number)] // Преобразование строк в числа
+      labels: this.labels,
+      series: this.dataset // Преобразование строк в числа
     };
 
     switch (chartType) {
@@ -43,12 +196,10 @@ export class DiagramManager {
         this.chart = new BarChart('#' + this.div.id, chartData);
         break;
       case 'pie':
-        const pieData = {
-          labels: labels,
-          series: dataset.map(Number) // Для круговой диаграммы формат данных отличается
-        };
-
-        this.chart = new PieChart('#' + this.div.id, pieData);
+        this.chart = new PieChart('#' + this.div.id, {
+          labels: this.labels,
+          series: this.dataset.map(row => row[0])
+        });
         break;
       default:
         throw new Error('BAD CHAR')
@@ -61,7 +212,6 @@ export class DiagramManager {
         this.chart?.update();
       });
 
-      console.log(svg)
       svg.id = charId;
       svg.onclick = (e) => {
         e.stopPropagation();
@@ -78,65 +228,19 @@ export class DiagramManager {
     this.core.moveCursorToStart();
   }
 
-  public updateChart(newLabels: string[], newDataset: string[]): void {
-    // Implementation of chart updating logic
-    // Update 'this.chart' with new data
-  }
-
   private openEditModal() {
     const isPieChart = this.chart instanceof PieChart;
 
-    // Получаем актуальные данные диаграммы
-    console.log(this.chart)
-    // @ts-ignore
-    const labels = this.chart.data.labels as string[];
-    let dataset: string[];
-    if (isPieChart) {
-      // @ts-ignore
-      dataset = this.chart.data.series as string[];
-    } else {
-      // @ts-ignore
-      dataset = this.chart.data.series[0] as string[];
-    }
-
-    // Подготовка данных для модального окна
-    const data = labels.map((label, index) => ({ name: label, value: dataset[index] }));
-
-
     // Открываем модальное окно с полями и обработчиком закрытия
     this.modal?.open([
-      {
-        label: 'Add Data Point',
-        type: 'button',
-        value: 'dataset', // Используйте соответствующее значение
-        data: data
-      }
-    ], (data) => {
-      const dataset: {[key: string]: string} = {};
-      const newLabels: string[] = []
-      const newDatas: string[] = []
-
-      for (const key in data) {
-        if (key.startsWith('dataset_name_')) {
-          const index = key.split('_')[2]; // Получаем индекс из ключа
-          const valueKey = `dataset_value_${index}`;
-          if (data[valueKey]) {
-            const dkey = data[key].toString() as string;
-            const dval = data[valueKey] as string;
-            // @ts-ignore
-            dataset[dkey] = data[valueKey];
-            newLabels.push(dkey)
-            newDatas.push(dval)
-          }
-        }
-      }
-
+      { label: 'dataset', type: 'block', div: this.createEditor() }
+    ], () => {
       if (this.chart) {
-        this.div?.setAttribute('data-chart-labels', JSON.stringify(newLabels));
-        this.div?.setAttribute('data-chart-dataset', JSON.stringify(newDatas));
+        this.div?.setAttribute('data-chart-labels', JSON.stringify(this.labels));
+        this.div?.setAttribute('data-chart-dataset', JSON.stringify(this.dataset));
         this.chart.update({
-          labels: newLabels,
-          series: isPieChart ? newDatas.map(Number) : [newDatas.map(Number)]
+          labels: this.labels,
+          series: isPieChart ? this.dataset.map(row => row[0]) : this.dataset
         });
 
         const editor = this.core?.editor.getEditorElement();
@@ -174,6 +278,15 @@ export class DiagramManager {
 
     if (this.resizer) {
       this.resizer.destroy();
+    }
+    if (this.divEditBlock) {
+      this.divEditBlock.remove();
+    }
+    if (this.addRowButton) {
+      this.addRowButton.remove();
+    }
+    if (this.addDataButton) {
+      this.addDataButton.remove();
     }
 
     // Nullify references to help with garbage collection

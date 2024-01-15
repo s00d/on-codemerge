@@ -1,0 +1,42 @@
+# LineBreakButton Plugin
+
+The `LineBreakButton` plugin is a functional enhancement for the On-Codemerge editor, focused on providing an intuitive way for users to insert line breaks into their content. This plugin simplifies the process of adding spacing and organizing content within the editor.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['LineBreakButton']} />
+
+## Integration
+
+To incorporate the `LineBreakButton` plugin into your On-Codemerge editor, you need to import it and register it with `EditorCore`. Here’s how you can do it:
+
+```jsx title="Initialize and Register LineBreakButton"
+import EditorCore from 'on-codemerge';
+import { LineBreakButton } from 'on-codemerge/lineBreakButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    editor.registerModule(new LineBreakButton());
+  }
+});
+```
+
+## Features
+
+- **Easy Line Breaks:** Allows users to insert line breaks with a single click.
+- **Context-Aware Placement:** The plugin intelligently places the line break based on the current cursor position.
+- **Preview Mode:** Offers a preview of where the line break will be inserted as the user hovers over the button.
+
+## How it Works
+
+The `LineBreakButton` operates by adding a special button to the toolbar. When clicked, it performs the following actions:
+
+1. **Locate Cursor Position:** It finds the nearest element in the content where the user’s cursor is located.
+2. **Insert Line Break:** A new `div` element with a `br` tag is created and inserted at the determined location, ensuring a line break is added exactly where intended.
+3. **Maintain Content Flow:** After insertion, the plugin updates the editor's content to reflect the change, maintaining the overall content flow and structure.
+
+Additionally, the plugin enhances the user experience by showing a temporary preview of the line break's placement as the user hovers over the button, providing visual feedback before the actual insertion.
+
+Upon destruction, the plugin ensures the removal of event listeners and other resources, keeping the editor's performance optimized.

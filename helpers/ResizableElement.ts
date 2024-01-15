@@ -1,4 +1,4 @@
-import EditorCoreInterface from "../src/types";
+import type EditorCoreInterface from "../src/types";
 
 export class ResizableElement {
   private element: HTMLElement|SVGAElement;
