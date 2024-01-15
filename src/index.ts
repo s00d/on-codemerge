@@ -321,9 +321,15 @@ export class EditorCore implements EditorCoreInterface {
   }
 
   contentCleanup(newContent: string): string {
-    return newContent
-      .replace(/\sid\s*=\s*["']?[^"']*["']?/gi, "")
-      .replace(/<meta\s+charset=["']utf-8["']\s*\/?>/gi, "");
+    if (/<[a-z][\s\S]*>/i.test(newContent)) {
+      // Если содержит HTML-теги, применяем правила замены
+      return newContent
+        .replace(/\sid\s*=\s*["']?[^"']*["']?/gi, "")   // Удаляем атрибуты id
+        .replace(/<meta\s+charset=["']utf-8["']\s*\/?>/gi, ""); // Удаляем теги meta с указанием кодировки
+    } else {
+      // Если HTML-теги отсутствуют, возвращаем исходный текст
+      return newContent;
+    }
   }
 
   setContentCleanup(newContent: string): void {

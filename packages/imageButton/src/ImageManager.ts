@@ -2,6 +2,7 @@ import { Modal } from "../../../helpers/modal";
 import type { EditorCoreInterface } from "../../../src/types";
 import { ContextMenu } from "../../../helpers/contextMenu";
 import { DropdownMenu } from "../../../helpers/dropdownMenu";
+import {ResizableElement} from "../../../helpers/ResizableElement";
 
 export class ImageManager {
   private img: HTMLImageElement;
@@ -10,8 +11,9 @@ export class ImageManager {
   private core: EditorCoreInterface;
   private contextMenu: ContextMenu;
   private dropdown: DropdownMenu;
-  private resizeHandle: HTMLDivElement;
   private onRemove: (id: string) => void;
+  private resizer: ResizableElement|null = null;
+
 
   constructor(core: EditorCoreInterface, img: HTMLImageElement, onRemove: (id: string) => void) {
     this.img = img;
@@ -20,19 +22,26 @@ export class ImageManager {
     this.onRemove = onRemove;
     this.core = core;
     this.contextMenu = new ContextMenu(core);
-    this.dropdown = new DropdownMenu(core, 'Align')
+    this.dropdown = new DropdownMenu(core, 'Align');
     this.dropdown.addItem('Left', () => this.applyAlignment(core, 'left'))
     this.dropdown.addItem('Right', () => this.applyAlignment(core, 'right'))
     this.dropdown.addItem('Center', () => this.applyAlignment(core, 'center'))
     this.dropdown.addItem('Normal', () => this.applyAlignment(core, 'normal'))
 
+
     this.contextMenu.addItem('Change Style', () => this.showImageModal());
     this.contextMenu.addHtmlItem(this.dropdown.getButton());
 
     this.img.addEventListener('contextmenu', this.handleContextMenu.bind(this));
-    this.resizeHandle = document.createElement('div');
-    this.addResizeHandle();
+
     this.observeImageRemoval();
+
+    const editor = this.core?.editor.getEditorElement();
+    if(editor) this.core?.setContent(editor.innerHTML)
+  }
+
+  addResizer() {
+    this.resizer = new ResizableElement(this.img, this.core);
   }
 
   private handleContextMenu(event: MouseEvent) {
@@ -83,70 +92,6 @@ export class ImageManager {
     this.contextMenu.hide();
   }
 
-  private addResizeHandle(): void {
-    this.resizeHandle.className = 'resize-handle';
-    this.resizeHandle.style.position = 'absolute';
-    this.resizeHandle.style.width = '4px';
-    this.resizeHandle.style.height = '4px';
-    this.resizeHandle.style.background = '#FFF';
-    this.resizeHandle.style.border = '2px solid #666';
-    this.resizeHandle.style.right = '-2px';
-    this.resizeHandle.style.bottom = '-2px';
-    this.resizeHandle.style.cursor = 'nwse-resize';
-    this.resizeHandle.style.zIndex = '1000';
-
-    this.resizeHandle.addEventListener('mousedown', this.startResizing.bind(this));
-
-    // Инициализация позиции ресайзера
-    this.updateResizeHandlePosition();
-
-    // Добавление обработчиков событий для обновления позиции ресайзера
-    this.img.addEventListener('mouseenter', () => this.updateResizeHandlePosition());
-    this.img.addEventListener('load', () => this.updateResizeHandlePosition());
-    window.addEventListener('scroll', () => this.updateResizeHandlePosition());
-
-    this.img.parentElement?.appendChild(this.resizeHandle);
-  }
-
-  private updateResizeHandlePosition(): void {
-    if (this.resizeHandle && this.img) {
-      const imgRect = this.img.getBoundingClientRect();
-      this.resizeHandle.style.left = `${imgRect.right + window.scrollX - 10}px`; // Учитываем прокрутку
-      this.resizeHandle.style.top = `${imgRect.bottom + window.scrollY - 10}px`;
-    }
-  }
-
-
-  private startResizing(e: MouseEvent): void {
-    e.preventDefault();
-    e.stopPropagation();
-
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startWidth = this.img.clientWidth;
-    const startHeight = this.img.clientHeight;
-
-    const doDrag = (e: MouseEvent) => {
-      const newWidth = startWidth + e.clientX - startX;
-      const newHeight = startHeight + e.clientY - startY;
-      this.img.style.width = `${newWidth}px`;
-      this.img.style.height = `${newHeight}px`;
-      this.updateResizeHandlePosition();
-
-      const editor = this.core?.editor.getEditorElement();
-      if(editor) this.core.setContent(editor?.innerHTML)
-    };
-
-    const stopDrag = () => {
-      document.removeEventListener('mousemove', doDrag, false);
-      document.removeEventListener('mouseup', stopDrag, false);
-      this.updateResizeHandlePosition();
-    };
-
-    document.addEventListener('mousemove', doDrag, false);
-    document.addEventListener('mouseup', stopDrag, false);
-  }
-
   private showImageModal(): void {
     const alt = this.img.alt ?? '';
     const width = (this.img.width ?? 0).toString();
@@ -171,8 +116,8 @@ export class ImageManager {
 
   private remove(): void {
     this.img.remove();
-    if (this.resizeHandle && this.resizeHandle.parentElement) {
-      this.resizeHandle.parentElement.removeChild(this.resizeHandle);
+    if (this.resizer) {
+      this.resizer.destroy();
     }
     this.onRemove(this.imgId);
   }
@@ -180,8 +125,10 @@ export class ImageManager {
   destroy(): void {
     // Remove any event listeners or perform other cleanup as needed
     this.img.removeEventListener('contextmenu', this.handleContextMenu);
-    window.removeEventListener('scroll', this.updateResizeHandlePosition);
-    this.resizeHandle.removeEventListener('mousedown', this.startResizing);
+
+    if (this.resizer) {
+      this.resizer.destroy();
+    }
 
     if (this.contextMenu) {
       this.contextMenu.destroy();
@@ -193,11 +140,6 @@ export class ImageManager {
       this.dropdown.destroy();
       // @ts-ignore
       this.dropdown = null;
-    }
-
-    // Remove the resize handle
-    if (this.resizeHandle && this.resizeHandle.parentElement) {
-      this.resizeHandle.parentElement.removeChild(this.resizeHandle);
     }
 
     // Set other properties to null to release references

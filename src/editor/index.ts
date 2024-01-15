@@ -50,8 +50,14 @@ export class Editor {
     const clipboardData = event.clipboardData || window.clipboardData;
     let pastedData = clipboardData.getData('text/html');
 
+    if (!pastedData) {
+      pastedData = clipboardData.getData('text/plain');
+    }
+
     // Очистка HTML от атрибутов id
     pastedData = this.core.contentCleanup(pastedData);
+
+    console.log(1111, pastedData, pastedData)
 
     const tempDiv = document.createElement('div');
     tempDiv.innerHTML = pastedData;

@@ -26,17 +26,17 @@ export class ImageButton implements IEditorModule, Observer {
     const editor = core.editor.getEditorElement();
     if (!editor) return;
 
-    const tables = editor.querySelectorAll('img');
-    tables.forEach((image: HTMLImageElement) => {
-      let blockId = image.id;
-      if (!blockId || blockId === '' || !blockId.startsWith('table-')) {
-        image.id = blockId = 'img-' + Math.random().toString(36).substring(2, 11)
-      }
+    const images = editor.querySelectorAll('img');
+    images.forEach((img: HTMLImageElement) => {
+      const imageId = img.id || 'img-' + Math.random().toString(36).substring(2, 11);
+      img.id = imageId;
 
-      if (!this.imageManagerMap.has(blockId)) {
-        // Если для этой таблицы еще нет TableManager, создаем его
-        const imageManager = new ImageManager(this.core!, image, this.removeImage.bind(this));
-        this.imageManagerMap.set(blockId, imageManager);
+      if (!this.imageManagerMap.has(imageId)) {
+        console.log('reload', imageId)
+        const imageManager = new ImageManager(this.core!, img, this.removeImage.bind(this));
+        this.imageManagerMap.set(imageId, imageManager);
+
+        imageManager.addResizer();
       }
     });
   }
@@ -68,10 +68,12 @@ export class ImageButton implements IEditorModule, Observer {
     img.style.overflow = 'auto';
     img.id = 'img-' + Math.random().toString(36).substring(2, 11)
 
-    this.core?.insertHTMLIntoEditor(img)
-
     const imageManager = new ImageManager(this.core!, img, this.removeImage.bind(this));
     this.imageManagerMap.set(img.id, imageManager);
+
+    this.core?.insertHTMLIntoEditor(img)
+
+    imageManager.addResizer();
   }
 
   private removeImage(id: string) {

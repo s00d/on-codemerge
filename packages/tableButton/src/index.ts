@@ -10,7 +10,7 @@ export class TableButton implements IEditorModule, Observer {
   initialize(core: EditorCoreInterface): void {
     this.core = core;
     this.injectStyles();
-    this.button = core.toolbar.addButtonIcon('Table', table, () => this.createTableEvent.bind(this))
+    this.button = core.toolbar.addButtonIcon('Table', table, this.createTableEvent.bind(this))
 
     core.subscribeToContentChange(() => {
       this.reloadTables(core)

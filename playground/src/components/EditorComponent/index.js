@@ -24,6 +24,8 @@ import ClearStylesButton from "../../../../packages/clearStylesButton/src";
 import MarkdownImportExportButton from "../../../../packages/markdownImportExportButton/src";
 import ResizeEditorButton from "../../../../packages/resizeEditorButton/src";
 import WordCountButton from "../../../../packages/wordCountButton/src";
+import DataVisualizationButton from "../../../../packages/dataVisualizationButton/src";
+import LineBreakButton from "../../../../packages/lineBreakButton/src";
 
 export default function EditorComponent({ activePlugins, language }) {
   const editorContainerRef = useRef(null);
@@ -32,6 +34,7 @@ export default function EditorComponent({ activePlugins, language }) {
 
   const allPlugins = {
     'UndoRedoButton': UndoRedoButton,
+    'LineBreakButton': LineBreakButton,
     'SpacerButton': SpacerButton,
     'BlockButton': BlockButton,
     'ParagraphButton': ParagraphButton,
@@ -52,6 +55,7 @@ export default function EditorComponent({ activePlugins, language }) {
     'MarkdownImportExportButton': MarkdownImportExportButton,
     'ResizeEditorButton': ResizeEditorButton,
     'WordCountButton': WordCountButton,
+    'DataVisualizationButton': DataVisualizationButton,
   };
 
 

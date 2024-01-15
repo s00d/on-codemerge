@@ -1,7 +1,7 @@
 export class DomUtils {
   getDeepestNodes(range: Range): Node[] {
     const nodesToProcess = [];
-    const deepestNodes: Node[] = [];
+    let deepestNodes: Node[] = [];
     if (!range.collapsed) {
 
       const startContainer = range.startContainer;
@@ -48,7 +48,30 @@ export class DomUtils {
       }
     }
 
+
+    // console.log(1111, node, this.isStyledTextNode(node))
+    if(deepestNodes.length === 1) {
+      const node = deepestNodes[0] as HTMLElement;
+      if (!this.hasStyledTextNode(node)) {
+        const newSpan = document.createElement('span');
+        range.surroundContents(newSpan);
+
+        // Заменяем последний узел на новый span
+        deepestNodes = [newSpan];
+      }
+    }
+
     return deepestNodes;
+  }
+
+  hasStyledTextNode(node: Node): boolean {
+    console.log(1111, node.nodeType)
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      const element = node as HTMLElement;
+      return element.style
+        .length > 0;
+    }
+    return false;
   }
 
   getSelectedRoot(selection: Selection) {
@@ -59,8 +82,8 @@ export class DomUtils {
       // Обработка случая с выделением
       const range = selection.getRangeAt(0);
       nodesToStyle = this.getDeepestNodes(range);
+      console.log(3333, nodesToStyle)
     } else {
-
       // Обработка случая без выделения, но с курсором
 
       const currentNode = selection.anchorNode;

@@ -23,7 +23,6 @@ export interface I18nInterface {
   currentLang: string;
 
   addObserver(observer: Observer): void;
-  notifyObservers(): void;
   loadLanguage(lang: string): Promise<void>;
   setCurrentLanguage(lang: string): Promise<void>;
   merge(newTranslations: LanguagePack): void;

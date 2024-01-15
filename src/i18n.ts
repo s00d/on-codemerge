@@ -2,37 +2,33 @@ import type { I18nInterface, LanguagePack, Languages, Observer, EditorCoreInterf
 
 export class I18n implements I18nInterface {
   private languages: Languages = {};
-  public currentLang: string = 'en';
+  public currentLang: string;
   private core: EditorCoreInterface;
   private observers: Observer[] = [];
-
-  addObserver(observer: Observer): void {
-    this.observers.push(observer);
-  }
-
-  notifyObservers(): void {
-    this.observers.forEach(observer => {
-      observer.update(this.currentLang, this.languages[this.currentLang])
-    });
-  }
 
   constructor(core: EditorCoreInterface, locale: string = 'en') {
     this.core = core;
     this.currentLang = locale;
   }
 
-  async loadLanguage(lang: string): Promise<void> {
-    if (this.languages[lang]) {
-      return;
-    }
+  addObserver(observer: Observer): void {
+    this.observers.push(observer);
+  }
 
-    try {
-      const messages = await import(`../locales/${lang}.json`);
-      this.languages[lang] = messages.default;
-      this.notifyObservers();
-      this.core.eventManager.publish('languageLoaded', lang);
-    } catch (error) {
-      console.error(`Could not load language: ${lang}`, error);
+  private notifyObservers(): void {
+    this.observers.forEach(observer => observer.update(this.currentLang, this.languages[this.currentLang]));
+  }
+
+  async loadLanguage(lang: string): Promise<void> {
+    if (!this.languages[lang]) {
+      try {
+        const messages = await import(`../locales/${lang}.json`);
+        this.languages[lang] = messages.default;
+        this.notifyObservers();
+        this.core.eventManager.publish('languageLoaded', lang);
+      } catch (error) {
+        console.error(`Could not load language: ${lang}`, error);
+      }
     }
   }
 
@@ -42,9 +38,10 @@ export class I18n implements I18nInterface {
   }
 
   merge(newTranslations: LanguagePack): void {
-    if (this.currentLang && this.languages[this.currentLang]) {
+    const currentLanguageTranslations = this.languages[this.currentLang];
+    if (currentLanguageTranslations) {
       this.languages[this.currentLang] = {
-        ...this.languages[this.currentLang],
+        ...currentLanguageTranslations,
         ...newTranslations
       };
       this.notifyObservers();

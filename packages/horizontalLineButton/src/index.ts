@@ -27,6 +27,9 @@ export class HorizontalLineButton implements IEditorModule, Observer {
     fragment.appendChild(hr);
     fragment.appendChild(breakElement);
     this.core.insertHTMLIntoEditor(fragment);
+
+    const editor = this.core.editor.getEditorElement();
+    if(editor) this.core.setContent(editor.innerHTML)
   }
 
   destroy(): void {
