@@ -10,7 +10,7 @@ export class EventManager {
     this.listeners[event].push(callback);
   }
 
-  publish(event: string, data?: string): void {
+  publish(event: string, data?: string|any): void {
     if (this.listeners[event]) {
       this.listeners[event].forEach(callback => callback(data));
     }

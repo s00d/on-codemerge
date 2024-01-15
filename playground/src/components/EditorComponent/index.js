@@ -26,6 +26,7 @@ import ResizeEditorButton from "../../../../packages/resizeEditorButton/src";
 import WordCountButton from "../../../../packages/wordCountButton/src";
 import DataVisualizationButton from "../../../../packages/dataVisualizationButton/src";
 import LineBreakButton from "../../../../packages/lineBreakButton/src";
+import FileButton from "../../../../packages/fileButton/src";
 
 export default function EditorComponent({ activePlugins, language }) {
   const editorContainerRef = useRef(null);
@@ -56,6 +57,7 @@ export default function EditorComponent({ activePlugins, language }) {
     'ResizeEditorButton': ResizeEditorButton,
     'WordCountButton': WordCountButton,
     'DataVisualizationButton': DataVisualizationButton,
+    'FileButton': FileButton,
   };
 
 

@@ -16,6 +16,15 @@ export class ImageButton implements IEditorModule, Observer {
     });
 
     core.i18n.addObserver(this);
+
+    core.eventManager.subscribe('fileDrop', this.handleDragAndDropFile.bind(this));
+  }
+
+  private handleDragAndDropFile(data: { fileName: string, fileContent: string, isImage: boolean }): void {
+    if (data.isImage) {
+      // Insert the image if the dropped file is an image
+      this.insertImage(data.fileContent);
+    }
   }
 
   update(): void {

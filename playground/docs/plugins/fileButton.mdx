@@ -1,0 +1,46 @@
+# FileButton Plugin
+
+The `FileButton` plugin is a comprehensive file management tool for the On-Codemerge editor. It enhances the editor's capabilities by allowing users to upload, display, and manage files directly within the editor interface.
+
+import EditorComponent from '@site/src/components/EditorComponent';
+
+<EditorComponent activePlugins={['FileButton']} />
+
+## Integration
+
+To integrate the `FileButton` plugin into the On-Codemerge editor, you need to import and register it with the `EditorCore`. Follow these steps for a seamless integration:
+
+```jsx title="Initialize and Register FileButton"
+import EditorCore from 'on-codemerge';
+import { FileButton } from 'on-codemerge/fileButton';
+
+document.addEventListener('DOMContentLoaded', () => {
+  const appElement = document.getElementById('app');
+  if (appElement) {
+    const editor = new EditorCore(appElement);
+    const fileButton = new FileButton('YOUR_FILE_UPLOAD_ENDPOINT', 'YOUR_FILE_DELETE_ENDPOINT');
+    editor.registerModule(fileButton);
+  }
+});
+```
+
+## Features
+
+The `FileButton` plugin offers a range of functionalities to handle files:
+
+- **Multiple File Upload:** Users can select and upload multiple files simultaneously.
+- **File Display:** Once uploaded, each file is represented as a block within the editor, showing the file's name.
+- **Download Link:** Each file block includes a download link, allowing users to download the file directly from the editor.
+- **File Deletion:** Users can delete uploaded files from the server and remove their representations from the editor.
+
+## How it Works
+
+The `FileButton` operates by:
+
+1. **Uploading Files:** When the user selects files, the plugin uploads them to a specified server endpoint using a `FormData` object and an asynchronous `fetch` request.
+
+2. **Creating File Blocks:** For each uploaded file, a block is created in the editor with the file's name and a download link. The blocks are styled for clear visibility and user interaction.
+
+3. **Handling File Deletion:** The plugin allows for the deletion of files. When a file is deleted, a request is sent to a server endpoint, and the corresponding block is removed from the editor.
+
+The `FileButton` plugin utilizes modern JavaScript features and async/await syntax for efficient file handling, making it a robust addition to the On-Codemerge editor suite.

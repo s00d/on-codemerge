@@ -11,6 +11,15 @@ export class LineBreakButton implements IEditorModule {
     this.button = core.toolbar.addButtonIcon('Insert Line Break',  new_line, this.insertLineBreakEvent.bind(this));
     this.button.addEventListener('mouseenter', this.showPreview.bind(this));
     this.button.addEventListener('mouseleave', this.hidePreview.bind(this));
+
+    document.addEventListener('keydown', this.handleKeyboardShortcut.bind(this))
+  }
+
+  private handleKeyboardShortcut(event: KeyboardEvent): void {
+    // Проверка на Command/Control + Enter
+    if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+      this.insertLineBreakEvent();
+    }
   }
 
   private findNearestOnCodemergeElement(selection: Range): HTMLElement | null {

@@ -5,7 +5,7 @@ import type Editor from "./editor";
 import type Footer from "./footer";
 import type EventManager from "./EventManager";
 
-export type Hook = (data?: string) => void
+export type Hook = (data?: string|any) => void
 
 export interface Languages {
   [key: string]: LanguagePack;
