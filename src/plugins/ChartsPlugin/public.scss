@@ -1,0 +1,5 @@
+/* Chart container */
+.chart-container {
+  @apply relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  min-height: 300px;
+}

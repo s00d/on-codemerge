@@ -1,0 +1,59 @@
+/* HTML Viewer Modal */
+.html-viewer-modal {
+  @apply max-w-3xl w-full;
+
+  .modal-header {
+    @apply flex items-center justify-between p-4 border-b border-gray-200;
+  }
+
+  .copy-button,
+  .save-button,
+  .edit-button {
+    @apply flex items-center gap-2 px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-md transition-colors;
+  }
+
+  .modal-body {
+    @apply p-4 max-h-[70vh] overflow-auto;
+  }
+
+  pre {
+    @apply bg-gray-50 rounded-lg p-4 overflow-x-auto;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  }
+
+  code {
+    @apply text-sm leading-relaxed whitespace-pre;
+  }
+}
+
+#html-viewer-content {
+  .tabs {
+    display: flex;
+    gap: 1rem; // Пространство между вкладками
+    border-bottom: 1px solid #e5e7eb; // Граница под вкладками (Tailwind: border-b border-gray-200)
+    margin-bottom: 1rem; // Отступ снизу (Tailwind: mb-4)
+
+    .tab {
+      padding: 0.5rem 1rem; // Отступы внутри вкладки (Tailwind: px-4 py-2)
+      font-size: 0.875rem; // Размер текста (Tailwind: text-sm)
+      font-weight: 500; // Жирность текста (Tailwind: font-medium)
+      color: #6b7280; // Цвет текста (Tailwind: text-gray-500)
+      border-bottom: 2px solid transparent; // Прозрачная граница снизу (Tailwind: border-b-2 border-transparent)
+      transition: all 0.2s ease-in-out; // Плавный переход для hover и active
+      cursor: pointer; // Курсор в виде указателя
+
+      &:hover {
+        color: #374151; // Цвет текста при наведении (Tailwind: hover:text-gray-700)
+      }
+
+      &:focus {
+        outline: none; // Убираем outline при фокусе (Tailwind: focus:outline-none)
+      }
+
+      &.active {
+        color: #2563eb; // Цвет текста активной вкладки (Tailwind: text-blue-600)
+        border-bottom-color: #2563eb; // Цвет границы активной вкладки (Tailwind: border-blue-600)
+      }
+    }
+  }
+}

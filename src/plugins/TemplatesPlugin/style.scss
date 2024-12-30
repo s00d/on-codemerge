@@ -1,0 +1,26 @@
+.templates-menu {
+  @apply max-w-xl w-full;
+}
+
+.template-item {
+  @apply transition-colors;
+
+  &:hover .edit-button,
+  &:hover .delete-button {
+    @apply opacity-100;
+  }
+
+  .edit-button,
+  .delete-button {
+    @apply opacity-0 transition-opacity;
+  }
+}
+
+.template-name,
+.template-content {
+  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+}
+
+.template-content {
+  @apply font-mono text-sm;
+}

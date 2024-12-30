@@ -1,0 +1,11 @@
+.export-menu {
+  @apply bg-white rounded-lg shadow-lg border border-gray-200 min-w-[200px];
+}
+
+.export-button {
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors rounded-md;
+
+  svg {
+    @apply text-gray-500;
+  }
+}

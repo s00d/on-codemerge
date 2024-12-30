@@ -1,0 +1,16 @@
+/* List menu */
+.lists-menu {
+  @apply max-w-lg w-full;
+
+  .list-option {
+    @apply w-full text-left;
+
+    svg {
+      @apply text-gray-600;
+    }
+
+    &:hover svg {
+      @apply text-blue-500;
+    }
+  }
+}

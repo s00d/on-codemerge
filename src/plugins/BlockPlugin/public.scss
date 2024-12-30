@@ -1,0 +1,38 @@
+/* Block container */
+.editor-block {
+  @apply relative my-4 min-h-[100px] min-w-[200px] border-2 border-dashed border-gray-300 rounded-lg;
+  resize: both;
+  overflow: hidden;
+
+  &.active {
+    @apply border-blue-500;
+  }
+
+  &:hover {
+    @apply border-blue-400;
+  }
+
+  .block-content {
+    @apply w-full h-full p-4;
+    outline: none;
+  }
+}
+
+/* Split containers */
+.split-container {
+  @apply flex gap-4 my-4;
+
+  &.horizontal {
+    @apply flex-row;
+  }
+
+  &.vertical {
+    @apply flex-col;
+  }
+
+  > .editor-block {
+    @apply flex-1 my-0;
+    min-width: 0;
+    min-height: 0; // Добавляем min-height для предотвращения съезжания
+  }
+}

@@ -1,0 +1,35 @@
+import { type LanguageDefinition, TokenType } from '../../../types';
+
+export const rDefinition: LanguageDefinition = {
+  name: 'r',
+  patterns: {
+    [TokenType.Comment]: /^#.*/,
+    [TokenType.String]: /^"(?:[^"\\]|\\.)*"|^'(?:[^'\\]|\\.)*'/,
+    [TokenType.Number]: /^\b(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?i?\b/,
+    [TokenType.Function]: /^\b[a-zA-Z_]\w*(?=\s*\()/,
+    [TokenType.Operator]: /^(?:->|<-|<<-|::|\$|@|[+\-*/%^<>!=]=?)/,
+    [TokenType.Punctuation]: /^[{}[\]();,.]/,
+  },
+  keywords: [
+    'if',
+    'else',
+    'repeat',
+    'while',
+    'function',
+    'for',
+    'in',
+    'next',
+    'break',
+    'TRUE',
+    'FALSE',
+    'NULL',
+    'Inf',
+    'NaN',
+    'NA',
+    'NA_integer_',
+    'NA_real_',
+    'NA_complex_',
+    'NA_character_',
+    'return',
+  ],
+};

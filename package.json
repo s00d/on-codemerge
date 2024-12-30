@@ -1,30 +1,29 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "0.8.1",
+  "version": "1.0.0",
+  "type": "module",
   "author": "Pavel Kuzmin",
   "license": "MIT",
-  "type": "module",
-  "module": "dist/main.esm.js",
-  "main": "dist/main.cjs",
-  "browser": "dist/main.iife.js",
-  "typings": "dist/types/src/types.d.ts",
+  "main": "dist/app.cjs",
+  "module": "dist/app.mjs",
+  "types": "dist/types/app.d.ts",
   "scripts": {
-    "prepublish": "npm run lint:fix && npm run build && npm run exports",
-    "build": "rollup -c",
-    "dev": "cd playground && npm run start",
-    "playground": "cd playground && npm run start",
-    "exports": "npx tsx ./update_exports.ts",
-    "lint": "eslint . --ext .ts,.tsx",
-    "lint:fix": "eslint . --ext .ts,.tsx --fix"
+    "prepublish": "npm run lint:fix && npm run build",
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --write \"src/**/*.{ts,tsx,js,jsx,json,css,scss,svelte}\"",
+    "format:check": "prettier --check \"src/**/*.{ts,tsx,js,jsx,json,css,scss,svelte}\"",
+    "test": "jest",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "files": [
-    "dist",
-    "locales"
-  ],
-  "workspaces": [
-    "app",
-    "packages/*"
+    "dist"
   ],
   "keywords": [
     "JavaScript",
@@ -47,182 +46,70 @@
     "url": "https://github.com/s00d/on-codemerge/issues"
   },
   "exports": {
-    ".": {
-      "import": "./dist/main.esm.js",
-      "require": "./dist/main.cjs.js",
-      "browser": "./dist/main.iife.js",
-      "types": "./dist/types/src/types.d.ts"
+    "./HTMLEditor": {
+      "import": "./dist/HTMLEditor.mjs",
+      "require": "./dist/HTMLEditor.cjs"
     },
-    "./tableButton": {
-      "import": "./dist/tableButton.esm.js",
-      "require": "./dist/tableButton.cjs.js",
-      "browser": "./dist/tableButton.iife.js",
-      "types": "./dist/types/packages/tableButton/src/index.d.ts"
+    "./app": {
+      "import": "./dist/app.mjs",
+      "require": "./dist/app.cjs"
     },
-    "./listButton": {
-      "import": "./dist/listButton.esm.js",
-      "require": "./dist/listButton.cjs.js",
-      "browser": "./dist/listButton.iife.js",
-      "types": "./dist/types/packages/listButton/src/index.d.ts"
-    },
-    "./spacerButton": {
-      "import": "./dist/spacerButton.esm.js",
-      "require": "./dist/spacerButton.cjs.js",
-      "browser": "./dist/spacerButton.iife.js",
-      "types": "./dist/types/packages/spacerButton/src/index.d.ts"
-    },
-    "./textDecorationButton": {
-      "import": "./dist/textDecorationButton.esm.js",
-      "require": "./dist/textDecorationButton.cjs.js",
-      "browser": "./dist/textDecorationButton.iife.js",
-      "types": "./dist/types/packages/textDecorationButton/src/index.d.ts"
-    },
-    "./textStylingButton": {
-      "import": "./dist/textStylingButton.esm.js",
-      "require": "./dist/textStylingButton.cjs.js",
-      "browser": "./dist/textStylingButton.iife.js",
-      "types": "./dist/types/packages/textStylingButton/src/index.d.ts"
-    },
-    "./undoRedoButton": {
-      "import": "./dist/undoRedoButton.esm.js",
-      "require": "./dist/undoRedoButton.cjs.js",
-      "browser": "./dist/undoRedoButton.iife.js",
-      "types": "./dist/types/packages/undoRedoButton/src/index.d.ts"
-    },
-    "./alignButton": {
-      "import": "./dist/alignButton.esm.js",
-      "require": "./dist/alignButton.cjs.js",
-      "browser": "./dist/alignButton.iife.js",
-      "types": "./dist/types/packages/alignButton/src/index.d.ts"
-    },
-    "./linkAndVideoButton": {
-      "import": "./dist/linkAndVideoButton.esm.js",
-      "require": "./dist/linkAndVideoButton.cjs.js",
-      "browser": "./dist/linkAndVideoButton.iife.js",
-      "types": "./dist/types/packages/linkAndVideoButton/src/index.d.ts"
-    },
-    "./templateButton": {
-      "import": "./dist/templateButton.esm.js",
-      "require": "./dist/templateButton.cjs.js",
-      "browser": "./dist/templateButton.iife.js",
-      "types": "./dist/types/packages/templateButton/src/index.d.ts"
-    },
-    "./blockButton": {
-      "import": "./dist/blockButton.esm.js",
-      "require": "./dist/blockButton.cjs.js",
-      "browser": "./dist/blockButton.iife.js",
-      "types": "./dist/types/packages/blockButton/src/index.d.ts"
-    },
-    "./imageButton": {
-      "import": "./dist/imageButton.esm.js",
-      "require": "./dist/imageButton.cjs.js",
-      "browser": "./dist/imageButton.iife.js",
-      "types": "./dist/types/packages/imageButton/src/index.d.ts"
-    },
-    "./codeEditorButton": {
-      "import": "./dist/codeEditorButton.esm.js",
-      "require": "./dist/codeEditorButton.cjs.js",
-      "browser": "./dist/codeEditorButton.iife.js",
-      "types": "./dist/types/packages/codeEditorButton/src/index.d.ts"
-    },
-    "./previewButton": {
-      "import": "./dist/previewButton.esm.js",
-      "require": "./dist/previewButton.cjs.js",
-      "browser": "./dist/previewButton.iife.js",
-      "types": "./dist/types/packages/previewButton/src/index.d.ts"
-    },
-    "./fullscreenButton": {
-      "import": "./dist/fullscreenButton.esm.js",
-      "require": "./dist/fullscreenButton.cjs.js",
-      "browser": "./dist/fullscreenButton.iife.js",
-      "types": "./dist/types/packages/fullscreenButton/src/index.d.ts"
-    },
-    "./paragraphButton": {
-      "import": "./dist/paragraphButton.esm.js",
-      "require": "./dist/paragraphButton.cjs.js",
-      "browser": "./dist/paragraphButton.iife.js",
-      "types": "./dist/types/packages/paragraphButton/src/index.d.ts"
-    },
-    "./printButton": {
-      "import": "./dist/printButton.esm.js",
-      "require": "./dist/printButton.cjs.js",
-      "browser": "./dist/printButton.iife.js",
-      "types": "./dist/types/packages/printButton/src/index.d.ts"
-    },
-    "./horizontalLineButton": {
-      "import": "./dist/horizontalLineButton.esm.js",
-      "require": "./dist/horizontalLineButton.cjs.js",
-      "browser": "./dist/horizontalLineButton.iife.js",
-      "types": "./dist/types/packages/horizontalLineButton/src/index.d.ts"
-    },
-    "./clearStylesButton": {
-      "import": "./dist/clearStylesButton.esm.js",
-      "require": "./dist/clearStylesButton.cjs.js",
-      "browser": "./dist/clearStylesButton.iife.js",
-      "types": "./dist/types/packages/clearStylesButton/src/index.d.ts"
-    },
-    "./markdownImportExportButton": {
-      "import": "./dist/markdownImportExportButton.esm.js",
-      "require": "./dist/markdownImportExportButton.cjs.js",
-      "browser": "./dist/markdownImportExportButton.iife.js",
-      "types": "./dist/types/packages/markdownImportExportButton/src/index.d.ts"
-    },
-    "./resizeEditorButton": {
-      "import": "./dist/resizeEditorButton.esm.js",
-      "require": "./dist/resizeEditorButton.cjs.js",
-      "browser": "./dist/resizeEditorButton.iife.js",
-      "types": "./dist/types/packages/resizeEditorButton/src/index.d.ts"
-    },
-    "./wordCountButton": {
-      "import": "./dist/wordCountButton.esm.js",
-      "require": "./dist/wordCountButton.cjs.js",
-      "browser": "./dist/wordCountButton.iife.js",
-      "types": "./dist/types/packages/wordCountButton/src/index.d.ts"
-    },
-    "./dataVisualizationButton": {
-      "import": "./dist/dataVisualizationButton.esm.js",
-      "require": "./dist/dataVisualizationButton.cjs.js",
-      "browser": "./dist/dataVisualizationButton.iife.js",
-      "types": "./dist/types/packages/dataVisualizationButton/src/index.d.ts"
-    },
-    "./lineBreakButton": {
-      "import": "./dist/lineBreakButton.esm.js",
-      "require": "./dist/lineBreakButton.cjs.js",
-      "browser": "./dist/lineBreakButton.iife.js",
-      "types": "./dist/types/packages/lineBreakButton/src/index.d.ts"
-    },
-    "./fileButton": {
-      "import": "./dist/fileButton.esm.js",
-      "require": "./dist/fileButton.cjs.js",
-      "browser": "./dist/fileButton.iife.js",
-      "types": "./dist/types/packages/fileButton/src/index.d.ts"
-    }
+    "./app.css": "./dist/app.css",
+    "./plugins/BlockPlugin/public.css": "./dist/plugins/BlockPlugin/public.css",
+    "./plugins/ChartsPlugin/public.css": "./dist/plugins/ChartsPlugin/public.css",
+    "./plugins/CodeBlockPlugin/public.css": "./dist/plugins/CodeBlockPlugin/public.css",
+    "./plugins/CollaborationPlugin/public.css": "./dist/plugins/CollaborationPlugin/public.css",
+    "./plugins/ColorPlugin/public.css": "./dist/plugins/ColorPlugin/public.css",
+    "./plugins/CommentsPlugin/public.css": "./dist/plugins/CommentsPlugin/public.css",
+    "./plugins/ExportPlugin/public.css": "./dist/plugins/ExportPlugin/public.css",
+    "./plugins/FileUploadPlugin/public.css": "./dist/plugins/FileUploadPlugin/public.css",
+    "./plugins/FooterPlugin/public.css": "./dist/plugins/FooterPlugin/public.css",
+    "./plugins/FootnotesPlugin/public.css": "./dist/plugins/FootnotesPlugin/public.css",
+    "./plugins/HistoryPlugin/public.css": "./dist/plugins/HistoryPlugin/public.css",
+    "./plugins/HTMLViewerPlugin/public.css": "./dist/plugins/HTMLViewerPlugin/public.css",
+    "./plugins/ImagePlugin/public.css": "./dist/plugins/ImagePlugin/public.css",
+    "./plugins/LinkPlugin/public.css": "./dist/plugins/LinkPlugin/public.css",
+    "./plugins/ListsPlugin/public.css": "./dist/plugins/ListsPlugin/public.css",
+    "./plugins/ResponsivePlugin/public.css": "./dist/plugins/ResponsivePlugin/public.css",
+    "./plugins/ShortcutsPlugin/public.css": "./dist/plugins/ShortcutsPlugin/public.css",
+    "./plugins/TablePlugin/public.css": "./dist/plugins/TablePlugin/public.css",
+    "./plugins/TemplatesPlugin/public.css": "./dist/plugins/TemplatesPlugin/public.css",
+    "./plugins/ToolbarDividerPlugin/public.css": "./dist/plugins/ToolbarDividerPlugin/public.css",
+    "./plugins/ToolbarPlugin/public.css": "./dist/plugins/ToolbarPlugin/public.css",
+    "./plugins/TypographyPlugin/public.css": "./dist/plugins/TypographyPlugin/public.css",
+    "./plugins/VideoPlugin/public.css": "./dist/plugins/VideoPlugin/public.css",
+    "./plugins/YouTubeVideoPlugin/public.css": "./dist/plugins/YouTubeVideoPlugin/public.css",
+    "./plugins/AlignmentPlugin/public.css": "./dist/plugins/AlignmentPlugin/public.css"
   },
   "devDependencies": {
-    "@rollup/plugin-babel": "^6.0.4",
-    "@rollup/plugin-commonjs": "^25.0.7",
-    "@rollup/plugin-json": "^6.1.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-terser": "^0.4.4",
-    "@rollup/plugin-typescript": "^11.1.5",
-    "@types/node": "^20.10.6",
-    "@typescript-eslint/eslint-plugin": "^6.18.0",
-    "@typescript-eslint/parser": "^6.18.0",
-    "eslint": "^8.56.0",
-    "rollup": "^4.9.4",
-    "rollup-plugin-dts": "^6.1.0",
-    "rollup-plugin-filesize": "^10.0.0",
-    "rollup-plugin-livereload": "^2.0.5",
-    "rollup-plugin-postcss": "^4.0.2",
-    "rollup-plugin-progress": "^1.1.2",
-    "rollup-plugin-serve": "^1.1.1",
-    "rollup-plugin-svg": "^2.0.0",
-    "rollup-plugin-svg-import": "^3.0.0",
-    "rollup-plugin-typescript2": "^0.36.0",
-    "sass": "^1.69.7",
-    "tslib": "^2.6.2",
-    "tslint": "^6.1.3",
-    "typescript": "^5.3.3"
+    "@eslint/js": "^9.17.0",
+    "@sveltejs/vite-plugin-svelte": "^5.0.3",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.2",
+    "@typescript-eslint/eslint-plugin": "^8.18.2",
+    "@typescript-eslint/parser": "^8.18.2",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^9.17.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "globals": "^15.14.0",
+    "identity-obj-proxy": "^3.0.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "jest-serializer-html": "^7.1.0",
+    "jsdom": "^25.0.1",
+    "postcss": "^8.4.49",
+    "prettier": "^3.4.2",
+    "sass-embedded": "^1.83.0",
+    "tailwindcss": "^3.4.17",
+    "ts-jest": "^29.2.5",
+    "typescript": "5.4.2",
+    "typescript-eslint": "^8.18.2",
+    "vite": "^6.0.6",
+    "vite-plugin-dts": "^4.4.0",
+    "vite-plugin-handlebars": "^2.0.0",
+    "vite-svg-loader": "^5.1.0",
+    "vitepress": "^1.5.0"
   },
-  "dependencies": {}
+  "packageManager": "pnpm@9.14.2"
 }

@@ -1,0 +1,43 @@
+import { type LanguageDefinition, TokenType } from '../../../types';
+
+export const elixirDefinition: LanguageDefinition = {
+  name: 'elixir',
+  patterns: {
+    [TokenType.Comment]: /^#.*/,
+    [TokenType.String]: /^"(?:[^"\\]|\\.)*"|^'(?:[^'\\]|\\.)*'|^"""[\s\S]*?"""/,
+    [TokenType.Number]: /^\b\d+(?:\.\d+)?(?:[eE][+-]?\d+)?\b/,
+    [TokenType.Function]: /^\b[a-z_]\w*(?=\s*\()/,
+    [TokenType.Atom]: /^:\w+/,
+    [TokenType.Variable]: /^@\w+|\b[A-Z]\w*/,
+    [TokenType.Operator]:
+      /^(?:\|\>|\+\+|\-\-|\|\||\&\&|\<\>|\=\~|\=\>|\<\-|\.\.|[+\-*/%|&^<>!=~]=?)/,
+    [TokenType.Punctuation]: /^[{}[\]();,.]/,
+  },
+  keywords: [
+    'after',
+    'and',
+    'catch',
+    'cond',
+    'def',
+    'defmodule',
+    'defp',
+    'do',
+    'else',
+    'end',
+    'false',
+    'fn',
+    'if',
+    'in',
+    'nil',
+    'not',
+    'or',
+    'raise',
+    'receive',
+    'rescue',
+    'true',
+    'try',
+    'unless',
+    'when',
+    'with',
+  ],
+};

@@ -1,0 +1,35 @@
+import { type LanguageDefinition, TokenType } from '../../../types';
+
+export const matlabDefinition: LanguageDefinition = {
+  name: 'matlab',
+  patterns: {
+    [TokenType.Comment]: /^%.*$/,
+    [TokenType.String]: /^'(?:[^'\\]|\\.)*'/,
+    [TokenType.Number]: /^\b\d+(?:\.\d*)?(?:[eE][+-]?\d+)?i?\b/,
+    [TokenType.Function]: /^\b[a-zA-Z_]\w*(?=\s*\()/,
+    [TokenType.Operator]: /^(?:\.\.\.|\.\*|\.\/|\.\\|\.\^|[+\-*/%\\^<>!=]=?)/,
+    [TokenType.Punctuation]: /^[{}[\]();,.]/,
+  },
+  keywords: [
+    'break',
+    'case',
+    'catch',
+    'classdef',
+    'continue',
+    'else',
+    'elseif',
+    'end',
+    'for',
+    'function',
+    'global',
+    'if',
+    'otherwise',
+    'parfor',
+    'persistent',
+    'return',
+    'spmd',
+    'switch',
+    'try',
+    'while',
+  ],
+};

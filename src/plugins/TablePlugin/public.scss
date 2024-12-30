@@ -1,0 +1,39 @@
+.html-editor-table {
+  @apply border-collapse my-4 w-full;
+  border: 1px solid #e0e0e0; // Рамка вокруг всей таблицы
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Легкая тень для таблицы
+  background-color: #ffffff; // Белый фон таблицы
+
+  // Стили для ячеек таблицы
+  td,
+  th {
+    @apply border border-gray-300 p-2 min-w-[100px] relative;
+    height: 24px;
+    cursor: text;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      @apply bg-gray-100; // Эффект при наведении на ячейку
+    }
+  }
+
+  // Стили для заголовков таблицы
+  th {
+    @apply bg-gray-50 font-semibold text-gray-700;
+    border-bottom: 2px solid #d0d0d0; // Более толстая нижняя граница для заголовков
+  }
+
+  // Стили для четных и нечетных строк (зебра)
+  tr:nth-child(even) {
+    background-color: #f9f9f9; // Светлый фон для четных строк
+  }
+
+  tr:nth-child(odd) {
+    background-color: #ffffff; // Белый фон для нечетных строк
+  }
+
+  // Стили для строки при наведении
+  tr:hover {
+    background-color: #f1f1f1; // Эффект при наведении на строку
+  }
+}

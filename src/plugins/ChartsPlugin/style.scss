@@ -1,0 +1,40 @@
+/* Chart type selector */
+.chart-type-selector {
+  @apply grid grid-cols-4 gap-4 mb-6;
+
+  .chart-type-option {
+    @apply flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-blue-400 cursor-pointer transition-all;
+
+    &.selected {
+      @apply border-blue-500 bg-blue-50;
+
+      .chart-type-icon svg {
+        @apply text-blue-600;
+      }
+    }
+
+    .chart-type-icon {
+      @apply flex items-center justify-center w-12 h-12 mb-2;
+
+      svg {
+        @apply w-8 h-8 text-gray-600;
+      }
+    }
+
+    .chart-type-label {
+      @apply text-sm font-medium text-gray-700 text-center;
+    }
+  }
+}
+
+/* Data editor */
+.chart-data-editor {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Preview container */
+.preview-container {
+  @apply bg-gray-50 rounded-lg flex items-center justify-center p-4;
+  min-height: 300px;
+}

@@ -6,7 +6,7 @@
 
 # on-codemerge
 
-zero dependencies editor
+Zero dependencies editor
 
 [Docs](https://s00d.github.io/on-codemerge/)
 
@@ -16,29 +16,27 @@ zero dependencies editor
 
 ## Description
 
-A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product. This intuitive tool for developers of all skill levels.
+A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product. This intuitive tool is designed for developers of all skill levels.
 
 ## Installation
 
-To use the editor, include it in your project by importing the main EditorCore class and any required plugins.
+To use the editor, include it in your project by importing the main `HTMLEditor` class and any required plugins.
 
 ```javascript
-import { EditorCore } from 'on-codemerge';
-import BoldButtonPlugin from 'on-codemerge/boldbuttonplugin';
-// Import other plugins as needed
+import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 ```
 
 ## Setup
 
-Initialize the editor by creating an instance of `EditorCore` and passing the target DOM element where the editor should be rendered.
+Initialize the editor by creating an instance of `HTMLEditor` and passing the target DOM element where the editor should be rendered.
 
 ```javascript
 const targetElement = document.getElementById('editor');
-const editor = new EditorCore(targetElement);
+const editor = new HTMLEditor(targetElement);
 
 // Register plugins
-editor.registerModule(new BoldButtonPlugin());
-// Register other plugins in a similar manner
+editor.use(new ToolbarPlugin());
+editor.use(new AlignmentPlugin());
 
 // To start the editor
 editor.init();
@@ -46,15 +44,14 @@ editor.init();
 
 ## Using Plugins
 
-Plugins can be added to enhance the functionality of the editor. Here's an example of how to add a bold button plugin.
+Plugins can be added to enhance the functionality of the editor. Here's an example of how to add a toolbar plugin.
 
 ```javascript
-import BoldButtonPlugin from 'path/to/boldbuttonplugin';
+import { ToolbarPlugin } from 'on-codemerge';
 
 // After initializing the editor
-editor.registerModule(new BoldButtonPlugin());
+editor.use(new ToolbarPlugin());
 ```
-
 
 ## Contribution
 
@@ -62,4 +59,4 @@ Contributions to the editor are welcome. Please ensure that custom plugins and f
 
 ---
 
-For more detailed documentation, please refer to the individual plugin files and the source code of `EditorCore`.
+For more detailed documentation, please refer to the individual plugin files and the source code of `HTMLEditor`.

@@ -1,0 +1,38 @@
+/* Color picker container */
+.color-picker {
+  @apply w-[400px];
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    @apply w-full max-w-sm;
+  }
+}
+
+/* Color buttons */
+.color-button {
+  @apply transition-transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-blue-500;
+
+  /* Responsive adjustments */
+  @media (max-width: 640px) {
+    @apply w-6 h-6;
+  }
+}
+
+/* Custom color input */
+.custom-color {
+  @apply rounded-lg;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+
+  &::-webkit-color-swatch-wrapper {
+    @apply p-0;
+  }
+
+  &::-webkit-color-swatch {
+    @apply border-0 rounded-lg;
+  }
+}
+
+.color-input {
+  @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+}

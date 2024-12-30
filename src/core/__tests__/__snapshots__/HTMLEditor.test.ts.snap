@@ -1,0 +1,25 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HTMLEditor should ensure editor focus 1`] = `
+<body>
+  <div>
+    <div
+      class="html-editor"
+    />
+  </div>
+</body>
+`;
+
+exports[`HTMLEditor should initialize with an empty container 1`] = `""`;
+
+exports[`HTMLEditor should insert text at the cursor 1`] = `"Hello, world!"`;
+
+exports[`HTMLEditor should set a new locale 1`] = `"New Block"`;
+
+exports[`HTMLEditor should set and get HTML content 1`] = `
+<p>
+  Hello, world!
+</p>
+`;
+
+exports[`HTMLEditor should translate text using LocaleManager 1`] = `"New Block"`;

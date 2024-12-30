@@ -1,0 +1,64 @@
+/* Typography menu */
+.typography-menu {
+  @apply w-[400px] max-w-[90vw];
+}
+
+.typography-option {
+  @apply transition-colors duration-200;
+
+  &:hover svg {
+    @apply text-blue-500;
+  }
+
+  .preview {
+    @apply text-gray-700;
+  }
+
+  &:hover .preview {
+    @apply text-gray-900;
+  }
+}
+
+/* Typography styles in editor */
+.html-editor {
+  h1 {
+    @apply text-3xl font-bold mb-4;
+  }
+
+  h2 {
+    @apply text-2xl font-bold mb-3;
+  }
+
+  h3 {
+    @apply text-xl font-bold mb-3;
+  }
+
+  h4 {
+    @apply text-lg font-bold mb-2;
+  }
+
+  p {
+    @apply text-base mb-4;
+  }
+
+  blockquote {
+    @apply pl-4 border-l-4 border-gray-300 italic my-4 text-gray-700;
+  }
+
+  pre {
+    @apply font-mono text-sm bg-gray-50 rounded-lg overflow-x-auto;
+  }
+
+  > *:first-child {
+    @apply mt-0;
+  }
+
+  > *:last-child {
+    @apply mb-0;
+  }
+}
+
+/* Popup positioning */
+.popup {
+  @apply top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+}

@@ -1,0 +1,99 @@
+.code-block {
+  @apply my-4 rounded-lg overflow-hidden border border-gray-200;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  .code-header {
+    @apply flex items-center justify-between px-4 py-2 bg-gray-50 border-b border-gray-200;
+  }
+
+  .code-language {
+    @apply text-sm text-gray-600 hover:text-gray-900 transition-colors;
+  }
+
+  .copy-button {
+    @apply p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors;
+  }
+
+  pre {
+    @apply m-0 p-4 bg-gray-50 overflow-x-auto;
+    tab-size: 2;
+  }
+
+  code {
+    @apply block text-sm leading-relaxed;
+    outline: none;
+  }
+}
+
+/* Syntax highlighting */
+.token {
+  &.keyword {
+    @apply text-purple-600 font-medium;
+  }
+
+  &.string {
+    @apply text-green-600;
+  }
+
+  &.number {
+    @apply text-blue-600;
+  }
+
+  &.boolean {
+    @apply text-blue-600 font-medium;
+  }
+
+  &.comment {
+    @apply text-gray-500 italic;
+  }
+
+  &.operator {
+    @apply text-yellow-600;
+  }
+
+  &.function {
+    @apply text-pink-600;
+  }
+
+  &.variable {
+    @apply text-orange-600;
+  }
+
+  &.type {
+    @apply text-teal-600 font-medium;
+  }
+
+  &.punctuation {
+    @apply text-gray-600;
+  }
+
+  &.tag {
+    @apply text-blue-600;
+  }
+
+  &.attribute {
+    @apply text-purple-600;
+  }
+}
+
+/* Copy button */
+.copy-button {
+  @apply p-1 text-gray-500 hover:text-gray-700 transition-colors;
+
+  svg {
+    @apply w-4 h-4;
+  }
+}
+
+// Preserve whitespace
+.code-block-pre {
+  white-space: pre;
+  tab-size: 2;
+
+  code {
+    display: block;
+    padding: 1rem;
+    overflow-x: auto;
+    background-color: transparent;
+  }
+}

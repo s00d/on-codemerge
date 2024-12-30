@@ -1,0 +1,9 @@
+/* Footnote menu */
+.footnote-menu {
+  @apply max-w-lg w-full;
+
+  textarea {
+    @apply font-mono text-sm;
+    white-space: pre-wrap;
+  }
+}

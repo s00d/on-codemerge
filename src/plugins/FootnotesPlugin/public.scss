@@ -1,0 +1,74 @@
+/* Footnote references in the text */
+.footnote-ref {
+  @apply text-blue-600 cursor-pointer hover:text-blue-800;
+  font-size: 0.75em;
+  vertical-align: super;
+  line-height: 0;
+}
+
+/* Footnotes section container */
+.footnotes-section {
+  @apply mt-8 pt-8 border-t border-gray-200;
+
+  h2 {
+    @apply text-xl font-semibold mb-4;
+  }
+
+  /* Print styles */
+  @media print {
+    @apply mt-8 pt-8 border-t border-gray-300;
+    page-break-before: always;
+  }
+}
+
+/* Footnotes list */
+.footnotes-list {
+  @apply list-none m-0 p-0;
+  counter-reset: footnotes;
+
+  li {
+    @apply relative pl-10 mb-4;
+    counter-increment: footnotes;
+    display: block;
+
+    /* Footnote numbers */
+    &::before {
+      @apply absolute left-0 top-0 text-gray-500 font-medium;
+      content: counter(footnotes) '.';
+      width: 2em;
+      text-align: right;
+      padding-right: 1em;
+    }
+
+    /* Hover state for footnotes */
+    &:hover::before {
+      @apply text-blue-600;
+    }
+
+    /* Active state for current footnote */
+    &:target {
+      @apply bg-blue-50;
+    }
+
+    /* Print styles */
+    @media print {
+      @apply break-inside-avoid;
+    }
+  }
+}
+
+/* Individual footnote lines */
+.footnote-line {
+  @apply text-sm text-gray-600 leading-relaxed my-2;
+  display: block;
+
+  /* First line special styling */
+  &:first-child {
+    @apply mt-0;
+  }
+
+  /* Last line special styling */
+  &:last-child {
+    @apply mb-0;
+  }
+}

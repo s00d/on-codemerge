@@ -1,0 +1,27 @@
+.shortcuts-menu {
+  @apply max-w-4xl w-full;
+
+  kbd {
+    @apply inline-flex items-center justify-center min-w-[2rem] font-mono text-xs font-medium;
+    font-feature-settings: 'tnum';
+  }
+
+  li {
+    @apply flex items-center justify-between gap-4;
+
+    &:hover {
+      @apply bg-gray-50 -mx-2 px-2 rounded;
+    }
+  }
+
+  h3 {
+    @apply text-sm font-medium text-gray-900 mb-3;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    .grid {
+      @apply grid-cols-1;
+    }
+  }
+}

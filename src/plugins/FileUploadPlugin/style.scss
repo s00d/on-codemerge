@@ -1,0 +1,47 @@
+/* File upload menu */
+.file-upload-menu {
+  @apply max-w-lg w-full;
+}
+
+/* Upload area */
+.upload-area {
+  @apply transition-colors duration-200;
+
+  &.drag-over {
+    @apply border-blue-500 bg-blue-50;
+  }
+
+  /* Responsive */
+  @media (max-width: 640px) {
+    @apply p-4;
+  }
+}
+
+/* Progress bar */
+.progress-bar {
+  @apply mt-4;
+
+  .progress-fill {
+    @apply w-0;
+  }
+}
+
+/* File link */
+.file-link {
+  @apply inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700;
+
+  svg {
+    @apply text-gray-500;
+  }
+}
+
+/* Hover effects */
+.browse-button {
+  &:hover {
+    @apply underline;
+  }
+}
+
+.upload-message {
+  @apply flex flex-col items-center justify-center;
+}

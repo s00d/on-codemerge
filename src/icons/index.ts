@@ -1,30 +1,155 @@
-export const arrowDown = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-arrow-down"><line x1="12" y1="5" x2="12" y2="19"></line><polyline points="19 12 12 19 5 12"></polyline></svg>';
-export const rotateCcw = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rotate-ccw"><polyline points="1 4 1 10 7 10"></polyline><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path></svg>';
-export const rotateCw = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rotate-cw"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>';
-export const alignCenter = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-align-center"><line x1="18" y1="10" x2="6" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="18" y1="18" x2="6" y2="18"></line></svg>';
-export const columns = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-columns"><path d="M12 3h7a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-7m0-18H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h7m0-18v18"></path></svg>';
-export const trash = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>';
-export const code = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-code"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>';
-export const maximize = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-maximize"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"></path></svg>';
-export const minus = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus"><line x1="5" y1="12" x2="19" y2="12"></line></svg>';
-export const image = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-image"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>';
-export const link = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-link"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>';
-export const video = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-video"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>';
-export const list = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-list"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>';
-export const eye = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>';
-export const printer = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-printer"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>';
-export const table = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-table"><path d="M9 3H5a2 2 0 0 0-2 2v4m6-6h10a2 2 0 0 1 2 2v4M9 3v18m0 0h10a2 2 0 0 0 2-2V9M9 21H5a2 2 0 0 1-2-2V9m0 0h18"></path></svg>';
-export const layers = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-layers"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>';
-export const type = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-type"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg>';
-export const upload = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-upload"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>';
-export const download = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-download"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>';
-export const terminal = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-terminal"><polyline points="4 17 10 11 4 5"></polyline><line x1="12" y1="19" x2="20" y2="19"></line></svg>';
-export const smartphone = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-smartphone"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>';
-export const octagon = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-octagon"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon></svg>';
-export const diagram = '<svg width="16" height="16"  viewBox="0 0 512 512"><g><g><path d="M137.8,511.9H69.5c-10,0-18.1-8.2-18.1-18.1V354c0-10,8.2-18.1,18.1-18.1h68.3c10,0,18.1,8.2,18.1,18.1    v139.8C156,503.8,147.8,511.9,137.8,511.9z" fill="#303A3F"/><path d="M286.9,511.9h-61.8c-11.7,0-21.4-9.6-21.4-21.4V288.8c0-11.7,9.6-21.4,21.4-21.4h61.8    c11.7,0,21.4,9.6,21.4,21.4v201.7C308.3,502.3,298.7,511.9,286.9,511.9z" fill="#303A3F"/><path d="M436.5,511.9h-56.3c-13.3,0-24.1-10.9-24.1-24.1V224.3c0-13.3,10.9-24.1,24.1-24.1h56.3    c13.3,0,24.1,10.9,24.1,24.1v263.5C460.6,501.1,449.8,511.9,436.5,511.9z" fill="#303A3F"/></g><path d="M445.1,0c-22,0.9-39.1,19.5-38.2,41.6l-101.6,99.9l-86.6-75.8L60.2,224.7c-20.4,2.6-35.7,20.2-34.9,41.1   c0.9,22,19.6,39.1,41.6,38.2s39.1-19.6,38.2-41.6c-0.1-1.8-0.5-3.5-0.8-5.3l119.3-114.5l83.7,73.3L446,79.7c0.8,0,1.6,0.2,2.4,0.1   c22-0.9,39.1-19.6,38.2-41.6C485.7,16.2,467.1-0.9,445.1,0z" fill="#303A3F"/></g></svg>';
-export const new_line = '<svg viewBox="0 0 32 32" width="16" height="16" xmlns="http://www.w3.org/2000/svg"><title/><path d="M27,2a2,2,0,0,0-2,2V15c0,2.73-1.27,4-4,4H8.92l2-1,2.57-2.57a2,2,0,0,0-2.83-2.83l-7,7a2,2,0,0,0,0,2.83l7,7a2,2,0,0,0,2.83-2.83L10.79,24,8.85,23H21c4.93,0,8-3.07,8-8V4A2,2,0,0,0,27,2Z"/></svg>';
-export const bold = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-bold"><path d="M6 4h8a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path><path d="M6 12h9a4 4 0 0 1 4 4 4 4 0 0 1-4 4H6z"></path></svg>';
-export const italic = '<svg height="16" viewBox="0 0 48 48" width="16" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h48v48h-48z" fill="none"/><path d="M20 8v6h4.43l-6.86 16h-5.57v6h16v-6h-4.43l6.86-16h5.57v-6z"/></svg>';
-export const underline = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-underline"><path d="M6 3v7a6 6 0 0 0 6 6 6 6 0 0 0 6-6V3"></path><line x1="4" y1="21" x2="20" y2="21"></line></svg>\n';
-export const file = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>\n';
-export const def = '';
+import alignCenterIcon from './align-center.svg?raw';
+import alignLeftIcon from './align-left.svg?raw';
+import alignRightIcon from './align-right.svg?raw';
+import alignJustifyIcon from './align-justify.svg?raw';
+import areaIcon from './area.svg?raw';
+import backgroundColorIcon from './background-color.svg?raw';
+import barIcon from './bar.svg?raw';
+import blockIcon from './block.svg?raw';
+import blockquoteIcon from './blockquote.svg?raw';
+import boldIcon from './bold.svg?raw';
+import bubbleIcon from './bubble.svg?raw';
+import clearIcon from './clear.svg?raw';
+import closeIcon from './close.svg?raw';
+import collaborationIcon from './collaboration.svg?raw';
+import commentIcon from './comment.svg?raw';
+import commentMarkerIcon from './comment-marker.svg?raw';
+import copyIcon from './copy.svg?raw';
+import deleteIcon from './delete.svg?raw';
+import deleteTableIcon from './delete-table.svg?raw';
+import deleteRowIcon from './delete-row.svg?raw';
+import deleteColumnIcon from './delete-column.svg?raw';
+import desktopIcon from './desktop.svg?raw';
+import dividerIcon from './divider.svg?raw';
+import doughnutIcon from './doughnut.svg?raw';
+import duplicateIcon from './duplicate.svg?raw';
+import editIcon from './edit.svg?raw';
+import exportIcon from './export.svg?raw';
+import fileIcon from './file.svg?raw';
+import footnoteIcon from './footnote.svg?raw';
+import formatIcon from './format.svg?raw';
+import h1Icon from './h1.svg?raw';
+import h2Icon from './h2.svg?raw';
+import h3Icon from './h3.svg?raw';
+import h4Icon from './h4.svg?raw';
+import historyIcon from './history.svg?raw';
+import hrIcon from './hr.svg?raw';
+import htmlIcon from './html.svg?raw';
+import imageIcon from './image.svg?raw';
+import insertIcon from './insert.svg?raw';
+import italicIcon from './italic.svg?raw';
+import lineIcon from './line.svg?raw';
+import linkIcon from './link.svg?raw';
+import listIcon from './list.svg?raw';
+import listBulletIcon from './list-bullet.svg?raw';
+import listNumberedIcon from './list-numbered.svg?raw';
+import markdownIcon from './markdown.svg?raw';
+import mobileIcon from './mobile.svg?raw';
+import moveIcon from './move.svg?raw';
+import paragraphIcon from './paragraph.svg?raw';
+import pieIcon from './pie.svg?raw';
+import plaintextIcon from './plaintext.svg?raw';
+import preIcon from './pre.svg?raw';
+import radarIcon from './radar.svg?raw';
+import redoIcon from './redo.svg?raw';
+import responsiveIcon from './responsive.svg?raw';
+import scatterIcon from './scatter.svg?raw';
+import shortcutsIcon from './shortcuts.svg?raw';
+import splitHorizontalIcon from './split-horizontal.svg?raw';
+import splitVerticalIcon from './split-vertical.svg?raw';
+import tableIcon from './table.svg?raw';
+import tabletIcon from './tablet.svg?raw';
+import templatesIcon from './templates.svg?raw';
+import textIcon from './text.svg?raw';
+import textColorIcon from './text-color.svg?raw';
+import typographyIcon from './typography.svg?raw';
+import undoIcon from './undo.svg?raw';
+import uploadIcon from './upload.svg?raw';
+import uploadMessageIcon from './upload-message.svg?raw';
+import bufferIcon from './buffer.svg?raw';
+import videoIcon from './video.svg?raw';
+import youtubeIcon from './youtube.svg?raw';
+import saveIcon from './save.svg?raw';
+import fontFamilyIcon from './font-family.svg?raw';
+import fontSizeIcon from './font-size.svg?raw';
+import underlineIcon from './underline.svg?raw';
+import strikethroughIcon from './strikethrough.svg?raw';
+
+export {
+  alignCenterIcon,
+  alignLeftIcon,
+  alignRightIcon,
+  alignJustifyIcon,
+  areaIcon,
+  backgroundColorIcon,
+  barIcon,
+  blockIcon,
+  blockquoteIcon,
+  boldIcon,
+  strikethroughIcon,
+  underlineIcon,
+  bufferIcon,
+  bubbleIcon,
+  clearIcon,
+  closeIcon,
+  collaborationIcon,
+  commentIcon,
+  commentMarkerIcon,
+  copyIcon,
+  deleteIcon,
+  deleteTableIcon,
+  deleteRowIcon,
+  deleteColumnIcon,
+  desktopIcon,
+  dividerIcon,
+  doughnutIcon,
+  duplicateIcon,
+  editIcon,
+  exportIcon,
+  fileIcon,
+  footnoteIcon,
+  formatIcon,
+  h1Icon,
+  h2Icon,
+  h3Icon,
+  h4Icon,
+  historyIcon,
+  hrIcon,
+  htmlIcon,
+  imageIcon,
+  insertIcon,
+  italicIcon,
+  lineIcon,
+  linkIcon,
+  listIcon,
+  listBulletIcon,
+  listNumberedIcon,
+  markdownIcon,
+  mobileIcon,
+  moveIcon,
+  paragraphIcon,
+  pieIcon,
+  plaintextIcon,
+  preIcon,
+  radarIcon,
+  redoIcon,
+  responsiveIcon,
+  scatterIcon,
+  shortcutsIcon,
+  splitHorizontalIcon,
+  splitVerticalIcon,
+  tableIcon,
+  tabletIcon,
+  templatesIcon,
+  textIcon,
+  textColorIcon,
+  typographyIcon,
+  undoIcon,
+  uploadIcon,
+  uploadMessageIcon,
+  videoIcon,
+  youtubeIcon,
+  saveIcon,
+  fontFamilyIcon,
+  fontSizeIcon,
+};

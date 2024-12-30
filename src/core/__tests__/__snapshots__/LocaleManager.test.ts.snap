@@ -1,0 +1,18 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LocaleManager should fallback to default locale if translation is missing 1`] = `"NonExistentKey"`;
+
+exports[`LocaleManager should load the default locale 1`] = `"en"`;
+
+exports[`LocaleManager should replace placeholders in translations 1`] = `"File size exceeds 10MB limit"`;
+
+exports[`LocaleManager should return the list of loaded locales 1`] = `
+[
+  "en",
+  "ru",
+]
+`;
+
+exports[`LocaleManager should set a new locale 1`] = `"en"`;
+
+exports[`LocaleManager should translate a key correctly 1`] = `"New Block"`;

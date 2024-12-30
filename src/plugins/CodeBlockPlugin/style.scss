@@ -1,0 +1,28 @@
+/* Code block modal */
+.code-block-modal {
+  width: 70%;
+}
+
+.language-selector {
+  @apply w-64 max-h-96 overflow-hidden bg-white rounded-lg shadow-lg border border-gray-200;
+
+  .language-search {
+    @apply p-2 border-b border-gray-200;
+
+    .search-input {
+      @apply w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md;
+    }
+  }
+
+  .language-list {
+    @apply max-h-80 overflow-y-auto p-1;
+  }
+
+  .language-option {
+    @apply w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-md;
+
+    &[data-hidden='true'] {
+      display: none;
+    }
+  }
+}

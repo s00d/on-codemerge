@@ -1,0 +1,59 @@
+/* Table styles */
+.html-editor-table {
+  @apply border-collapse my-4 w-full;
+
+  td,
+  th {
+    @apply border border-gray-300 p-2 min-w-[100px] relative;
+    height: 24px;
+    cursor: text;
+  }
+
+  th {
+    @apply bg-gray-50 font-semibold;
+  }
+}
+
+.table-color-picker {
+  @apply border-0 p-0 cursor-pointer mt-2 w-6;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* Table Popup */
+.table-popup {
+  @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl hidden;
+
+  &.visible {
+    @apply block;
+  }
+
+  .table-popup-content {
+    @apply space-y-4;
+  }
+
+  .table-options {
+    @apply flex items-center gap-4 mb-4;
+  }
+
+  .table-option-label {
+    @apply text-sm text-gray-600;
+  }
+
+  .table-option-checkbox {
+    @apply h-4 w-4 text-blue-500 rounded border-gray-300 focus:ring-blue-500;
+  }
+
+  .table-size-grid {
+    @apply grid grid-cols-10 gap-0.5;
+  }
+
+  .grid-cell {
+    @apply w-6 h-6 border border-gray-300 cursor-pointer transition-colors duration-150 hover:border-blue-500;
+
+    &.selected {
+      @apply bg-blue-500 border-blue-400;
+    }
+  }
+}

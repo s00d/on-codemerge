@@ -1,0 +1,17 @@
+/* Responsive menu */
+.responsive-menu {
+  @apply max-w-xl w-full;
+
+  .viewport-btn {
+    @apply w-full text-left;
+
+    svg {
+      @apply text-gray-600;
+    }
+  }
+}
+
+.html-editor {
+  @apply transition-all duration-300 ease-in-out;
+  min-width: 320px;
+}

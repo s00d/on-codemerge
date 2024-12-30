@@ -30,25 +30,35 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Node
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 9.14.2
+          run_install: false
+
+      - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          cache: 'npm'
+          cache: 'pnpm'
+
       - name: Install dependencies
-        run: npm install
-      - name: docusaurusl build
+        run: pnpm install
+
+      - name: Build with VitePress
         run: |
-          cd playground
-          npm install
-          npm run build
+          pnpm run build
+          pnpm run docs:build
+
       - name: Setup Pages
         uses: actions/configure-pages@v3
+
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v2
         with:
-          # Upload dist repository
-          path: './playground/build'
+          # Upload the VitePress build output
+          path: './docs/.vitepress/dist'
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v2

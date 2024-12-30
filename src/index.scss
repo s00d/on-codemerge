@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.html-editor {
+  @apply border border-gray-300 rounded-lg p-4 min-h-[300px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+
+  .drag-overlay {
+    @apply absolute top-0 left-0 w-full h-full;
+    @apply border-2 border-dashed border-blue-500;
+    @apply bg-blue-100 bg-opacity-10;
+    @apply z-[1000] pointer-events-none;
+    @apply block;
+  }
+}
+
+.editor-toolbar {
+  @apply flex flex-wrap gap-1 p-2 bg-gray-50 border-b border-gray-300 sticky top-0;
+}
+
+.toolbar-button {
+  @apply p-2 rounded hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500;
+
+  &:disabled {
+    @apply opacity-50 cursor-not-allowed;
+  }
+
+  svg {
+    @apply w-5 h-5 text-gray-700;
+  }
+}
+
+/* Стили для контекстного меню */
+.context-menu {
+  @apply bg-white border border-gray-200 shadow-lg rounded-lg p-2;
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  min-width: 160px;
+  opacity: 0;
+  transform: translateY(-10px);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+
+  &.horizontal {
+    @apply flex flex-row items-center;
+    min-width: auto;
+  }
+
+  .menu-item {
+    @apply flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200 rounded-md;
+
+    &:disabled {
+      @apply opacity-50 cursor-not-allowed;
+    }
+
+    .menu-icon {
+      @apply w-4 h-4;
+
+      svg {
+        @apply w-4 h-4;
+      }
+    }
+
+    .menu-label {
+      @apply flex-grow;
+    }
+  }
+
+  .menu-divider {
+    @apply w-px h-10 bg-gray-200 mx-1;
+  }
+}
+
+.resize-handle {
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background-color: #007bff; // Синий цвет маркеров
+  border: 1px solid #fff; // Белая рамка для контраста
+  border-radius: 50%; // Круглые маркеры
+  cursor: pointer; // Курсор в виде указателя
+  z-index: 1000; // Убедимся, что маркеры поверх других элементов
+
+  // Позиционирование маркеров
+  &-nw {
+    cursor: nw-resize; // Курсор для изменения размера в северо-западном направлении
+  }
+
+  &-ne {
+    cursor: ne-resize; // Курсор для изменения размера в северо-восточном направлении
+  }
+
+  &-se {
+    cursor: se-resize; // Курсор для изменения размера в юго-восточном направлении
+  }
+
+  &-sw {
+    cursor: sw-resize; // Курсор для изменения размера в юго-западном направлении
+  }
+
+  // Эффект при наведении
+  &:hover {
+    background-color: #0056b3; // Темно-синий цвет при наведении
+    transform: scale(1.2); // Увеличение маркера при наведении
+  }
+
+  // Эффект при активном состоянии (перетаскивание)
+  &:active {
+    background-color: #004080; // Еще более темный синий при активном состоянии
+  }
+}
+
+/* Base popup styles */
+.popup {
+  @apply hidden bg-white rounded-lg shadow-xl z-[5000];
+  max-height: 90vh;
+  max-width: 90vw;
+  display: flex;
+  flex-direction: column;
+
+  /* Positioning */
+  &[style*='position: fixed'] {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  /* Header */
+  .popup-header {
+    @apply flex-shrink-0 border-b border-gray-200;
+    border-top-left-radius: inherit;
+    border-top-right-radius: inherit;
+  }
+
+  /* Content */
+  .popup-content {
+    @apply flex-1 overflow-y-auto w-full p-0;
+    min-height: 0; /* Critical for flex child scrolling */
+  }
+
+  /* Footer */
+  .popup-footer {
+    @apply flex-shrink-0 p-4;
+    border-bottom-left-radius: inherit;
+    border-bottom-right-radius: inherit;
+  }
+
+  /* Close button */
+  .close-button {
+    @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors;
+
+    svg {
+      @apply w-5 h-5;
+    }
+  }
+
+  .popup-items-container {
+    @apply space-y-4 p-3;
+  }
+
+  .popup-button-icon {
+    @apply flex items-center;
+    svg {
+      @apply w-5 h-5;
+    }
+  }
+
+  .popup-item {
+    @apply space-y-2;
+
+    svg {
+      @apply w-5 h-5;
+    }
+  }
+
+  .popup-item-label {
+    @apply block text-sm font-medium text-gray-700;
+  }
+
+  .popup-item-input {
+    @apply w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  .popup-radio-container {
+    @apply flex items-center;
+  }
+
+  .popup-radio-input {
+    @apply h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500;
+  }
+
+  .popup-radio-label {
+    @apply ml-2 text-sm text-gray-700;
+  }
+}
+
+.popup-footer {
+  @apply flex justify-end p-4 border-t border-gray-200;
+}
+
+.popup-footer-items {
+  @apply flex gap-2;
+}
+
+.popup-footer-button {
+  @apply px-3 py-1.5 text-sm rounded-md transition-colors;
+}
+
+.popup-footer-button-primary {
+  @apply bg-blue-500 text-white hover:bg-blue-600;
+}
+
+.popup-footer-button-secondary {
+  @apply text-gray-600 hover:text-gray-800;
+}
+
+.popup-header {
+  @apply w-full;
+}
+
+.popup-header-container {
+  @apply flex items-center justify-between p-4 border-b border-gray-200;
+}
+
+.popup-header-title {
+  @apply text-lg font-semibold;
+}
+
+.close-button {
+  @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors;
+}
+
+/* Chart popup specific styles */
+.chart-menu {
+  @apply w-full max-w-2xl;
+}
+
+/* Chart preview container */
+.preview-container {
+  @apply bg-gray-50 rounded-lg flex items-center justify-center p-4;
+  min-height: 300px;
+}
+
+/* Data editor container */
+.data-editor-container {
+  @apply bg-white rounded-lg border border-gray-200 p-4;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Buttons */
+.popup-button {
+  @apply px-3 py-1.5 rounded-md transition-colors flex gap-0.5 flex-row items-center focus:outline-none focus:ring-2 focus:ring-offset-2 w-full;
+
+  &.default {
+    @apply text-sm text-gray-700 bg-gray-100 hover:bg-gray-200;
+  }
+
+  /* Дефолтные стили */
+  @apply bg-gray-100 text-gray-700
+  hover:bg-gray-200
+  active:bg-gray-300
+  focus:ring-gray-500
+  disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed;
+
+  &-primary {
+    @apply bg-blue-500 text-white
+    hover:bg-blue-600
+    active:bg-blue-700
+    focus:ring-blue-500
+    disabled:bg-blue-300 disabled:cursor-not-allowed;
+  }
+
+  &-secondary {
+    @apply text-gray-600
+    hover:text-gray-800
+    active:text-gray-900
+    focus:ring-gray-500
+    disabled:text-gray-400 disabled:cursor-not-allowed;
+  }
+}
+
+.custom-color {
+  @apply w-10 h-10 p-0 border-0 rounded cursor-pointer;
+}
+
+.color-input {
+  @apply flex-1 px-3 py-1.5 text-sm border rounded;
+}
+
+.error-modal {
+  @apply max-w-sm w-full;
+
+  .popup-content {
+    @apply text-center;
+  }
+
+  p {
+    @apply text-gray-700 mb-0;
+  }
+}

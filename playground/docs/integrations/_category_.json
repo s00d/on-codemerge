@@ -1,8 +1,0 @@
-{
-  "label": "Tutorial - Integrations",
-  "position": 3,
-  "link": {
-    "type": "generated-index",
-    "description": "Welcome to the integration section of the On-Codemerge documentation. This part of our documentation provides detailed guides on how to integrate the On-Codemerge editor into a wide variety of platforms and frameworks. Our aim is to empower developers to seamlessly embed On-Codemerge's capabilities into their existing development environments, regardless of the technology stack they are using."
-  }
-}

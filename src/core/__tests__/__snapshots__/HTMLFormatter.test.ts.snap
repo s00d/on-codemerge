@@ -1,0 +1,46 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`HTMLFormatter should format simple HTML correctly 1`] = `
+<div>
+  <p>
+    Hello
+  </p>
+</div>
+`;
+
+exports[`HTMLFormatter should handle custom indentation size 1`] = `
+<div>
+  <p>
+    Hello
+  </p>
+</div>
+`;
+
+exports[`HTMLFormatter should handle mixed content correctly 1`] = `
+<div>
+  <p>
+    Hello
+  </p>
+  <img src="image.jpg">
+</div>
+`;
+
+exports[`HTMLFormatter should handle nested tags correctly 1`] = `
+<div>
+  <div>
+    <p>
+      Nested
+    </p>
+  </div>
+</div>
+`;
+
+exports[`HTMLFormatter should handle self-closing tags correctly 1`] = `
+<img src="image.jpg">
+<br>
+`;
+
+exports[`HTMLFormatter should handle void elements correctly 1`] = `
+<input type="text">
+<br>
+`;

@@ -1,0 +1,27 @@
+.editor-footer {
+  @apply mt-0 rounded-lg overflow-hidden shadow-sm transition-colors duration-200;
+
+  .stat-label {
+    @apply text-gray-500;
+  }
+
+  .stat-value {
+    @apply font-medium text-gray-700;
+  }
+
+  /* Hover effects */
+  &:hover {
+    @apply bg-gray-100;
+  }
+
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    > div {
+      @apply flex-col gap-2;
+    }
+
+    > div > div {
+      @apply w-full justify-between;
+    }
+  }
+}

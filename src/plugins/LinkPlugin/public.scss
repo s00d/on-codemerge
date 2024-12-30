@@ -1,0 +1,15 @@
+/* Стили для ссылок внутри редактора */
+a {
+  @apply text-blue-600 underline hover:text-blue-800 transition-colors duration-200;
+
+  /* Стили для ссылок с атрибутом target="_blank" */
+  &[target='_blank']::after {
+    content: '↗';
+    @apply ml-1 text-xs text-gray-500;
+  }
+
+  /* Стили для ссылок с атрибутом rel="nofollow" */
+  &[rel='nofollow'] {
+    @apply text-purple-600 hover:text-purple-800;
+  }
+}

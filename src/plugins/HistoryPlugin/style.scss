@@ -1,0 +1,43 @@
+.history-viewer-modal {
+  @apply max-w-4xl w-full;
+}
+
+.history-item {
+  @apply border-b border-gray-100 last:border-0;
+
+  &.current {
+    @apply bg-blue-50;
+  }
+
+  &.selected {
+    @apply bg-gray-100;
+  }
+
+  .restore-button {
+    @apply opacity-0 transition-opacity;
+  }
+
+  &:hover .restore-button {
+    @apply opacity-100;
+  }
+}
+
+.close-button {
+  @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors;
+}
+
+.diff-view {
+  @apply font-mono text-sm;
+}
+
+.diff-content {
+  @apply whitespace-pre-wrap break-all;
+}
+
+.diff-add {
+  @apply bg-green-100 text-green-800 px-1 rounded;
+}
+
+.diff-remove {
+  @apply bg-red-100 text-red-800 px-1 rounded line-through;
+}
