@@ -2,8 +2,12 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
+  lang: 'en-US',
   title: "OnCodemerge Docs",
   description: "A WYSIWYG editor for on-codemerge",
+  lastUpdated: true,
+  cleanUrls: true,
+  base: process.env.NODE_ENV === 'production' ? '/on-codemerge/' : '/',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     nav: [
