@@ -22,6 +22,9 @@ Here’s how to integrate On-Codemerge into a Nuxt 3 project:
 
 ```javascript title="composables/useEditor.js"
 import 'on-codemerge/index.css';
+import 'on-codemerge/plugins/ToolbarPlugin/style.css';
+import 'on-codemerge/plugins/AlignmentPlugin/public.css';
+import 'on-codemerge/plugins/AlignmentPlugin/style.css';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 

@@ -46,7 +46,11 @@ bun add on-codemerge
 Here's a basic example of integrating On-Codemerge into a vanilla JavaScript project:
 
 ```typescript
-import 'on-codemerge/index.css'
+import 'on-codemerge/index.css';
+import 'on-codemerge/plugins/ToolbarPlugin/style.css';
+import 'on-codemerge/plugins/AlignmentPlugin/public.css';
+import 'on-codemerge/plugins/AlignmentPlugin/style.css';
+
 import {HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', () => {

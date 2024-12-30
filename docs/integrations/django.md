@@ -32,6 +32,9 @@ Here's how to integrate On-Codemerge into a Django application:
 
 ```javascript title="static/js/editor.js"
 import 'on-codemerge/index.css';
+import 'on-codemerge/plugins/ToolbarPlugin/style.css';
+import 'on-codemerge/plugins/AlignmentPlugin/public.css';
+import 'on-codemerge/plugins/AlignmentPlugin/style.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {

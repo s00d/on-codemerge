@@ -22,6 +22,9 @@ yarn add on-codemerge
 
 ```javascript title="app/javascript/packs/editor.js"
 import 'on-codemerge/index.css';
+import 'on-codemerge/plugins/ToolbarPlugin/style.css';
+import 'on-codemerge/plugins/AlignmentPlugin/public.css';
+import 'on-codemerge/plugins/AlignmentPlugin/style.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {

@@ -63,7 +63,42 @@ Below is a list of all available public styles for **On-Codemerge** and its plug
 ## Notes
 
 - **Core Styles**: Always include the core styles (`index.css`) to ensure the editor functions correctly.
-- **Plugin Styles**: Include the styles for the plugins you are using to your frontend.
+- **Plugin Styles**: Include the styles for the plugins you are using to ensure proper rendering and functionality.
 - **Customization**: You can override the default styles by adding your own CSS rules after importing the public styles.
 
 By following this guide, you can ensure that **On-Codemerge** and its plugins are styled correctly in your project.
+
+
+## full import 
+
+```typescript
+import 'on-codemerge/index.css';
+import 'on-codemerge/plugins/BlockPlugin/public.css';
+import 'on-codemerge/plugins/ChartsPlugin/public.css';
+import 'on-codemerge/plugins/CodeBlockPlugin/public.css';
+import 'on-codemerge/plugins/FootnotesPlugin/public.css';
+import 'on-codemerge/plugins/LinkPlugin/public.css';
+import 'on-codemerge/plugins/ListsPlugin/public.css';
+import 'on-codemerge/plugins/TablePlugin/public.css';
+import 'on-codemerge/plugins/AlignmentPlugin/public.css';
+import 'on-codemerge/plugins/ChartsPlugin/style.css';
+import 'on-codemerge/plugins/CodeBlockPlugin/style.css';
+import 'on-codemerge/plugins/ColorPlugin/style.css';
+import 'on-codemerge/plugins/CommentsPlugin/style.css';
+import 'on-codemerge/plugins/ExportPlugin/style.css';
+import 'on-codemerge/plugins/FileUploadPlugin/style.css';
+import 'on-codemerge/plugins/FooterPlugin/style.css';
+import 'on-codemerge/plugins/FootnotesPlugin/style.css';
+import 'on-codemerge/plugins/HistoryPlugin/style.css';
+import 'on-codemerge/plugins/HTMLViewerPlugin/style.css';
+import 'on-codemerge/plugins/ImagePlugin/style.css';
+import 'on-codemerge/plugins/LinkPlugin/style.css';
+import 'on-codemerge/plugins/ListsPlugin/style.css';
+import 'on-codemerge/plugins/ResponsivePlugin/style.css';
+import 'on-codemerge/plugins/ShortcutsPlugin/style.css';
+import 'on-codemerge/plugins/TablePlugin/style.css';
+import 'on-codemerge/plugins/TemplatesPlugin/style.css';
+import 'on-codemerge/plugins/ToolbarPlugin/style.css';
+import 'on-codemerge/plugins/TypographyPlugin/style.css';
+import 'on-codemerge/plugins/AlignmentPlugin/style.css';
+```

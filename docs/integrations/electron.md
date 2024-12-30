@@ -37,6 +37,9 @@ Here's how to integrate On-Codemerge into an Electron application:
 
 ```javascript title="path/to/your/javascript/file.js"
 import 'on-codemerge/index.css';
+import 'on-codemerge/plugins/ToolbarPlugin/style.css';
+import 'on-codemerge/plugins/AlignmentPlugin/public.css';
+import 'on-codemerge/plugins/AlignmentPlugin/style.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {
