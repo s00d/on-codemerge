@@ -27,6 +27,7 @@ Here’s how to integrate On-Codemerge into a Spring application:
 1. **Create a JavaScript File for the Editor**:
 
 ```javascript title="src/main/resources/static/js/editor.js"
+import 'on-codemerge/index.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {

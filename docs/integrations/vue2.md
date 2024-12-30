@@ -24,6 +24,7 @@ Here’s an example of how to integrate On-Codemerge into a Vue.js 2 component:
 </template>
 
 <script>
+import 'on-codemerge/index.css';
 import Vue from 'vue';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 

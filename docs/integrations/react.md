@@ -19,6 +19,7 @@ npm i --save on-codemerge
 Here’s how to integrate On-Codemerge into a React project:
 
 ```jsx title="MyEditorComponent.jsx"
+import 'on-codemerge/index.css';
 import React, { useEffect, useRef, useState } from 'react';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 

@@ -21,6 +21,7 @@ yarn add on-codemerge
 1. **Create a JavaScript Pack**:
 
 ```javascript title="app/javascript/packs/editor.js"
+import 'on-codemerge/index.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {

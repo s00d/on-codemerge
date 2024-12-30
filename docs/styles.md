@@ -15,7 +15,7 @@ To use the public styles provided by **On-Codemerge**, you need to import them s
 If you are using a module bundler like Webpack or Vite, you can import the styles directly in your JavaScript or TypeScript file:
 
 ```javascript
-import 'on-codemerge/app.css'; // Core styles
+import 'on-codemerge/index.css'; // all
 import 'on-codemerge/plugins/ToolbarPlugin/public.css'; // Toolbar plugin styles
 ```
 
@@ -32,7 +32,7 @@ Below is a list of all available public styles for **On-Codemerge** and its plug
 
 | Plugin               | CSS File Path                                          |
 |----------------------|--------------------------------------------------------|
-| **Core Styles**      | `on-codemerge/index.css`                               |
+| **All Styles**       | `on-codemerge/index.css`                               |
 | BlockPlugin          | `on-codemerge/plugins/BlockPlugin/public.css`          |
 | ChartsPlugin         | `on-codemerge/plugins/ChartsPlugin/public.css`         |
 | CodeBlockPlugin      | `on-codemerge/plugins/CodeBlockPlugin/public.css`      |
@@ -62,8 +62,8 @@ Below is a list of all available public styles for **On-Codemerge** and its plug
 
 ## Notes
 
-- **Core Styles**: Always include the core styles (`app.css`) to ensure the editor functions correctly.
-- **Plugin Styles**: Include the styles for the plugins you are using to ensure proper rendering and functionality.
+- **Core Styles**: Always include the core styles (`index.css`) to ensure the editor functions correctly.
+- **Plugin Styles**: Include the styles for the plugins you are using to your frontend.
 - **Customization**: You can override the default styles by adding your own CSS rules after importing the public styles.
 
 By following this guide, you can ensure that **On-Codemerge** and its plugins are styled correctly in your project.

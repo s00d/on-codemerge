@@ -23,6 +23,7 @@ npm i --save on-codemerge
 Here's an example that demonstrates how to integrate On-Codemerge into an Angular project using the new plugin version:
 
 ```typescript title="app.component.ts"
+import 'on-codemerge/index.css';
 import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 

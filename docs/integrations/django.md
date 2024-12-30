@@ -31,6 +31,7 @@ Here's how to integrate On-Codemerge into a Django application:
 1. **Create Your JavaScript File**: Create a new JavaScript file in your Django static files.
 
 ```javascript title="static/js/editor.js"
+import 'on-codemerge/index.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {

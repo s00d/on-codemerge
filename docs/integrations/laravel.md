@@ -30,6 +30,7 @@ mix.js('resources/js/app.js', 'public/js')
 2. **Create the Editor Initialization Script**:
 
 ```javascript title="resources/js/app.js"
+import 'on-codemerge/index.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {

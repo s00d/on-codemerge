@@ -25,6 +25,7 @@ Integrating On-Codemerge in a Backbone.js application can be done by creating a 
 1. **Create a Backbone View**: You will need to create a Backbone view for the On-Codemerge editor. This view will handle initializing and rendering the editor.
 
 ```javascript title="OnCodemergeView.js"
+import 'on-codemerge/index.css';
 import Backbone from 'backbone';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 

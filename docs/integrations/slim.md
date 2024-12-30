@@ -21,6 +21,7 @@ Here’s how to integrate On-Codemerge into a Slim application:
 1. **Frontend Setup**:
 
 ```javascript title="public/js/app.js"
+import 'on-codemerge/index.css';
 import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 document.addEventListener('DOMContentLoaded', async () => {
