@@ -22,7 +22,7 @@ import 'on-codemerge/plugins/ToolbarPlugin/public.css'; // Toolbar plugin styles
 Alternatively, you can include the styles in your HTML file using a `<link>` tag:
 
 ```html
-<link rel="stylesheet" href="path/to/on-codemerge/app.css">
+<link rel="stylesheet" href="path/to/on-codemerge/index.css">
 <link rel="stylesheet" href="path/to/on-codemerge/plugins/ToolbarPlugin/public.css">
 ```
 
@@ -32,7 +32,7 @@ Below is a list of all available public styles for **On-Codemerge** and its plug
 
 | Plugin               | CSS File Path                                          |
 |----------------------|--------------------------------------------------------|
-| **Core Styles**      | `on-codemerge/app.css`                                 |
+| **Core Styles**      | `on-codemerge/index.css`                               |
 | BlockPlugin          | `on-codemerge/plugins/BlockPlugin/public.css`          |
 | ChartsPlugin         | `on-codemerge/plugins/ChartsPlugin/public.css`         |
 | CodeBlockPlugin      | `on-codemerge/plugins/CodeBlockPlugin/public.css`      |
