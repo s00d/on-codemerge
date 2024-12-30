@@ -9,6 +9,7 @@
   "module": "dist/app.mjs",
   "types": "dist/types/app.d.ts",
   "scripts": {
+    "release": "pnpm run prepack && pnpm publish -r",
     "prepublish": "npm run lint:fix && npm run build",
     "dev": "vite",
     "build": "vite build",
