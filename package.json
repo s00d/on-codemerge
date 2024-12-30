@@ -1,7 +1,7 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "author": "Pavel Kuzmin",
   "license": "MIT",
@@ -50,6 +50,10 @@
     "./HTMLEditor": {
       "import": "./dist/HTMLEditor.mjs",
       "require": "./dist/HTMLEditor.cjs"
+    },
+    ".": {
+      "import": "./dist/app.mjs",
+      "require": "./dist/app.cjs"
     },
     "./app": {
       "import": "./dist/app.mjs",
