@@ -44,8 +44,11 @@ export class BlockCommand implements Command {
     blockContent.contentEditable = 'true';
     blockContent.setAttribute('contenteditable', 'true');
     blockContent.textContent = this.editor.t('New Block');
+
+    const br = document.createElement('br');
     // Сборка структуры
     block.appendChild(blockContent);
+    block.appendChild(br);
 
     return block;
   }

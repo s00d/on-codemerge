@@ -97,7 +97,7 @@ export class TablePlugin implements Plugin {
   };
 
   private handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Delete' || e.key === 'Backspace') {
+    if (e.key === 'Delete') {
       const table = this.selection.restoreTable();
       if (table) {
         table.remove();
