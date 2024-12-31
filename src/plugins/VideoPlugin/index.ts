@@ -103,7 +103,6 @@ export class VideoPlugin implements Plugin {
       const container = this.editor.getContainer();
       container.removeEventListener('contextmenu', this.handleContextMenu);
       container.removeEventListener('click', this.handleClick);
-
     }
 
     if (this.contextMenu) {

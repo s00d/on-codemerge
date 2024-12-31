@@ -104,7 +104,6 @@ export class ImagePlugin implements Plugin {
   }
 
   public destroy(): void {
-
     const container = this.editor?.getContainer();
 
     if (container) {

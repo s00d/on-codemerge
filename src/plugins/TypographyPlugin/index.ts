@@ -122,7 +122,7 @@ export class TypographyPlugin implements Plugin {
 
     this.menu?.destroy();
 
-    this.editor?.off('typography')
+    this.editor?.off('typography');
 
     // Очищаем ссылки
     this.editor = null;

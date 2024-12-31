@@ -30,7 +30,7 @@ export class YouTubeVideoPlugin implements Plugin {
     this.setupResizer();
 
     this.editor.on('youtube-video', () => {
-      this.openModal()
+      this.openModal();
     });
   }
 
