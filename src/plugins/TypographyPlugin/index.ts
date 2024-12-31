@@ -110,23 +110,19 @@ export class TypographyPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем обработчик события click
     if (this.editor) {
       this.editor.getContainer().removeEventListener('click', this.handleClick);
     }
 
-    // Удаляем обработчик события keydown
     document.removeEventListener('keydown', this.handleKeyDown);
 
-    // Удаляем кнопку из панели инструментов
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Уничтожаем меню
-    if (this.menu) {
-      this.menu.destroy(); // Предполагается, что у TypographyMenu есть метод destroy
-    }
+    this.menu?.destroy();
+
+    this.editor?.off('typography')
 
     // Очищаем ссылки
     this.editor = null;

@@ -173,22 +173,18 @@ export class LinkPlugin implements Plugin {
   }
 
   destroy(): void {
-    // Удаляем обработчик события 'link'
     this.editor?.off('link');
 
-    // Удаляем контекстное меню
     if (this.contextMenu) {
-      this.contextMenu.destroy(); // Предполагается, что у ContextMenu есть метод destroy
+      this.contextMenu.destroy();
       this.contextMenu = null;
     }
 
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
       this.toolbarButton = null;
     }
 
-    // Удаляем обработчик контекстного меню
     const container = this.editor?.getContainer();
     if (container) {
       container.removeEventListener('contextmenu', this.handleContextMenu);

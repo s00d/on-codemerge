@@ -1,6 +1,6 @@
 /* Base toolbar button */
 .editor-toolbar {
-  @apply z-[100];
+  @apply z-[11];
 }
 .toolbar-button {
   @apply p-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500;

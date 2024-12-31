@@ -50,24 +50,17 @@ export class TemplatesPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Уничтожаем меню шаблонов
     if (this.menu) {
-      this.menu.destroy(); // Предполагается, что у TemplatesMenu есть метод destroy
+      this.menu.destroy();
       this.menu = null;
     }
 
-    // Отписываемся от событий редактора
-    if (this.editor) {
-      this.editor.off('templates'); // Предполагается, что у HTMLEditor есть метод off
-      this.editor = null;
-    }
-
-    // Очищаем ссылки
+    this.editor?.off('templates');
+    this.editor = null;
     this.manager = null!;
     this.toolbarButton = null;
   }

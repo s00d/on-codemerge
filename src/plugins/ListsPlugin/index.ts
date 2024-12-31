@@ -127,12 +127,10 @@ export class ListsPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем обработчики событий
     if (this.editor) {
       this.editor.getContainer().removeEventListener('keydown', this.handleKeydown);
     }
 
-    // Удаляем кнопки из тулбара
     if (this.ulButton && this.ulButton.parentElement) {
       this.ulButton.parentElement.removeChild(this.ulButton);
     }
@@ -140,7 +138,8 @@ export class ListsPlugin implements Plugin {
       this.olButton.parentElement.removeChild(this.olButton);
     }
 
-    // Очищаем ссылки
+    this.editor?.off('lists');
+
     this.editor = null;
     this.ulButton = null;
     this.olButton = null;

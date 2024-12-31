@@ -43,24 +43,18 @@ export class ExportPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Уничтожаем меню экспорта
     if (this.menu) {
-      this.menu.destroy(); // Предполагается, что у ExportMenu есть метод destroy
+      this.menu.destroy();
       this.menu = null;
     }
 
-    // Удаляем обработчик события
-    if (this.editor) {
-      this.editor.off('export'); // Предполагается, что у HTMLEditor есть метод off
-      this.editor = null;
-    }
+    this.editor?.off('export');
+    this.editor = null;
 
-    // Очищаем ссылку на кнопку
     this.toolbarButton = null;
   }
 }

@@ -153,7 +153,6 @@ export class FootnotesPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем обработчики событий
     if (this.editor) {
       const container = this.editor.getContainer();
       container.removeEventListener('click', (e) => {
@@ -165,17 +164,12 @@ export class FootnotesPlugin implements Plugin {
           }
         }
       });
-
-      // Отписываемся от события 'footnotes'
-      this.editor.off('footnotes');
     }
 
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Удаляем секцию сносок
     if (this.editor) {
       const existingSection = this.editor.getContainer().querySelector('.footnotes-section');
       if (existingSection) {
@@ -183,10 +177,11 @@ export class FootnotesPlugin implements Plugin {
       }
     }
 
-    // Очищаем ссылки
+    this.editor?.off('footnotes');
+
     this.editor = null;
     this.menu = null;
     this.toolbarButton = null;
-    this.manager.destroy(); // Предполагается, что FootnoteManager имеет метод destroy
+    this.manager.destroy();
   }
 }

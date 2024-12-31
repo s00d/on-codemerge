@@ -42,22 +42,17 @@ export class HTMLViewerPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем модальное окно
     if (this.modal) {
-      this.modal.destroy(); // Предполагается, что у HTMLViewerModal есть метод destroy
+      this.modal.destroy();
       this.modal = null;
     }
 
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
       this.toolbarButton = null;
     }
 
-    // Отписываемся от событий
-    if (this.editor) {
-      this.editor.off('html-viewer'); // Предполагается, что у HTMLEditor есть метод off
-      this.editor = null;
-    }
+    this.editor?.off('html-viewer');
+    this.editor = null;
   }
 }

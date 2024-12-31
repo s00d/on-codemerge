@@ -204,23 +204,16 @@ export class FontPlugin implements Plugin {
   }
 
   destroy(): void {
-    // Удаляем кнопки из тулбара
     this.toolbarButtons.forEach((button) => button.remove());
     this.toolbarButtons = [];
 
-    // Уничтожаем всплывающее окно
-    if (this.fontPopup) {
-      this.fontPopup.destroy();
-      this.fontPopup = null;
-    }
+    this.fontPopup?.destroy();
+    this.fontPopup = null;
 
-    // Отписываемся от событий редактора
-    if (this.editor) {
-      this.editor.off('bold');
-      this.editor.off('italic');
-      this.editor.off('underline');
-      this.editor.off('strikethrough');
-      this.editor = null;
-    }
+    this.editor?.off('bold');
+    this.editor?.off('italic');
+    this.editor?.off('underline');
+    this.editor?.off('strikethrough');
+    this.editor = null;
   }
 }

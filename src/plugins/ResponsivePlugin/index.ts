@@ -52,23 +52,17 @@ export class ResponsivePlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Уничтожаем меню
     if (this.menu) {
-      this.menu.destroy(); // Предполагается, что у ResponsiveMenu есть метод destroy
+      this.menu.destroy();
       this.menu = null;
     }
 
-    // Отсоединяем обработчики событий
-    if (this.editor) {
-      this.editor.off('responsive'); // Предполагается, что у HTMLEditor есть метод off
-    }
+    this.editor?.off('responsive');
 
-    // Очищаем ссылки
     this.editor = null;
     this.toolbarButton = null;
   }

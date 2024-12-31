@@ -131,11 +131,7 @@ export class ChartsPlugin implements Plugin {
     });
   }
 
-  /**
-   * Уничтожение плагина
-   */
   public destroy(): void {
-    // Уничтожаем меню и контекстное меню
     if (this.menu) {
       this.menu.destroy();
       this.menu = null;
@@ -145,19 +141,18 @@ export class ChartsPlugin implements Plugin {
       this.contextMenu = null;
     }
 
-    // Уничтожаем текущий Resizer
     if (this.currentResizer) {
       this.currentResizer.destroy();
       this.currentResizer = null;
     }
 
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
       this.toolbarButton = null;
     }
 
-    // Очищаем ссылку на редактор
+    this.editor?.off('charts');
+
     this.editor = null;
   }
 }

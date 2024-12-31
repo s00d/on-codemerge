@@ -36,6 +36,7 @@ export class ShortcutsPlugin implements Plugin {
       title: this.editor?.t('Keyboard Shortcuts'),
       onClick: () => this.menu?.show(),
     });
+
     toolbar.appendChild(this.toolbarButton);
   }
 
@@ -55,19 +56,16 @@ export class ShortcutsPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Удаляем обработчик событий для клавиатурных сокращений
     document.removeEventListener('keydown', (e) => {
       this.shortcutManager.handleKeyDown(e);
     });
 
-    // Уничтожаем меню
     if (this.menu) {
-      this.menu.destroy(); // Предполагается, что у ShortcutsMenu есть метод destroy
+      this.menu.destroy();
     }
 
     // Очищаем ссылки

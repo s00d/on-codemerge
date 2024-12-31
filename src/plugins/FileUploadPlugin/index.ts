@@ -97,21 +97,22 @@ export class FileUploadPlugin implements Plugin {
   }
 
   destroy(): void {
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Удаляем обработчики событий
     if (this.editor) {
       const container = this.editor.getContainer();
       container.removeEventListener('click', this.handleFileLinkClick);
     }
 
-    // Закрываем меню, если оно открыто
+    this.editor?.off('file-upload', () => {
+      this.editor?.ensureEditorFocus();
+      this.showUploadMenu();
+    });
+
     this.menu?.destroy();
 
-    // Очищаем ссылки
     this.editor = null;
     this.menu = null;
     this.toolbarButton = null;

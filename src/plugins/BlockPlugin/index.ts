@@ -26,37 +26,6 @@ export class BlockPlugin implements Plugin {
     });
   }
 
-  /**
-   * Уничтожение плагина
-   */
-  destroy(): void {
-    // Удаляем обработчики событий
-    if (this.editor) {
-      const container = this.editor.getContainer();
-      container.removeEventListener('click', this.handleBlockClick);
-      container.removeEventListener('contextmenu', this.handleContextMenu);
-    }
-
-    // Уничтожаем Resizer
-    if (this.currentResizer) {
-      this.currentResizer.destroy();
-      this.currentResizer = null;
-    }
-
-    // Уничтожаем контекстное меню
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
-
-    // Деактивируем активный блок
-    this.deactivateBlock();
-
-    // Очищаем ссылки
-    this.editor = null;
-    this.activeBlock = null;
-  }
-
   private addToolbarButton(): void {
     const toolbar = document.querySelector('.editor-toolbar');
     if (!toolbar) return;
@@ -147,5 +116,30 @@ export class BlockPlugin implements Plugin {
 
     const command = new BlockCommand(this.editor);
     command.execute();
+  }
+
+  destroy(): void {
+    if (this.editor) {
+      const container = this.editor.getContainer();
+      container.removeEventListener('click', this.handleBlockClick);
+      container.removeEventListener('contextmenu', this.handleContextMenu);
+    }
+
+    this.editor?.off('block');
+
+    if (this.currentResizer) {
+      this.currentResizer.destroy();
+      this.currentResizer = null;
+    }
+
+    if (this.contextMenu) {
+      this.contextMenu.destroy();
+      this.contextMenu = null;
+    }
+
+    this.deactivateBlock();
+
+    this.editor = null;
+    this.activeBlock = null;
   }
 }

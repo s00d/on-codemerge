@@ -50,7 +50,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     editor.use(new ExportPlugin());
     editor.use(new HistoryPlugin());
     editor.use(new ChartsPlugin());
-    editor.use(new ShortcutsPlugin());
     editor.use(new ColorPlugin());
     editor.use(new TypographyPlugin());
     editor.use(new ListsPlugin());
@@ -61,6 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     editor.use(new LinkPlugin());
     editor.use(new VideoPlugin());
     editor.use(new YouTubeVideoPlugin());
+    editor.use(new ShortcutsPlugin());
     editor.use(
       new FileUploadPlugin({
         // Configure with emulation by default

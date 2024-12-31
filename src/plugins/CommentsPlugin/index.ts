@@ -29,7 +29,7 @@ export class CommentsPlugin implements Plugin {
     this.editor = editor;
     this.addToolbarButton();
     this.setupEventListeners();
-    this.editor.on('comments', () => {
+    this.editor.on('comment', () => {
       this.addComment();
     });
   }
@@ -211,7 +211,6 @@ export class CommentsPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем обработчики событий
     if (this.editor) {
       const container = this.editor.getContainer();
       container.removeEventListener('mouseover', this.handleMouseOver);
@@ -219,16 +218,15 @@ export class CommentsPlugin implements Plugin {
       container.removeEventListener('click', this.handleClick);
     }
 
-    // Удаляем тултип из DOM
     if (this.tooltip && this.tooltip.parentElement) {
       this.tooltip.parentElement.removeChild(this.tooltip);
     }
 
-    // Уничтожаем меню и модальное окно
     this.menu?.destroy();
     this.errorModal?.destroy();
 
-    // Очищаем ссылки
+    this.editor?.off('comment');
+
     this.editor = null;
     this.menu = null;
     this.errorModal = null;

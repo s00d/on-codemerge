@@ -28,6 +28,10 @@ export class YouTubeVideoPlugin implements Plugin {
     this.addToolbarButton();
     this.setupContextMenu();
     this.setupResizer();
+
+    this.editor.on('youtube-video', () => {
+      this.openModal()
+    });
   }
 
   private setupResizer(): void {
@@ -82,28 +86,25 @@ export class YouTubeVideoPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем обработчики событий
     if (this.editor) {
       const container = this.editor.getContainer();
       container.removeEventListener('click', this.setupResizer);
       container.removeEventListener('contextmenu', this.setupContextMenu);
     }
 
-    // Уничтожаем меню и контекстное меню
     this.menu?.destroy();
     this.contextMenu?.destroy();
 
-    // Отсоединяем ресайзер
     this.resizer.detach();
 
-    // Удаляем кнопку из тулбара
     const toolbar = document.querySelector('.editor-toolbar');
     const button = toolbar?.querySelector(`[title="${this.editor?.t('Insert YouTube Video')}"]`);
     if (button) {
       button.remove();
     }
 
-    // Очищаем ссылки
+    this.editor?.off('youtube-video');
+
     this.editor = null;
     this.menu = null;
     this.contextMenu = null;

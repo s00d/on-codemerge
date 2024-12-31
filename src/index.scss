@@ -9,7 +9,7 @@
     @apply absolute top-0 left-0 w-full h-full;
     @apply border-2 border-dashed border-blue-500;
     @apply bg-blue-100 bg-opacity-10;
-    @apply z-[1000] pointer-events-none;
+    @apply z-[110] pointer-events-none;
     @apply block;
   }
 }
@@ -114,7 +114,7 @@
 
 /* Base popup styles */
 .popup {
-  @apply hidden bg-white rounded-lg shadow-xl z-[5000];
+  @apply hidden bg-white rounded-lg shadow-xl z-[11];
   max-height: 90vh;
   max-width: 90vw;
   display: flex;

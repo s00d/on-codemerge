@@ -123,7 +123,6 @@ export class TablePlugin implements Plugin {
   }
 
   destroy(): void {
-    // Удаляем обработчики событий
     if (this.editor) {
       const container = this.editor.getContainer();
       container.removeEventListener('contextmenu', this.handleContextMenu);
@@ -131,25 +130,23 @@ export class TablePlugin implements Plugin {
       container.removeEventListener('keydown', this.handleKeydown);
     }
 
-    // Уничтожаем всплывающее окно
     if (this.popup) {
       this.popup.destroy();
       this.popup = null;
     }
 
-    // Уничтожаем контекстное меню
     if (this.contextMenu) {
       this.contextMenu.destroy();
       this.contextMenu = null;
     }
 
-    // Уничтожаем текущий ресайзер
     if (this.currentResizer) {
       this.currentResizer.destroy();
       this.currentResizer = null;
     }
 
-    // Очищаем ссылки
+    this.editor?.off('table');
+
     this.editor = null;
     this.selection.clearTable();
   }

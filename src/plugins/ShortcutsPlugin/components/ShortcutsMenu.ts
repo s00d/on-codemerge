@@ -47,6 +47,11 @@ export class ShortcutsMenu {
         shortcutItem.className = 'flex items-center justify-between text-sm';
 
         // Описание шортката
+        const icon = document.createElement('span');
+        icon.className = 'text-gray-600';
+        icon.textContent = shortcut.icon;
+
+        // Описание шортката
         const description = document.createElement('span');
         description.className = 'text-gray-600';
         description.textContent = shortcut.description;
@@ -57,6 +62,7 @@ export class ShortcutsMenu {
         keys.textContent = this.formatShortcut(shortcut.keys);
 
         // Сборка элемента
+        shortcutItem.appendChild(icon);
         shortcutItem.appendChild(description);
         shortcutItem.appendChild(keys);
         shortcutsList.appendChild(shortcutItem);

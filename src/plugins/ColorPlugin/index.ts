@@ -23,10 +23,10 @@ export class ColorPlugin implements Plugin {
 
     this.editor = editor;
     this.addToolbarButtons();
-    this.editor.on('foreColor', () => {
+    this.editor.on('fore-color', () => {
       this.showTextColorPicker();
     });
-    this.editor.on('hiliteColor', () => {
+    this.editor.on('hilite-color', () => {
       this.showBgColorPicker();
     });
   }
@@ -76,7 +76,6 @@ export class ColorPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Удаляем кнопки из панели инструментов
     if (this.textColorButton && this.textColorButton.parentElement) {
       this.textColorButton.parentElement.removeChild(this.textColorButton);
     }
@@ -84,25 +83,18 @@ export class ColorPlugin implements Plugin {
       this.bgColorButton.parentElement.removeChild(this.bgColorButton);
     }
 
-    // Очищаем ссылки на кнопки
     this.textColorButton = null;
     this.bgColorButton = null;
 
-    // Уничтожаем ColorPicker
     this.textColorPicker?.destroy();
     this.bgColorPicker?.destroy();
 
-    // Очищаем ссылки на ColorPicker
     this.textColorPicker = null;
     this.bgColorPicker = null;
 
-    // Отписываемся от событий редактора
-    if (this.editor) {
-      this.editor.off('foreColor');
-      this.editor.off('hiliteColor');
-    }
+    this.editor?.off('foreColor');
+    this.editor?.off('hiliteColor');
 
-    // Очищаем ссылку на редактор
     this.editor = null;
   }
 }

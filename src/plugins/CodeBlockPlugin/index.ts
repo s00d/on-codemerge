@@ -174,24 +174,22 @@ export class CodeBlockPlugin implements Plugin {
    * Очистка ресурсов плагина
    */
   public destroy(): void {
-    // Удаление кнопки из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Уничтожение модального окна
     if (this.modal) {
       this.modal.destroy();
       this.modal = null;
     }
 
-    // Уничтожение контекстного меню
     if (this.contextMenu) {
       this.contextMenu.destroy();
       this.contextMenu = null;
     }
 
-    // Очистка ссылок
+    this.editor?.off('code-block');
+
     this.editor = null;
     this.highlighter = null!;
   }

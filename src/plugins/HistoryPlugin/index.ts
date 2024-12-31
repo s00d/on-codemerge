@@ -114,13 +114,11 @@ export class HistoryPlugin implements Plugin {
   }
 
   public destroy(): void {
-    // Остановить MutationObserver
     if (this.observer) {
       this.observer.disconnect();
       this.observer = null;
     }
 
-    // Удалить кнопки из тулбара
     if (this.undoButton && this.undoButton.parentElement) {
       this.undoButton.parentElement.removeChild(this.undoButton);
     }
@@ -131,14 +129,16 @@ export class HistoryPlugin implements Plugin {
       this.historyButton.parentElement.removeChild(this.historyButton);
     }
 
-    // Уничтожить HistoryViewer
     if (this.historyViewer) {
       this.historyViewer.destroy();
       this.historyViewer = null;
     }
 
-    // Очистить ссылки
+    this.editor?.off('history');
+    this.editor?.off('undo');
+    this.editor?.off('redo');
+
     this.editor = null;
-    this.historyManager.clear(); // Очистить историю, если это необходимо
+    this.historyManager.clear();
   }
 }

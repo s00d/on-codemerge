@@ -16,6 +16,25 @@ export class AlignmentPlugin implements Plugin {
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
     this.addToolbarButtons();
+
+    this.editor.on('align_left', () => {
+      this.editor?.ensureEditorFocus();
+      this.applyAlignment('left');
+    });
+
+    this.editor.on('align_center', () => {
+      this.editor?.ensureEditorFocus();
+      this.applyAlignment('center');
+    });
+
+    this.editor.on('align_right', () => {
+      this.editor?.ensureEditorFocus();
+      this.applyAlignment('right');
+    });
+    this.editor.on('align_justify', () => {
+      this.editor?.ensureEditorFocus();
+      this.applyAlignment('justify');
+    });
   }
 
   private addToolbarButtons(): void {
@@ -80,22 +99,20 @@ export class AlignmentPlugin implements Plugin {
     document.execCommand(command, false);
   }
 
-  /**
-   * Уничтожение плагина
-   */
   public destroy(): void {
     const toolbar = document.querySelector('.editor-toolbar');
     if (toolbar) {
-      // Удаляем все кнопки, созданные плагином
       this.buttons.forEach((button) => {
         toolbar.removeChild(button);
       });
     }
 
-    // Очищаем массив кнопок
-    this.buttons = [];
+    this.editor?.off('align_left');
+    this.editor?.off('align_center');
+    this.editor?.off('align_right');
+    this.editor?.off('align_justify');
 
-    // Очищаем ссылку на редактор
+    this.buttons = [];
     this.editor = null;
   }
 }

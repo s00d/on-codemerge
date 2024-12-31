@@ -13,6 +13,7 @@ export class HTMLEditor {
   private dragOverlay: HTMLElement | null = null;
   private localeManager: LocaleManager;
   private contentChangeCallbacks: Callback[] = [];
+  private mutationObserver: MutationObserver;
 
   constructor(innerContainer: HTMLElement) {
     // Создаем новый внутренний контейнер
@@ -41,7 +42,28 @@ export class HTMLEditor {
 
     this.container.addEventListener('paste', (e) => this.handlePaste(e));
 
-    this.container.addEventListener('input', () => this.handleContentChange());
+    // Инициализация MutationObserver
+    this.mutationObserver = new MutationObserver((mutations) => this.handleMutations(mutations));
+    this.mutationObserver.observe(this.container, {
+      childList: true, // Отслеживаем изменения в дочерних элементах
+      subtree: true, // Отслеживаем изменения во всем поддереве
+      characterData: true, // Отслеживаем изменения текста
+      attributes: true, // Отслеживаем изменения атрибутов
+    });
+  }
+
+  private handleMutations(mutations: MutationRecord[]): void {
+    const hasContentChanged = mutations.some((mutation) => {
+      return (
+        mutation.type === 'childList' || // Изменения в дочерних элементах
+        mutation.type === 'characterData' || // Изменения в тексте
+        mutation.type === 'attributes' // Изменения в атрибутах
+      );
+    });
+
+    if (hasContentChanged) {
+      this.handleContentChange();
+    }
   }
 
   private async handlePaste(e: ClipboardEvent): Promise<void> {
@@ -253,6 +275,8 @@ export class HTMLEditor {
   }
 
   public destroy(): void {
+    this.mutationObserver.disconnect();
+
     // Удаляем все обработчики событий
     this.container.removeEventListener('click', () => this.container.focus());
     this.container.removeEventListener('dragenter', (e) => this.handleDragEnter(e));
@@ -260,7 +284,6 @@ export class HTMLEditor {
     this.container.removeEventListener('dragleave', (e) => this.handleDragLeave(e));
     this.container.removeEventListener('drop', (e) => this.handleDrop(e));
     this.container.removeEventListener('paste', (e) => this.handlePaste(e));
-    this.container.removeEventListener('input', () => this.handleContentChange());
 
     // Очищаем подписчиков на изменения контента
     this.contentChangeCallbacks = [];
@@ -281,5 +304,6 @@ export class HTMLEditor {
     this.formatter = null!;
     this.dragOverlay = null;
     this.localeManager = null!;
+    this.mutationObserver = null!;
   }
 }

@@ -104,33 +104,26 @@ export class ImagePlugin implements Plugin {
   }
 
   public destroy(): void {
-    if (!this.editor) return;
 
-    const container = this.editor.getContainer();
+    const container = this.editor?.getContainer();
 
-    // Удаление обработчиков событий
-    container.removeEventListener('contextmenu', this.handleContextMenu);
-    container.removeEventListener('click', this.handleClick);
+    if (container) {
+      container.removeEventListener('contextmenu', this.handleContextMenu);
+      container.removeEventListener('click', this.handleClick);
+    }
 
-    // Удаляем подписку на событие 'image'
-    this.editor.off('image');
+    this.editor?.off('image');
+    this.editor?.off('file-drop');
 
-    // Удаляем подписку на событие 'file-drop'
-    this.editor.off('file-drop');
-
-    // Уничтожаем контекстное меню
     this.contextMenu?.destroy();
     this.contextMenu = null;
 
-    // Отсоединяем ресайзер
     this.resizer.detach();
 
-    // Удаляем кнопку из тулбара
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    // Очищаем ссылки
     this.editor = null;
     this.toolbarButton = null;
   }
