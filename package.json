@@ -1,7 +1,7 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "type": "module",
   "author": "Pavel Kuzmin",
   "license": "MIT",
@@ -10,7 +10,7 @@
   "types": "dist/types/app.d.ts",
   "scripts": {
     "release": "pnpm publish -r",
-    "prepublish": "npm run lint:fix && npm run build",
+    "prepublish": "npm run format && npm run lint:fix && npm run build",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
@@ -85,7 +85,7 @@
     "./plugins/VideoPlugin/public.css": "./dist/plugins/VideoPlugin/public.css",
     "./plugins/YouTubeVideoPlugin/public.css": "./dist/plugins/YouTubeVideoPlugin/public.css",
     "./plugins/AlignmentPlugin/public.css": "./dist/plugins/AlignmentPlugin/public.css",
-
+    "./plugins/FormBuilderPlugin/public.css": "./dist/plugins/FormBuilderPlugin/public.css",
     "./plugins/BlockPlugin/style.css": "./dist/plugins/BlockPlugin/style.css",
     "./plugins/ChartsPlugin/style.css": "./dist/plugins/ChartsPlugin/style.css",
     "./plugins/CodeBlockPlugin/style.css": "./dist/plugins/CodeBlockPlugin/style.css",
@@ -110,7 +110,8 @@
     "./plugins/TypographyPlugin/style.css": "./dist/plugins/TypographyPlugin/style.css",
     "./plugins/VideoPlugin/style.css": "./dist/plugins/VideoPlugin/style.css",
     "./plugins/YouTubeVideoPlugin/style.css": "./dist/plugins/YouTubeVideoPlugin/style.css",
-    "./plugins/AlignmentPlugin/style.css": "./dist/plugins/AlignmentPlugin/style.css"
+    "./plugins/AlignmentPlugin/style.css": "./dist/plugins/AlignmentPlugin/style.css",
+    "./plugins/FormBuilderPlugin/style.css": "./dist/plugins/FormBuilderPlugin/style.css"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
@@ -131,7 +132,7 @@
     "jsdom": "^25.0.1",
     "postcss": "^8.4.49",
     "prettier": "^3.4.2",
-    "sass-embedded": "^1.83.0",
+    "sass": "^1.83.0",
     "tailwindcss": "^3.4.17",
     "ts-jest": "^29.2.5",
     "typescript": "5.4.2",

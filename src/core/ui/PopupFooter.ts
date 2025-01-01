@@ -1,6 +1,6 @@
 export interface PopupFooterButton {
   label: string;
-  variant?: 'primary' | 'secondary';
+  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info';
   onClick: () => void;
 }
 
@@ -46,11 +46,27 @@ export class PopupFooter {
     return buttonElement;
   }
 
-  private getButtonClasses(variant: 'primary' | 'secondary' = 'secondary'): string {
+  private getButtonClasses(
+    variant: 'primary' | 'secondary' | 'success' | 'danger' | 'warning' | 'info' = 'secondary'
+  ): string {
     const baseClasses = 'popup-footer-button';
-    return variant === 'primary'
-      ? `${baseClasses} popup-footer-button-primary`
-      : `${baseClasses} popup-footer-button-secondary`;
+
+    switch (variant) {
+      case 'primary':
+        return `${baseClasses} popup-footer-button-primary`;
+      case 'secondary':
+        return `${baseClasses} popup-footer-button-secondary`;
+      case 'success':
+        return `${baseClasses} popup-footer-button-success`;
+      case 'danger':
+        return `${baseClasses} popup-footer-button-danger`;
+      case 'warning':
+        return `${baseClasses} popup-footer-button-warning`;
+      case 'info':
+        return `${baseClasses} popup-footer-button-info`;
+      default:
+        return `${baseClasses} popup-footer-button-secondary`;
+    }
   }
 
   public updateButtonCallback(buttonLabel: string, newCallback: () => void): void {

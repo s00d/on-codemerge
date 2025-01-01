@@ -1,0 +1,71 @@
+.form-builder-container {
+  .add-field-button {
+    @apply bg-blue-500 text-white border-none py-2 px-4 rounded cursor-pointer text-sm;
+
+    &:hover {
+      @apply bg-blue-600;
+    }
+  }
+
+  .field-container {
+    @apply mb-4 p-3 border border-gray-200 rounded bg-gray-50;
+
+    .field-type-select,
+    .field-label-input,
+    .field-regex-input {
+      @apply w-full p-2 mb-2 border border-gray-200 rounded text-sm;
+
+      &:focus {
+        @apply outline-none border-blue-500 ring-2 ring-blue-200;
+      }
+    }
+
+    .field-required-checkbox {
+      @apply mr-2;
+    }
+
+    .remove-field-button {
+      @apply bg-red-500 text-white border-none py-1.5 px-3 rounded cursor-pointer text-sm;
+
+      &:hover {
+        @apply bg-red-600;
+      }
+    }
+  }
+}
+
+.options-container {
+  @apply mt-2; // По умолчанию скрыт
+
+  .option-container {
+    @apply flex gap-2 items-center;
+
+    .option-input {
+      @apply flex-1 p-1.5 border border-gray-200 rounded text-sm;
+
+      &:focus {
+        @apply outline-none border-blue-500 ring-2 ring-blue-200;
+      }
+    }
+
+    .remove-option-button {
+      @apply bg-red-500 text-white border-none py-1 px-2 rounded cursor-pointer text-xs;
+
+      &:hover {
+        @apply bg-red-600;
+      }
+    }
+  }
+}
+
+.form-builder {
+  @apply w-full max-w-2xl;
+}
+
+.add-option-button {
+  @apply bg-blue-500 text-white border-none py-1.5 px-3 rounded cursor-pointer text-sm mt-2 hidden; // По умолчанию скрыт
+
+  &:hover {
+    @apply bg-blue-600;
+  }
+}

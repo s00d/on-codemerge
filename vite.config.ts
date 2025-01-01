@@ -4,7 +4,12 @@ import dts from 'vite-plugin-dts';
 
 export default defineConfig({
   css: {
-    postcss: './postcss.config.js', // Укажите путь к конфигурации PostCSS
+    preprocessorOptions: {
+      scss: {
+        api: 'modern-compiler'
+      }
+    },
+    postcss: './postcss.config.js',
   },
   plugins: [
     svgLoader({
@@ -19,7 +24,7 @@ export default defineConfig({
     }),
   ],
   build: {
-    cssCodeSplit: true, // Включает разделение CSS
+    cssCodeSplit: true,
     lib: {
       entry: {
         app: './src/app.ts',
@@ -30,7 +35,7 @@ export default defineConfig({
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'mjs' : 'cjs'}`,
     },
     rollupOptions: {
-      external: [], // Укажите внешние зависимости, если они есть
+      external: [],
       output: {
         preserveModules: true,
         dir: 'dist',

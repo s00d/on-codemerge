@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 .html-editor {
-  @apply border border-gray-300 rounded-lg p-4 min-h-[300px] focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+  @apply border border-gray-300 p-4 min-h-[300px] focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent;
 
   .drag-overlay {
     @apply absolute top-0 left-0 w-full h-full;
@@ -12,10 +12,6 @@
     @apply z-[110] pointer-events-none;
     @apply block;
   }
-}
-
-.editor-toolbar {
-  @apply flex flex-wrap gap-1 p-2 bg-gray-50 border-b border-gray-300 sticky top-0;
 }
 
 .toolbar-button {
@@ -114,7 +110,7 @@
 
 /* Base popup styles */
 .popup {
-  @apply hidden bg-white rounded-lg shadow-xl z-[11];
+  @apply hidden bg-white rounded-lg shadow-xl z-[12];
   max-height: 90vh;
   max-width: 90vw;
   display: flex;
@@ -208,12 +204,32 @@
   @apply px-3 py-1.5 text-sm rounded-md transition-colors;
 }
 
-.popup-footer-button-primary {
-  @apply bg-blue-500 text-white hover:bg-blue-600;
-}
+.popup-footer-button {
+  @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
 
-.popup-footer-button-secondary {
-  @apply text-gray-600 hover:text-gray-800;
+  &-primary {
+    @apply bg-blue-500 text-white hover:bg-blue-600;
+  }
+
+  &-secondary {
+    @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+  }
+
+  &-success {
+    @apply bg-green-500 text-white hover:bg-green-600;
+  }
+
+  &-danger {
+    @apply bg-red-500 text-white hover:bg-red-600;
+  }
+
+  &-warning {
+    @apply bg-yellow-500 text-white hover:bg-yellow-600;
+  }
+
+  &-info {
+    @apply bg-blue-400 text-white hover:bg-blue-500;
+  }
 }
 
 .popup-header {

@@ -15,7 +15,7 @@ export class CodeBlockPlugin implements Plugin {
   private modal: CodeBlockModal | null = null;
   private contextMenu: CodeBlockContextMenu | null = null;
   private highlighter: SyntaxHighlighter;
-  private toolbarButton: HTMLElement | null = null; // Для хранения кнопки в тулбаре
+  private toolbarButton: HTMLElement | null = null;
 
   constructor() {
     this.highlighter = new SyntaxHighlighter();

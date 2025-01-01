@@ -59,6 +59,10 @@ export class FooterRenderer {
       this.editor.t('min') // Переводим суффикс
     );
 
+    const collaborationStatus = document.createElement('div');
+    collaborationStatus.className = 'collaboration-status';
+
+    rightSection.appendChild(collaborationStatus);
     rightSection.appendChild(sentencesStat);
     rightSection.appendChild(paragraphsStat);
     rightSection.appendChild(readingTimeStat);

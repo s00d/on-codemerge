@@ -188,11 +188,27 @@ export class HTMLEditor {
     plugin.initialize(this);
   }
 
-  public on(eventName: string, callback: Callback): void {
+  public on(eventName: string, callback: Callback): () => void {
     if (!this.eventHandlers.has(eventName)) {
       this.eventHandlers.set(eventName, []);
     }
     this.eventHandlers.get(eventName)!.push(callback);
+
+    // Возвращаем функцию для отписки
+    return () => {
+      const handlers = this.eventHandlers.get(eventName);
+      if (handlers) {
+        const index = handlers.indexOf(callback);
+        if (index !== -1) {
+          handlers.splice(index, 1); // Удаляем callback из массива
+        }
+
+        // Если обработчиков больше нет, удаляем событие из Map
+        if (handlers.length === 0) {
+          this.eventHandlers.delete(eventName);
+        }
+      }
+    };
   }
 
   public triggerEvent(eventName: string, ...args: any[]): void {
@@ -237,8 +253,16 @@ export class HTMLEditor {
    * Подписка на изменения контента
    * @param callback Функция, которая будет вызвана при изменении контента
    */
-  public subscribeToContentChange(callback: Callback): void {
+  public subscribeToContentChange(callback: Callback): () => void {
     this.contentChangeCallbacks.push(callback);
+
+    // Возвращаем функцию для отписки
+    return () => {
+      const index = this.contentChangeCallbacks.indexOf(callback);
+      if (index !== -1) {
+        this.contentChangeCallbacks.splice(index, 1);
+      }
+    };
   }
 
   public ensureEditorFocus(): void {
@@ -264,6 +288,43 @@ export class HTMLEditor {
 
   public setHtml(html: string) {
     this.getContainer().innerHTML = this.formatter.format(html);
+  }
+
+  public insertContent(content: string | HTMLElement): void {
+    this.ensureEditorFocus();
+
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents(); // Удаляем текущее выделение, если оно есть
+
+      // Если content — это строка, вставляем её как HTML
+      if (typeof content === 'string') {
+        const div = document.createElement('div'); // Создаем временный контейнер
+        div.innerHTML = content; // Вставляем HTML в контейнер
+
+        // Вставляем все дочерние элементы из временного контейнера
+        while (div.firstChild) {
+          range.insertNode(div.firstChild);
+        }
+      } else {
+        // Если content — это HTMLElement, вставляем его
+        range.insertNode(content);
+      }
+
+      // Перемещаем курсор в конец вставленного контента
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+    } else {
+      // Если курсор не активен, вставляем контент в конец редактора
+      const container = this.getContainer();
+      if (typeof content === 'string') {
+        container.insertAdjacentHTML('beforeend', content);
+      } else {
+        container.appendChild(content);
+      }
+    }
   }
 
   public t(key: string, params: Record<string, string> = {}): string {
