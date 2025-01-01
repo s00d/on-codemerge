@@ -497,6 +497,8 @@ export class FormBuilderPlugin implements Plugin {
     // Открываем модальное окно с текущими настройками формы
     this.popup?.show();
 
+    this.formManager.clearOptions();
+
     // Очищаем контейнер формы перед добавлением новых полей
     const formBuilderContainer = this.popup
       ?.getElement()
