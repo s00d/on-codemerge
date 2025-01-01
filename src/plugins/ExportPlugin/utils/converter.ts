@@ -1,5 +1,7 @@
+import { createContainer } from '../../../utils/helpers.ts';
+
 export function htmlToMarkdown(html: string): string {
-  const div = document.createElement('div');
+  const div = createContainer();
   div.innerHTML = html;
 
   return convertNodeToMarkdown(div);

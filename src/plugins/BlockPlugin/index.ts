@@ -90,7 +90,12 @@ export class BlockPlugin implements Plugin {
     const block = (e.target as Element).closest('.editor-block');
     if (block instanceof HTMLElement) {
       e.preventDefault();
-      this.contextMenu?.show(block, e.clientX, e.clientY);
+      const mouseX = (e as MouseEvent).clientX + window.scrollX;
+      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+      console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+      this.contextMenu?.show(block, mouseX, mouseY);
     }
   }
 

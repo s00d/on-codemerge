@@ -1,5 +1,6 @@
 import type { Command } from '../../../core/commands/Command';
 import type { HTMLEditor } from '../../../core/HTMLEditor';
+import { createVideo } from '../../../utils/helpers.ts';
 
 export class VideoCommand implements Command {
   private dataUrl: string;
@@ -9,10 +10,9 @@ export class VideoCommand implements Command {
   }
 
   execute(): void {
-    const video = document.createElement('video');
+    const video = createVideo('max-w-full h-auto rounded-lg');
     video.src = this.dataUrl;
     video.controls = true;
-    video.className = 'max-w-full h-auto rounded-lg';
 
     const selection = window.getSelection();
     const range = selection?.getRangeAt(0);

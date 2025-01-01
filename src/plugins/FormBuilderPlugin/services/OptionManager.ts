@@ -1,3 +1,5 @@
+import { createButton, createContainer, createInputField } from '../../../utils/helpers';
+
 export class OptionManager {
   private optionsContainer: HTMLDivElement | null = null;
   private optionInputs: HTMLInputElement[] = [];
@@ -11,26 +13,23 @@ export class OptionManager {
   addOption(optionValue: string = ''): void {
     if (!this.optionsContainer) return;
 
-    const optionContainer = document.createElement('div');
-    optionContainer.className = 'option-container mb-2';
+    const optionContainer = createContainer('option-container mb-2'); // Используем существующий хелпер
 
-    const optionInput = document.createElement('input');
-    optionInput.type = 'text';
-    optionInput.placeholder = 'Option Value';
+    const optionInput = createInputField('text', 'Option Value', optionValue); // Используем существующий хелпер
     optionInput.className = 'option-input';
-    optionInput.value = optionValue;
 
     // Добавляем опцию в глобальный массив
     this.optionInputs.push(optionInput);
 
-    const removeOptionButton = document.createElement('button');
-    removeOptionButton.className = 'remove-option-button';
-    removeOptionButton.textContent = 'Remove';
-    removeOptionButton.addEventListener('click', () => {
-      optionContainer.remove();
-      // Удаляем опцию из глобального массива
-      this.optionInputs = this.optionInputs.filter((input) => input !== optionInput);
-    });
+    const removeOptionButton = createButton(
+      'Remove',
+      () => {
+        optionContainer.remove();
+        // Удаляем опцию из глобального массива
+        this.optionInputs = this.optionInputs.filter((input) => input !== optionInput);
+      },
+      'danger'
+    ); // Используем существующий хелпер
 
     optionContainer.appendChild(optionInput);
     optionContainer.appendChild(removeOptionButton);

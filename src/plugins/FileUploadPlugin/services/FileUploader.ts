@@ -1,4 +1,5 @@
 import { type UploadConfig, defaultConfig } from '../config/UploadConfig';
+import { createLink } from '../../../utils/helpers.ts';
 
 interface UploadedFile {
   id: string;
@@ -111,8 +112,7 @@ export class FileUploader {
   }
 
   private triggerDownload(url: string, filename: string): void {
-    const link = document.createElement('a');
-    link.href = url;
+    const link = createLink('', url);
     link.download = filename;
     document.body.appendChild(link);
     link.click();

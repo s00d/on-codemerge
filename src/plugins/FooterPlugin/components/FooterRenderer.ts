@@ -1,5 +1,6 @@
 import type { Statistics } from '../services/StatisticsCalculator';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createContainer, createSpan } from '../../../utils/helpers.ts';
 
 export class FooterRenderer {
   private editor: HTMLEditor;
@@ -11,19 +12,11 @@ export class FooterRenderer {
   }
 
   public createElement(): HTMLElement {
-    // Основной контейнер
-    this.element = document.createElement('div');
-    this.element.className = 'editor-footer';
-
-    // Контейнер для статистики
-    const footerContent = document.createElement('div');
-    footerContent.className =
-      'flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-gray-200 text-sm text-gray-600';
-
-    // Левая часть (слова и символы)
-    const leftSection = document.createElement('div');
-    leftSection.className = 'flex items-center gap-4';
-
+    this.element = createContainer('editor-footer');
+    const footerContent = createContainer(
+      'flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-gray-200 text-sm text-gray-600'
+    );
+    const leftSection = createContainer('flex items-center gap-4');
     const wordsStat = this.createStatElement(
       this.editor.t('Words'), // Переводим текст
       'stat-words'
@@ -42,9 +35,7 @@ export class FooterRenderer {
     leftSection.appendChild(charactersNoSpacesStat);
 
     // Правая часть (предложения, абзацы и время чтения)
-    const rightSection = document.createElement('div');
-    rightSection.className = 'flex items-center gap-4';
-
+    const rightSection = createContainer('flex items-center gap-4');
     const sentencesStat = this.createStatElement(
       this.editor.t('Sentences'), // Переводим текст
       'stat-sentences'
@@ -59,8 +50,7 @@ export class FooterRenderer {
       this.editor.t('min') // Переводим суффикс
     );
 
-    const collaborationStatus = document.createElement('div');
-    collaborationStatus.className = 'collaboration-status';
+    const collaborationStatus = createContainer('collaboration-status');
 
     rightSection.appendChild(collaborationStatus);
     rightSection.appendChild(sentencesStat);
@@ -74,33 +64,31 @@ export class FooterRenderer {
 
     // Кэширование элементов статистики
     this.stats = {
-      words: this.element.querySelector('.stat-words')!,
-      characters: this.element.querySelector('.stat-characters')!,
-      charactersNoSpaces: this.element.querySelector('.stat-characters-no-spaces')!,
-      sentences: this.element.querySelector('.stat-sentences')!,
-      paragraphs: this.element.querySelector('.stat-paragraphs')!,
-      readingTime: this.element.querySelector('.stat-reading-time')!,
+      words: wordsStat,
+      characters: charactersStat,
+      charactersNoSpaces: charactersNoSpacesStat,
+      sentences: sentencesStat,
+      paragraphs: paragraphsStat,
+      readingTime: readingTimeStat,
     };
 
     return this.element;
   }
 
   private createStatElement(label: string, className: string, suffix: string = ''): HTMLElement {
-    const container = document.createElement('div');
+    const container = createContainer();
 
-    const labelElement = document.createElement('span');
+    const labelElement = createSpan('', `${label}: `);
     labelElement.textContent = `${label}: `;
 
-    const valueElement = document.createElement('span');
-    valueElement.className = `${className} font-medium`;
+    const valueElement = createSpan('', `${className} font-medium`);
     valueElement.textContent = '0';
 
     container.appendChild(labelElement);
     container.appendChild(valueElement);
 
     if (suffix) {
-      const suffixElement = document.createElement('span');
-      suffixElement.textContent = ` ${suffix}`;
+      const suffixElement = createSpan('', ` ${suffix}`);
       container.appendChild(suffixElement);
     }
 
@@ -110,11 +98,18 @@ export class FooterRenderer {
   public update(stats: Statistics): void {
     if (!this.element) return;
 
-    this.stats.words.textContent = stats.words.toLocaleString();
-    this.stats.characters.textContent = stats.characters.toLocaleString();
-    this.stats.charactersNoSpaces.textContent = stats.charactersNoSpaces.toLocaleString();
-    this.stats.sentences.textContent = stats.sentences.toLocaleString();
-    this.stats.paragraphs.textContent = stats.paragraphs.toLocaleString();
-    this.stats.readingTime.textContent = stats.readingTime.toString();
+    this.stats.words.textContent = this.editor.t('Words') + ': ' + stats.words.toLocaleString();
+    this.stats.characters.textContent =
+      this.editor.t('Characters') + ': ' + stats.characters.toLocaleString();
+    this.stats.charactersNoSpaces.textContent =
+      this.editor.t('Characters (without spaces)') +
+      ': ' +
+      stats.charactersNoSpaces.toLocaleString();
+    this.stats.sentences.textContent =
+      this.editor.t('Sentences') + ': ' + stats.sentences.toLocaleString();
+    this.stats.paragraphs.textContent =
+      this.editor.t('Paragraphs') + ': ' + stats.paragraphs.toLocaleString();
+    this.stats.readingTime.textContent =
+      this.editor.t('Reading time') + ': ' + stats.readingTime.toString();
   }
 }

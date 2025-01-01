@@ -1,5 +1,6 @@
 import { PopupManager } from '../../../core/ui/PopupManager';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createButton, createContainer, createP, createTextarea } from '../../../utils/helpers.ts';
 
 export class CommentMenu {
   private editor: HTMLEditor;
@@ -40,29 +41,31 @@ export class CommentMenu {
 
   private createContent(): HTMLElement {
     // Основной контейнер
-    const container = document.createElement('div');
-    container.className = 'p-4';
+    const container = createContainer('p-4');
 
     // Текстовое поле для ввода комментария
-    this.textarea = document.createElement('textarea');
+    this.textarea = createTextarea('Add your comment...');
     this.textarea.className =
       'comment-content w-full h-32 p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500';
-    this.textarea.placeholder = 'Add your comment...';
 
     // Контейнер для подсказки и кнопки удаления
-    const footer = document.createElement('div');
-    footer.className = 'flex justify-between items-center mt-4';
+    const footer = createContainer('flex justify-between items-center mt-4');
 
     // Подсказка
-    const hint = document.createElement('p');
-    hint.className = 'text-sm text-gray-500';
-    hint.textContent = this.editor.t('Use comments to provide feedback or suggestions.');
+    const hint = createP(
+      'text-sm text-gray-500',
+      this.editor.t('Use comments to provide feedback or suggestions.')
+    );
 
     // Кнопка удаления комментария
-    this.deleteButton = document.createElement('button');
+    this.deleteButton = createButton(this.editor.t('Delete Comment'), () => {
+      if (this.callback) {
+        this.callback('', 'delete');
+        this.popup.hide();
+      }
+    });
     this.deleteButton.className =
       'delete-comment hidden px-3 py-1.5 text-sm text-red-600 hover:text-red-700 transition-colors';
-    this.deleteButton.textContent = this.editor.t('Delete Comment');
 
     // Сборка структуры
     footer.appendChild(hint);
@@ -70,21 +73,7 @@ export class CommentMenu {
     container.appendChild(this.textarea);
     container.appendChild(footer);
 
-    // Настройка обработчиков событий
-    this.setupEventListeners();
-
     return container;
-  }
-
-  private setupEventListeners(): void {
-    if (this.deleteButton) {
-      this.deleteButton.addEventListener('click', () => {
-        if (this.callback) {
-          this.callback('', 'delete');
-          this.popup.hide();
-        }
-      });
-    }
   }
 
   private handleSubmit(): void {

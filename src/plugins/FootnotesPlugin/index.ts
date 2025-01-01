@@ -7,6 +7,15 @@ import { FootnoteManager } from './services/FootnoteManager';
 import { FootnoteMenu } from './components/FootnoteMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { footnoteIcon } from '../../icons/';
+import {
+  createContainer,
+  createH,
+  createHr,
+  createLi,
+  createOl,
+  createP,
+  createSup,
+} from '../../utils/helpers.ts';
 
 export class FootnotesPlugin implements Plugin {
   name = 'footnotes';
@@ -83,7 +92,7 @@ export class FootnotesPlugin implements Plugin {
   private insertFootnoteReference(id: string): void {
     if (!this.editor) return;
 
-    const ref = document.createElement('sup');
+    const ref = createSup('footnote-ref');
     ref.className = 'footnote-ref';
     ref.setAttribute('data-footnote-id', id);
     ref.textContent = `[${this.manager.getFootnoteNumber(id)}]`;
@@ -113,35 +122,30 @@ export class FootnotesPlugin implements Plugin {
     if (footnotes.length === 0) return;
 
     // Создаем новый раздел для сносок
-    const section = document.createElement('div');
+    const section = createContainer();
     section.className = 'footnotes-section';
 
     // Добавляем горизонтальную линию
-    const hr = document.createElement('hr');
+    const hr = createHr();
     hr.className = 'my-8';
     section.appendChild(hr);
 
     // Добавляем заголовок раздела
-    const heading = document.createElement('h2');
-    heading.className = 'text-xl font-semibold mb-4';
-    heading.textContent = this.editor?.t('Footnotes') ?? '';
+    const heading = createH('h2', 'text-xl font-semibold mb-4', this.editor?.t('Footnotes') ?? '');
     section.appendChild(heading);
 
     // Создаем упорядоченный список для сносок
-    const ol = document.createElement('ol');
-    ol.className = 'footnotes-list';
+    const ol = createOl('footnotes-list');
 
     // Добавляем каждую сноску в список
     footnotes.forEach((footnote) => {
-      const li = document.createElement('li');
+      const li = createLi();
       li.id = `footnote-${footnote.id}`;
 
       // Разделяем содержимое сноски по строкам и добавляем их как параграфы
       const lines = footnote.content.split(/\r?\n/).filter((line) => line.trim());
       lines.forEach((line) => {
-        const p = document.createElement('p');
-        p.className = 'footnote-line';
-        p.textContent = line;
+        const p = createP('footnote-line', line);
         li.appendChild(p);
       });
 

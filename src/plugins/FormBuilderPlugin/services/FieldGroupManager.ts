@@ -1,27 +1,27 @@
+import {
+  createContainer,
+  createFieldset,
+  createInputField,
+  createLabel,
+} from '../../../utils/helpers';
+
 export class FieldGroupManager {
   createFieldset(legend: string, fields: HTMLElement[]): HTMLElement {
-    const fieldset = document.createElement('fieldset');
-    const legendElement = document.createElement('legend');
-    legendElement.textContent = legend;
-    fieldset.appendChild(legendElement);
-
+    const fieldset = createFieldset(legend);
     fields.forEach((field) => {
       fieldset.appendChild(field);
     });
-
     return fieldset;
   }
 
   createRadioGroup(name: string, options: string[]): HTMLElement {
-    const container = document.createElement('div');
+    const container = createContainer();
+
     options.forEach((optionValue) => {
-      const label = document.createElement('label');
-      const input = document.createElement('input');
-      input.setAttribute('type', 'radio');
+      const label = createLabel(optionValue);
+      const input = createInputField('radio', '', optionValue);
       input.setAttribute('name', name);
-      input.setAttribute('value', optionValue);
       label.appendChild(input);
-      label.appendChild(document.createTextNode(optionValue));
       container.appendChild(label);
     });
 

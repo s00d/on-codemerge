@@ -1,6 +1,12 @@
 import type { ChartSeries, ChartPoint } from '../types';
 import { deleteIcon } from '../../../icons';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import {
+  createButton,
+  createContainer,
+  createH,
+  createInputField,
+} from '../../../utils/helpers.ts';
 
 export class MultiSeriesDataEditor {
   private editor: HTMLEditor;
@@ -13,60 +19,39 @@ export class MultiSeriesDataEditor {
 
   constructor(editor: HTMLEditor, onChange: (series: ChartSeries[]) => void) {
     this.editor = editor;
-    this.container = document.createElement('div');
+    this.container = createContainer('chart-data-editor');
     this.onChange = onChange;
     this.initialize();
   }
 
   private initialize(): void {
-    this.container.className = 'chart-data-editor';
+    const mainContainer = createContainer('space-y-4');
+    const header = createContainer('flex justify-between items-center');
+    const title = createH('h4', 'text-sm font-medium text-gray-700', this.editor.t('Series Data'));
 
-    // Основной контейнер
-    const mainContainer = document.createElement('div');
-    mainContainer.className = 'space-y-4';
-
-    // Заголовок и кнопка добавления серии
-    const header = document.createElement('div');
-    header.className = 'flex justify-between items-center';
-
-    const title = document.createElement('h4');
-    title.className = 'text-sm font-medium text-gray-700';
-    title.textContent = this.editor.t('Series Data');
-
-    const addSeriesButton = document.createElement('button');
-    addSeriesButton.type = 'button';
-    addSeriesButton.className =
-      'add-series-btn px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600';
-    addSeriesButton.textContent = this.editor.t('Add Series');
-
-    header.appendChild(title);
-    header.appendChild(addSeriesButton);
-
-    // Контейнер для серий
-    const seriesContainer = document.createElement('div');
-    seriesContainer.className = 'series-container space-y-6';
-
-    // Сборка структуры
-    mainContainer.appendChild(header);
-    mainContainer.appendChild(seriesContainer);
-    this.container.appendChild(mainContainer);
-
-    // Настройка обработчиков событий
-    this.setupEventListeners();
-
-    // Добавление начальной серии
-    this.addInitialSeries();
-  }
-
-  private setupEventListeners(): void {
-    const addSeriesButton = this.container.querySelector('.add-series-btn');
-    addSeriesButton?.addEventListener('click', () => {
+    const addSeriesButton = createButton(this.editor.t('Add Series'), () => {
       this.addSeries({
         name: `Series ${this.series.length + 1}`,
         color: this.getNextColor(),
         data: [],
       });
     });
+    addSeriesButton.className =
+      'add-series-btn px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600';
+
+    header.appendChild(title);
+    header.appendChild(addSeriesButton);
+
+    // Контейнер для серий
+    const seriesContainer = createContainer('series-container space-y-6');
+
+    // Сборка структуры
+    mainContainer.appendChild(header);
+    mainContainer.appendChild(seriesContainer);
+    this.container.appendChild(mainContainer);
+
+    // Добавление начальной серии
+    this.addInitialSeries();
   }
 
   private addInitialSeries(): void {
@@ -139,28 +124,33 @@ export class MultiSeriesDataEditor {
   }
 
   private createSeriesSection(series: ChartSeries): HTMLDivElement {
-    const section = document.createElement('div');
-    section.className = 'series-section border rounded-lg p-4';
-
-    // Заголовок серии
-    const header = document.createElement('div');
-    header.className = 'flex items-center justify-between mb-4';
-
-    const nameColorContainer = document.createElement('div');
-    nameColorContainer.className = 'flex items-center gap-3';
-
-    this.nameInput = document.createElement('input');
-    this.nameInput.type = 'text';
+    const section = createContainer('series-section border rounded-lg p-4');
+    const header = createContainer('flex items-center justify-between mb-4');
+    const nameColorContainer = createContainer('flex items-center gap-3');
+    this.nameInput = createInputField(
+      'text',
+      this.editor.t('Series name'),
+      series.name,
+      (value) => {
+        series.name = value;
+      }
+    );
     this.nameInput.className = 'series-name px-2 py-1 border rounded text-sm';
-    this.nameInput.value = series.name;
-    this.nameInput.placeholder = this.editor.t('Series name');
 
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
+    const colorInput = createInputField(
+      'color',
+      this.editor.t('Color'),
+      series.color || '#3b82f6',
+      (value) => {
+        series.color = value;
+      }
+    );
     colorInput.className = 'series-color w-8 h-8 rounded cursor-pointer';
-    colorInput.value = series.color || '#3b82f6';
 
-    const deleteButton = document.createElement('button');
+    const deleteButton = createButton('', () => {
+      section.remove();
+      this.updateData();
+    });
     deleteButton.className = 'delete-series-btn p-1 text-red-500 hover:text-red-700';
     deleteButton.innerHTML = deleteIcon;
 
@@ -170,35 +160,25 @@ export class MultiSeriesDataEditor {
     header.appendChild(deleteButton);
 
     // Сетка данных
-    const dataGrid = document.createElement('div');
-    dataGrid.className = 'data-grid';
-
-    const gridHeader = document.createElement('div');
-    gridHeader.className = 'grid grid-cols-[0.9fr,60px,60px,60px,40px,60px] gap-2 pb-2 border-b';
-
-    const labelHeader = document.createElement('div');
-    labelHeader.className = 'text-sm font-medium text-gray-600';
-    labelHeader.textContent = this.editor.t('Label');
-
-    const valueHeader = document.createElement('div');
-    valueHeader.className = 'text-sm font-medium text-gray-600';
-    valueHeader.textContent = this.editor.t('Value');
-
-    const xHeader = document.createElement('div');
-    xHeader.className = 'text-sm font-medium text-gray-600';
-    xHeader.textContent = this.editor.t('X');
-
-    const yHeader = document.createElement('div');
-    yHeader.className = 'text-sm font-medium text-gray-600';
-    yHeader.textContent = this.editor.t('Y');
-
-    const colorHeader = document.createElement('div');
-    colorHeader.className = 'text-sm font-medium text-gray-600';
-    colorHeader.textContent = this.editor.t('Color');
-
-    const actionHeader = document.createElement('div');
-    actionHeader.className = 'text-sm font-medium text-gray-600';
-    actionHeader.textContent = '';
+    const dataGrid = createContainer('data-grid');
+    const gridHeader = createContainer(
+      'grid grid-cols-[0.9fr,60px,60px,60px,40px,60px] gap-2 pb-2 border-b'
+    );
+    const labelHeader = createContainer(
+      'text-sm font-medium text-gray-600',
+      this.editor.t('Label')
+    );
+    const valueHeader = createContainer(
+      'text-sm font-medium text-gray-600',
+      this.editor.t('Value')
+    );
+    const xHeader = createContainer('text-sm font-medium text-gray-600', this.editor.t('X'));
+    const yHeader = createContainer('text-sm font-medium text-gray-600', this.editor.t('Y'));
+    const colorHeader = createContainer(
+      'text-sm font-medium text-gray-600',
+      this.editor.t('Color')
+    );
+    const actionHeader = createContainer('text-sm font-medium text-gray-600');
 
     gridHeader.appendChild(labelHeader);
     gridHeader.appendChild(valueHeader);
@@ -208,24 +188,20 @@ export class MultiSeriesDataEditor {
     gridHeader.appendChild(actionHeader);
     dataGrid.appendChild(gridHeader);
 
-    const dataRows = document.createElement('div');
-    dataRows.className = 'data-rows space-y-2 mt-2';
+    const dataRows = createContainer('data-rows space-y-2 mt-2');
     dataGrid.appendChild(dataRows);
 
     // Кнопка добавления точки данных
-    const addPointButton = document.createElement('button');
-    addPointButton.type = 'button';
+    const addPointButton = createButton(this.editor.t('+ Add Data Point'), () => {
+      this.addDataPoint(section);
+    });
     addPointButton.className =
       'add-point-btn mt-2 px-2 py-1 text-sm text-blue-600 hover:text-blue-700';
-    addPointButton.textContent = this.editor.t('+ Add Data Point');
 
     // Сборка структуры
     section.appendChild(header);
     section.appendChild(dataGrid);
     section.appendChild(addPointButton);
-
-    // Настройка обработчиков событий
-    this.setupSeriesEventListeners(section);
 
     // Заполнение данных
     this.populateSeriesData(dataRows, series.data);
@@ -233,61 +209,45 @@ export class MultiSeriesDataEditor {
     return section;
   }
 
-  private setupSeriesEventListeners(section: HTMLElement): void {
-    const addPointButton = section.querySelector('.add-point-btn');
-    addPointButton?.addEventListener('click', () => {
-      this.addDataPoint(section);
-    });
-
-    const deleteButton = section.querySelector('.delete-series-btn');
-    deleteButton?.addEventListener('click', () => {
-      section.remove();
-      this.updateData();
-    });
-
-    section.addEventListener('input', () => this.updateData());
-  }
-
   private addDataPoint(section: HTMLElement, point?: ChartPoint): void {
     const dataRows = section.querySelector('.data-rows');
     if (!dataRows) return;
 
-    const row = document.createElement('div');
-    row.className = 'grid grid-cols-[0.9fr,60px,60px,60px,40px,60px] gap-2 items-center';
+    const row = createContainer(
+      'grid grid-cols-[0.9fr,60px,60px,60px,40px,60px] gap-2 items-center'
+    );
 
-    const labelInput = document.createElement('input');
-    labelInput.type = 'text';
+    const labelInput = createInputField('text', 'label', point?.label || '', (value) => {
+      if (point) point.label = value;
+    });
     labelInput.className = 'label-input px-2 py-1 border rounded text-sm';
-    labelInput.value = point?.label || '';
 
-    const valueInput = document.createElement('input');
-    valueInput.type = 'number';
+    const valueInput = createInputField('number', 'value', point?.value?.toString(), (value) => {
+      if (point) point.value = parseInt(value);
+    });
     valueInput.className = 'value-input px-2 py-1 border rounded text-sm';
-    valueInput.value = point?.value?.toString() || '';
 
-    const xInput = document.createElement('input');
-    xInput.type = 'number';
+    const xInput = createInputField('number', 'X', point?.x?.toString() || '', (value) => {
+      if (point) point.x = parseInt(value);
+    });
     xInput.className = 'x-input px-2 py-1 border rounded text-sm';
-    xInput.value = point?.x?.toString() || '';
 
-    const yInput = document.createElement('input');
-    yInput.type = 'number';
+    const yInput = createInputField('number', 'Y', point?.y?.toString() || '', (value) => {
+      if (point) point.y = parseInt(value);
+    });
     yInput.className = 'y-input px-2 py-1 border rounded text-sm';
-    yInput.value = point?.y?.toString() || '';
 
-    const colorInput = document.createElement('input');
-    colorInput.type = 'color';
+    const colorInput = createInputField('color', 'Color', point?.y?.toString() || '', (value) => {
+      colorInput.value = value;
+    });
     colorInput.className = 'color-input px-2 py-1 border rounded text-sm';
-    colorInput.value = point?.color?.toString() || '';
 
-    const deleteButton = document.createElement('button');
-    deleteButton.className = 'delete-point-btn p-1 pl-2 text-red-500 hover:text-red-700';
-    deleteButton.innerHTML = deleteIcon;
-
-    deleteButton.addEventListener('click', () => {
+    const deleteButton = createButton('', () => {
       row.remove();
       this.updateData();
     });
+    deleteButton.className = 'delete-point-btn p-1 pl-2 text-red-500 hover:text-red-700';
+    deleteButton.innerHTML = deleteIcon;
 
     row.appendChild(labelInput);
     row.appendChild(valueInput);

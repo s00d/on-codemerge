@@ -2,6 +2,7 @@ import { PopupManager } from '../../../core/ui/PopupManager';
 import type { Viewport } from '../types';
 import { responsiveIcon, mobileIcon, tabletIcon, desktopIcon } from '../../../icons';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createButton, createContainer, createP, createSpan } from '../../../utils/helpers.ts';
 
 // Интерфейс для описания структуры элемента массива viewports
 interface ViewportOption {
@@ -56,12 +57,8 @@ export class ResponsiveMenu {
 
   private createContent(): HTMLElement {
     // Основной контейнер
-    const container = document.createElement('div');
-    container.className = 'p-4';
-
-    // Сетка кнопок
-    const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-3 gap-4';
+    const container = createContainer('p-4');
+    const grid = createContainer('grid grid-cols-3 gap-4');
 
     // Создаем кнопки на основе массива viewports
     this.viewports.forEach((viewport) => {
@@ -70,11 +67,8 @@ export class ResponsiveMenu {
     });
 
     // Подсказка
-    const hint = document.createElement('div');
-    hint.className = 'mt-4 pt-4 border-t';
-
-    const hintText = document.createElement('p');
-    hintText.className = 'text-sm text-gray-600';
+    const hint = createContainer('mt-4 pt-4 border-t');
+    const hintText = createP('text-sm text-gray-600');
     hintText.innerHTML = this.editor.t(
       `Select a viewport size to preview your content at different screen widths.<br>Use the resize handles in responsive mode to adjust the width manually.`
     );
@@ -92,24 +86,28 @@ export class ResponsiveMenu {
   }
 
   private createViewportButton(viewport: ViewportOption): HTMLElement {
-    const button = document.createElement('button');
+    const button = createButton('', () => {
+      document
+        .querySelectorAll('.viewport-btn')
+        .forEach((btn) => btn.classList.remove('border-blue-500'));
+
+      button.classList.add('border-blue-500');
+
+      this.notifyViewportChange(viewport.name);
+
+      this.popup.hide();
+    });
     button.className = 'viewport-btn';
     button.dataset.viewport = viewport.name;
 
-    const buttonContent = document.createElement('div');
-    buttonContent.className =
-      'flex flex-col items-center gap-2 p-4 border rounded-lg hover:border-blue-500 transition-colors text-center';
-
-    const iconElement = document.createElement('div');
+    const buttonContent = createContainer(
+      'flex flex-col items-center gap-2 p-4 border rounded-lg hover:border-blue-500 transition-colors text-center'
+    );
+    const iconElement = createContainer();
     iconElement.innerHTML = viewport.icon;
 
-    const labelElement = document.createElement('span');
-    labelElement.className = 'text-sm font-medium';
-    labelElement.textContent = viewport.label;
-
-    const sizeElement = document.createElement('span');
-    sizeElement.className = 'text-xs text-gray-500';
-    sizeElement.textContent = viewport.size;
+    const labelElement = createSpan('text-sm font-medium', viewport.label);
+    const sizeElement = createSpan('text-xs text-gray-500', viewport.size);
 
     buttonContent.appendChild(iconElement);
     buttonContent.appendChild(labelElement);

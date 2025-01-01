@@ -75,6 +75,7 @@ import fontSizeIcon from './font-size.svg?raw';
 import underlineIcon from './underline.svg?raw';
 import strikethroughIcon from './strikethrough.svg?raw';
 import formIcon from './form.svg?raw';
+import pdfIcon from './pdf.svg?raw';
 
 export {
   alignCenterIcon,
@@ -154,4 +155,5 @@ export {
   fontFamilyIcon,
   fontSizeIcon,
   formIcon,
+  pdfIcon,
 };

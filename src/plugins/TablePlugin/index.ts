@@ -63,7 +63,15 @@ export class TablePlugin implements Plugin {
     const cell = (e.target as Element).closest('td, th');
     if (cell instanceof HTMLTableCellElement) {
       e.preventDefault();
-      this.contextMenu?.show(cell, (e as MouseEvent).clientX, (e as MouseEvent).clientY);
+
+      // Получаем координаты мыши с учётом прокрутки страницы
+      const mouseX = (e as MouseEvent).clientX + window.scrollX;
+      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+      console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+      // Показываем контекстное меню с учётом скорректированных координат
+      this.contextMenu?.show(cell, mouseX, mouseY);
     }
   };
 
@@ -111,7 +119,7 @@ export class TablePlugin implements Plugin {
 
     this.editor.ensureEditorFocus();
 
-    let range = this.selection.restoreSelection();
+    let range = this.selection.restoreSelection(this.editor.getContainer());
     if (!range) {
       range = document.createRange();
       range.selectNodeContents(this.editor.getContainer());

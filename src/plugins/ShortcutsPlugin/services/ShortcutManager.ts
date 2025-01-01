@@ -14,7 +14,7 @@ export class ShortcutManager {
   public handleKeyDown(event: KeyboardEvent): void {
     const pressedKeys: string[] = [];
 
-    if (event.ctrlKey) pressedKeys.push('ctrl');
+    if (event.ctrlKey || event.metaKey) pressedKeys.push('ctrl');
     if (event.shiftKey) pressedKeys.push('shift');
     if (event.altKey) pressedKeys.push('alt');
     if (event.key !== 'Control' && event.key !== 'Shift' && event.key !== 'Alt') {

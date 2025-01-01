@@ -10,6 +10,7 @@ import { BubbleChartRenderer } from '../renderers/BubbleChartRenderer';
 import { normalizeChartData } from '../utils/validation';
 import type { BaseChartRenderer } from '../renderers/BaseChartRenderer.ts';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createCanvas } from '../../../utils/helpers.ts';
 
 export class ChartRenderer {
   private renderers: Map<ChartType, BaseChartRenderer>;
@@ -32,7 +33,7 @@ export class ChartRenderer {
     data: ChartPoint[] | ChartSeries[],
     options: ChartOptions
   ): HTMLCanvasElement {
-    const canvas = document.createElement('canvas');
+    const canvas = createCanvas();
     const dpr = window.devicePixelRatio || 1;
 
     canvas.width = options.width * dpr;

@@ -2,6 +2,7 @@ import type { Template } from '../types';
 import { formatDate } from '../utils/formatters';
 import { editIcon, deleteIcon } from '../../../icons';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createButton, createContainer } from '../../../utils/helpers.ts';
 
 export class TemplatesList {
   private editor: HTMLEditor;
@@ -18,7 +19,7 @@ export class TemplatesList {
     onDelete: (template: Template) => void
   ) {
     this.editor = editor;
-    this.element = document.createElement('div');
+    this.element = createContainer();
     this.onSelect = onSelect;
     this.onEdit = onEdit;
     this.onDelete = onDelete;
@@ -35,16 +36,16 @@ export class TemplatesList {
 
     if (this.templates.length === 0) {
       // Отображение сообщения, если шаблонов нет
-      const emptyMessage = document.createElement('div');
-      emptyMessage.className = 'text-center text-gray-500 py-4';
-      emptyMessage.textContent = 'No templates yet. Click "New Template" to create one.';
+      const emptyMessage = createContainer(
+        'text-center text-gray-500 py-4',
+        'No templates yet. Click "New Template" to create one.'
+      );
       this.element.appendChild(emptyMessage);
       return;
     }
 
     // Контейнер для списка шаблонов
-    const listContainer = document.createElement('div');
-    listContainer.className = 'space-y-2';
+    const listContainer = createContainer('space-y-2');
 
     // Создание элементов для каждого шаблона
     this.templates.forEach((template) => {
@@ -60,36 +61,31 @@ export class TemplatesList {
   }
 
   private createTemplateItem(template: Template): HTMLElement {
-    const templateItem = document.createElement('div');
-    templateItem.className = 'template-item';
+    const templateItem = createContainer('template-item');
     templateItem.dataset.templateId = template.id;
 
-    const templateContent = document.createElement('div');
-    templateContent.className =
-      'flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer';
+    const templateContent = createContainer(
+      'flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer'
+    );
 
     // Левая часть: название и дата обновления
-    const templateInfo = document.createElement('div');
-    const templateName = document.createElement('div');
-    templateName.className = 'font-medium';
-    templateName.textContent = template.name;
-
-    const templateDate = document.createElement('div');
-    templateDate.className = 'text-xs text-gray-500';
-    templateDate.textContent = this.editor.t('Updated') + ` ${formatDate(template.updatedAt)}`;
+    const templateInfo = createContainer('div');
+    const templateName = createContainer('font-medium', template.name);
+    const templateDate = createContainer(
+      'ext-xs text-gray-500',
+      this.editor.t('Updated') + ` ${formatDate(template.updatedAt)}`
+    );
 
     templateInfo.appendChild(templateName);
     templateInfo.appendChild(templateDate);
 
     // Правая часть: кнопки редактирования и удаления
-    const templateActions = document.createElement('div');
-    templateActions.className = 'flex items-center gap-2';
-
-    const editButton = document.createElement('button');
+    const templateActions = createContainer('flex items-center gap-2');
+    const editButton = createButton('', () => {});
     editButton.className = 'edit-button p-1 text-gray-500 hover:text-gray-700 rounded';
     editButton.innerHTML = editIcon;
 
-    const deleteButton = document.createElement('button');
+    const deleteButton = createButton('', () => {});
     deleteButton.className = 'delete-button p-1 text-gray-500 hover:text-red-600 rounded';
     deleteButton.innerHTML = deleteIcon;
 

@@ -1,5 +1,6 @@
 import type { Command } from '../../../core/commands/Command';
 import type { HTMLEditor } from '../../../core/HTMLEditor';
+import { createIframe } from '../../../utils/helpers.ts';
 
 export class YouTubeVideoCommand implements Command {
   private videoUrl: string;
@@ -12,13 +13,12 @@ export class YouTubeVideoCommand implements Command {
     const videoId = this.extractYouTubeVideoId(this.videoUrl);
     if (!videoId) return;
 
-    const iframe = document.createElement('iframe');
+    const iframe = createIframe('max-w-full rounded-lg p-2');
     iframe.src = `https://www.youtube.com/embed/${videoId}`;
     iframe.width = '800';
     iframe.height = '400';
     iframe.frameBorder = '0';
     iframe.allowFullscreen = true;
-    iframe.className = 'max-w-full rounded-lg p-2';
 
     const selection = window.getSelection();
     const range = selection?.getRangeAt(0);

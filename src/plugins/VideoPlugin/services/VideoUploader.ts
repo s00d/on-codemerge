@@ -1,15 +1,13 @@
+import { createInputField } from '../../../utils/helpers.ts';
+
 export class VideoUploader {
   public async selectFile(): Promise<File | null> {
     return new Promise((resolve) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'video/*';
-
-      input.onchange = () => {
+      const input = createInputField('file', 'Select File', '', () => {
         const file = input.files?.[0] || null;
         resolve(file);
-      };
-
+      });
+      input.accept = 'video/*';
       input.click();
     });
   }

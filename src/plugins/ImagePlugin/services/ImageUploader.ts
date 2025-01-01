@@ -1,14 +1,13 @@
+import { createInputField } from '../../../utils/helpers.ts';
+
 export class ImageUploader {
   public async selectFile(): Promise<File | null> {
     return new Promise((resolve) => {
-      const input = document.createElement('input');
-      input.type = 'file';
-      input.accept = 'image/*';
-
-      input.onchange = () => {
+      const input = createInputField('file', 'select file', '', () => {
         const file = input.files?.[0] || null;
         resolve(file);
-      };
+      });
+      input.accept = 'image/*';
 
       input.click();
     });

@@ -1,6 +1,12 @@
 import { PopupManager } from '../../../core/ui/PopupManager';
 import type { TableOptions } from './Table';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import {
+  createContainer,
+  createInputField,
+  createLabel,
+  createSpan,
+} from '../../../utils/helpers.ts';
 
 export class TablePopup {
   private editor: HTMLEditor;
@@ -39,44 +45,33 @@ export class TablePopup {
   }
 
   private createContent(): HTMLElement {
-    // Основной контейнер
-    const container = document.createElement('div');
-    container.className = 'p-4';
-
-    // Опция для заголовка таблицы
-    const headerOption = document.createElement('div');
-    headerOption.className = 'table-options mb-4';
-
-    const headerLabel = document.createElement('label');
+    const container = createContainer('p-4');
+    const headerOption = createContainer('table-options mb-4');
+    const headerLabel = createLabel('label');
     headerLabel.className = 'flex items-center gap-2';
 
-    this.headerCheckbox = document.createElement('input');
-    this.headerCheckbox.type = 'checkbox';
+    this.headerCheckbox = createInputField('checkbox', '', '', () => {
+      this.hasHeader = this.headerCheckbox?.checked ?? false;
+    });
     this.headerCheckbox.className = 'table-option-checkbox';
     this.headerCheckbox.id = 'tableHeader';
 
-    const headerText = document.createElement('span');
-    headerText.className = 'table-option-label';
-    headerText.textContent = this.editor.t('Include header row');
+    const headerText = createSpan('table-option-label', this.editor.t('Include header row'));
 
     headerLabel.appendChild(this.headerCheckbox);
     headerLabel.appendChild(headerText);
     headerOption.appendChild(headerLabel);
 
     // Сетка для выбора размера таблицы
-    this.grid = document.createElement('div');
-    this.grid.className = 'table-size-grid';
+    this.grid = createContainer('table-size-grid');
 
     for (let i = 0; i < 100; i++) {
-      const cell = document.createElement('div');
-      cell.className = 'grid-cell';
+      const cell = createContainer('grid-cell');
       this.grid.appendChild(cell);
     }
 
     // Подпись с выбранным размером
-    this.label = document.createElement('div');
-    this.label.className = 'text-sm text-gray-600 mt-2';
-    this.label.textContent = '0 x 0';
+    this.label = createContainer('text-sm text-gray-600 mt-2', '0 x 0');
 
     // Сборка структуры
     container.appendChild(headerOption);

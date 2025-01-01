@@ -3,6 +3,7 @@ import type { FileUploader } from '../services/FileUploader';
 import { uploadMessageIcon } from '../../../icons';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 import type { UploadConfig } from '../config/UploadConfig.ts';
+import { createContainer, createInputField, createP } from '../../../utils/helpers.ts';
 
 export class FileUploadMenu {
   private editor: HTMLEditor;
@@ -46,23 +47,15 @@ export class FileUploadMenu {
 
   private createUploadContent(): HTMLElement {
     // Основной контейнер
-    const container = document.createElement('div');
-    container.className = 'p-4';
-
-    // Область для загрузки файлов
-    this.uploadArea = document.createElement('div');
-    this.uploadArea.className =
-      'upload-area border-2 border-dashed border-gray-300 rounded-lg p-8 text-center';
-
-    // Сообщение для загрузки
-    this.uploadMessage = document.createElement('div');
-    this.uploadMessage.className = 'upload-message';
-
-    // Иконка загрузки (вставляем напрямую)
+    const container = createContainer('p-4');
+    this.uploadArea = createContainer(
+      'upload-area border-2 border-dashed border-gray-300 rounded-lg p-8 text-center'
+    );
+    this.uploadMessage = createContainer('upload-message');
     this.uploadMessage.insertAdjacentHTML('afterbegin', uploadMessageIcon);
 
     // Текст сообщения
-    const messageText = document.createElement('p');
+    const messageText = createP('p');
     messageText.className = 'mt-2 text-sm text-gray-600';
     messageText.innerHTML = `
     ${this.editor.t('Drag and drop your file here, or')}
@@ -73,37 +66,35 @@ export class FileUploadMenu {
     this.uploadMessage.appendChild(messageText);
 
     // Информация о максимальном размере файла
-    const sizeInfo = document.createElement('p');
-    sizeInfo.className = 'mt-1 text-xs text-gray-500';
-    sizeInfo.textContent =
+    const sizeInfo = createP(
+      'mt-1 text-xs text-gray-500',
       this.editor.t('Maximum file size: ') +
-      this.uploader.formatFileSize(this.config.maxFileSize ?? 10 * 1024 * 1024);
+        this.uploader.formatFileSize(this.config.maxFileSize ?? 10 * 1024 * 1024)
+    );
     this.uploadMessage.appendChild(sizeInfo);
 
     // Прогресс загрузки
-    this.uploadProgress = document.createElement('div');
-    this.uploadProgress.className = 'upload-progress hidden';
-
-    // Прогресс-бар
-    const progressBar = document.createElement('div');
-    progressBar.className = 'progress-bar h-2 bg-gray-200 rounded-full overflow-hidden';
-
-    this.progressFill = document.createElement('div');
-    this.progressFill.className = 'progress-fill h-full bg-blue-500 transition-all duration-300';
+    this.uploadProgress = createContainer('upload-progress hidden');
+    const progressBar = createContainer(
+      'progress-bar h-2 bg-gray-200 rounded-full overflow-hidden'
+    );
+    this.progressFill = createContainer(
+      'progress-fill h-full bg-blue-500 transition-all duration-300'
+    );
     this.progressFill.style.width = '0%';
     progressBar.appendChild(this.progressFill);
 
     this.uploadProgress.appendChild(progressBar);
 
     // Текст с именем файла
-    this.filename = document.createElement('p');
-    this.filename.className = 'mt-2 text-sm text-gray-600';
-    this.filename.innerHTML = `${this.editor.t('Uploading')} <span class="filename"></span>...`;
+    this.filename = createP(
+      'mt-2 text-sm text-gray-600',
+      `${this.editor.t('Uploading')} <span class="filename"></span>...`
+    );
     this.uploadProgress.appendChild(this.filename);
 
     // Поле для выбора файла
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
+    const fileInput = createInputField('file');
     fileInput.className = 'hidden';
 
     // Сборка структуры

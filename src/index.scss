@@ -37,7 +37,9 @@
   transform: translateY(-10px);
   transition:
     opacity 0.2s ease,
-    transform 0.2s ease;
+    transform 0.2s ease,
+    left 0.2s ease,
+    top 0.2s ease;
 
   &.horizontal {
     @apply flex flex-row items-center;

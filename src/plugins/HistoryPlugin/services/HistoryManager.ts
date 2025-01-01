@@ -4,8 +4,8 @@ interface HistoryState {
 }
 
 export class HistoryManager {
-  private states: HistoryState[] = [];
-  private currentIndex: number = -1;
+  private states: HistoryState[] = [{ content: '', timestamp: 0 }];
+  private currentIndex: number = 0;
   private maxStates: number = 100;
 
   constructor() {
@@ -41,14 +41,22 @@ export class HistoryManager {
     if (this.currentIndex <= 0) return null;
 
     this.currentIndex--;
-    return this.getCurrentState()?.content || null;
+    const state = this.getCurrentState();
+    if (state === null) {
+      return null;
+    }
+    return state.content;
   }
 
   public redo(): string | null {
     if (this.currentIndex >= this.states.length - 1) return null;
 
     this.currentIndex++;
-    return this.getCurrentState()?.content || null;
+    const state = this.getCurrentState();
+    if (state === null) {
+      return null;
+    }
+    return state.content;
   }
 
   public getCurrentState(): HistoryState | null {

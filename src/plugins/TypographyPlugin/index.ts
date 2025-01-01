@@ -6,6 +6,7 @@ import type { HTMLEditor } from '../../core/HTMLEditor';
 import { TypographyMenu } from './components/TypographyMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { typographyIcon } from '../../icons';
+import { createHr } from '../../utils/helpers.ts';
 
 export class TypographyPlugin implements Plugin {
   name = 'typography';
@@ -93,8 +94,7 @@ export class TypographyPlugin implements Plugin {
         document.execCommand('formatBlock', false, 'pre');
         break;
       case 'hr':
-        const hrElement = document.createElement('hr');
-        hrElement.className = 'my-4 border-t border-gray-300';
+        const hrElement = createHr('my-4 border-t border-gray-300');
         range.deleteContents();
         range.insertNode(hrElement);
         range.setStartAfter(hrElement);

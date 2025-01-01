@@ -8,6 +8,7 @@ import { CommentMenu } from './components/CommentMenu';
 import { ErrorModal } from './components/ErrorModal';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { commentIcon, commentMarkerIcon } from '../../icons';
+import { createContainer, createSpan } from '../../utils/helpers.ts';
 
 export class CommentsPlugin implements Plugin {
   name = 'comments';
@@ -35,8 +36,7 @@ export class CommentsPlugin implements Plugin {
   }
 
   private createTooltip(): HTMLElement {
-    const tooltip = document.createElement('div');
-    tooltip.className = 'comment-tooltip';
+    const tooltip = createContainer('comment-tooltip');
     tooltip.style.display = 'none';
     return tooltip;
   }
@@ -175,12 +175,10 @@ export class CommentsPlugin implements Plugin {
       const contents = range.cloneContents();
 
       // Create wrapper and marker elements
-      const wrapper = document.createElement('span');
-      wrapper.className = 'commented-text';
+      const wrapper = createSpan('commented-text');
       wrapper.appendChild(contents);
 
-      const marker = document.createElement('span');
-      marker.className = 'comment-marker';
+      const marker = createSpan('comment-marker');
       marker.setAttribute('data-comment-id', id);
       marker.innerHTML = commentMarkerIcon;
 

@@ -2,20 +2,24 @@ import type { FieldConfig } from './FieldBuilder';
 import { FieldBuilder } from './FieldBuilder';
 import { ValidationManager } from './ValidationManager';
 import { OptionManager } from './OptionManager';
-import { ButtonManager } from './ButtonManager';
+import {
+  createLink,
+  createContainer,
+  createButton,
+  createSelectOption,
+  createForm,
+} from '../../../utils/helpers.ts';
 
 export class FormManager {
   fieldBuilder: FieldBuilder;
   private optionManager: OptionManager;
   private validationManager: ValidationManager;
-  private buttonManager: ButtonManager;
   private fieldsConfig: FieldConfig[] = []; // Хранит конфигурации полей
 
   constructor() {
     this.optionManager = new OptionManager();
     this.fieldBuilder = new FieldBuilder();
     this.validationManager = new ValidationManager();
-    this.buttonManager = new ButtonManager();
   }
 
   // Добавляет поле в форму
@@ -40,19 +44,16 @@ export class FormManager {
   }
 
   // Создает и возвращает форму на основе текущего конфига
-  createForm(url: string, type = 'GET'): HTMLElement {
-    const form = document.createElement('form');
-    form.className = 'generated-form space-y-4';
-    form.action = url;
-    form.method = type;
+  createForm(url: string, type: 'POST' | 'GET' = 'GET'): HTMLElement {
+    const form = createForm('generated-form space-y-4', url, type);
 
     this.fieldsConfig.forEach((fieldConfig) => {
       let field: HTMLElement | null = null;
 
-      // Если поле типа "button", используем ButtonManager
+      // Если поле типа "button", используем createLink
       if (fieldConfig.type === 'button') {
         const target = fieldConfig.options?.target || '';
-        field = this.buttonManager.createButton(fieldConfig.label, target);
+        field = createLink(fieldConfig.label, target, '_blank');
       } else {
         // Для остальных полей используем FieldBuilder
         field = this.fieldBuilder.createField(fieldConfig);
@@ -68,9 +69,7 @@ export class FormManager {
           const selectElement = field.querySelector('select');
           if (selectElement) {
             fieldConfig.options.options.forEach((optionValue) => {
-              const option = document.createElement('option');
-              option.value = optionValue;
-              option.textContent = optionValue;
+              const option = createSelectOption(optionValue, optionValue);
               selectElement.appendChild(option);
             });
           }
@@ -80,20 +79,17 @@ export class FormManager {
       }
     });
 
-    const buttonContainer = document.createElement('div');
-    buttonContainer.className = 'button-container flex gap-2'; // Используем flexbox с отступом между кнопками
+    const buttonContainer = createContainer('button-container flex gap-2');
 
-    const submitButton = document.createElement('button');
+    const submitButton = createButton('Submit', () => {}, 'primary');
     submitButton.type = 'submit';
-    submitButton.textContent = 'Submit';
-    submitButton.className =
-      'submit-button flex-1 bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
+    submitButton.className +=
+      ' flex-1 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2';
 
-    const resetButton = document.createElement('button');
+    const resetButton = createButton('Reset', () => {}, 'secondary');
     resetButton.type = 'reset';
-    resetButton.textContent = 'Reset';
-    resetButton.className =
-      'reset-button flex-1 bg-gray-500 text-white p-2 rounded-md hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2';
+    resetButton.className +=
+      ' flex-1 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2';
 
     buttonContainer.appendChild(submitButton);
     buttonContainer.appendChild(resetButton);

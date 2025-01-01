@@ -1,5 +1,6 @@
 // Table.ts
 import { TableCell } from './TableCell';
+import { createTh } from '../../../utils/helpers.ts';
 
 export interface TableOptions {
   hasHeader: boolean;
@@ -21,7 +22,7 @@ export class Table {
     if (hasHeader) {
       const headerRow = this.element.createTHead().insertRow();
       for (let j = 0; j < cols; j++) {
-        const headerCell = document.createElement('th') as HTMLTableCellElement;
+        const headerCell = createTh();
         headerCell.textContent = `Column ${j + 1}`; // Заголовок столбца
         headerRow.appendChild(headerCell);
         new TableCell(headerCell);

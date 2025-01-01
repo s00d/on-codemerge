@@ -11,7 +11,6 @@ export class FooterPlugin implements Plugin {
   private editor: HTMLEditor | null = null;
   private calculator: StatisticsCalculator;
   private renderer: FooterRenderer | null = null;
-  private updateTimeout: number | null = null;
 
   constructor() {
     this.calculator = new StatisticsCalculator();
@@ -36,19 +35,9 @@ export class FooterPlugin implements Plugin {
   private setupEventListeners(): void {
     if (!this.editor) return;
 
-    const container = this.editor.getContainer();
-    container.addEventListener('input', () => this.scheduleUpdate());
-    container.addEventListener('paste', () => this.scheduleUpdate());
-  }
-
-  private scheduleUpdate(): void {
-    if (this.updateTimeout) {
-      window.clearTimeout(this.updateTimeout);
-    }
-
-    this.updateTimeout = window.setTimeout(() => {
+    this.editor.subscribeToContentChange(() => {
       this.updateStatistics();
-    }, 300);
+    });
   }
 
   private updateStatistics(): void {

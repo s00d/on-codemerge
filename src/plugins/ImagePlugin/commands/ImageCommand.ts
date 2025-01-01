@@ -1,5 +1,6 @@
 import type { Command } from '../../../core/commands/Command';
 import type { HTMLEditor } from '../../../core/HTMLEditor';
+import { createImg } from '../../../utils/helpers.ts';
 
 export class ImageCommand implements Command {
   private editor: HTMLEditor;
@@ -12,9 +13,7 @@ export class ImageCommand implements Command {
   }
 
   execute(): void {
-    const image = document.createElement('img');
-    image.src = this.dataUrl;
-    image.className = 'max-w-full h-auto rounded-lg';
+    const image = createImg('max-w-full h-auto rounded-lg', this.dataUrl);
 
     const range = document.createRange();
 

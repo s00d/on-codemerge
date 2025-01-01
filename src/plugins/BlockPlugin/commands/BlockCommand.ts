@@ -1,5 +1,6 @@
 import type { Command } from '../../../core/commands/Command';
 import type { HTMLEditor } from '../../../core/HTMLEditor';
+import { createContainer, createLineBreak } from '../../../utils/helpers.ts';
 
 export class BlockCommand implements Command {
   private editor: HTMLEditor;
@@ -34,21 +35,17 @@ export class BlockCommand implements Command {
   }
 
   private createBlock(): HTMLElement {
-    const block = document.createElement('div');
-    block.className = 'editor-block';
+    const block = createContainer('editor-block');
     block.setAttribute('contenteditable', 'true');
 
     // Создание содержимого блока
-    const blockContent = document.createElement('div');
-    blockContent.className = 'block-content';
+    const blockContent = createContainer('block-content');
     blockContent.contentEditable = 'true';
     blockContent.setAttribute('contenteditable', 'true');
     blockContent.textContent = this.editor.t('New Block');
 
-    const br = document.createElement('br');
-    // Сборка структуры
     block.appendChild(blockContent);
-    block.appendChild(br);
+    block.appendChild(createLineBreak());
 
     return block;
   }

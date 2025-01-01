@@ -7,6 +7,7 @@ import {
 } from '../../../icons';
 import { ContextMenu } from '../../../core/ui/ContextMenu';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createContainer } from '../../../utils/helpers.ts';
 
 export class BlockContextMenu {
   private editor: HTMLEditor;
@@ -114,21 +115,16 @@ export class BlockContextMenu {
       }
 
       // Создаем два новых блока
-      const block1 = document.createElement('div');
-      block1.className = 'editor-block';
+      const block1 = createContainer('editor-block');
       block1.setAttribute('contenteditable', 'true');
 
-      const block2 = document.createElement('div');
-      block2.className = 'editor-block';
+      const block2 = createContainer('editor-block');
       block2.setAttribute('contenteditable', 'true');
 
       // Добавляем содержимое в блоки
-      const content1 = document.createElement('div');
-      content1.className = 'block-content';
+      const content1 = createContainer('block-content');
+      const content2 = createContainer('block-content');
       content1.textContent = this.editor.t('Block 1');
-
-      const content2 = document.createElement('div');
-      content2.className = 'block-content';
       content2.textContent = this.editor.t('Block 2');
 
       block1.appendChild(content1);
@@ -139,8 +135,7 @@ export class BlockContextMenu {
       container.appendChild(block2);
     } else {
       // Если активный блок не является контейнером, создаем новый контейнер
-      const container = document.createElement('div');
-      container.className = `split-container ${direction}`;
+      const container = createContainer(`split-container ${direction}`);
 
       // Создаем два новых блока
       const block1 = this.activeBlock.cloneNode(true) as HTMLElement;

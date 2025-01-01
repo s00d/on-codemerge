@@ -6,6 +6,7 @@ import type { HTMLEditor } from '../../core/HTMLEditor';
 // import { ListsMenu } from './components/ListsMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { listBulletIcon, listNumberedIcon } from '../../icons';
+import { createP } from '../../utils/helpers.ts';
 
 export class ListsPlugin implements Plugin {
   name = 'lists';
@@ -83,8 +84,7 @@ export class ListsPlugin implements Plugin {
       if (!list) return;
 
       // Create a new paragraph
-      const newParagraph = document.createElement('p');
-      newParagraph.className = 'my-4';
+      const newParagraph = createP('my-4');
 
       // Insert it after the list
       if (list.nextSibling) {

@@ -36,7 +36,7 @@ export class ContextMenu {
     this.buttons = buttons;
     this.editor = editor;
     this.menu = this.createMenu();
-    editor.getInnerContainer().appendChild(this.menu);
+    document.body.appendChild(this.menu);
     this.setupEventListeners();
   }
 
@@ -139,26 +139,40 @@ export class ContextMenu {
 
   public show(element: HTMLElement, x: number, y: number): void {
     this.activeElement = element;
-    this.menu.style.left = `${x}px`;
-    this.menu.style.top = `${y}px`;
-    this.menu.style.display = 'flex';
 
-    // Анимация открытия
+    // Показываем меню и применяем начальные стили для анимации
+    this.menu.style.display = 'flex';
     this.menu.style.opacity = '0';
     this.menu.style.transform = 'translateY(-10px)';
+
+    // Устанавливаем начальные координаты
+    this.menu.style.left = `${x}px`;
+    this.menu.style.top = `${y}px`;
+
+    // Анимация открытия
     setTimeout(() => {
       this.menu.style.opacity = '1';
       this.menu.style.transform = 'translateY(0)';
     }, 10);
 
     // Корректировка позиции, если меню выходит за пределы экрана
-    const rect = this.menu.getBoundingClientRect();
-    if (rect.right > window.innerWidth) {
-      this.menu.style.left = `${x - rect.width}px`;
-    }
-    if (rect.bottom > window.innerHeight) {
-      this.menu.style.top = `${y - rect.height}px`;
-    }
+    setTimeout(() => {
+      const rect = this.menu.getBoundingClientRect();
+      const windowWidth = window.innerWidth;
+      const windowHeight = window.innerHeight;
+
+      // Корректировка по горизонтали (если меню выходит за правый край)
+      if (rect.right > windowWidth) {
+        const overflowX = rect.right - windowWidth + 100;
+        this.menu.style.left = `${x - overflowX}px`;
+      }
+
+      // Корректировка по вертикали (если меню выходит за нижний край)
+      if (rect.bottom > windowHeight) {
+        const overflowY = rect.bottom - windowHeight;
+        this.menu.style.top = `${y - overflowY}px`;
+      }
+    }, 100);
   }
 
   public hide(): void {

@@ -1,3 +1,5 @@
+import { createButton } from '../../utils/helpers.ts';
+
 interface ToolbarButtonOptions {
   icon: string;
   title: string | undefined;
@@ -11,18 +13,16 @@ export function createToolbarButton({
   onClick,
   disabled = false,
 }: ToolbarButtonOptions): HTMLButtonElement {
-  const button = document.createElement('button');
+  const button = createButton('', (e) => {
+    e.preventDefault();
+    if (!disabled) {
+      onClick();
+    }
+  });
   button.className = 'toolbar-button';
   button.title = title ?? '';
   button.innerHTML = icon;
   button.disabled = disabled;
-
-  if (!disabled) {
-    button.addEventListener('click', (e) => {
-      e.preventDefault();
-      onClick();
-    });
-  }
 
   return button;
 }

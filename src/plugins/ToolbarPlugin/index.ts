@@ -3,6 +3,7 @@ import './public.scss';
 
 import type { Plugin } from '../../core/Plugin';
 import type { HTMLEditor } from '../../core/HTMLEditor';
+import { createContainer } from '../../utils/helpers.ts';
 
 export class ToolbarPlugin implements Plugin {
   name = 'toolbar';
@@ -13,8 +14,7 @@ export class ToolbarPlugin implements Plugin {
   }
 
   private createToolbar(): void {
-    this.toolbar = document.createElement('div');
-    this.toolbar.className = 'editor-toolbar';
+    this.toolbar = createContainer('editor-toolbar');
 
     const editorElement = document.querySelector('.html-editor');
     if (editorElement?.parentNode && this.toolbar) {

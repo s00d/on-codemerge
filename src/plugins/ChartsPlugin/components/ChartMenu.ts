@@ -5,6 +5,7 @@ import { MultiSeriesDataEditor } from './MultiSeriesDataEditor';
 import { ChartDataEditor } from './ChartDataEditor';
 import { CHART_TYPE_CONFIGS } from '../constants/chartTypes';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createButton, createContainer, createSpan } from '../../../utils/helpers.ts';
 
 export class ChartMenu {
   private editor: HTMLEditor;
@@ -41,8 +42,6 @@ export class ChartMenu {
     this.currentEditor = new ChartDataEditor(editor, (data) =>
       this.schedulePreviewUpdate([{ name: 'Series 1', data }])
     );
-
-    this.setupEventListeners();
   }
 
   private createPopupItems(): PopupItem[] {
@@ -68,64 +67,50 @@ export class ChartMenu {
   }
 
   private createChartTypeSelector(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'chart-type-selector mb-6';
+    const container = createContainer('chart-type-selector mb-6');
+
+    const buttons: HTMLButtonElement[] = [];
 
     Object.entries(CHART_TYPE_CONFIGS).forEach(([type, config]) => {
-      const button = document.createElement('button');
+      const button = createButton('', () => {
+        this.selectedType = type as ChartType;
+
+        buttons.forEach((btn) => btn.classList.remove('selected'));
+        button.classList.add('selected');
+
+        this.updateEditor(this.selectedType);
+      });
       button.className = `chart-type-option ${type === 'bar' ? 'selected' : ''}`;
       button.dataset.type = type;
 
-      const icon = document.createElement('span');
-      icon.className = 'chart-type-icon';
+      const icon = createSpan('chart-type-icon');
       icon.innerHTML = config.icon;
 
-      const label = document.createElement('span');
-      label.className = 'chart-type-label';
+      const label = createSpan('chart-type-label');
       label.textContent = config.name;
 
       button.appendChild(icon);
       button.appendChild(label);
       container.appendChild(button);
+
+      buttons.push(button);
     });
 
     return container;
   }
 
   private createDataEditorContainer(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'data-editor-container mb-6';
+    const container = createContainer('data-editor-container mb-6');
     this.updateEditor('bar', container);
     return container;
   }
 
   private createPreviewContainer(): HTMLElement {
-    const container = document.createElement('div');
-    container.className =
-      'preview-container h-64 bg-gray-50 rounded-lg flex items-center justify-center';
+    const container = createContainer(
+      'preview-container h-64 bg-gray-50 rounded-lg flex items-center justify-center'
+    );
     container.innerHTML = '<div class="text-gray-400">Chart preview will appear here</div>';
     return container;
-  }
-
-  private handlePopupClick = (e: Event): void => {
-    const button = (e.target as Element).closest('.chart-type-option');
-    if (!button) return;
-
-    const type = button.getAttribute('data-type') as ChartType;
-    if (!type) return;
-
-    const popupElement = this.popup.getElement();
-    popupElement
-      .querySelectorAll('.chart-type-option')
-      .forEach((opt) => opt.classList.toggle('selected', opt === button));
-
-    this.selectedType = type;
-    this.updateEditor(type);
-  };
-
-  private setupEventListeners(): void {
-    const popupElement = this.popup.getElement();
-    popupElement.addEventListener('click', this.handlePopupClick);
   }
 
   private updateEditor(type: ChartType, container?: HTMLElement): void {
@@ -199,8 +184,7 @@ export class ChartMenu {
       this.editingChart.appendChild(canvas);
     } else {
       // Create new chart
-      const chartContainer = document.createElement('div');
-      chartContainer.className = 'chart-container';
+      const chartContainer = createContainer('chart-container');
       chartContainer.style.width = '100%';
       chartContainer.style.height = '400px';
       chartContainer.setAttribute('data-chart-type', this.selectedType);
@@ -271,12 +255,6 @@ export class ChartMenu {
   }
 
   public destroy(): void {
-    // Очистка обработчиков событий
-    const popupElement = this.popup.getElement();
-    if (popupElement) {
-      popupElement.removeEventListener('click', this.handlePopupClick);
-    }
-
     // Очистка таймеров
     if (this.previewTimeout) {
       window.clearTimeout(this.previewTimeout);

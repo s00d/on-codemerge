@@ -1,5 +1,6 @@
 import type { Command } from '../../../core/commands/Command.ts';
 import { TableCell } from '../components/TableCell.ts';
+import { createTh } from '../../../utils/helpers.ts';
 
 export class AddHeaderRowCommand implements Command {
   private table: HTMLTableElement;
@@ -13,7 +14,7 @@ export class AddHeaderRowCommand implements Command {
     const cols = this.table.rows[0].cells.length;
 
     for (let i = 0; i < cols; i++) {
-      const headerCell = document.createElement('th');
+      const headerCell = createTh();
       headerRow.appendChild(headerCell);
       new TableCell(headerCell);
     }

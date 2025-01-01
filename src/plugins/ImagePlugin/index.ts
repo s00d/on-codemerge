@@ -70,7 +70,12 @@ export class ImagePlugin implements Plugin {
     const image = (e.target as Element).closest('img');
     if (image instanceof HTMLImageElement) {
       e.preventDefault();
-      this.contextMenu?.show(image, e.clientX, e.clientY);
+      const mouseX = (e as MouseEvent).clientX + window.scrollX;
+      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+      console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+      this.contextMenu?.show(image, mouseX, mouseY);
     }
   };
 

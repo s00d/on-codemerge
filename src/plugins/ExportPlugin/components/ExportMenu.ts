@@ -1,6 +1,6 @@
 import { PopupManager } from '../../../core/ui/PopupManager';
 import { ExportService } from '../services/ExportService';
-import { htmlIcon, markdownIcon, textIcon } from '../../../icons';
+import { htmlIcon, markdownIcon, textIcon, pdfIcon } from '../../../icons';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 
 export class ExportMenu {
@@ -44,6 +44,18 @@ export class ExportMenu {
           value: 'text',
           icon: textIcon,
           text: editor.t(`Plain Text`),
+          buttonVariant: 'primary',
+          onChange: (format) => {
+            this.exportService.export(this.content, format.toString());
+            this.popup.hide();
+          },
+        },
+        {
+          type: 'button',
+          id: 'submit-button',
+          value: 'pdf',
+          icon: pdfIcon,
+          text: editor.t(`Print / PDF File`),
           buttonVariant: 'primary',
           onChange: (format) => {
             this.exportService.export(this.content, format.toString());

@@ -68,7 +68,12 @@ export class VideoPlugin implements Plugin {
     const video = (e.target as Element).closest('video');
     if (video instanceof HTMLVideoElement) {
       e.preventDefault();
-      this.contextMenu?.show(video, (e as MouseEvent).clientX, (e as MouseEvent).clientY);
+      const mouseX = (e as MouseEvent).clientX + window.scrollX;
+      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+      console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+      this.contextMenu?.show(video, mouseX, mouseY);
     }
   };
 

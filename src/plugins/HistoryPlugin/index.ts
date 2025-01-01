@@ -68,17 +68,33 @@ export class HistoryPlugin implements Plugin {
 
   private undo(): void {
     if (!this.editor) return;
+
+    const container = this.editor.getContainer();
+    const cursorPosition = this.editor.saveCursorPosition();
+
     const previousState = this.historyManager.undo();
-    if (previousState) {
-      this.editor.getContainer().innerHTML = previousState;
+    if (previousState !== null) {
+      container.innerHTML = previousState;
+
+      if (cursorPosition) {
+        this.editor.restoreCursorPosition(cursorPosition);
+      }
     }
   }
 
   private redo(): void {
     if (!this.editor) return;
+
+    const container = this.editor.getContainer();
+    const cursorPosition = this.editor.saveCursorPosition();
+
     const nextState = this.historyManager.redo();
     if (nextState) {
-      this.editor.getContainer().innerHTML = nextState;
+      container.innerHTML = nextState;
+
+      if (cursorPosition) {
+        this.editor.restoreCursorPosition(cursorPosition);
+      }
     }
   }
 

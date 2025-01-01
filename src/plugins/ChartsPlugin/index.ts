@@ -8,6 +8,7 @@ import { ChartContextMenu } from './components/ChartContextMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { CHART_TYPE_CONFIGS } from './constants/chartTypes';
 import { Resizer } from '../../utils/Resizer.ts';
+import { createContainer, createLineBreak } from '../../utils/helpers.ts';
 
 export class ChartsPlugin implements Plugin {
   name = 'charts';
@@ -72,7 +73,12 @@ export class ChartsPlugin implements Plugin {
       const chart = (e.target as Element).closest('.chart-container');
       if (chart instanceof HTMLElement) {
         e.preventDefault();
-        this.contextMenu?.show(chart, e.clientX, e.clientY);
+        const mouseX = (e as MouseEvent).clientX + window.scrollX;
+        const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+        console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+        this.contextMenu?.show(chart, mouseX, mouseY);
       }
     });
 
@@ -112,12 +118,10 @@ export class ChartsPlugin implements Plugin {
       if (!this.editor) return;
 
       // Insert chart and line break
-      const wrapper = document.createElement('div');
-      wrapper.className = 'chart-wrapper my-4';
+      const wrapper = createContainer('chart-wrapper my-4');
       wrapper.appendChild(chartElement);
 
-      const br = document.createElement('br');
-      wrapper.appendChild(br);
+      wrapper.appendChild(createLineBreak());
 
       // Insert at current selection
       range.deleteContents();

@@ -1,6 +1,14 @@
 import { PopupManager } from '../../../core/ui/PopupManager';
 import { SHORTCUTS } from '../constants';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import {
+  createContainer,
+  createH,
+  createKbd,
+  createLi,
+  createSpan,
+  createUl,
+} from '../../../utils/helpers.ts';
 
 export class ShortcutsMenu {
   private popup: PopupManager;
@@ -22,44 +30,28 @@ export class ShortcutsMenu {
 
   private createContent(): HTMLElement {
     // Основной контейнер
-    const container = document.createElement('div');
-    container.className = 'p-4';
-
-    // Сетка для категорий
-    const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-2 gap-8';
+    const container = createContainer('p-4');
+    const grid = createContainer('grid grid-cols-2 gap-8');
 
     // Создаем элементы для каждой категории
     Object.entries(SHORTCUTS).forEach(([category, shortcuts]) => {
-      const categoryContainer = document.createElement('div');
+      const categoryContainer = createContainer();
 
       // Заголовок категории
-      const categoryTitle = document.createElement('h3');
-      categoryTitle.className = 'text-sm font-medium text-gray-900 mb-3';
-      categoryTitle.textContent = category;
+      const categoryTitle = createH('h3', 'text-sm font-medium text-gray-900 mb-3', category);
 
       // Список шорткатов
-      const shortcutsList = document.createElement('ul');
-      shortcutsList.className = 'space-y-2';
+      const shortcutsList = createUl('space-y-2');
 
       shortcuts.forEach((shortcut) => {
-        const shortcutItem = document.createElement('li');
-        shortcutItem.className = 'flex items-center justify-between text-sm';
+        const shortcutItem = createLi('flex items-center justify-between text-sm');
 
-        // Описание шортката
-        const icon = document.createElement('span');
-        icon.className = 'text-gray-600';
-        icon.textContent = shortcut.icon;
-
-        // Описание шортката
-        const description = document.createElement('span');
-        description.className = 'text-gray-600';
-        description.textContent = shortcut.description;
-
-        // Клавиши шортката
-        const keys = document.createElement('kbd');
-        keys.className = 'px-2 py-1 bg-gray-100 rounded text-gray-800 font-mono text-xs';
-        keys.textContent = this.formatShortcut(shortcut.keys);
+        const icon = createSpan('text-gray-600', shortcut.icon);
+        const description = createSpan('text-gray-600', shortcut.description);
+        const keys = createKbd(
+          'px-2 py-1 bg-gray-100 rounded text-gray-800 font-mono text-xs',
+          this.formatShortcut(shortcut.keys)
+        );
 
         // Сборка элемента
         shortcutItem.appendChild(icon);

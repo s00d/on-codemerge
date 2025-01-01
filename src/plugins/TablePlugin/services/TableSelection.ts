@@ -29,12 +29,25 @@ export class TableSelection {
     return this.selectedCells;
   }
 
-  public restoreSelection(): Range | null {
-    if (this.lastSelection) {
-      const selection = window.getSelection();
-      selection?.removeAllRanges();
-      selection?.addRange(this.lastSelection);
+  public restoreSelection(container: HTMLElement): Range | null {
+    if (!this.lastSelection) return null;
+
+    // Проверяем, что начальный и конечный узлы диапазона находятся внутри контейнера
+    const startContainer = this.lastSelection.startContainer;
+    const endContainer = this.lastSelection.endContainer;
+
+    if (!container.contains(startContainer) || !container.contains(endContainer)) {
+      this.clearSelection(); // Очищаем сохранённое выделение, если оно вне контейнера
+      return null;
     }
+
+    // Восстанавливаем выделение
+    const selection = window.getSelection();
+    if (selection) {
+      selection.removeAllRanges();
+      selection.addRange(this.lastSelection);
+    }
+
     return this.lastSelection;
   }
 

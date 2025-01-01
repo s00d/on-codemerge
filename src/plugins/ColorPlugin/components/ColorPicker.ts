@@ -1,6 +1,7 @@
 import { PopupManager, type PopupItem } from '../../../core/ui/PopupManager';
 import { COLORS, RECENT_COLORS_KEY } from '../constants';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createButton, createContainer, createH } from '../../../utils/helpers.ts';
 
 export class ColorPicker {
   private editor: HTMLEditor;
@@ -26,7 +27,6 @@ export class ColorPicker {
     });
 
     this.loadRecentColors();
-    this.setupEventListeners();
   }
 
   private createPopupItems(): PopupItem[] {
@@ -61,16 +61,12 @@ export class ColorPicker {
   }
 
   private createColorGrid(title: string, colors: string[]): HTMLElement {
-    const container = document.createElement('div');
+    const container = createContainer();
 
-    // Заголовок
-    const titleElement = document.createElement('h3');
-    titleElement.className = 'text-sm font-medium text-gray-700 mb-2';
-    titleElement.textContent = title;
+    const titleElement = createH('h3', 'text-sm font-medium text-gray-700 mb-2', title);
 
     // Сетка цветов
-    const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-8 gap-2';
+    const grid = createContainer('grid grid-cols-8 gap-2');
 
     // Кнопки для цветов
     colors.forEach((color) => {
@@ -86,26 +82,30 @@ export class ColorPicker {
   }
 
   private createColorButton(color: string): HTMLElement {
-    const button = document.createElement('button');
+    const button = createButton(color, () => {
+      const color = button.dataset.color;
+      if (color) {
+        this.color = color;
+        this.popup.setValue('custom-color', color);
+      }
+    });
     button.className =
       'color-button w-8 h-8 rounded-lg border border-gray-200 overflow-hidden relative group';
     button.dataset.color = color;
     button.title = color;
 
     // Цвет фона
-    const colorBackground = document.createElement('div');
-    colorBackground.className = 'absolute inset-0';
+    const colorBackground = createContainer('absolute inset-0');
     colorBackground.style.backgroundColor = color;
 
     // Эффект при наведении
-    const hoverEffect = document.createElement('div');
-    hoverEffect.className =
-      'absolute inset-0 opacity-0 group-hover:opacity-10 bg-black transition-opacity';
+    const hoverEffect = createContainer(
+      'absolute inset-0 opacity-0 group-hover:opacity-10 bg-black transition-opacity'
+    );
 
     // Белая рамка для белого цвета
     if (color.toLowerCase() === '#ffffff') {
-      const whiteBorder = document.createElement('div');
-      whiteBorder.className = 'absolute inset-0 border border-gray-200 rounded-lg';
+      const whiteBorder = createContainer('absolute inset-0 border border-gray-200 rounded-lg');
       button.appendChild(whiteBorder);
     }
 
@@ -114,22 +114,6 @@ export class ColorPicker {
 
     return button;
   }
-
-  private setupEventListeners(): void {
-    const popupElement = this.popup.getElement();
-    popupElement.addEventListener('click', this.handleColorButtonClick);
-  }
-
-  private handleColorButtonClick = (e: Event): void => {
-    const button = (e.target as Element).closest('.color-button');
-    if (button instanceof HTMLElement) {
-      const color = button.dataset.color;
-      if (color) {
-        this.color = color;
-        this.popup.setValue('custom-color', color);
-      }
-    }
-  };
 
   private selectColor(color: string): void {
     // Add to recent colors if not already present
@@ -166,12 +150,6 @@ export class ColorPicker {
   }
 
   public destroy(): void {
-    // Удаляем обработчики событий
-    const popupElement = this.popup.getElement();
-    if (popupElement) {
-      popupElement.removeEventListener('click', this.handleColorButtonClick);
-    }
-
     // Уничтожаем всплывающее окно
     this.popup.destroy();
 

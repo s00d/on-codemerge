@@ -47,10 +47,15 @@ export class ShortcutsPlugin implements Plugin {
         this.shortcutManager.register(shortcut.keys, () =>
           this.editor?.triggerEvent(shortcut.command)
         );
+        if (shortcut.keysMac) {
+          this.shortcutManager.register(shortcut.keysMac, () =>
+            this.editor?.triggerEvent(shortcut.command)
+          );
+        }
       });
     });
     // Handle keyboard events
-    document.addEventListener('keydown', (e) => {
+    this.editor?.getContainer().addEventListener('keydown', (e) => {
       this.shortcutManager.handleKeyDown(e);
     });
   }
@@ -60,7 +65,7 @@ export class ShortcutsPlugin implements Plugin {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
 
-    document.removeEventListener('keydown', (e) => {
+    this.editor?.getContainer().removeEventListener('keydown', (e) => {
       this.shortcutManager.handleKeyDown(e);
     });
 

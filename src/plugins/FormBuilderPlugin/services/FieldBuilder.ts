@@ -1,11 +1,46 @@
+import {
+  createButton,
+  createCheckbox,
+  createContainer,
+  createFileInput,
+  createInputField,
+  createLabel,
+  createSelectField,
+  createTextarea,
+} from '../../../utils/helpers.ts';
+
+export interface FieldConfig {
+  type: string;
+  label: string;
+  options?: {
+    target?: string;
+    placeholder?: string;
+    autocomplete?: string;
+    readonly?: boolean;
+    disabled?: boolean;
+    multiple?: boolean;
+    name?: string;
+    value?: string;
+    className?: string;
+    id?: string;
+    options?: string[];
+  };
+  validation?: {
+    required?: boolean;
+    pattern?: string;
+    minLength?: number;
+    maxLength?: number;
+    min?: number;
+    max?: number;
+  };
+}
+
 export class FieldBuilder {
   createField(config: FieldConfig): HTMLElement | null {
     const { type, label, options, validation } = config;
-    const fieldContainer = document.createElement('div');
-    fieldContainer.className = 'form-field';
+    const fieldContainer = createContainer('form-field');
 
-    const labelElement = document.createElement('label');
-    labelElement.textContent = label;
+    const labelElement = createLabel(label, options?.id);
 
     let inputElement: HTMLElement | null = null;
 
@@ -18,56 +53,39 @@ export class FieldBuilder {
       case 'date':
       case 'time':
       case 'range':
-        inputElement = document.createElement('input');
-        inputElement.setAttribute('type', type);
+        inputElement = createInputField(type, options?.placeholder, options?.value);
         break;
       case 'textarea':
-        inputElement = document.createElement('textarea');
+        inputElement = createTextarea(options?.placeholder, options?.value);
         break;
       case 'select':
-        inputElement = document.createElement('select');
+        inputElement = createSelectField(
+          options?.options?.map((opt) => ({ value: opt, label: opt })) || [],
+          options?.value
+        );
         if (options?.multiple) {
           inputElement.setAttribute('multiple', 'true');
         }
-        options?.options?.forEach((optionValue: string) => {
-          const option = document.createElement('option');
-          option.value = optionValue;
-          option.textContent = optionValue;
-          inputElement?.appendChild(option);
-        });
         break;
       case 'checkbox':
       case 'radio':
-        inputElement = document.createElement('input');
-        inputElement.setAttribute('type', type);
+        inputElement = createCheckbox(label, options?.value === 'true');
         if (options?.name) {
           inputElement.setAttribute('name', options.name);
         }
         break;
       case 'file':
-        inputElement = document.createElement('input');
-        inputElement.setAttribute('type', 'file');
-        if (options?.multiple) {
-          inputElement.setAttribute('multiple', 'true');
-        }
+        inputElement = createFileInput(options?.multiple);
         break;
       case 'button':
       case 'submit':
       case 'reset':
-        inputElement = document.createElement('button');
-        inputElement.setAttribute('type', type);
-        inputElement.textContent = label;
+        inputElement = createButton(label, () => {}, type as 'primary' | 'secondary' | 'danger');
         break;
       default:
         return null;
     }
 
-    if (options?.value) {
-      inputElement?.setAttribute('value', options.value);
-    }
-    if (options?.placeholder) {
-      inputElement?.setAttribute('placeholder', options.placeholder);
-    }
     if (options?.autocomplete) {
       inputElement?.setAttribute('autocomplete', options.autocomplete);
     }
@@ -106,30 +124,4 @@ export class FieldBuilder {
 
     return fieldContainer;
   }
-}
-
-export interface FieldConfig {
-  type: string;
-  label: string;
-  options?: {
-    target?: string;
-    placeholder?: string;
-    autocomplete?: string;
-    readonly?: boolean;
-    disabled?: boolean;
-    multiple?: boolean;
-    name?: string;
-    value?: string;
-    className?: string;
-    id?: string;
-    options?: string[];
-  };
-  validation?: {
-    required?: boolean;
-    pattern?: string;
-    minLength?: number;
-    maxLength?: number;
-    min?: number;
-    max?: number;
-  };
 }

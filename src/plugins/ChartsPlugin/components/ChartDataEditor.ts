@@ -3,6 +3,7 @@ import { DataRow } from './DataRow';
 import { getRandomColor } from '../utils/colors';
 import type { ChartData } from '../types/ChartData.ts';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createButton, createContainer } from '../../../utils/helpers.ts';
 
 export class ChartDataEditor {
   private container: HTMLElement;
@@ -21,7 +22,7 @@ export class ChartDataEditor {
     isScatter = false
   ) {
     this.editor = editor;
-    this.container = document.createElement('div');
+    this.container = createContainer('chart-data-editor');
     this.onChange = onChange;
     this.requiresXY = requiresXY;
     this.isScatter = isScatter;
@@ -29,87 +30,77 @@ export class ChartDataEditor {
   }
 
   private initialize(): void {
-    this.container.className = 'chart-data-editor';
-
     // Основной контейнер
-    const mainContainer = document.createElement('div');
-    mainContainer.className = 'space-y-4';
+    const mainContainer = createContainer('space-y-4');
 
     // Заголовок и кнопка добавления
-    const header = document.createElement('div');
-    header.className = 'flex items-center justify-between mb-4';
+    const header = createContainer('flex items-center justify-between mb-4');
 
-    const title = document.createElement('h4');
-    title.className = 'text-sm font-medium text-gray-700';
-    title.textContent = this.editor.t('Data Points');
+    const title = createContainer(
+      'text-sm font-medium text-gray-700',
+      this.editor.t('Data Points')
+    );
 
-    this.addButton = document.createElement('button'); // Сохраняем ссылку на кнопку
-    this.addButton.type = 'button';
+    this.addButton = createButton(this.editor.t('Add Point'), () => {
+      this.addRow();
+    });
     this.addButton.className =
       'add-row-btn px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600';
-    this.addButton.textContent = this.editor.t('Add Point');
 
     header.appendChild(title);
     header.appendChild(this.addButton);
 
     // Сетка данных
-    const dataGrid = document.createElement('div');
-    dataGrid.className = 'data-grid';
+    const dataGrid = createContainer('data-grid');
 
     // Заголовки столбцов
-    const headerGrid = document.createElement('div');
-    headerGrid.className = `grid ${this.getHeaderGridCols()} gap-2 pb-2 border-b`;
+    const headerGrid = createContainer(`grid ${this.getHeaderGridCols()} gap-2 pb-2 border-b`);
 
-    const labelHeader = document.createElement('div');
-    labelHeader.className = 'text-sm font-medium text-gray-600';
-    labelHeader.textContent = this.editor.t('Label');
+    const labelHeader = createContainer(
+      'text-sm font-medium text-gray-600',
+      this.editor.t('Label')
+    );
 
     headerGrid.appendChild(labelHeader);
 
     if (this.requiresXY) {
-      const xHeader = document.createElement('div');
-      xHeader.className = 'text-sm font-medium text-gray-600';
-      xHeader.textContent = this.editor.t('X');
-
-      const yHeader = document.createElement('div');
-      yHeader.className = 'text-sm font-medium text-gray-600';
-      yHeader.textContent = this.editor.t('Y');
+      const xHeader = createContainer('text-sm font-medium text-gray-600', this.editor.t('X'));
+      const yHeader = createContainer('text-sm font-medium text-gray-600', this.editor.t('Y'));
 
       headerGrid.appendChild(xHeader);
       headerGrid.appendChild(yHeader);
 
       if (!this.isScatter) {
-        const sizeHeader = document.createElement('div');
-        sizeHeader.className = 'text-sm font-medium text-gray-600';
-        sizeHeader.textContent = this.editor.t('Size');
-
-        const colorHeader = document.createElement('div');
-        colorHeader.className = 'text-sm font-medium text-gray-600';
-        colorHeader.textContent = this.editor.t('Color');
-
+        const sizeHeader = createContainer(
+          'text-sm font-medium text-gray-600',
+          this.editor.t('Size')
+        );
+        const colorHeader = createContainer(
+          'text-sm font-medium text-gray-600',
+          this.editor.t('Color')
+        );
         headerGrid.appendChild(sizeHeader);
         headerGrid.appendChild(colorHeader);
       }
     } else {
-      const valueHeader = document.createElement('div');
-      valueHeader.className = 'text-sm font-medium text-gray-600';
-      valueHeader.textContent = this.editor.t('Value');
-
-      const colorHeader = document.createElement('div');
-      colorHeader.className = 'text-sm font-medium text-gray-600';
-      colorHeader.textContent = this.editor.t('Color');
-
+      const valueHeader = createContainer(
+        'text-sm font-medium text-gray-600',
+        this.editor.t('Value')
+      );
+      const colorHeader = createContainer(
+        'text-sm font-medium text-gray-600',
+        this.editor.t('Color')
+      );
       headerGrid.appendChild(valueHeader);
       headerGrid.appendChild(colorHeader);
     }
 
     // Пустой элемент для выравнивания
-    const emptyHeader = document.createElement('div');
+    const emptyHeader = createContainer();
     headerGrid.appendChild(emptyHeader);
 
     // Контейнер для строк данных
-    this.dataRows = document.createElement('div');
-    this.dataRows.className = 'data-rows space-y-2 mt-2';
+    this.dataRows = createContainer('data-rows space-y-2 mt-2');
 
     // Сборка структуры
     dataGrid.appendChild(headerGrid);
@@ -117,11 +108,6 @@ export class ChartDataEditor {
     mainContainer.appendChild(header);
     mainContainer.appendChild(dataGrid);
     this.container.appendChild(mainContainer);
-
-    // Обработчик для кнопки добавления
-    this.addButton.addEventListener('click', () => {
-      this.addRow();
-    });
 
     // Добавление начальных строк
     this.addInitialRows();

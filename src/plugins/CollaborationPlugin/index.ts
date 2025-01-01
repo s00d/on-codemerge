@@ -3,6 +3,7 @@ import { PopupManager } from '../../core/ui/PopupManager';
 import type { Plugin } from '../../core/Plugin';
 import { createToolbarButton } from '../ToolbarPlugin/utils.ts';
 import { collaborationIcon } from '../../icons';
+import { createContainer, createLink } from '../../utils/helpers.ts';
 
 interface CollaborationPluginOptions {
   serverUrl?: string; // URL WebSocket сервера
@@ -198,16 +199,12 @@ export class CollaborationPlugin implements Plugin {
   }
 
   private createCollaborationContent(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'p-4';
+    const container = createContainer('p-4');
 
     const docId = generateToken();
     const collaborationLink = `${window.location.origin}${window.location.pathname}?docId=${docId}`;
 
-    const linkElement = document.createElement('a');
-    linkElement.href = collaborationLink;
-    linkElement.textContent = collaborationLink;
-    linkElement.target = '_blank';
+    const linkElement = createLink(collaborationLink, collaborationLink, '_blank');
 
     container.appendChild(document.createTextNode('Share this link to collaborate: '));
     container.appendChild(linkElement);

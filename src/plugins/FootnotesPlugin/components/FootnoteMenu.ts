@@ -1,5 +1,6 @@
 import { PopupManager } from '../../../core/ui/PopupManager';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createContainer, createP } from '../../../utils/helpers.ts';
 
 export class FootnoteMenu {
   private popup: PopupManager;
@@ -48,10 +49,8 @@ export class FootnoteMenu {
   }
 
   private createContent(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'p-0';
-    const hint = document.createElement('p');
-    hint.className = 'mt-2 text-sm text-gray-500';
+    const container = createContainer('p-0');
+    const hint = createP('mt-2 text-sm text-gray-500');
 
     container.appendChild(hint);
 

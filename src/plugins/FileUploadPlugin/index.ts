@@ -8,6 +8,7 @@ import { FileUploadMenu } from './components/FileUploadMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import type { UploadConfig } from './config/UploadConfig';
 import { uploadIcon, fileIcon } from '../../icons';
+import { createLink } from '../../utils/helpers.ts';
 
 export class FileUploadPlugin implements Plugin {
   name = 'file-upload';
@@ -75,7 +76,7 @@ export class FileUploadPlugin implements Plugin {
   private insertFileLink(file: { id: string; name: string; size: number }): void {
     if (!this.editor) return;
 
-    const link = document.createElement('a');
+    const link = createLink('');
     link.className = 'file-link';
     link.setAttribute('data-file-id', file.id);
     link.innerHTML = `

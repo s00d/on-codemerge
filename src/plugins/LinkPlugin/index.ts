@@ -7,6 +7,7 @@ import { LinkMenu } from './components/LinkMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { linkIcon, editIcon, deleteIcon } from '../../icons/';
 import { ContextMenu } from '../../core/ui/ContextMenu.ts';
+import { createLink } from '../../utils/helpers.ts';
 
 interface LinkData {
   url: string; // URL ссылки
@@ -90,7 +91,12 @@ export class LinkPlugin implements Plugin {
     const link = (e.target as Element).closest('a');
     if (link instanceof HTMLAnchorElement) {
       e.preventDefault();
-      this.contextMenu?.show(link, e.clientX, e.clientY);
+      const mouseX = (e as MouseEvent).clientX + window.scrollX;
+      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+      console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+      this.contextMenu?.show(link, mouseX, mouseY);
     }
   };
 
@@ -119,9 +125,7 @@ export class LinkPlugin implements Plugin {
     if (!this.editor || !this.currentRange) return;
 
     const anchor = linkData.anchor || selectedText;
-    const link = document.createElement('a');
-    link.href = linkData.url;
-    link.textContent = anchor;
+    const link = createLink(anchor, linkData.url);
 
     if (linkData.title) {
       link.title = linkData.title;

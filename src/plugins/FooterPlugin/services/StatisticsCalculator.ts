@@ -1,3 +1,5 @@
+import { createContainer } from '../../../utils/helpers.ts';
+
 export interface Statistics {
   characters: number;
   charactersNoSpaces: number;
@@ -30,7 +32,7 @@ export class StatisticsCalculator {
   }
 
   private stripHTML(html: string): string {
-    const tmp = document.createElement('div');
+    const tmp = createContainer();
     tmp.innerHTML = html;
     return tmp.textContent || tmp.innerText || '';
   }
@@ -47,7 +49,7 @@ export class StatisticsCalculator {
   }
 
   private countParagraphs(html: string): number {
-    const tmp = document.createElement('div');
+    const tmp = createContainer();
     tmp.innerHTML = html;
     return tmp.querySelectorAll('p, div:not(.editor-toolbar)').length || 1;
   }

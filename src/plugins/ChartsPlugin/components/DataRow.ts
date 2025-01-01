@@ -1,6 +1,7 @@
 import type { ChartPoint } from '../types';
 import { getRandomColor } from '../utils/colors';
 import { deleteIcon } from '../../../icons';
+import { createContainer } from '../../../utils/helpers.ts';
 
 export class DataRow {
   public element: HTMLElement;
@@ -16,7 +17,7 @@ export class DataRow {
     onChange: () => void,
     onDelete: () => void
   ) {
-    this.element = document.createElement('div');
+    this.element = createContainer();
     this.requiresXY = requiresXY;
     this.isScatter = isScatter;
     this.onChange = onChange;

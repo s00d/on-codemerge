@@ -1,5 +1,12 @@
 import type { Template } from '../types';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import {
+  createContainer,
+  createForm,
+  createInputField,
+  createLabel,
+  createTextarea,
+} from '../../../utils/helpers.ts';
 
 export class TemplateForm {
   private editor: HTMLEditor;
@@ -13,7 +20,7 @@ export class TemplateForm {
     template?: Template
   ) {
     this.editor = editor;
-    this.element = document.createElement('div');
+    this.element = createContainer();
     this.onSubmit = onSubmit;
     this.template = template;
     this.initialize();
@@ -21,34 +28,27 @@ export class TemplateForm {
 
   private initialize(): void {
     // Создание формы
-    const form = document.createElement('form');
-    form.className = 'space-y-4';
-
+    const form = createForm('space-y-4');
     // Поле для имени шаблона
-    const nameContainer = document.createElement('div');
-    const nameLabel = document.createElement('label');
+    const nameContainer = createContainer();
+    const nameLabel = createLabel(this.editor.t('Name'));
     nameLabel.className = 'block text-sm font-medium text-gray-700';
-    nameLabel.textContent = this.editor.t('Name');
 
-    const nameInput = document.createElement('input');
-    nameInput.type = 'text';
+    const nameInput = createInputField('text', 'Template Name', this.template?.name || '');
     nameInput.className = 'template-name mt-1 block w-full rounded-md border-gray-300 shadow-sm';
-    nameInput.value = this.template?.name || '';
     nameInput.required = true;
 
     nameContainer.appendChild(nameLabel);
     nameContainer.appendChild(nameInput);
 
     // Поле для содержимого шаблона
-    const contentContainer = document.createElement('div');
-    const contentLabel = document.createElement('label');
+    const contentContainer = createContainer();
+    const contentLabel = createLabel(this.editor.t('Content'));
     contentLabel.className = 'block text-sm font-medium text-gray-700';
-    contentLabel.textContent = this.editor.t('Content');
 
-    const contentInput = document.createElement('textarea');
+    const contentInput = createTextarea(this.editor.t('Content'), this.template?.content || '');
     contentInput.className =
       'template-content mt-1 block w-full rounded-md border-gray-300 shadow-sm h-40';
-    contentInput.textContent = this.template?.content || '';
     contentInput.required = true;
 
     contentContainer.appendChild(contentLabel);

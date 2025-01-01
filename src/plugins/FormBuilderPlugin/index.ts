@@ -16,7 +16,8 @@ import {
   createLabel,
   createButton,
   createContainer,
-} from './helpers';
+  createLineBreak,
+} from '../../utils/helpers';
 
 export class FormBuilderPlugin implements Plugin {
   name = 'form-builder';
@@ -26,7 +27,7 @@ export class FormBuilderPlugin implements Plugin {
   container: HTMLDivElement | null = null;
   private editFormElement: HTMLElement | null = null;
   private formManager: FormManager;
-  private type: string = 'GET';
+  private type: 'POST' | 'GET' = 'GET';
   private url: string = '';
   private formButton: HTMLButtonElement | null = null;
 
@@ -39,6 +40,12 @@ export class FormBuilderPlugin implements Plugin {
     this.setupPopup();
     this.addToolbarButton();
     this.setupContextMenu();
+
+    this.editor.on('form', () => {
+      this.formManager.clearFields();
+      this.addFormField('text', 'New Field', false, '', []);
+      this.popup?.show();
+    });
   }
 
   private setupContextMenu(): void {
@@ -57,11 +64,16 @@ export class FormBuilderPlugin implements Plugin {
       },
     ]);
 
-    this.editor.getContainer().addEventListener('contextmenu', (e) => {
+    this.editor.getInnerContainer().addEventListener('contextmenu', (e) => {
       const form = (e.target as Element).closest('form');
       if (form) {
         e.preventDefault();
-        this.contextMenu?.show(form, e.clientX, e.clientY);
+        const mouseX = (e as MouseEvent).clientX + window.scrollX;
+        const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+        console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+        this.contextMenu?.show(form, mouseX, mouseY);
       }
     });
   }
@@ -99,7 +111,7 @@ export class FormBuilderPlugin implements Plugin {
         {
           label: 'Insert',
           variant: 'primary',
-          onClick: () => this.handleFormInsert(this.type, this.url),
+          onClick: () => this.handleFormInsert(this.url, this.type),
         },
         {
           label: 'Cancel',
@@ -118,8 +130,7 @@ export class FormBuilderPlugin implements Plugin {
   }
 
   private createFormBuilderContent(): HTMLElement {
-    this.container = document.createElement('div');
-    this.container.className = 'form-builder-container p-4';
+    this.container = createContainer('form-builder-container p-4');
 
     this.formManager.clearOptions();
 
@@ -173,7 +184,7 @@ export class FormBuilderPlugin implements Plugin {
       ],
       this.type,
       (value) => {
-        this.type = value;
+        this.type = value as 'GET' | 'POST';
       }
     );
     formTypeContainer.appendChild(formTypeLabel);
@@ -391,7 +402,7 @@ export class FormBuilderPlugin implements Plugin {
             );
             break;
           default:
-            field = document.createElement('div');
+            field = createContainer();
             break;
         }
 
@@ -462,7 +473,7 @@ export class FormBuilderPlugin implements Plugin {
     });
   }
 
-  private handleFormInsert(url: string, type = 'GET'): void {
+  private handleFormInsert(url: string, type: 'POST' | 'GET' = 'GET'): void {
     if (!this.editor || !this.popup) return;
 
     if (this.editFormElement) {
@@ -474,6 +485,7 @@ export class FormBuilderPlugin implements Plugin {
 
     // Вставляем форму в редактор
     this.editor.insertContent(form.outerHTML);
+    this.editor.insertContent(createLineBreak());
     this.popup.hide();
   }
 

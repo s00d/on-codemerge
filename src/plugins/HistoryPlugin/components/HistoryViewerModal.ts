@@ -4,6 +4,7 @@ import { formatTimestamp } from '../utils/formatters';
 import { computeDiff, type DiffChange } from '../utils/diff';
 import { closeIcon } from '../../../icons';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { createButton, createContainer, createH } from '../../../utils/helpers.ts';
 
 export class HistoryViewerModal {
   private editor: HTMLEditor;
@@ -30,18 +31,12 @@ export class HistoryViewerModal {
 
   private createContent(): HTMLElement {
     // Основной контейнер
-    const container = document.createElement('div');
-    container.className = 'p-4';
-
-    // Заголовок и кнопка закрытия
-    const header = document.createElement('div');
-    header.className = 'flex items-center justify-between mb-4';
-
-    const title = document.createElement('h3');
-    title.className = 'text-lg font-semibold';
-    title.textContent = this.editor.t('Edit History');
-
-    const closeButton = document.createElement('button');
+    const container = createContainer('p-4');
+    const header = createContainer('flex items-center justify-between mb-4');
+    const title = createH('h3', 'text-lg font-semibold', this.editor.t('Edit History'));
+    const closeButton = createButton('', () => {
+      this.popup.hide();
+    });
     closeButton.className = 'close-button';
     closeButton.innerHTML = closeIcon;
 
@@ -49,16 +44,11 @@ export class HistoryViewerModal {
     header.appendChild(closeButton);
 
     // Сетка для списка истории и просмотра изменений
-    const grid = document.createElement('div');
-    grid.className = 'grid grid-cols-2 gap-4';
-
-    // Контейнер для списка истории
-    const historyList = document.createElement('div');
-    historyList.className = 'history-list max-h-[60vh] overflow-y-auto';
-
-    // Контейнер для просмотра изменений
-    const diffView = document.createElement('div');
-    diffView.className = 'diff-view max-h-[60vh] overflow-y-auto p-3 bg-gray-50 rounded-lg';
+    const grid = createContainer('grid grid-cols-2 gap-4');
+    const historyList = createContainer('history-list max-h-[60vh] overflow-y-auto');
+    const diffView = createContainer(
+      'diff-view max-h-[60vh] overflow-y-auto p-3 bg-gray-50 rounded-lg'
+    );
 
     // Сборка структуры
     grid.appendChild(historyList);
@@ -67,34 +57,17 @@ export class HistoryViewerModal {
     container.appendChild(grid);
 
     // Настройка обработчиков событий
-    this.setupEventListeners(container);
-
-    return container;
-  }
-
-  private setupEventListeners(container: HTMLElement): void {
-    const closeButton = container.querySelector('.close-button');
-    closeButton?.addEventListener('click', () => {
-      this.popup.hide();
-    });
-
     container.addEventListener('click', (e) => {
       const button = (e.target as Element).closest('[data-index]');
       if (!button) return;
 
       const index = parseInt(button.getAttribute('data-index') || '0', 10);
 
-      if ((e.target as Element).closest('.restore-button')) {
-        const state = this.states[index];
-        if (state && this.onRestore) {
-          this.onRestore(state.content);
-          this.popup.hide();
-        }
-      } else {
-        this.selectedIndex = index;
-        this.showDiff(index);
-      }
+      this.selectedIndex = index;
+      this.showDiff(index);
     });
+
+    return container;
   }
 
   private renderHistoryList(): void {
@@ -112,27 +85,32 @@ export class HistoryViewerModal {
   }
 
   private createHistoryItem(state: HistoryState, index: number): HTMLElement {
-    const item = document.createElement('div');
-    item.className = `history-item ${index === this.currentIndex ? 'current' : ''} ${index === this.selectedIndex ? 'selected' : ''}`;
+    const item = createContainer(
+      `history-item ${index === this.currentIndex ? 'current' : ''} ${index === this.selectedIndex ? 'selected' : ''}`
+    );
     item.dataset.index = index.toString();
 
-    const itemContent = document.createElement('div');
-    itemContent.className =
-      'flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer';
-
-    const itemText = document.createElement('div');
-    const version = document.createElement('div');
-    version.className = 'text-sm font-medium';
+    const itemContent = createContainer(
+      'flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer'
+    );
+    const itemText = createContainer();
+    const version = createContainer('text-sm font-medium');
     version.textContent = `Version ${index + 1}`;
 
-    const timestamp = document.createElement('div');
-    timestamp.className = 'text-xs text-gray-500';
-    timestamp.textContent = formatTimestamp(state.timestamp);
+    const timestamp = createContainer('ext-xs text-gray-500', formatTimestamp(state.timestamp));
 
     itemText.appendChild(version);
     itemText.appendChild(timestamp);
 
-    const restoreButton = document.createElement('button');
+    const restoreButton = createButton(this.editor.t('Restore'), (e) => {
+      e.preventDefault();
+      const state = this.states[index];
+      if (state && this.onRestore) {
+        this.onRestore(state.content);
+        this.popup.hide();
+      }
+    });
+
     restoreButton.className =
       'restore-button px-2 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded';
     restoreButton.textContent = this.editor.t('Restore');
@@ -158,16 +136,13 @@ export class HistoryViewerModal {
     diffContainer.innerHTML = '';
 
     // Создание элементов для отображения изменений
-    const diffTitle = document.createElement('div');
-    diffTitle.className = 'text-sm mb-2 text-gray-500';
+    const diffTitle = createContainer('text-sm mb-2 text-gray-500');
     diffTitle.textContent =
       index > 0
         ? this.editor.t('Changes from previous version:')
         : this.editor.t('Initial version');
 
-    const diffContent = document.createElement('div');
-    diffContent.className = 'diff-content';
-    diffContent.innerHTML = diffHtml;
+    const diffContent = createContainer('diff-content', diffHtml);
 
     diffContainer.appendChild(diffTitle);
     diffContainer.appendChild(diffContent);

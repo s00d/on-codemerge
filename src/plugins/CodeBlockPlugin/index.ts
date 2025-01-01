@@ -8,6 +8,13 @@ import { CodeBlockContextMenu } from './components/CodeBlockContextMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { SyntaxHighlighter } from './services/SyntaxHighlighter';
 import { insertIcon } from '../../icons';
+import {
+  createButton,
+  createCode,
+  createContainer,
+  createPre,
+  createSpan,
+} from '../../utils/helpers.ts';
 
 export class CodeBlockPlugin implements Plugin {
   name = 'code-block';
@@ -55,7 +62,12 @@ export class CodeBlockPlugin implements Plugin {
       const codeBlock = (e.target as Element).closest('.code-block');
       if (codeBlock instanceof HTMLElement) {
         e.preventDefault();
-        this.contextMenu?.show(codeBlock, e.clientX, e.clientY);
+        const mouseX = (e as MouseEvent).clientX + window.scrollX;
+        const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+        console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+        this.contextMenu?.show(codeBlock, mouseX, mouseY);
       }
     });
   }
@@ -117,23 +129,18 @@ export class CodeBlockPlugin implements Plugin {
   }
 
   private createCodeBlock(code: string, language: string): HTMLElement {
-    const block = document.createElement('div');
+    const block = createContainer(`code-block`);
     const uniqueId = `code-block-${Math.random().toString(36).substring(2, 11)}`; // Генерация уникального ID
     block.id = uniqueId; // Присвоение уникального ID
-    block.className = 'code-block';
 
     // Создание заголовка блока
-    const header = document.createElement('div');
+    const header = createContainer('code-header');
     header.className = 'code-header';
 
-    const languageSpan = document.createElement('span');
-    languageSpan.className = 'code-language';
-    languageSpan.textContent = language;
-
-    const copyButton = document.createElement('button');
+    const languageSpan = createSpan('code-language', language);
+    const copyButton = createButton(this.editor?.t('Copy') ?? 'Copy', () => {});
     copyButton.className = 'copy-button';
     copyButton.title = this.editor?.t('Copy to clipboard') ?? 'Copy to clipboard';
-    copyButton.textContent = this.editor?.t('Copy') ?? 'Copy';
     const copied = this.editor?.t('Copied!');
 
     // Использование onclick для сохранения функциональности в HTML
@@ -155,11 +162,9 @@ export class CodeBlockPlugin implements Plugin {
     header.appendChild(copyButton);
 
     // Создание контейнера для кода
-    const pre = document.createElement('pre');
-    const codeElement = document.createElement('code');
-    codeElement.className = `language-${language}`;
+    const pre = createPre();
+    const codeElement = createCode(`language-${language}`, code);
     codeElement.contentEditable = 'true';
-    codeElement.textContent = code;
 
     pre.appendChild(codeElement);
 

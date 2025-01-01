@@ -70,7 +70,12 @@ export class YouTubeVideoPlugin implements Plugin {
       const iframe = (e.target as Element).closest('iframe');
       if (iframe instanceof HTMLIFrameElement && iframe.src.includes('youtube.com')) {
         e.preventDefault();
-        this.contextMenu?.show(iframe, e.clientX, e.clientY);
+        const mouseX = (e as MouseEvent).clientX + window.scrollX;
+        const mouseY = (e as MouseEvent).clientY + window.scrollY;
+
+        console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+
+        this.contextMenu?.show(iframe, mouseX, mouseY);
       }
     });
   }

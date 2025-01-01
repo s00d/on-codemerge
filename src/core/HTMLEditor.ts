@@ -183,6 +183,98 @@ export class HTMLEditor {
     return this.innerContainer;
   }
 
+  private isSelectionInsideContainer(selection: Selection): boolean {
+    if (!selection || selection.rangeCount === 0) return false;
+
+    const range = selection.getRangeAt(0);
+    return (
+      this.container.contains(range.startContainer) && this.container.contains(range.endContainer)
+    );
+  }
+
+  private getSelectionInsideContainer(): Selection | null {
+    const selection = window.getSelection();
+    return selection && this.isSelectionInsideContainer(selection) ? selection : null;
+  }
+
+  public getSelectedText(): string | null {
+    const selection = this.getSelectionInsideContainer();
+    return selection ? selection.toString() : null;
+  }
+
+  public deleteSelectedText(): void {
+    const selection = this.getSelectionInsideContainer();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+    }
+  }
+
+  public insertHtmlAtCursor(html: string): void {
+    const selection = this.getSelectionInsideContainer();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      range.deleteContents();
+
+      const div = document.createElement('div');
+      div.innerHTML = html;
+
+      while (div.firstChild) {
+        range.insertNode(div.firstChild);
+      }
+
+      range.collapse(false); // Перемещаем курсор в конец вставленного HTML
+    }
+  }
+
+  public saveCursorPosition(): { offset: number } | null {
+    const selection = this.getSelectionInsideContainer();
+    if (!selection || selection.rangeCount === 0) return null;
+
+    const range = selection.getRangeAt(0);
+    const preSelectionRange = range.cloneRange();
+    preSelectionRange.selectNodeContents(this.container);
+    preSelectionRange.setEnd(range.startContainer, range.startOffset);
+
+    const offset = preSelectionRange.toString().length;
+    return { offset };
+  }
+
+  public restoreCursorPosition(position: { offset: number }): void {
+    const selection = window.getSelection();
+    if (!selection) return;
+
+    const range = document.createRange();
+    let node: Node = this.container;
+    let offset = position.offset;
+
+    // Ищем узел и смещение для восстановления позиции курсора
+    const walker = document.createTreeWalker(this.container, NodeFilter.SHOW_TEXT);
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode as Text;
+      if (offset <= textNode.length) {
+        node = textNode;
+        break;
+      }
+      offset -= textNode.length;
+    }
+
+    // Если узел не текстовый или смещение выходит за пределы, корректируем позицию
+    if (node.nodeType !== Node.TEXT_NODE || offset < 0 || offset > (node as Text).length) {
+      // Если смещение выходит за пределы, устанавливаем курсор в конец контейнера
+      node = this.container;
+      offset = this.container.childNodes.length;
+    }
+
+    range.setStart(node, offset);
+    range.collapse(true);
+
+    selection.removeAllRanges();
+    selection.addRange(range);
+
+    this.container.focus();
+  }
+
   public use(plugin: Plugin): void {
     this.plugins.register(plugin);
     plugin.initialize(this);
@@ -290,7 +382,7 @@ export class HTMLEditor {
     this.getContainer().innerHTML = this.formatter.format(html);
   }
 
-  public insertContent(content: string | HTMLElement): void {
+  public insertContent(content: string | HTMLElement | DocumentFragment): void {
     this.ensureEditorFocus();
 
     const selection = window.getSelection();
