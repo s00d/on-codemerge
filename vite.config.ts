@@ -39,6 +39,7 @@ export default defineConfig({
       output: {
         preserveModules: true,
         dir: 'dist',
+        exports: 'named',
       },
     },
   },
