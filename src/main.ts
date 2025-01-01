@@ -25,6 +25,8 @@ import {
   FileUploadPlugin,
   FontPlugin,
   AlignmentPlugin,
+  CollaborationPlugin,
+  FormBuilderPlugin,
 } from './app';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -36,6 +38,9 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Initialize all plugins
     editor.use(new ToolbarPlugin());
+
+    editor.use(new HistoryPlugin());
+    editor.use(new ToolbarDividerPlugin());
     editor.use(new AlignmentPlugin());
     editor.use(new ToolbarDividerPlugin());
     editor.use(new FontPlugin());
@@ -48,7 +53,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     editor.use(new CodeBlockPlugin());
     editor.use(new TemplatesPlugin());
     editor.use(new ExportPlugin());
-    editor.use(new HistoryPlugin());
     editor.use(new ChartsPlugin());
     editor.use(new ColorPlugin());
     editor.use(new TypographyPlugin());
@@ -61,6 +65,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     editor.use(new VideoPlugin());
     editor.use(new YouTubeVideoPlugin());
     editor.use(new ShortcutsPlugin());
+    editor.use(new FormBuilderPlugin());
+    editor.use(
+      new CollaborationPlugin({
+        serverUrl: 'ws://localhost:8080',
+        autoStart: true,
+      })
+    );
     editor.use(
       new FileUploadPlugin({
         // Configure with emulation by default

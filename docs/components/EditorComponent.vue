@@ -51,6 +51,8 @@ import {
   FileUploadPlugin,
   FontPlugin,
   AlignmentPlugin,
+  CollaborationPlugin,
+  FormBuilderPlugin,
 } from '../../src/app';
 
 export default {
@@ -81,6 +83,7 @@ export default {
       // Список всех плагинов
       const allPlugins = {
         ToolbarPlugin,
+        HistoryPlugin,
         AlignmentPlugin,
         ToolbarDividerPlugin,
         FontPlugin,
@@ -91,7 +94,6 @@ export default {
         CodeBlockPlugin,
         TemplatesPlugin,
         ExportPlugin,
-        HistoryPlugin,
         ChartsPlugin,
         ShortcutsPlugin,
         ColorPlugin,
@@ -105,6 +107,8 @@ export default {
         VideoPlugin,
         YouTubeVideoPlugin,
         FileUploadPlugin,
+        CollaborationPlugin,
+        FormBuilderPlugin,
       };
 
       // Если activePlugins пустой, регистрируем все плагины

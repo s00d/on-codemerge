@@ -26,6 +26,8 @@ import { VideoPlugin } from './plugins/VideoPlugin';
 import { YouTubeVideoPlugin } from './plugins/YouTubeVideoPlugin';
 import { FontPlugin } from './plugins/FontPlugin';
 import { AlignmentPlugin } from './plugins/AlignmentPlugin';
+import { CollaborationPlugin } from './plugins/CollaborationPlugin';
+import { FormBuilderPlugin } from './plugins/FormBuilderPlugin';
 
 export {
   HTMLEditor,
@@ -54,4 +56,6 @@ export {
   YouTubeVideoPlugin,
   FileUploadPlugin,
   FontPlugin,
+  CollaborationPlugin,
+  FormBuilderPlugin,
 };

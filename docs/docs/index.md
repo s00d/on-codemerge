@@ -78,9 +78,95 @@ document.addEventListener('DOMContentLoaded', () => {
 
 Each plugin adds unique functionality to the On-Codemerge editor, making it a powerful tool for web content creation and editing.
 
+---
 
+## Supported Locales
 
-Добавим таблицу с описанием всех плагинов в документацию. Таблица будет содержать название плагина и его краткое описание. Вот обновленный раздел документации:
+**On-Codemerge** supports multiple locales to cater to a global audience. Below is the list of available locales:
+
+| Locale Code | Language             | File Name |
+|-------------|----------------------|-----------|
+| `ar`        | Arabic               | `ar.json` |
+| `cs`        | Czech                | `cs.json` |
+| `de`        | German               | `de.json` |
+| `en`        | English              | `en.json` |
+| `es`        | Spanish              | `es.json` |
+| `fr`        | French               | `fr.json` |
+| `hi`        | Hindi                | `hi.json` |
+| `id`        | Indonesian           | `id.json` |
+| `it`        | Italian              | `it.json` |
+| `ja`        | Japanese             | `ja.json` |
+| `ko`        | Korean               | `ko.json` |
+| `nl`        | Dutch                | `nl.json` |
+| `pl`        | Polish               | `pl.json` |
+| `pt`        | Portuguese           | `pt.json` |
+| `ru`        | Russian              | `ru.json` |
+| `th`        | Thai                 | `th.json` |
+| `tr`        | Turkish              | `tr.json` |
+| `vi`        | Vietnamese           | `vi.json` |
+| `zh`        | Chinese (Simplified) | `zh.json` |
+
+---
+
+### Setting a Locale
+
+To set a locale in **On-Codemerge**, use the `setLocale` method:
+
+```typescript
+await editor.setLocale('ru'); // Set locale to Russian
+```
+
+---
+
+### Translating Placeholders
+
+You can use placeholders in your translations to dynamically insert values. For example:
+
+```json
+{
+  "File size exceeds {{max}} limit": "File size exceeds {{max}} limit"
+}
+```
+
+In your code, you can pass the `max` parameter when translating:
+
+```typescript
+editor.t('File size exceeds {{max}} limit', { max: '10MB' });
+```
+
+This will output: `File size exceeds 10MB limit`.
+
+---
+
+### Fallback Locale
+
+If a translation key is missing in the current locale, **On-Codemerge** will fall back to the default locale (`en` by default). You can change the fallback locale using the `setFallbackLocale` method:
+
+```typescript
+editor.setFallbackLocale('en'); // Set fallback locale to English
+```
+
+---
+
+### Getting the Current Locale
+
+To retrieve the currently active locale, use the `getCurrentLocale` method:
+
+```typescript
+const currentLocale = editor.getCurrentLocale();
+console.log(currentLocale); // Outputs: 'ru' (if Russian is set)
+```
+
+---
+
+### Getting Loaded Locales
+
+To get a list of all loaded locales, use the `getLoadedLocales` method:
+
+```typescript
+const loadedLocales = editor.getLoadedLocales();
+console.log(loadedLocales); // Outputs: ['en', 'ru', 'es']
+```
 
 ---
 

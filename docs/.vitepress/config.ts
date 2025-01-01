@@ -12,7 +12,9 @@ export default defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Docs', link: '/docs' },
+      { text: 'Styles', link: '/styles' },
+      { text: 'Core', link: '/core' },
+      { text: 'Plugin Development', link: '/plugin-development-guide' },
       { text: 'Integrations', link: '/integrations' }
     ],
 
@@ -22,6 +24,8 @@ export default defineConfig({
         items: [
           { text: 'Docs', link: '/' },
           { text: 'Styles', link: '/styles' },
+          { text: 'Core', link: '/core' },
+          { text: 'Plugin Development', link: '/plugin-development-guide' },
         ]
       },
       {
