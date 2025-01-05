@@ -1,4 +1,4 @@
-import { HTMLEditor } from '../../core/HTMLEditor';
+import type { HTMLEditor } from '../../core/HTMLEditor';
 import { fontSizeIcon, boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '../../icons';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES } from './constants';

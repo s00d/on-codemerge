@@ -1,5 +1,5 @@
-import { DomUtils } from "./DomUtils";
-import { StyleManager } from "./StyleManager";
+import { DomUtils } from './DomUtils';
+import { StyleManager } from './StyleManager';
 
 export class TextFormatter {
   private domUtils: DomUtils;
@@ -28,9 +28,17 @@ export class TextFormatter {
       const isFormatted = this.styleManager.has(element, styleCommand);
 
       if (isFormatted) {
-        this.domUtils.removeStyleFromNode(node, styleCommand, this.styleManager.remove.bind(this.styleManager));
+        this.domUtils.removeStyleFromNode(
+          node,
+          styleCommand,
+          this.styleManager.remove.bind(this.styleManager)
+        );
       } else {
-        this.domUtils.applyStyleToNode(node, styleCommand, this.styleManager.set.bind(this.styleManager));
+        this.domUtils.applyStyleToNode(
+          node,
+          styleCommand,
+          this.styleManager.set.bind(this.styleManager)
+        );
       }
     });
   }
@@ -85,4 +93,3 @@ export class TextFormatter {
     });
   }
 }
-

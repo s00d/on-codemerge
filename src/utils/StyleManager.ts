@@ -100,7 +100,6 @@ const styleConfig: { [p: string]: Config } = {
 };
 
 export class StyleManager {
-
   set(element: HTMLElement, styleCommand: string): void {
     const config = styleConfig[styleCommand];
     if (!config) {
@@ -114,10 +113,10 @@ export class StyleManager {
       element.style[config.property as any] = config.enabledValue;
     }
 
-    if(config.property === 'textAlign') {
-      element.style.display = 'block'
+    if (config.property === 'textAlign') {
+      element.style.display = 'block';
     } else if (!element.style.display) {
-      element.style.display = 'inline'
+      element.style.display = 'inline';
     }
   }
 
@@ -131,12 +130,11 @@ export class StyleManager {
     if (config.isComplex) {
       this.removeComplexStyle(element, config.property, config.enabledValue);
     } else {
-
       element.style.removeProperty(config.property as string);
       if (element.style[config.property as any]) {
-        if(config.property === 'textAlign') {
+        if (config.property === 'textAlign') {
           element.style[config.property as any] = '';
-          element.style.display = 'inline'
+          element.style.display = 'inline';
         } else {
           element.style[config.property as any] = 'normal';
         }
@@ -149,7 +147,11 @@ export class StyleManager {
     return config ? element.style[config.property as any] === config.enabledValue : false;
   }
 
-  private setComplexStyle(element: HTMLElement, property: keyof CSSStyleDeclaration, value: string): void {
+  private setComplexStyle(
+    element: HTMLElement,
+    property: keyof CSSStyleDeclaration,
+    value: string
+  ): void {
     const currentStyles = element.style[property]?.toString().split(' ');
     if (currentStyles && !currentStyles.includes(value)) {
       currentStyles.push(value);
@@ -157,8 +159,15 @@ export class StyleManager {
     }
   }
 
-  private removeComplexStyle(element: HTMLElement, property: keyof CSSStyleDeclaration, value: string): void {
-    const currentStyles = element.style[property]?.toString().split(' ').filter((style) => style !== value);
+  private removeComplexStyle(
+    element: HTMLElement,
+    property: keyof CSSStyleDeclaration,
+    value: string
+  ): void {
+    const currentStyles = element.style[property]
+      ?.toString()
+      .split(' ')
+      .filter((style) => style !== value);
     if (currentStyles) {
       element.style[property as any] = currentStyles.join(' ').trim();
     }

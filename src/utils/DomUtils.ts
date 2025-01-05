@@ -9,7 +9,7 @@ export class DomUtils {
     } else if (!read) {
       return this.handleCollapsedRange(selection, range);
     }
-    return []
+    return [];
   }
 
   private getDeepestNodes(range: Range, read: boolean): Node[] {
@@ -26,7 +26,7 @@ export class DomUtils {
       null
     );
 
-    let currentNode: Node | null = treeWalker.currentNode = range.startContainer;
+    let currentNode: Node | null = (treeWalker.currentNode = range.startContainer);
 
     while (currentNode) {
       if (
@@ -58,7 +58,6 @@ export class DomUtils {
         }
       }
     }
-
 
     return deepestNodes;
   }
@@ -96,13 +95,18 @@ export class DomUtils {
 
     if (endOffset === 0 || startOffset === text.length || startOffset === endOffset) return null;
 
-    let element: HTMLElement = document.createElement('p');
+    const element: HTMLElement = document.createElement('p');
     element.textContent = text.substring(startOffset, endOffset);
     this.replaceNodeWithSpan(node, element, startOffset, endOffset);
     return element;
   }
 
-  private replaceNodeWithSpan(node: Node, span: HTMLElement, startOffset: number, endOffset: number): void {
+  private replaceNodeWithSpan(
+    node: Node,
+    span: HTMLElement,
+    startOffset: number,
+    endOffset: number
+  ): void {
     const { textContent: text } = node;
     const parent = node.parentNode;
 
@@ -120,13 +124,21 @@ export class DomUtils {
     return node ? !node.classList.contains('html-editor') : false;
   }
 
-  applyStyleToNode(node: Node, styleCommand: string, setStyle: (element: HTMLElement, styleCommand: string) => void): void {
+  applyStyleToNode(
+    node: Node,
+    styleCommand: string,
+    setStyle: (element: HTMLElement, styleCommand: string) => void
+  ): void {
     if (node.nodeType === Node.ELEMENT_NODE) {
       setStyle(node as HTMLElement, styleCommand);
     }
   }
 
-  removeStyleFromNode(node: Node, styleCommand: string, removeStyle: (element: HTMLElement, styleCommand: string) => void): void {
+  removeStyleFromNode(
+    node: Node,
+    styleCommand: string,
+    removeStyle: (element: HTMLElement, styleCommand: string) => void
+  ): void {
     if (node.nodeType === Node.ELEMENT_NODE) {
       const element = node as HTMLElement;
       if (this.isStyledTextNode(element)) {

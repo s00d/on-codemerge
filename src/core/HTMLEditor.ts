@@ -416,7 +416,6 @@ export class HTMLEditor {
     await new Promise((resolve) => requestAnimationFrame(resolve));
   }
 
-
   public insertContent(content: string | HTMLElement | DocumentFragment): void {
     this.ensureEditorFocus();
 
