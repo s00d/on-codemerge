@@ -509,7 +509,7 @@ export class FormBuilderPlugin implements Plugin {
 
     // Проходим по всем полям формы и восстанавливаем их настройки
     const fields = formElement.querySelectorAll('.form-field');
-    console.log(1111, fields)
+    console.log(1111, fields);
     fields.forEach((field) => {
       const label = field.querySelector('label')?.textContent || '';
       const input = field.querySelector('input, select, textarea, button');
@@ -528,7 +528,7 @@ export class FormBuilderPlugin implements Plugin {
         });
       }
 
-      console.log(2222, type, label, isRequired, regexPattern, options)
+      console.log(2222, type, label, isRequired, regexPattern, options);
       // Добавляем поле с восстановленными настройками
       this.addFormField(type, label, isRequired, regexPattern, options);
     });

@@ -1,27 +1,29 @@
-import './style.scss';
-import './public.scss';
-
+import { HTMLEditor } from '../../core/HTMLEditor';
+import { fontSizeIcon, boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '../../icons';
+import { createToolbarButton } from '../ToolbarPlugin/utils';
+import { DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES } from './constants';
 import type { Plugin } from '../../core/Plugin';
 import { PopupManager } from '../../core/ui/PopupManager';
-import type { HTMLEditor } from '../../core/HTMLEditor';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { fontSizeIcon, boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '../../icons';
-import { DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES } from './constants';
+import { TextFormatter } from '../../utils/TextFormatter';
 
 export class FontPlugin implements Plugin {
   name = 'font';
   private editor: HTMLEditor | null = null;
+  private toolbarButtons: Map<string, HTMLElement> = new Map();
+  private fontButtons: Map<string, HTMLElement> = new Map();
   private fontPopup: PopupManager | null = null;
   private fontFamilies: string[] = [];
   private font = 'Arial';
   private size = '16px';
-  private toolbarButtons: HTMLElement[] = [];
+  private textFormatter: TextFormatter | null = null;
 
   constructor() {}
 
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
-    this.fontFamilies = this.getAvailableFonts(); // Получаем список шрифтов
+    this.textFormatter = new TextFormatter(editor.getContainer()); // Инициализируем TextFormatter
+    // const container = editor.getContainer();
+    this.fontFamilies = this.getAvailableFonts();
     this.fontPopup = new PopupManager(editor, {
       title: editor.t('Font Settings'),
       className: 'font-popup',
@@ -57,28 +59,61 @@ export class FontPlugin implements Plugin {
         },
       ],
     });
-
     this.addToolbarButtons();
+    document.addEventListener('selectionchange', this.handleSelectionChange.bind(this));
+  }
 
-    this.editor.on('bold', () => {
-      this.toggleFontStyle('bold');
+  private addToolbarButtons(): void {
+    const toolbar = document.querySelector('.editor-toolbar');
+    if (!toolbar || !this.textFormatter) return;
+
+    const buttons = [
+      { icon: boldIcon, title: 'Bold', style: 'bold' },
+      { icon: italicIcon, title: 'Italic', style: 'italic' },
+      { icon: underlineIcon, title: 'Underline', style: 'underline' },
+      { icon: strikethroughIcon, title: 'Strikethrough', style: 'strikethrough' },
+    ];
+
+    buttons.forEach(({ icon, title, style }) => {
+      const button = createToolbarButton({
+        icon,
+        title,
+        onClick: () => {
+          if (this.textFormatter) {
+            this.textFormatter.toggleStyle(style);
+            this.handleSelectionChange();
+          }
+        },
+      });
+      toolbar.appendChild(button);
+      this.toolbarButtons.set(style, button);
     });
-    this.editor.on('italic', () => {
-      this.toggleFontStyle('italic');
+
+    const fontSettingsButton = createToolbarButton({
+      icon: fontSizeIcon,
+      title: this.editor?.t('Font Settings'),
+      onClick: () => this.fontPopup?.show(),
     });
-    this.editor.on('underline', () => {
-      this.toggleFontStyle('underline');
-    });
-    this.editor.on('strikethrough', () => {
-      this.toggleFontStyle('strikethrough');
+    toolbar.appendChild(fontSettingsButton);
+    this.fontButtons.set('fontSize', fontSettingsButton);
+  }
+
+  private handleSelectionChange(): void {
+    if (!this.textFormatter) return;
+
+    // Проверяем, какие стили применены к выделенному тексту
+    this.toolbarButtons.forEach((button, style) => {
+      const isActive = this.textFormatter?.hasStyle(style);
+      if (isActive) {
+        button.classList.add('active'); // Добавляем класс для активной кнопки
+      } else {
+        button.classList.remove('active'); // Убираем класс, если стиль не применен
+      }
     });
   }
 
   private getAvailableFonts(): string[] {
-    // Получаем загруженные шрифты через document.fonts
     const loadedFonts = this.getLoadedFonts();
-
-    // Объединяем стандартные и загруженные шрифты, удаляем дубликаты
     return [...new Set([...DEFAULT_FONT_FAMILIES, ...loadedFonts])];
   }
 
@@ -90,130 +125,24 @@ export class FontPlugin implements Plugin {
     return Array.from(fonts);
   }
 
-  private setFontFamily(fontFamily: string): void {
-    if (this.editor) {
-      document.execCommand('fontName', false, fontFamily);
-    }
-  }
-
-  private setFontSize(fontSize: string): void {
-    if (this.editor) {
-      document.execCommand('fontSize', false, fontSize.replace('px', ''));
-    }
-  }
-
   private applyFontSettings(): void {
-    if (this.fontPopup) {
-      this.setFontFamily(this.font);
-      this.setFontSize(this.size);
-
+    if (this.fontPopup && this.textFormatter) {
+      this.textFormatter.setFontFamily(this.font);
+      this.textFormatter.setFontSize(this.size);
       this.fontPopup.hide();
     }
   }
 
-  private addToolbarButtons(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar) return;
-
-    // Font family button
-    const fontFamilyButton = createToolbarButton({
-      icon: fontSizeIcon,
-      title: 'Font Family',
-      onClick: () => {
-        this.fontPopup?.show();
-      },
-    });
-
-    const boldButton = createToolbarButton({
-      icon: boldIcon,
-      title: this.editor?.t('Bold'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.toggleFontStyle('bold');
-      },
-    });
-
-    // Italic button
-    const italicButton = createToolbarButton({
-      icon: italicIcon,
-      title: this.editor?.t('Italic'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.toggleFontStyle('italic');
-      },
-    });
-
-    // Underline button
-    const underlineButton = createToolbarButton({
-      icon: underlineIcon,
-      title: this.editor?.t('Underline'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.toggleFontStyle('underline');
-      },
-    });
-
-    // Strikethrough button
-    const strikethroughButton = createToolbarButton({
-      icon: strikethroughIcon,
-      title: this.editor?.t('Strikethrough'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.toggleFontStyle('strikethrough');
-      },
-    });
-
-    toolbar.appendChild(fontFamilyButton);
-    toolbar.appendChild(boldButton);
-    toolbar.appendChild(italicButton);
-    toolbar.appendChild(underlineButton);
-    toolbar.appendChild(strikethroughButton);
-
-    // Сохраняем кнопки для последующего удаления
-    this.toolbarButtons.push(
-      fontFamilyButton,
-      boldButton,
-      italicButton,
-      underlineButton,
-      strikethroughButton
-    );
-  }
-
-  private toggleFontStyle(style: 'bold' | 'italic' | 'underline' | 'strikethrough'): void {
-    if (!this.editor) return;
-
-    this.editor.ensureEditorFocus();
-
-    // Execute the corresponding command
-    const command = (() => {
-      switch (style) {
-        case 'bold':
-          return 'bold';
-        case 'italic':
-          return 'italic';
-        case 'underline':
-          return 'underline';
-        case 'strikethrough':
-          return 'strikethrough';
-        default:
-          throw new Error(`Unsupported font style: ${style}`);
-      }
-    })();
-
-    document.execCommand(command, false);
-  }
-
   destroy(): void {
     this.toolbarButtons.forEach((button) => button.remove());
-    this.toolbarButtons = [];
+    this.toolbarButtons.clear();
+    this.fontButtons.forEach((button) => button.remove());
+    this.fontButtons.clear();
 
     this.fontPopup?.destroy();
     this.fontPopup = null;
 
-    this.editor?.off('bold');
-    this.editor?.off('italic');
-    this.editor?.off('underline');
-    this.editor?.off('strikethrough');
     this.editor = null;
+    this.textFormatter = null;
   }
 }

@@ -9,9 +9,26 @@
     @apply hover:bg-gray-200 cursor-pointer;
   }
 
+  &:focus {
+    @apply outline-none ring-0;
+  }
+
+  // Настраиваем фокусное состояние для клавиатуры
+  &:focus-visible {
+    @apply ring-2 ring-blue-500;
+  }
+
   &:disabled {
     @apply cursor-default;
     pointer-events: none;
+  }
+
+  &.active {
+    @apply bg-gray-300; // Фон для активной кнопки
+
+    &:hover {
+      @apply bg-gray-400; // Фон при наведении на активную кнопку
+    }
   }
 }
 

@@ -5,114 +5,82 @@ import type { Plugin } from '../../core/Plugin';
 import type { HTMLEditor } from '../../core/HTMLEditor';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { alignLeftIcon, alignCenterIcon, alignRightIcon, alignJustifyIcon } from '../../icons';
+import { TextFormatter } from '../../utils/TextFormatter';
 
 export class AlignmentPlugin implements Plugin {
   name = 'alignment';
   private editor: HTMLEditor | null = null;
-  private buttons: HTMLElement[] = []; // Хранилище для кнопок, созданных плагином
+  private toolbarButtons: Map<string, HTMLElement> = new Map();
+  private textFormatter: TextFormatter | null = null;
 
   constructor() {}
 
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
+    this.textFormatter = new TextFormatter(editor.getContainer()); // Инициализируем TextFormatter
     this.addToolbarButtons();
 
-    this.editor.on('align_left', () => {
-      this.editor?.ensureEditorFocus();
-      this.applyAlignment('left');
-    });
+    // Подписываемся на события выравнивания
+    this.editor.on('align_left', () => this.textFormatter?.toggleStyle('alignLeft'));
+    this.editor.on('align_center', () => this.textFormatter?.toggleStyle('alignCenter'));
+    this.editor.on('align_right', () => this.textFormatter?.toggleStyle('alignRight'));
+    this.editor.on('align_justify', () => this.textFormatter?.toggleStyle('alignJustify'));
 
-    this.editor.on('align_center', () => {
-      this.editor?.ensureEditorFocus();
-      this.applyAlignment('center');
-    });
-
-    this.editor.on('align_right', () => {
-      this.editor?.ensureEditorFocus();
-      this.applyAlignment('right');
-    });
-    this.editor.on('align_justify', () => {
-      this.editor?.ensureEditorFocus();
-      this.applyAlignment('justify');
-    });
+    document.addEventListener('selectionchange', this.handleSelectionChange.bind(this));
   }
 
   private addToolbarButtons(): void {
     const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar) return;
+    if (!toolbar || !this.textFormatter) return;
 
-    // Left align button
-    const leftAlignButton = createToolbarButton({
-      icon: alignLeftIcon,
-      title: this.editor?.t('Align Left'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.applyAlignment('left');
-      },
+    // Массив кнопок для выравнивания
+    const buttons = [
+      { icon: alignLeftIcon, title: 'Align Left', command: 'alignLeft' },
+      { icon: alignCenterIcon, title: 'Align Center', command: 'alignCenter' },
+      { icon: alignRightIcon, title: 'Align Right', command: 'alignRight' },
+      { icon: alignJustifyIcon, title: 'Align Justify', command: 'alignJustify' },
+    ];
+
+    // Создаем кнопки и добавляем их в тулбар
+    buttons.forEach(({ icon, title, command }) => {
+      const button = createToolbarButton({
+        icon,
+        title: this.editor?.t(title) || title,
+        onClick: () => {
+          this.textFormatter?.toggleStyle(command);
+          this.handleSelectionChange();
+        },
+      });
+      toolbar.appendChild(button);
+      this.toolbarButtons.set(command, button);
     });
-
-    // Center align button
-    const centerAlignButton = createToolbarButton({
-      icon: alignCenterIcon,
-      title: this.editor?.t('Align Center'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.applyAlignment('center');
-      },
-    });
-
-    // Right align button
-    const rightAlignButton = createToolbarButton({
-      icon: alignRightIcon,
-      title: this.editor?.t('Align Right'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.applyAlignment('right');
-      },
-    });
-
-    // Justify align button
-    const justifyAlignButton = createToolbarButton({
-      icon: alignJustifyIcon,
-      title: this.editor?.t('Align Justify'),
-      onClick: () => {
-        this.editor?.ensureEditorFocus();
-        this.applyAlignment('justify');
-      },
-    });
-
-    // Добавляем кнопки в тулбар и сохраняем их в массиве
-    toolbar.appendChild(leftAlignButton);
-    toolbar.appendChild(centerAlignButton);
-    toolbar.appendChild(rightAlignButton);
-    toolbar.appendChild(justifyAlignButton);
-
-    this.buttons.push(leftAlignButton, centerAlignButton, rightAlignButton, justifyAlignButton);
   }
 
-  private applyAlignment(alignment: 'left' | 'center' | 'right' | 'justify'): void {
-    if (!this.editor) return;
+  private handleSelectionChange(): void {
+    if (!this.textFormatter) return;
 
-    this.editor.ensureEditorFocus();
-
-    const command = `justify${alignment.charAt(0).toUpperCase() + alignment.slice(1)}`;
-    document.execCommand(command, false);
+    // Проверяем, какие стили применены к выделенному тексту
+    this.toolbarButtons.forEach((button, style) => {
+      const isActive = this.textFormatter?.hasStyle(style);
+      if (isActive) {
+        button.classList.add('active'); // Добавляем класс для активной кнопки
+      } else {
+        button.classList.remove('active'); // Убираем класс, если стиль не применен
+      }
+    });
   }
 
   public destroy(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
-    if (toolbar) {
-      this.buttons.forEach((button) => {
-        toolbar.removeChild(button);
-      });
-    }
+    this.toolbarButtons.forEach((button) => button.remove());
+    this.toolbarButtons.clear();
 
+    // Отписываемся от событий
     this.editor?.off('align_left');
     this.editor?.off('align_center');
     this.editor?.off('align_right');
     this.editor?.off('align_justify');
 
-    this.buttons = [];
     this.editor = null;
+    this.textFormatter = null;
   }
 }
