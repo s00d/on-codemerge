@@ -378,9 +378,44 @@ export class HTMLEditor {
     return this.formatter.format(this.getContainer().innerHTML);
   }
 
-  public setHtml(html: string) {
-    this.getContainer().innerHTML = this.formatter.format(html);
+  private waitForDOMStabilization(container: HTMLElement, timeout = 100): Promise<void> {
+    return new Promise((resolve) => {
+      let timer: ReturnType<typeof setTimeout>;
+      const observer = new MutationObserver(() => {
+        // Сбрасываем таймер при каждом изменении DOM
+        clearTimeout(timer);
+        timer = setTimeout(() => {
+          // Если изменений не было в течение `timeout` мс, завершаем наблюдение
+          observer.disconnect();
+          resolve();
+        }, timeout);
+      });
+
+      // Начинаем наблюдение за изменениями в контейнере
+      observer.observe(container, {
+        childList: true, // Отслеживаем изменения в дочерних элементах
+        subtree: true, // Отслеживаем изменения во всем поддереве
+        attributes: true, // Отслеживаем изменения атрибутов
+        characterData: true, // Отслеживаем изменения текста
+      });
+
+      // Запускаем таймер при первом вызове
+      timer = setTimeout(() => {
+        observer.disconnect();
+        resolve();
+      }, timeout);
+    });
   }
+
+  public async setHtml(html: string): Promise<void> {
+    // Ждем, пока DOM стабилизируется
+    await this.waitForDOMStabilization(this.container);
+    // Устанавливаем новый HTML
+    this.container.innerHTML = this.formatter.format(html);
+    // Убеждаемся, что браузер завершил рендеринг
+    await new Promise((resolve) => requestAnimationFrame(resolve));
+  }
+
 
   public insertContent(content: string | HTMLElement | DocumentFragment): void {
     this.ensureEditorFocus();
