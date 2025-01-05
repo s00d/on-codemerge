@@ -37,7 +37,12 @@ export class DomUtils {
         range.intersectsNode(currentNode)
       ) {
         const parent = currentNode.parentElement;
-        if (parent && this.isStyledTextNode(parent)) {
+        if (
+          parent &&
+          this.isStyledTextNode(parent) &&
+          !this.isTableNode(parent) &&
+          !this.isBlockNode(parent)
+        ) {
           if (!deepestNodes.includes(parent)) {
             deepestNodes.push(parent);
           }
@@ -122,6 +127,15 @@ export class DomUtils {
 
   private isStyledTextNode(node: HTMLElement | null): boolean {
     return node ? !node.classList.contains('html-editor') : false;
+  }
+
+  private isTableNode(node: HTMLElement | null): boolean {
+    return node
+      ? !!(node.closest('table') || node.closest('tr') || node.closest('td') || node.closest('th'))
+      : false;
+  }
+  private isBlockNode(node: HTMLElement | null): boolean {
+    return node ? node.classList.contains('block-content') : false;
   }
 
   applyStyleToNode(
