@@ -1,4 +1,5 @@
 import './index.scss';
+import './public.scss';
 
 import { HTMLEditor } from './core/HTMLEditor';
 import { TablePlugin } from './plugins/TablePlugin';

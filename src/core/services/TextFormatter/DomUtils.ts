@@ -157,14 +157,6 @@ export class DomUtils {
       const element = node as HTMLElement;
       if (this.isStyledTextNode(element)) {
         removeStyle(element, styleCommand);
-
-        if (!element.getAttribute('style') && element.tagName === 'P') {
-          const fragment = document.createDocumentFragment();
-          while (element.firstChild) {
-            fragment.appendChild(element.firstChild);
-          }
-          element.parentNode?.replaceChild(fragment, element);
-        }
       }
     }
   }

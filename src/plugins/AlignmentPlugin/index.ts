@@ -5,33 +5,33 @@ import type { Plugin } from '../../core/Plugin';
 import type { HTMLEditor } from '../../core/HTMLEditor';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { alignLeftIcon, alignCenterIcon, alignRightIcon, alignJustifyIcon } from '../../icons';
-import { TextFormatter } from '../../utils/TextFormatter';
-
 export class AlignmentPlugin implements Plugin {
   name = 'alignment';
   private editor: HTMLEditor | null = null;
   private toolbarButtons: Map<string, HTMLElement> = new Map();
-  private textFormatter: TextFormatter | null = null;
 
   constructor() {}
 
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
-    this.textFormatter = new TextFormatter(editor.getContainer()); // Инициализируем TextFormatter
     this.addToolbarButtons();
 
     // Подписываемся на события выравнивания
-    this.editor.on('align_left', () => this.textFormatter?.toggleStyle('alignLeft'));
-    this.editor.on('align_center', () => this.textFormatter?.toggleStyle('alignCenter'));
-    this.editor.on('align_right', () => this.textFormatter?.toggleStyle('alignRight'));
-    this.editor.on('align_justify', () => this.textFormatter?.toggleStyle('alignJustify'));
+    this.editor.on('align_left', () => this.editor?.getTextFormatter()?.toggleStyle('alignLeft'));
+    this.editor.on('align_center', () =>
+      this.editor?.getTextFormatter()?.toggleStyle('alignCenter')
+    );
+    this.editor.on('align_right', () => this.editor?.getTextFormatter()?.toggleStyle('alignRight'));
+    this.editor.on('align_justify', () =>
+      this.editor?.getTextFormatter()?.toggleStyle('alignJustify')
+    );
 
     document.addEventListener('selectionchange', this.handleSelectionChange.bind(this));
   }
 
   private addToolbarButtons(): void {
     const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar || !this.textFormatter) return;
+    if (!toolbar) return;
 
     // Массив кнопок для выравнивания
     const buttons = [
@@ -47,7 +47,7 @@ export class AlignmentPlugin implements Plugin {
         icon,
         title: this.editor?.t(title) || title,
         onClick: () => {
-          this.textFormatter?.toggleStyle(command);
+          this.editor?.getTextFormatter()?.toggleStyle(command);
           this.handleSelectionChange();
         },
       });
@@ -57,11 +57,9 @@ export class AlignmentPlugin implements Plugin {
   }
 
   private handleSelectionChange(): void {
-    if (!this.textFormatter) return;
-
     // Проверяем, какие стили применены к выделенному тексту
     this.toolbarButtons.forEach((button, style) => {
-      const isActive = this.textFormatter?.hasStyle(style);
+      const isActive = this.editor?.getTextFormatter()?.hasClass(style);
       if (isActive) {
         button.classList.add('active'); // Добавляем класс для активной кнопки
       } else {
@@ -81,6 +79,5 @@ export class AlignmentPlugin implements Plugin {
     this.editor?.off('align_justify');
 
     this.editor = null;
-    this.textFormatter = null;
   }
 }

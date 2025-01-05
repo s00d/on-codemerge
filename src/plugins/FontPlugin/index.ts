@@ -4,7 +4,6 @@ import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES } from './constants';
 import type { Plugin } from '../../core/Plugin';
 import { PopupManager } from '../../core/ui/PopupManager';
-import { TextFormatter } from '../../utils/TextFormatter';
 
 export class FontPlugin implements Plugin {
   name = 'font';
@@ -15,13 +14,11 @@ export class FontPlugin implements Plugin {
   private fontFamilies: string[] = [];
   private font = 'Arial';
   private size = '16px';
-  private textFormatter: TextFormatter | null = null;
 
   constructor() {}
 
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
-    this.textFormatter = new TextFormatter(editor.getContainer()); // Инициализируем TextFormatter
     // const container = editor.getContainer();
     this.fontFamilies = this.getAvailableFonts();
     this.fontPopup = new PopupManager(editor, {
@@ -53,6 +50,11 @@ export class FontPlugin implements Plugin {
           onClick: () => this.applyFontSettings(),
         },
         {
+          label: editor.t('Clear'),
+          variant: 'danger',
+          onClick: () => this.clearFontSettings(),
+        },
+        {
           label: editor.t('Cancel'),
           variant: 'secondary',
           onClick: () => this.fontPopup?.hide(),
@@ -65,7 +67,7 @@ export class FontPlugin implements Plugin {
 
   private addToolbarButtons(): void {
     const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar || !this.textFormatter) return;
+    if (!toolbar) return;
 
     const buttons = [
       { icon: boldIcon, title: 'Bold', style: 'bold' },
@@ -79,10 +81,8 @@ export class FontPlugin implements Plugin {
         icon,
         title,
         onClick: () => {
-          if (this.textFormatter) {
-            this.textFormatter.toggleStyle(style);
-            this.handleSelectionChange();
-          }
+          this.editor?.getTextFormatter()?.toggleStyle(style);
+          this.handleSelectionChange();
         },
       });
       toolbar.appendChild(button);
@@ -92,18 +92,24 @@ export class FontPlugin implements Plugin {
     const fontSettingsButton = createToolbarButton({
       icon: fontSizeIcon,
       title: this.editor?.t('Font Settings'),
-      onClick: () => this.fontPopup?.show(),
+      onClick: () => {
+        let fontFamily = this.editor?.getTextFormatter()?.getStyle('fontFamily');
+        if (fontFamily === '') fontFamily = null;
+        this.fontPopup?.setValue('font-family', fontFamily ?? 'Arial');
+        let fontSize = this.editor?.getTextFormatter()?.getStyle('fontSize');
+        if (fontSize === '') fontSize = null;
+        this.fontPopup?.setValue('font-size', fontSize ?? '16px');
+        this.fontPopup?.show();
+      },
     });
     toolbar.appendChild(fontSettingsButton);
     this.fontButtons.set('fontSize', fontSettingsButton);
   }
 
   private handleSelectionChange(): void {
-    if (!this.textFormatter) return;
-
     // Проверяем, какие стили применены к выделенному тексту
     this.toolbarButtons.forEach((button, style) => {
-      const isActive = this.textFormatter?.hasStyle(style);
+      const isActive = this.editor?.getTextFormatter()?.hasClass(style);
       if (isActive) {
         button.classList.add('active'); // Добавляем класс для активной кнопки
       } else {
@@ -126,9 +132,15 @@ export class FontPlugin implements Plugin {
   }
 
   private applyFontSettings(): void {
-    if (this.fontPopup && this.textFormatter) {
-      this.textFormatter.setFontFamily(this.font);
-      this.textFormatter.setFontSize(this.size);
+    this.editor?.getTextFormatter()?.setFont(this.font, this.size);
+    if (this.fontPopup) {
+      this.fontPopup.hide();
+    }
+  }
+
+  private clearFontSettings(): void {
+    this.editor?.getTextFormatter()?.clearFont();
+    if (this.fontPopup) {
       this.fontPopup.hide();
     }
   }
@@ -143,6 +155,5 @@ export class FontPlugin implements Plugin {
     this.fontPopup = null;
 
     this.editor = null;
-    this.textFormatter = null;
   }
 }

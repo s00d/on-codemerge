@@ -1,0 +1,63 @@
+[class*='format-'] {
+  &:not(.format-text-block) {
+    display: inline;
+  }
+}
+
+.format {
+  display: inline;
+  &-bold {
+    font-weight: bold;
+  }
+
+  &-italic {
+    font-style: italic;
+  }
+
+  &-underline {
+    text-decoration: underline;
+  }
+
+  &-strikethrough {
+    text-decoration: line-through;
+  }
+
+  &-superscript {
+    vertical-align: super;
+  }
+
+  &-subscript {
+    vertical-align: sub;
+  }
+
+  &-text-transform {
+    text-transform: uppercase;
+  }
+
+  &-text-inline {
+    display: inline;
+  }
+
+  &-text-block {
+    display: block;
+  }
+
+  // Сабклассы для align
+  &-align {
+    &-left {
+      text-align: left;
+    }
+
+    &-center {
+      text-align: center;
+    }
+
+    &-right {
+      text-align: right;
+    }
+
+    &-justify {
+      text-align: justify;
+    }
+  }
+}

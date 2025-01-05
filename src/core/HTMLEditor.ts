@@ -1,6 +1,7 @@
 import { type Plugin, type PluginManager, DefaultPluginManager } from './Plugin';
 import { HTMLFormatter } from './services/HTMLFormatter';
 import { LocaleManager } from './services/LocaleManager';
+import { TextFormatter } from './services/TextFormatter';
 
 type Callback = (...data: any[]) => void;
 
@@ -14,6 +15,7 @@ export class HTMLEditor {
   private localeManager: LocaleManager;
   private contentChangeCallbacks: Callback[] = [];
   private mutationObserver: MutationObserver;
+  private textFormatter: TextFormatter | null = null;
 
   constructor(innerContainer: HTMLElement) {
     // Создаем новый внутренний контейнер
@@ -30,6 +32,7 @@ export class HTMLEditor {
     this.plugins = new DefaultPluginManager();
     this.eventHandlers = new Map();
     this.formatter = new HTMLFormatter();
+    this.textFormatter = new TextFormatter(this.container);
 
     this.container.addEventListener('click', () => {
       this.container.focus();
@@ -181,6 +184,10 @@ export class HTMLEditor {
 
   public getInnerContainer(): HTMLElement {
     return this.innerContainer;
+  }
+
+  public getTextFormatter(): TextFormatter | null {
+    return this.textFormatter;
   }
 
   private isSelectionInsideContainer(selection: Selection): boolean {
@@ -492,5 +499,6 @@ export class HTMLEditor {
     this.dragOverlay = null;
     this.localeManager = null!;
     this.mutationObserver = null!;
+    this.textFormatter = null!;
   }
 }

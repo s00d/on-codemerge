@@ -35,7 +35,7 @@ export class ColorPlugin implements Plugin {
     this.textColorPicker?.show((color) => {
       if (this.editor) {
         this.editor.getContainer().focus();
-        document.execCommand('foreColor', false, color);
+        this.editor?.getTextFormatter()?.setColor(color);
       }
     });
   }
@@ -44,7 +44,7 @@ export class ColorPlugin implements Plugin {
     this.bgColorPicker?.show((color) => {
       if (this.editor) {
         this.editor.getContainer().focus();
-        document.execCommand('hiliteColor', false, color);
+        this.editor?.getTextFormatter()?.setBackgroundColor(color);
       }
     });
   }

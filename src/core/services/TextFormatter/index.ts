@@ -43,15 +43,33 @@ export class TextFormatter {
     });
   }
 
-  setFontFamily(fontFamily: string): void {
+  setColor(color: string): void {
     this.applyStyleToSelectedNodes((element) => {
-      element.style.fontFamily = fontFamily;
+      element.style.color = color;
+      element.classList.add('format');
     });
   }
 
-  setFontSize(fontSize: string): void {
+  setBackgroundColor(color: string): void {
     this.applyStyleToSelectedNodes((element) => {
+      element.style.backgroundColor = color;
+      element.classList.add('format');
+    });
+  }
+
+  setFont(fontFamily: string, fontSize: string): void {
+    this.applyStyleToSelectedNodes((element) => {
+      element.style.fontFamily = fontFamily;
       element.style.fontSize = fontSize;
+      element.classList.add('format');
+    });
+  }
+
+  clearFont(): void {
+    this.applyStyleToSelectedNodes((element) => {
+      element.style.removeProperty('font-family');
+      element.style.removeProperty('font-size');
+      element.classList.add('format');
     });
   }
 
@@ -76,7 +94,7 @@ export class TextFormatter {
     return span;
   }
 
-  hasStyle(styleCommand: string): boolean {
+  hasClass(styleCommand: string): boolean {
     const selection = window.getSelection();
     if (!selection || selection.rangeCount === 0) return false;
 
@@ -91,5 +109,22 @@ export class TextFormatter {
       }
       return false;
     });
+  }
+
+  getStyle(name: keyof CSSStyleDeclaration): string | null | undefined {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+
+    const nodesToCheck = this.domUtils.getSelectedRoot(selection, true);
+    if (!nodesToCheck) return null;
+
+    // Проверяем, применен ли стиль к любому из выделенных узлов
+    for (const nodesToCheckItem of nodesToCheck) {
+      if (nodesToCheckItem.nodeType === Node.ELEMENT_NODE) {
+        const element = nodesToCheckItem as HTMLElement;
+        return (element.style[name] ?? null) as string | null;
+      }
+      return null;
+    }
   }
 }
