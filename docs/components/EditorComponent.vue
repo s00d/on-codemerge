@@ -130,6 +130,8 @@ export default {
         this.editorContent = newContent;
         this.previewContent = newContent;
       });
+
+      editor.setHtml('awfa waw awf awf aw&nbsp; <table class="html-editor-table"> <tbody> <tr> <td contenteditable="true">Cell 1 - 1 </td> <td contenteditable="true">Cell 1 - 2 </td> </tr> </tbody> </table> <br class="">\n')
     }
   },
 };
