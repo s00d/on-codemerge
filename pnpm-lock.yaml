@@ -11,9 +11,6 @@ importers:
       spellchecker-wasm:
         specifier: ^0.3.3
         version: 0.3.3
-      typo-js:
-        specifier: ^1.2.5
-        version: 1.2.5
     devDependencies:
       '@eslint/js':
         specifier: ^9.17.0
@@ -3360,9 +3357,6 @@ packages:
     resolution: {integrity: sha512-+2/g0Fds1ERlP6JsakQQDXjZdZMM+rqpamFZJEKh4kwTIn3iDkgKtby0CeNd5ATNZ4Ry1ax15TMx0W2V+miizQ==}
     engines: {node: '>=14.17'}
     hasBin: true
-
-  typo-js@1.2.5:
-    resolution: {integrity: sha512-F45vFWdGX8xahIk/sOp79z2NJs8ETMYsmMChm9D5Hlx3+9j7VnCyQyvij5MOCrNY3NNe8noSyokRjQRfq+Bc7A==}
 
   ufo@1.5.4:
     resolution: {integrity: sha512-UsUk3byDzKd04EyoZ7U4DOlxQaD14JUKQl6/P7wiX4FNvUfm3XL246n9W5AmqwW5RSFJ27NAuM0iLscAOYUiGQ==}
@@ -7262,8 +7256,6 @@ snapshots:
       - supports-color
 
   typescript@5.4.2: {}
-
-  typo-js@1.2.5: {}
 
   ufo@1.5.4: {}
 
