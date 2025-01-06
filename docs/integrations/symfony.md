@@ -27,6 +27,7 @@ Here’s how to integrate On-Codemerge into a Symfony project:
 1. **Configure Encore**:
 
 ```javascript title="webpack.config.js"
+import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/ToolbarPlugin/style.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';

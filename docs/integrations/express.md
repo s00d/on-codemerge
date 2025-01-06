@@ -54,6 +54,7 @@ app.listen(port, () => {
 3. **Initialize On-Codemerge in a JavaScript File**:
 
 ```javascript title="public/path/to/your/javascript/file.js"
+import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/ToolbarPlugin/style.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';

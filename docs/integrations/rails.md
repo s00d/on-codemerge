@@ -21,6 +21,7 @@ yarn add on-codemerge
 1. **Create a JavaScript Pack**:
 
 ```javascript title="app/javascript/packs/editor.js"
+import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/ToolbarPlugin/style.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';

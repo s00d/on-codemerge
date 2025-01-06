@@ -69,4 +69,11 @@ export default {
   }
 };
 </script>
+<style>
+  @import 'on-codemerge/public.css';
+  @import 'on-codemerge/index.css';
+  @import 'on-codemerge/plugins/ToolbarPlugin/style.css';
+  @import 'on-codemerge/plugins/AlignmentPlugin/public.css';
+  @import 'on-codemerge/plugins/AlignmentPlugin/style.css';
+</style>
 ```

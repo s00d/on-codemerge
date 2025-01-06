@@ -21,6 +21,7 @@ Here’s how to integrate On-Codemerge into a Next.js project:
 1. **Create a React Component**:
 
 ```jsx title="components/OnCodemergeEditor.jsx"
+import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/ToolbarPlugin/style.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';

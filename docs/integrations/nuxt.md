@@ -21,6 +21,7 @@ Here’s how to integrate On-Codemerge into a Nuxt 3 project:
 1. **Create a Composable**:
 
 ```javascript title="composables/useEditor.js"
+import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/ToolbarPlugin/style.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';

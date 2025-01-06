@@ -15,6 +15,7 @@ To use the public styles provided by **On-Codemerge**, you need to import them s
 If you are using a module bundler like Webpack or Vite, you can import the styles directly in your JavaScript or TypeScript file:
 
 ```javascript
+import 'on-codemerge/style.css'; // all
 import 'on-codemerge/index.css'; // all
 import 'on-codemerge/plugins/ToolbarPlugin/public.css'; // Toolbar plugin styles
 ```
@@ -22,6 +23,7 @@ import 'on-codemerge/plugins/ToolbarPlugin/public.css'; // Toolbar plugin styles
 Alternatively, you can include the styles in your HTML file using a `<link>` tag:
 
 ```html
+<link rel="stylesheet" href="path/to/on-codemerge/style.css">
 <link rel="stylesheet" href="path/to/on-codemerge/index.css">
 <link rel="stylesheet" href="path/to/on-codemerge/plugins/ToolbarPlugin/public.css">
 ```
@@ -32,7 +34,7 @@ Below is a list of all available public styles for **On-Codemerge** and its plug
 
 | Plugin               | CSS File Path                                          |
 |----------------------|--------------------------------------------------------|
-| **All Styles**       | `on-codemerge/index.css`                               |
+| **Core Styles**      | `on-codemerge/index.css`                               |
 | BlockPlugin          | `on-codemerge/plugins/BlockPlugin/public.css`          |
 | ChartsPlugin         | `on-codemerge/plugins/ChartsPlugin/public.css`         |
 | CodeBlockPlugin      | `on-codemerge/plugins/CodeBlockPlugin/public.css`      |
@@ -72,6 +74,7 @@ By following this guide, you can ensure that **On-Codemerge** and its plugins ar
 ## full import 
 
 ```typescript
+import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/BlockPlugin/public.css';
 import 'on-codemerge/plugins/ChartsPlugin/public.css';

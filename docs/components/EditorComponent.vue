@@ -51,8 +51,9 @@ import {
   FileUploadPlugin,
   FontPlugin,
   AlignmentPlugin,
-  CollaborationPlugin,
+  // CollaborationPlugin,
   FormBuilderPlugin,
+  SpellCheckerPlugin,
 } from '../../src/app';
 
 export default {
@@ -107,8 +108,9 @@ export default {
         VideoPlugin,
         YouTubeVideoPlugin,
         FileUploadPlugin,
-        CollaborationPlugin,
+        // CollaborationPlugin,
         FormBuilderPlugin,
+        SpellCheckerPlugin,
       };
 
       // Если activePlugins пустой, регистрируем все плагины

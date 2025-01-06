@@ -23,6 +23,7 @@ npm i --save on-codemerge
 Here's an example that demonstrates how to integrate On-Codemerge into an Angular project using the new plugin version:
 
 ```typescript title="app.component.ts"
+import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/ToolbarPlugin/style.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';
