@@ -130,7 +130,7 @@ export default {
       });
 
       editor.use(new CollaborationPlugin({
-        serverUrl: 'ws://on-codemerge-production.up.railway.app/',
+        serverUrl: 'wss://on-codemerge-production.up.railway.app/',
         autoStart: true,
       }));
 
