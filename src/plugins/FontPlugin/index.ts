@@ -1,7 +1,7 @@
 import type { HTMLEditor } from '../../core/HTMLEditor';
 import { fontSizeIcon, boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '../../icons';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES } from './constants';
+import { DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES, DEFAULT_LINE_HEIGHTS } from './constants';
 import type { Plugin } from '../../core/Plugin';
 import { PopupManager } from '../../core/ui/PopupManager';
 
@@ -14,6 +14,7 @@ export class FontPlugin implements Plugin {
   private fontFamilies: string[] = [];
   private font = 'Arial';
   private size = '16px';
+  private lineHeight = 'normal';
 
   constructor() {}
 
@@ -41,6 +42,14 @@ export class FontPlugin implements Plugin {
           options: DEFAULT_FONT_SIZES,
           value: this.size,
           onChange: (value) => (this.size = value.toString()),
+        },
+        {
+          type: 'list',
+          id: 'line-height',
+          label: editor.t('Line Height'),
+          options: DEFAULT_LINE_HEIGHTS,
+          value: this.lineHeight,
+          onChange: (value) => (this.lineHeight = value.toString()),
         },
       ],
       buttons: [
@@ -99,6 +108,9 @@ export class FontPlugin implements Plugin {
         let fontSize = this.editor?.getTextFormatter()?.getStyle('fontSize');
         if (fontSize === '') fontSize = null;
         this.fontPopup?.setValue('font-size', fontSize ?? '16px');
+        let lineHeight = this.editor?.getTextFormatter()?.getStyle('lineHeight');
+        if (lineHeight === '') lineHeight = null;
+        this.fontPopup?.setValue('line-height', lineHeight ?? 'normal');
         this.fontPopup?.show();
       },
     });
@@ -132,7 +144,7 @@ export class FontPlugin implements Plugin {
   }
 
   private applyFontSettings(): void {
-    this.editor?.getTextFormatter()?.setFont(this.font, this.size);
+    this.editor?.getTextFormatter()?.setFont(this.font, this.size, this.lineHeight);
     if (this.fontPopup) {
       this.fontPopup.hide();
     }
@@ -150,6 +162,8 @@ export class FontPlugin implements Plugin {
     this.toolbarButtons.clear();
     this.fontButtons.forEach((button) => button.remove());
     this.fontButtons.clear();
+
+    document.removeEventListener('selectionchange', this.handleSelectionChange.bind(this));
 
     this.fontPopup?.destroy();
     this.fontPopup = null;

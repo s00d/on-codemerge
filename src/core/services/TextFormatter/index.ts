@@ -57,10 +57,11 @@ export class TextFormatter {
     });
   }
 
-  setFont(fontFamily: string, fontSize: string): void {
+  setFont(fontFamily: string, fontSize: string, lineHeight: string): void {
     this.applyStyleToSelectedNodes((element) => {
       element.style.fontFamily = fontFamily;
       element.style.fontSize = fontSize;
+      element.style.lineHeight = lineHeight;
       element.classList.add('format');
     });
   }
@@ -69,7 +70,36 @@ export class TextFormatter {
     this.applyStyleToSelectedNodes((element) => {
       element.style.removeProperty('font-family');
       element.style.removeProperty('font-size');
+      element.style.removeProperty('line-height');
       element.classList.add('format');
+    });
+  }
+
+  applyBlock(tag: keyof HTMLElementTagNameMap = 'p'): void {
+    this.applyStyleToSelectedNodes((element) => {
+      const newElement = document.createElement(tag);
+      newElement.textContent = element.textContent; // Копируем только текст
+      newElement.classList.add('format', 'format-text-block');
+
+      if (element.parentNode) {
+        element.parentNode.replaceChild(newElement, element);
+      }
+    });
+  }
+
+  clearBlock(): void {
+    this.applyStyleToSelectedNodes((element) => {
+      const newElement = document.createElement('p');
+      newElement.textContent = element.textContent; // Копируем только текст
+      newElement.classList.add('format');
+      element.style.removeProperty('font-family');
+      element.style.removeProperty('font-size');
+      element.style.removeProperty('line-height');
+      element.style.removeProperty('format-text-block');
+
+      if (element.parentNode) {
+        element.parentNode.replaceChild(newElement, element);
+      }
     });
   }
 
@@ -77,7 +107,8 @@ export class TextFormatter {
     const selection = window.getSelection();
     if (!selection) return;
 
-    const nodesToStyle = this.domUtils.getSelectedRoot(selection);
+    const nodesToStyle = this.domUtils.getSelectedRoot(selection, false);
+    console.log(111, nodesToStyle);
     if (!nodesToStyle) return;
 
     nodesToStyle.forEach((node) => {

@@ -104,3 +104,18 @@ export const DEFAULT_FONT_SIZES = [
   '71px',
   '72px',
 ];
+
+export const DEFAULT_LINE_HEIGHTS = [
+  'normal',
+  '0.75',
+  '1',
+  '1.15',
+  '1.25',
+  '1.35',
+  '1.5',
+  '1.75',
+  '2',
+  '2.5',
+  '3',
+  '16px',
+];

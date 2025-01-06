@@ -82,16 +82,16 @@ export class TypographyPlugin implements Plugin {
       case 'h4':
       case 'h5':
       case 'h6':
-        document.execCommand('formatBlock', false, style);
+        this.editor?.getTextFormatter()?.applyBlock(style);
         break;
       case 'paragraph':
-        document.execCommand('formatBlock', false, 'p');
+        this.editor?.getTextFormatter()?.applyBlock('p');
         break;
       case 'blockquote':
-        document.execCommand('formatBlock', false, 'blockquote');
+        this.editor?.getTextFormatter()?.applyBlock('blockquote');
         break;
       case 'pre':
-        document.execCommand('formatBlock', false, 'pre');
+        this.editor?.getTextFormatter()?.applyBlock('pre');
         break;
       case 'hr':
         const hrElement = createHr('my-4 border-t border-gray-300');
@@ -103,8 +103,7 @@ export class TypographyPlugin implements Plugin {
         selection.addRange(range);
         break;
       case 'clear':
-        document.execCommand('removeFormat', false);
-        document.execCommand('formatBlock', false, 'p');
+        this.editor?.getTextFormatter()?.clearBlock();
         break;
     }
   }

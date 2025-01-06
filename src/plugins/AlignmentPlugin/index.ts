@@ -72,6 +72,8 @@ export class AlignmentPlugin implements Plugin {
     this.toolbarButtons.forEach((button) => button.remove());
     this.toolbarButtons.clear();
 
+    document.removeEventListener('selectionchange', this.handleSelectionChange.bind(this));
+
     // Отписываемся от событий
     this.editor?.off('align_left');
     this.editor?.off('align_center');
