@@ -1,13 +1,14 @@
 import { defineConfig } from 'vite';
 import svgLoader from 'vite-svg-loader';
 import dts from 'vite-plugin-dts';
+import wasm from 'vite-plugin-wasm';
 
 export default defineConfig({
   css: {
     preprocessorOptions: {
       scss: {
-        api: 'modern-compiler'
-      }
+        api: 'modern-compiler',
+      },
     },
     postcss: './postcss.config.js',
   },
@@ -22,6 +23,7 @@ export default defineConfig({
       tsconfigPath: './tsconfig.app.json',
       outDir: 'dist/types',
     }),
+    wasm(),
   ],
   build: {
     cssCodeSplit: true,
@@ -42,5 +44,9 @@ export default defineConfig({
         exports: 'named',
       },
     },
+  },
+  optimizeDeps: {
+    // Убедитесь, что WASM включен в оптимизацию зависимостей
+    exclude: ['spellchecker-wasm'], // Исключите WASM-библиотеку из оптимизации
   },
 });

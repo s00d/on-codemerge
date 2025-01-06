@@ -1,7 +1,7 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "1.0.13",
+  "version": "1.0.14",
   "type": "module",
   "author": "Pavel Kuzmin",
   "license": "MIT",
@@ -60,6 +60,7 @@
       "require": "./dist/app.cjs"
     },
     "./index.css": "./dist/index.css",
+    "./public.css": "./dist/public.css",
     "./plugins/BlockPlugin/public.css": "./dist/plugins/BlockPlugin/public.css",
     "./plugins/ChartsPlugin/public.css": "./dist/plugins/ChartsPlugin/public.css",
     "./plugins/CodeBlockPlugin/public.css": "./dist/plugins/CodeBlockPlugin/public.css",
@@ -86,6 +87,7 @@
     "./plugins/YouTubeVideoPlugin/public.css": "./dist/plugins/YouTubeVideoPlugin/public.css",
     "./plugins/AlignmentPlugin/public.css": "./dist/plugins/AlignmentPlugin/public.css",
     "./plugins/FormBuilderPlugin/public.css": "./dist/plugins/FormBuilderPlugin/public.css",
+    "./plugins/SpellCheckerPlugin/public.css": "./dist/plugins/SpellCheckerPlugin/public.css",
     "./plugins/BlockPlugin/style.css": "./dist/plugins/BlockPlugin/style.css",
     "./plugins/ChartsPlugin/style.css": "./dist/plugins/ChartsPlugin/style.css",
     "./plugins/CodeBlockPlugin/style.css": "./dist/plugins/CodeBlockPlugin/style.css",
@@ -111,13 +113,15 @@
     "./plugins/VideoPlugin/style.css": "./dist/plugins/VideoPlugin/style.css",
     "./plugins/YouTubeVideoPlugin/style.css": "./dist/plugins/YouTubeVideoPlugin/style.css",
     "./plugins/AlignmentPlugin/style.css": "./dist/plugins/AlignmentPlugin/style.css",
-    "./plugins/FormBuilderPlugin/style.css": "./dist/plugins/FormBuilderPlugin/style.css"
+    "./plugins/FormBuilderPlugin/style.css": "./dist/plugins/FormBuilderPlugin/style.css",
+    "./plugins/SpellCheckerPlugin/style.css": "./dist/plugins/SpellCheckerPlugin/style.css"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
+    "@types/typo-js": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^8.18.2",
     "@typescript-eslint/parser": "^8.18.2",
     "autoprefixer": "^10.4.20",
@@ -140,8 +144,13 @@
     "vite": "^6.0.6",
     "vite-plugin-dts": "^4.4.0",
     "vite-plugin-handlebars": "^2.0.0",
+    "vite-plugin-wasm": "^3.4.1",
     "vite-svg-loader": "^5.1.0",
     "vitepress": "^1.5.0"
   },
-  "packageManager": "pnpm@9.14.2"
+  "packageManager": "pnpm@9.14.2",
+  "dependencies": {
+    "spellchecker-wasm": "^0.3.3",
+    "typo-js": "^1.2.5"
+  }
 }
