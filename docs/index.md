@@ -219,15 +219,8 @@ Below is a list of all available plugins for **On-Codemerge** and their function
 | **FileUploadPlugin**     | Provides functionality to upload and manage files.                      |
 | **CollaborationPlugin**  | Enables real-time collaborative editing with multiple users.            |
 | **FormBuilderPlugin**    | Form builder plugin                                                     |
+| **SpellCheckerPlugin**   | Spell Checker plugin                                                    |
 
-
-Добавим таблицу с параметрами для `FileUploadPlugin` и `VideoPlugin`, чтобы пользователи могли лучше понять, как их настраивать. Вот обновленный раздел документации:
-
----
-
-На основе предоставленных типов (`UploadEndpoints`, `UploadConfig`, и `defaultConfig`) обновим таблицу с параметрами для `FileUploadPlugin`. Это поможет пользователям лучше понять, как настраивать плагин.
-
----
 
 ## Plugin Configuration
 
@@ -260,8 +253,57 @@ editor.use(
 );
 ```
 
+# SpellCheckerPlugin
 
-Here’s the updated documentation with the `CollaborationPlugin` section added in English:
+The `SpellCheckerPlugin` provides spell-checking functionality for the **On-Codemerge** editor. It relies on WebAssembly (WASM) to perform efficient spell-checking operations. To use this plugin, you need to configure your build system to handle WASM files properly.
+
+---
+
+## **Key Features**
+
+- **Real-time Spell Checking**: Highlights misspelled words as you type.
+- **Multi-language Support**: Works with multiple languages.
+- **WASM-based**: Utilizes WebAssembly for high-performance spell checking.
+
+---
+
+## **Installation and Configuration**
+
+To use the `SpellCheckerPlugin`, you need to configure your build system (e.g., Vite) to handle WASM files. Below is an example configuration for Vite:
+
+### **Vite Configuration**
+
+```javascript
+import { defineConfig } from 'vite';
+import wasm from 'vite-plugin-wasm';
+
+export default defineConfig({
+  plugins: [
+    // ...
+    wasm(), // Enable WASM support
+  ],
+  optimizeDeps: {
+    exclude: ['spellchecker-wasm'], // Exclude WASM library from dependency optimization
+  },
+});
+```
+
+---
+
+## **Usage**
+
+To use the `SpellCheckerPlugin`, follow these steps:
+
+1. **Install the Plugin**:
+   Ensure the plugin is installed in your project.
+
+2. **Register the Plugin**:
+   Register the plugin with the **On-Codemerge** editor.
+
+3. **Configure the Plugin**:
+   Provide the necessary configuration options, such as the language dictionary.
+
+---
 
 ---
 
