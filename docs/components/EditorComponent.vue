@@ -54,6 +54,7 @@ import {
   // CollaborationPlugin,
   FormBuilderPlugin,
   SpellCheckerPlugin,
+  BlockStylePlugin,
 } from '../../src/app';
 
 export default {
@@ -111,6 +112,7 @@ export default {
         // CollaborationPlugin,
         FormBuilderPlugin,
         SpellCheckerPlugin,
+        BlockStylePlugin,
       };
 
       // Если activePlugins пустой, регистрируем все плагины

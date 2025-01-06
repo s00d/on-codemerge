@@ -28,6 +28,7 @@ import {
   CollaborationPlugin,
   FormBuilderPlugin,
   SpellCheckerPlugin,
+  BlockStylePlugin,
 } from './app';
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -68,6 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     editor.use(new ShortcutsPlugin());
     editor.use(new FormBuilderPlugin());
     editor.use(new SpellCheckerPlugin());
+    editor.use(new BlockStylePlugin());
     editor.use(
       new CollaborationPlugin({
         serverUrl: 'ws://localhost:8080',

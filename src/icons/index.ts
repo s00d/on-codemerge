@@ -77,6 +77,7 @@ import strikethroughIcon from './strikethrough.svg?raw';
 import formIcon from './form.svg?raw';
 import pdfIcon from './pdf.svg?raw';
 import spellCheckIcon from './spell-check.svg?raw';
+import styleIcon from './style.svg?raw';
 
 export {
   alignCenterIcon,
@@ -158,4 +159,5 @@ export {
   formIcon,
   pdfIcon,
   spellCheckIcon,
+  styleIcon,
 };

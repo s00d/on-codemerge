@@ -30,6 +30,7 @@ import { AlignmentPlugin } from './plugins/AlignmentPlugin';
 import { CollaborationPlugin } from './plugins/CollaborationPlugin';
 import { FormBuilderPlugin } from './plugins/FormBuilderPlugin';
 import { SpellCheckerPlugin } from './plugins/SpellCheckerPlugin';
+import { BlockStylePlugin } from './plugins/BlockStylePlugin';
 
 export {
   HTMLEditor,
@@ -61,4 +62,5 @@ export {
   CollaborationPlugin,
   FormBuilderPlugin,
   SpellCheckerPlugin,
+  BlockStylePlugin,
 };

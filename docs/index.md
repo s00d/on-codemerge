@@ -220,6 +220,7 @@ Below is a list of all available plugins for **On-Codemerge** and their function
 | **CollaborationPlugin**  | Enables real-time collaborative editing with multiple users.            |
 | **FormBuilderPlugin**    | Form builder plugin                                                     |
 | **SpellCheckerPlugin**   | Spell Checker plugin                                                    |
+| **BlockStylePlugin**     | Class and style editor                                                  |
 
 
 ## Plugin Configuration

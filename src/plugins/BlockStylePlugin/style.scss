@@ -1,0 +1,31 @@
+.block-style-editor {
+  @apply w-[500px];
+
+  .popup-content {
+    @apply space-y-4 p-5;
+  }
+
+  .popup-item {
+    @apply flex flex-col gap-2;
+
+    .style-item {
+      @apply flex items-center gap-2;
+    }
+
+    .style-property-select,
+    .style-value-select,
+    .class-input {
+      @apply flex-1 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all m-1;
+
+      border: 1px solid #d1d5db; /* Tailwind's border-gray-300 */
+    }
+
+    .remove-button {
+      @apply text-red-500 hover:text-red-700 cursor-pointer;
+    }
+
+    .add-button {
+      @apply mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600;
+    }
+  }
+}
