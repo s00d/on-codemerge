@@ -62,7 +62,7 @@ export class BlockStylePlugin {
     const range = selection.getRangeAt(0);
     const parentElement = range.commonAncestorContainer.parentElement;
 
-    if (this.editor && !this.isInsideEditor(this.editor.getContainer(), parentElement)) {
+    if (!this.editor) {
       return;
     }
 
@@ -79,13 +79,6 @@ export class BlockStylePlugin {
       this.selectedElement = null;
       this.toolbarButton?.classList.remove('active');
     }
-  }
-
-  private isInsideEditor(editorContainer: HTMLElement, element: HTMLElement | null): boolean {
-    if (!element) return false;
-
-    // Проверяем, что элемент находится внутри контейнера редактора
-    return editorContainer.contains(element);
   }
 
   private isBlockElement(element: HTMLElement): boolean {
