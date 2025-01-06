@@ -26,7 +26,7 @@ export class AlignmentPlugin implements Plugin {
       this.editor?.getTextFormatter()?.toggleStyle('alignJustify')
     );
 
-    document.addEventListener('selectionchange', this.handleSelectionChange.bind(this));
+    this.editor.on('selectionchange', () => this.handleSelectionChange());
   }
 
   private addToolbarButtons(): void {
@@ -72,7 +72,7 @@ export class AlignmentPlugin implements Plugin {
     this.toolbarButtons.forEach((button) => button.remove());
     this.toolbarButtons.clear();
 
-    document.removeEventListener('selectionchange', this.handleSelectionChange.bind(this));
+    this.editor?.off('selectionchange');
 
     // Отписываемся от событий
     this.editor?.off('align_left');

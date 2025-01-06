@@ -39,7 +39,7 @@ export class BlockStylePlugin {
     });
 
     this.addToolbarButton();
-    document.addEventListener('selectionchange', this.handleSelectionChange.bind(this));
+    this.editor.on('selectionchange', () => this.handleSelectionChange());
   }
 
   private addToolbarButton(): void {
@@ -416,7 +416,7 @@ export class BlockStylePlugin {
     this.toolbarButton?.remove();
     this.toolbarButton = null;
 
-    document.removeEventListener('selectionchange', this.handleSelectionChange.bind(this));
+    this.editor?.off('selectionchange');
 
     this.popup?.destroy();
     this.popup = null;

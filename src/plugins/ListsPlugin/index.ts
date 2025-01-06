@@ -58,7 +58,7 @@ export class ListsPlugin implements Plugin {
     toolbar.appendChild(this.ulButton);
     toolbar.appendChild(this.olButton);
 
-    document.addEventListener('selectionchange', this.handleSelectionChange.bind(this));
+    this.editor?.on('selectionchange', () => this.handleSelectionChange());
   }
 
   private handleSelectionChange(): void {
@@ -282,8 +282,7 @@ export class ListsPlugin implements Plugin {
       this.olButton.parentElement.removeChild(this.olButton);
     }
 
-    document.removeEventListener('selectionchange', this.handleSelectionChange.bind(this));
-
+    this.editor?.off('selectionchange');
     this.editor?.off('lists');
 
     this.editor = null;

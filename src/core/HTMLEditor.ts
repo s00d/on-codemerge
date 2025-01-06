@@ -45,6 +45,8 @@ export class HTMLEditor {
 
     this.container.addEventListener('paste', (e) => this.handlePaste(e));
 
+    document.addEventListener('selectionchange', (e) => this.handleSelectionChange(e));
+
     // Инициализация MutationObserver
     this.mutationObserver = new MutationObserver((mutations) => this.handleMutations(mutations));
     this.mutationObserver.observe(this.container, {
@@ -53,6 +55,37 @@ export class HTMLEditor {
       characterData: true, // Отслеживаем изменения текста
       attributes: true, // Отслеживаем изменения атрибутов
     });
+  }
+
+  private async handleSelectionChange(event: Event): Promise<void> {
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const commonAncestor = range.commonAncestorContainer;
+
+    // Проверяем, что выделение находится внутри контейнера редактора
+    if (this.isSelectionInsideEditor(commonAncestor)) {
+      this.triggerEvent('selectionchange', { event });
+    }
+  }
+
+  /**
+   * Проверяет, находится ли выделение внутри контейнера редактора.
+   */
+  private isSelectionInsideEditor(node: Node): boolean {
+    // Если узел является текстовым узлом, проверяем его родительский элемент
+    if (node.nodeType === Node.TEXT_NODE) {
+      return this.container.contains(node.parentElement);
+    }
+
+    // Если узел является элементом, проверяем его напрямую
+    if (node.nodeType === Node.ELEMENT_NODE) {
+      return this.container.contains(node as HTMLElement);
+    }
+
+    // Для других типов узлов (например, комментарии) возвращаем false
+    return false;
   }
 
   private handleMutations(mutations: MutationRecord[]): void {

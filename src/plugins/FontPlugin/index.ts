@@ -71,7 +71,7 @@ export class FontPlugin implements Plugin {
       ],
     });
     this.addToolbarButtons();
-    document.addEventListener('selectionchange', this.handleSelectionChange.bind(this));
+    this.editor.on('selectionchange', () => this.handleSelectionChange());
   }
 
   private addToolbarButtons(): void {
@@ -163,7 +163,7 @@ export class FontPlugin implements Plugin {
     this.fontButtons.forEach((button) => button.remove());
     this.fontButtons.clear();
 
-    document.removeEventListener('selectionchange', this.handleSelectionChange.bind(this));
+    this.editor?.off('selectionchange');
 
     this.fontPopup?.destroy();
     this.fontPopup = null;
