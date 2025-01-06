@@ -51,7 +51,7 @@ import {
   FileUploadPlugin,
   FontPlugin,
   AlignmentPlugin,
-  // CollaborationPlugin,
+  CollaborationPlugin,
   FormBuilderPlugin,
   SpellCheckerPlugin,
   BlockStylePlugin,
@@ -128,6 +128,11 @@ export default {
           console.warn(`Плагин "${pluginName}" не найден.`);
         }
       });
+
+      editor.use(new CollaborationPlugin({
+        serverUrl: 'ws://on-codemerge-production.up.railway.app/',
+        autoStart: true,
+      }));
 
       // Подписка на изменения контента
       editor.subscribeToContentChange((newContent) => {

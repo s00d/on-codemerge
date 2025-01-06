@@ -31,6 +31,8 @@ export class CollaborationPlugin implements Plugin {
   private contentVersion: number = 0; // Текущая версия контента
   private lastContent: string = ''; // Последний известный контент
   private unsubscribeFromContentChange: (() => void) | null = null; // Функция для отписки от изменений
+  private status: string = '';
+  private userId: string = '';
 
   constructor(options: CollaborationPluginOptions = {}) {
     this.options = {
@@ -41,6 +43,9 @@ export class CollaborationPlugin implements Plugin {
   }
 
   initialize(editor: HTMLEditor): void {
+    const urlParams = new URLSearchParams(window.location.search);
+    this.userId = urlParams.get('userId') ?? generateToken();
+
     this.editor = editor;
     this.popup = new PopupManager(this.editor, {
       title: 'Collaboration',
@@ -81,6 +86,7 @@ export class CollaborationPlugin implements Plugin {
   }
 
   private updateConnectionStatus(status: string): void {
+    this.status = status;
     if (!this.editor) return;
     const statusElement = this.editor.getInnerContainer().querySelector('.collaboration-status');
     if (statusElement) {
@@ -97,20 +103,41 @@ export class CollaborationPlugin implements Plugin {
       return;
     }
     const urlParams = new URLSearchParams(window.location.search);
-    this.docId = urlParams.get('docId') || generateToken();
+    this.docId = urlParams.get('docId') ?? null;
+
+    if (!this.docId) {
+      return;
+    }
 
     this.ws = new WebSocket(this.options.serverUrl);
 
     this.ws.onopen = () => {
       console.log('WebSocket connected');
       this.updateConnectionStatus('Connected');
-      this.ws?.send(JSON.stringify({ type: 'join', docId: this.docId }));
+      this.ws?.send(
+        JSON.stringify({
+          type: 'join',
+          docId: this.docId,
+          userId: this.userId,
+          content: this.editor?.getHtml(),
+        })
+      );
     };
 
     this.ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
       if (data.type === 'init' || data.type === 'update') {
-        console.log('onmessage', data.content);
+        console.log('onmessage', data);
+
+        if (data.userId === this.userId) {
+          console.log('Ignoring self update');
+          return;
+        }
+
+        if (!data.content || data.content === '') {
+          console.log('Ignoring empty version:', data.content);
+          return;
+        }
 
         // Проверяем версию контента
         if (data.version && data.version < this.contentVersion) {
@@ -156,6 +183,34 @@ export class CollaborationPlugin implements Plugin {
     );
   }
 
+  private debounce(func: (...args: any[]) => void, wait: number) {
+    let timeout: ReturnType<typeof setTimeout> | null;
+
+    return (...args: any[]) => {
+      if (timeout) {
+        clearTimeout(timeout);
+      }
+      timeout = setTimeout(() => {
+        func(...args);
+      }, wait);
+    };
+  }
+
+  private debouncedSendUpdate = this.debounce((newContent: string) => {
+    if (this.ws && this.docId && this.status === 'Connected') {
+      this.ws.send(
+        JSON.stringify({
+          type: 'update',
+          docId: this.docId,
+          userId: this.userId,
+          content: newContent,
+          version: this.contentVersion,
+        })
+      );
+      console.log('Content sent:', newContent);
+    }
+  }, 300);
+
   private handleContentChange(newContent?: string): void {
     if (!newContent || this.isExternalUpdate) {
       return;
@@ -167,20 +222,12 @@ export class CollaborationPlugin implements Plugin {
 
     // Проверяем, изменился ли контент
     if (normalizedCurrentContent !== normalizedLastContent) {
-      console.log('Content changed, sending update');
+      console.log('Content changed, scheduling update');
       this.lastContent = newContent;
       this.contentVersion += 1;
 
-      if (this.ws && this.docId) {
-        this.ws.send(
-          JSON.stringify({
-            type: 'update',
-            docId: this.docId,
-            content: newContent,
-            version: this.contentVersion,
-          })
-        );
-      }
+      // Планируем отправку обновления с задержкой
+      this.debouncedSendUpdate(newContent);
     }
   }
 
@@ -214,7 +261,7 @@ export class CollaborationPlugin implements Plugin {
 
   private startCollaboration(): void {
     const docId = generateToken();
-    window.location.href = `${window.location.origin}${window.location.pathname}?docId=${docId}`;
+    window.location.href = `${window.location.origin}${window.location.pathname}?docId=${docId}}`;
   }
 
   destroy(): void {
