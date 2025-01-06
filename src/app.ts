@@ -29,6 +29,7 @@ import { FontPlugin } from './plugins/FontPlugin';
 import { AlignmentPlugin } from './plugins/AlignmentPlugin';
 import { CollaborationPlugin } from './plugins/CollaborationPlugin';
 import { FormBuilderPlugin } from './plugins/FormBuilderPlugin';
+import { SpellCheckerPlugin } from './plugins/SpellCheckerPlugin';
 
 export {
   HTMLEditor,
@@ -59,4 +60,5 @@ export {
   FontPlugin,
   CollaborationPlugin,
   FormBuilderPlugin,
+  SpellCheckerPlugin,
 };

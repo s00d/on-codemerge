@@ -15,25 +15,35 @@ export class HTMLFormatter {
     let indent = 0;
     const { indentSize } = { ...this.defaultOptions, ...this.options };
 
-    // Split by tags but preserve attributes with > or < symbols
+    // Удаляем все элементы с классом resize-handle
+    html = html.replace(/<[^>]*class="[^"]*\bresize-handle\b[^"]*"[^>]*>/g, '');
+
+    // Удаляем атрибуты contenteditable="true" и class="selected"
+    html = html.replace(/\s*contenteditable="true"\s*/g, ' ');
+    html = html.replace(/\s*class="selected"\s*/g, ' ');
+
+    // Удаляем style="position: relative;" из <th> и <td>
+    html = html.replace(/(<(th|td)[^>]*)\s*style="position:\s*relative;"\s*/g, '$1');
+
+    // Разделяем по тегам, сохраняя атрибуты с символами > или <
     const parts = html.split(/(<[^>]+>)/g).filter(Boolean);
 
     parts.forEach((part) => {
       if (!part.trim()) return;
 
-      // Handle closing tags
+      // Обрабатываем закрывающие теги
       if (part.match(/^<\//)) {
         indent = Math.max(0, indent - 1);
       }
 
-      // Add formatted element with proper indentation
+      // Добавляем отформатированный элемент с правильным отступом
       if (part.startsWith('<')) {
         formatted += '\n' + ' '.repeat(indent * indentSize) + part;
       } else {
         formatted += part;
       }
 
-      // Increase indent for opening tags that aren't self-closing or void elements
+      // Увеличиваем отступ для открывающих тегов, которые не самозакрывающиеся и не void-элементы
       if (part.match(/^<[^/][^>]*[^/]>$/) && !this.isVoidElement(part)) {
         indent = Math.max(0, indent + 1);
       }

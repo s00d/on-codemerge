@@ -468,6 +468,10 @@ export class HTMLEditor {
     return await this.localeManager.setLocale(locale);
   }
 
+  public getLocale(): string {
+    return this.localeManager.getCurrentLocale();
+  }
+
   public destroy(): void {
     this.mutationObserver.disconnect();
 
