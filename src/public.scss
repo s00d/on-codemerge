@@ -1,11 +1,4 @@
-[class*='format-'] {
-  &:not(.format-text-block) {
-    display: inline;
-  }
-}
-
 .format {
-  display: inline;
   &-bold {
     font-weight: bold;
   }

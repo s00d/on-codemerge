@@ -106,8 +106,6 @@ export class StyleManager {
       );
       element.classList.remove('format-text-block');
     }
-
-    element.classList.add('format');
   }
 
   has(element: HTMLElement, styleCommand: string): boolean {

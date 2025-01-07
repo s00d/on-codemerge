@@ -71,8 +71,8 @@ export class DomUtils {
     const currentNode = selection.anchorNode;
     if (!currentNode || !this.container.contains(currentNode)) return [];
 
-    let span: HTMLElement = document.createElement('p');
-    if (currentNode.nodeType === Node.ELEMENT_NODE && (currentNode as Element).tagName === 'p') {
+    let span: HTMLElement = document.createElement('span');
+    if (currentNode.nodeType === Node.ELEMENT_NODE && (currentNode as Element).tagName === 'SPAN') {
       span = currentNode as HTMLElement;
     } else {
       span.textContent = ' \u200B'; // Неразрывный пробел
@@ -100,9 +100,24 @@ export class DomUtils {
 
     if (endOffset === 0 || startOffset === text.length || startOffset === endOffset) return null;
 
-    const element: HTMLElement = document.createElement('p');
+    const element: HTMLElement = document.createElement('span');
     element.textContent = text.substring(startOffset, endOffset);
     this.replaceNodeWithSpan(node, element, startOffset, endOffset);
+
+    try {
+      const selection = window.getSelection();
+      if (selection) {
+        const newRange = document.createRange();
+        const textNode = element.firstChild;
+        if (textNode && textNode.nodeType === Node.TEXT_NODE) {
+          newRange.setStart(textNode, 0);
+          newRange.setEnd(textNode, textNode.textContent?.length || 0);
+          selection.removeAllRanges();
+          selection.addRange(newRange);
+        }
+      }
+    } catch (e) {}
+
     return element;
   }
 
@@ -157,7 +172,36 @@ export class DomUtils {
       const element = node as HTMLElement;
       if (this.isStyledTextNode(element)) {
         removeStyle(element, styleCommand);
+
+        if (!element.getAttribute('style') && element.classList.length === 0 && element.tagName === 'SPAN') {
+          const fragment = document.createDocumentFragment();
+          while (element.firstChild) {
+            fragment.appendChild(element.firstChild);
+          }
+          const parent = element.parentNode;
+          const firstChild = fragment.firstChild;
+          const lastChild = fragment.lastChild;
+
+          // Вставляем фрагмент в DOM
+          parent?.replaceChild(fragment, element);
+
+          // Обновление выделения на содержимое фрагмента
+          try {
+            if (firstChild && lastChild && firstChild.nodeType === Node.TEXT_NODE && lastChild.nodeType === Node.TEXT_NODE) {
+              const selection = window.getSelection();
+              if (selection) {
+                const range = document.createRange();
+                range.setStart(firstChild, 0);
+                range.setEnd(lastChild, lastChild.textContent?.length || 0);
+                selection.removeAllRanges();
+                selection.addRange(range);
+              }
+            }
+          } catch (e) {}
+
+        }
       }
     }
   }
+
 }

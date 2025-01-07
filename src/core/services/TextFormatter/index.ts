@@ -46,14 +46,12 @@ export class TextFormatter {
   setColor(color: string): void {
     this.applyStyleToSelectedNodes((element) => {
       element.style.color = color;
-      element.classList.add('format');
     });
   }
 
   setBackgroundColor(color: string): void {
     this.applyStyleToSelectedNodes((element) => {
       element.style.backgroundColor = color;
-      element.classList.add('format');
     });
   }
 
@@ -62,7 +60,6 @@ export class TextFormatter {
       element.style.fontFamily = fontFamily;
       element.style.fontSize = fontSize;
       element.style.lineHeight = lineHeight;
-      element.classList.add('format');
     });
   }
 
@@ -71,15 +68,14 @@ export class TextFormatter {
       element.style.removeProperty('font-family');
       element.style.removeProperty('font-size');
       element.style.removeProperty('line-height');
-      element.classList.add('format');
     });
   }
 
-  applyBlock(tag: keyof HTMLElementTagNameMap = 'p'): void {
+  applyBlock(tag: keyof HTMLElementTagNameMap = 'span'): void {
     this.applyStyleToSelectedNodes((element) => {
       const newElement = document.createElement(tag);
       newElement.textContent = element.textContent; // Копируем только текст
-      newElement.classList.add('format', 'format-text-block');
+      newElement.classList.add('format-text-block');
 
       if (element.parentNode) {
         element.parentNode.replaceChild(newElement, element);
@@ -89,9 +85,8 @@ export class TextFormatter {
 
   clearBlock(): void {
     this.applyStyleToSelectedNodes((element) => {
-      const newElement = document.createElement('p');
+      const newElement = document.createElement('span');
       newElement.textContent = element.textContent; // Копируем только текст
-      newElement.classList.add('format');
       element.style.removeProperty('font-family');
       element.style.removeProperty('font-size');
       element.style.removeProperty('line-height');
@@ -108,7 +103,6 @@ export class TextFormatter {
     if (!selection) return;
 
     const nodesToStyle = this.domUtils.getSelectedRoot(selection, false);
-    console.log(111, nodesToStyle);
     if (!nodesToStyle) return;
 
     nodesToStyle.forEach((node) => {
@@ -119,7 +113,7 @@ export class TextFormatter {
   }
 
   private wrapTextNodeInSpan(node: Node): HTMLElement {
-    const span = document.createElement('p');
+    const span = document.createElement('span');
     node.parentNode?.replaceChild(span, node);
     span.appendChild(node);
     return span;
