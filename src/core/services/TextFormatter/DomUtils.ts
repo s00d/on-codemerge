@@ -116,7 +116,9 @@ export class DomUtils {
           selection.addRange(newRange);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
 
     return element;
   }
@@ -173,7 +175,11 @@ export class DomUtils {
       if (this.isStyledTextNode(element)) {
         removeStyle(element, styleCommand);
 
-        if (!element.getAttribute('style') && element.classList.length === 0 && element.tagName === 'SPAN') {
+        if (
+          !element.getAttribute('style') &&
+          element.classList.length === 0 &&
+          element.tagName === 'SPAN'
+        ) {
           const fragment = document.createDocumentFragment();
           while (element.firstChild) {
             fragment.appendChild(element.firstChild);
@@ -187,7 +193,12 @@ export class DomUtils {
 
           // Обновление выделения на содержимое фрагмента
           try {
-            if (firstChild && lastChild && firstChild.nodeType === Node.TEXT_NODE && lastChild.nodeType === Node.TEXT_NODE) {
+            if (
+              firstChild &&
+              lastChild &&
+              firstChild.nodeType === Node.TEXT_NODE &&
+              lastChild.nodeType === Node.TEXT_NODE
+            ) {
               const selection = window.getSelection();
               if (selection) {
                 const range = document.createRange();
@@ -197,11 +208,11 @@ export class DomUtils {
                 selection.addRange(range);
               }
             }
-          } catch (e) {}
-
+          } catch (e) {
+            console.error(e);
+          }
         }
       }
     }
   }
-
 }
