@@ -24,7 +24,10 @@ export class FileUploadPlugin implements Plugin {
   }
 
   initialize(editor: HTMLEditor): void {
-    this.menu = new FileUploadMenu(editor, this.uploader, this.config);
+    this.menu = new FileUploadMenu(editor, this.uploader, this.config, (file) => {
+      this.insertFileLink(file);
+    });
+
     this.editor = editor;
     this.addToolbarButton();
     this.setupEventListeners();
@@ -68,9 +71,7 @@ export class FileUploadPlugin implements Plugin {
   };
 
   private showUploadMenu(): void {
-    this.menu?.show((file) => {
-      this.insertFileLink(file);
-    });
+    this.menu?.show();
   }
 
   private insertFileLink(file: { id: string; name: string; size: number }): void {

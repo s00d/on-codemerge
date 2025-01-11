@@ -11,7 +11,6 @@ export class FileUploadMenu {
   private uploader: FileUploader;
   private config: Partial<UploadConfig>;
   private onUpload: ((file: { id: string; name: string; size: number }) => void) | null = null;
-  private dragCounter = 0;
 
   // Ссылки на элементы
   private uploadArea: HTMLElement | null = null;
@@ -20,7 +19,8 @@ export class FileUploadMenu {
   private progressFill: HTMLElement | null = null;
   private filename: HTMLElement | null = null;
 
-  constructor(editor: HTMLEditor, uploader: FileUploader, config: Partial<UploadConfig>) {
+  constructor(editor: HTMLEditor, uploader: FileUploader, config: Partial<UploadConfig>, onUpload: (file: { id: string; name: string; size: number }) => void) {
+    this.onUpload = onUpload;
     this.editor = editor;
     this.uploader = uploader;
     this.config = config;
@@ -112,33 +112,27 @@ export class FileUploadMenu {
   private setupEventListeners(uploadArea: HTMLElement, fileInput: HTMLInputElement): void {
     const browseButton = uploadArea.querySelector('.browse-button')!;
 
-    // Handle drag and drop
-    uploadArea.addEventListener('dragenter', (e) => {
-      e.preventDefault();
-      this.dragCounter++;
-      uploadArea.classList.add('border-blue-500', 'bg-blue-50');
-    });
 
-    uploadArea.addEventListener('dragleave', (e) => {
-      e.preventDefault();
-      this.dragCounter--;
-      if (this.dragCounter === 0) {
-        uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
-      }
-    });
+    this.editor.on('file-drop', async (e: { type: string; name: string; content: string | ArrayBuffer }) => {
+      if (!e.type.startsWith('image/')) {
+        this.editor?.ensureEditorFocus();
 
-    uploadArea.addEventListener('dragover', (e) => {
-      e.preventDefault();
-    });
-
-    uploadArea.addEventListener('drop', async (e) => {
-      e.preventDefault();
-      this.dragCounter = 0;
-      uploadArea.classList.remove('border-blue-500', 'bg-blue-50');
-
-      const file = (e as DragEvent).dataTransfer?.files[0];
-      if (file) {
-        await this.handleFileUpload(file);
+        // Если content является файлом (например, объект File)
+        if (e.content instanceof File) {
+          await this.handleFileUpload(e.content);
+        }
+        // Если content является ArrayBuffer (например, бинарные данные)
+        else if (e.content instanceof ArrayBuffer) {
+          // Создаем файл из ArrayBuffer
+          const file = new File([e.content], e.name, { type: e.type });
+          await this.handleFileUpload(file);
+        }
+        // Если content является строкой (например, текстовые данные)
+        else if (typeof e.content === 'string') {
+          // Создаем файл из строки
+          const file = new File([e.content], e.name, { type: 'text/plain' });
+          await this.handleFileUpload(file);
+        }
       }
     });
 
@@ -158,68 +152,69 @@ export class FileUploadMenu {
   }
 
   private async handleFileUpload(file: File): Promise<void> {
-    if (file.size > 10 * 1024 * 1024) {
-      // 10MB limit
-      alert(
-        this.editor.t('File size exceeds 10MB limit', {
-          max: this.uploader.formatFileSize(this.config.maxFileSize ?? 10 * 1024 * 1024),
-        })
-      );
-      return;
-    }
-
-    if (!this.uploadMessage || !this.uploadProgress || !this.progressFill || !this.filename) {
-      console.error('UI elements are not initialized');
-      return;
-    }
-
-    // Show progress UI
-    this.uploadMessage.classList.add('hidden');
-    this.uploadProgress.classList.remove('hidden');
-    this.filename.textContent = file.name;
-
-    // Simulate progress
-    let progress = 0;
-    const interval = setInterval(() => {
-      progress = Math.min(95, progress + 5);
-      this.progressFill!.style.width = `${progress}%`;
-    }, 50);
-
-    try {
-      const uploadedFile = await this.uploader.uploadFile(file);
-
-      // Complete progress
-      clearInterval(interval);
-      this.progressFill!.style.width = '100%';
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      if (this.onUpload) {
-        this.onUpload(uploadedFile);
+    this.popup.show()
+    setTimeout(async () => {
+      if (file.size > 10 * 1024 * 1024) {
+        // 10MB limit
+        alert(
+          this.editor.t('File size exceeds 10MB limit', {
+            max: this.uploader.formatFileSize(this.config.maxFileSize ?? 10 * 1024 * 1024),
+          })
+        );
+        return;
       }
 
-      this.popup.hide();
+      if (!this.uploadMessage || !this.uploadProgress || !this.progressFill || !this.filename) {
+        console.error('UI elements are not initialized');
+        return;
+      }
 
-      // Reset UI after a short delay
-      setTimeout(() => {
+      // Show progress UI
+      this.uploadMessage.classList.add('hidden');
+      this.uploadProgress.classList.remove('hidden');
+      this.filename.textContent = file.name;
+
+      // Simulate progress
+      let progress = 0;
+      const interval = setInterval(() => {
+        progress = Math.min(95, progress + 5);
+        this.progressFill!.style.width = `${progress}%`;
+      }, 50);
+
+      try {
+        const uploadedFile = await this.uploader.uploadFile(file);
+
+        // Complete progress
+        clearInterval(interval);
+        this.progressFill!.style.width = '100%';
+
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+        if (this.onUpload) {
+          this.onUpload(uploadedFile);
+        }
+
+        this.popup.hide();
+
+        // Reset UI after a short delay
+        setTimeout(() => {
+          this.uploadMessage!.classList.remove('hidden');
+          this.uploadProgress!.classList.add('hidden');
+          this.progressFill!.style.width = '0%';
+        }, 300);
+      } catch (error) {
+        clearInterval(interval);
+        alert(this.editor.t('Upload failed. Please try again.'));
+
+        // Reset UI
         this.uploadMessage!.classList.remove('hidden');
         this.uploadProgress!.classList.add('hidden');
         this.progressFill!.style.width = '0%';
-      }, 300);
-    } catch (error) {
-      clearInterval(interval);
-      alert(this.editor.t('Upload failed. Please try again.'));
-
-      // Reset UI
-      this.uploadMessage!.classList.remove('hidden');
-      this.uploadProgress!.classList.add('hidden');
-      this.progressFill!.style.width = '0%';
-    }
+      }
+    }, 100)
   }
 
-  public show(onUpload: (file: { id: string; name: string; size: number }) => void): void {
-    this.onUpload = onUpload;
-
+  public show(): void {
     // Reset UI state
     if (this.uploadMessage && this.uploadProgress && this.progressFill) {
       this.uploadMessage.classList.remove('hidden');
@@ -236,10 +231,9 @@ export class FileUploadMenu {
 
     // Очищаем обработчики событий
     if (this.uploadArea) {
-      this.uploadArea.removeEventListener('dragenter', () => {});
-      this.uploadArea.removeEventListener('dragleave', () => {});
-      this.uploadArea.removeEventListener('dragover', () => {});
-      this.uploadArea.removeEventListener('drop', () => {});
+      this.editor.off('drag-enter');
+      this.editor.off('drag-leave');
+      this.editor.off('drop');
     }
 
     // Очищаем ссылки на элементы
