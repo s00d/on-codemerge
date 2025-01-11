@@ -4,6 +4,7 @@ import { LocaleManager } from './services/LocaleManager';
 import { TextFormatter } from './services/TextFormatter';
 
 type Callback = (...data: any[]) => void;
+type ContentCallback = (value: string) => void;
 
 export class HTMLEditor {
   private innerContainer: HTMLElement;
@@ -12,7 +13,7 @@ export class HTMLEditor {
   private eventHandlers: Map<string, Callback[]>;
   private formatter: HTMLFormatter;
   private localeManager: LocaleManager;
-  private contentChangeCallbacks: Callback[] = [];
+  private contentChangeCallbacks: ContentCallback[] = [];
   private mutationObserver: MutationObserver;
   private textFormatter: TextFormatter | null = null;
 
@@ -401,7 +402,7 @@ export class HTMLEditor {
    * Подписка на изменения контента
    * @param callback Функция, которая будет вызвана при изменении контента
    */
-  public subscribeToContentChange(callback: Callback): () => void {
+  public subscribeToContentChange(callback: ContentCallback): () => void {
     this.contentChangeCallbacks.push(callback);
 
     // Возвращаем функцию для отписки
@@ -431,7 +432,18 @@ export class HTMLEditor {
   }
 
   public getHtml(): string {
-    return this.formatter.format(this.getContainer().innerHTML);
+    // Получаем контейнер
+    const container = this.getContainer();
+    if (!container) return '';
+
+    // Клонируем контейнер, чтобы не изменять оригинальный DOM
+    const clonedContainer = container.cloneNode(true) as HTMLElement;
+
+    // Получаем HTML с замененными canvas
+    const htmlContent = clonedContainer.innerHTML;
+
+    // Форматируем HTML с помощью formatter (если он есть)
+    return this.formatter.format(htmlContent);
   }
 
   private waitForDOMStabilization(container: HTMLElement, timeout = 100): Promise<void> {
