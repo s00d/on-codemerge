@@ -55,6 +55,7 @@ import {
   FormBuilderPlugin,
   SpellCheckerPlugin,
   BlockStylePlugin,
+  MathPlugin,
 } from '../../src/app';
 
 export default {
@@ -113,6 +114,7 @@ export default {
         FormBuilderPlugin,
         SpellCheckerPlugin,
         BlockStylePlugin,
+        MathPlugin,
       };
 
       // Если activePlugins пустой, регистрируем все плагины
