@@ -1,7 +1,4 @@
-interface HistoryState {
-  content: string;
-  timestamp: number;
-}
+import { HistoryState } from "../types";
 
 export class HistoryManager {
   private states: HistoryState[] = [{ content: '', timestamp: 0 }];

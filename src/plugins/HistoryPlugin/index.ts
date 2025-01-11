@@ -8,6 +8,8 @@ import { HistoryViewerModal } from './components/HistoryViewerModal';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { historyIcon, undoIcon, redoIcon } from '../../icons';
 
+type Unsubscribe = () => void
+
 export class HistoryPlugin implements Plugin {
   name = 'history';
   private editor: HTMLEditor | null = null;
@@ -17,6 +19,8 @@ export class HistoryPlugin implements Plugin {
   private undoButton: HTMLElement | null = null;
   private redoButton: HTMLElement | null = null;
   private historyButton: HTMLElement | null = null;
+  private unsubscribe: Unsubscribe | null = null;
+  private isRestoringState: boolean = false; // Флаг для игнорирования изменений
 
   constructor() {
     this.historyManager = new HistoryManager();
@@ -26,7 +30,8 @@ export class HistoryPlugin implements Plugin {
     this.historyViewer = new HistoryViewerModal(editor);
     this.editor = editor;
     this.addToolbarButtons();
-    this.startObserving();
+
+    this.unsubscribe = this.editor.subscribeToContentChange(this.contentEvent.bind(this));
 
     this.editor.on('history', () => {
       this.showHistory();
@@ -37,6 +42,12 @@ export class HistoryPlugin implements Plugin {
     this.editor.on('redo', () => {
       this.redo();
     });
+  }
+
+  private contentEvent(newContent: string) {
+    if (this.isRestoringState) return; // Игнорируем изменения, если восстанавливаем состояние
+    console.log(1111, this.isRestoringState)
+    this.historyManager.addState(newContent);
   }
 
   private addToolbarButtons(): void {
@@ -66,7 +77,7 @@ export class HistoryPlugin implements Plugin {
     toolbar.appendChild(this.historyButton);
   }
 
-  private undo(): void {
+  private async undo(): Promise<void> {
     if (!this.editor) return;
 
     const container = this.editor.getContainer();
@@ -74,15 +85,21 @@ export class HistoryPlugin implements Plugin {
 
     const previousState = this.historyManager.undo();
     if (previousState !== null) {
+      this.isRestoringState = true; // Включаем флаг
+
       container.innerHTML = previousState;
 
       if (cursorPosition) {
         this.editor.restoreCursorPosition(cursorPosition);
       }
+
+      // Откладываем сброс флага до следующего цикла событий
+      await Promise.resolve();
+      this.isRestoringState = false; // Выключаем флаг
     }
   }
 
-  private redo(): void {
+  private async redo(): Promise<void> {
     if (!this.editor) return;
 
     const container = this.editor.getContainer();
@@ -90,11 +107,17 @@ export class HistoryPlugin implements Plugin {
 
     const nextState = this.historyManager.redo();
     if (nextState) {
+      this.isRestoringState = true; // Включаем флаг
+
       container.innerHTML = nextState;
 
       if (cursorPosition) {
         this.editor.restoreCursorPosition(cursorPosition);
       }
+
+      // Откладываем сброс флага до следующего цикла событий
+      await Promise.resolve();
+      this.isRestoringState = false; // Выключаем флаг
     }
   }
 
@@ -104,29 +127,15 @@ export class HistoryPlugin implements Plugin {
     this.historyViewer?.show(
       this.historyManager.getStates(),
       this.historyManager.getCurrentIndex(),
-      (content: string) => {
+      async (content: string) => {
         if (this.editor) {
+          this.isRestoringState = true; // Включаем флаг
           this.editor.getContainer().innerHTML = content;
+          await Promise.resolve();
+          this.isRestoringState = false; // Выключаем флаг
         }
       }
     );
-  }
-
-  private startObserving(): void {
-    if (!this.editor) return;
-
-    const container = this.editor.getContainer();
-    if (!container) return;
-
-    this.observer = new MutationObserver((mutations) => {
-      mutations.forEach(() => {
-        this.historyManager.addState(container.innerHTML);
-      });
-    });
-
-    // Observer configuration: Listen for child changes (insertions, deletions, or text changes)
-    const config = { childList: true, subtree: true, characterData: true };
-    this.observer.observe(container, config);
   }
 
   public destroy(): void {
@@ -149,6 +158,8 @@ export class HistoryPlugin implements Plugin {
       this.historyViewer.destroy();
       this.historyViewer = null;
     }
+
+    if (this.unsubscribe) this.unsubscribe();
 
     this.editor?.off('history');
     this.editor?.off('undo');
