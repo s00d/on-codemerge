@@ -1,7 +1,7 @@
 {
   "name": "on-codemerge",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
-  "version": "1.0.20",
+  "version": "1.0.21",
   "type": "module",
   "author": "Pavel Kuzmin",
   "license": "MIT",
@@ -89,6 +89,7 @@
     "./plugins/FormBuilderPlugin/public.css": "./dist/plugins/FormBuilderPlugin/public.css",
     "./plugins/SpellCheckerPlugin/public.css": "./dist/plugins/SpellCheckerPlugin/public.css",
     "./plugins/BlockStylePlugin/public.css": "./dist/plugins/BlockStylePlugin/public.css",
+    "./plugins/MathPlugin/public.css": "./dist/plugins/MathPlugin/public.css",
     "./plugins/BlockPlugin/style.css": "./dist/plugins/BlockPlugin/style.css",
     "./plugins/ChartsPlugin/style.css": "./dist/plugins/ChartsPlugin/style.css",
     "./plugins/CodeBlockPlugin/style.css": "./dist/plugins/CodeBlockPlugin/style.css",
@@ -116,14 +117,14 @@
     "./plugins/AlignmentPlugin/style.css": "./dist/plugins/AlignmentPlugin/style.css",
     "./plugins/FormBuilderPlugin/style.css": "./dist/plugins/FormBuilderPlugin/style.css",
     "./plugins/SpellCheckerPlugin/style.css": "./dist/plugins/SpellCheckerPlugin/style.css",
-    "./plugins/BlockStylePlugin/style.css": "./dist/plugins/BlockStylePlugin/style.css"
+    "./plugins/BlockStylePlugin/style.css": "./dist/plugins/BlockStylePlugin/style.css",
+    "./plugins/MathPlugin/style.css": "./dist/plugins/MathPlugin/style.css"
   },
   "devDependencies": {
     "@eslint/js": "^9.17.0",
     "@sveltejs/vite-plugin-svelte": "^5.0.3",
     "@types/jest": "^29.5.14",
     "@types/node": "^22.10.2",
-    "@types/typo-js": "^1.2.2",
     "@typescript-eslint/eslint-plugin": "^8.18.2",
     "@typescript-eslint/parser": "^8.18.2",
     "autoprefixer": "^10.4.20",
@@ -152,6 +153,7 @@
   },
   "packageManager": "pnpm@9.14.2",
   "dependencies": {
+    "mathjax-full": "^3.2.2",
     "spellchecker-wasm": "^0.3.3"
   }
 }

@@ -47,6 +47,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     // Убедитесь, что WASM включен в оптимизацию зависимостей
-    exclude: ['spellchecker-wasm'], // Исключите WASM-библиотеку из оптимизации
+    exclude: ['spellchecker-wasm', 'mathjax-full'], // Исключите WASM-библиотеку из оптимизации
   },
 });
