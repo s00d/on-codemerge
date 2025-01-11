@@ -32,7 +32,7 @@ export class ChartRenderer {
     type: ChartType,
     data: ChartPoint[] | ChartSeries[],
     options: ChartOptions
-  ): HTMLCanvasElement {
+  ): HTMLImageElement {
     const canvas = createCanvas();
     const dpr = window.devicePixelRatio || 1;
 
@@ -42,7 +42,9 @@ export class ChartRenderer {
     canvas.style.height = `${options.height}px`;
 
     const ctx = canvas.getContext('2d');
-    if (!ctx) return canvas;
+    if (!ctx) {
+      throw new Error('Failed to get 2D context');
+    }
 
     // Scale context for retina displays
     ctx.scale(dpr, dpr);
@@ -64,6 +66,13 @@ export class ChartRenderer {
       renderer.render(ctx, chartData, options);
     }
 
-    return canvas;
+    // Convert canvas to Data URL and create an image
+    const img = new Image();
+    img.className = 'svg-chart'
+    img.src = canvas.toDataURL('image/png');
+    img.width = options.width;
+    img.height = options.height;
+
+    return img;
   }
 }
