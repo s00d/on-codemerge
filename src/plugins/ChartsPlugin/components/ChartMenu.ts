@@ -210,7 +210,7 @@ export class ChartMenu {
     this.popup.show();
   }
 
-  public edit(chartElement: HTMLElement): void {
+  public edit(chartElement: HTMLElement, hidden = false): void {
     this.editingChart = chartElement;
 
     // Get current chart data
@@ -236,7 +236,7 @@ export class ChartMenu {
           this.updatePreview(data);
         }, 100);
 
-        this.popup.show();
+        if(!hidden) this.popup.show();
       } catch (e) {
         console.error('Failed to parse chart data:', e);
       }

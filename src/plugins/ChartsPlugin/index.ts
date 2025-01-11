@@ -9,6 +9,7 @@ import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { CHART_TYPE_CONFIGS } from './constants/chartTypes';
 import { Resizer } from '../../utils/Resizer.ts';
 import { createContainer, createLineBreak } from '../../utils/helpers.ts';
+import type {ChartSeries, ChartType} from "./types";
 
 export class ChartsPlugin implements Plugin {
   name = 'charts';
@@ -61,9 +62,15 @@ export class ChartsPlugin implements Plugin {
         this.currentResizer = new Resizer(chart, {
           handleSize: 10,
           handleColor: 'blue',
-          onResizeStart: () => console.log('Resize started'),
-          onResize: (width, height) => console.log(`Resized to ${width}x${height}`),
-          onResizeEnd: () => console.log('Resize ended'),
+          onResizeStart: () => this.editor?.disableObserver(),
+          onResize: (width, height) => {
+            console.log(`Resized to ${width}x${height}`);
+            const type = chart.getAttribute('data-chart-type') as ChartType;
+            const dataStr = chart.getAttribute('data-chart-data') ?? '';
+            const data = JSON.parse(dataStr) as ChartSeries[];
+            this.menu?.redrawChart(chart, type, data, {width, height});
+          },
+          onResizeEnd: () => this.editor?.enableObserver(),
         });
       }
     });

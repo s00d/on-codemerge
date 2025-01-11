@@ -16,6 +16,7 @@ export class HTMLEditor {
   private contentChangeCallbacks: ContentCallback[] = [];
   private mutationObserver: MutationObserver;
   private textFormatter: TextFormatter | null = null;
+  private _disableObserver = false;
 
   constructor(innerContainer: HTMLElement) {
     // Создаем новый внутренний контейнер
@@ -390,10 +391,19 @@ export class HTMLEditor {
     }
   }
 
+  disableObserver() {
+    this._disableObserver = true;
+  }
+
+  enableObserver() {
+    this._disableObserver = false;
+  }
+
   /**
    * Обработчик изменений контента
    */
   private handleContentChange(): void {
+    if (this._disableObserver) return;
     const content = this.getHtml();
     this.contentChangeCallbacks.forEach((callback) => callback(content));
   }

@@ -129,7 +129,7 @@ export class MathPlugin implements Plugin {
         this.currentResizer = new Resizer(math, {
           handleSize: 10,
           handleColor: 'blue',
-          onResizeStart: () => console.log('Resize started'),
+          onResizeStart: () => this.editor?.disableObserver(),
           onResize: (width, height) => {
             console.log(`Resized to ${width}x${height}`);
             if (math instanceof HTMLElement) {
@@ -139,7 +139,7 @@ export class MathPlugin implements Plugin {
               });
             }
           },
-          onResizeEnd: () => console.log('Resize ended'),
+          onResizeEnd: () => this.editor?.enableObserver(),
         });
       }
     });

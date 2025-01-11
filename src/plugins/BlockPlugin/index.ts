@@ -71,9 +71,9 @@ export class BlockPlugin implements Plugin {
       this.currentResizer = new Resizer(block, {
         handleSize: 10,
         handleColor: 'blue',
-        onResizeStart: () => console.log('Resize started'),
+        onResizeStart: () => this.editor?.disableObserver(),
         onResize: (width, height) => console.log(`Resized to ${width}x${height}`),
-        onResizeEnd: () => console.log('Resize ended'),
+        onResizeEnd: () => this.editor?.enableObserver(),
       });
 
       // Фокусируемся на содержимом блока
