@@ -10,6 +10,9 @@ import { templatesIcon } from '../../icons';
 
 export class TemplatesPlugin implements Plugin {
   name = 'templates';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+T', description: 'Insert template', command: 'templates', icon: '📄' },
+  ];
   private editor: HTMLEditor | null = null;
   private menu: TemplatesMenu | null = null;
   private manager: TemplateManager;

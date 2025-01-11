@@ -19,6 +19,9 @@ interface LinkData {
 
 export class LinkPlugin implements Plugin {
   name = 'link';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+K', description: 'Insert link', command: 'link', icon: '🔗' }
+  ];
   private editor: HTMLEditor | null = null;
   private menu: LinkMenu | null = null;
   private contextMenu: ContextMenu | null = null;

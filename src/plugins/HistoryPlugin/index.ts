@@ -12,6 +12,11 @@ type Unsubscribe = () => void;
 
 export class HistoryPlugin implements Plugin {
   name = 'history';
+  hotkeys = [
+    { keys: 'Ctrl+Z', description: 'Undo', command: 'undo', icon: '↩️' },
+    { keys: 'Ctrl+Y', keysMac: 'Ctrl+Shift+Z', description: 'Redo', command: 'redo', icon: '↪️' },
+    { keys: 'Ctrl+Alt+H', description: 'View history', command: 'history', icon: '🕒' },
+  ];
   private editor: HTMLEditor | null = null;
   private historyManager: HistoryManager;
   private historyViewer: HistoryViewerModal | null = null;
@@ -46,7 +51,6 @@ export class HistoryPlugin implements Plugin {
 
   private contentEvent(newContent: string) {
     if (this.isRestoringState) return; // Игнорируем изменения, если восстанавливаем состояние
-    console.log(1111, this.isRestoringState);
     this.historyManager.addState(newContent);
   }
 

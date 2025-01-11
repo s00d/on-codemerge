@@ -12,6 +12,14 @@ import { ResizableElement } from '../../utils/ResizableElement';
 
 export class YouTubeVideoPlugin implements Plugin {
   name = 'youtube-video';
+  hotkeys = [
+    {
+      keys: 'Ctrl+Alt+Y',
+      description: 'Insert YouTube video',
+      command: 'youtube-video',
+      icon: '▶️',
+    },
+  ];
   private editor: HTMLEditor | null = null;
   private menu: YouTubeVideoMenu | null = null;
   private contextMenu: YouTubeVideoContextMenu | null = null;

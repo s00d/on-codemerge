@@ -11,6 +11,9 @@ import { mathIcon } from '../../icons';
 
 export class MathPlugin implements Plugin {
   name = 'math';
+  hotkeys = [
+    { keys: 'Ctrl+Shift+M', description: 'Insert math formula', command: 'math-editor', icon: '𝛢'}
+  ];
   private editor: HTMLEditor | null = null;
   private menu: MathMenu | null = null;
   private contextMenu: MathContextMenu | null = null;
@@ -52,6 +55,11 @@ export class MathPlugin implements Plugin {
 
     this.editor.on('drag-drop', ({ e }: { e: DragEvent }) => {
       this.handleDrop(e);
+    });
+
+    this.editor.on('math', () => {
+      this.editor?.getSelector()?.saveSelection();
+      this.insertMath();
     });
   }
 

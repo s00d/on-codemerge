@@ -9,6 +9,10 @@ import { textColorIcon, backgroundColorIcon } from '../../icons';
 
 export class ColorPlugin implements Plugin {
   name = 'color';
+  hotkeys = [
+    { keys: 'Ctrl+Shift+H', description: 'Highlight text', command: 'hilite-color', icon: '🖍️' },
+    { keys: 'Ctrl+Shift+F', description: 'Change text color', command: 'fore-color', icon: '🎨' }
+  ];
   private editor: HTMLEditor | null = null;
   private textColorPicker: ColorPicker | null = null;
   private bgColorPicker: ColorPicker | null = null;

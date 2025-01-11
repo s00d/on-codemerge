@@ -12,6 +12,9 @@ import { createContainer, createSpan } from '../../utils/helpers.ts';
 
 export class CommentsPlugin implements Plugin {
   name = 'comments';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+M', description: 'Insert comment', command: 'comment', icon: '💬' },
+  ];
   private editor: HTMLEditor | null = null;
   private manager: CommentManager;
   private menu: CommentMenu | null = null;

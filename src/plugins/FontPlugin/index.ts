@@ -7,6 +7,14 @@ import { PopupManager } from '../../core/ui/PopupManager';
 
 export class FontPlugin implements Plugin {
   name = 'font';
+  hotkeys = [
+    {
+      keys: 'Ctrl+Shift+G',
+      description: 'Change font style',
+      command: 'font-style',
+      icon: '🔤'
+    }
+  ];
   private editor: HTMLEditor | null = null;
   private toolbarButtons: Map<string, HTMLElement> = new Map();
   private fontButtons: Map<string, HTMLElement> = new Map();
@@ -72,6 +80,10 @@ export class FontPlugin implements Plugin {
     });
     this.addToolbarButtons();
     this.editor.on('selectionchange', () => this.handleSelectionChange());
+
+    this.editor.on('font', () => {
+      this.fontPopup?.show();
+    });
   }
 
   private addToolbarButtons(): void {

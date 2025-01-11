@@ -18,6 +18,9 @@ import {
 
 export class CodeBlockPlugin implements Plugin {
   name = 'code-block';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+C', description: 'Insert code block', command: 'code-block', icon: '</>' },
+  ];
   private editor: HTMLEditor | null = null;
   private modal: CodeBlockModal | null = null;
   private contextMenu: CodeBlockContextMenu | null = null;

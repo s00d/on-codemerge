@@ -12,6 +12,9 @@ const dictionaries = import.meta.glob('./dictionaries/**/*', {
 
 export class SpellCheckerPlugin implements Plugin {
   name = 'spellchecker';
+  hotkeys = [
+    { keys: 'Ctrl+Shift+L', description: 'Run spell checker', command: 'spellchecker', icon: '🔍✅' }
+  ];
   private editor: HTMLEditor | null = null;
   private toolbarButton: HTMLElement | null = null;
   private isSpellCheckEnabled: boolean = false;
@@ -25,6 +28,13 @@ export class SpellCheckerPlugin implements Plugin {
     this.editor = editor;
     this.addToolbarButton();
     this.enableSpellCheck(this.isSpellCheckEnabled);
+
+    this.editor.on('spellchecker', async () => {
+      this.isSpellCheckEnabled = !this.isSpellCheckEnabled;
+      if (this.isSpellCheckEnabled) await this.loadDictionary(this.editor?.getLocale() ?? 'en');
+      this.enableSpellCheck(this.isSpellCheckEnabled);
+      this.toolbarButton?.classList.toggle('active', this.isSpellCheckEnabled);
+    });
   }
 
   private async loadDictionary(locale: string): Promise<void> {

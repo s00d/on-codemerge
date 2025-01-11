@@ -9,6 +9,9 @@ import { htmlIcon } from '../../icons';
 
 export class HTMLViewerPlugin implements Plugin {
   name = 'html-viewer';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+W', description: 'View HTML', command: 'html-viewer', icon: '🖥️' },
+  ];
   private editor: HTMLEditor | null = null;
   private modal: HTMLViewerModal | null = null;
   private toolbarButton: HTMLElement | null = null;

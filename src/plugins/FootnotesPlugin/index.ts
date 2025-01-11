@@ -19,6 +19,9 @@ import {
 
 export class FootnotesPlugin implements Plugin {
   name = 'footnotes';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+N', description: 'Insert footnote', command: 'footnotes', icon: '👣' },
+  ];
   private editor: HTMLEditor | null = null;
   private manager: FootnoteManager;
   private menu: FootnoteMenu | null = null;

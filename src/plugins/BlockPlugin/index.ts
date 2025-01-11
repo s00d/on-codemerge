@@ -11,6 +11,9 @@ import { Resizer } from '../../utils/Resizer';
 
 export class BlockPlugin implements Plugin {
   name = 'block';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+B', description: 'Insert block', command: 'block', icon: '🧱' },
+  ];
   private editor: HTMLEditor | null = null;
   private contextMenu: BlockContextMenu | null = null;
   private activeBlock: HTMLElement | null = null;

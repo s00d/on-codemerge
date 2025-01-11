@@ -9,6 +9,9 @@ import { exportIcon } from '../../icons';
 
 export class ExportPlugin implements Plugin {
   name = 'export';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+E', description: 'Export document', command: 'export', icon: '📤' }
+  ];
   private editor: HTMLEditor | null = null;
   private menu: ExportMenu | null = null;
   private toolbarButton: HTMLElement | null = null;

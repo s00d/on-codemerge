@@ -7,6 +7,7 @@ import { createContainer } from '../../utils/helpers.ts';
 
 export class ToolbarPlugin implements Plugin {
   name = 'toolbar';
+
   private toolbar: HTMLElement | null = null;
 
   initialize(_editor: HTMLEditor): void {

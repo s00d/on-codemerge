@@ -12,6 +12,9 @@ import { videoIcon } from '../../icons';
 
 export class VideoPlugin implements Plugin {
   name = 'video';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+V', description: 'Insert video', command: 'video', icon: '🎥' },
+  ];
   private editor: HTMLEditor | null = null;
   private uploader: VideoUploader;
   private contextMenu: VideoContextMenu | null = null;

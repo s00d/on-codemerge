@@ -12,6 +12,9 @@ import { createLink } from '../../utils/helpers.ts';
 
 export class FileUploadPlugin implements Plugin {
   name = 'file-upload';
+  hotkeys = [
+    { keys: 'Ctrl+Alt+U', description: 'Upload file', command: 'file-upload', icon: '📎' },
+  ];
   private editor: HTMLEditor | null = null;
   private uploader: FileUploader;
   private menu: FileUploadMenu | null = null;

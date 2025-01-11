@@ -6,7 +6,6 @@ import type { HTMLEditor } from '../../core/HTMLEditor';
 import { ShortcutManager } from './services/ShortcutManager';
 import { ShortcutsMenu } from './components/ShortcutsMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { SHORTCUTS } from './constants';
 import { shortcutsIcon } from '../../icons';
 
 export class ShortcutsPlugin implements Plugin {
@@ -24,7 +23,11 @@ export class ShortcutsPlugin implements Plugin {
     this.menu = new ShortcutsMenu(editor);
     this.editor = editor;
     this.addToolbarButton();
-    this.setupShortcuts();
+
+    setTimeout(() => {
+      this.setupShortcuts();
+    }, 1000)
+
   }
 
   private addToolbarButton(): void {
@@ -41,8 +44,13 @@ export class ShortcutsPlugin implements Plugin {
   }
 
   private setupShortcuts(): void {
+
+    const hotkeysList = this.editor?.getHotkeys()
+
+    if (!hotkeysList) return;
+
     // Register default shortcuts
-    Object.entries(SHORTCUTS).map(([_category, shortcuts]) => {
+    Object.entries(hotkeysList).map(([_category, shortcuts]) => {
       shortcuts.map((shortcut) => {
         this.shortcutManager.register(shortcut.keys, () =>
           this.editor?.triggerEvent(shortcut.command)

@@ -21,6 +21,9 @@ function generateToken(length: number = 8): string {
 
 export class CollaborationPlugin implements Plugin {
   name = 'collaboration';
+  hotkeys = [
+    { keys: 'Ctrl+Shift+C', description: 'Enable collaboration mode',command: 'collaboration',icon: '👥' }
+  ];
   private editor: HTMLEditor | null = null;
   private ws: WebSocket | null = null;
   private docId: string | null = null;
@@ -71,6 +74,10 @@ export class CollaborationPlugin implements Plugin {
     }
 
     this.addToolbarButton();
+
+    this.editor.on('collaboration', () => {
+      this.popup?.show();
+    });
   }
 
   private addToolbarButton(): void {
