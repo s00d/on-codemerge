@@ -31,6 +31,7 @@ import { CollaborationPlugin } from './plugins/CollaborationPlugin';
 import { FormBuilderPlugin } from './plugins/FormBuilderPlugin';
 import { SpellCheckerPlugin } from './plugins/SpellCheckerPlugin';
 import { BlockStylePlugin } from './plugins/BlockStylePlugin';
+import { MathPlugin } from './plugins/MathPlugin';
 
 export {
   HTMLEditor,
@@ -63,4 +64,5 @@ export {
   FormBuilderPlugin,
   SpellCheckerPlugin,
   BlockStylePlugin,
+  MathPlugin,
 };

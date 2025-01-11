@@ -4,14 +4,13 @@
 
 .html-editor {
   @apply border border-gray-300 p-4 min-h-[300px] focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent;
+}
 
-  .drag-overlay {
-    @apply absolute top-0 left-0 w-full h-full;
-    @apply border-2 border-dashed border-blue-500;
-    @apply bg-blue-100 bg-opacity-10;
-    @apply z-[110] pointer-events-none;
-    @apply block;
-  }
+.drag-overlay {
+  @apply border-2 border-dashed border-blue-500;
+  @apply bg-blue-100 bg-opacity-10;
+  @apply z-[110] pointer-events-none;
+  @apply block;
 }
 
 .toolbar-button {

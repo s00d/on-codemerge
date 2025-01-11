@@ -30,6 +30,7 @@ import {
   SpellCheckerPlugin,
   BlockStylePlugin,
 } from './app';
+import {MathPlugin} from "./plugins/MathPlugin";
 
 document.addEventListener('DOMContentLoaded', async () => {
   const editorElement = document.getElementById('editor');
@@ -70,6 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     editor.use(new FormBuilderPlugin());
     editor.use(new SpellCheckerPlugin());
     editor.use(new BlockStylePlugin());
+    editor.use(new MathPlugin());
     editor.use(
       new CollaborationPlugin({
         serverUrl: 'ws://localhost:8080',

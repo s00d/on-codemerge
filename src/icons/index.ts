@@ -78,6 +78,7 @@ import formIcon from './form.svg?raw';
 import pdfIcon from './pdf.svg?raw';
 import spellCheckIcon from './spell-check.svg?raw';
 import styleIcon from './style.svg?raw';
+import mathIcon from './math.svg?raw';
 
 export {
   alignCenterIcon,
@@ -160,4 +161,5 @@ export {
   pdfIcon,
   spellCheckIcon,
   styleIcon,
+  mathIcon,
 };
