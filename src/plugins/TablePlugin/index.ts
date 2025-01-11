@@ -5,7 +5,6 @@ import type { Plugin } from '../../core/Plugin';
 import type { HTMLEditor } from '../../core/HTMLEditor';
 import { TablePopup } from './components/TablePopup';
 import { TableContextMenu } from './components/TableContextMenu';
-import { TableSelection } from './services/TableSelection';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { tableIcon } from '../../icons';
 import { InsertTableCommand } from './commands/InsertTableCommand.ts';
@@ -16,12 +15,9 @@ export class TablePlugin implements Plugin {
   private editor: HTMLEditor | null = null;
   private popup: TablePopup | null = null;
   private contextMenu: TableContextMenu | null = null;
-  private selection: TableSelection;
   private currentResizer: Resizer | null = null;
 
-  constructor() {
-    this.selection = new TableSelection();
-  }
+  constructor() {}
 
   initialize(editor: HTMLEditor): void {
     this.popup = new TablePopup(editor);
@@ -30,7 +26,7 @@ export class TablePlugin implements Plugin {
     this.addToolbarButton();
     this.setupTableEvents();
     this.editor.on('table', () => {
-      this.selection.saveSelection();
+      this.editor?.getSelector()?.saveSelection();
       this.popup?.show((options) => this.insertTable(options));
     });
   }
@@ -42,7 +38,7 @@ export class TablePlugin implements Plugin {
         icon: tableIcon,
         title: this.editor?.t('Insert Table'),
         onClick: () => {
-          this.selection.saveSelection();
+          this.editor?.getSelector()?.saveSelection();
           this.popup?.show((options) => this.insertTable(options));
         },
       });
@@ -79,7 +75,7 @@ export class TablePlugin implements Plugin {
     const table = (e.target as Element).closest('table');
     if (table instanceof HTMLTableElement) {
       e.preventDefault();
-      this.selection.saveTable(table);
+      this.editor?.getSelector()?.saveTable(table);
     }
 
     const cell = (e.target as Element).closest('td, th') as HTMLTableCellElement | null;
@@ -87,7 +83,7 @@ export class TablePlugin implements Plugin {
 
     if (cell instanceof HTMLTableCellElement) {
       e.preventDefault();
-      this.selection.selectCell(cell);
+      this.editor?.getSelector()?.selectCell(cell);
 
       if (this.currentResizer) {
         this.currentResizer.destroy();
@@ -106,10 +102,10 @@ export class TablePlugin implements Plugin {
 
   private handleKeydown = (e: KeyboardEvent): void => {
     if (e.key === 'Delete') {
-      const table = this.selection.restoreTable();
+      const table = this.editor?.getSelector()?.restoreTable();
       if (table) {
         table.remove();
-        this.selection.clearTable();
+        this.editor?.getSelector()?.clearTable();
       }
     }
   };
@@ -119,7 +115,7 @@ export class TablePlugin implements Plugin {
 
     this.editor.ensureEditorFocus();
 
-    let range = this.selection.restoreSelection(this.editor.getContainer());
+    let range = this.editor?.getSelector()?.restoreSelection(this.editor.getContainer());
     if (!range) {
       range = document.createRange();
       range.selectNodeContents(this.editor.getContainer());
@@ -155,7 +151,8 @@ export class TablePlugin implements Plugin {
 
     this.editor?.off('table');
 
+    this.editor?.getSelector()?.clearTable();
+
     this.editor = null;
-    this.selection.clearTable();
   }
 }

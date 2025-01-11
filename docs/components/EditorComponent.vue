@@ -13,7 +13,7 @@
     <hr />
     <div>
       Result:
-      <div id="result">{{ editorContent }}</div>
+      <div id="result" class="result">{{ editorContent }}</div>
     </div>
     <hr />
     <div>
@@ -162,6 +162,14 @@ export default {
   margin: 0 !important;
   overflow-x: visible !important;
   width: 100% !important;
+}
+
+.result {
+  width: 100%;
+  height: 300px;
+  overflow: scroll;
+  border: 1px solid #d6d6d6;
+  padding: 10px;
 }
 </style>
 

@@ -28,6 +28,7 @@ export class MathPlugin implements Plugin {
     this.setupMathEvents();
     this.editor.on('math', () => {
       this.insertMath();
+      this.editor?.getSelector()?.saveSelection();
     });
 
     this.editor.on('drag-start', ({ e }: { e: DragEvent }) => {
@@ -107,7 +108,10 @@ export class MathPlugin implements Plugin {
     this.toolbarButton = createToolbarButton({
       icon: mathIcon,
       title: this.editor?.t('Insert Math'),
-      onClick: () => this.insertMath(),
+      onClick: () => {
+        this.editor?.getSelector()?.saveSelection();
+        this.insertMath();
+      },
     });
     toolbar.appendChild(this.toolbarButton);
   }
@@ -162,18 +166,12 @@ export class MathPlugin implements Plugin {
 
     this.editor.ensureEditorFocus();
 
-    const container = this.editor.getContainer();
     const selection = window.getSelection();
-    let range: Range;
-
-    if (selection && selection.rangeCount > 0) {
-      range = selection.getRangeAt(0);
-    } else {
+    let range = this.editor?.getSelector()?.restoreSelection(this.editor.getContainer());
+    if (!range) {
       range = document.createRange();
-      range.selectNodeContents(container);
+      range.selectNodeContents(this.editor.getContainer());
       range.collapse(false);
-      selection?.removeAllRanges();
-      selection?.addRange(range);
     }
 
     this.menu?.show((mathElement) => {

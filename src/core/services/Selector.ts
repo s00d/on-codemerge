@@ -1,5 +1,5 @@
 // TableSelection.ts (дополнение)
-export class TableSelection {
+export class Selector {
   private lastSelection: Range | null = null;
   private lastTable: HTMLTableElement | null = null;
   private selectedCells: HTMLTableCellElement[] = [];

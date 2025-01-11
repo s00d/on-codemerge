@@ -2,6 +2,7 @@ import { type Plugin, type PluginManager, DefaultPluginManager } from './Plugin'
 import { HTMLFormatter } from './services/HTMLFormatter';
 import { LocaleManager } from './services/LocaleManager';
 import { TextFormatter } from './services/TextFormatter';
+import { Selector } from './services/Selector';
 
 type Callback = (...data: any[]) => void;
 type ContentCallback = (value: string) => void;
@@ -16,6 +17,7 @@ export class HTMLEditor {
   private contentChangeCallbacks: ContentCallback[] = [];
   private mutationObserver: MutationObserver;
   private textFormatter: TextFormatter | null = null;
+  private selector: Selector;
   private _disableObserver = false;
 
   constructor(innerContainer: HTMLElement) {
@@ -34,6 +36,7 @@ export class HTMLEditor {
     this.eventHandlers = new Map();
     this.formatter = new HTMLFormatter();
     this.textFormatter = new TextFormatter(this.container);
+    this.selector = new Selector();
 
     this.container.addEventListener('click', () => {
       this.container.focus();
@@ -241,6 +244,10 @@ export class HTMLEditor {
     return this.textFormatter;
   }
 
+  public getSelector(): Selector | null {
+    return this.selector;
+  }
+
   private isSelectionInsideContainer(selection: Selection): boolean {
     if (!selection || selection.rangeCount === 0) return false;
 
@@ -253,36 +260,6 @@ export class HTMLEditor {
   private getSelectionInsideContainer(): Selection | null {
     const selection = window.getSelection();
     return selection && this.isSelectionInsideContainer(selection) ? selection : null;
-  }
-
-  public getSelectedText(): string | null {
-    const selection = this.getSelectionInsideContainer();
-    return selection ? selection.toString() : null;
-  }
-
-  public deleteSelectedText(): void {
-    const selection = this.getSelectionInsideContainer();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-    }
-  }
-
-  public insertHtmlAtCursor(html: string): void {
-    const selection = this.getSelectionInsideContainer();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      range.deleteContents();
-
-      const div = document.createElement('div');
-      div.innerHTML = html;
-
-      while (div.firstChild) {
-        range.insertNode(div.firstChild);
-      }
-
-      range.collapse(false); // Перемещаем курсор в конец вставленного HTML
-    }
   }
 
   public saveCursorPosition(): { offset: number } | null {

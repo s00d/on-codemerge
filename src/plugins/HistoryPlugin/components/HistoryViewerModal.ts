@@ -142,7 +142,8 @@ export class HistoryViewerModal {
         ? this.editor.t('Changes from previous version:')
         : this.editor.t('Initial version');
 
-    const diffContent = createContainer('diff-content', diffHtml);
+    const diffContent = createContainer('diff-content');
+    diffContent.innerHTML = diffHtml;
 
     diffContainer.appendChild(diffTitle);
     diffContainer.appendChild(diffContent);

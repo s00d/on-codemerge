@@ -1,5 +1,6 @@
 // TableCell.ts
-import { focusNodeStart } from '../../../utils/selection';
+
+import { focusNodeStart } from '../../../utils/Selection';
 
 export class TableCell {
   private element: HTMLTableCellElement;

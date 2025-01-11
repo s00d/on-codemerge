@@ -236,7 +236,7 @@ export class ChartMenu {
           this.updatePreview(data);
         }, 100);
 
-        if(!hidden) this.popup.show();
+        if (!hidden) this.popup.show();
       } catch (e) {
         console.error('Failed to parse chart data:', e);
       }
