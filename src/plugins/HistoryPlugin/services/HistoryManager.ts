@@ -1,4 +1,4 @@
-import { HistoryState } from "../types";
+import type { HistoryState } from '../types';
 
 export class HistoryManager {
   private states: HistoryState[] = [{ content: '', timestamp: 0 }];

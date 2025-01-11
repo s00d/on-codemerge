@@ -1,9 +1,9 @@
-import {mathjax} from 'mathjax-full/js/mathjax';
-import {TeX} from 'mathjax-full/js/input/tex';
-import {SVG} from 'mathjax-full/js/output/svg';
-import {liteAdaptor} from 'mathjax-full/js/adaptors/liteAdaptor';
-import {RegisterHTMLHandler} from 'mathjax-full/js/handlers/html';
-import type {MathExpression} from '../types';
+import { mathjax } from 'mathjax-full/js/mathjax';
+import { TeX } from 'mathjax-full/js/input/tex';
+import { SVG } from 'mathjax-full/js/output/svg';
+import { liteAdaptor } from 'mathjax-full/js/adaptors/liteAdaptor';
+import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html';
+import type { MathExpression } from '../types';
 
 const adaptor = liteAdaptor();
 RegisterHTMLHandler(adaptor);
@@ -35,7 +35,7 @@ export class MathRenderer {
       // Преобразование SVG в Data URL
       const encodedSvg = encodeURIComponent(svgString);
       // Установка Data URL в источник изображения
-      img.className = 'svg-img'
+      img.className = 'svg-img';
       img.src = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
       img.width = options.width;
       img.height = options.height;

@@ -68,7 +68,7 @@ export class ChartRenderer {
 
     // Convert canvas to Data URL and create an image
     const img = new Image();
-    img.className = 'svg-chart'
+    img.className = 'svg-chart';
     img.src = canvas.toDataURL('image/png');
     img.width = options.width;
     img.height = options.height;

@@ -8,7 +8,7 @@ import { HistoryViewerModal } from './components/HistoryViewerModal';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { historyIcon, undoIcon, redoIcon } from '../../icons';
 
-type Unsubscribe = () => void
+type Unsubscribe = () => void;
 
 export class HistoryPlugin implements Plugin {
   name = 'history';
@@ -46,7 +46,7 @@ export class HistoryPlugin implements Plugin {
 
   private contentEvent(newContent: string) {
     if (this.isRestoringState) return; // Игнорируем изменения, если восстанавливаем состояние
-    console.log(1111, this.isRestoringState)
+    console.log(1111, this.isRestoringState);
     this.historyManager.addState(newContent);
   }
 
