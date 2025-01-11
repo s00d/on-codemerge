@@ -1,9 +1,9 @@
-import {type PopupItem, PopupManager} from '../../../core/ui/PopupManager';
-import {MathRenderer} from '../services/MathRenderer';
-import type {MathExpression} from '../types';
-import type {HTMLEditor} from '../../../core/HTMLEditor';
-import {createContainer, createLabel, createTextarea} from '../../../utils/helpers';
-import {MathToolbar} from "./MathToolbar";
+import { type PopupItem, PopupManager } from '../../../core/ui/PopupManager';
+import { MathRenderer } from '../services/MathRenderer';
+import type { MathExpression } from '../types';
+import type { HTMLEditor } from '../../../core/HTMLEditor';
+import { createContainer, createLabel, createTextarea } from '../../../utils/helpers';
+import { MathToolbar } from './MathToolbar';
 
 export class MathMenu {
   private editor: HTMLEditor;
@@ -59,7 +59,8 @@ export class MathMenu {
     if (!this.expressionInput) return;
     const cursorPos = this.expressionInput.selectionStart;
     const currentValue = this.expressionInput.value;
-    this.expressionInput.value = currentValue.slice(0, cursorPos) + symbol + currentValue.slice(cursorPos);
+    this.expressionInput.value =
+      currentValue.slice(0, cursorPos) + symbol + currentValue.slice(cursorPos);
     this.expressionInput.focus();
     this.expressionInput.setSelectionRange(cursorPos + symbol.length, cursorPos + symbol.length);
     this.handleInputChange(this.expressionInput.value);
@@ -67,7 +68,6 @@ export class MathMenu {
 
   private createMathEditorContainer(): HTMLElement {
     const container = createContainer('math-editor-container mb-6');
-
 
     container.appendChild(this.mathToolbar.getElement());
 
@@ -82,21 +82,20 @@ export class MathMenu {
     container.appendChild(inputLabel);
     container.appendChild(this.expressionInput);
 
-
     return container;
   }
 
   private handleInputChange(value: string): void {
-    this.expression = value
+    this.expression = value;
     this.updatePreview(value);
   }
-
 
   private createPreviewContainer(): HTMLElement {
     this.previewContainer = createContainer(
       'preview-math-container h-64 bg-gray-50 rounded-lg flex items-center justify-center'
     );
-    this.previewContainer.innerHTML = '<div class="text-gray-400">Math preview will appear here</div>';
+    this.previewContainer.innerHTML =
+      '<div class="text-gray-400">Math preview will appear here</div>';
     return this.previewContainer;
   }
 
@@ -117,7 +116,7 @@ export class MathMenu {
     const expression = this.expression;
     if (!expression) return;
 
-    this.editor?.ensureEditorFocus()
+    this.editor?.ensureEditorFocus();
 
     if (this.editingMath) {
       this.editingMath.setAttribute('data-math-expression', expression);

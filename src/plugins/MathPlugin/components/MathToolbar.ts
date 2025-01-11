@@ -34,10 +34,11 @@ export class MathToolbar {
 
     operations.forEach((op) => {
       const button = createButton(op.label, () => this.onInsertSymbol(op.symbol));
-      button.className = 'math-toolbar-button px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600';
+      button.className =
+        'math-toolbar-button px-3 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600';
       this.container.appendChild(button);
 
-      this.buttons.push(button)
+      this.buttons.push(button);
     });
   }
 
@@ -47,7 +48,7 @@ export class MathToolbar {
 
   public destroy(): void {
     // Удаляем все кнопки из DOM
-    this.buttons.forEach(button => button.remove());
+    this.buttons.forEach((button) => button.remove());
     this.buttons = []; // Очищаем массив кнопок
 
     // Очищаем контейнер

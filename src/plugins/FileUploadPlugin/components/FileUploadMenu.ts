@@ -19,7 +19,12 @@ export class FileUploadMenu {
   private progressFill: HTMLElement | null = null;
   private filename: HTMLElement | null = null;
 
-  constructor(editor: HTMLEditor, uploader: FileUploader, config: Partial<UploadConfig>, onUpload: (file: { id: string; name: string; size: number }) => void) {
+  constructor(
+    editor: HTMLEditor,
+    uploader: FileUploader,
+    config: Partial<UploadConfig>,
+    onUpload: (file: { id: string; name: string; size: number }) => void
+  ) {
     this.onUpload = onUpload;
     this.editor = editor;
     this.uploader = uploader;
@@ -112,29 +117,31 @@ export class FileUploadMenu {
   private setupEventListeners(uploadArea: HTMLElement, fileInput: HTMLInputElement): void {
     const browseButton = uploadArea.querySelector('.browse-button')!;
 
+    this.editor.on(
+      'file-drop',
+      async (e: { type: string; name: string; content: string | ArrayBuffer }) => {
+        if (!e.type.startsWith('image/')) {
+          this.editor?.ensureEditorFocus();
 
-    this.editor.on('file-drop', async (e: { type: string; name: string; content: string | ArrayBuffer }) => {
-      if (!e.type.startsWith('image/')) {
-        this.editor?.ensureEditorFocus();
-
-        // Если content является файлом (например, объект File)
-        if (e.content instanceof File) {
-          await this.handleFileUpload(e.content);
-        }
-        // Если content является ArrayBuffer (например, бинарные данные)
-        else if (e.content instanceof ArrayBuffer) {
-          // Создаем файл из ArrayBuffer
-          const file = new File([e.content], e.name, { type: e.type });
-          await this.handleFileUpload(file);
-        }
-        // Если content является строкой (например, текстовые данные)
-        else if (typeof e.content === 'string') {
-          // Создаем файл из строки
-          const file = new File([e.content], e.name, { type: 'text/plain' });
-          await this.handleFileUpload(file);
+          // Если content является файлом (например, объект File)
+          if (e.content instanceof File) {
+            await this.handleFileUpload(e.content);
+          }
+          // Если content является ArrayBuffer (например, бинарные данные)
+          else if (e.content instanceof ArrayBuffer) {
+            // Создаем файл из ArrayBuffer
+            const file = new File([e.content], e.name, { type: e.type });
+            await this.handleFileUpload(file);
+          }
+          // Если content является строкой (например, текстовые данные)
+          else if (typeof e.content === 'string') {
+            // Создаем файл из строки
+            const file = new File([e.content], e.name, { type: 'text/plain' });
+            await this.handleFileUpload(file);
+          }
         }
       }
-    });
+    );
 
     // Handle file input
     browseButton.addEventListener('click', () => {
@@ -152,7 +159,7 @@ export class FileUploadMenu {
   }
 
   private async handleFileUpload(file: File): Promise<void> {
-    this.popup.show()
+    this.popup.show();
     setTimeout(async () => {
       if (file.size > 10 * 1024 * 1024) {
         // 10MB limit
@@ -211,7 +218,7 @@ export class FileUploadMenu {
         this.uploadProgress!.classList.add('hidden');
         this.progressFill!.style.width = '0%';
       }
-    }, 100)
+    }, 100);
   }
 
   public show(): void {

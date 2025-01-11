@@ -1,4 +1,10 @@
-import {editIcon, deleteIcon, alignLeftIcon, alignCenterIcon, alignRightIcon} from '../../../icons';
+import {
+  editIcon,
+  deleteIcon,
+  alignLeftIcon,
+  alignCenterIcon,
+  alignRightIcon,
+} from '../../../icons';
 import { ContextMenu } from '../../../core/ui/ContextMenu.ts';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 import type { MathMenu } from './MathMenu';
@@ -72,7 +78,6 @@ export class MathContextMenu {
         break;
     }
   }
-
 
   private handleEdit(): void {
     if (!this.activeMath) return;

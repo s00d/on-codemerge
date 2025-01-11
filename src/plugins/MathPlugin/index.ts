@@ -6,8 +6,8 @@ import { MathMenu } from './components/MathMenu';
 import { MathContextMenu } from './components/MathContextMenu';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { Resizer } from '../../utils/Resizer.ts';
-import {createLineBreak, createSpan} from '../../utils/helpers.ts';
-import {mathIcon} from "../../icons";
+import { createLineBreak, createSpan } from '../../utils/helpers.ts';
+import { mathIcon } from '../../icons';
 
 export class MathPlugin implements Plugin {
   name = 'math';
@@ -30,7 +30,7 @@ export class MathPlugin implements Plugin {
       this.insertMath();
     });
 
-    this.editor.on('drag-start', ({e}: {e: DragEvent}) => {
+    this.editor.on('drag-start', ({ e }: { e: DragEvent }) => {
       const math = (e.target as Element).closest('.math-wrapper');
       if (math instanceof HTMLElement) {
         this.handleDragStart(e, math);
@@ -38,18 +38,18 @@ export class MathPlugin implements Plugin {
     });
 
     // Обработка завершения перетаскивания
-    this.editor.on('drag-end', ({e}: {e: DragEvent}) => {
+    this.editor.on('drag-end', ({ e }: { e: DragEvent }) => {
       const math = (e.target as Element).closest('.math-wrapper');
       if (math instanceof HTMLElement) {
         this.handleDragEnd(e, math);
       }
     });
 
-    this.editor.on('drag-over', ({e}: {e: DragEvent}) => {
+    this.editor.on('drag-over', ({ e }: { e: DragEvent }) => {
       this.handleDragOver(e);
     });
 
-    this.editor.on('drag-drop', ({e}: {e: DragEvent}) => {
+    this.editor.on('drag-drop', ({ e }: { e: DragEvent }) => {
       this.handleDrop(e);
     });
   }
@@ -131,7 +131,7 @@ export class MathPlugin implements Plugin {
           handleColor: 'blue',
           onResizeStart: () => console.log('Resize started'),
           onResize: (width, height) => {
-            console.log(`Resized to ${width}x${height}`)
+            console.log(`Resized to ${width}x${height}`);
             if (math instanceof HTMLElement) {
               this.menu?.redrawMath(math, math.dataset?.mathExpression ?? '', {
                 width: width,
@@ -180,7 +180,7 @@ export class MathPlugin implements Plugin {
       if (!this.editor) return;
 
       const wrapper = createSpan('math-wrapper my-4');
-      wrapper.draggable = true
+      wrapper.draggable = true;
       wrapper.appendChild(mathElement);
       wrapper.appendChild(createLineBreak());
 

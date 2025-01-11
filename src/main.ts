@@ -30,7 +30,7 @@ import {
   SpellCheckerPlugin,
   BlockStylePlugin,
 } from './app';
-import {MathPlugin} from "./plugins/MathPlugin";
+import { MathPlugin } from './plugins/MathPlugin';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const editorElement = document.getElementById('editor');
