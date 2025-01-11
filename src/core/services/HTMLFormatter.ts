@@ -19,8 +19,10 @@ export class HTMLFormatter {
     html = html.replace(/<[^>]*class="[^"]*\bresize-handle\b[^"]*"[^>]*>/g, '');
 
     // Удаляем атрибуты contenteditable="true" и class="selected"
+    html = html.replace(/\s*draggable="true"\s*/g, ' ');
     html = html.replace(/\s*contenteditable="true"\s*/g, ' ');
     html = html.replace(/\s*class="selected"\s*/g, ' ');
+    html = html.replace(/\bdragging\b/g, '');
 
     // Удаляем style="position: relative;" из <th> и <td>
     html = html.replace(/(<(th|td)[^>]*)\s*style="position:\s*relative;"\s*/g, '$1');

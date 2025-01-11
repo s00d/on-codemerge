@@ -11,7 +11,6 @@ export class HTMLEditor {
   private plugins: PluginManager;
   private eventHandlers: Map<string, Callback[]>;
   private formatter: HTMLFormatter;
-  private dragOverlay: HTMLElement | null = null;
   private localeManager: LocaleManager;
   private contentChangeCallbacks: Callback[] = [];
   private mutationObserver: MutationObserver;
@@ -38,6 +37,8 @@ export class HTMLEditor {
       this.container.focus();
     });
 
+    this.container.addEventListener('dragstart', (e) => this.handleDragStart(e));
+    this.container.addEventListener('dragend', (e) => this.handleDragEnd(e));
     this.container.addEventListener('dragenter', (e) => this.handleDragEnter(e));
     this.container.addEventListener('dragover', (e) => this.handleDragOver(e));
     this.container.addEventListener('dragleave', (e) => this.handleDragLeave(e));
@@ -113,20 +114,28 @@ export class HTMLEditor {
 
     if (files.length > 0) {
       // Обработка файлов
-      this.handleFileDrop(files);
+      this.handleFileDrop(files, e);
     } else if (text) {
       // Обработка текста
       this.handleTextDrop(text);
     }
   }
 
+  private handleDragStart(e: DragEvent): void {
+    this.triggerEvent('drag-start', { e });
+  }
+
+  private handleDragEnd(e: DragEvent): void {
+    this.triggerEvent('drag-end', { e });
+  }
+
   private handleDragEnter(e: DragEvent): void {
     e.preventDefault();
 
-    this.dragOverlay = document.createElement('div');
-    this.dragOverlay.className = 'drag-overlay';
+    this.container.classList.add('drag-overlay');
+    this.container.draggable = true;
 
-    this.container.appendChild(this.dragOverlay);
+    this.triggerEvent('drag-enter', { e });
   }
 
   private handleDragOver(e: DragEvent): void {
@@ -134,20 +143,24 @@ export class HTMLEditor {
     if (e.dataTransfer) {
       e.dataTransfer.dropEffect = 'copy'; // Указываем, что это копирование
     }
+
+    this.triggerEvent('drag-over', { e });
   }
 
   private handleDragLeave(e: DragEvent): void {
     e.preventDefault();
-    if (this.dragOverlay) {
-      this.dragOverlay.remove();
-    }
+
+    this.container.classList.remove('drag-overlay');
+    this.container.draggable = false;
+
+    this.triggerEvent('drag-leave', { e });
   }
 
   private handleDrop(e: DragEvent): void {
     e.preventDefault();
-    if (this.dragOverlay) {
-      this.dragOverlay.remove();
-    }
+
+    this.container.classList.remove('drag-overlay');
+    this.container.draggable = false;
 
     if (e.dataTransfer) {
       const files = e.dataTransfer.files;
@@ -155,22 +168,25 @@ export class HTMLEditor {
 
       if (files.length > 0) {
         // Обработка файлов
-        this.handleFileDrop(files);
+        this.handleFileDrop(files, e);
       } else if (text) {
         // Обработка текста
         this.handleTextDrop(text);
       }
     }
+
+    this.triggerEvent('drag-drop', { e });
   }
 
-  private async handleFileDrop(files: FileList): Promise<void> {
+  private async handleFileDrop(files: FileList, e: ClipboardEvent | DragEvent): Promise<void> {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const fileType = file.type;
+      const fileName = file.name; // Извлекаем имя файла
       const fileContent = await this.readFileContent(file);
 
-      // Запускаем событие для каждого файла
-      this.triggerEvent('file-drop', { type: fileType, content: fileContent });
+      // Запускаем событие для каждого файла, включая имя файла
+      this.triggerEvent('file-drop', { type: fileType, name: fileName, content: fileContent, e });
     }
   }
 
@@ -533,7 +549,6 @@ export class HTMLEditor {
     this.plugins = null!;
     this.eventHandlers = null!;
     this.formatter = null!;
-    this.dragOverlay = null;
     this.localeManager = null!;
     this.mutationObserver = null!;
     this.textFormatter = null!;
