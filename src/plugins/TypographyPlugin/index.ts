@@ -11,7 +11,12 @@ import { createHr } from '../../utils/helpers.ts';
 export class TypographyPlugin implements Plugin {
   name = 'typography';
   hotkeys = [
-    { keys: 'Ctrl+Shift+Y', description: 'Adjust typography settings', command: 'typography-settings', icon: '✒️'}
+    {
+      keys: 'Ctrl+Shift+Y',
+      description: 'Adjust typography settings',
+      command: 'typography-settings',
+      icon: '✒️',
+    },
   ];
   private editor: HTMLEditor | null = null;
   private menu: TypographyMenu | null = null;

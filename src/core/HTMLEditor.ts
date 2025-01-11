@@ -3,7 +3,7 @@ import { HTMLFormatter } from './services/HTMLFormatter';
 import { LocaleManager } from './services/LocaleManager';
 import { TextFormatter } from './services/TextFormatter';
 import { Selector } from './services/Selector';
-import {ShortcutCategories} from "./types.ts";
+import type { ShortcutCategories } from './types.ts';
 
 type Callback = (...data: any[]) => void;
 type ContentCallback = (value: string) => void;
@@ -317,11 +317,11 @@ export class HTMLEditor {
   }
 
   public getPlugins(): Map<string, Plugin> {
-    return this.plugins.getPlugins()
+    return this.plugins.getPlugins();
   }
 
   public getHotkeys(): ShortcutCategories {
-    return this.plugins.getHotkeys()
+    return this.plugins.getHotkeys();
   }
 
   public on(eventName: string, callback: Callback): () => void {

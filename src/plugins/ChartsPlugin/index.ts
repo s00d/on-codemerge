@@ -13,9 +13,7 @@ import type { ChartSeries, ChartType } from './types';
 
 export class ChartsPlugin implements Plugin {
   name = 'charts';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+G', description: 'Insert chart', command: 'charts', icon: '📊' },
-  ];
+  hotkeys = [{ keys: 'Ctrl+Alt+G', description: 'Insert chart', command: 'charts', icon: '📊' }];
   private editor: HTMLEditor | null = null;
   private menu: ChartMenu | null = null;
   private contextMenu: ChartContextMenu | null = null;

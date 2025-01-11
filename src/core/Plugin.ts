@@ -1,11 +1,11 @@
 import type { HTMLEditor } from './HTMLEditor.ts';
-import { ShortcutCategories } from './types.ts';
+import type { ShortcutCategories } from './types.ts';
 
 interface Hotkey {
-  icon: string
-  keys: string
-  description: string
-  command: string
+  icon: string;
+  keys: string;
+  description: string;
+  command: string;
 }
 
 export interface Plugin {
@@ -57,7 +57,7 @@ export class DefaultPluginManager implements PluginManager {
    * Возвращает плагины
    */
   getPlugins(): Map<string, Plugin> {
-    return this.plugins
+    return this.plugins;
   }
 
   getHotkeys(): ShortcutCategories {
@@ -73,7 +73,9 @@ export class DefaultPluginManager implements PluginManager {
 
         // Check for hotkey conflict
         if (registeredKeys[keys]) {
-          console.warn(`Hotkey conflict: The key combination "${keys}" is already used for the command "${registeredKeys[keys]}".`);
+          console.warn(
+            `Hotkey conflict: The key combination "${keys}" is already used for the command "${registeredKeys[keys]}".`
+          );
         } else {
           registeredKeys[keys] = select.command; // Register the hotkey
         }

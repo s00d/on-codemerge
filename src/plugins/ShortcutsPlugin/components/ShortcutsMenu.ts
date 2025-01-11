@@ -1,7 +1,8 @@
 import { PopupManager } from '../../../core/ui/PopupManager';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 import {
-  createContainer, createHr,
+  createContainer,
+  createHr,
   createKbd,
   createLi,
   createSpan,
@@ -42,7 +43,8 @@ export class ShortcutsMenu {
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
     searchInput.placeholder = 'Search by category or shortcut...';
-    searchInput.className = 'w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500';
+    searchInput.className =
+      'w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500';
     this.container.appendChild(searchInput);
 
     const grid = createContainer('grid grid-cols-1 gap-4');
@@ -61,7 +63,9 @@ export class ShortcutsMenu {
           const filteredShortcuts = shortcuts.filter((shortcut) => {
             const matchesCategory = category.toLowerCase().includes(filterTerm);
             const matchesDescription = shortcut.description.toLowerCase().includes(filterTerm);
-            const matchesKeys = this.formatShortcut(shortcut.keys).toLowerCase().includes(filterTerm);
+            const matchesKeys = this.formatShortcut(shortcut.keys)
+              .toLowerCase()
+              .includes(filterTerm);
             return matchesCategory || matchesDescription || matchesKeys;
           });
 
@@ -86,7 +90,7 @@ export class ShortcutsMenu {
     return this.container;
   }
 
-// Метод для отображения категории
+  // Метод для отображения категории
   private renderCategory(category: string, shortcuts: any[]): HTMLElement {
     const categoryContainer = createContainer();
 
@@ -109,7 +113,7 @@ export class ShortcutsMenu {
     return categoryContainer;
   }
 
-// Метод для отображения шортката
+  // Метод для отображения шортката
   private renderShortcut(shortcut: any): HTMLElement {
     const shortcutItem = createLi('flex items-center justify-between text-sm');
 
@@ -143,7 +147,7 @@ export class ShortcutsMenu {
   }
 
   public show(): void {
-    this.initialize(this.editor)
+    this.initialize(this.editor);
     this.popup?.show();
   }
 

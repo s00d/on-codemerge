@@ -26,8 +26,7 @@ export class ShortcutsPlugin implements Plugin {
 
     setTimeout(() => {
       this.setupShortcuts();
-    }, 1000)
-
+    }, 1000);
   }
 
   private addToolbarButton(): void {
@@ -44,8 +43,7 @@ export class ShortcutsPlugin implements Plugin {
   }
 
   private setupShortcuts(): void {
-
-    const hotkeysList = this.editor?.getHotkeys()
+    const hotkeysList = this.editor?.getHotkeys();
 
     if (!hotkeysList) return;
 

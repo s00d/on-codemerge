@@ -12,9 +12,7 @@ import { imageIcon } from '../../icons';
 
 export class ImagePlugin implements Plugin {
   name = 'image';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+I', description: 'Insert image', command: 'image', icon: '🖼️' },
-  ];
+  hotkeys = [{ keys: 'Ctrl+Alt+I', description: 'Insert image', command: 'image', icon: '🖼️' }];
   private editor: HTMLEditor | null = null;
   private uploader: ImageUploader;
   private contextMenu: ImageContextMenu | null = null;

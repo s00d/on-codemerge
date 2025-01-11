@@ -13,7 +13,12 @@ const dictionaries = import.meta.glob('./dictionaries/**/*', {
 export class SpellCheckerPlugin implements Plugin {
   name = 'spellchecker';
   hotkeys = [
-    { keys: 'Ctrl+Shift+L', description: 'Run spell checker', command: 'spellchecker', icon: '🔍✅' }
+    {
+      keys: 'Ctrl+Shift+L',
+      description: 'Run spell checker',
+      command: 'spellchecker',
+      icon: '🔍✅',
+    },
   ];
   private editor: HTMLEditor | null = null;
   private toolbarButton: HTMLElement | null = null;

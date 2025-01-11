@@ -11,8 +11,13 @@ export class AlignmentPlugin implements Plugin {
     { keys: 'Ctrl+B', description: 'Bold text', command: 'bold', icon: '𝐁' },
     { keys: 'Ctrl+I', description: 'Italic text', command: 'italic', icon: '𝐼' },
     { keys: 'Ctrl+U', description: 'Underline text', command: 'underline', icon: 'U̲' },
-    { keys: 'Ctrl+Shift+S', description: 'Strikethrough text', command: 'strikethrough', icon: 'S̶' },
-];
+    {
+      keys: 'Ctrl+Shift+S',
+      description: 'Strikethrough text',
+      command: 'strikethrough',
+      icon: 'S̶',
+    },
+  ];
   private editor: HTMLEditor | null = null;
   private toolbarButtons: Map<string, HTMLElement> = new Map();
 

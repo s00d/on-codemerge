@@ -21,9 +21,7 @@ import {
 
 export class FormBuilderPlugin implements Plugin {
   name = 'form-builder';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+F', description: 'Insert form', command: 'form', icon: '📝' },
-  ];
+  hotkeys = [{ keys: 'Ctrl+Alt+F', description: 'Insert form', command: 'form', icon: '📝' }];
   private editor: HTMLEditor | null = null;
   private popup: PopupManager | null = null;
   private contextMenu: ContextMenu | null = null;

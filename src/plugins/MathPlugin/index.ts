@@ -12,7 +12,7 @@ import { mathIcon } from '../../icons';
 export class MathPlugin implements Plugin {
   name = 'math';
   hotkeys = [
-    { keys: 'Ctrl+Shift+M', description: 'Insert math formula', command: 'math-editor', icon: '𝛢'}
+    { keys: 'Ctrl+Shift+M', description: 'Insert math formula', command: 'math-editor', icon: '𝛢' },
   ];
   private editor: HTMLEditor | null = null;
   private menu: MathMenu | null = null;

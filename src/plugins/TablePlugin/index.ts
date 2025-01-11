@@ -13,7 +13,12 @@ import { Resizer } from '../../utils/Resizer.ts';
 export class TablePlugin implements Plugin {
   name = 'table';
   hotkeys = [
-    { keys: 'Ctrl+Shift+T', description: 'Insert or edit table', command: 'table-editor', icon: '📊'}
+    {
+      keys: 'Ctrl+Shift+T',
+      description: 'Insert or edit table',
+      command: 'table-editor',
+      icon: '📊',
+    },
   ];
   private editor: HTMLEditor | null = null;
   private popup: TablePopup | null = null;

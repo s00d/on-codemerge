@@ -12,8 +12,8 @@ export class FontPlugin implements Plugin {
       keys: 'Ctrl+Shift+G',
       description: 'Change font style',
       command: 'font-style',
-      icon: '🔤'
-    }
+      icon: '🔤',
+    },
   ];
   private editor: HTMLEditor | null = null;
   private toolbarButtons: Map<string, HTMLElement> = new Map();
