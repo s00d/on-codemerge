@@ -1,0 +1,28 @@
+/* Math editor */
+.math-editor {
+  @apply space-y-4;
+
+  .math-input {
+    @apply w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
+  }
+
+  .math-buttons {
+    @apply flex gap-2;
+
+    button {
+      @apply px-4 py-2 rounded-md text-sm font-medium bg-blue-500 text-white hover:bg-blue-600;
+    }
+  }
+}
+
+.preview-math-container {
+  @apply bg-gray-50 rounded-lg flex items-center justify-center p-4;
+  height: 100px;
+}
+
+.math-wrapper {
+  &.dragging {
+    opacity: 0.5;
+    border: 2px dashed blue;
+  }
+}

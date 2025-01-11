@@ -1,0 +1,46 @@
+/* Math container */
+.math-container {
+  @apply relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+
+  display: flex;
+  justify-content: center; /* По умолчанию выравнивание по центру */
+  width: 100%;
+  padding: 10px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+.math-wrapper {
+  display: flex;
+  justify-content: center; /* По умолчанию выравнивание по центру */
+  width: 100%;
+  //background-color: #f9fafb;
+  //border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin: 10px;
+
+  &.align-left {
+    justify-content: flex-start;
+  }
+
+  &.align-center {
+    justify-content: center;
+  }
+
+  &.align-right {
+    justify-content: flex-end;
+  }
+
+}
+
+/* Math preview */
+.math-preview {
+  @apply bg-gray-50 rounded-lg flex items-center justify-center p-4;
+}
+
+/* Math formula */
+.math-formula {
+  @apply text-2xl text-gray-800;
+}
