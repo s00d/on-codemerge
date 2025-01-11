@@ -49,10 +49,75 @@ export class MathMenu {
       },
       {
         type: 'custom',
+        id: 'formula-help-section',
+        content: () => this.createFormulaHelpSection(),
+      },
+      {
+        type: 'custom',
         id: 'preview-math-container',
         content: () => this.createPreviewContainer(),
       },
     ];
+  }
+
+  private createFormulaHelpSection(): HTMLElement {
+    const container = createContainer('formula-help-section mt-4');
+
+    // Collapsible header
+    const header = document.createElement('div');
+    header.className = 'flex items-center justify-between cursor-pointer';
+    header.innerHTML = `
+      <span class="text-lg font-semibold m-0 text-gray-800">How to Write Formulas</span>
+      <span class="arrow">▼</span>
+    `;
+
+    // Collapsible content
+    const content = createContainer('formula-help-content hidden mt-2');
+    content.innerHTML = `
+      <p class="text-gray-600">
+        Use LaTeX syntax to write mathematical expressions. Below are some examples:
+      </p>
+      <div class="mt-4 space-y-2">
+        <div>
+          <strong>Example 1:</strong> Quadratic formula
+          <pre class="bg-gray-100 p-2 rounded-md">x = \\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}</pre>
+        </div>
+        <div>
+          <strong>Example 2:</strong> Integral
+          <pre class="bg-gray-100 p-2 rounded-md">\\int_{a}^{b} x^2 \\, dx</pre>
+        </div>
+        <div>
+          <strong>Example 3:</strong> Matrix
+          <pre class="bg-gray-100 p-2 rounded-md">
+\\begin{bmatrix}
+1 & 2 \\\\
+3 & 4
+\\end{bmatrix}
+          </pre>
+        </div>
+        <div>
+          <strong>Example 4:</strong> Greek letters
+          <pre class="bg-gray-100 p-2 rounded-md">\\alpha, \\beta, \\gamma</pre>
+        </div>
+      </div>
+      <p class="mt-4 text-gray-600">
+        For more information, refer to the <a href="https://en.wikibooks.org/wiki/LaTeX/Mathematics" target="_blank" class="text-blue-500 hover:underline">LaTeX documentation</a>.
+      </p>
+    `;
+
+    // Toggle visibility on header click
+    header.addEventListener('click', () => {
+      content.classList.toggle('hidden');
+      const arrow = header.querySelector('.arrow');
+      if (arrow) {
+        arrow.textContent = content.classList.contains('hidden') ? '▼' : '▲';
+      }
+    });
+
+    container.appendChild(header);
+    container.appendChild(content);
+
+    return container;
   }
 
   private handleInsertSymbol = (symbol: string): void => {
@@ -99,11 +164,11 @@ export class MathMenu {
     return this.previewContainer;
   }
 
-  private updatePreview(expression: MathExpression): void {
+  private async updatePreview(expression: MathExpression): Promise<void> {
     const previewContainer = this.popup.getElement()?.querySelector('.preview-math-container');
     if (!previewContainer) return;
 
-    const canvas = this.renderer.renderMath(expression, {
+    const canvas = await this.renderer.renderMath(expression, {
       width: 400,
       height: 100,
     });
@@ -112,7 +177,7 @@ export class MathMenu {
     previewContainer.appendChild(canvas);
   }
 
-  private handleSubmit(): void {
+  private async handleSubmit(): Promise<void> {
     const expression = this.expression;
     if (!expression) return;
 
@@ -121,7 +186,7 @@ export class MathMenu {
     if (this.editingMath) {
       this.editingMath.setAttribute('data-math-expression', expression);
 
-      const canvas = this.renderer.renderMath(expression, {
+      const canvas = await this.renderer.renderMath(expression, {
         width: this.editingMath.clientWidth || 800,
         height: this.editingMath.clientHeight || 200,
       });
@@ -134,7 +199,7 @@ export class MathMenu {
       mathContainer.style.height = '200px';
       mathContainer.setAttribute('data-math-expression', expression);
 
-      const canvas = this.renderer.renderMath(expression, {
+      const canvas = await this.renderer.renderMath(expression, {
         width: mathContainer.clientWidth || 800,
         height: mathContainer.clientHeight || 200,
       });
@@ -166,12 +231,12 @@ export class MathMenu {
     this.popup.show();
   }
 
-  public redrawMath(
+  public async redrawMath(
     container: HTMLElement,
     expression: MathExpression,
     dimensions: { width: number; height: number }
-  ): void {
-    const canvas = this.renderer.renderMath(expression, dimensions);
+  ): Promise<void> {
+    const canvas = await this.renderer.renderMath(expression, dimensions);
     container.innerHTML = '';
     container.appendChild(canvas);
   }
