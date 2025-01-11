@@ -3,7 +3,7 @@ type ResizerOptions = {
   handleSize?: number; // Размер точки для ресайза
   handleColor?: string; // Цвет точки для ресайза
   onResizeStart?: () => void; // Событие начала ресайза
-  onResize?: (width: number, height: number) => void; // Событие изменения размера
+  onResize?: (width: number, height: number, e?: MouseEvent) => void; // Событие изменения размера
   onResizeEnd?: () => void; // Событие завершения ресайза
   minWidth?: number; // Минимальная ширина элемента
   minHeight?: number; // Минимальная высота элемента
@@ -99,7 +99,7 @@ export class Resizer {
       this.element.style.height = `${newHeight}px`;
 
       // Вызываем событие изменения размера
-      this.options.onResize?.(newWidth, newHeight);
+      this.options.onResize?.(newWidth, newHeight, e);
     }
   }
 
