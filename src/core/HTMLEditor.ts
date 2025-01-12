@@ -37,7 +37,7 @@ export class HTMLEditor {
     this.eventHandlers = new Map();
     this.formatter = new HTMLFormatter();
     this.textFormatter = new TextFormatter(this.container);
-    this.selector = new Selector();
+    this.selector = new Selector(this.container);
 
     this.container.addEventListener('click', () => {
       this.container.focus();

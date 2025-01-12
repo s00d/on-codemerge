@@ -1,13 +1,35 @@
 // TableSelection.ts (дополнение)
 export class Selector {
+  private container: HTMLElement;
+
+  constructor(container: HTMLElement) {
+    this.container = container;
+  }
+
   private lastSelection: Range | null = null;
   private lastTable: HTMLTableElement | null = null;
   private selectedCells: HTMLTableCellElement[] = [];
 
   public saveSelection(): void {
     const selection = window.getSelection();
+
     if (selection && selection.rangeCount > 0) {
       this.lastSelection = selection.getRangeAt(0).cloneRange();
+    } else {
+      const range = document.createRange();
+      const container = this.container;
+
+      if (container && container.childNodes.length > 0) {
+        range.selectNodeContents(container);
+        range.collapse(false);
+      } else {
+        range.setStart(container, 0);
+        range.collapse(true);
+      }
+
+      selection?.removeAllRanges();
+      selection?.addRange(range);
+      this.lastSelection = range.cloneRange();
     }
   }
 
