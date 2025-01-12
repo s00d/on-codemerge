@@ -4,17 +4,26 @@
 
 .html-editor {
   @apply border border-gray-300 p-4 min-h-[300px] focus:outline-none focus:ring-2 focus:ring-gray-200 focus:border-transparent;
+
+  html.dark & {
+    @apply border-gray-600 focus:ring-gray-600 bg-gray-800 text-white;
+  }
 }
 
 .drag-overlay {
-  @apply border-2 border-dashed border-blue-500;
-  @apply bg-blue-100 bg-opacity-10;
-  @apply z-[110] pointer-events-none;
-  @apply block;
+  @apply border-2 border-dashed border-blue-500 bg-blue-100 bg-opacity-10 z-[110] pointer-events-none block;
+
+  html.dark & {
+    @apply border-blue-400 bg-blue-900 bg-opacity-10;
+  }
 }
 
 .toolbar-button {
   @apply p-2 rounded hover:bg-gray-200 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500;
+
+  html.dark & {
+    @apply hover:bg-gray-700 focus:ring-blue-400;
+  }
 
   &:disabled {
     @apply opacity-50 cursor-not-allowed;
@@ -22,10 +31,13 @@
 
   svg {
     @apply w-5 h-5 text-gray-700;
+
+    html.dark & {
+      @apply text-gray-300;
+    }
   }
 }
 
-/* Стили для контекстного меню */
 .context-menu {
   @apply bg-white border border-gray-200 shadow-lg rounded-lg p-2;
   display: none;
@@ -40,6 +52,10 @@
     left 0.2s ease,
     top 0.2s ease;
 
+  html.dark & {
+    @apply bg-gray-800 border-gray-700;
+  }
+
   &.horizontal {
     @apply flex flex-row items-center;
     min-width: auto;
@@ -47,6 +63,10 @@
 
   .menu-item {
     @apply flex items-center gap-2 w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors duration-200 rounded-md;
+
+    html.dark & {
+      @apply text-gray-300 hover:bg-gray-700;
+    }
 
     &:disabled {
       @apply opacity-50 cursor-not-allowed;
@@ -57,6 +77,10 @@
 
       svg {
         @apply w-4 h-4;
+
+        path {
+          @apply fill-current; /* Используем текущий цвет текста для stroke и fill */
+        }
       }
     }
 
@@ -67,6 +91,10 @@
 
   .menu-divider {
     @apply w-px h-10 bg-gray-200 mx-1;
+
+    html.dark & {
+      @apply bg-gray-600;
+    }
   }
 }
 
@@ -74,42 +102,38 @@
   position: absolute;
   width: 8px;
   height: 8px;
-  background-color: #007bff; // Синий цвет маркеров
-  border: 1px solid #fff; // Белая рамка для контраста
-  border-radius: 50%; // Круглые маркеры
-  cursor: pointer; // Курсор в виде указателя
-  z-index: 2; // Убедимся, что маркеры поверх других элементов
+  background-color: #007bff;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2;
 
-  // Позиционирование маркеров
   &-nw {
-    cursor: nw-resize; // Курсор для изменения размера в северо-западном направлении
+    cursor: nw-resize;
   }
 
   &-ne {
-    cursor: ne-resize; // Курсор для изменения размера в северо-восточном направлении
+    cursor: ne-resize;
   }
 
   &-se {
-    cursor: se-resize; // Курсор для изменения размера в юго-восточном направлении
+    cursor: se-resize;
   }
 
   &-sw {
-    cursor: sw-resize; // Курсор для изменения размера в юго-западном направлении
+    cursor: sw-resize;
   }
 
-  // Эффект при наведении
   &:hover {
-    background-color: #0056b3; // Темно-синий цвет при наведении
-    transform: scale(1.2); // Увеличение маркера при наведении
+    background-color: #0056b3;
+    transform: scale(1.2);
   }
 
-  // Эффект при активном состоянии (перетаскивание)
   &:active {
-    background-color: #004080; // Еще более темный синий при активном состоянии
+    background-color: #004080;
   }
 }
 
-/* Base popup styles */
 .popup {
   @apply hidden bg-white rounded-lg shadow-xl z-[12];
   max-height: 90vh;
@@ -117,36 +141,39 @@
   display: flex;
   flex-direction: column;
 
-  /* Positioning */
+  html.dark & {
+    @apply bg-gray-800 border-gray-700;
+  }
+
   &[style*='position: fixed'] {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
   }
 
-  /* Header */
   .popup-header {
     @apply flex-shrink-0 border-b border-gray-200;
-    border-top-left-radius: inherit;
-    border-top-right-radius: inherit;
+
+    html.dark & {
+      @apply border-gray-700;
+    }
   }
 
-  /* Content */
   .popup-content {
     @apply flex-1 overflow-y-auto w-full p-0;
-    min-height: 0; /* Critical for flex child scrolling */
+    min-height: 0;
   }
 
-  /* Footer */
   .popup-footer {
     @apply flex-shrink-0 p-4;
-    border-bottom-left-radius: inherit;
-    border-bottom-right-radius: inherit;
   }
 
-  /* Close button */
   .close-button {
     @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors;
+
+    html.dark & {
+      @apply text-gray-400 hover:text-gray-200 hover:bg-gray-700;
+    }
 
     svg {
       @apply w-5 h-5;
@@ -159,6 +186,7 @@
 
   .popup-button-icon {
     @apply flex items-center;
+
     svg {
       @apply w-5 h-5;
     }
@@ -174,10 +202,18 @@
 
   .popup-item-label {
     @apply block text-sm font-medium text-gray-700;
+
+    html.dark & {
+      @apply text-gray-300;
+    }
   }
 
   .popup-item-input {
     @apply w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
+
+    html.dark & {
+      @apply border-gray-600 focus:ring-blue-400;
+    }
   }
 
   .popup-radio-container {
@@ -186,15 +222,27 @@
 
   .popup-radio-input {
     @apply h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500;
+
+    html.dark & {
+      @apply text-blue-400 border-gray-600;
+    }
   }
 
   .popup-radio-label {
     @apply ml-2 text-sm text-gray-700;
+
+    html.dark & {
+      @apply text-gray-300;
+    }
   }
 }
 
 .popup-footer {
   @apply flex justify-end p-4 border-t border-gray-200;
+
+  html.dark & {
+    @apply border-gray-700;
+  }
 }
 
 .popup-footer-items {
@@ -202,34 +250,54 @@
 }
 
 .popup-footer-button {
-  @apply px-3 py-1.5 text-sm rounded-md transition-colors;
-}
-
-.popup-footer-button {
   @apply px-4 py-2 rounded-md text-sm font-medium transition-colors duration-200;
 
   &-primary {
     @apply bg-blue-500 text-white hover:bg-blue-600;
+
+    html.dark & {
+      @apply bg-blue-600 hover:bg-blue-700;
+    }
   }
 
   &-secondary {
     @apply bg-gray-200 text-gray-700 hover:bg-gray-300;
+
+    html.dark & {
+      @apply bg-gray-700 text-gray-300 hover:bg-gray-600;
+    }
   }
 
   &-success {
     @apply bg-green-500 text-white hover:bg-green-600;
+
+    html.dark & {
+      @apply bg-green-600 hover:bg-green-700;
+    }
   }
 
   &-danger {
     @apply bg-red-500 text-white hover:bg-red-600;
+
+    html.dark & {
+      @apply bg-red-600 hover:bg-red-700;
+    }
   }
 
   &-warning {
     @apply bg-yellow-500 text-white hover:bg-yellow-600;
+
+    html.dark & {
+      @apply bg-yellow-600 hover:bg-yellow-700;
+    }
   }
 
   &-info {
     @apply bg-blue-400 text-white hover:bg-blue-500;
+
+    html.dark & {
+      @apply bg-blue-500 hover:bg-blue-600;
+    }
   }
 }
 
@@ -239,63 +307,68 @@
 
 .popup-header-container {
   @apply flex items-center justify-between p-4 border-b border-gray-200;
+
+  html.dark & {
+    @apply border-gray-700;
+  }
 }
 
 .popup-header-title {
   @apply text-lg font-semibold;
+
+  html.dark & {
+    @apply text-gray-300;
+  }
 }
 
-.close-button {
-  @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors;
-}
-
-/* Chart popup specific styles */
 .chart-menu {
   @apply w-full max-w-2xl;
 }
 
-/* Chart preview container */
 .preview-container {
   @apply bg-gray-50 rounded-lg flex items-center justify-center p-4;
   min-height: 300px;
+
+  html.dark & {
+    @apply bg-gray-700;
+  }
 }
 
-/* Data editor container */
 .data-editor-container {
   @apply bg-white rounded-lg border border-gray-200 p-4;
   max-height: 400px;
   overflow-y: auto;
+
+  html.dark & {
+    @apply bg-gray-800 border-gray-700;
+  }
 }
 
-/* Buttons */
 .popup-button {
   @apply px-3 py-1.5 rounded-md transition-colors flex gap-0.5 flex-row items-center focus:outline-none focus:ring-2 focus:ring-offset-2 w-full;
 
   &.default {
     @apply text-sm text-gray-700 bg-gray-100 hover:bg-gray-200;
+
+    html.dark & {
+      @apply text-gray-300 bg-gray-700 hover:bg-gray-600;
+    }
   }
 
-  /* Дефолтные стили */
-  @apply bg-gray-100 text-gray-700
-  hover:bg-gray-200
-  active:bg-gray-300
-  focus:ring-gray-500
-  disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed;
-
   &-primary {
-    @apply bg-blue-500 text-white
-    hover:bg-blue-600
-    active:bg-blue-700
-    focus:ring-blue-500
-    disabled:bg-blue-300 disabled:cursor-not-allowed;
+    @apply bg-blue-500 text-white hover:bg-blue-600 active:bg-blue-700 focus:ring-blue-500 disabled:bg-blue-300 disabled:cursor-not-allowed;
+
+    html.dark & {
+      @apply bg-blue-600 hover:bg-blue-700 active:bg-blue-800;
+    }
   }
 
   &-secondary {
-    @apply text-gray-600
-    hover:text-gray-800
-    active:text-gray-900
-    focus:ring-gray-500
-    disabled:text-gray-400 disabled:cursor-not-allowed;
+    @apply text-gray-600 hover:text-gray-800 active:text-gray-900 focus:ring-gray-500 disabled:text-gray-400 disabled:cursor-not-allowed;
+
+    html.dark & {
+      @apply text-gray-300 hover:text-gray-200 active:text-gray-100;
+    }
   }
 }
 
@@ -305,6 +378,10 @@
 
 .color-input {
   @apply flex-1 px-3 py-1.5 text-sm border rounded;
+
+  html.dark & {
+    @apply border-gray-600;
+  }
 }
 
 .error-modal {
@@ -316,5 +393,13 @@
 
   p {
     @apply text-gray-700 mb-0;
+
+    html.dark & {
+      @apply text-gray-300;
+    }
   }
+}
+
+input {
+  background-color: revert;
 }

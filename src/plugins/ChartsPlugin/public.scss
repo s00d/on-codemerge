@@ -1,5 +1,10 @@
-/* Chart container */
 .chart-container {
-  @apply relative bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden;
+  @apply relative rounded-lg shadow-sm border border-gray-200 overflow-hidden;
   min-height: 300px;
+
+  html.dark & {
+    @apply border-gray-700;
+    background-color: #1f2937;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
 }

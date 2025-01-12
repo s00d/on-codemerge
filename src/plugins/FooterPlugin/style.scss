@@ -1,17 +1,41 @@
 .editor-footer {
   @apply mt-0 rounded-b-lg overflow-hidden shadow-sm transition-colors duration-200;
 
+  .editor-footer-block {
+    @apply flex items-center justify-between px-4 py-2 bg-gray-50 border-t border-gray-200 text-sm text-gray-600;
+
+    html.dark & {
+      @apply bg-gray-800 border-gray-700 text-gray-300; /* Темная тема */
+    }
+  }
+
+  html.dark & {
+    @apply bg-gray-800;
+  }
+
   .stat-label {
     @apply text-gray-500;
+
+    html.dark & {
+      @apply text-gray-400;
+    }
   }
 
   .stat-value {
     @apply font-medium text-gray-700;
+
+    html.dark & {
+      @apply text-gray-300;
+    }
   }
 
   /* Hover effects */
   &:hover {
     @apply bg-gray-100;
+
+    html.dark & {
+      @apply bg-gray-700;
+    }
   }
 
   /* Responsive adjustments */

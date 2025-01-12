@@ -1,42 +1,84 @@
-/* Base toolbar button */
 .editor-toolbar {
   @apply z-[11] flex flex-wrap gap-1 p-2 bg-gray-50 border-b border-gray-300 sticky top-0 rounded-t-lg;
+
+  html.dark & {
+    @apply bg-gray-800 border-gray-700;
+  }
 }
+
 .toolbar-button {
   @apply p-2 rounded transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500;
 
+  html.dark & {
+    @apply text-gray-300 focus:ring-indigo-400;
+  }
+
   &:not(:disabled) {
     @apply hover:bg-gray-200 cursor-pointer;
+
+    html.dark & {
+      @apply hover:bg-gray-700;
+    }
   }
 
   &:focus {
     @apply outline-none ring-0;
   }
 
-  // Настраиваем фокусное состояние для клавиатуры
   &:focus-visible {
     @apply ring-2 ring-blue-500;
+
+    html.dark & {
+      @apply ring-indigo-400;
+    }
   }
 
   &:disabled {
     @apply cursor-default;
     pointer-events: none;
+
+    html.dark & {
+      @apply text-gray-400;
+    }
   }
 
   &.active {
-    @apply bg-blue-100 text-blue-800; // Фон и текст для активной кнопки
+    @apply bg-blue-100 text-blue-800;
+
+    html.dark & {
+      @apply bg-indigo-900 text-indigo-200;
+    }
 
     &:hover {
-      @apply bg-blue-200; // Фон при наведении на активную кнопку
+      @apply bg-blue-200;
+
+      html.dark & {
+        @apply bg-indigo-800;
+      }
+    }
+  }
+
+  svg {
+    @apply w-5 h-5;
+
+    path {
+      @apply fill-current; /* Используем текущий цвет текста для stroke и fill */
+    }
+
+    html.dark & {
+      @apply text-gray-300;
     }
   }
 }
 
-/* Toolbar divider */
 .toolbar-divider {
   @apply p-0 mx-1;
 
   svg {
     @apply text-gray-300;
+
+    html.dark & {
+      @apply text-gray-500;
+    }
   }
 }

@@ -215,9 +215,7 @@ export class FormBuilderPlugin implements Plugin {
     let lasId = 1;
 
     fields.forEach((fieldConfig, index) => {
-      const fieldContainer = createContainer(
-        'field-container mb-4 p-3 border border-gray-200 rounded bg-gray-50'
-      );
+      const fieldContainer = createContainer('field-container mb-4 p-3 border rounded');
 
       // Массив конфигураций для полей
       const fieldConfigurations = [

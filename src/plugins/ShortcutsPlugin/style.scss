@@ -2,8 +2,12 @@
   @apply max-w-sm w-full;
 
   kbd {
-    @apply inline-flex items-center justify-center min-w-[2rem] font-mono text-xs font-medium;
+    @apply inline-flex items-center justify-center min-w-[2rem] font-mono text-xs font-medium text-gray-700 bg-gray-100;
     font-feature-settings: 'tnum';
+
+    html.dark & {
+      @apply text-gray-300 bg-gray-700; /* Темная тема для kbd */
+    }
   }
 
   li {
@@ -11,17 +15,67 @@
 
     &:hover {
       @apply bg-gray-50 -mx-2 px-2 rounded;
+
+      html.dark & {
+        @apply bg-gray-700; /* Темная тема для hover */
+      }
     }
   }
 
   h3 {
     @apply text-sm font-medium text-gray-900 mb-3;
+
+    html.dark & {
+      @apply text-gray-100; /* Темная тема для заголовка */
+    }
   }
 
   /* Responsive */
   @media (max-width: 640px) {
     .grid {
       @apply grid-cols-1;
+    }
+  }
+}
+
+.shortcuts-content {
+  .shortcuts-grid {
+    @apply grid grid-cols-1 gap-4;
+
+    .shortcuts-category {
+      @apply text-lg font-semibold block mb-2 text-gray-900;
+
+      html.dark & {
+        @apply text-gray-100; /* Темная тема для заголовка категории */
+      }
+    }
+
+    .shortcuts-group {
+      @apply space-y-2;
+
+      .shortcut {
+        @apply flex items-center justify-between text-sm;
+
+        .shortcut-icon {
+          @apply text-gray-600;
+
+          html.dark & {
+            @apply text-gray-400; /* Темная тема для иконки */
+          }
+        }
+
+        .shortcut-description {
+          @apply text-gray-600;
+
+          html.dark & {
+            @apply text-gray-400; /* Темная тема для описания */
+          }
+        }
+
+        .shortcut-key {
+          @apply px-2 py-1 rounded font-mono text-xs border border-current;
+        }
+      }
     }
   }
 }

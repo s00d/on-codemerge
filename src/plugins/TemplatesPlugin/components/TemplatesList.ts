@@ -65,7 +65,7 @@ export class TemplatesList {
     templateItem.dataset.templateId = template.id;
 
     const templateContent = createContainer(
-      'flex items-center justify-between p-3 bg-gray-50 hover:bg-gray-100 rounded-lg cursor-pointer'
+      'flex items-center justify-between p-3 rounded-lg cursor-pointer'
     );
 
     // Левая часть: название и дата обновления

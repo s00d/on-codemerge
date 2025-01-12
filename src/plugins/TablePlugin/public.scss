@@ -4,6 +4,12 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Легкая тень для таблицы
   background-color: #ffffff; // Белый фон таблицы
 
+  html.dark & {
+    border-color: #374151; // Рамка для темной темы
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); // Тень для темной темы
+    background-color: #1f2937; // Темный фон таблицы
+  }
+
   // Стили для ячеек таблицы
   td,
   th {
@@ -12,8 +18,16 @@
     cursor: text;
     transition: background-color 0.2s ease;
 
+    html.dark & {
+      border-color: #374151; // Граница ячеек для темной темы
+    }
+
     &:hover {
       @apply bg-gray-100; // Эффект при наведении на ячейку
+
+      html.dark & {
+        @apply bg-gray-700; // Эффект при наведении на ячейку в темной теме
+      }
     }
 
     p {
@@ -26,19 +40,36 @@
   th {
     @apply bg-gray-50 font-semibold text-gray-700;
     border-bottom: 2px solid #d0d0d0; // Более толстая нижняя граница для заголовков
+
+    html.dark & {
+      @apply bg-gray-800 text-gray-300; // Темный фон и текст для заголовков
+      border-bottom-color: #4b5563; // Граница для заголовков в темной теме
+    }
   }
 
   // Стили для четных и нечетных строк (зебра)
   tr:nth-child(even) {
     background-color: #f9f9f9; // Светлый фон для четных строк
+
+    html.dark & {
+      background-color: #374151; // Темный фон для четных строк
+    }
   }
 
   tr:nth-child(odd) {
     background-color: #ffffff; // Белый фон для нечетных строк
+
+    html.dark & {
+      background-color: #1f2937; // Темный фон для нечетных строк
+    }
   }
 
   // Стили для строки при наведении
   tr:hover {
     background-color: #f1f1f1; // Эффект при наведении на строку
+
+    html.dark & {
+      background-color: #4b5563; // Эффект при наведении на строку в темной теме
+    }
   }
 }

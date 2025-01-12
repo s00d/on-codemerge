@@ -1,15 +1,27 @@
 .generated-form {
   @apply flex flex-col gap-3 p-4 border border-gray-200 rounded bg-gray-50;
 
+  html.dark & {
+    @apply border-gray-700 bg-gray-800; /* Темная тема для формы */
+  }
+
   .form-field {
     @apply flex flex-col gap-2;
 
     .form-input {
       @apply w-full p-2 border bg-white border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all;
+
+      html.dark & {
+        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input */
+      }
     }
 
     label {
       @apply text-sm font-medium text-gray-700;
+
+      html.dark & {
+        @apply text-gray-300; /* Темная тема для label */
+      }
     }
 
     input,
@@ -17,16 +29,32 @@
     select {
       @apply w-full p-2 border border-gray-200 rounded text-sm;
 
+      html.dark & {
+        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input, textarea, select */
+      }
+
       &:focus {
         @apply outline-none border-blue-500 ring-2 ring-blue-200;
+
+        html.dark & {
+          @apply border-blue-500 ring-blue-700; /* Темная тема для focus */
+        }
       }
     }
 
     button {
       @apply bg-blue-500 text-white border-none py-2 px-4 rounded cursor-pointer text-sm;
 
+      html.dark & {
+        @apply bg-blue-600; /* Темная тема для кнопки */
+      }
+
       &:hover {
         @apply bg-blue-600;
+
+        html.dark & {
+          @apply bg-blue-700; /* Темная тема для hover */
+        }
       }
     }
   }
@@ -35,7 +63,15 @@
 .button-link {
   @apply bg-blue-500 text-white border-none py-2 px-4 rounded cursor-pointer text-sm;
 
+  html.dark & {
+    @apply bg-blue-600; /* Темная тема для кнопки */
+  }
+
   &:hover {
     @apply bg-blue-600;
+
+    html.dark & {
+      @apply bg-blue-700; /* Темная тема для hover */
+    }
   }
 }

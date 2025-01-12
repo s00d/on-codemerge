@@ -2,21 +2,41 @@
   .add-field-button {
     @apply bg-blue-500 text-white border-none py-2 px-4 rounded cursor-pointer text-sm;
 
+    html.dark & {
+      @apply bg-blue-600; /* Темная тема для кнопки */
+    }
+
     &:hover {
       @apply bg-blue-600;
+
+      html.dark & {
+        @apply bg-blue-700; /* Темная тема для hover */
+      }
     }
   }
 
   .field-container {
     @apply mb-4 p-3 border border-gray-200 rounded bg-gray-50;
 
+    html.dark & {
+      @apply border-gray-700 bg-gray-800; /* Темная тема для контейнера поля */
+    }
+
     .field-type-select,
     .field-label-input,
     .field-regex-input {
       @apply w-full p-2 mb-2 border border-gray-200 rounded text-sm;
 
+      html.dark & {
+        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input */
+      }
+
       &:focus {
         @apply outline-none border-blue-500 ring-2 ring-blue-200;
+
+        html.dark & {
+          @apply border-blue-500 ring-blue-700; /* Темная тема для focus */
+        }
       }
     }
 
@@ -27,15 +47,23 @@
     .remove-field-button {
       @apply bg-red-500 text-white border-none py-1.5 px-3 rounded cursor-pointer text-sm;
 
+      html.dark & {
+        @apply bg-red-600; /* Темная тема для кнопки */
+      }
+
       &:hover {
         @apply bg-red-600;
+
+        html.dark & {
+          @apply bg-red-700; /* Темная тема для hover */
+        }
       }
     }
   }
 }
 
 .options-container {
-  @apply mt-2; // По умолчанию скрыт
+  @apply mt-2;
 
   .option-container {
     @apply flex gap-2 items-center;
@@ -43,16 +71,32 @@
     .option-input {
       @apply flex-1 p-1.5 border border-gray-200 rounded text-sm;
 
+      html.dark & {
+        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input */
+      }
+
       &:focus {
         @apply outline-none border-blue-500 ring-2 ring-blue-200;
+
+        html.dark & {
+          @apply border-blue-500 ring-blue-700; /* Темная тема для focus */
+        }
       }
     }
 
     .remove-option-button {
       @apply bg-red-500 text-white border-none py-1 px-2 rounded cursor-pointer text-xs;
 
+      html.dark & {
+        @apply bg-red-600; /* Темная тема для кнопки */
+      }
+
       &:hover {
         @apply bg-red-600;
+
+        html.dark & {
+          @apply bg-red-700; /* Темная тема для hover */
+        }
       }
     }
   }
@@ -63,9 +107,17 @@
 }
 
 .add-option-button {
-  @apply bg-blue-500 text-white border-none py-1.5 px-3 rounded cursor-pointer text-sm mt-2 hidden; // По умолчанию скрыт
+  @apply bg-blue-500 text-white border-none py-1.5 px-3 rounded cursor-pointer text-sm mt-2 hidden;
+
+  html.dark & {
+    @apply bg-blue-600; /* Темная тема для кнопки */
+  }
 
   &:hover {
     @apply bg-blue-600;
+
+    html.dark & {
+      @apply bg-blue-700; /* Темная тема для hover */
+    }
   }
 }

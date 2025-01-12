@@ -47,7 +47,7 @@ export class ShortcutsMenu {
       'w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500';
     this.container.appendChild(searchInput);
 
-    const grid = createContainer('grid grid-cols-1 gap-4');
+    const grid = createContainer('shortcuts-grid');
     this.container.appendChild(grid);
 
     // Инициализация данных
@@ -95,10 +95,10 @@ export class ShortcutsMenu {
     const categoryContainer = createContainer();
 
     // Заголовок категории
-    const categoryTitle = createSpan('text-lg font-semibold block mb-2', category);
+    const categoryTitle = createSpan('shortcuts-category', category);
 
     // Список шорткатов
-    const shortcutsList = createUl('space-y-2');
+    const shortcutsList = createUl('shortcuts-group');
 
     shortcuts.forEach((shortcut) => {
       const shortcutItem = this.renderShortcut(shortcut);
@@ -115,14 +115,11 @@ export class ShortcutsMenu {
 
   // Метод для отображения шортката
   private renderShortcut(shortcut: any): HTMLElement {
-    const shortcutItem = createLi('flex items-center justify-between text-sm');
+    const shortcutItem = createLi('shortcut');
 
-    const icon = createSpan('text-gray-600', shortcut.icon);
-    const description = createSpan('text-gray-600', shortcut.description);
-    const keys = createKbd(
-      'px-2 py-1 bg-gray-100 rounded text-gray-800 font-mono text-xs',
-      this.formatShortcut(shortcut.keys)
-    );
+    const icon = createSpan('shortcut-icon', shortcut.icon);
+    const description = createSpan('shortcut-description', shortcut.description);
+    const keys = createKbd('shortcut-key', this.formatShortcut(shortcut.keys));
 
     // Сборка элемента
     shortcutItem.appendChild(icon);
