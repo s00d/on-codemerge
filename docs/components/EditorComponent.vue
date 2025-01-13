@@ -56,6 +56,7 @@ import {
   SpellCheckerPlugin,
   BlockStylePlugin,
   MathPlugin,
+  AIAssistantPlugin,
 } from '../../src/app';
 
 export default {
@@ -115,6 +116,7 @@ export default {
         SpellCheckerPlugin,
         BlockStylePlugin,
         MathPlugin,
+        AIAssistantPlugin,
       };
 
       // Если activePlugins пустой, регистрируем все плагины

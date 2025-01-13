@@ -79,6 +79,7 @@ import pdfIcon from './pdf.svg?raw';
 import spellCheckIcon from './spell-check.svg?raw';
 import styleIcon from './style.svg?raw';
 import mathIcon from './math.svg?raw';
+import aiAssistantIcon from './ai-assistant.svg?raw';
 
 export {
   alignCenterIcon,
@@ -162,4 +163,5 @@ export {
   spellCheckIcon,
   styleIcon,
   mathIcon,
+  aiAssistantIcon,
 };

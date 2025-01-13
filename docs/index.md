@@ -222,6 +222,7 @@ Below is a list of all available plugins for **On-Codemerge** and their function
 | **SpellCheckerPlugin**   | Spell Checker plugin                                                    |
 | **BlockStylePlugin**     | Class and style editor                                                  |
 | **MathPlugin**           | Math Plugin                                                             |
+| **AIAssistantPlugin**    | AI Assistant Plugin                                                     |
 
 
 ## Plugin Configuration

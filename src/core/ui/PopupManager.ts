@@ -22,7 +22,9 @@ export interface PopupItem {
     | 'text'
     | 'custom'
     | 'button'
-    | 'divider'; // Тип элемента
+    | 'divider'
+    | 'progress'
+    | 'loader'; // Тип элемента
   label?: string; // Подпись к элементу
   icon?: string; // Иконка для элемента
   className?: string;
@@ -52,6 +54,7 @@ export class PopupManager {
   private popup: HTMLElement;
   private header: HTMLElement | null = null;
   private content: HTMLElement;
+  private overlay: HTMLElement;
   private footer: PopupFooter | null = null;
   private isVisible = false;
 
@@ -60,6 +63,7 @@ export class PopupManager {
 
     this.popup = this.createPopup(className);
     this.content = this.createContent();
+    this.overlay = this.createOverlay();
 
     if (options.title) {
       this.header = new PopupHeader(options.title, () => this.hide()).getElement();
@@ -78,10 +82,11 @@ export class PopupManager {
       this.setContent(this.createContentFromItems(items));
     }
 
+    editor.getInnerContainer().appendChild(this.overlay);
     editor.getInnerContainer().appendChild(this.popup);
 
     if (closeOnClickOutside) {
-      document.addEventListener('mousedown', (e) => {
+      this.overlay.addEventListener('mousedown', (e) => {
         if (this.isVisible && !this.popup.contains(e.target as Node)) {
           this.hide();
         }
@@ -126,6 +131,21 @@ export class PopupManager {
       let inputElement: HTMLElement;
 
       switch (item.type) {
+        case 'progress':
+          inputElement = document.createElement('div');
+          inputElement.className = `popup-progress ${item.className || ''}`;
+          const progressBar = document.createElement('div');
+          progressBar.className = 'popup-progress-bar';
+          progressBar.style.width = `${item.value || 0}%`;
+          inputElement.appendChild(progressBar);
+          break;
+        case 'loader':
+          inputElement = document.createElement('div');
+          inputElement.className = `popup-loader ${item.className || ''}`;
+          const spinner = document.createElement('div');
+          spinner.className = 'popup-loader-spinner';
+          inputElement.appendChild(spinner);
+          break;
         case 'input':
           inputElement = document.createElement('input');
           inputElement.setAttribute('type', 'text');
@@ -149,13 +169,17 @@ export class PopupManager {
           break;
         case 'list':
           inputElement = document.createElement('select');
-          inputElement.className = `popup-item-input ${item.className || ''}`; // Добавляем класс из PopupItem
+          inputElement.className = `popup-item-input ${item.className || ''}`;
           item.options?.forEach((option) => {
             const optionElement = document.createElement('option');
             optionElement.value = option;
             optionElement.textContent = option;
+            if (item.value && option === item.value) {
+              optionElement.selected = true;
+            }
             inputElement.appendChild(optionElement);
           });
+
           break;
         case 'textarea':
           inputElement = document.createElement('textarea');
@@ -327,7 +351,12 @@ export class PopupManager {
           throw new Error(`Unsupported item type: ${item.type}`);
       }
 
-      if (item.onChange && item.type !== 'button') {
+      if (
+        item.onChange &&
+        item.type !== 'button' &&
+        item.type !== 'progress' &&
+        item.type !== 'loader'
+      ) {
         inputElement.addEventListener('change', (e) => {
           let value: string | boolean | number;
           if (item.type === 'checkbox') {
@@ -337,6 +366,20 @@ export class PopupManager {
           } else {
             value = (e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value;
           }
+
+          item.onChange!(value, e);
+        });
+
+        inputElement.addEventListener('input', (e) => {
+          let value: string | boolean | number;
+          if (item.type === 'checkbox') {
+            value = (e.target as HTMLInputElement).checked;
+          } else if (item.type === 'range' || item.type === 'number') {
+            value = parseFloat((e.target as HTMLInputElement).value);
+          } else {
+            value = (e.target as HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement).value;
+          }
+
           item.onChange!(value, e);
         });
       }
@@ -346,6 +389,20 @@ export class PopupManager {
     });
 
     return container;
+  }
+
+  public visibleShow(id: string): void {
+    const loader = this.popup.querySelector(`#${id}`) as HTMLElement;
+    if (loader) {
+      loader.style.display = 'block';
+    }
+  }
+
+  public visibleHide(id: string): void {
+    const loader = this.popup.querySelector(`#${id}`) as HTMLElement;
+    if (loader) {
+      loader.style.display = 'none';
+    }
   }
 
   /**
@@ -453,6 +510,23 @@ export class PopupManager {
     }
   }
 
+  private createOverlay(): HTMLElement {
+    const overlay = document.createElement('div');
+    overlay.className = 'popup-overlay'; // Применяем SCSS класс
+    return overlay;
+  }
+
+  public rerender(items: PopupItem[]): void {
+    // Очищаем текущее содержимое
+    this.content.innerHTML = '';
+
+    // Создаем новое содержимое на основе переданных items
+    const newContent = this.createContentFromItems(items);
+
+    // Добавляем новое содержимое в контейнер
+    this.content.appendChild(newContent);
+  }
+
   public updateFooterButtonCallback(buttonLabel: string, newCallback: () => void): void {
     if (this.footer) {
       this.footer.updateButtonCallback(buttonLabel, newCallback);
@@ -476,7 +550,10 @@ export class PopupManager {
 
   public show(x?: number, y?: number): void {
     this.popup.style.display = 'flex';
+    this.overlay.style.display = 'block';
     this.isVisible = true;
+
+    document.body.classList.add('popup-open');
 
     if (typeof x === 'number' && typeof y === 'number') {
       this.popup.style.position = 'fixed';
@@ -501,7 +578,10 @@ export class PopupManager {
 
   public hide(): void {
     this.popup.style.display = 'none';
+    this.overlay.style.display = 'none';
     this.isVisible = false;
+
+    document.body.classList.remove('popup-open');
   }
 
   public isOpen(): boolean {
