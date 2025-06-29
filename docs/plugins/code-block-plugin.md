@@ -242,13 +242,6 @@ const editor = new HTMLEditor(container);
 editor.use(new CodeBlockPlugin());
 ```
 
-## Demo
-<script setup>
-import EditorComponent from '../components/EditorComponent.vue';
-</script>
-
-<EditorComponent :activePlugins="['CodeBlockPlugin']" />
-
 ## API Reference
 
 ### Code Block Creation

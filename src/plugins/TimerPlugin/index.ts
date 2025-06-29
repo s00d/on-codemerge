@@ -13,9 +13,7 @@ import { createLineBreak } from '../../utils/helpers';
 
 export class TimerPlugin implements Plugin {
   name = 'timer';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+D', description: 'Insert timer', command: 'timer', icon: '⏱️' },
-  ];
+  hotkeys = [{ keys: 'Ctrl+Alt+D', description: 'Insert timer', command: 'timer', icon: '⏱️' }];
   private editor: HTMLEditor | null = null;
   private menu: TimerMenu | null = null;
   private manager!: TimerManager;
@@ -60,7 +58,7 @@ export class TimerPlugin implements Plugin {
 
     // Обработка кликов по таймерам
     this.editor.getContainer().addEventListener('click', (e) => this.handleTimerClick(e));
-    
+
     // Обработка контекстного меню
     this.editor.getContainer().addEventListener('contextmenu', (e) => this.handleContextMenu(e));
   }
@@ -68,7 +66,7 @@ export class TimerPlugin implements Plugin {
   private handleTimerClick(e: MouseEvent): void {
     const target = e.target as Element;
     const timerElement = target.closest('.timer-widget');
-    
+
     if (!timerElement) return;
 
     const timerId = timerElement.getAttribute('data-timer-id');
@@ -84,11 +82,11 @@ export class TimerPlugin implements Plugin {
   private handleContextMenu(e: MouseEvent): void {
     const target = e.target as Element;
     const timerElement = target.closest('.timer-widget');
-    
+
     if (!timerElement) return;
 
     e.preventDefault();
-    
+
     const timerId = timerElement.getAttribute('data-timer-id');
     if (!timerId) return;
 
@@ -108,10 +106,14 @@ export class TimerPlugin implements Plugin {
       case 'copy-timer':
         try {
           this.manager.copyTimer(target.id);
-          this.editor?.showSuccessNotification(this.editor?.t('Timer copied successfully') || 'Timer copied successfully');
+          this.editor?.showSuccessNotification(
+            this.editor?.t('Timer copied successfully') || 'Timer copied successfully'
+          );
           this.refreshTimers();
         } catch (error) {
-          this.editor?.showErrorNotification(this.editor?.t('Failed to copy timer') || 'Failed to copy timer');
+          this.editor?.showErrorNotification(
+            this.editor?.t('Failed to copy timer') || 'Failed to copy timer'
+          );
         }
         break;
       case 'export-timer':
@@ -153,7 +155,7 @@ export class TimerPlugin implements Plugin {
     if (range) {
       const timerElement = document.createElement('div');
       timerElement.innerHTML = timerHtml;
-      
+
       // Получаем элемент таймера и скрипт
       const timerNode = timerElement.firstElementChild;
       const scriptNode = timerElement.querySelector('script');
@@ -161,13 +163,13 @@ export class TimerPlugin implements Plugin {
       if (timerNode) {
         range.deleteContents();
         range.insertNode(timerNode);
-        
+
         // Добавляем скрипт после элемента таймера
         if (scriptNode) {
           scriptNode.setAttribute('data-timer-id', timerData.id);
           range.insertNode(scriptNode);
         }
-        
+
         range.collapse(false);
         this.editor.getSelector()?.saveSelection();
       }
@@ -193,21 +195,21 @@ export class TimerPlugin implements Plugin {
       const updatedHtml = this.manager.generateTimerHTML(timerData);
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = updatedHtml;
-      
+
       // Получаем новый элемент таймера и скрипт
       const newTimerElement = tempDiv.firstElementChild;
       const newScript = tempDiv.querySelector('script');
-      
+
       if (newTimerElement && element.parentNode) {
         // Удаляем старый скрипт, если он есть
         const oldScript = element.parentNode.querySelector(`script[data-timer-id="${timerId}"]`);
         if (oldScript) {
           oldScript.remove();
         }
-        
+
         // Заменяем элемент таймера
         element.parentNode.replaceChild(newTimerElement, element);
-        
+
         // Добавляем новый скрипт, если он есть
         if (newScript) {
           newScript.setAttribute('data-timer-id', timerId);
@@ -251,7 +253,9 @@ export class TimerPlugin implements Plugin {
           try {
             const timer = JSON.parse(e.target?.result as string);
             this.manager.importTimer(timer);
-            this.editor?.showSuccessNotification(this.editor?.t('Timer imported successfully') || 'Timer imported successfully');
+            this.editor?.showSuccessNotification(
+              this.editor?.t('Timer imported successfully') || 'Timer imported successfully'
+            );
             this.refreshTimers();
           } catch (error) {
             this.editor?.showErrorNotification(this.editor?.t('Import failed') || 'Import failed');
@@ -283,4 +287,4 @@ export class TimerPlugin implements Plugin {
     this.manager = null!;
     this.toolbarButton = null;
   }
-} 
+}

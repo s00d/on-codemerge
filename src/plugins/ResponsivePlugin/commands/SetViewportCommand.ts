@@ -1,7 +1,7 @@
 import type { Command } from '../../../core/commands/Command';
 import type { HTMLEditor } from '../../../core/HTMLEditor';
 import type { Viewport } from '../types';
-import { ResponsivePlugin } from '../index';
+import type { ResponsivePlugin } from '../index';
 
 export class SetViewportCommand implements Command {
   name = 'setViewport';
@@ -44,7 +44,7 @@ export class SetViewportCommand implements Command {
 
     const plugins = this.editor.getPlugins();
     const responsivePlugin = plugins.get('responsive') as ResponsivePlugin;
-    
+
     if (responsivePlugin && responsivePlugin.viewportManager) {
       responsivePlugin.viewportManager.setViewport(container, this.previousViewport);
     }
@@ -58,9 +58,9 @@ export class SetViewportCommand implements Command {
 
     const plugins = this.editor.getPlugins();
     const responsivePlugin = plugins.get('responsive') as ResponsivePlugin;
-    
+
     if (responsivePlugin && responsivePlugin.viewportManager) {
       responsivePlugin.viewportManager.setViewport(container, this.viewport);
     }
   }
-} 
+}

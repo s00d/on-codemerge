@@ -14,7 +14,12 @@ export class CalendarMenu {
   private onSelect: ((calendar: Calendar) => void) | null = null;
   private onImport?: () => void;
 
-  constructor(manager: CalendarManager, editor: HTMLEditor, onImport?: () => void, categoryManager?: CategoryManager) {
+  constructor(
+    manager: CalendarManager,
+    editor: HTMLEditor,
+    onImport?: () => void,
+    categoryManager?: CategoryManager
+  ) {
     this.editor = editor;
     this.manager = manager;
     this.categoryManager = categoryManager || new CategoryManager();
@@ -64,7 +69,7 @@ export class CalendarMenu {
       `;
       container.appendChild(emptyState);
     } else {
-      calendars.forEach(calendar => {
+      calendars.forEach((calendar) => {
         const calendarItem = this.createCalendarItem(calendar);
         container.appendChild(calendarItem);
       });

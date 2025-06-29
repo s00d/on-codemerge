@@ -149,8 +149,9 @@ export class ShortcutsMenu {
 
     const shortcutItems = shortcutsGrid.querySelectorAll('.shortcut-item');
 
-    shortcutItems.forEach(item => {
-      const description = item.querySelector('.shortcut-description')?.textContent?.toLowerCase() || '';
+    shortcutItems.forEach((item) => {
+      const description =
+        item.querySelector('.shortcut-description')?.textContent?.toLowerCase() || '';
       const keys = item.querySelector('.shortcut-key')?.textContent?.toLowerCase() || '';
 
       const matches = description.includes(searchTerm) || keys.includes(searchTerm);

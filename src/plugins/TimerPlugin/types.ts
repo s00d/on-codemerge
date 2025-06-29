@@ -39,4 +39,4 @@ export interface TimerTimeLeft {
   minutes: number;
   seconds: number;
   isExpired: boolean;
-} 
+}

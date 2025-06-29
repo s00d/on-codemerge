@@ -8,21 +8,21 @@
   transition: all 0.2s ease-in-out;
   background: #fff;
   min-height: 40px;
-  
+
   &:hover {
     border-color: #e5e7eb;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
-  
+
   &.active {
     border-color: #2563eb;
     box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
-    
+
     .block-content {
       background: #f8fafc;
       border-radius: 4px;
     }
-    
+
     &::before {
       content: '';
       position: absolute;
@@ -36,7 +36,7 @@
       animation: pulse 2s infinite;
     }
   }
-  
+
   /* Типы блоков */
   &.text-block {
     .block-content {
@@ -50,31 +50,31 @@
       background: transparent;
       width: 100%;
       box-sizing: border-box;
-      
+
       &:focus {
         outline: none;
         background: #f9fafb;
       }
-      
-      &[contenteditable="true"] {
+
+      &[contenteditable='true'] {
         cursor: text;
       }
-      
+
       // Предотвращаем сброс позиции курсора
       &::selection {
         background: #dbeafe;
       }
-      
+
       &::-moz-selection {
         background: #dbeafe;
       }
     }
   }
-  
+
   &.container-block {
     background: #f8fafc;
     border: 2px dashed #d1d5db;
-    
+
     .block-content {
       padding: 16px;
       text-align: center;
@@ -82,29 +82,29 @@
       font-style: italic;
     }
   }
-  
+
   &.split-container {
     display: flex;
     gap: 16px;
     padding: 16px;
     background: #f8fafc;
     border: 2px dashed #d1d5db;
-    
+
     &.horizontal {
       flex-direction: row;
-      
+
       > .editor-block {
         flex: 1;
         margin: 0;
       }
     }
-    
+
     &.vertical {
       flex-direction: column;
-      
+
       > .editor-block {
         margin: 0 0 8px 0;
-        
+
         &:last-child {
           margin-bottom: 0;
         }
@@ -115,7 +115,8 @@
 
 /* Анимации */
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -130,7 +131,7 @@
   border-radius: 2px;
   opacity: 0;
   transition: opacity 0.2s;
-  
+
   &:hover {
     opacity: 1;
   }
@@ -146,20 +147,20 @@
     padding: 8px 12px;
     border-radius: 4px;
     transition: background-color 0.2s;
-    
+
     &:hover {
       background-color: #f3f4f6;
     }
-    
+
     &.danger {
       color: #dc2626;
-      
+
       &:hover {
         background-color: #fef2f2;
       }
     }
   }
-  
+
   .submenu {
     margin-left: 8px;
     border-left: 2px solid #e5e7eb;
@@ -168,19 +169,19 @@
 }
 
 /* Состояния для разных типов блоков */
-.editor-block[data-block-type="text"] {
+.editor-block[data-block-type='text'] {
   .block-content {
     cursor: text;
   }
 }
 
-.editor-block[data-block-type="container"] {
+.editor-block[data-block-type='container'] {
   .block-content {
     cursor: pointer;
   }
 }
 
-.editor-block[data-block-type="split"] {
+.editor-block[data-block-type='split'] {
   .block-content {
     cursor: default;
   }
@@ -190,21 +191,21 @@
 @media (max-width: 768px) {
   .editor-block {
     margin: 4px 0;
-    
+
     &.split-container {
       flex-direction: column !important;
       gap: 8px;
       padding: 8px;
-      
+
       > .editor-block {
         margin: 0 0 4px 0;
-        
+
         &:last-child {
           margin-bottom: 0;
         }
       }
     }
-    
+
     .block-content {
       padding: 8px 12px;
       font-size: 13px;
@@ -217,30 +218,30 @@
   .editor-block {
     background: #1f2937;
     color: #f9fafb;
-    
+
     &:hover {
       border-color: #4b5563;
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     }
-    
+
     &.active {
       border-color: #3b82f6;
       box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
     }
-    
+
     &.container-block {
       background: #374151;
       border-color: #6b7280;
     }
-    
+
     &.split-container {
       background: #374151;
       border-color: #6b7280;
     }
-    
+
     .block-content {
       color: #f9fafb;
-      
+
       &:focus {
         background: #374151;
       }

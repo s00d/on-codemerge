@@ -1,3 +1,3 @@
 export { CalendarManager } from './CalendarManager';
 export { CategoryManager } from './CategoryManager';
-export { ReminderService } from './ReminderService'; 
+export { ReminderService } from './ReminderService';

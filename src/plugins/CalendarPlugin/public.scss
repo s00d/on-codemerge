@@ -96,7 +96,7 @@
 
 .calendar-event {
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -179,17 +179,17 @@
   padding: 2px 6px;
   border-radius: 4px;
   text-transform: uppercase;
-  
+
   &.priority-high {
     background-color: #fef2f2;
     color: #dc2626;
   }
-  
+
   &.priority-medium {
     background-color: #fffbeb;
     color: #d97706;
   }
-  
+
   &.priority-low {
     background-color: #f0fdf4;
     color: #16a34a;
@@ -406,12 +406,12 @@ html.dark .event-priority {
     background-color: #7f1d1d;
     color: #fca5a5;
   }
-  
+
   &.priority-medium {
     background-color: #78350f;
     color: #fcd34d;
   }
-  
+
   &.priority-low {
     background-color: #14532d;
     color: #86efac;
@@ -449,4 +449,4 @@ html.dark .event-date {
 
 html.dark .event-time {
   color: #9ca3af;
-} 
+}

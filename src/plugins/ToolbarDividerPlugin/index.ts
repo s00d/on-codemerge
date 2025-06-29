@@ -4,7 +4,7 @@ import './public.scss';
 import type { Plugin } from '../../core/Plugin';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { dividerIcon } from '../../icons';
-import {HTMLEditor} from "../../core/HTMLEditor.ts";
+import type { HTMLEditor } from '../../core/HTMLEditor.ts';
 
 let lastIndex = 0;
 

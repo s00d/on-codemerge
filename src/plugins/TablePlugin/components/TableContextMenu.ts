@@ -680,7 +680,8 @@ export class TableContextMenu {
   private async loadAndFillTable(table: HTMLElement, options: any): Promise<void> {
     try {
       // Показываем индикатор загрузки
-      table.innerHTML = '<div class="table-row"><div class="table-cell" style="text-align:center;padding:20px;">Загрузка данных...</div></div>';
+      table.innerHTML =
+        '<div class="table-row"><div class="table-cell" style="text-align:center;padding:20px;">Загрузка данных...</div></div>';
 
       // Загружаем данные
       const response = await fetch(options.url);
@@ -698,7 +699,6 @@ export class TableContextMenu {
 
       // Заполняем таблицу данными
       this.renderTableData(table, data, options.format, options.hasHeaders);
-
     } catch (error) {
       // Показываем ошибку
       table.innerHTML = `<div class="table-row"><div class="table-cell" style="text-align:center;padding:20px;color:#e74c3c;">Ошибка загрузки: ${error instanceof Error ? error.message : 'Неизвестная ошибка'}</div></div>`;
@@ -711,7 +711,7 @@ export class TableContextMenu {
       const result: string[] = [];
       let current = '';
       let inQuotes = false;
-      
+
       for (let i = 0; i < row.length; i++) {
         const char = row[i];
         if (char === '"') {
@@ -728,7 +728,12 @@ export class TableContextMenu {
     });
   }
 
-  private renderTableData(table: HTMLElement, data: any, format: string, hasHeaders: boolean): void {
+  private renderTableData(
+    table: HTMLElement,
+    data: any,
+    format: string,
+    hasHeaders: boolean
+  ): void {
     table.innerHTML = '';
 
     if (format === 'json') {
@@ -745,7 +750,7 @@ export class TableContextMenu {
     }
 
     const headers = Object.keys(data[0]);
-    
+
     // Создаем заголовки
     const headerRow = document.createElement('div');
     headerRow.className = 'table-header-row';
@@ -775,14 +780,14 @@ export class TableContextMenu {
     data.forEach((row, rowIndex) => {
       const rowDiv = document.createElement('div');
       rowDiv.className = rowIndex === 0 && hasHeaders ? 'table-header-row' : 'table-row';
-      
+
       row.forEach((cellData) => {
         const cell = document.createElement('div');
         cell.className = rowIndex === 0 && hasHeaders ? 'table-header-cell' : 'table-cell';
         cell.textContent = cellData;
         rowDiv.appendChild(cell);
       });
-      
+
       table.appendChild(rowDiv);
     });
   }

@@ -2,18 +2,18 @@
 
 .shortcuts-toolbar-button {
   @apply relative;
-  
+
   &:hover {
     @apply bg-gray-100;
-    
+
     html.dark & {
       @apply bg-gray-700;
     }
   }
-  
+
   &.active {
     @apply bg-blue-100 text-blue-600;
-    
+
     html.dark & {
       @apply bg-blue-900 text-blue-400;
     }
@@ -28,7 +28,7 @@
 // Подсказки для шорткатов
 .shortcut-tooltip {
   @apply absolute z-50 px-2 py-1 text-xs text-white bg-gray-900 rounded shadow-lg opacity-0 transition-opacity duration-200;
-  
+
   &.visible {
     @apply opacity-100;
   }
@@ -43,11 +43,11 @@
 @media (max-width: 768px) {
   .shortcuts-menu {
     @apply fixed inset-0 z-50 max-w-none mx-0 rounded-none;
-    
+
     .shortcuts-container {
       @apply h-full flex flex-col;
     }
-    
+
     .shortcuts-content {
       @apply flex-1;
     }
@@ -59,4 +59,4 @@
   html.dark .shortcuts-menu {
     @apply bg-gray-900;
   }
-} 
+}

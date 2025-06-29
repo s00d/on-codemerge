@@ -106,10 +106,14 @@ export class CalendarPlugin implements Plugin {
         case 'copy-calendar':
           try {
             this.manager.copyCalendar(target.id);
-            this.editor?.showSuccessNotification(this.editor?.t('Calendar copied successfully') || 'Calendar copied successfully');
+            this.editor?.showSuccessNotification(
+              this.editor?.t('Calendar copied successfully') || 'Calendar copied successfully'
+            );
             this.refreshCalendar();
           } catch (error) {
-            this.editor?.showErrorNotification(this.editor?.t('Failed to copy calendar') || 'Failed to copy calendar');
+            this.editor?.showErrorNotification(
+              this.editor?.t('Failed to copy calendar') || 'Failed to copy calendar'
+            );
           }
           break;
         case 'export-calendar':
@@ -132,10 +136,14 @@ export class CalendarPlugin implements Plugin {
         case 'copy-event':
           try {
             this.manager.copyEvent(target.id);
-            this.editor?.showSuccessNotification(this.editor?.t('Event copied successfully') || 'Event copied successfully');
+            this.editor?.showSuccessNotification(
+              this.editor?.t('Event copied successfully') || 'Event copied successfully'
+            );
             this.refreshCalendar();
           } catch (error) {
-            this.editor?.showErrorNotification(this.editor?.t('Failed to copy event') || 'Failed to copy event');
+            this.editor?.showErrorNotification(
+              this.editor?.t('Failed to copy event') || 'Failed to copy event'
+            );
           }
           break;
         case 'delete-event':
@@ -203,7 +211,7 @@ export class CalendarPlugin implements Plugin {
       const tempDiv = document.createElement('div');
       tempDiv.innerHTML = updatedHtml;
       const newCalendarElement = tempDiv.firstElementChild;
-      
+
       if (newCalendarElement && element.parentNode) {
         element.parentNode.replaceChild(newCalendarElement, element);
       }
@@ -237,7 +245,9 @@ export class CalendarPlugin implements Plugin {
           try {
             const calendar = JSON.parse(e.target?.result as string);
             this.manager.importCalendar(calendar);
-            this.editor?.showSuccessNotification(this.editor?.t('Calendar imported successfully') || 'Calendar imported successfully');
+            this.editor?.showSuccessNotification(
+              this.editor?.t('Calendar imported successfully') || 'Calendar imported successfully'
+            );
             this.refreshCalendar();
           } catch (error) {
             this.editor?.showErrorNotification(this.editor?.t('Import failed') || 'Import failed');

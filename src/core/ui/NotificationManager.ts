@@ -2,7 +2,13 @@ export interface NotificationOptions {
   message: string;
   type?: 'success' | 'error' | 'warning' | 'info';
   duration?: number;
-  position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center';
+  position?:
+    | 'top-right'
+    | 'top-left'
+    | 'bottom-right'
+    | 'bottom-left'
+    | 'top-center'
+    | 'bottom-center';
 }
 
 export class NotificationManager {
@@ -22,7 +28,9 @@ export class NotificationManager {
     const { message, type = 'info', duration = 3000, position = 'top-right' } = options;
 
     // Создаем контейнер для позиции, если его нет
-    let container = document.querySelector(`.notification-container.${position.replace('-', '-')}`) as HTMLElement;
+    let container = document.querySelector(
+      `.notification-container.${position.replace('-', '-')}`
+    ) as HTMLElement;
     if (!container) {
       container = document.createElement('div');
       container.className = `notification-container ${position.replace('-', '-')}`;
@@ -66,12 +74,12 @@ export class NotificationManager {
     if (!notification.parentNode) return;
 
     notification.classList.add('removing');
-    
+
     setTimeout(() => {
       if (notification.parentNode) {
         notification.parentNode.removeChild(notification);
       }
-      
+
       const index = this.notifications.indexOf(notification);
       if (index > -1) {
         this.notifications.splice(index, 1);
@@ -79,7 +87,7 @@ export class NotificationManager {
 
       // Удаляем пустые контейнеры
       const containers = document.querySelectorAll('.notification-container');
-      containers.forEach(container => {
+      containers.forEach((container) => {
         if (container.children.length === 0) {
           container.remove();
         }
@@ -88,7 +96,7 @@ export class NotificationManager {
   }
 
   public clearAll(): void {
-    this.notifications.forEach(notification => {
+    this.notifications.forEach((notification) => {
       this.remove(notification);
     });
   }
@@ -96,4 +104,4 @@ export class NotificationManager {
   public destroy(): void {
     this.clearAll();
   }
-} 
+}

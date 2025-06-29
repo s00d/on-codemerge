@@ -12,8 +12,7 @@ export class DeleteBlockCommand implements Command {
   private nextSibling: Node | null = null;
   private deletedBlock: HTMLElement | null = null;
 
-  constructor(_editor: HTMLEditor) {
-  }
+  constructor(_editor: HTMLEditor) {}
 
   setBlock(block: HTMLElement): void {
     this.block = block;

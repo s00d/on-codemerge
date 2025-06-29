@@ -58,7 +58,7 @@ export class TimerMenu {
       `;
       container.appendChild(emptyState);
     } else {
-      timers.forEach(timer => {
+      timers.forEach((timer) => {
         const timerItem = this.createTimerItem(timer);
         container.appendChild(timerItem);
       });
@@ -71,10 +71,10 @@ export class TimerMenu {
     const timeLeft = this.manager.getTimeLeft(timer);
     const item = document.createElement('div');
     item.className = 'timer-item';
-    
+
     const statusClass = timeLeft.isExpired ? 'expired' : 'active';
     const statusText = timeLeft.isExpired ? 'Истек' : 'Активен';
-    
+
     item.innerHTML = `
       <div class="timer-info">
         <h4 class="timer-title">${timer.title}</h4>
@@ -154,11 +154,11 @@ export class TimerMenu {
 
     const form = new TimerForm(this.editor, (data) => {
       const newTimer = this.manager.createTimer(data);
-      
+
       // Закрываем модалку и уничтожаем форму
       this.popup.hide();
       form.destroy();
-      
+
       // Возвращаемся к главному меню
       this.popup = this.createMainPopup();
       this.popup.show();
@@ -188,11 +188,11 @@ export class TimerMenu {
       this.editor,
       (data) => {
         this.manager.updateTimer(timer.id, data);
-        
+
         // Закрываем модалку и уничтожаем форму
         this.popup.hide();
         form.destroy();
-        
+
         // Возвращаемся к главному меню
         this.popup = this.createMainPopup();
         this.popup.show();
@@ -239,7 +239,9 @@ export class TimerMenu {
           try {
             const timer = JSON.parse(e.target?.result as string);
             this.manager.importTimer(timer);
-            this.editor?.showSuccessNotification(this.editor?.t('Timer imported successfully') || 'Timer imported successfully');
+            this.editor?.showSuccessNotification(
+              this.editor?.t('Timer imported successfully') || 'Timer imported successfully'
+            );
             this.popup.hide();
             this.popup = this.createMainPopup();
             this.popup.show();
@@ -266,4 +268,4 @@ export class TimerMenu {
     this.manager = null!;
     this.onSelect = null;
   }
-} 
+}

@@ -1,7 +1,13 @@
 import { PopupManager } from '../../../core/ui/PopupManager';
 import type { HTMLEditor } from '../../../core/HTMLEditor';
-import { InsertLazyTableCommand, type InsertLazyTableCommandOptions } from '../commands/InsertLazyTableCommand';
-import { ImportTableFromHTMLCommand, type ImportTableFromHTMLCommandOptions } from '../commands/ImportTableFromHTMLCommand';
+import {
+  InsertLazyTableCommand,
+  type InsertLazyTableCommandOptions,
+} from '../commands/InsertLazyTableCommand';
+import {
+  ImportTableFromHTMLCommand,
+  type ImportTableFromHTMLCommandOptions,
+} from '../commands/ImportTableFromHTMLCommand';
 
 export interface LazyTableModalOptions extends Partial<InsertLazyTableCommandOptions> {
   isEdit?: boolean;
@@ -87,9 +93,11 @@ export class LazyTableModal {
           onClick: () => this.popup?.hide(),
         },
         {
-          label: this.options.isEdit ? this.editor.t('Update Table') : 
-                 this.options.isFillMode ? this.editor.t('Fill Table') : 
-                 this.editor.t('Insert Table'),
+          label: this.options.isEdit
+            ? this.editor.t('Update Table')
+            : this.options.isFillMode
+              ? this.editor.t('Fill Table')
+              : this.editor.t('Insert Table'),
           variant: 'primary',
           onClick: () => this.insertTable(),
         },
@@ -119,7 +127,8 @@ export class LazyTableModal {
     jsonCsvOnlyFields.forEach((field) => {
       const item = field.closest('.popup-item');
       if (item) {
-        (item as HTMLElement).style.display = (importType === 'json' || importType === 'csv') ? 'block' : 'none';
+        (item as HTMLElement).style.display =
+          importType === 'json' || importType === 'csv' ? 'block' : 'none';
       }
     });
 
@@ -176,4 +185,4 @@ export class LazyTableModal {
 
     this.popup.hide();
   }
-} 
+}

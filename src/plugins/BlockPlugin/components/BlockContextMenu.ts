@@ -237,9 +237,11 @@ export class BlockContextMenu {
   }
 
   private canSplit(block: HTMLElement): boolean {
-    return block.classList.contains('editor-block') &&
-           !block.classList.contains('split-container') &&
-           block.getAttribute('data-block-type') === 'text';
+    return (
+      block.classList.contains('editor-block') &&
+      !block.classList.contains('split-container') &&
+      block.getAttribute('data-block-type') === 'text'
+    );
   }
 
   private getAdjacentBlocks(block: HTMLElement): HTMLElement[] {
@@ -250,16 +252,22 @@ export class BlockContextMenu {
 
     // Ищем предыдущие блоки
     let prev = block.previousElementSibling;
-    while (prev && prev.classList.contains('editor-block') &&
-           prev.getAttribute('data-block-type') === 'text') {
+    while (
+      prev &&
+      prev.classList.contains('editor-block') &&
+      prev.getAttribute('data-block-type') === 'text'
+    ) {
       blocks.unshift(prev as HTMLElement);
       prev = prev.previousElementSibling;
     }
 
     // Ищем следующие блоки
     let next = block.nextElementSibling;
-    while (next && next.classList.contains('editor-block') &&
-           next.getAttribute('data-block-type') === 'text') {
+    while (
+      next &&
+      next.classList.contains('editor-block') &&
+      next.getAttribute('data-block-type') === 'text'
+    ) {
       blocks.push(next as HTMLElement);
       next = next.nextElementSibling;
     }

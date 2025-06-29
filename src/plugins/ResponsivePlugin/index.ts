@@ -70,8 +70,10 @@ export class ResponsivePlugin implements Plugin {
     if (!toolbar) return;
 
     this.viewportIndicator = document.createElement('div');
-    this.viewportIndicator.className = 'viewport-indicator flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors';
-    this.viewportIndicator.title = this.editor?.t('Current viewport - Click to change') || 'Current viewport - Click to change';
+    this.viewportIndicator.className =
+      'viewport-indicator flex items-center gap-2 px-3 py-1 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors';
+    this.viewportIndicator.title =
+      this.editor?.t('Current viewport - Click to change') || 'Current viewport - Click to change';
 
     this.updateViewportIndicator();
 
@@ -81,7 +83,10 @@ export class ResponsivePlugin implements Plugin {
 
     // Добавляем после кнопки responsive
     if (this.toolbarButton) {
-      this.toolbarButton.parentNode?.insertBefore(this.viewportIndicator, this.toolbarButton.nextSibling);
+      this.toolbarButton.parentNode?.insertBefore(
+        this.viewportIndicator,
+        this.toolbarButton.nextSibling
+      );
     } else {
       toolbar.appendChild(this.viewportIndicator);
     }
@@ -124,7 +129,7 @@ export class ResponsivePlugin implements Plugin {
       desktop: this.editor?.t('Desktop') || 'Desktop',
       largeDesktop: this.editor?.t('Large') || 'Large',
       ultraWide: this.editor?.t('Ultra') || 'Ultra',
-      responsive: this.editor?.t('Fluid') || 'Fluid'
+      responsive: this.editor?.t('Fluid') || 'Fluid',
     };
     return labels[viewport] || viewport;
   }
@@ -138,7 +143,10 @@ export class ResponsivePlugin implements Plugin {
     this.menu?.onViewportChange((viewport) => {
       this.viewportManager.setViewport(container, viewport);
       this.updateViewportIndicator();
-      this.editor?.triggerEvent('viewportChanged', { viewport, width: this.viewportManager.getCurrentWidth() });
+      this.editor?.triggerEvent('viewportChanged', {
+        viewport,
+        width: this.viewportManager.getCurrentWidth(),
+      });
       this.adaptTablesToViewport(viewport);
       this.removeResizeHandle();
       if (viewport === 'responsive') {
@@ -190,7 +198,13 @@ export class ResponsivePlugin implements Plugin {
 
       // Удаляем старые классы responsive
       tableElement.classList.remove('responsive-table');
-      tableElement.classList.remove('breakpoint-320', 'breakpoint-768', 'breakpoint-1024', 'breakpoint-1440', 'breakpoint-1920');
+      tableElement.classList.remove(
+        'breakpoint-320',
+        'breakpoint-768',
+        'breakpoint-1024',
+        'breakpoint-1440',
+        'breakpoint-1920'
+      );
 
       // Применяем новые классы в зависимости от viewport'а
       switch (viewport) {
@@ -228,7 +242,7 @@ export class ResponsivePlugin implements Plugin {
           '3': 'desktop',
           '4': 'largeDesktop',
           '5': 'ultraWide',
-          '0': 'responsive'
+          '0': 'responsive',
         };
 
         if (viewportMap[key]) {

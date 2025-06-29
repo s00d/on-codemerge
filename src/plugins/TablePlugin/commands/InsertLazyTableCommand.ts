@@ -27,8 +27,10 @@ export class InsertLazyTableCommand implements Command {
     tableElement.id = tableId;
     tableElement.setAttribute('data-lazy-url', this.options.url);
     tableElement.setAttribute('data-lazy-format', this.options.format);
-    if (this.options.delimiter) tableElement.setAttribute('data-lazy-delimiter', this.options.delimiter);
-    if (this.options.hasHeaders !== undefined) tableElement.setAttribute('data-lazy-headers', String(this.options.hasHeaders));
+    if (this.options.delimiter)
+      tableElement.setAttribute('data-lazy-delimiter', this.options.delimiter);
+    if (this.options.hasHeaders !== undefined)
+      tableElement.setAttribute('data-lazy-headers', String(this.options.hasHeaders));
     tableElement.classList.add('lazy-table');
     // Плейсхолдер
     const cell = tableElement.querySelector('.table-cell');

@@ -424,14 +424,18 @@ export function createFormSubmitHandler(
 ): (e: Event) => void {
   return (e: Event) => {
     e.preventDefault();
-    
+
     if (!validateForm(form)) {
       showFormValidationErrors(form);
       if (onError) {
         const errors: string[] = [];
         const invalidElements = form.querySelectorAll(':invalid');
         invalidElements.forEach((element) => {
-          if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
+          if (
+            element instanceof HTMLInputElement ||
+            element instanceof HTMLTextAreaElement ||
+            element instanceof HTMLSelectElement
+          ) {
             errors.push(`${element.name || element.id}: ${element.validationMessage}`);
           }
         });

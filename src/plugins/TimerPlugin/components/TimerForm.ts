@@ -5,7 +5,7 @@ import {
   createInputField,
   createTextarea,
   createContainer,
-  createLabel
+  createLabel,
 } from '../../../utils/helpers';
 
 export class TimerForm {
@@ -20,11 +20,7 @@ export class TimerForm {
   private categoryField?: HTMLInputElement;
   private tagsField?: HTMLInputElement;
 
-  constructor(
-    editor: HTMLEditor,
-    onSubmit: (data: CreateTimerData) => void,
-    timer?: Timer
-  ) {
+  constructor(editor: HTMLEditor, onSubmit: (data: CreateTimerData) => void, timer?: Timer) {
     this.editor = editor;
     this.onSubmit = onSubmit;
     this.timer = timer;
@@ -65,21 +61,13 @@ export class TimerForm {
 
     // Время
     const timeLabel = createLabel(this.editor.t('Target Time'), 'targetTime');
-    this.timeField = createInputField(
-      'time',
-      '',
-      this.timer?.targetTime || ''
-    );
+    this.timeField = createInputField('time', '', this.timer?.targetTime || '');
     this.timeField.id = 'targetTime';
     this.timeField.required = true;
 
     // Цвет
     const colorLabel = createLabel(this.editor.t('Color'), 'color');
-    this.colorField = createInputField(
-      'color',
-      '',
-      this.timer?.color || '#3b82f6'
-    );
+    this.colorField = createInputField('color', '', this.timer?.color || '#3b82f6');
     this.colorField.id = 'color';
 
     // Категория
@@ -147,7 +135,10 @@ export class TimerForm {
       targetTime: this.timeField.value || '',
       color: this.colorField?.value || '#3b82f6',
       category: this.categoryField?.value || '',
-      tags: (this.tagsField?.value || '').split(',').map(tag => tag.trim()).filter(Boolean),
+      tags: (this.tagsField?.value || '')
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean),
     };
 
     // Валидация
@@ -157,17 +148,23 @@ export class TimerForm {
     }
 
     if (!dateValue) {
-      this.editor.showErrorNotification(this.editor.t('Target date is required') || 'Target date is required');
+      this.editor.showErrorNotification(
+        this.editor.t('Target date is required') || 'Target date is required'
+      );
       return;
     }
 
     if (!timeValue) {
-      this.editor.showErrorNotification(this.editor.t('Target time is required') || 'Target time is required');
+      this.editor.showErrorNotification(
+        this.editor.t('Target time is required') || 'Target time is required'
+      );
       return;
     }
 
     if (isNaN(targetDate.getTime())) {
-      this.editor.showErrorNotification(this.editor.t('Invalid date/time format') || 'Invalid date/time format');
+      this.editor.showErrorNotification(
+        this.editor.t('Invalid date/time format') || 'Invalid date/time format'
+      );
       return;
     }
 

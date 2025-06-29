@@ -12,8 +12,7 @@ export class MergeBlocksCommand implements Command {
   private mergedBlock: HTMLElement | null = null;
   private originalBlocks: HTMLElement[] = [];
 
-  constructor(_editor: HTMLEditor) {
-  }
+  constructor(_editor: HTMLEditor) {}
 
   setData(data: MergeBlocksCommandData): void {
     this.blocks = data.blocks;
@@ -49,7 +48,10 @@ export class MergeBlocksCommand implements Command {
       this.mergedBlock.parentNode?.replaceChild(this.originalBlocks[0], this.mergedBlock);
 
       for (let i = 1; i < this.originalBlocks.length; i++) {
-        this.mergedBlock.parentNode?.insertBefore(this.originalBlocks[i], this.originalBlocks[i - 1].nextSibling);
+        this.mergedBlock.parentNode?.insertBefore(
+          this.originalBlocks[i],
+          this.originalBlocks[i - 1].nextSibling
+        );
       }
     }
   }
@@ -85,8 +87,9 @@ export class MergeBlocksCommand implements Command {
   }
 
   private isValidBlock(block: HTMLElement): boolean {
-    return block.classList.contains('editor-block') &&
-           block.getAttribute('data-block-type') === 'text';
+    return (
+      block.classList.contains('editor-block') && block.getAttribute('data-block-type') === 'text'
+    );
   }
 
   private createMergedBlock(blocks: HTMLElement[]): HTMLElement {

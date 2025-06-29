@@ -111,7 +111,8 @@
   border: none;
   box-shadow: none;
 
-  .table-cell, .table-header-cell {
+  .table-cell,
+  .table-header-cell {
     border: none;
     border-bottom: 1px solid var(--border-color);
   }
@@ -122,13 +123,15 @@
 }
 
 .table-bordered {
-  .table-cell, .table-header-cell {
+  .table-cell,
+  .table-header-cell {
     border: 2px solid var(--border-color);
   }
 }
 
 .table-compact {
-  .table-cell, .table-header-cell {
+  .table-cell,
+  .table-header-cell {
     padding: 4px;
     height: 20px;
   }
@@ -143,7 +146,8 @@
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
   }
 
-  .table-cell, .table-header-cell {
+  .table-cell,
+  .table-header-cell {
     border: none;
     border-bottom: 1px solid var(--border-color);
   }
@@ -163,12 +167,14 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
   }
 
-  .table-cell, .table-header-cell {
+  .table-cell,
+  .table-header-cell {
     border: none;
     border-right: 1px solid var(--border-color);
   }
 
-  .table-cell:last-child, .table-header-cell:last-child {
+  .table-cell:last-child,
+  .table-header-cell:last-child {
     border-right: none;
   }
 }
@@ -260,7 +266,8 @@
   animation: tableFadeIn 0.3s ease-in-out;
 
   // Эффект при фокусе на ячейке
-  .table-cell:focus, .table-header-cell:focus {
+  .table-cell:focus,
+  .table-header-cell:focus {
     outline: 2px solid #3b82f6;
     outline-offset: -2px;
     background-color: #eff6ff;
@@ -272,7 +279,8 @@
   }
 
   // Эффект при выделении ячейки
-  .table-cell.selected, .table-header-cell.selected {
+  .table-cell.selected,
+  .table-header-cell.selected {
     background-color: #dbeafe;
     border-color: #3b82f6;
 
@@ -283,13 +291,15 @@
   }
 
   // Эффект при перетаскивании
-  .table-cell.dragging, .table-header-cell.dragging {
+  .table-cell.dragging,
+  .table-header-cell.dragging {
     opacity: 0.5;
     transform: rotate(5deg);
   }
 
   // Эффект при вставке
-  .table-cell.insert-target, .table-header-cell.insert-target {
+  .table-cell.insert-target,
+  .table-header-cell.insert-target {
     background-color: #fef3c7;
     border: 2px dashed #f59e0b;
 
@@ -313,7 +323,12 @@
 }
 
 // Стили для попапов и меню
-.table-popup, .table-editor-popup, .cell-formatter-popup, .export-dialog-popup, .import-dialog-popup, .sort-dialog-popup {
+.table-popup,
+.table-editor-popup,
+.cell-formatter-popup,
+.export-dialog-popup,
+.import-dialog-popup,
+.sort-dialog-popup {
   .popup-content {
     max-width: 600px;
     max-height: 80vh;
@@ -322,7 +337,7 @@
 
   .section-title {
     @apply text-lg font-semibold mb-3 text-gray-800;
-    
+
     html.dark & {
       @apply text-gray-200;
     }
@@ -334,15 +349,16 @@
 
   .form-label {
     @apply block text-sm font-medium text-gray-700 mb-1;
-    
+
     html.dark & {
       @apply text-gray-300;
     }
   }
 
-  .form-input, .form-select {
+  .form-input,
+  .form-select {
     @apply w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500;
-    
+
     html.dark & {
       @apply bg-gray-700 border-gray-600 text-gray-200;
     }
@@ -350,7 +366,7 @@
 
   .form-checkbox {
     @apply h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded;
-    
+
     html.dark & {
       @apply bg-gray-700 border-gray-600;
     }
@@ -365,7 +381,7 @@
 
   button {
     @apply border-gray-200 hover:border-blue-300 hover:bg-blue-50;
-    
+
     html.dark & {
       @apply border-gray-600 hover:border-blue-500 hover:bg-blue-900;
     }
@@ -421,7 +437,7 @@
 .table-context-menu {
   @apply bg-white border border-gray-200 shadow-2xl rounded-xl p-1.5;
   backdrop-filter: blur(10px);
-  box-shadow: 
+  box-shadow:
     0 20px 25px -5px rgba(0, 0, 0, 0.1),
     0 10px 10px -5px rgba(0, 0, 0, 0.04),
     0 0 0 1px rgba(255, 255, 255, 0.05);
@@ -436,7 +452,7 @@
 
   &::-webkit-scrollbar-track {
     @apply bg-gray-100 rounded-full;
-    
+
     html.dark & {
       @apply bg-gray-700;
     }
@@ -444,7 +460,7 @@
 
   &::-webkit-scrollbar-thumb {
     @apply bg-gray-300 rounded-full;
-    
+
     html.dark & {
       @apply bg-gray-500;
     }
@@ -452,7 +468,7 @@
 
   &::-webkit-scrollbar-thumb:hover {
     @apply bg-gray-400;
-    
+
     html.dark & {
       @apply bg-gray-400;
     }
@@ -460,7 +476,7 @@
 
   html.dark & {
     @apply bg-gray-800 border-gray-700;
-    box-shadow: 
+    box-shadow:
       0 20px 25px -5px rgba(0, 0, 0, 0.3),
       0 10px 10px -5px rgba(0, 0, 0, 0.2),
       0 0 0 1px rgba(255, 255, 255, 0.1);
@@ -481,7 +497,7 @@
     &:hover {
       @apply bg-blue-50 text-blue-700;
       transform: translateX(2px);
-      
+
       html.dark & {
         @apply bg-blue-900 text-blue-300;
       }
@@ -511,7 +527,7 @@
     .context-menu-hotkey {
       @apply text-xs text-gray-400 ml-auto pl-2 text-right;
       font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-      
+
       html.dark & {
         @apply text-gray-500;
       }
@@ -532,7 +548,7 @@
 
     .context-menu-group-title {
       @apply px-2 py-0.5 text-xs font-semibold text-gray-500 uppercase tracking-wide text-left;
-      
+
       html.dark & {
         @apply text-gray-400;
       }
@@ -540,25 +556,25 @@
   }
 
   // Специальные стили для разных типов элементов
-  .context-menu-item[data-variant="danger"] {
+  .context-menu-item[data-variant='danger'] {
     @apply text-red-600 hover:bg-red-50;
-    
+
     html.dark & {
       @apply text-red-400 hover:bg-red-900;
     }
   }
 
-  .context-menu-item[data-variant="success"] {
+  .context-menu-item[data-variant='success'] {
     @apply text-green-600 hover:bg-green-50;
-    
+
     html.dark & {
       @apply text-green-400 hover:bg-green-900;
     }
   }
 
-  .context-menu-item[data-variant="warning"] {
+  .context-menu-item[data-variant='warning'] {
     @apply text-yellow-600 hover:bg-yellow-50;
-    
+
     html.dark & {
       @apply text-yellow-400 hover:bg-yellow-900;
     }
@@ -568,9 +584,9 @@
   .context-menu-custom {
     @apply p-1;
 
-    input[type="color"] {
+    input[type='color'] {
       @apply w-full h-6 rounded-lg border border-gray-200 cursor-pointer;
-      
+
       html.dark & {
         @apply border-gray-600;
       }
@@ -612,14 +628,14 @@
 }
 
 // Стили для объединения ячеек (colspan/rowspan)
-.table-cell[data-colspan], 
+.table-cell[data-colspan],
 .table-header-cell[data-colspan] {
   // Горизонтальное объединение через width
   width: calc(100px * attr(data-colspan number, 1));
   min-width: calc(100px * attr(data-colspan number, 1));
 }
 
-.table-cell[data-rowspan], 
+.table-cell[data-rowspan],
 .table-header-cell[data-rowspan] {
   // Вертикальное объединение через height
   height: calc(24px * attr(data-rowspan number, 1));
@@ -627,18 +643,18 @@
 }
 
 // Визуализация объединённых ячеек
-.table-cell[data-colspan]:not([data-colspan="1"]),
-.table-header-cell[data-colspan]:not([data-colspan="1"]),
-.table-cell[data-rowspan]:not([data-rowspan="1"]),
-.table-header-cell[data-rowspan]:not([data-rowspan="1"]) {
+.table-cell[data-colspan]:not([data-colspan='1']),
+.table-header-cell[data-colspan]:not([data-colspan='1']),
+.table-cell[data-rowspan]:not([data-rowspan='1']),
+.table-header-cell[data-rowspan]:not([data-rowspan='1']) {
   background: linear-gradient(135deg, #f5f7fa 0%, #e8eaed 100%);
   font-weight: 600;
   border-color: #888;
   position: relative;
-  
+
   // Добавляем индикатор объединения
   &::after {
-    content: attr(data-colspan) "×" attr(data-rowspan);
+    content: attr(data-colspan) '×' attr(data-rowspan);
     position: absolute;
     top: 2px;
     right: 4px;
@@ -653,7 +669,7 @@
   html.dark & {
     background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
     border-color: #6b7280;
-    
+
     &::after {
       color: #9ca3af;
       background: rgba(31, 41, 55, 0.8);
@@ -662,14 +678,14 @@
 }
 
 // Стили для выделенных объединённых ячеек
-.table-cell[data-colspan]:not([data-colspan="1"]).selected,
-.table-header-cell[data-colspan]:not([data-colspan="1"]).selected,
-.table-cell[data-rowspan]:not([data-rowspan="1"]).selected,
-.table-header-cell[data-rowspan]:not([data-rowspan="1"]).selected {
+.table-cell[data-colspan]:not([data-colspan='1']).selected,
+.table-header-cell[data-colspan]:not([data-colspan='1']).selected,
+.table-cell[data-rowspan]:not([data-rowspan='1']).selected,
+.table-header-cell[data-rowspan]:not([data-rowspan='1']).selected {
   background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
   color: white;
   border-color: #1d4ed8;
-  
+
   &::after {
     color: white;
     background: rgba(29, 78, 216, 0.8);
@@ -682,11 +698,11 @@
 .table-cell[data-rowspan],
 .table-header-cell[data-rowspan] {
   transition: all 0.3s ease;
-  
+
   &:hover {
     transform: scale(1.02);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-    
+
     html.dark & {
       box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
     }
@@ -697,28 +713,28 @@
 .merge-cells-menu {
   .merge-horizontal {
     &::before {
-      content: "↔";
+      content: '↔';
       margin-right: 8px;
     }
   }
-  
+
   .merge-vertical {
     &::before {
-      content: "↕";
+      content: '↕';
       margin-right: 8px;
     }
   }
-  
+
   .split-horizontal {
     &::before {
-      content: "⇹";
+      content: '⇹';
       margin-right: 8px;
     }
   }
-  
+
   .split-vertical {
     &::before {
-      content: "⇳";
+      content: '⇳';
       margin-right: 8px;
     }
   }
@@ -729,13 +745,13 @@
   // Индикатор подменю
   .context-menu-submenu-indicator {
     @apply ml-auto text-xs text-gray-400;
-    content: "▶";
+    content: '▶';
 
     html.dark & {
       @apply text-gray-500;
     }
   }
-  
+
   // Позиционирование подменю
   .context-menu-submenu {
     position: absolute;
@@ -743,22 +759,22 @@
     top: 0;
     margin-left: 2px;
     z-index: 1001;
-    
+
     // Анимация появления
     opacity: 0;
     transform: translateX(-10px);
     transition: all 0.2s ease;
-    
+
     &.visible {
       opacity: 1;
       transform: translateX(0);
     }
   }
-  
+
   // Элемент с подменю
   .context-menu-item-has-submenu {
     position: relative;
-    
+
     &:hover {
       .context-menu-submenu {
         opacity: 1;
@@ -774,18 +790,18 @@
   --responsive-enable-scroll: 1;
   --responsive-enable-touch: 1;
   --responsive-enable-cards: 1;
-  
+
   // Базовые стили для десктопа
   display: table;
   width: 100%;
   border-collapse: collapse;
   margin: 1rem 0;
-  
+
   .table-row,
   .table-header-row {
     display: table-row;
   }
-  
+
   .table-cell,
   .table-header-cell {
     display: table-cell;
@@ -794,19 +810,19 @@
     border-bottom: 1px solid #e5e7eb;
     vertical-align: top;
   }
-  
+
   .table-header-cell {
     background-color: #f9fafb;
     font-weight: 600;
     color: #374151;
   }
-  
+
   // Адаптивные стили для мобильных устройств
   @media (max-width: var(--responsive-breakpoint)) {
     // Если включены карточки, показываем карточный вид
     &.responsive-table--cards {
       display: block;
-      
+
       .table-row,
       .table-header-row {
         display: block;
@@ -814,10 +830,12 @@
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         background-color: #ffffff;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        box-shadow:
+          0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px 0 rgba(0, 0, 0, 0.06);
         overflow: hidden;
         position: relative;
-        
+
         // Добавляем заголовок карточки
         &::before {
           content: attr(data-row-index, 'Row');
@@ -831,18 +849,18 @@
           font-size: 0.875rem;
         }
       }
-      
+
       .table-cell,
       .table-header-cell {
         display: block;
         padding: 0.75rem;
         border-bottom: 1px solid #f3f4f6;
         position: relative;
-        
+
         &:last-child {
           border-bottom: none;
         }
-        
+
         // Добавляем лейблы для ячеек на мобильных
         &::before {
           content: attr(data-label);
@@ -855,28 +873,28 @@
           letter-spacing: 0.05em;
         }
       }
-      
+
       .table-header-cell {
         background-color: #f8fafc;
         border-bottom: 2px solid #e2e8f0;
         font-weight: 700;
         color: #1e293b;
-        
+
         &::before {
           display: none; // Убираем лейблы для заголовков
         }
       }
-      
+
       // Скрываем заголовочную строку на мобильных
       .table-header-row {
         display: none;
       }
     }
-    
+
     // Если карточки отключены, показываем обычную адаптивную таблицу
     &:not(.responsive-table--cards) {
       display: block;
-      
+
       .table-row,
       .table-header-row {
         display: block;
@@ -884,21 +902,23 @@
         border: 1px solid #e5e7eb;
         border-radius: 8px;
         background-color: #ffffff;
-        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
+        box-shadow:
+          0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px 0 rgba(0, 0, 0, 0.06);
         overflow: hidden;
       }
-      
+
       .table-cell,
       .table-header-cell {
         display: block;
         padding: 0.75rem;
         border-bottom: 1px solid #f3f4f6;
         position: relative;
-        
+
         &:last-child {
           border-bottom: none;
         }
-        
+
         // Добавляем лейблы для ячеек на мобильных
         &::before {
           content: attr(data-label);
@@ -911,37 +931,37 @@
           letter-spacing: 0.05em;
         }
       }
-      
+
       .table-header-cell {
         background-color: #f8fafc;
         border-bottom: 2px solid #e2e8f0;
         font-weight: 700;
         color: #1e293b;
-        
+
         &::before {
           display: none; // Убираем лейблы для заголовков
         }
       }
-      
+
       // Скрываем заголовочную строку на мобильных
       .table-header-row {
         display: none;
       }
     }
   }
-  
+
   // Дополнительные стили для очень маленьких экранов
   @media (max-width: 480px) {
     .table-cell,
     .table-header-cell {
       padding: 0.5rem;
       font-size: 0.875rem;
-      
+
       &::before {
         font-size: 0.75rem;
       }
     }
-    
+
     // Стили для карточек на очень маленьких экранах
     &.responsive-table--cards {
       .table-row,
@@ -951,18 +971,18 @@
           padding: 0.5rem 0.5rem 0.375rem 0.5rem;
         }
       }
-      
+
       .table-cell,
       .table-header-cell {
         padding: 0.5rem;
-        
+
         &::before {
           font-size: 0.75rem;
         }
       }
     }
   }
-  
+
   // Стили для горизонтальной прокрутки (работают на всех размерах экрана)
   &.responsive-table--scroll {
     // Контейнер для прокрутки
@@ -972,7 +992,7 @@
     -webkit-overflow-scrolling: touch;
     border: 1px solid #e5e7eb;
     border-radius: 8px;
-    
+
     // Внутренний контейнер для таблицы
     .responsive-table-inner {
       display: table;
@@ -980,14 +1000,14 @@
       min-width: max-content;
       border-collapse: collapse;
     }
-    
+
     // Стили для внутренней таблицы
     .table-row,
     .table-header-row {
       display: table-row;
       white-space: nowrap;
     }
-    
+
     .table-cell,
     .table-header-cell {
       display: table-cell;
@@ -995,7 +1015,7 @@
       min-width: 120px;
     }
   }
-  
+
   // Touch поддержка
   &.responsive-table--touch {
     .table-cell,
@@ -1008,7 +1028,7 @@
       -khtml-user-select: none;
       -moz-user-select: none;
       -ms-user-select: none;
-      
+
       &:active {
         background-color: #f3f4f6;
       }
@@ -1025,7 +1045,7 @@
   background: #f9fafb;
   border-radius: 8px;
   margin: 1rem 0;
-  
+
   // Показываем карточки только на мобильных устройствах
   @media (max-width: var(--responsive-breakpoint, 768px)) {
     display: grid !important;
@@ -1040,12 +1060,12 @@
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
-  
+
   &:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   }
-  
+
   .responsive-table-card-header {
     font-weight: 600;
     color: #374151;
@@ -1053,24 +1073,24 @@
     padding-bottom: 0.5rem;
     border-bottom: 1px solid #f3f4f6;
   }
-  
+
   .responsive-table-card-item {
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 0;
     border-bottom: 1px solid #f9fafb;
-    
+
     &:last-child {
       border-bottom: none;
     }
-    
+
     .responsive-table-card-label {
       font-weight: 500;
       color: #6b7280;
       font-size: 0.875rem;
     }
-    
+
     .responsive-table-card-value {
       color: #111827;
       font-size: 0.875rem;
@@ -1085,25 +1105,27 @@
   @media (max-width: var(--responsive-breakpoint)) {
     .table-row {
       transition: all 0.2s ease-in-out;
-      
+
       &:hover {
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        box-shadow:
+          0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -1px rgba(0, 0, 0, 0.06);
         transform: translateY(-1px);
       }
     }
-    
+
     // Стили для пустых ячеек
     .table-cell:empty::after {
       content: '—';
       color: #9ca3af;
       font-style: italic;
     }
-    
+
     // Стили для длинного контента
     .table-cell {
       word-wrap: break-word;
       overflow-wrap: break-word;
-      
+
       // Ограничиваем высоту для очень длинного контента
       max-height: 200px;
       overflow-y: auto;

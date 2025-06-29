@@ -18,13 +18,13 @@ export class TimerManager {
     // Конвертируем строки targetDate обратно в объекты Date
     return timers.map((timer: any) => ({
       ...timer,
-      targetDate: new Date(timer.targetDate)
+      targetDate: new Date(timer.targetDate),
     }));
   }
 
   public getTimer(id: string): Timer | null {
     const timers = this.getTimers();
-    return timers.find(timer => timer.id === id) || null;
+    return timers.find((timer) => timer.id === id) || null;
   }
 
   public createTimer(data: CreateTimerData): Timer {
@@ -44,19 +44,22 @@ export class TimerManager {
     };
 
     timers.push(newTimer);
-    localStorage.setItem(this.timersKey, JSON.stringify(timers, (_key, value) => {
-      // Конвертируем Date в строку для JSON
-      if (value instanceof Date) {
-        return value.toISOString();
-      }
-      return value;
-    }));
+    localStorage.setItem(
+      this.timersKey,
+      JSON.stringify(timers, (_key, value) => {
+        // Конвертируем Date в строку для JSON
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+        return value;
+      })
+    );
     return newTimer;
   }
 
   public updateTimer(id: string, data: UpdateTimerData): Timer {
     const timers = this.getTimers();
-    const index = timers.findIndex(timer => timer.id === id);
+    const index = timers.findIndex((timer) => timer.id === id);
 
     if (index === -1) {
       throw new Error('Timer not found');
@@ -69,18 +72,21 @@ export class TimerManager {
     };
 
     timers[index] = updated;
-    localStorage.setItem(this.timersKey, JSON.stringify(timers, (_key, value) => {
-      // Конвертируем Date в строку для JSON
-      if (value instanceof Date) {
-        return value.toISOString();
-      }
-      return value;
-    }));
+    localStorage.setItem(
+      this.timersKey,
+      JSON.stringify(timers, (_key, value) => {
+        // Конвертируем Date в строку для JSON
+        if (value instanceof Date) {
+          return value.toISOString();
+        }
+        return value;
+      })
+    );
     return updated;
   }
 
   public deleteTimer(id: string): void {
-    const timers = this.getTimers().filter(timer => timer.id !== id);
+    const timers = this.getTimers().filter((timer) => timer.id !== id);
     localStorage.setItem(this.timersKey, JSON.stringify(timers));
   }
 
@@ -126,12 +132,13 @@ export class TimerManager {
     const timeLeft = this.getTimeLeft(timer);
     const categoryColor = timer.color || '#3b82f6';
     const categoryName = timer.category || this.editor.t('General');
-    
-    const tagsHtml = timer.tags && timer.tags.length > 0 
-      ? `<div class="timer-tags">${timer.tags.map(tag => `<span class="timer-tag">${tag}</span>`).join('')}</div>` 
-      : '';
 
-    const timeLeftHtml = timeLeft.isExpired 
+    const tagsHtml =
+      timer.tags && timer.tags.length > 0
+        ? `<div class="timer-tags">${timer.tags.map((tag) => `<span class="timer-tag">${tag}</span>`).join('')}</div>`
+        : '';
+
+    const timeLeftHtml = timeLeft.isExpired
       ? `<div class="timer-expired">${this.editor.t('Time expired')}</div>`
       : `<div class="timer-countdown" id="timer-countdown-${timer.id}">
           <div class="timer-unit">
@@ -160,13 +167,13 @@ export class TimerManager {
       // Fallback для старых данных
       targetDate = new Date(`${timer.targetDate}T${timer.targetTime}`);
     }
-    
-    const formattedTargetDate = targetDate.toLocaleDateString('ru-RU', { 
-      day: 'numeric', 
-      month: 'short', 
+
+    const formattedTargetDate = targetDate.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'short',
       year: 'numeric',
       hour: '2-digit',
-      minute: '2-digit'
+      minute: '2-digit',
     });
 
     // JavaScript для обновления таймера
@@ -277,4 +284,4 @@ export class TimerManager {
       tags: originalTimer.tags,
     });
   }
-} 
+}

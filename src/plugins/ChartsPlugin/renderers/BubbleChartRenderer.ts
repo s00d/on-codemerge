@@ -12,7 +12,6 @@ export class BubbleChartRenderer extends BaseChartRenderer {
 
     const orientation = options.orientation || 'vertical';
 
-
     // Find data ranges
     const allPoints = data.flatMap((series) => series.data);
     const xMax = Math.max(...allPoints.map((p) => p.x || 0));

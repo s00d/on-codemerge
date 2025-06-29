@@ -31,8 +31,10 @@ export class LanguagePlugin implements Plugin {
     if (!toolbar) return;
 
     this.toolbarButton = document.createElement('div');
-    this.toolbarButton.className = 'language-indicator flex items-center gap-2 py-1 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors';
-    this.toolbarButton.title = this.editor?.t('Current locale - Click to change') || 'Current locale - Click to change';
+    this.toolbarButton.className =
+      'language-indicator flex items-center gap-2 py-1 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-colors';
+    this.toolbarButton.title =
+      this.editor?.t('Current locale - Click to change') || 'Current locale - Click to change';
 
     this.updateLanguageIndicator();
 

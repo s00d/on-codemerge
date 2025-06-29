@@ -38,15 +38,15 @@ describe('ShortcutsPlugin', () => {
             command: 'bold',
             keys: 'Ctrl+B',
             description: 'Bold text',
-            icon: 'bold'
-          }
-        ]
+            icon: 'bold',
+          },
+        ],
       };
 
       jest.spyOn(editor, 'getHotkeys').mockReturnValue(mockHotkeys);
-      
+
       plugin.initialize(editor);
-      
+
       // Ждем регистрации шорткатов
       setTimeout(() => {
         const shortcutManager = plugin.getShortcutManager();
@@ -59,15 +59,15 @@ describe('ShortcutsPlugin', () => {
   describe('keyboard handling', () => {
     it('should handle keyboard events', () => {
       plugin.initialize(editor);
-      
+
       const mockEvent = new KeyboardEvent('keydown', {
         key: 'b',
-        ctrlKey: true
+        ctrlKey: true,
       });
 
       const container = editor.getContainer();
       container.dispatchEvent(mockEvent);
-      
+
       // Проверяем, что событие обработано
       expect(mockEvent.defaultPrevented).toBe(false);
     });
@@ -77,7 +77,7 @@ describe('ShortcutsPlugin', () => {
     it('should clean up resources on destroy', () => {
       plugin.initialize(editor);
       plugin.destroy();
-      
+
       // Проверяем, что ссылки очищены
       expect(plugin.getShortcutManager().getShortcuts()).toHaveLength(0);
     });
@@ -94,14 +94,8 @@ describe('ShortcutManager', () => {
   describe('shortcut registration', () => {
     it('should register shortcuts correctly', () => {
       const callback = jest.fn();
-      
-      manager.register(
-        'test-shortcut',
-        'Ctrl+A',
-        callback,
-        'Test shortcut',
-        'Test Category'
-      );
+
+      manager.register('test-shortcut', 'Ctrl+A', callback, 'Test shortcut', 'Test Category');
 
       const shortcuts = manager.getShortcuts();
       expect(shortcuts).toHaveLength(1);
@@ -110,7 +104,7 @@ describe('ShortcutManager', () => {
 
     it('should handle Mac shortcuts', () => {
       const callback = jest.fn();
-      
+
       manager.register(
         'test-shortcut',
         'Ctrl+A',
@@ -128,22 +122,16 @@ describe('ShortcutManager', () => {
   describe('keyboard handling', () => {
     it('should execute shortcut on matching key combination', () => {
       const callback = jest.fn();
-      
-      manager.register(
-        'test-shortcut',
-        'Ctrl+A',
-        callback,
-        'Test shortcut',
-        'Test Category'
-      );
+
+      manager.register('test-shortcut', 'Ctrl+A', callback, 'Test shortcut', 'Test Category');
 
       const event = new KeyboardEvent('keydown', {
         key: 'a',
-        ctrlKey: true
+        ctrlKey: true,
       });
 
       const result = manager.handleKeyDown(event);
-      
+
       expect(result).toBe(true);
       expect(callback).toHaveBeenCalled();
       expect(event.defaultPrevented).toBe(true);
@@ -151,22 +139,16 @@ describe('ShortcutManager', () => {
 
     it('should not execute shortcut on non-matching combination', () => {
       const callback = jest.fn();
-      
-      manager.register(
-        'test-shortcut',
-        'Ctrl+A',
-        callback,
-        'Test shortcut',
-        'Test Category'
-      );
+
+      manager.register('test-shortcut', 'Ctrl+A', callback, 'Test shortcut', 'Test Category');
 
       const event = new KeyboardEvent('keydown', {
         key: 'b',
-        ctrlKey: true
+        ctrlKey: true,
       });
 
       const result = manager.handleKeyDown(event);
-      
+
       expect(result).toBe(false);
       expect(callback).not.toHaveBeenCalled();
     });
@@ -175,22 +157,16 @@ describe('ShortcutManager', () => {
   describe('statistics', () => {
     it('should track usage statistics', () => {
       const callback = jest.fn();
-      
-      manager.register(
-        'test-shortcut',
-        'Ctrl+A',
-        callback,
-        'Test shortcut',
-        'Test Category'
-      );
+
+      manager.register('test-shortcut', 'Ctrl+A', callback, 'Test shortcut', 'Test Category');
 
       const event = new KeyboardEvent('keydown', {
         key: 'a',
-        ctrlKey: true
+        ctrlKey: true,
       });
 
       manager.handleKeyDown(event);
-      
+
       const stats = manager.getStats();
       expect(stats.mostUsed).toHaveLength(1);
       expect(stats.mostUsed[0].usageCount).toBe(1);
@@ -201,22 +177,10 @@ describe('ShortcutManager', () => {
     it('should detect conflicts between shortcuts', () => {
       const callback1 = jest.fn();
       const callback2 = jest.fn();
-      
-      manager.register(
-        'shortcut-1',
-        'Ctrl+A',
-        callback1,
-        'First shortcut',
-        'Test Category'
-      );
 
-      manager.register(
-        'shortcut-2',
-        'Ctrl+A',
-        callback2,
-        'Second shortcut',
-        'Test Category'
-      );
+      manager.register('shortcut-1', 'Ctrl+A', callback1, 'First shortcut', 'Test Category');
+
+      manager.register('shortcut-2', 'Ctrl+A', callback2, 'Second shortcut', 'Test Category');
 
       const stats = manager.getStats();
       expect(stats.conflicts.length).toBeGreaterThan(0);
@@ -237,4 +201,4 @@ describe('ShortcutManager', () => {
       expect(typeof formatted).toBe('string');
     });
   });
-}); 
+});

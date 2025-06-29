@@ -68,9 +68,9 @@ export interface CreateCalendarData {
   events?: CreateEventData[];
 }
 
-export interface UpdateEventData extends Partial<CreateEventData> {}
+export type UpdateEventData = Partial<CreateEventData>;
 
-export interface UpdateCalendarData extends Partial<CreateCalendarData> {}
+export type UpdateCalendarData = Partial<CreateCalendarData>;
 
 // Новые типы для категорий и тегов
 export interface Category {
@@ -110,4 +110,4 @@ export interface RecurringEvent {
     endDate?: string;
   };
   createdAt: number;
-} 
+}

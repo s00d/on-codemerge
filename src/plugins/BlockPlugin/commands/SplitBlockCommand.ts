@@ -28,13 +28,13 @@ export class SplitBlockCommand implements Command {
     if (!this.block || !this.isValidBlock(this.block)) return;
 
     this.originalBlock = this.block;
-    
+
     // Создаем контейнер для разделения
     this.splitContainer = this.createSplitContainer(this.direction, this.block);
-    
+
     // Заменяем исходный блок контейнером
     this.block.parentNode?.replaceChild(this.splitContainer, this.block);
-    
+
     // Фокусируемся на первом блоке с задержкой для стабильности DOM
     setTimeout(() => {
       const firstBlock = this.splitContainer?.querySelector('.editor-block') as HTMLElement;
@@ -59,11 +59,13 @@ export class SplitBlockCommand implements Command {
   }
 
   private isValidBlock(block: HTMLElement): boolean {
-    return block.classList.contains('editor-block') && 
-           !block.classList.contains('split-container');
+    return block.classList.contains('editor-block') && !block.classList.contains('split-container');
   }
 
-  private createSplitContainer(direction: 'horizontal' | 'vertical', originalBlock: HTMLElement): HTMLElement {
+  private createSplitContainer(
+    direction: 'horizontal' | 'vertical',
+    originalBlock: HTMLElement
+  ): HTMLElement {
     const container = createContainer(`editor-block split-container ${direction}`);
     container.setAttribute('contenteditable', 'false');
     container.setAttribute('data-block-type', 'split');
@@ -86,7 +88,7 @@ export class SplitBlockCommand implements Command {
 
     const blockContent = createContainer('block-content');
     blockContent.contentEditable = 'true';
-    
+
     // Копируем содержимое из исходного блока или используем текст по умолчанию
     const originalContent = originalBlock.querySelector('.block-content');
     if (originalContent && originalContent.textContent?.trim()) {
@@ -104,12 +106,12 @@ export class SplitBlockCommand implements Command {
     if (content && content.contentEditable === 'true') {
       // Убеждаемся, что contentEditable установлен
       content.contentEditable = 'true';
-      
+
       // НЕ устанавливаем фокус программно - браузер сам поставит курсор
       // content.focus();
-      
+
       // Добавляем активный класс
       block.classList.add('active');
     }
   }
-} 
+}

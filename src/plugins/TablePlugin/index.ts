@@ -34,9 +34,19 @@ export class TablePlugin implements Plugin {
   name = 'table';
   hotkeys = [
     { keys: 'Ctrl+Shift+T', description: 'Insert table', command: 'insert-table', icon: '📊' },
-    { keys: 'Ctrl+Shift+J', description: 'Insert lazy table', command: 'insert-lazy-table', icon: '📊⏳' },
+    {
+      keys: 'Ctrl+Shift+J',
+      description: 'Insert lazy table',
+      command: 'insert-lazy-table',
+      icon: '📊⏳',
+    },
     { keys: 'Ctrl+L', description: 'Edit lazy table', command: 'edit-lazy-table', icon: '🔄' },
-    { keys: 'Ctrl+Shift+Z', description: 'Import from HTML', command: 'import-from-html', icon: '🌐' },
+    {
+      keys: 'Ctrl+Shift+Z',
+      description: 'Import from HTML',
+      command: 'import-from-html',
+      icon: '🌐',
+    },
     { keys: 'Ctrl+Shift+E', description: 'Export table', command: 'export-table', icon: '📤' },
     { keys: 'Ctrl+Shift+I', description: 'Import table', command: 'import-table', icon: '📥' },
     { keys: 'Alt+Shift+F', description: 'Format cells', command: 'format-cells', icon: '🎨' },
@@ -229,7 +239,10 @@ export class TablePlugin implements Plugin {
           '.table-cell.selected, .table-header-cell.selected'
         );
         if (selectedCells.length > 0) {
-          const command = new DeleteCellContentCommand(this.editor, selectedCells[0] as HTMLElement);
+          const command = new DeleteCellContentCommand(
+            this.editor,
+            selectedCells[0] as HTMLElement
+          );
           command.execute();
         }
       }

@@ -23,7 +23,7 @@ export class ReminderService {
     }
 
     const eventDate = new Date(`${event.date}T${event.time}`);
-    const triggerTime = eventDate.getTime() - (event.reminder * 60 * 1000);
+    const triggerTime = eventDate.getTime() - event.reminder * 60 * 1000;
 
     const reminder: Reminder = {
       id: crypto.randomUUID(),
@@ -50,18 +50,18 @@ export class ReminderService {
 
   // Получение напоминаний для события
   public getEventReminders(eventId: string): Reminder[] {
-    return this.getReminders().filter(reminder => reminder.eventId === eventId);
+    return this.getReminders().filter((reminder) => reminder.eventId === eventId);
   }
 
   // Удаление напоминания
   public deleteReminder(id: string): void {
-    const reminders = this.getReminders().filter(reminder => reminder.id !== id);
+    const reminders = this.getReminders().filter((reminder) => reminder.id !== id);
     localStorage.setItem(this.remindersKey, JSON.stringify(reminders));
   }
 
   // Удаление всех напоминаний события
   public deleteEventReminders(eventId: string): void {
-    const reminders = this.getReminders().filter(reminder => reminder.eventId !== eventId);
+    const reminders = this.getReminders().filter((reminder) => reminder.eventId !== eventId);
     localStorage.setItem(this.remindersKey, JSON.stringify(reminders));
   }
 
@@ -79,11 +79,11 @@ export class ReminderService {
   private checkReminders(): void {
     const now = Date.now();
     const reminders = this.getReminders();
-    const dueReminders = reminders.filter(reminder =>
-      reminder.triggerTime <= now && !reminder.isShown
+    const dueReminders = reminders.filter(
+      (reminder) => reminder.triggerTime <= now && !reminder.isShown
     );
 
-    dueReminders.forEach(reminder => {
+    dueReminders.forEach((reminder) => {
       this.showReminder(reminder);
     });
   }
@@ -92,7 +92,7 @@ export class ReminderService {
   private showReminder(reminder: Reminder): void {
     // Помечаем как показанное
     const reminders = this.getReminders();
-    const index = reminders.findIndex(r => r.id === reminder.id);
+    const index = reminders.findIndex((r) => r.id === reminder.id);
     if (index !== -1) {
       reminders[index].isShown = true;
       localStorage.setItem(this.remindersKey, JSON.stringify(reminders));
@@ -112,9 +112,10 @@ export class ReminderService {
 
     const priorityClass = event.priority || 'medium';
     const categoryColor = event.color || '#3b82f6';
-    const tagsHtml = event.tags && event.tags.length > 0
-      ? `<div class="event-tags">${event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join('')}</div>`
-      : '';
+    const tagsHtml =
+      event.tags && event.tags.length > 0
+        ? `<div class="event-tags">${event.tags.map((tag) => `<span class="event-tag">${tag}</span>`).join('')}</div>`
+        : '';
 
     return `
       <div class="calendar-reminder" data-reminder-id="${reminder.id}" data-event-id="${reminder.eventId}">
@@ -175,15 +176,15 @@ export class ReminderService {
 
   // Генерация JavaScript кода для клиента
   public generateReminderScript(calendarId: string): string {
-    const reminders = this.getReminders().filter(r => r.calendarId === calendarId);
+    const reminders = this.getReminders().filter((r) => r.calendarId === calendarId);
 
     if (reminders.length === 0) return '';
 
-    const reminderData = reminders.map(reminder => ({
+    const reminderData = reminders.map((reminder) => ({
       id: reminder.id,
       eventId: reminder.eventId,
       triggerTime: reminder.triggerTime,
-      message: reminder.message
+      message: reminder.message,
     }));
 
     return `

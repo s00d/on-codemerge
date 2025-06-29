@@ -43,7 +43,7 @@ export class BlockCommand implements Command {
 
     if (selection && selection.rangeCount > 0) {
       range = selection.getRangeAt(0);
-      
+
       // Проверяем, что курсор находится внутри редактора
       if (!container.contains(range.commonAncestorContainer)) {
         range = this.createRangeAtEnd(container);
@@ -54,7 +54,7 @@ export class BlockCommand implements Command {
 
     // Вставляем блок
     this.insertBlockAtRange(block, range);
-    
+
     // Фокусируемся на новом блоке
     this.focusBlock(block);
   }
@@ -83,7 +83,7 @@ export class BlockCommand implements Command {
     const blockContent = createContainer('block-content');
     blockContent.contentEditable = 'true';
     blockContent.textContent = content || this.editor.t('New Block');
-    
+
     // Устанавливаем фокус на содержимое
     blockContent.focus();
 
@@ -130,7 +130,7 @@ export class BlockCommand implements Command {
   private insertBlockAtRange(block: HTMLElement, range: Range): void {
     // Проверяем, не находимся ли мы внутри другого блока
     const parentBlock = (range.commonAncestorContainer as Element).closest('.editor-block');
-    
+
     if (parentBlock && parentBlock !== range.commonAncestorContainer) {
       // Вставляем после родительского блока
       parentBlock.parentNode?.insertBefore(block, parentBlock.nextSibling);
@@ -151,10 +151,10 @@ export class BlockCommand implements Command {
     if (content && content.contentEditable === 'true') {
       // Убеждаемся, что contentEditable установлен
       content.contentEditable = 'true';
-      
+
       // НЕ устанавливаем фокус программно - браузер сам поставит курсор
       // content.focus();
-      
+
       // Добавляем активный класс
       block.classList.add('active');
     }

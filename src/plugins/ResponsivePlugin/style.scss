@@ -3,27 +3,27 @@
 /* Viewport Indicator */
 .viewport-indicator {
   @apply flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-all duration-200 border border-gray-200;
-  
+
   .viewport-icon {
     @apply text-gray-600;
     svg {
       @apply w-4 h-4;
     }
   }
-  
+
   .viewport-label {
     @apply font-semibold;
   }
-  
+
   .viewport-width {
     @apply text-xs text-gray-500 font-mono;
   }
-  
+
   &:hover {
     @apply shadow-sm border-gray-300;
     transform: translateY(-1px);
   }
-  
+
   &:active {
     transform: translateY(0);
   }
@@ -35,12 +35,12 @@
 
   .viewport-btn {
     @apply w-full text-left transition-all duration-200;
-    
+
     &:hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
-    
+
     &:active {
       transform: translateY(0);
     }
@@ -48,21 +48,21 @@
     svg {
       @apply text-gray-600;
     }
-    
+
     .screen-preview {
       @apply relative;
-      
+
       &::before {
         content: '';
         @apply absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 rounded opacity-50;
       }
     }
   }
-  
+
   /* Анимации для кнопок */
   .viewport-btn {
     animation: fadeInUp 0.3s ease-out;
-    
+
     @for $i from 1 through 6 {
       &:nth-child(#{$i}) {
         animation-delay: #{$i * 0.05}s;
@@ -87,15 +87,15 @@
 .html-editor {
   @apply transition-all duration-300 ease-in-out;
   min-width: 320px;
-  
+
   /* Плавные переходы для всех свойств */
   transition-property: width, margin, max-width, padding;
-  
+
   /* Улучшенная производительность */
   will-change: width, margin;
-  
+
   /* Тень при изменении размера */
-  &:not([style*="width: 100%"]) {
+  &:not([style*='width: 100%']) {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
   }
 }
@@ -104,15 +104,15 @@
 @media (max-width: 768px) {
   .viewport-indicator {
     @apply px-2 py-1 text-xs;
-    
+
     .viewport-width {
       @apply hidden;
     }
   }
-  
+
   .responsive-menu {
     @apply max-w-sm;
-    
+
     .viewport-btn {
       @apply p-3;
     }
@@ -123,28 +123,28 @@
 @media (prefers-color-scheme: dark) {
   .viewport-indicator {
     @apply bg-gray-800 text-gray-200 border-gray-700;
-    
+
     &:hover {
       @apply bg-gray-700 border-gray-600;
     }
-    
+
     .viewport-icon svg {
       @apply text-gray-400;
     }
-    
+
     .viewport-width {
       @apply text-gray-400;
     }
   }
-  
+
   .responsive-menu {
     .viewport-btn {
       @apply border-gray-700 bg-gray-800 text-gray-200;
-      
+
       &:hover {
         @apply border-blue-400 bg-gray-700;
       }
-      
+
       &.border-blue-500 {
         @apply border-blue-400 bg-blue-900/20;
       }
@@ -155,7 +155,7 @@
 /* Интеграция с TablePlugin */
 .html-editor-table {
   @apply transition-all duration-300 ease-in-out;
-  
+
   /* Адаптация таблиц к viewport'у */
   &.responsive-table {
     @apply w-full overflow-x-auto;
@@ -166,7 +166,7 @@
 .viewport-btn {
   position: relative;
   overflow: hidden;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -177,7 +177,7 @@
     background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
     transition: left 0.5s;
   }
-  
+
   &:hover::before {
     left: 100%;
   }

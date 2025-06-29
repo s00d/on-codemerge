@@ -30,12 +30,12 @@ export class HTMLEditor {
     this.container.contentEditable = 'true';
     this.localeManager = new LocaleManager();
     this.notificationManager = NotificationManager.getInstance();
-    
+
     // Инициализируем LocaleManager
-    this.localeManager.initialize().catch(error => {
+    this.localeManager.initialize().catch((error) => {
       console.error('Failed to initialize LocaleManager:', error);
     });
-    
+
     // this.container.draggable = true;
 
     innerContainer.appendChild(this.container);
@@ -52,12 +52,12 @@ export class HTMLEditor {
       // Проверяем, не кликнули ли мы на блок
       const target = e.target as Element;
       const block = target.closest('.editor-block');
-      
+
       // Если кликнули на блок, не устанавливаем фокус на контейнер
       if (block) {
         return;
       }
-      
+
       // Только если кликнули на пустое место, устанавливаем фокус
       this.container.focus();
     });
@@ -570,7 +570,11 @@ export class HTMLEditor {
   }
 
   // Notification methods
-  public showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', duration: number = 3000): void {
+  public showNotification(
+    message: string,
+    type: 'success' | 'error' | 'warning' | 'info' = 'info',
+    duration: number = 3000
+  ): void {
     this.notificationManager.show({ message, type, duration });
   }
 
@@ -598,12 +602,12 @@ export class HTMLEditor {
       // Проверяем, не кликнули ли мы на блок
       const target = e.target as Element;
       const block = target.closest('.editor-block');
-      
+
       // Если кликнули на блок, не устанавливаем фокус на контейнер
       if (block) {
         return;
       }
-      
+
       // Только если кликнули на пустое место, устанавливаем фокус
       this.container.focus();
     });

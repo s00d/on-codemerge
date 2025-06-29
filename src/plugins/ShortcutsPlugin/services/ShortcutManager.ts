@@ -23,7 +23,7 @@ export class ShortcutManager {
     totalShortcuts: 0,
     mostUsed: [],
     recentlyUsed: [],
-    conflicts: []
+    conflicts: [],
   };
 
   constructor() {
@@ -40,13 +40,13 @@ export class ShortcutManager {
   ): void {
     const shortcut: Shortcut = {
       id,
-      keys: keys.split('+').map(key => key.trim().toLowerCase()),
-      keysMac: keysMac ? keysMac.split('+').map(key => key.trim().toLowerCase()) : undefined,
+      keys: keys.split('+').map((key) => key.trim().toLowerCase()),
+      keysMac: keysMac ? keysMac.split('+').map((key) => key.trim().toLowerCase()) : undefined,
       callback,
       description,
       category,
       usageCount: 0,
-      lastUsed: 0
+      lastUsed: 0,
     };
 
     // Проверяем конфликты
@@ -78,7 +78,7 @@ export class ShortcutManager {
     // Ищем подходящий шорткат
     for (const shortcut of this.shortcuts.values()) {
       const shortcutKeys = this.isMac && shortcut.keysMac ? shortcut.keysMac : shortcut.keys;
-      
+
       if (this.matchesShortcut(pressedKeys, shortcutKeys)) {
         event.preventDefault();
         this.executeShortcut(shortcut);
@@ -102,24 +102,33 @@ export class ShortcutManager {
 
   private normalizeKey(key: string): string {
     const keyMap: Record<string, string> = {
-      'Enter': 'enter',
-      'Backspace': 'backspace',
-      'Delete': 'delete',
-      'Escape': 'escape',
-      'Tab': 'tab',
-      'Space': 'space',
-      'ArrowUp': 'arrowup',
-      'ArrowDown': 'arrowdown',
-      'ArrowLeft': 'arrowleft',
-      'ArrowRight': 'arrowright',
-      'Home': 'home',
-      'End': 'end',
-      'PageUp': 'pageup',
-      'PageDown': 'pagedown',
-      'Insert': 'insert',
-      'F1': 'f1', 'F2': 'f2', 'F3': 'f3', 'F4': 'f4',
-      'F5': 'f5', 'F6': 'f6', 'F7': 'f7', 'F8': 'f8',
-      'F9': 'f9', 'F10': 'f10', 'F11': 'f11', 'F12': 'f12'
+      Enter: 'enter',
+      Backspace: 'backspace',
+      Delete: 'delete',
+      Escape: 'escape',
+      Tab: 'tab',
+      Space: 'space',
+      ArrowUp: 'arrowup',
+      ArrowDown: 'arrowdown',
+      ArrowLeft: 'arrowleft',
+      ArrowRight: 'arrowright',
+      Home: 'home',
+      End: 'end',
+      PageUp: 'pageup',
+      PageDown: 'pagedown',
+      Insert: 'insert',
+      F1: 'f1',
+      F2: 'f2',
+      F3: 'f3',
+      F4: 'f4',
+      F5: 'f5',
+      F6: 'f6',
+      F7: 'f7',
+      F8: 'f8',
+      F9: 'f9',
+      F10: 'f10',
+      F11: 'f11',
+      F12: 'f12',
     };
 
     return keyMap[key] || key.toLowerCase();
@@ -127,11 +136,11 @@ export class ShortcutManager {
 
   private matchesShortcut(pressed: string[], defined: string[]): boolean {
     if (pressed.length !== defined.length) return false;
-    
+
     // Сортируем массивы для корректного сравнения
     const sortedPressed = [...pressed].sort();
     const sortedDefined = [...defined].sort();
-    
+
     return sortedDefined.every((key, index) => sortedPressed[index] === key);
   }
 
@@ -141,7 +150,7 @@ export class ShortcutManager {
 
     for (const [id, shortcut] of this.shortcuts) {
       if (id === newShortcut.id) continue;
-      
+
       const shortcutKeys = this.isMac && shortcut.keysMac ? shortcut.keysMac : shortcut.keys;
       if (this.matchesShortcut(newKeys, shortcutKeys)) {
         conflicts.push(`${id} (${shortcut.description})`);
@@ -153,15 +162,13 @@ export class ShortcutManager {
 
   private updateStats(): void {
     const shortcuts = Array.from(this.shortcuts.values());
-    
+
     // Самые используемые
-    this.stats.mostUsed = shortcuts
-      .sort((a, b) => b.usageCount - a.usageCount)
-      .slice(0, 5);
+    this.stats.mostUsed = shortcuts.sort((a, b) => b.usageCount - a.usageCount).slice(0, 5);
 
     // Недавно использованные
     this.stats.recentlyUsed = shortcuts
-      .filter(s => s.lastUsed > 0)
+      .filter((s) => s.lastUsed > 0)
       .sort((a, b) => b.lastUsed - a.lastUsed)
       .slice(0, 5);
   }
@@ -172,7 +179,7 @@ export class ShortcutManager {
 
   public getShortcutsByCategory(): Record<string, Shortcut[]> {
     const categories: Record<string, Shortcut[]> = {};
-    
+
     for (const shortcut of this.shortcuts.values()) {
       if (!categories[shortcut.category]) {
         categories[shortcut.category] = [];
@@ -193,26 +200,26 @@ export class ShortcutManager {
 
   public formatShortcut(keys: string[]): string {
     const keyMap: Record<string, string> = {
-      'ctrl': this.isMac ? '⌘' : 'Ctrl',
-      'shift': '⇧',
-      'alt': this.isMac ? '⌥' : 'Alt',
-      'enter': '↵',
-      'backspace': '⌫',
-      'delete': '⌦',
-      'escape': '⎋',
-      'tab': '⇥',
-      'space': '␣',
-      'arrowup': '↑',
-      'arrowdown': '↓',
-      'arrowleft': '←',
-      'arrowright': '→',
-      'home': '⇱',
-      'end': '⇲',
-      'pageup': '⇞',
-      'pagedown': '⇟'
+      ctrl: this.isMac ? '⌘' : 'Ctrl',
+      shift: '⇧',
+      alt: this.isMac ? '⌥' : 'Alt',
+      enter: '↵',
+      backspace: '⌫',
+      delete: '⌦',
+      escape: '⎋',
+      tab: '⇥',
+      space: '␣',
+      arrowup: '↑',
+      arrowdown: '↓',
+      arrowleft: '←',
+      arrowright: '→',
+      home: '⇱',
+      end: '⇲',
+      pageup: '⇞',
+      pagedown: '⇟',
     };
 
-    return keys.map(key => keyMap[key] || key.toUpperCase()).join(' ');
+    return keys.map((key) => keyMap[key] || key.toUpperCase()).join(' ');
   }
 
   public unregister(id: string): boolean {
@@ -225,7 +232,7 @@ export class ShortcutManager {
       totalShortcuts: 0,
       mostUsed: [],
       recentlyUsed: [],
-      conflicts: []
+      conflicts: [],
     };
   }
-} 
+}

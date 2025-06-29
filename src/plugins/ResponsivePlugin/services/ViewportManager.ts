@@ -19,7 +19,11 @@ export class ViewportManager {
     // responsive по умолчанию, desktop игнорируем как дефолт
     let initial: Viewport = 'responsive';
     const savedViewport = localStorage.getItem('responsive-viewport') as Viewport;
-    if (savedViewport && savedViewport !== 'desktop' && VIEWPORT_SIZES[savedViewport as keyof typeof VIEWPORT_SIZES]) {
+    if (
+      savedViewport &&
+      savedViewport !== 'desktop' &&
+      VIEWPORT_SIZES[savedViewport as keyof typeof VIEWPORT_SIZES]
+    ) {
       initial = savedViewport;
     }
     this.currentViewport = initial;
@@ -28,15 +32,15 @@ export class ViewportManager {
   public setViewport(container: HTMLElement, viewport: Viewport): void {
     this.container = container;
     this.currentViewport = viewport;
-    
+
     // Сохраняем в localStorage
     localStorage.setItem('responsive-viewport', viewport);
 
     const size = VIEWPORT_SIZES[viewport as keyof typeof VIEWPORT_SIZES];
-    
+
     // Добавляем анимацию перехода
     container.style.transition = 'width 0.3s ease-in-out, margin 0.3s ease-in-out';
-    
+
     if (viewport === 'responsive') {
       container.style.width = '100%';
       container.style.margin = '0';
@@ -69,7 +73,7 @@ export class ViewportManager {
   }
 
   private notifyChange(viewport: Viewport, width: number): void {
-    this.changeHandlers.forEach(handler => handler(viewport, width));
+    this.changeHandlers.forEach((handler) => handler(viewport, width));
   }
 
   private setupResizeObserver(): void {
@@ -99,20 +103,34 @@ export class ViewportManager {
 
   // Методы для быстрого переключения
   public nextViewport(): void {
-    const viewports: Viewport[] = ['mobile', 'tablet', 'desktop', 'largeDesktop', 'ultraWide', 'responsive'];
+    const viewports: Viewport[] = [
+      'mobile',
+      'tablet',
+      'desktop',
+      'largeDesktop',
+      'ultraWide',
+      'responsive',
+    ];
     const currentIndex = viewports.indexOf(this.currentViewport);
     const nextIndex = (currentIndex + 1) % viewports.length;
-    
+
     if (this.container) {
       this.setViewport(this.container, viewports[nextIndex]);
     }
   }
 
   public previousViewport(): void {
-    const viewports: Viewport[] = ['mobile', 'tablet', 'desktop', 'largeDesktop', 'ultraWide', 'responsive'];
+    const viewports: Viewport[] = [
+      'mobile',
+      'tablet',
+      'desktop',
+      'largeDesktop',
+      'ultraWide',
+      'responsive',
+    ];
     const currentIndex = viewports.indexOf(this.currentViewport);
     const previousIndex = currentIndex === 0 ? viewports.length - 1 : currentIndex - 1;
-    
+
     if (this.container) {
       this.setViewport(this.container, viewports[previousIndex]);
     }

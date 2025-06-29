@@ -40,7 +40,11 @@ export class EventForm {
     // Заголовок события
     const titleContainer = createContainer('form-group mb-4');
     const titleLabel = createLabel(this.editor.t('Title'), 'event-title');
-    const titleInput = createInputField('text', this.editor.t('Enter event title'), this.event?.title || '');
+    const titleInput = createInputField(
+      'text',
+      this.editor.t('Enter event title'),
+      this.event?.title || ''
+    );
     titleInput.id = 'event-title';
     titleInput.name = 'title';
     titleInput.required = true;
@@ -51,7 +55,10 @@ export class EventForm {
     // Описание события
     const descriptionContainer = createContainer('form-group mb-4');
     const descriptionLabel = createLabel(this.editor.t('Description'), 'event-description');
-    const descriptionTextarea = createTextarea(this.editor.t('Enter event description'), this.event?.description || '');
+    const descriptionTextarea = createTextarea(
+      this.editor.t('Enter event description'),
+      this.event?.description || ''
+    );
     descriptionTextarea.id = 'event-description';
     descriptionTextarea.name = 'description';
     descriptionTextarea.rows = 3;
@@ -117,7 +124,7 @@ export class EventForm {
     const priorityOptions = [
       { value: 'low', label: this.editor.t('Low') },
       { value: 'medium', label: this.editor.t('Medium') },
-      { value: 'high', label: this.editor.t('High') }
+      { value: 'high', label: this.editor.t('High') },
     ];
     const prioritySelect = createSelectField(priorityOptions, this.event?.priority || 'medium');
     prioritySelect.id = 'event-priority';
@@ -128,9 +135,7 @@ export class EventForm {
 
     const categoryContainer = createContainer('form-group');
     const categoryLabel = createLabel(this.editor.t('Category'), 'event-category');
-    let categoryOptions = [
-      { value: '', label: this.editor.t('Select category') }
-    ];
+    let categoryOptions = [{ value: '', label: this.editor.t('Select category') }];
 
     if (this.categoryManager) {
       const categories = this.categoryManager.getCategories();
@@ -151,7 +156,11 @@ export class EventForm {
     // Местоположение
     const locationContainer = createContainer('form-group mb-4');
     const locationLabel = createLabel(this.editor.t('Location'), 'event-location');
-    const locationInput = createInputField('text', this.editor.t('Enter event location'), this.event?.location || '');
+    const locationInput = createInputField(
+      'text',
+      this.editor.t('Enter event location'),
+      this.event?.location || ''
+    );
     locationInput.id = 'event-location';
     locationInput.name = 'location';
     locationContainer.appendChild(locationLabel);
@@ -161,7 +170,11 @@ export class EventForm {
     // Участники
     const attendeesContainer = createContainer('form-group mb-4');
     const attendeesLabel = createLabel(this.editor.t('Attendees'), 'event-attendees');
-    const attendeesInput = createInputField('text', this.editor.t('Enter attendees (comma separated)'), this.event?.attendees?.join(', ') || '');
+    const attendeesInput = createInputField(
+      'text',
+      this.editor.t('Enter attendees (comma separated)'),
+      this.event?.attendees?.join(', ') || ''
+    );
     attendeesInput.id = 'event-attendees';
     attendeesInput.name = 'attendees';
     attendeesContainer.appendChild(attendeesLabel);
@@ -171,7 +184,11 @@ export class EventForm {
     // Теги
     const tagsContainer = createContainer('form-group mb-4');
     const tagsLabel = createLabel(this.editor.t('Tags'), 'event-tags');
-    const tagsInput = createInputField('text', this.editor.t('Enter tags (comma separated)'), this.event?.tags?.join(', ') || '');
+    const tagsInput = createInputField(
+      'text',
+      this.editor.t('Enter tags (comma separated)'),
+      this.event?.tags?.join(', ') || ''
+    );
     tagsInput.id = 'event-tags';
     tagsInput.name = 'tags';
     tagsContainer.appendChild(tagsLabel);
@@ -192,7 +209,10 @@ export class EventForm {
 
     // Весь день
     const allDayContainer = createContainer('form-group mb-4');
-    const allDayCheckbox = createCheckbox(this.editor.t('All day event'), this.event?.isAllDay || false);
+    const allDayCheckbox = createCheckbox(
+      this.editor.t('All day event'),
+      this.event?.isAllDay || false
+    );
     const allDayInput = allDayCheckbox.querySelector('input') as HTMLInputElement;
     allDayInput.id = 'event-all-day';
     allDayInput.name = 'isAllDay';
@@ -200,24 +220,37 @@ export class EventForm {
     this.formElement.appendChild(allDayContainer);
 
     // Обработчик отправки
-    this.formElement.addEventListener('submit', createFormSubmitHandler(this.formElement, (data) => {
-      const eventData: CreateEventData = {
-        title: data.title as string,
-        description: data.description as string,
-        date: data.date as string,
-        time: data.time as string,
-        duration: data.duration as number,
-        location: data.location as string,
-        color: data.color as string,
-        isAllDay: data.isAllDay as boolean,
-        priority: data.priority as 'low' | 'medium' | 'high',
-        category: data.category as string,
-        tags: data.tags ? (data.tags as string).split(',').map(tag => tag.trim()).filter(tag => tag) : [],
-        attendees: data.attendees ? (data.attendees as string).split(',').map(attendee => attendee.trim()).filter(attendee => attendee) : [],
-        reminder: data.reminder ? parseInt(data.reminder as string) : undefined,
-      };
-      this.onSubmit(eventData);
-    }));
+    this.formElement.addEventListener(
+      'submit',
+      createFormSubmitHandler(this.formElement, (data) => {
+        const eventData: CreateEventData = {
+          title: data.title as string,
+          description: data.description as string,
+          date: data.date as string,
+          time: data.time as string,
+          duration: data.duration as number,
+          location: data.location as string,
+          color: data.color as string,
+          isAllDay: data.isAllDay as boolean,
+          priority: data.priority as 'low' | 'medium' | 'high',
+          category: data.category as string,
+          tags: data.tags
+            ? (data.tags as string)
+                .split(',')
+                .map((tag) => tag.trim())
+                .filter((tag) => tag)
+            : [],
+          attendees: data.attendees
+            ? (data.attendees as string)
+                .split(',')
+                .map((attendee) => attendee.trim())
+                .filter((attendee) => attendee)
+            : [],
+          reminder: data.reminder ? parseInt(data.reminder as string) : undefined,
+        };
+        this.onSubmit(eventData);
+      })
+    );
 
     container.appendChild(this.formElement);
     return container;

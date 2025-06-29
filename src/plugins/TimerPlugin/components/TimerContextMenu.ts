@@ -102,4 +102,4 @@ export class TimerContextMenu {
     this.closeContextMenu();
     this.editor = null!;
   }
-} 
+}

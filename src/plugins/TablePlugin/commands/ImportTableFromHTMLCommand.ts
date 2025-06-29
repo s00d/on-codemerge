@@ -49,7 +49,10 @@ export class ImportTableFromHTMLCommand implements Command {
     table.focusFirstCell();
   }
 
-  private generateImportScript(tableId: string, _options: ImportTableFromHTMLCommandOptions): string {
+  private generateImportScript(
+    tableId: string,
+    _options: ImportTableFromHTMLCommandOptions
+  ): string {
     return `
 (function() {
   var table = document.getElementById('${tableId}');

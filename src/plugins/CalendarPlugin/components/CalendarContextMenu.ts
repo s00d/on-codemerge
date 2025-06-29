@@ -8,7 +8,10 @@ export class CalendarContextMenu {
   private onAction: (action: string, target: Calendar | CalendarEvent) => void;
   private currentContextMenu: ContextMenu | null = null;
 
-  constructor(editor: HTMLEditor, onAction: (action: string, target: Calendar | CalendarEvent) => void) {
+  constructor(
+    editor: HTMLEditor,
+    onAction: (action: string, target: Calendar | CalendarEvent) => void
+  ) {
     this.editor = editor;
     this.onAction = onAction;
   }
@@ -26,10 +29,14 @@ export class CalendarContextMenu {
     let element: HTMLElement;
     if ('events' in target) {
       // Calendar
-      element = this.editor.getContainer().querySelector(`[data-calendar-id="${target.id}"]`) as HTMLElement;
+      element = this.editor
+        .getContainer()
+        .querySelector(`[data-calendar-id="${target.id}"]`) as HTMLElement;
     } else {
       // Event
-      element = this.editor.getContainer().querySelector(`[data-event-id="${target.id}"]`) as HTMLElement;
+      element = this.editor
+        .getContainer()
+        .querySelector(`[data-event-id="${target.id}"]`) as HTMLElement;
     }
 
     if (element) {

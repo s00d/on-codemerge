@@ -38,7 +38,7 @@ export class ResponsiveMenu {
         label: editor.t('Mobile'),
         size: '320px',
         description: editor.t('Smartphone view'),
-        hotkey: 'Ctrl+1'
+        hotkey: 'Ctrl+1',
       },
       {
         name: 'tablet',
@@ -46,7 +46,7 @@ export class ResponsiveMenu {
         label: editor.t('Tablet'),
         size: '768px',
         description: editor.t('Tablet view'),
-        hotkey: 'Ctrl+2'
+        hotkey: 'Ctrl+2',
       },
       {
         name: 'desktop',
@@ -54,7 +54,7 @@ export class ResponsiveMenu {
         label: editor.t('Desktop'),
         size: '1024px',
         description: editor.t('Standard desktop'),
-        hotkey: 'Ctrl+3'
+        hotkey: 'Ctrl+3',
       },
       {
         name: 'largeDesktop',
@@ -62,7 +62,7 @@ export class ResponsiveMenu {
         label: editor.t('Large Desktop'),
         size: '1440px',
         description: editor.t('Large desktop view'),
-        hotkey: 'Ctrl+4'
+        hotkey: 'Ctrl+4',
       },
       {
         name: 'ultraWide',
@@ -70,7 +70,7 @@ export class ResponsiveMenu {
         label: editor.t('Ultra Wide'),
         size: '1920px',
         description: editor.t('Ultra wide screen'),
-        hotkey: 'Ctrl+5'
+        hotkey: 'Ctrl+5',
       },
       {
         name: 'responsive',
@@ -78,7 +78,7 @@ export class ResponsiveMenu {
         label: editor.t('Responsive'),
         size: 'Fluid',
         description: editor.t('Fluid width'),
-        hotkey: 'Ctrl+0'
+        hotkey: 'Ctrl+0',
       },
     ];
 
@@ -105,9 +105,11 @@ export class ResponsiveMenu {
     // Заголовок с текущим viewport'ом
     const header = createContainer('flex items-center justify-between');
     const title = createSpan('text-lg font-semibold', this.editor.t('Select Viewport'));
-    const currentViewport = this.viewports.find(v => v.name === this.activeViewport);
-    const currentInfo = createSpan('text-sm text-gray-500',
-      `${currentViewport?.label} (${currentViewport?.size})`);
+    const currentViewport = this.viewports.find((v) => v.name === this.activeViewport);
+    const currentInfo = createSpan(
+      'text-sm text-gray-500',
+      `${currentViewport?.label} (${currentViewport?.size})`
+    );
 
     header.appendChild(title);
     header.appendChild(currentInfo);
@@ -142,8 +144,8 @@ export class ResponsiveMenu {
     });
 
     button.className = `viewport-btn w-full p-4 border-2 rounded-lg transition-all duration-200 ${
-      isActive 
-        ? 'border-blue-500 bg-blue-50 shadow-md' 
+      isActive
+        ? 'border-blue-500 bg-blue-50 shadow-md'
         : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
     }`;
     button.dataset.viewport = viewport.name;
@@ -156,10 +158,13 @@ export class ResponsiveMenu {
     iconElement.innerHTML = viewport.icon;
 
     // Превью экрана
-    const screenPreview = createContainer(`w-16 h-10 border-2 border-gray-300 rounded ${
-      viewport.name === 'responsive' ? 'w-20' : 'w-16'
-    }`);
-    screenPreview.style.background = 'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)';
+    const screenPreview = createContainer(
+      `w-16 h-10 border-2 border-gray-300 rounded ${
+        viewport.name === 'responsive' ? 'w-20' : 'w-16'
+      }`
+    );
+    screenPreview.style.background =
+      'linear-gradient(45deg, #f0f0f0 25%, transparent 25%), linear-gradient(-45deg, #f0f0f0 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #f0f0f0 75%), linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)';
     screenPreview.style.backgroundSize = '4px 4px';
     screenPreview.style.backgroundPosition = '0 0, 0 2px, 2px -2px, -2px 0px';
 
@@ -188,18 +193,17 @@ export class ResponsiveMenu {
   private createInfoPanel(): HTMLElement {
     const panel = createContainer('mt-6 p-4 bg-gray-50 rounded-lg border');
 
-    const title = createSpan('block text-sm font-medium text-gray-900 mb-2',
-      this.editor.t('Tips'));
+    const title = createSpan('block text-sm font-medium text-gray-900 mb-2', this.editor.t('Tips'));
 
     const tips = [
       this.editor.t('• Use hotkeys for quick switching'),
       this.editor.t('• Responsive mode allows manual resizing'),
       this.editor.t('• Viewport state is saved automatically'),
-      this.editor.t('• Tables adapt automatically to viewport size')
+      this.editor.t('• Tables adapt automatically to viewport size'),
     ];
 
     const tipsList = createContainer('space-y-1');
-    tips.forEach(tip => {
+    tips.forEach((tip) => {
       const tipElement = createSpan('block text-xs text-gray-600', tip);
       tipsList.appendChild(tipElement);
     });
@@ -230,7 +234,7 @@ export class ResponsiveMenu {
           '3': 'desktop',
           '4': 'largeDesktop',
           '5': 'ultraWide',
-          '0': 'responsive'
+          '0': 'responsive',
         };
 
         if (viewportMap[key]) {
@@ -253,12 +257,12 @@ export class ResponsiveMenu {
     // Обновляем UI если меню открыто
     if (this.popup) {
       const buttons = document.querySelectorAll('.viewport-btn');
-      buttons.forEach(btn => {
+      buttons.forEach((btn) => {
         const btnElement = btn as HTMLElement;
         const isActive = btnElement.dataset.viewport === viewport;
         btnElement.className = `viewport-btn w-full p-4 border-2 rounded-lg transition-all duration-200 ${
-          isActive 
-            ? 'border-blue-500 bg-blue-50 shadow-md' 
+          isActive
+            ? 'border-blue-500 bg-blue-50 shadow-md'
             : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
         }`;
       });

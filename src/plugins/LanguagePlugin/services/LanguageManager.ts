@@ -21,4 +21,4 @@ export class LanguageManager {
     await this.editor.setLocale(locale);
     localStorage.setItem('editor-language', locale);
   }
-} 
+}

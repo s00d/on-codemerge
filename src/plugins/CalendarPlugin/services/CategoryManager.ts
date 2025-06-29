@@ -1,4 +1,4 @@
-import { Category, Tag } from '../types';
+import type { Category, Tag } from '../types';
 
 export class CategoryManager {
   private categoriesKey = 'html-editor-calendar-categories';
@@ -12,7 +12,7 @@ export class CategoryManager {
 
   public getCategory(id: string): Category | null {
     const categories = this.getCategories();
-    return categories.find(cat => cat.id === id) || null;
+    return categories.find((cat) => cat.id === id) || null;
   }
 
   public createCategory(name: string, color: string): Category {
@@ -31,7 +31,7 @@ export class CategoryManager {
 
   public updateCategory(id: string, data: Partial<Category>): Category {
     const categories = this.getCategories();
-    const index = categories.findIndex(cat => cat.id === id);
+    const index = categories.findIndex((cat) => cat.id === id);
 
     if (index === -1) {
       throw new Error('Category not found');
@@ -48,7 +48,7 @@ export class CategoryManager {
   }
 
   public deleteCategory(id: string): void {
-    const categories = this.getCategories().filter(cat => cat.id !== id);
+    const categories = this.getCategories().filter((cat) => cat.id !== id);
     localStorage.setItem(this.categoriesKey, JSON.stringify(categories));
   }
 
@@ -60,7 +60,7 @@ export class CategoryManager {
 
   public getTag(id: string): Tag | null {
     const tags = this.getTags();
-    return tags.find(tag => tag.id === id) || null;
+    return tags.find((tag) => tag.id === id) || null;
   }
 
   public createTag(name: string, color: string): Tag {
@@ -79,7 +79,7 @@ export class CategoryManager {
 
   public updateTag(id: string, data: Partial<Tag>): Tag {
     const tags = this.getTags();
-    const index = tags.findIndex(tag => tag.id === id);
+    const index = tags.findIndex((tag) => tag.id === id);
 
     if (index === -1) {
       throw new Error('Tag not found');
@@ -96,27 +96,27 @@ export class CategoryManager {
   }
 
   public deleteTag(id: string): void {
-    const tags = this.getTags().filter(tag => tag.id !== id);
+    const tags = this.getTags().filter((tag) => tag.id !== id);
     localStorage.setItem(this.tagsKey, JSON.stringify(tags));
   }
 
   // Утилиты
   public getCategoryByName(name: string): Category | null {
     const categories = this.getCategories();
-    return categories.find(cat => cat.name.toLowerCase() === name.toLowerCase()) || null;
+    return categories.find((cat) => cat.name.toLowerCase() === name.toLowerCase()) || null;
   }
 
   public getTagByName(name: string): Tag | null {
     const tags = this.getTags();
-    return tags.find(tag => tag.name.toLowerCase() === name.toLowerCase()) || null;
+    return tags.find((tag) => tag.name.toLowerCase() === name.toLowerCase()) || null;
   }
 
   public getEventsByCategory(categoryId: string, events: any[]): any[] {
-    return events.filter(event => event.category === categoryId);
+    return events.filter((event) => event.category === categoryId);
   }
 
   public getEventsByTag(tagName: string, events: any[]): any[] {
-    return events.filter(event => event.tags?.includes(tagName));
+    return events.filter((event) => event.tags?.includes(tagName));
   }
 
   // Статистика
@@ -124,7 +124,7 @@ export class CategoryManager {
     const stats: Record<string, number> = {};
     const categories = this.getCategories();
 
-    categories.forEach(category => {
+    categories.forEach((category) => {
       stats[category.id] = this.getEventsByCategory(category.id, events).length;
     });
 
@@ -135,7 +135,7 @@ export class CategoryManager {
     const stats: Record<string, number> = {};
     const tags = this.getTags();
 
-    tags.forEach(tag => {
+    tags.forEach((tag) => {
       stats[tag.id] = this.getEventsByTag(tag.name, events).length;
     });
 
@@ -162,4 +162,4 @@ export class CategoryManager {
       { id: 'cancelled', name: 'Cancelled', color: '#6b7280', createdAt: Date.now() },
     ];
   }
-} 
+}

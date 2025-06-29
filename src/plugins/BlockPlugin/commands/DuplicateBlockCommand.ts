@@ -24,7 +24,7 @@ export class DuplicateBlockCommand implements Command {
 
     // Создаем клон блока
     this.duplicatedBlock = this.originalBlock.cloneNode(true) as HTMLElement;
-    
+
     // Очищаем содержимое клона
     const content = this.duplicatedBlock.querySelector('.block-content') as HTMLElement;
     if (content) {
@@ -32,16 +32,19 @@ export class DuplicateBlockCommand implements Command {
       // Убеждаемся, что contentEditable установлен
       content.contentEditable = 'true';
     }
-    
+
     // Удаляем активное состояние
     this.duplicatedBlock.classList.remove('active');
-    
+
     // Убеждаемся, что блок не редактируемый, только содержимое
     this.duplicatedBlock.setAttribute('contenteditable', 'false');
-    
+
     // Вставляем после исходного блока
-    this.originalBlock.parentNode?.insertBefore(this.duplicatedBlock, this.originalBlock.nextSibling);
-    
+    this.originalBlock.parentNode?.insertBefore(
+      this.duplicatedBlock,
+      this.originalBlock.nextSibling
+    );
+
     // Фокусируемся на новом блоке
     this.focusBlock(this.duplicatedBlock);
   }
@@ -54,7 +57,10 @@ export class DuplicateBlockCommand implements Command {
 
   redo(): void {
     if (this.originalBlock && this.duplicatedBlock) {
-      this.originalBlock.parentNode?.insertBefore(this.duplicatedBlock, this.originalBlock.nextSibling);
+      this.originalBlock.parentNode?.insertBefore(
+        this.duplicatedBlock,
+        this.originalBlock.nextSibling
+      );
     }
   }
 
@@ -67,12 +73,12 @@ export class DuplicateBlockCommand implements Command {
     if (content && content.contentEditable === 'true') {
       // Убеждаемся, что contentEditable установлен
       content.contentEditable = 'true';
-      
+
       // НЕ устанавливаем фокус программно - браузер сам поставит курсор
       // content.focus();
-      
+
       // Добавляем активный класс
       block.classList.add('active');
     }
   }
-} 
+}

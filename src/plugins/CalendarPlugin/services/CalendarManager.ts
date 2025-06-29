@@ -4,7 +4,7 @@ import type {
   CreateCalendarData,
   CreateEventData,
   UpdateCalendarData,
-  UpdateEventData
+  UpdateEventData,
 } from '../types';
 import { CategoryManager } from './CategoryManager';
 import { ReminderService } from './ReminderService';
@@ -27,7 +27,7 @@ export class CalendarManager {
 
   public getCalendar(id: string): Calendar | null {
     const calendars = this.getCalendars();
-    return calendars.find(cal => cal.id === id) || null;
+    return calendars.find((cal) => cal.id === id) || null;
   }
 
   public createCalendar(data: CreateCalendarData): Calendar {
@@ -36,7 +36,7 @@ export class CalendarManager {
       id: crypto.randomUUID(),
       title: data.title,
       description: data.description,
-      events: data.events ? data.events.map(event => this.createEvent(event)) : [],
+      events: data.events ? data.events.map((event) => this.createEvent(event)) : [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -48,7 +48,7 @@ export class CalendarManager {
 
   public updateCalendar(id: string, data: UpdateCalendarData): Calendar {
     const calendars = this.getCalendars();
-    const index = calendars.findIndex(cal => cal.id === id);
+    const index = calendars.findIndex((cal) => cal.id === id);
 
     if (index === -1) {
       throw new Error('Calendar not found');
@@ -58,7 +58,7 @@ export class CalendarManager {
     const updated: Calendar = {
       ...calendars[index],
       ...otherData,
-      events: events ? events.map(event => this.createEvent(event, id)) : calendars[index].events,
+      events: events ? events.map((event) => this.createEvent(event, id)) : calendars[index].events,
       updatedAt: Date.now(),
     };
 
@@ -68,7 +68,7 @@ export class CalendarManager {
   }
 
   public deleteCalendar(id: string): void {
-    const calendars = this.getCalendars().filter(cal => cal.id !== id);
+    const calendars = this.getCalendars().filter((cal) => cal.id !== id);
     localStorage.setItem(this.calendarsKey, JSON.stringify(calendars));
 
     // Удаляем все напоминания календаря
@@ -77,12 +77,12 @@ export class CalendarManager {
 
   public getEvents(calendarId: string): CalendarEvent[] {
     const allEvents = this.getAllEvents();
-    return allEvents.filter(event => event.calendarId === calendarId);
+    return allEvents.filter((event) => event.calendarId === calendarId);
   }
 
   public getEvent(id: string): CalendarEvent | null {
     const allEvents = this.getAllEvents();
-    return allEvents.find(event => event.id === id) || null;
+    return allEvents.find((event) => event.id === id) || null;
   }
 
   public createEvent(data: CreateEventData, calendarId?: string): CalendarEvent {
@@ -122,7 +122,7 @@ export class CalendarManager {
 
   public updateEvent(id: string, data: UpdateEventData): CalendarEvent {
     const allEvents = this.getAllEvents();
-    const index = allEvents.findIndex(event => event.id === id);
+    const index = allEvents.findIndex((event) => event.id === id);
 
     if (index === -1) {
       throw new Error('Event not found');
@@ -150,7 +150,7 @@ export class CalendarManager {
   }
 
   public deleteEvent(id: string): void {
-    const allEvents = this.getAllEvents().filter(event => event.id !== id);
+    const allEvents = this.getAllEvents().filter((event) => event.id !== id);
     localStorage.setItem(this.eventsKey, JSON.stringify(allEvents));
 
     // Удаляем напоминания события
@@ -159,12 +159,12 @@ export class CalendarManager {
 
   public getEventsByDate(date: string): CalendarEvent[] {
     const allEvents = this.getAllEvents();
-    return allEvents.filter(event => event.date === date);
+    return allEvents.filter((event) => event.date === date);
   }
 
   public getEventsByDateRange(startDate: string, endDate: string): CalendarEvent[] {
     const allEvents = this.getAllEvents();
-    return allEvents.filter(event => {
+    return allEvents.filter((event) => {
       const eventDate = new Date(event.date);
       const start = new Date(startDate);
       const end = new Date(endDate);
@@ -175,28 +175,29 @@ export class CalendarManager {
   // Новые методы для работы с категориями и тегами
   public getEventsByCategory(categoryId: string): CalendarEvent[] {
     const allEvents = this.getAllEvents();
-    return allEvents.filter(event => event.category === categoryId);
+    return allEvents.filter((event) => event.category === categoryId);
   }
 
   public getEventsByTag(tagName: string): CalendarEvent[] {
     const allEvents = this.getAllEvents();
-    return allEvents.filter(event => event.tags?.includes(tagName));
+    return allEvents.filter((event) => event.tags?.includes(tagName));
   }
 
   public getEventsByPriority(priority: 'low' | 'medium' | 'high'): CalendarEvent[] {
     const allEvents = this.getAllEvents();
-    return allEvents.filter(event => event.priority === priority);
+    return allEvents.filter((event) => event.priority === priority);
   }
 
   public searchEvents(query: string): CalendarEvent[] {
     const allEvents = this.getAllEvents();
     const lowerQuery = query.toLowerCase();
 
-    return allEvents.filter(event =>
-      event.title.toLowerCase().includes(lowerQuery) ||
-      event.description?.toLowerCase().includes(lowerQuery) ||
-      event.location?.toLowerCase().includes(lowerQuery) ||
-      event.tags?.some(tag => tag.toLowerCase().includes(lowerQuery))
+    return allEvents.filter(
+      (event) =>
+        event.title.toLowerCase().includes(lowerQuery) ||
+        event.description?.toLowerCase().includes(lowerQuery) ||
+        event.location?.toLowerCase().includes(lowerQuery) ||
+        event.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
     );
   }
 
@@ -225,15 +226,15 @@ export class CalendarManager {
   // Генерация HTML календаря
   public generateCalendarHTML(calendar: Calendar): string {
     const events = this.getEvents(calendar.id);
-    
+
     // Сортируем события по дате и времени
     const sortedEvents = events.sort((a, b) => {
       const dateA = new Date(`${a.date}T${a.time}`);
       const dateB = new Date(`${b.date}T${b.time}`);
       return dateA.getTime() - dateB.getTime();
     });
-    
-    const eventsHtml = sortedEvents.map(event => this.generateEventHTML(event)).join('');
+
+    const eventsHtml = sortedEvents.map((event) => this.generateEventHTML(event)).join('');
 
     return `
       <div class="calendar-widget" data-calendar-id="${calendar.id}">
@@ -254,36 +255,40 @@ export class CalendarManager {
     const priorityClass = event.priority || 'medium';
     const categoryColor = event.color || '#3b82f6';
     const categoryName = event.category || 'General';
-    
+
     // Форматируем дату
     const eventDate = new Date(event.date);
-    const formattedDate = eventDate.toLocaleDateString('ru-RU', { 
-      day: 'numeric', 
-      month: 'short', 
-      year: 'numeric' 
+    const formattedDate = eventDate.toLocaleDateString('ru-RU', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
     });
-    
-    const tagsHtml = event.tags && event.tags.length > 0 
-      ? `<div class="event-tags">${event.tags.map(tag => `<span class="event-tag">${tag}</span>`).join('')}</div>` 
-      : '';
-    
-    const attendeesHtml = event.attendees && event.attendees.length > 0 
-      ? `<span class="event-attendees">👥 ${event.attendees.join(', ')}</span>` 
-      : '';
-    
-    const reminderHtml = event.reminder 
-      ? `<span class="event-reminder">⏰ ${event.reminder}</span>` 
-      : '';
-    
-    const locationHtml = event.location 
-      ? `<span class="event-location">📍 ${event.location}</span>` 
-      : '';
-    
-    const durationHtml = event.duration 
-      ? `<span class="event-duration">⏱️ ${event.duration} min</span>` 
+
+    const tagsHtml =
+      event.tags && event.tags.length > 0
+        ? `<div class="event-tags">${event.tags.map((tag) => `<span class="event-tag">${tag}</span>`).join('')}</div>`
+        : '';
+
+    const attendeesHtml =
+      event.attendees && event.attendees.length > 0
+        ? `<span class="event-attendees">👥 ${event.attendees.join(', ')}</span>`
+        : '';
+
+    const reminderHtml = event.reminder
+      ? `<span class="event-reminder">⏰ ${event.reminder}</span>`
       : '';
 
-    const metaInfo = [locationHtml, durationHtml, attendeesHtml, reminderHtml].filter(Boolean).join(' • ');
+    const locationHtml = event.location
+      ? `<span class="event-location">📍 ${event.location}</span>`
+      : '';
+
+    const durationHtml = event.duration
+      ? `<span class="event-duration">⏱️ ${event.duration} min</span>`
+      : '';
+
+    const metaInfo = [locationHtml, durationHtml, attendeesHtml, reminderHtml]
+      .filter(Boolean)
+      .join(' • ');
 
     return `
       <div class="calendar-event" data-event-id="${event.id}" style="--event-color: ${event.color || '#3b82f6'}">
@@ -373,24 +378,27 @@ export class CalendarManager {
     });
 
     // Копируем события
-    events.forEach(event => {
-      this.createEvent({
-        title: event.title,
-        description: event.description,
-        date: event.date,
-        time: event.time,
-        duration: event.duration,
-        location: event.location,
-        color: event.color,
-        isAllDay: event.isAllDay,
-        priority: event.priority,
-        category: event.category,
-        tags: event.tags,
-        attendees: event.attendees,
-        reminder: event.reminder,
-        recurring: event.recurring,
-        attachments: event.attachments,
-      }, newCalendar.id);
+    events.forEach((event) => {
+      this.createEvent(
+        {
+          title: event.title,
+          description: event.description,
+          date: event.date,
+          time: event.time,
+          duration: event.duration,
+          location: event.location,
+          color: event.color,
+          isAllDay: event.isAllDay,
+          priority: event.priority,
+          category: event.category,
+          tags: event.tags,
+          attendees: event.attendees,
+          reminder: event.reminder,
+          recurring: event.recurring,
+          attachments: event.attachments,
+        },
+        newCalendar.id
+      );
     });
 
     return newCalendar;
@@ -403,27 +411,30 @@ export class CalendarManager {
     }
 
     const allEvents = this.getAllEvents();
-    const eventWithCalendar = allEvents.find(e => e.id === id);
+    const eventWithCalendar = allEvents.find((e) => e.id === id);
     if (!eventWithCalendar) {
       throw new Error('Event calendar not found');
     }
 
-    return this.createEvent({
-      title: `${originalEvent.title} (Copy)`,
-      description: originalEvent.description,
-      date: originalEvent.date,
-      time: originalEvent.time,
-      duration: originalEvent.duration,
-      location: originalEvent.location,
-      color: originalEvent.color,
-      isAllDay: originalEvent.isAllDay,
-      priority: originalEvent.priority,
-      category: originalEvent.category,
-      tags: originalEvent.tags,
-      attendees: originalEvent.attendees,
-      reminder: originalEvent.reminder,
-      recurring: originalEvent.recurring,
-      attachments: originalEvent.attachments,
-    }, eventWithCalendar.calendarId);
+    return this.createEvent(
+      {
+        title: `${originalEvent.title} (Copy)`,
+        description: originalEvent.description,
+        date: originalEvent.date,
+        time: originalEvent.time,
+        duration: originalEvent.duration,
+        location: originalEvent.location,
+        color: originalEvent.color,
+        isAllDay: originalEvent.isAllDay,
+        priority: originalEvent.priority,
+        category: originalEvent.category,
+        tags: originalEvent.tags,
+        attendees: originalEvent.attendees,
+        reminder: originalEvent.reminder,
+        recurring: originalEvent.recurring,
+        attachments: originalEvent.attachments,
+      },
+      eventWithCalendar.calendarId
+    );
   }
 }
