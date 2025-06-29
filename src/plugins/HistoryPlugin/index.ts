@@ -59,7 +59,7 @@ export class HistoryPlugin implements Plugin {
     if (toolbar) {
       this.undoButton = createToolbarButton({
         icon: undoIcon,
-        title: this.editor.t('Undo') ?? '',
+        title: this.editor?.t('Undo') ?? '',
         onClick: () => this.undo(),
       });
 
@@ -71,7 +71,7 @@ export class HistoryPlugin implements Plugin {
 
       this.historyButton = createToolbarButton({
         icon: historyIcon,
-        title: this.editor.t('View History') ?? '',
+        title: this.editor?.t('View History') ?? '',
         onClick: () => this.showHistory(),
       });
 
