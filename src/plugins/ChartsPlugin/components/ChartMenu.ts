@@ -423,9 +423,18 @@ export class ChartMenu {
     const previewContainer = this.popup.getElement()?.querySelector('.preview-container');
     if (!previewContainer) return;
 
+    // Получаем размеры контейнера для адаптивного canvas
+    const containerRect = previewContainer.getBoundingClientRect();
+    const padding = 60; // Учитываем padding контейнера
+    const containerWidth = Math.max(300, containerRect.width - padding);
+    const containerHeight = Math.max(200, containerRect.height - padding);
+
+    // Используем квадратные пропорции для лучшего отображения
+    const size = Math.min(containerWidth, containerHeight);
+
     const options = {
-      width: 400,
-      height: 200,
+      width: 350,
+      height: 250,
       title: this.chartTitle,
       xAxis: { title: this.xAxisLabel },
       yAxis: { title: this.yAxisLabel },
@@ -436,6 +445,10 @@ export class ChartMenu {
     };
 
     const canvas = this.renderer.createChart(this.selectedType, data, options);
+    canvas.style.position = 'absolute';
+    canvas.style.top = '50%';
+    canvas.style.left = '50%';
+    canvas.style.transform = 'translate(-50%, -50%)';
     previewContainer.innerHTML = '';
     previewContainer.appendChild(canvas);
   }

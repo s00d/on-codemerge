@@ -34,11 +34,14 @@ export class ChartRenderer {
     options: ChartOptions
   ): HTMLCanvasElement {
     const canvas = createCanvas();
+    canvas.className = 'chart-canvas';
     const dpr = window.devicePixelRatio || 1;
     canvas.width = options.width * dpr;
     canvas.height = options.height * dpr;
     canvas.style.width = `${options.width}px`;
     canvas.style.height = `${options.height}px`;
+    canvas.style.display = 'block';
+    canvas.style.margin = 'auto';
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       throw new Error('Failed to get 2D context');
