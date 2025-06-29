@@ -11,8 +11,8 @@ import { createP } from '../../utils/helpers.ts';
 export class ListsPlugin implements Plugin {
   name = 'lists';
   hotkeys = [
-    { keys: 'Ctrl+Shift+U', description: 'Bulleted list', command: 'lists-unordered', icon: '•' },
-    { keys: 'Ctrl+Shift+O', description: 'Numbered list', command: 'lists-ordered', icon: '1️⃣' },
+    { keys: 'Ctrl+Shift+B', description: 'Bulleted list', command: 'lists-unordered', icon: '•' },
+    { keys: 'Ctrl+Shift+N', description: 'Numbered list', command: 'lists-ordered', icon: '1️⃣' },
   ];
   private editor: HTMLEditor | null = null;
   private ulButton: HTMLElement | null = null;
@@ -39,7 +39,7 @@ export class ListsPlugin implements Plugin {
   }
 
   private addToolbarButtons(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     // Unordered list button

@@ -33,6 +33,9 @@ import { SpellCheckerPlugin } from './plugins/SpellCheckerPlugin';
 import { BlockStylePlugin } from './plugins/BlockStylePlugin';
 import { MathPlugin } from './plugins/MathPlugin';
 import { AIAssistantPlugin } from './plugins/AIAssistantPlugin';
+import { LanguagePlugin } from './plugins/LanguagePlugin';
+import { CalendarPlugin } from './plugins/CalendarPlugin';
+import { TimerPlugin } from './plugins/TimerPlugin';
 
 export {
   HTMLEditor,
@@ -67,4 +70,7 @@ export {
   BlockStylePlugin,
   MathPlugin,
   AIAssistantPlugin,
+  LanguagePlugin,
+  CalendarPlugin,
+  TimerPlugin,
 };

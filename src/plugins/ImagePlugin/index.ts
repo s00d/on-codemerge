@@ -35,7 +35,7 @@ export class ImagePlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (toolbar) {
       this.toolbarButton = createToolbarButton({
         icon: imageIcon,

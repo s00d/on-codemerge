@@ -29,4 +29,8 @@ export class ToolbarPlugin implements Plugin {
       this.toolbar = null; // Очищаем ссылку
     }
   }
+
+  public getToolbar(): HTMLElement | null {
+    return this.toolbar;
+  }
 }

@@ -12,7 +12,7 @@ export class AlignmentPlugin implements Plugin {
     { keys: 'Ctrl+I', description: 'Italic text', command: 'italic', icon: '𝐼' },
     { keys: 'Ctrl+U', description: 'Underline text', command: 'underline', icon: 'U̲' },
     {
-      keys: 'Ctrl+Shift+S',
+      keys: 'Ctrl+Shift+D',
       description: 'Strikethrough text',
       command: 'strikethrough',
       icon: 'S̶',
@@ -41,7 +41,7 @@ export class AlignmentPlugin implements Plugin {
   }
 
   private addToolbarButtons(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     // Массив кнопок для выравнивания

@@ -1,0 +1,452 @@
+/* Calendar Plugin Public Styles */
+
+.calendar-widget {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin: 1rem 0;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  * {
+    box-sizing: border-box;
+  }
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: #f9fafb;
+    .calendar-title {
+      margin: 0;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #374151;
+    }
+    .calendar-actions {
+      display: flex;
+      gap: 0.5rem;
+      .add-event-btn {
+        background: #3b82f6;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        width: 32px;
+        height: 32px;
+        font-size: 1.25rem;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background-color 0.2s;
+        &:hover {
+          background: #2563eb;
+        }
+      }
+    }
+  }
+  .calendar-body {
+    padding: 1rem;
+    .calendar-events {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      .calendar-event {
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 0.75rem;
+        background: #f9fafb;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 4px;
+          background: var(--event-color, #3b82f6);
+          border-radius: 2px;
+        }
+        &:hover {
+          background: #f3f4f6;
+          border-color: #d1d5db;
+        }
+        .event-time {
+          font-size: 0.875rem;
+          color: #6b7280;
+          font-weight: 500;
+          margin-bottom: 0.25rem;
+        }
+        .event-title {
+          font-weight: 600;
+          color: #374151;
+          margin-bottom: 0.25rem;
+        }
+        .event-description {
+          font-size: 0.875rem;
+          color: #6b7280;
+          line-height: 1.4;
+        }
+      }
+    }
+  }
+}
+
+.calendar-event {
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    background: var(--event-color, #3b82f6);
+    border-radius: 2px;
+  }
+}
+
+.calendar-form,
+.event-form {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+// Event meta styles
+.event-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.event-meta-info {
+  font-size: 0.75rem;
+  color: #6b7280;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+// Event attendees styles
+.event-attendees {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+// Event reminder styles
+.event-reminder {
+  font-size: 0.75rem;
+  color: #f59e0b;
+  font-weight: 500;
+}
+
+// Event header styles
+.event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 8px;
+}
+
+// Event datetime styles
+.event-datetime {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.event-date {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.event-time {
+  font-size: 0.875rem;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+// Event priority styles
+.event-priority {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  
+  &.priority-high {
+    background-color: #fef2f2;
+    color: #dc2626;
+  }
+  
+  &.priority-medium {
+    background-color: #fffbeb;
+    color: #d97706;
+  }
+  
+  &.priority-low {
+    background-color: #f0fdf4;
+    color: #16a34a;
+  }
+}
+
+// Event category styles
+.event-category {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: white;
+  padding: 4px 8px;
+  border-radius: 12px;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+// Event tags styles
+.event-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.event-tag {
+  font-size: 0.75rem;
+  padding: 2px 6px;
+  background-color: #f3f4f6;
+  color: #374151;
+  border-radius: 12px;
+  white-space: nowrap;
+}
+
+// Event location styles
+.event-location {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+// Event duration styles
+.event-duration {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+// Reminder notification styles
+.calendar-reminders-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 10000;
+  max-width: 400px;
+  pointer-events: none;
+}
+
+.calendar-reminder {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 10px;
+  pointer-events: auto;
+  animation: reminderSlideIn 0.3s ease-out;
+  max-width: 400px;
+  word-wrap: break-word;
+}
+
+.calendar-reminder .reminder-header {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #f3f4f6;
+  background-color: #f9fafb;
+  border-radius: 8px 8px 0 0;
+}
+
+.calendar-reminder .reminder-icon {
+  font-size: 1.25rem;
+  margin-right: 8px;
+}
+
+.calendar-reminder .reminder-title {
+  font-weight: 600;
+  color: #374151;
+  flex-grow: 1;
+}
+
+.calendar-reminder .reminder-close {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.calendar-reminder .reminder-close:hover {
+  background-color: #e5e7eb;
+  color: #374151;
+}
+
+.calendar-reminder .reminder-content {
+  padding: 12px 16px;
+}
+
+.calendar-reminder .reminder-event-title {
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 4px;
+}
+
+.calendar-reminder .reminder-event-time {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.calendar-reminder .reminder-event-location {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 4px;
+}
+
+.calendar-reminder .reminder-event-description {
+  font-size: 0.875rem;
+  color: #4b5563;
+  line-height: 1.4;
+}
+
+.calendar-reminder .reminder-footer {
+  display: flex;
+  gap: 8px;
+  padding: 8px 16px 12px;
+}
+
+.calendar-reminder .reminder-priority {
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.calendar-reminder .reminder-category {
+  font-size: 0.75rem;
+  color: white;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+@keyframes reminderSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+// Dark mode support for reminders
+html.dark .calendar-reminder {
+  background: #1f2937;
+  border-color: #374151;
+  color: #f9fafb;
+}
+
+html.dark .calendar-reminder .reminder-header {
+  background-color: #374151;
+  border-bottom-color: #4b5563;
+}
+
+html.dark .calendar-reminder .reminder-title {
+  color: #f9fafb;
+}
+
+html.dark .calendar-reminder .reminder-close {
+  color: #9ca3af;
+}
+
+html.dark .calendar-reminder .reminder-close:hover {
+  background-color: #4b5563;
+  color: #f9fafb;
+}
+
+html.dark .calendar-reminder .reminder-event-title {
+  color: #f9fafb;
+}
+
+html.dark .calendar-reminder .reminder-event-time,
+html.dark .calendar-reminder .reminder-event-location {
+  color: #9ca3af;
+}
+
+html.dark .calendar-reminder .reminder-event-description {
+  color: #d1d5db;
+}
+
+// Dark mode support for event elements
+html.dark .event-priority {
+  &.priority-high {
+    background-color: #7f1d1d;
+    color: #fca5a5;
+  }
+  
+  &.priority-medium {
+    background-color: #78350f;
+    color: #fcd34d;
+  }
+  
+  &.priority-low {
+    background-color: #14532d;
+    color: #86efac;
+  }
+}
+
+html.dark .event-tag {
+  background-color: #374151;
+  color: #d1d5db;
+}
+
+html.dark .event-meta-info {
+  color: #9ca3af;
+}
+
+html.dark .event-attendees {
+  color: #9ca3af;
+}
+
+html.dark .event-reminder {
+  color: #fbbf24;
+}
+
+html.dark .event-location {
+  color: #9ca3af;
+}
+
+html.dark .event-duration {
+  color: #9ca3af;
+}
+
+html.dark .event-date {
+  color: #f9fafb;
+}
+
+html.dark .event-time {
+  color: #9ca3af;
+} 

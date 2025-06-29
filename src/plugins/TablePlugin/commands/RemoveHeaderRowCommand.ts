@@ -1,13 +1,14 @@
 import type { Command } from '../../../core/commands/Command.ts';
 
 export class RemoveHeaderRowCommand implements Command {
-  private table: HTMLTableElement;
+  private table: HTMLElement;
 
-  constructor(table: HTMLTableElement) {
+  constructor(table: HTMLElement) {
     this.table = table;
   }
 
   execute(): void {
-    this.table.tHead?.remove();
+    const headerRows = this.table.querySelectorAll('.table-header-row');
+    headerRows.forEach((row) => row.remove());
   }
 }

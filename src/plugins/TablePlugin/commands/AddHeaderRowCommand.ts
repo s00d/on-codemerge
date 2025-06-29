@@ -1,22 +1,26 @@
 import type { Command } from '../../../core/commands/Command.ts';
-import { TableCell } from '../components/TableCell.ts';
-import { createTh } from '../../../utils/helpers.ts';
 
 export class AddHeaderRowCommand implements Command {
-  private table: HTMLTableElement;
+  private table: HTMLElement;
 
-  constructor(table: HTMLTableElement) {
+  constructor(table: HTMLElement) {
     this.table = table;
   }
 
   execute(): void {
-    const headerRow = this.table.createTHead().insertRow();
-    const cols = this.table.rows[0].cells.length;
+    const firstRow = this.table.querySelector('.table-row, .table-header-row') as HTMLElement;
+    if (firstRow) {
+      const headerRow = document.createElement('div');
+      headerRow.className = 'table-header-row';
 
-    for (let i = 0; i < cols; i++) {
-      const headerCell = createTh();
-      headerRow.appendChild(headerCell);
-      new TableCell(headerCell);
+      const numCells = firstRow.querySelectorAll('.table-cell, .table-header-cell').length;
+      for (let i = 0; i < numCells; i++) {
+        const headerCell = document.createElement('div');
+        headerCell.className = 'table-header-cell';
+        headerRow.appendChild(headerCell);
+      }
+
+      this.table.insertBefore(headerRow, firstRow);
     }
   }
 }

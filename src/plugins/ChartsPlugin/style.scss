@@ -1,28 +1,61 @@
 /* Chart type selector */
 .chart-type-selector {
-  @apply grid grid-cols-4 gap-4 mb-6;
+  margin-bottom: 1.5rem;
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 768px) {
+    .grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
 
   .chart-type-option {
-    @apply flex flex-col items-center justify-center p-4 border border-gray-200 rounded-lg hover:border-blue-400 cursor-pointer transition-all;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    border: 2px solid #e5e7eb;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background-color: white;
+
+    &:hover {
+      border-color: #93c5fd;
+      background-color: #eff6ff;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
 
     &.selected {
-      @apply border-blue-500 bg-blue-50;
-
-      .chart-type-icon svg {
-        @apply text-blue-600;
-      }
-    }
-
-    .chart-type-icon {
-      @apply flex items-center justify-center w-12 h-12 mb-2;
+      border-color: #3b82f6;
+      background-color: #dbeafe;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 
       svg {
-        @apply w-8 h-8 text-gray-600;
+        color: #2563eb;
       }
     }
 
-    .chart-type-label {
-      @apply text-sm font-medium text-gray-700 text-center;
+    svg {
+      width: 2.5rem;
+      height: 2.5rem;
+      color: #4b5563;
+      transition: color 0.2s ease;
+      margin-bottom: 0.75rem;
+    }
+
+    span {
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      text-align: center;
+      margin-top: 0.5rem;
     }
   }
 }
@@ -31,10 +64,36 @@
 .chart-data-editor {
   max-height: 400px;
   overflow-y: auto;
+  border-radius: 0.75rem;
+  background-color: white;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  padding: 1rem;
 }
 
 /* Preview container */
 .preview-container {
-  @apply bg-gray-50 rounded-lg flex items-center justify-center p-4;
-  min-height: 300px;
+  background-color: #f9fafb;
+  border-radius: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-shadow: 0 6px 32px 0 rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+  min-height: 320px;
+  min-width: 320px;
+  position: relative;
+}
+
+.preview-container img.svg-chart, .preview-container canvas {
+  border-radius: 1.25rem;
+  box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  animation: fadeIn 0.5s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
 }

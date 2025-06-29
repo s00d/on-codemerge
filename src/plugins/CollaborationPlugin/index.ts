@@ -86,15 +86,15 @@ export class CollaborationPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: collaborationIcon,
-      title: this.editor?.t('Collaboration'),
-      onClick: () => this.popup?.show(),
-    });
-    toolbar.appendChild(this.toolbarButton);
+    const toolbar = this.editor?.getToolbar();
+    if (toolbar) {
+      this.toolbarButton = createToolbarButton({
+        icon: collaborationIcon,
+        title: this.editor?.t('Collaboration'),
+        onClick: () => this.popup?.show(),
+      });
+      toolbar.appendChild(this.toolbarButton);
+    }
   }
 
   private updateConnectionStatus(status: string): void {

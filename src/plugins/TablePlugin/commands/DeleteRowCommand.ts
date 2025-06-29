@@ -2,17 +2,18 @@ import type { Command } from '../../../core/commands/Command.ts';
 import { TableOperations } from '../services/TableOperations.ts';
 
 export class DeleteRowCommand implements Command {
-  private table: HTMLTableElement;
-  private row: HTMLTableRowElement;
+  private table: HTMLElement;
+  private cell: HTMLElement;
 
-  constructor(table: HTMLTableElement, cell: HTMLTableCellElement) {
+  constructor(table: HTMLElement, cell: HTMLElement) {
     this.table = table;
-    this.row = cell.parentElement as HTMLTableRowElement;
-    // this.rowIndex = this.row.rowIndex;
-    // this.rowHTML = this.row.outerHTML;
+    this.cell = cell;
   }
 
   execute(): void {
-    TableOperations.deleteRow(this.table, this.row);
+    const row = this.cell.parentElement as HTMLElement;
+    if (row) {
+      TableOperations.deleteRow(this.table, row);
+    }
   }
 }

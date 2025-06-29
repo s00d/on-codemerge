@@ -55,30 +55,30 @@ export class HistoryPlugin implements Plugin {
   }
 
   private addToolbarButtons(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar || !this.editor) return;
+    const toolbar = this.editor?.getToolbar();
+    if (toolbar) {
+      this.undoButton = createToolbarButton({
+        icon: undoIcon,
+        title: this.editor.t('Undo') ?? '',
+        onClick: () => this.undo(),
+      });
 
-    this.undoButton = createToolbarButton({
-      icon: undoIcon,
-      title: this.editor.t('Undo') ?? '',
-      onClick: () => this.undo(),
-    });
+      this.redoButton = createToolbarButton({
+        icon: redoIcon,
+        title: this.editor?.t('Redo') ?? '',
+        onClick: () => this.redo(),
+      });
 
-    this.redoButton = createToolbarButton({
-      icon: redoIcon,
-      title: this.editor.t('Redo') ?? '',
-      onClick: () => this.redo(),
-    });
+      this.historyButton = createToolbarButton({
+        icon: historyIcon,
+        title: this.editor.t('View History') ?? '',
+        onClick: () => this.showHistory(),
+      });
 
-    this.historyButton = createToolbarButton({
-      icon: historyIcon,
-      title: this.editor.t('View History') ?? '',
-      onClick: () => this.showHistory(),
-    });
-
-    toolbar.appendChild(this.undoButton);
-    toolbar.appendChild(this.redoButton);
-    toolbar.appendChild(this.historyButton);
+      toolbar.appendChild(this.undoButton);
+      toolbar.appendChild(this.redoButton);
+      toolbar.appendChild(this.historyButton);
+    }
   }
 
   private async undo(): Promise<void> {

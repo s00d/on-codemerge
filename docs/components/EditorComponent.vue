@@ -57,6 +57,9 @@ import {
   BlockStylePlugin,
   MathPlugin,
   AIAssistantPlugin,
+  LanguagePlugin,
+  CalendarPlugin,
+  TimerPlugin,
 } from '../../src/app';
 
 export default {
@@ -117,12 +120,20 @@ export default {
         BlockStylePlugin,
         MathPlugin,
         AIAssistantPlugin,
+        LanguagePlugin,
+        CalendarPlugin,
+        TimerPlugin,
       };
 
       // Если activePlugins пустой, регистрируем все плагины
       const pluginsToUse = this.activePlugins.length === 0
         ? Object.keys(allPlugins)
         : this.activePlugins;
+
+      // ToolbarPlugin всегда должен быть первым
+      if (!pluginsToUse.includes('ToolbarPlugin')) {
+        pluginsToUse.unshift('ToolbarPlugin');
+      }
 
       // Регистрация плагинов
       pluginsToUse.forEach((pluginName) => {

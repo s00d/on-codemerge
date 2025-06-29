@@ -20,7 +20,7 @@ import {
 export class FootnotesPlugin implements Plugin {
   name = 'footnotes';
   hotkeys = [
-    { keys: 'Ctrl+Alt+N', description: 'Insert footnote', command: 'footnotes', icon: '👣' },
+    { keys: 'Ctrl+Alt+X', description: 'Insert footnote', command: 'footnotes', icon: '👣' },
   ];
   private editor: HTMLEditor | null = null;
   private manager: FootnoteManager;
@@ -42,15 +42,15 @@ export class FootnotesPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: footnoteIcon,
-      title: this.editor?.t('Insert Footnote') ?? '',
-      onClick: () => this.insertFootnote(),
-    });
-    toolbar.appendChild(this.toolbarButton);
+    const toolbar = this.editor?.getToolbar();
+    if (toolbar) {
+      this.toolbarButton = createToolbarButton({
+        icon: footnoteIcon,
+        title: this.editor?.t('Insert Footnote') ?? '',
+        onClick: () => this.insertFootnote(),
+      });
+      toolbar.appendChild(this.toolbarButton);
+    }
   }
 
   private setupEventListeners(): void {

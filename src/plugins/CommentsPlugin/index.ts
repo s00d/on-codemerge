@@ -12,7 +12,7 @@ import { createContainer, createSpan } from '../../utils/helpers.ts';
 
 export class CommentsPlugin implements Plugin {
   name = 'comments';
-  hotkeys = [{ keys: 'Ctrl+Alt+M', description: 'Insert comment', command: 'comment', icon: '💬' }];
+  hotkeys = [{ keys: 'Ctrl+Alt+J', description: 'Insert comment', command: 'comment', icon: '💬' }];
   private editor: HTMLEditor | null = null;
   private manager: CommentManager;
   private menu: CommentMenu | null = null;
@@ -43,15 +43,15 @@ export class CommentsPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar) return;
-
-    const button = createToolbarButton({
-      icon: commentIcon,
-      title: this.editor?.t('Insert Comment'),
-      onClick: () => this.addComment(),
-    });
-    toolbar.appendChild(button);
+    const toolbar = this.editor?.getToolbar();
+    if (toolbar) {
+      const button = createToolbarButton({
+        icon: commentIcon,
+        title: this.editor?.t('Insert Comment'),
+        onClick: () => this.addComment(),
+      });
+      toolbar.appendChild(button);
+    }
   }
 
   private setupEventListeners(): void {

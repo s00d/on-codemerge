@@ -12,7 +12,7 @@ export class TypographyPlugin implements Plugin {
   name = 'typography';
   hotkeys = [
     {
-      keys: 'Ctrl+Shift+Y',
+      keys: 'Ctrl+Shift+W',
       description: 'Adjust typography settings',
       command: 'typography-settings',
       icon: '✒️',
@@ -38,7 +38,7 @@ export class TypographyPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     this.toolbarButton = createToolbarButton({

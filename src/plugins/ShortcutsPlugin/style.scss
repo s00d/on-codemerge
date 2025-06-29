@@ -1,80 +1,156 @@
 .shortcuts-menu {
-  @apply max-w-sm w-full;
-
-  kbd {
-    @apply inline-flex items-center justify-center min-w-[2rem] font-mono text-xs font-medium text-gray-700 bg-gray-100;
-    font-feature-settings: 'tnum';
-
-    html.dark & {
-      @apply text-gray-300 bg-gray-700; /* Темная тема для kbd */
-    }
+  @apply max-w-3xl w-full bg-white rounded-lg shadow-xl border border-gray-200;
+  position: fixed !important;
+  top: 50% !important;
+  left: 50% !important;
+  transform: translate(-50%, -50%) !important;
+  max-height: 90vh !important;
+  overflow-y: auto !important;
+  
+  html.dark & {
+    @apply bg-gray-800 border-gray-700;
   }
 
-  li {
-    @apply flex items-center justify-between gap-4;
+  .popup-items-container {
+    @apply p-0;
+  }
 
-    &:hover {
-      @apply bg-gray-50 -mx-2 px-2 rounded;
+  .shortcuts-container {
+    @apply p-4 space-y-4;
+  }
 
+  .shortcuts-search {
+    @apply relative sticky top-0 bg-white z-10 p-4 border-b border-gray-200;
+    
+    html.dark & {
+      @apply bg-gray-800 border-gray-700;
+    }
+
+    .search-icon {
+      @apply absolute left-7 top-1/2 transform -translate-y-1/2 text-gray-400 text-sm;
+    }
+
+    .shortcuts-search-input {
+      @apply w-full pl-8 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 placeholder-gray-500 text-sm;
+      
       html.dark & {
-        @apply bg-gray-700; /* Темная тема для hover */
+        @apply bg-gray-700 border-gray-600 text-gray-100 placeholder-gray-400;
       }
     }
   }
 
-  h3 {
-    @apply text-sm font-medium text-gray-900 mb-3;
+  .shortcuts-content {
+    @apply overflow-visible p-4;
 
-    html.dark & {
-      @apply text-gray-100; /* Темная тема для заголовка */
+    .shortcuts-grid {
+      @apply space-y-4;
     }
-  }
 
-  /* Responsive */
-  @media (max-width: 640px) {
-    .grid {
-      @apply grid-cols-1;
+    .shortcuts-category {
+      @apply space-y-2;
+
+      .category-header {
+        @apply flex items-center justify-between;
+
+        .category-title {
+          @apply text-sm font-semibold text-gray-900;
+          
+          html.dark & {
+            @apply text-gray-100;
+          }
+        }
+
+        .shortcuts-count {
+          @apply text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded;
+          
+          html.dark & {
+            @apply text-gray-400 bg-gray-700;
+          }
+        }
+      }
+
+      .shortcuts-list {
+        @apply space-y-1;
+
+        .shortcut-item {
+          @apply flex items-center justify-between p-2 bg-white border border-gray-200 rounded hover:bg-gray-50 transition-colors duration-200;
+          
+          html.dark & {
+            @apply bg-gray-700 border-gray-600 hover:bg-gray-600;
+          }
+
+          .shortcut-info {
+            @apply flex items-center space-x-2 flex-1;
+
+            .shortcut-icon {
+              @apply text-sm text-gray-600;
+              
+              html.dark & {
+                @apply text-gray-400;
+              }
+            }
+
+            .shortcut-description {
+              @apply text-sm text-gray-900 font-medium;
+              
+              html.dark & {
+                @apply text-gray-100;
+              }
+            }
+          }
+
+          .shortcut-keys {
+            @apply flex items-center space-x-1;
+
+            .shortcut-key {
+              @apply inline-flex items-center justify-center min-w-[1.5rem] px-1.5 py-0.5 font-mono text-xs font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded;
+              font-feature-settings: 'tnum';
+              
+              html.dark & {
+                @apply text-gray-300 bg-gray-600 border-gray-500;
+              }
+            }
+          }
+        }
+      }
     }
   }
 }
 
-.shortcuts-content {
-  .shortcuts-grid {
-    @apply grid grid-cols-1 gap-4;
+// Анимации
+.shortcuts-menu {
+  animation: fadeIn 0.2s ease-out;
+}
 
-    .shortcuts-category {
-      @apply text-lg font-semibold block mb-2 text-gray-900;
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
 
-      html.dark & {
-        @apply text-gray-100; /* Темная тема для заголовка категории */
-      }
+// Responsive
+@media (max-width: 768px) {
+  .shortcuts-menu {
+    @apply max-w-full mx-4 max-h-[95vh];
+
+    .shortcuts-search {
+      @apply p-3;
     }
 
-    .shortcuts-group {
-      @apply space-y-2;
+    .shortcuts-content {
+      @apply p-3;
+    }
 
-      .shortcut {
-        @apply flex items-center justify-between text-sm;
+    .shortcut-item {
+      @apply flex-col items-start space-y-1;
 
-        .shortcut-icon {
-          @apply text-gray-600;
-
-          html.dark & {
-            @apply text-gray-400; /* Темная тема для иконки */
-          }
-        }
-
-        .shortcut-description {
-          @apply text-gray-600;
-
-          html.dark & {
-            @apply text-gray-400; /* Темная тема для описания */
-          }
-        }
-
-        .shortcut-key {
-          @apply px-2 py-1 rounded font-mono text-xs border border-current;
-        }
+      .shortcut-keys {
+        @apply w-full justify-start;
       }
     }
   }

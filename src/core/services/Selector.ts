@@ -7,8 +7,8 @@ export class Selector {
   }
 
   private lastSelection: Range | null = null;
-  private lastTable: HTMLTableElement | null = null;
-  private selectedCells: HTMLTableCellElement[] = [];
+  private lastTable: HTMLElement | null = null;
+  private selectedCells: HTMLElement[] = [];
 
   public saveSelection(): void {
     const selection = window.getSelection();
@@ -33,11 +33,11 @@ export class Selector {
     }
   }
 
-  public saveTable(table: HTMLTableElement): void {
+  public saveTable(table: HTMLElement): void {
     this.lastTable = table;
   }
 
-  public selectCell(cell: HTMLTableCellElement): void {
+  public selectCell(cell: HTMLElement): void {
     this.selectedCells.push(cell);
     cell.classList.add('selected');
   }
@@ -47,8 +47,12 @@ export class Selector {
     this.selectedCells = [];
   }
 
-  public getSelectedCells(): HTMLTableCellElement[] {
+  public getSelectedCells(): HTMLElement[] {
     return this.selectedCells;
+  }
+
+  public getSelection() {
+    return this.lastSelection;
   }
 
   public restoreSelection(container: HTMLElement): Range | null {
@@ -73,7 +77,7 @@ export class Selector {
     return this.lastSelection;
   }
 
-  public restoreTable(): HTMLTableElement | null {
+  public restoreTable(): HTMLElement | null {
     return this.lastTable;
   }
 

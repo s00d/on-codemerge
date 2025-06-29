@@ -58,7 +58,7 @@ export class YouTubeVideoPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (toolbar) {
       const button = createToolbarButton({
         icon: youtubeIcon,
@@ -110,7 +110,7 @@ export class YouTubeVideoPlugin implements Plugin {
 
     this.resizer.detach();
 
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     const button = toolbar?.querySelector(`[title="${this.editor?.t('Insert YouTube Video')}"]`);
     if (button) {
       button.remove();

@@ -2,9 +2,9 @@ import type { Command } from '../../../core/commands/Command.ts';
 import { TableOperations } from '../services/TableOperations.ts';
 
 export class DeleteTableCommand implements Command {
-  private table: HTMLTableElement;
+  private table: HTMLElement;
 
-  constructor(table: HTMLTableElement) {
+  constructor(table: HTMLElement) {
     this.table = table;
     // this.parent = table.parentElement as HTMLElement;
     // this.nextSibling = table.nextSibling;

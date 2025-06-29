@@ -2,11 +2,11 @@ import type { Command } from '../../../core/commands/Command.ts';
 import { TableOperations } from '../services/TableOperations.ts';
 
 export class AddColumnCommand implements Command {
-  private table: HTMLTableElement;
-  private cell: HTMLTableCellElement;
+  private table: HTMLElement;
+  private cell: HTMLElement;
   private before: boolean;
 
-  constructor(table: HTMLTableElement, cell: HTMLTableCellElement, before: boolean) {
+  constructor(table: HTMLElement, cell: HTMLElement, before: boolean) {
     this.table = table;
     this.cell = cell;
     this.before = before;

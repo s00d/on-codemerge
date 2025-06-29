@@ -1,0 +1,135 @@
+.timer-menu {
+  .timers-list {
+    max-height: 400px;
+    overflow-y: auto;
+
+    .empty-state {
+      text-align: center;
+      padding: 2rem;
+      color: #6b7280;
+
+      p {
+        margin: 0.5rem 0;
+      }
+    }
+
+    .timer-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 0.75rem;
+      cursor: pointer;
+      transition: all 0.2s;
+
+      &:hover {
+        background: #f9fafb;
+        border-color: #d1d5db;
+      }
+
+      .timer-info {
+        flex: 1;
+
+        .timer-title {
+          margin: 0 0 0.25rem 0;
+          font-weight: 600;
+          color: #374151;
+        }
+
+        .timer-description {
+          margin: 0 0 0.5rem 0;
+          font-size: 0.875rem;
+          color: #6b7280;
+        }
+
+        .timer-status {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+          border-radius: 4px;
+          display: inline-block;
+
+          &.active {
+            background: #f0fdf4;
+            color: #16a34a;
+          }
+
+          &.expired {
+            background: #fef2f2;
+            color: #dc2626;
+          }
+        }
+      }
+
+      .timer-actions {
+        display: flex;
+        gap: 0.5rem;
+
+        button {
+          background: none;
+          border: none;
+          cursor: pointer;
+          padding: 0.25rem;
+          border-radius: 4px;
+          transition: background-color 0.2s;
+
+          &:hover {
+            background: #f3f4f6;
+          }
+
+          &.btn-delete:hover {
+            background: #fef2f2;
+            color: #dc2626;
+          }
+        }
+      }
+    }
+  }
+}
+
+.timer-form-container {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+// Dark mode support
+html.dark .timer-menu {
+  .timers-list {
+    .timer-item {
+      border-color: #374151;
+
+      &:hover {
+        background: #374151;
+        border-color: #4b5563;
+      }
+
+      .timer-info {
+        .timer-title {
+          color: #f9fafb;
+        }
+
+        .timer-description {
+          color: #9ca3af;
+        }
+
+        .timer-status {
+          &.active {
+            background: #14532d;
+            color: #86efac;
+          }
+
+          &.expired {
+            background: #7f1d1d;
+            color: #fca5a5;
+          }
+        }
+      }
+
+      .timer-actions {
+        button:hover {
+          background: #4b5563;
+        }
+      }
+    }
+  }
+} 

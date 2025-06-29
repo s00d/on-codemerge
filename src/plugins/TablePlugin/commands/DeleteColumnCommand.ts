@@ -2,21 +2,18 @@ import type { Command } from '../../../core/commands/Command.ts';
 import { TableOperations } from '../services/TableOperations.ts';
 
 export class DeleteColumnCommand implements Command {
-  private table: HTMLTableElement;
-  private columnIndex: number;
-  private cellsHTML: string[] = [];
+  private table: HTMLElement;
+  private cell: HTMLElement;
 
-  constructor(table: HTMLTableElement, cell: HTMLTableCellElement) {
+  constructor(table: HTMLElement, cell: HTMLElement) {
     this.table = table;
-    this.columnIndex = cell.cellIndex;
-
-    // Store HTML of all cells in the column
-    for (const row of table.rows) {
-      this.cellsHTML.push(row.cells[this.columnIndex].outerHTML);
-    }
+    this.cell = cell;
   }
 
   execute(): void {
-    TableOperations.deleteColumn(this.table, this.columnIndex);
+    const columnIndex = Array.from(
+      (this.cell.parentElement as HTMLElement).querySelectorAll('.table-cell, .table-header-cell')
+    ).indexOf(this.cell);
+    TableOperations.deleteColumn(this.table, columnIndex);
   }
 }

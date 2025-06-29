@@ -3,6 +3,7 @@ import { HTMLFormatter } from './services/HTMLFormatter';
 import { LocaleManager } from './services/LocaleManager';
 import { TextFormatter } from './services/TextFormatter';
 import { Selector } from './services/Selector';
+import { NotificationManager } from './ui/NotificationManager';
 import type { ShortcutCategories } from './types.ts';
 
 type Callback = (...data: any[]) => void;
@@ -20,6 +21,7 @@ export class HTMLEditor {
   private textFormatter: TextFormatter | null = null;
   private selector: Selector;
   private _disableObserver = false;
+  private notificationManager: NotificationManager;
 
   constructor(innerContainer: HTMLElement) {
     // Создаем новый внутренний контейнер
@@ -27,6 +29,13 @@ export class HTMLEditor {
     this.container.className = 'html-editor';
     this.container.contentEditable = 'true';
     this.localeManager = new LocaleManager();
+    this.notificationManager = NotificationManager.getInstance();
+    
+    // Инициализируем LocaleManager
+    this.localeManager.initialize().catch(error => {
+      console.error('Failed to initialize LocaleManager:', error);
+    });
+    
     // this.container.draggable = true;
 
     innerContainer.appendChild(this.container);
@@ -39,7 +48,17 @@ export class HTMLEditor {
     this.textFormatter = new TextFormatter(this.container);
     this.selector = new Selector(this.container);
 
-    this.container.addEventListener('click', () => {
+    this.container.addEventListener('click', (e) => {
+      // Проверяем, не кликнули ли мы на блок
+      const target = e.target as Element;
+      const block = target.closest('.editor-block');
+      
+      // Если кликнули на блок, не устанавливаем фокус на контейнер
+      if (block) {
+        return;
+      }
+      
+      // Только если кликнули на пустое место, устанавливаем фокус
       this.container.focus();
     });
 
@@ -249,6 +268,14 @@ export class HTMLEditor {
     return this.selector;
   }
 
+  public getToolbar(): HTMLElement | null {
+    const toolbarPlugin = this.plugins.getPlugin('toolbar');
+    if (toolbarPlugin && 'getToolbar' in toolbarPlugin) {
+      return (toolbarPlugin as any).getToolbar();
+    }
+    return null;
+  }
+
   private isSelectionInsideContainer(selection: Selection): boolean {
     if (!selection || selection.rangeCount === 0) return false;
 
@@ -413,11 +440,20 @@ export class HTMLEditor {
   public ensureEditorFocus(): void {
     const container = this.getContainer();
 
-    // Focus the editor
+    // Проверяем, есть ли уже активное выделение
+    const selection = window.getSelection();
+    if (selection && selection.rangeCount > 0) {
+      const range = selection.getRangeAt(0);
+      // Если выделение уже внутри редактора, не трогаем его
+      if (this.isSelectionInsideEditor(range.commonAncestorContainer)) {
+        return;
+      }
+    }
+
+    // Focus the editor only if no valid selection exists
     container.focus();
 
     // If there's no selection, create one at the start of the editor
-    const selection = window.getSelection();
     if (!selection || !selection.rangeCount) {
       const range = document.createRange();
       range.selectNodeContents(container);
@@ -518,6 +554,10 @@ export class HTMLEditor {
   }
 
   public t(key: string, params: Record<string, string> = {}): string {
+    // Если LocaleManager еще не готов, возвращаем ключ
+    if (!this.localeManager.isReady()) {
+      return key;
+    }
     return this.localeManager.translate(key, params);
   }
 
@@ -529,11 +569,44 @@ export class HTMLEditor {
     return this.localeManager.getCurrentLocale();
   }
 
+  // Notification methods
+  public showNotification(message: string, type: 'success' | 'error' | 'warning' | 'info' = 'info', duration: number = 3000): void {
+    this.notificationManager.show({ message, type, duration });
+  }
+
+  public showSuccessNotification(message: string, duration?: number): void {
+    this.notificationManager.success(message, { duration });
+  }
+
+  public showErrorNotification(message: string, duration?: number): void {
+    this.notificationManager.error(message, { duration });
+  }
+
+  public showWarningNotification(message: string, duration?: number): void {
+    this.notificationManager.warning(message, { duration });
+  }
+
+  public showInfoNotification(message: string, duration?: number): void {
+    this.notificationManager.info(message, { duration });
+  }
+
   public destroy(): void {
     this.mutationObserver.disconnect();
 
     // Удаляем все обработчики событий
-    this.container.removeEventListener('click', () => this.container.focus());
+    this.container.removeEventListener('click', (e) => {
+      // Проверяем, не кликнули ли мы на блок
+      const target = e.target as Element;
+      const block = target.closest('.editor-block');
+      
+      // Если кликнули на блок, не устанавливаем фокус на контейнер
+      if (block) {
+        return;
+      }
+      
+      // Только если кликнули на пустое место, устанавливаем фокус
+      this.container.focus();
+    });
     this.container.removeEventListener('dragenter', (e) => this.handleDragEnter(e));
     this.container.removeEventListener('dragover', (e) => this.handleDragOver(e));
     this.container.removeEventListener('dragleave', (e) => this.handleDragLeave(e));

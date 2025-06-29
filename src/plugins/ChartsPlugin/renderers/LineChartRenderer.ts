@@ -11,6 +11,7 @@ export class LineChartRenderer extends BaseChartRenderer {
     }
 
     const { height } = this.getDimensions(options);
+    const colors = this.getColors(options);
 
     // Ensure data is array and has valid structure
     const validData = Array.isArray(data) ? data : [data];
@@ -20,20 +21,33 @@ export class LineChartRenderer extends BaseChartRenderer {
 
     const scale = height / (maxValue * 1.1); // Add 10% padding at the top
 
-    this.drawGrid(ctx, options, maxValue);
-    this.drawAxisLabels(
+    // Draw background
+    this.drawBackground(ctx, options);
+
+    // Draw title
+    this.drawTitle(ctx, options);
+
+    // Draw grid
+    this.drawGrid(
       ctx,
+      options,
+      maxValue,
+      true,
       validData[0].data.map((p) => p.label),
-      options
+      'line'
     );
 
     // Draw lines and points
     validData.forEach((series, index) => {
-      const color = series.color || this.colors[index % this.colors.length];
+      const color = series.color || colors[index % colors.length];
       this.drawLine(ctx, series, options, scale, color);
       this.drawPoints(ctx, series, options, scale, color);
     });
 
+    // Draw axis labels
+    this.drawAxisLabels(ctx, options);
+
+    // Draw legend
     this.drawLegend(ctx, validData, options);
   }
 
@@ -88,48 +102,10 @@ export class LineChartRenderer extends BaseChartRenderer {
       ctx.stroke();
 
       // Draw value above point
-      ctx.fillStyle = '#374151';
+      ctx.fillStyle = this.getTextColor(options);
       ctx.textAlign = 'center';
       ctx.textBaseline = 'bottom';
       ctx.fillText(point.value?.toString() || '0', x, y - 8);
-
-      // Draw label below point
-      if (i === points.length - 1 || i === 0 || i % Math.ceil(points.length / 5) === 0) {
-        ctx.save();
-        ctx.translate(x, options.height - padding + 10);
-        ctx.rotate(-Math.PI / 4);
-        ctx.textAlign = 'right';
-        ctx.fillStyle = '#374151';
-        ctx.fillText(point.label || '', 0, 0);
-        ctx.restore();
-      }
     });
-  }
-
-  private drawAxisLabels(
-    ctx: CanvasRenderingContext2D,
-    labels: string[],
-    options: ChartOptions
-  ): void {
-    const { padding, width } = this.getDimensions(options);
-
-    ctx.save();
-    ctx.fillStyle = '#6b7280';
-    ctx.textAlign = 'center';
-    ctx.font = '12px Inter, system-ui, sans-serif';
-
-    labels.forEach((label, i) => {
-      const x = padding + (width / (labels.length - 1)) * i;
-      const y = options.height - padding + 20;
-
-      // Rotate labels for better readability
-      ctx.save();
-      ctx.translate(x, y);
-      ctx.rotate(-Math.PI / 4);
-      ctx.fillText(label || '', 0, 0);
-      ctx.restore();
-    });
-
-    ctx.restore();
   }
 }

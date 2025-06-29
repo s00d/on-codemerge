@@ -19,7 +19,7 @@ import {
 export class CodeBlockPlugin implements Plugin {
   name = 'code-block';
   hotkeys = [
-    { keys: 'Ctrl+Alt+C', description: 'Insert code block', command: 'code-block', icon: '</>' },
+    { keys: 'Ctrl+Alt+Q', description: 'Insert code block', command: 'code-block', icon: '</>' },
   ];
   private editor: HTMLEditor | null = null;
   private modal: CodeBlockModal | null = null;
@@ -44,7 +44,7 @@ export class CodeBlockPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     this.toolbarButton = createToolbarButton({

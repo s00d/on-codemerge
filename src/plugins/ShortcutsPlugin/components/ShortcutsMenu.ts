@@ -2,7 +2,6 @@ import { PopupManager } from '../../../core/ui/PopupManager';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 import {
   createContainer,
-  createHr,
   createKbd,
   createLi,
   createSpan,
@@ -20,111 +19,112 @@ export class ShortcutsMenu {
 
   initialize(editor: HTMLEditor): void {
     this.popup = new PopupManager(editor, {
-      title: editor.t('Keyboard Shortcuts'),
+      title: this.editor.t('Keyboard Shortcuts'),
       className: 'shortcuts-menu',
       closeOnClickOutside: true,
       items: [
         {
           type: 'custom',
+          id: 'shortcuts-search',
+          content: () => this.createSearchSection(),
+        },
+        {
+          type: 'custom',
           id: 'shortcuts-content',
-          content: () => this.createContent(),
+          content: () => this.createContentSection(),
         },
       ],
     });
   }
+  private createSearchSection(): HTMLElement {
+    const searchSection = createContainer('shortcuts-search');
 
-  private createContent(): HTMLElement {
-    // Основной контейнер
-    this.container?.remove();
-
-    this.container = createContainer('p-4');
-
-    // Поле для фильтрации
     const searchInput = document.createElement('input');
     searchInput.type = 'text';
-    searchInput.placeholder = 'Search by category or shortcut...';
-    searchInput.className =
-      'w-full p-2 mb-4 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500';
-    this.container.appendChild(searchInput);
+    searchInput.placeholder = this.editor.t('Search shortcuts...');
+    searchInput.className = 'shortcuts-search-input';
 
-    const grid = createContainer('shortcuts-grid');
-    this.container.appendChild(grid);
-
-    // Инициализация данных
-    const hotkeysList = this.editor?.getHotkeys();
-
-    // Отрисовка списка
-    const renderList = (filterTerm: string = '') => {
-      grid.innerHTML = ''; // Очищаем контейнер перед отрисовкой
-
-      if (hotkeysList) {
-        Object.entries(hotkeysList).forEach(([category, shortcuts]) => {
-          // Фильтрация шорткатов в категории
-          const filteredShortcuts = shortcuts.filter((shortcut) => {
-            const matchesCategory = category.toLowerCase().includes(filterTerm);
-            const matchesDescription = shortcut.description.toLowerCase().includes(filterTerm);
-            const matchesKeys = this.formatShortcut(shortcut.keys)
-              .toLowerCase()
-              .includes(filterTerm);
-            return matchesCategory || matchesDescription || matchesKeys;
-          });
-
-          // Если есть отфильтрованные шорткаты, отрисовываем категорию
-          if (filteredShortcuts.length > 0) {
-            const categoryContainer = this.renderCategory(category, filteredShortcuts);
-            grid.appendChild(categoryContainer);
-          }
-        });
-      }
-    };
-
-    // Первоначальная отрисовка
-    renderList();
+    const searchIcon = createSpan('search-icon', '🔍');
+    searchSection.appendChild(searchIcon);
+    searchSection.appendChild(searchInput);
 
     // Обработчик поиска
     searchInput.addEventListener('input', (event) => {
       const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-      renderList(searchTerm); // Отрисовываем отфильтрованный список
+      this.filterShortcuts(searchTerm);
     });
 
-    return this.container;
+    return searchSection;
   }
 
-  // Метод для отображения категории
+  private createContentSection(): HTMLElement {
+    const contentSection = createContainer('shortcuts-content');
+
+    // Создаем контейнер для отображения шорткатов
+    const shortcutsGrid = createContainer('shortcuts-grid');
+    contentSection.appendChild(shortcutsGrid);
+
+    // Первоначальная отрисовка
+    this.renderShortcuts(shortcutsGrid);
+
+    return contentSection;
+  }
+
+  private renderShortcuts(container: HTMLElement): void {
+    container.innerHTML = '';
+
+    const hotkeysList = this.editor?.getHotkeys();
+    if (!hotkeysList) return;
+
+    // Показываем все шорткаты
+    this.renderAllShortcuts(container, hotkeysList);
+  }
+
+  private renderAllShortcuts(container: HTMLElement, hotkeysList: any): void {
+    Object.entries(hotkeysList).forEach(([category, shortcuts]) => {
+      const categoryContainer = this.renderCategory(category, shortcuts as any[]);
+      container.appendChild(categoryContainer);
+    });
+  }
+
   private renderCategory(category: string, shortcuts: any[]): HTMLElement {
-    const categoryContainer = createContainer();
+    const categoryContainer = createContainer('shortcuts-category');
 
-    // Заголовок категории
-    const categoryTitle = createSpan('shortcuts-category', category);
+    const categoryHeader = createContainer('category-header');
+    const categoryTitle = createSpan('category-title', category);
+    const shortcutsCount = createSpan('shortcuts-count', `(${shortcuts.length})`);
 
-    // Список шорткатов
-    const shortcutsList = createUl('shortcuts-group');
+    categoryHeader.appendChild(categoryTitle);
+    categoryHeader.appendChild(shortcutsCount);
+    categoryContainer.appendChild(categoryHeader);
+
+    const shortcutsList = createUl('shortcuts-list');
 
     shortcuts.forEach((shortcut) => {
       const shortcutItem = this.renderShortcut(shortcut);
       shortcutsList.appendChild(shortcutItem);
     });
 
-    // Сборка категории
-    categoryContainer.appendChild(categoryTitle);
     categoryContainer.appendChild(shortcutsList);
-    categoryContainer.appendChild(createHr());
-
     return categoryContainer;
   }
 
-  // Метод для отображения шортката
   private renderShortcut(shortcut: any): HTMLElement {
-    const shortcutItem = createLi('shortcut');
+    const shortcutItem = createLi('shortcut-item');
 
-    const icon = createSpan('shortcut-icon', shortcut.icon);
+    const shortcutInfo = createContainer('shortcut-info');
+    const icon = createSpan('shortcut-icon', shortcut.icon || '⌨️');
     const description = createSpan('shortcut-description', shortcut.description);
-    const keys = createKbd('shortcut-key', this.formatShortcut(shortcut.keys));
 
-    // Сборка элемента
-    shortcutItem.appendChild(icon);
-    shortcutItem.appendChild(description);
-    shortcutItem.appendChild(keys);
+    shortcutInfo.appendChild(icon);
+    shortcutInfo.appendChild(description);
+
+    const shortcutKeys = createContainer('shortcut-keys');
+    const keys = createKbd('shortcut-key', this.formatShortcut(shortcut.keys));
+    shortcutKeys.appendChild(keys);
+
+    shortcutItem.appendChild(shortcutInfo);
+    shortcutItem.appendChild(shortcutKeys);
 
     return shortcutItem;
   }
@@ -143,15 +143,51 @@ export class ShortcutsMenu {
       .replace('ArrowRight', '→');
   }
 
+  private filterShortcuts(searchTerm: string): void {
+    const shortcutsGrid = this.container?.querySelector('.shortcuts-grid');
+    if (!shortcutsGrid) return;
+
+    const shortcutItems = shortcutsGrid.querySelectorAll('.shortcut-item');
+
+    shortcutItems.forEach(item => {
+      const description = item.querySelector('.shortcut-description')?.textContent?.toLowerCase() || '';
+      const keys = item.querySelector('.shortcut-key')?.textContent?.toLowerCase() || '';
+
+      const matches = description.includes(searchTerm) || keys.includes(searchTerm);
+
+      if (matches) {
+        (item as HTMLElement).style.display = 'flex';
+      } else {
+        (item as HTMLElement).style.display = 'none';
+      }
+    });
+  }
+
   public show(): void {
     this.initialize(this.editor);
-    this.popup?.show();
+
+    // Показываем попап в центре экрана
+    if (this.popup) {
+      this.popup.show();
+
+      // Принудительно центрируем попап и устанавливаем размеры
+      const popupElement = document.querySelector('.shortcuts-menu') as HTMLElement;
+      if (popupElement) {
+        popupElement.style.position = 'fixed';
+        popupElement.style.top = '50%';
+        popupElement.style.left = '50%';
+        popupElement.style.transform = 'translate(-50%, -50%)';
+        popupElement.style.zIndex = '9999';
+        popupElement.style.maxHeight = '90vh';
+        popupElement.style.overflowY = 'auto';
+      }
+    }
   }
 
   public destroy(): void {
     if (this.popup) {
-      this.popup.destroy(); // Закрываем и очищаем всплывающее окно
-      this.popup = null!; // Очищаем ссылку
+      this.popup.destroy();
+      this.popup = null;
     }
     this.container?.remove();
   }

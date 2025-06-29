@@ -9,7 +9,7 @@ export class FontPlugin implements Plugin {
   name = 'font';
   hotkeys = [
     {
-      keys: 'Ctrl+Shift+G',
+      keys: 'Ctrl+Shift+F',
       description: 'Change font style',
       command: 'font-style',
       icon: '🔤',
@@ -87,47 +87,47 @@ export class FontPlugin implements Plugin {
   }
 
   private addToolbarButtons(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
-    if (!toolbar) return;
+    const toolbar = this.editor?.getToolbar();
+    if (toolbar) {
+      const buttons = [
+        { icon: boldIcon, title: 'Bold', style: 'bold' },
+        { icon: italicIcon, title: 'Italic', style: 'italic' },
+        { icon: underlineIcon, title: 'Underline', style: 'underline' },
+        { icon: strikethroughIcon, title: 'Strikethrough', style: 'strikethrough' },
+      ];
 
-    const buttons = [
-      { icon: boldIcon, title: 'Bold', style: 'bold' },
-      { icon: italicIcon, title: 'Italic', style: 'italic' },
-      { icon: underlineIcon, title: 'Underline', style: 'underline' },
-      { icon: strikethroughIcon, title: 'Strikethrough', style: 'strikethrough' },
-    ];
+      buttons.forEach(({ icon, title, style }) => {
+        const button = createToolbarButton({
+          icon,
+          title,
+          onClick: () => {
+            this.editor?.getTextFormatter()?.toggleStyle(style);
+            this.handleSelectionChange();
+          },
+        });
+        toolbar.appendChild(button);
+        this.toolbarButtons.set(style, button);
+      });
 
-    buttons.forEach(({ icon, title, style }) => {
-      const button = createToolbarButton({
-        icon,
-        title,
+      const fontSettingsButton = createToolbarButton({
+        icon: fontSizeIcon,
+        title: this.editor?.t('Font Settings'),
         onClick: () => {
-          this.editor?.getTextFormatter()?.toggleStyle(style);
-          this.handleSelectionChange();
+          let fontFamily = this.editor?.getTextFormatter()?.getStyle('fontFamily');
+          if (fontFamily === '') fontFamily = null;
+          this.fontPopup?.setValue('font-family', fontFamily ?? 'Arial');
+          let fontSize = this.editor?.getTextFormatter()?.getStyle('fontSize');
+          if (fontSize === '') fontSize = null;
+          this.fontPopup?.setValue('font-size', fontSize ?? '16px');
+          let lineHeight = this.editor?.getTextFormatter()?.getStyle('lineHeight');
+          if (lineHeight === '') lineHeight = null;
+          this.fontPopup?.setValue('line-height', lineHeight ?? 'normal');
+          this.fontPopup?.show();
         },
       });
-      toolbar.appendChild(button);
-      this.toolbarButtons.set(style, button);
-    });
-
-    const fontSettingsButton = createToolbarButton({
-      icon: fontSizeIcon,
-      title: this.editor?.t('Font Settings'),
-      onClick: () => {
-        let fontFamily = this.editor?.getTextFormatter()?.getStyle('fontFamily');
-        if (fontFamily === '') fontFamily = null;
-        this.fontPopup?.setValue('font-family', fontFamily ?? 'Arial');
-        let fontSize = this.editor?.getTextFormatter()?.getStyle('fontSize');
-        if (fontSize === '') fontSize = null;
-        this.fontPopup?.setValue('font-size', fontSize ?? '16px');
-        let lineHeight = this.editor?.getTextFormatter()?.getStyle('lineHeight');
-        if (lineHeight === '') lineHeight = null;
-        this.fontPopup?.setValue('line-height', lineHeight ?? 'normal');
-        this.fontPopup?.show();
-      },
-    });
-    toolbar.appendChild(fontSettingsButton);
-    this.fontButtons.set('fontSize', fontSettingsButton);
+      toolbar.appendChild(fontSettingsButton);
+      this.fontButtons.set('fontSize', fontSettingsButton);
+    }
   }
 
   private handleSelectionChange(): void {

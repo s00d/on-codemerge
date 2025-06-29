@@ -386,3 +386,73 @@ export function createTh(className: string = ''): HTMLTableCellElement {
 export function createCanvas(): HTMLCanvasElement {
   return document.createElement('canvas');
 }
+
+// Функции для работы с данными форм
+export interface FormData {
+  [key: string]: string | number | boolean | undefined;
+}
+
+export function getFormData(form: HTMLFormElement): FormData {
+  const formData = new FormData(form);
+  const data: FormData = {};
+
+  for (const [key, value] of formData.entries()) {
+    if (value === 'true' || value === 'false') {
+      data[key] = value === 'true';
+    } else if (!isNaN(Number(value)) && value !== '') {
+      data[key] = Number(value);
+    } else {
+      data[key] = value as string;
+    }
+  }
+
+  return data;
+}
+
+export function validateForm(form: HTMLFormElement): boolean {
+  return form.checkValidity();
+}
+
+export function showFormValidationErrors(form: HTMLFormElement): void {
+  form.reportValidity();
+}
+
+export function createFormSubmitHandler(
+  form: HTMLFormElement,
+  onSubmit: (data: FormData) => void,
+  onError?: (errors: string[]) => void
+): (e: Event) => void {
+  return (e: Event) => {
+    e.preventDefault();
+    
+    if (!validateForm(form)) {
+      showFormValidationErrors(form);
+      if (onError) {
+        const errors: string[] = [];
+        const invalidElements = form.querySelectorAll(':invalid');
+        invalidElements.forEach((element) => {
+          if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement || element instanceof HTMLSelectElement) {
+            errors.push(`${element.name || element.id}: ${element.validationMessage}`);
+          }
+        });
+        onError(errors);
+      }
+      return;
+    }
+
+    const data = getFormData(form);
+    onSubmit(data);
+  };
+}
+
+// Функции для работы с событиями календаря
+export interface CalendarEventData {
+  title: string;
+  description?: string;
+  date: string;
+  time: string;
+  duration?: number;
+  location?: string;
+  color?: string;
+  isAllDay?: boolean;
+}

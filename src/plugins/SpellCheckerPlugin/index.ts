@@ -14,7 +14,7 @@ export class SpellCheckerPlugin implements Plugin {
   name = 'spellchecker';
   hotkeys = [
     {
-      keys: 'Ctrl+Shift+L',
+      keys: 'Ctrl+Shift+S',
       description: 'Run spell checker',
       command: 'spellchecker',
       icon: '🔍✅',
@@ -80,7 +80,7 @@ export class SpellCheckerPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     this.toolbarButton = createToolbarButton({

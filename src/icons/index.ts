@@ -80,6 +80,10 @@ import spellCheckIcon from './spell-check.svg?raw';
 import styleIcon from './style.svg?raw';
 import mathIcon from './math.svg?raw';
 import aiAssistantIcon from './ai-assistant.svg?raw';
+import lazyTableIcon from './lazy-table.svg?raw';
+import globeIcon from './globe.svg?raw';
+import calendarIcon from './calendar.svg?raw';
+import timerIcon from './timer.svg?raw';
 
 export {
   alignCenterIcon,
@@ -164,4 +168,8 @@ export {
   styleIcon,
   mathIcon,
   aiAssistantIcon,
+  lazyTableIcon,
+  globeIcon,
+  calendarIcon,
+  timerIcon,
 };

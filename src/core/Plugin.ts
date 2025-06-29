@@ -9,13 +9,12 @@ interface Hotkey {
 }
 
 export interface Plugin {
+  version?: string;
   name: string;
   hotkeys?: Hotkey[];
   initialize: (editor: HTMLEditor) => void;
   destroy?: () => void; // Опциональный метод для очистки ресурсов плагина
 }
-
-// { keys: 'Ctrl+B', description: 'Bold text', command: 'bold', icon: '𝐁' },
 
 export interface PluginManager {
   register: (plugin: Plugin) => void;
@@ -103,6 +102,10 @@ export class DefaultPluginManager implements PluginManager {
    */
   getPlugin(pluginName: string): Plugin | undefined {
     return this.plugins.get(pluginName);
+  }
+
+  getVersion(pluginName: string): string {
+    return this.getPlugin(pluginName)?.version || '1.0.0';
   }
 
   /**

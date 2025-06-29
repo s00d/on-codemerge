@@ -1,20 +1,15 @@
 import type { Command } from '../../../core/commands/Command.ts';
 
 export class StyleTableCellCommand implements Command {
-  private cell: HTMLTableCellElement;
-  private newStyle: Partial<CSSStyleDeclaration>;
+  private cell: HTMLElement;
+  private style: Partial<CSSStyleDeclaration>;
 
-  constructor(cell: HTMLTableCellElement, style: Partial<CSSStyleDeclaration>) {
+  constructor(cell: HTMLElement, style: Partial<CSSStyleDeclaration>) {
     this.cell = cell;
-    this.newStyle = style;
-    // this.oldStyle = {
-    //   textAlign: cell.style.textAlign,
-    //   verticalAlign: cell.style.verticalAlign,
-    //   backgroundColor: cell.style.backgroundColor,
-    // };
+    this.style = style;
   }
 
   execute(): void {
-    Object.assign(this.cell.style, this.newStyle);
+    Object.assign(this.cell.style, this.style);
   }
 }

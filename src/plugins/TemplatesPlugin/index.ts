@@ -11,7 +11,7 @@ import { templatesIcon } from '../../icons';
 export class TemplatesPlugin implements Plugin {
   name = 'templates';
   hotkeys = [
-    { keys: 'Ctrl+Alt+T', description: 'Insert template', command: 'templates', icon: '📄' },
+    { keys: 'Ctrl+Alt+M', description: 'Insert template', command: 'templates', icon: '📄' },
   ];
   private editor: HTMLEditor | null = null;
   private menu: TemplatesMenu | null = null;
@@ -32,7 +32,7 @@ export class TemplatesPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     this.toolbarButton = createToolbarButton({

@@ -3,9 +3,9 @@
 import { focusNodeStart } from '../../../utils/Selection';
 
 export class TableCell {
-  private element: HTMLTableCellElement;
+  private element: HTMLElement;
 
-  constructor(element: HTMLTableCellElement) {
+  constructor(element: HTMLElement) {
     this.element = element;
     this.initialize();
   }
@@ -21,7 +21,7 @@ export class TableCell {
     focusNodeStart(this.element);
   }
 
-  public getElement(): HTMLTableCellElement {
+  public getElement(): HTMLElement {
     return this.element;
   }
 }

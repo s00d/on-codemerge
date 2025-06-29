@@ -19,7 +19,7 @@ interface LinkData {
 
 export class LinkPlugin implements Plugin {
   name = 'link';
-  hotkeys = [{ keys: 'Ctrl+Alt+K', description: 'Insert link', command: 'link', icon: '🔗' }];
+  hotkeys = [{ keys: 'Ctrl+Alt+Z', description: 'Insert link', command: 'link', icon: '🔗' }];
   private editor: HTMLEditor | null = null;
   private menu: LinkMenu | null = null;
   private contextMenu: ContextMenu | null = null;
@@ -68,7 +68,7 @@ export class LinkPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     this.toolbarButton = createToolbarButton({

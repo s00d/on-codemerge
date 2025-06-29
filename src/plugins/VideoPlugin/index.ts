@@ -34,7 +34,7 @@ export class VideoPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (toolbar) {
       const button = createToolbarButton({
         icon: videoIcon,

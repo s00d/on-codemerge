@@ -15,73 +15,121 @@ Integrating On-Codemerge into your Angular project is straightforward. Begin by 
 Run the following command in your Angular project directory to install `on-codemerge`:
 
 ```bash
-npm i --save on-codemerge
+npm install on-codemerge
 ```
 
 ## Angular Integration Example
 
-Here's an example that demonstrates how to integrate On-Codemerge into an Angular project using the new plugin version:
+Here's an example that demonstrates how to integrate On-Codemerge into an Angular project:
 
-```typescript title="app.component.ts"
+```typescript title="editor.component.ts"
+import { Component, ElementRef, ViewChild, AfterViewInit, Input, Output, EventEmitter, OnDestroy } from '@angular/core';
+import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 import 'on-codemerge/public.css';
 import 'on-codemerge/index.css';
 import 'on-codemerge/plugins/ToolbarPlugin/style.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';
 import 'on-codemerge/plugins/AlignmentPlugin/style.css';
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
-import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
 
 @Component({
-  selector: 'app-root',
-  template: `<div #editorContainer></div>`
+  selector: 'app-editor',
+  template: `<div #editorContainer style="min-height: 300px;"></div>`,
+  styleUrls: ['./editor.component.css']
 })
-export class AppComponent implements AfterViewInit {
-  @ViewChild('editorContainer') editorContainer: ElementRef;
+export class EditorComponent implements AfterViewInit, OnDestroy {
+  @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef;
+  @Input() value: string = '';
+  @Output() valueChange = new EventEmitter<string>();
+
+  private editor: HTMLEditor | null = null;
 
   async ngAfterViewInit() {
-    const editor = new HTMLEditor(this.editorContainer.nativeElement);
+    if (this.editorContainer?.nativeElement) {
+      this.editor = new HTMLEditor(this.editorContainer.nativeElement);
 
-    await editor.setLocale('ru');
+      // Set locale
+      await this.editor.setLocale('ru');
 
-    editor.use(new ToolbarPlugin());
-    editor.use(new AlignmentPlugin());
-    // ... register other modules
+      // Register plugins
+      this.editor.use(new ToolbarPlugin());
+      this.editor.use(new AlignmentPlugin());
 
-    editor.subscribeToContentChange((newContent?: string) => {
-      console.log('Content changed:', newContent);
-    });
+      // Subscribe to content changes
+      this.editor.subscribeToContentChange((newContent: string) => {
+        this.valueChange.emit(newContent);
+      });
 
-    // Optional: Set initial content
-    editor.setHtml('Your initial content here');
-    console.log(editor.getHtml());
+      // Set initial content
+      if (this.value) {
+        this.editor.setHtml(this.value);
+      }
+    }
+  }
+
+  ngOnDestroy() {
+    if (this.editor) {
+      this.editor.destroy();
+    }
+  }
+
+  // Method to update content from parent component
+  updateContent(content: string) {
+    if (this.editor && content !== this.editor.getHtml()) {
+      this.editor.setHtml(content);
+    }
   }
 }
 ```
 
-### Key Points
+## Usage Example
 
-1. **HTMLEditor Initialization**: The `HTMLEditor` is initialized with a container element.
-2. **Locale Setting**: The `setLocale` method is used to set the editor's language (e.g., `'ru'` for Russian).
-3. **Plugin Registration**: Plugins like `ToolbarPlugin` and `AlignmentPlugin` are registered using the `use` method.
-4. **Content Subscription**: The `subscribeToContentChange` method listens for changes in the editor's content.
-5. **HTML Content Management**: The `setHtml` and `getHtml` methods are used to set and retrieve the editor's content in HTML format.
+```typescript title="app.component.ts"
+import { Component } from '@angular/core';
 
-### Example with Additional Plugins
-
-To add more plugins, import and register them similarly:
-
-```typescript
-import { TablePlugin, ImagePlugin } from 'on-codemerge';
-
-// Inside ngAfterViewInit
-editor.use(new TablePlugin());
-editor.use(new ImagePlugin());
+@Component({
+  selector: 'app-root',
+  template: `
+    <h1>My Angular App with On-Codemerge</h1>
+    <app-editor [(value)]="content"></app-editor>
+    <div>
+      <h3>Current HTML:</h3>
+      <pre>{{ content }}</pre>
+    </div>
+  `
+})
+export class AppComponent {
+  content: string = '<p>Initial content</p>';
+}
 ```
 
-### Usage
+## Module Configuration
 
-1. Add a container element in your template using `#editorContainer`.
-2. Initialize the editor in the `ngAfterViewInit` lifecycle hook.
-3. Register the required plugins and subscribe to content changes.
+```typescript title="app.module.ts"
+import { NgModule } from '@angular/core';
+import { BrowserModule } from '@angular/platform-browser';
+import { AppComponent } from './app.component';
+import { EditorComponent } from './editor.component';
 
-This approach ensures seamless integration of On-Codemerge into Angular applications using the latest plugin version.
+@NgModule({
+  declarations: [
+    AppComponent,
+    EditorComponent
+  ],
+  imports: [
+    BrowserModule
+  ],
+  providers: [],
+  bootstrap: [AppComponent]
+})
+export class AppModule { }
+```
+
+## Key Features
+
+- **Angular Integration**: Full compatibility with Angular's component system
+- **Two-way Binding**: Support for `[(value)]` two-way data binding
+- **TypeScript**: Complete TypeScript support with proper type definitions
+- **Lifecycle Management**: Proper cleanup in `ngOnDestroy`
+- **Plugin System**: Easy plugin registration and management
+- **Localization**: Built-in multi-language support
+- **Content Management**: Simple HTML content setting and retrieval

@@ -1,9 +1,9 @@
 import type { Command } from '../../../core/commands/Command.ts';
 
 export class CopyTableCommand implements Command {
-  private table: HTMLTableElement;
+  private table: HTMLElement;
 
-  constructor(table: HTMLTableElement) {
+  constructor(table: HTMLElement) {
     this.table = table;
   }
 

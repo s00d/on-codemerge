@@ -71,7 +71,7 @@ export class AIAssistantPlugin implements Plugin {
   }
 
   private addToolbarButton(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (toolbar) {
       const aiButton = createToolbarButton({
         icon: aiAssistantIcon,

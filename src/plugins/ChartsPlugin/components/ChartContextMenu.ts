@@ -1,5 +1,5 @@
 import type { ChartMenu } from './ChartMenu';
-import { editIcon, deleteIcon } from '../../../icons';
+import { editIcon, deleteIcon, exportIcon } from '../../../icons';
 import type { ChartType } from '../types';
 import { ContextMenu } from '../../../core/ui/ContextMenu.ts';
 import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
@@ -21,6 +21,12 @@ export class ChartContextMenu {
           icon: editIcon,
           action: 'edit',
           onClick: () => this.handleEdit(),
+        },
+        {
+          label: editor.t('Export PNG'),
+          icon: exportIcon,
+          action: 'export',
+          onClick: () => this.handleExport(),
         },
         {
           label: editor.t('Delete'),
@@ -52,6 +58,30 @@ export class ChartContextMenu {
   private handleDelete(): void {
     if (this.activeChart) {
       this.activeChart.remove();
+    }
+  }
+
+  private handleExport(): void {
+    if (!this.activeChart) return;
+    // Пробуем найти img/svg-chart или canvas внутри activeChart
+    const img = this.activeChart.querySelector('img.svg-chart') as HTMLImageElement;
+    if (img && img.src) {
+      const link = document.createElement('a');
+      link.href = img.src;
+      link.download = 'chart.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } else {
+      const canvas = this.activeChart.querySelector('canvas') as HTMLCanvasElement;
+      if (canvas) {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'chart.png';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     }
   }
 

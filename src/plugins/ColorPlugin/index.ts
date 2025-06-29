@@ -11,7 +11,7 @@ export class ColorPlugin implements Plugin {
   name = 'color';
   hotkeys = [
     { keys: 'Ctrl+Shift+H', description: 'Highlight text', command: 'hilite-color', icon: '🖍️' },
-    { keys: 'Ctrl+Shift+F', description: 'Change text color', command: 'fore-color', icon: '🎨' },
+    { keys: 'Ctrl+Shift+Q', description: 'Change text color', command: 'fore-color', icon: '🎨' },
   ];
   private editor: HTMLEditor | null = null;
   private textColorPicker: ColorPicker | null = null;
@@ -54,7 +54,7 @@ export class ColorPlugin implements Plugin {
   }
 
   private addToolbarButtons(): void {
-    const toolbar = document.querySelector('.editor-toolbar');
+    const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
     // Text color button with "A" icon

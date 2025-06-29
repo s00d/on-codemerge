@@ -49,13 +49,22 @@ export abstract class BaseChartRenderer {
     options: ChartOptions,
     maxValue: number,
     showXAxis: boolean = true,
-    xLabels?: string[]
+    xLabels?: string[],
+    chartType?: string
   ): void {
+    if (options.grid && options.grid.show === false) {
+      return;
+    }
+
     const { padding, width, height } = this.getDimensions(options);
 
     ctx.save();
-    ctx.strokeStyle = '#e5e7eb';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = options.grid?.color || this.getGridColor(options);
+    ctx.lineWidth = options.grid?.width || 1;
+    ctx.setLineDash(
+      options.grid?.style === 'dashed' ? [5, 5] : options.grid?.style === 'dotted' ? [2, 2] : []
+    );
+    ctx.globalAlpha = options.grid?.opacity || 0.3;
     ctx.fillStyle = '#6b7280';
     ctx.font = '12px Inter, system-ui, sans-serif';
 
@@ -88,9 +97,20 @@ export abstract class BaseChartRenderer {
       if (xLabels && xLabels.length > 0) {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'top';
+        ctx.fillStyle = this.getTextColor(options);
+        ctx.font = '11px Inter, system-ui, sans-serif';
 
         xLabels.forEach((label, i) => {
-          const x = padding + (width * i) / (xLabels.length - 1);
+          let x: number;
+
+          if (chartType === 'line' || chartType === 'area') {
+            // Для line и area графиков - позиционирование как у точек
+            x = padding + (width / Math.max(1, xLabels.length - 1)) * i;
+          } else {
+            // Для bar и других графиков - позиционирование по центру слотов
+            const barSpacing = width / xLabels.length;
+            x = padding + barSpacing * i + barSpacing / 2;
+          }
 
           ctx.save();
           ctx.translate(x, options.height - padding + 8);
@@ -105,13 +125,17 @@ export abstract class BaseChartRenderer {
   }
 
   protected drawLegend(ctx: CanvasRenderingContext2D, data: any[], options: ChartOptions): void {
+    if (options.legend && options.legend.show === false) {
+      return;
+    }
+
     const { padding } = this.getDimensions(options);
     const legendY = padding / 2;
     let legendX = padding;
 
     data.forEach((series, i) => {
       const name = series.name || this.editor.t('Series') + ` ${i + 1}`;
-      const color = series.color || this.colors[i % this.colors.length];
+      const color = series.color || this.getColors(options)[i % this.getColors(options).length];
 
       // Draw color indicator
       ctx.beginPath();
@@ -123,11 +147,89 @@ export abstract class BaseChartRenderer {
       ctx.stroke();
 
       // Draw series name
-      ctx.fillStyle = '#374151';
+      ctx.fillStyle = this.getTextColor(options);
       ctx.textAlign = 'left';
       ctx.fillText(name, legendX + 15, legendY + 4);
 
       legendX += ctx.measureText(name).width + 40;
     });
+  }
+
+  protected getColors(options: ChartOptions): string[] {
+    if (options.colors && options.colors.length > 0) {
+      return options.colors;
+    }
+    if (options.theme && options.theme.colors && options.theme.colors.primary) {
+      return options.theme.colors.primary;
+    }
+    return this.colors;
+  }
+
+  protected getTextColor(options: ChartOptions): string {
+    if (options.theme && options.theme.colors && options.theme.colors.text) {
+      return options.theme.colors.text;
+    }
+    return '#222';
+  }
+
+  protected getBackgroundColor(options: ChartOptions): string {
+    if (options.theme && options.theme.colors && options.theme.colors.background) {
+      return options.theme.colors.background;
+    }
+    return '#fff';
+  }
+
+  protected getGridColor(options: ChartOptions): string {
+    if (options.theme && options.theme.colors && options.theme.colors.grid) {
+      return options.theme.colors.grid;
+    }
+    return '#e5e7eb';
+  }
+
+  protected drawTitle(ctx: CanvasRenderingContext2D, options: ChartOptions): void {
+    if (!options.title) return;
+
+    ctx.save();
+    ctx.fillStyle = this.getTextColor(options);
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+    ctx.font = 'bold 16px Inter, system-ui, sans-serif';
+    ctx.fillText(options.title, options.width / 2, 20);
+    ctx.restore();
+  }
+
+  protected drawAxisLabels(ctx: CanvasRenderingContext2D, options: ChartOptions): void {
+    const { padding } = this.getDimensions(options);
+
+    ctx.save();
+    ctx.fillStyle = this.getTextColor(options);
+    ctx.font = '12px Inter, system-ui, sans-serif';
+
+    // X-axis label
+    if (options.xAxis?.title) {
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(options.xAxis.title, options.width / 2, options.height - padding + 30);
+    }
+
+    // Y-axis label
+    if (options.yAxis?.title) {
+      ctx.save();
+      ctx.translate(padding - 30, options.height / 2);
+      ctx.rotate(-Math.PI / 2);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(options.yAxis.title, 0, 0);
+      ctx.restore();
+    }
+
+    ctx.restore();
+  }
+
+  protected drawBackground(ctx: CanvasRenderingContext2D, options: ChartOptions): void {
+    ctx.save();
+    ctx.fillStyle = this.getBackgroundColor(options);
+    ctx.fillRect(0, 0, options.width, options.height);
+    ctx.restore();
   }
 }
