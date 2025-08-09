@@ -363,9 +363,9 @@ export class ChartMenu {
       const link = document.createElement('a');
       link.href = img.src;
       link.download = 'chart.png';
-      document.body.appendChild(link);
+      (this.editor.getInnerContainer() || document.body).appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.parentNode?.removeChild(link);
     } else {
       // Если используется canvas (например, для предпросмотра)
       const canvas = previewContainer.querySelector('canvas') as HTMLCanvasElement;
@@ -373,9 +373,9 @@ export class ChartMenu {
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/png');
         link.download = 'chart.png';
-        document.body.appendChild(link);
+        (this.editor.getInnerContainer() || document.body).appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        link.parentNode?.removeChild(link);
       }
     }
   }

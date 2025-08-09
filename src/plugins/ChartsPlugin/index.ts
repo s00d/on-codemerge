@@ -111,14 +111,23 @@ export class ChartsPlugin implements Plugin {
     const selection = window.getSelection();
     let range: Range;
 
-    if (selection && selection.rangeCount > 0) {
-      range = selection.getRangeAt(0);
-    } else {
-      range = document.createRange();
-      range.selectNodeContents(container);
-      range.collapse(false);
+    const createRangeAtEnd = () => {
+      const r = document.createRange();
+      r.selectNodeContents(container);
+      r.collapse(false);
       selection?.removeAllRanges();
-      selection?.addRange(range);
+      selection?.addRange(r);
+      return r;
+    };
+
+    if (selection && selection.rangeCount > 0) {
+      const candidate = selection.getRangeAt(0);
+      const isInsideEditor =
+        container.contains(candidate.startContainer) &&
+        container.contains(candidate.endContainer);
+      range = isInsideEditor ? candidate : createRangeAtEnd();
+    } else {
+      range = createRangeAtEnd();
     }
 
     // Show chart menu

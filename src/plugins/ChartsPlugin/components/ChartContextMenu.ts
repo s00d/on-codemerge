@@ -7,11 +7,13 @@ import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 export class ChartContextMenu {
   private contextMenu: ContextMenu;
   private activeChart: HTMLElement | null = null;
+  private editor: HTMLEditor;
 
   constructor(
     editor: HTMLEditor,
     private chartMenu: ChartMenu
   ) {
+    this.editor = editor;
     // Создаем контекстное меню с кнопками
     this.contextMenu = new ContextMenu(
       editor,
@@ -69,18 +71,19 @@ export class ChartContextMenu {
       const link = document.createElement('a');
       link.href = img.src;
       link.download = 'chart.png';
-      document.body.appendChild(link);
+      // Вставляем временную ссылку рядом с редактором, чтобы не трогать body
+      (this.editor.getInnerContainer() || document.body).appendChild(link);
       link.click();
-      document.body.removeChild(link);
+      link.parentNode?.removeChild(link);
     } else {
       const canvas = this.activeChart.querySelector('canvas') as HTMLCanvasElement;
       if (canvas) {
         const link = document.createElement('a');
         link.href = canvas.toDataURL('image/png');
         link.download = 'chart.png';
-        document.body.appendChild(link);
+        (this.editor.getInnerContainer() || document.body).appendChild(link);
         link.click();
-        document.body.removeChild(link);
+        link.parentNode?.removeChild(link);
       }
     }
   }
