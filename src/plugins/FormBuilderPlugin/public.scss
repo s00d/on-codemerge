@@ -1,77 +1,278 @@
+/* Стили для сгенерированных форм */
 .generated-form {
-  @apply flex flex-col gap-3 p-4 border border-gray-200 rounded bg-gray-50;
+  @apply flex flex-col gap-4 p-6 border border-gray-200 rounded-lg bg-white shadow-sm;
+  max-width: 600px;
+  margin: 1rem 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  transition: all 0.3s ease;
 
   html.dark & {
-    @apply border-gray-700 bg-gray-800; /* Темная тема для формы */
+    @apply border-gray-700 bg-gray-800;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  }
+
+  // CSS переменные для кастомизации
+  --field-padding: 0.75rem;
+  --border-color: #d1d5db;
+  --focus-color: #3b82f6;
+  --error-color: #ef4444;
+  --success-color: #10b981;
+  --label-color: #374151;
+  --input-bg: #ffffff;
+
+  html.dark & {
+    --border-color: #4b5563;
+    --focus-color: #3b82f6;
+    --error-color: #f87171;
+    --success-color: #34d399;
+    --label-color: #d1d5db;
+    --input-bg: #374151;
   }
 
   .form-field {
     @apply flex flex-col gap-2;
 
-    .form-input {
-      @apply w-full p-2 border bg-white border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all;
-
-      html.dark & {
-        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input */
-      }
-    }
-
     label {
-      @apply text-sm font-medium text-gray-700;
-
-      html.dark & {
-        @apply text-gray-300; /* Темная тема для label */
-      }
+      @apply text-sm font-medium;
+      color: var(--label-color);
+      margin-bottom: 0.25rem;
     }
 
     input,
     textarea,
     select {
-      @apply w-full p-2 border border-gray-200 rounded text-sm;
-
-      html.dark & {
-        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input, textarea, select */
-      }
+      @apply w-full border rounded-md transition-all duration-200;
+      padding: var(--field-padding);
+      border-color: var(--border-color);
+      background-color: var(--input-bg);
+      font-size: 0.875rem;
 
       &:focus {
-        @apply outline-none border-blue-500 ring-2 ring-blue-200;
+        @apply outline-none ring-2;
+        border-color: var(--focus-color);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+      }
 
-        html.dark & {
-          @apply border-blue-500 ring-blue-700; /* Темная тема для focus */
-        }
+      &::placeholder {
+        @apply text-gray-400;
       }
     }
 
-    button {
-      @apply bg-blue-500 text-white border-none py-2 px-4 rounded cursor-pointer text-sm;
+    textarea {
+      @apply resize-y;
+      min-height: 100px;
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+      background-position: right 0.5rem center;
+      background-repeat: no-repeat;
+      background-size: 1.5em 1.5em;
+      padding-right: 2.5rem;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
 
       html.dark & {
-        @apply bg-blue-600; /* Темная тема для кнопки */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%239ca3af' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
       }
+    }
+  }
+
+  button {
+    @apply bg-blue-500 text-white border-none rounded-md cursor-pointer font-medium transition-colors duration-200;
+    padding: 0.75rem 1.5rem;
+    font-size: 0.875rem;
+
+    &:hover {
+      @apply bg-blue-600;
+    }
+
+    &:focus {
+      @apply outline-none ring-2 ring-blue-500 ring-offset-2;
+    }
+
+    &:disabled {
+      @apply bg-gray-300 text-gray-500 cursor-not-allowed;
 
       &:hover {
-        @apply bg-blue-600;
-
-        html.dark & {
-          @apply bg-blue-700; /* Темная тема для hover */
-        }
+        @apply bg-gray-300;
       }
+    }
+  }
+
+  .submit-button {
+    @apply bg-green-500 mt-4;
+
+    &:hover {
+      @apply bg-green-600;
+    }
+
+    html.dark & {
+      @apply bg-green-600;
+
+      &:hover {
+        @apply bg-green-700;
+      }
+    }
+  }
+
+  /* Стили для различных типов полей */
+  input[type='checkbox'],
+  input[type='radio'] {
+    @apply w-auto mr-2;
+    width: 1rem;
+    height: 1rem;
+  }
+
+  /* Стили для контейнера чекбокса */
+  .checkbox-container {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    input[type='checkbox'] {
+      margin: 0;
+      flex-shrink: 0;
+    }
+
+    label {
+      margin: 0;
+      cursor: pointer;
+    }
+  }
+
+  input[type='file'] {
+    @apply p-2 border-2 border-dashed;
+    border-color: var(--border-color);
+    background-color: #f9fafb;
+
+    html.dark & {
+      background-color: #374151;
+    }
+  }
+
+  /* Стили для обязательных полей */
+  .required-field label::after {
+    content: ' *';
+    color: var(--error-color);
+  }
+
+  /* Стили для ошибок валидации */
+  .field-error {
+    @apply text-red-500 text-xs mt-1;
+
+    input,
+    textarea,
+    select {
+      border-color: var(--error-color);
+
+      &:focus {
+        border-color: var(--error-color);
+        box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+      }
+    }
+  }
+
+  /* Стили для успешной валидации */
+  .field-success input,
+  .field-success textarea,
+  .field-success select {
+    border-color: var(--success-color);
+
+    &:focus {
+      border-color: var(--success-color);
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
     }
   }
 }
 
+/* Стили для кнопок-ссылок */
 .button-link {
-  @apply bg-blue-500 text-white border-none py-2 px-4 rounded cursor-pointer text-sm;
-
-  html.dark & {
-    @apply bg-blue-600; /* Темная тема для кнопки */
-  }
+  @apply bg-blue-500 text-white border-none rounded-md cursor-pointer font-medium transition-colors duration-200;
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  text-decoration: none;
+  display: inline-block;
 
   &:hover {
     @apply bg-blue-600;
+  }
 
-    html.dark & {
-      @apply bg-blue-700; /* Темная тема для hover */
+  html.dark & {
+    @apply bg-blue-600;
+
+    &:hover {
+      @apply bg-blue-700;
     }
   }
+}
+
+/* Responsive стили */
+@media (max-width: 768px) {
+  .generated-form {
+    @apply p-4;
+    max-width: 100%;
+    margin: 0.5rem 0;
+
+    .form-field {
+      input,
+      textarea,
+      select {
+        @apply text-base;
+        padding: 0.875rem;
+      }
+    }
+
+    button {
+      @apply w-full;
+      padding: 1rem 1.5rem;
+      font-size: 1rem;
+    }
+  }
+}
+
+// Drag and Drop стили
+.field-item {
+  cursor: grab;
+  transition: all 0.2s ease;
+
+  &:active {
+    cursor: grabbing;
+  }
+
+  &.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+  }
+
+  &.drag-over {
+    background-color: #f0f8ff !important;
+    border: 2px dashed #007bff !important;
+    transform: scale(1.02);
+  }
+}
+
+// Улучшенные стили для кнопок действий
+.field-action-button {
+  padding: 4px 8px;
+  margin: 0 2px;
+  border-radius: 4px;
+  font-size: 12px;
+  transition: all 0.2s ease;
+
+  &:hover {
+    transform: scale(1.1);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// Стили для автофокуса
+#form-action-url:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
 }

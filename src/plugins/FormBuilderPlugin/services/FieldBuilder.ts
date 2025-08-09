@@ -1,127 +1,117 @@
-import {
-  createButton,
-  createCheckbox,
-  createContainer,
-  createFileInput,
-  createInputField,
-  createLabel,
-  createSelectField,
-  createTextarea,
-} from '../../../utils/helpers.ts';
-
-export interface FieldConfig {
-  type: string;
-  label: string;
-  options?: {
-    target?: string;
-    placeholder?: string;
-    autocomplete?: string;
-    readonly?: boolean;
-    disabled?: boolean;
-    multiple?: boolean;
-    name?: string;
-    value?: string;
-    className?: string;
-    id?: string;
-    options?: string[];
-  };
-  validation?: {
-    required?: boolean;
-    pattern?: string;
-    minLength?: number;
-    maxLength?: number;
-    min?: number;
-    max?: number;
-  };
-}
+import type { FieldConfig, FieldType, FieldOptions, ValidationRules } from '../types';
 
 export class FieldBuilder {
-  createField(config: FieldConfig): HTMLElement | null {
-    const { type, label, options, validation } = config;
-    const fieldContainer = createContainer('form-field');
+  /**
+   * Создает поле с предустановленными настройками
+   */
+  createPresetField(
+    type: FieldType, 
+    label: string, 
+    options?: Partial<FieldOptions>, 
+    validation?: ValidationRules
+  ): FieldConfig {
+    const id = this.generateFieldId();
 
-    const labelElement = createLabel(label, options?.id);
+    return {
+      id,
+      type,
+      label,
+      options: {
+        id,
+        name: id,
+        className: 'form-input',
+        placeholder: this.getDefaultPlaceholder(type),
+        ...this.getDefaultOptions(type),
+        ...options
+      },
+      validation: {
+        ...this.getDefaultValidation(type),
+        ...validation
+      }
+    };
+  }
 
-    let inputElement: HTMLElement | null = null;
+  /**
+   * Генерирует уникальный ID для поля
+   */
+  private generateFieldId(): string {
+    return `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+  }
 
+  /**
+   * Get default placeholder for field type
+   */
+  private getDefaultPlaceholder(type: FieldType): string {
+    const placeholders: Record<FieldType, string> = {
+      text: 'Enter text',
+      textarea: 'Enter text',
+      email: 'example@email.com',
+      password: 'Enter password',
+      number: 'Enter number',
+      tel: '+1 (555) 123-4567',
+      url: 'https://example.com',
+      date: 'Select date',
+      time: 'Select time',
+      'datetime-local': 'Select date and time',
+      month: 'Select month',
+      week: 'Select week',
+      color: '#000000',
+      range: 'Select value',
+      select: 'Select option',
+      checkbox: '',
+      radio: '',
+      button: '',
+      submit: '',
+      reset: '',
+      file: 'Choose file',
+      hidden: '',
+      image: ''
+    };
+
+    return placeholders[type] || '';
+  }
+
+  /**
+   * Получает опции по умолчанию для типа поля
+   */
+  private getDefaultOptions(type: FieldType): Partial<FieldOptions> {
     switch (type) {
-      case 'text':
       case 'email':
+        return { autocomplete: 'email' };
       case 'password':
-      case 'number':
-      case 'color':
-      case 'date':
-      case 'time':
-      case 'range':
-        inputElement = createInputField(type, options?.placeholder, options?.value);
-        break;
-      case 'textarea':
-        inputElement = createTextarea(options?.placeholder, options?.value);
-        break;
-      case 'select':
-        inputElement = createSelectField(
-          options?.options?.map((opt) => ({ value: opt, label: opt })) || [],
-          options?.value
-        );
-        if (options?.multiple) {
-          inputElement.setAttribute('multiple', 'true');
-        }
-        break;
-      case 'checkbox':
-      case 'radio':
-        inputElement = createCheckbox(label, options?.value === 'true');
-        if (options?.name) {
-          inputElement.setAttribute('name', options.name);
-        }
-        break;
+        return { autocomplete: 'current-password' };
+      case 'tel':
+        return { autocomplete: 'tel' };
+      case 'url':
+        return { autocomplete: 'url' };
       case 'file':
-        inputElement = createFileInput(options?.multiple);
-        break;
-      case 'button':
-      case 'submit':
-      case 'reset':
-        inputElement = createButton(label, () => {}, type as 'primary' | 'secondary' | 'danger');
-        break;
+        return { accept: '*/*' };
+      case 'range':
+        return { min: 0, max: 100, step: 1 };
+      case 'number':
+        return { min: 0, step: 1 };
       default:
-        return null;
+        return {};
     }
+  }
 
-    if (options?.autocomplete) {
-      inputElement?.setAttribute('autocomplete', options.autocomplete);
+  /**
+   * Получает валидацию по умолчанию для типа поля
+   */
+  private getDefaultValidation(type: FieldType): ValidationRules {
+    switch (type) {
+      case 'email':
+        return { required: true, email: true };
+      case 'password':
+        return { required: true, minLength: 6 };
+      case 'tel':
+        return { pattern: '^[+]?[0-9\\s\\-\\(\\)]{10,}$' };
+      case 'url':
+        return { url: true };
+      case 'number':
+        return { numeric: true };
+      default:
+        return {};
     }
-    if (options?.readonly) {
-      inputElement?.setAttribute('readonly', 'true');
-    }
-    if (options?.disabled) {
-      inputElement?.setAttribute('disabled', 'true');
-    }
-    if (validation?.pattern) {
-      inputElement?.setAttribute('pattern', validation.pattern);
-    }
-    if (validation?.minLength) {
-      inputElement?.setAttribute('minlength', validation.minLength.toString());
-    }
-    if (validation?.maxLength) {
-      inputElement?.setAttribute('maxlength', validation.maxLength.toString());
-    }
-    if (validation?.min) {
-      inputElement?.setAttribute('min', validation.min.toString());
-    }
-    if (validation?.max) {
-      inputElement?.setAttribute('max', validation.max.toString());
-    }
-    if (options?.className) {
-      inputElement?.classList.add(options.className);
-    }
-    if (options?.id) {
-      inputElement?.setAttribute('id', options.id);
-    }
-
-    fieldContainer.appendChild(labelElement);
-    if (inputElement) {
-      fieldContainer.appendChild(inputElement);
-    }
-
-    return fieldContainer;
   }
 }

@@ -1,123 +1,1251 @@
+/* Стили для интерфейса построителя форм */
 .form-builder-container {
-  .add-field-button {
-    @apply bg-blue-500 text-white border-none py-2 px-4 rounded cursor-pointer text-sm;
-
-    html.dark & {
-      @apply bg-blue-600; /* Темная тема для кнопки */
-    }
-
-    &:hover {
-      @apply bg-blue-600;
-
-      html.dark & {
-        @apply bg-blue-700; /* Темная тема для hover */
-      }
-    }
-  }
-
-  .field-container {
-    @apply mb-4 p-3 border border-gray-200 rounded bg-gray-50;
-
-    html.dark & {
-      @apply border-gray-700 bg-gray-800; /* Темная тема для контейнера поля */
-    }
-
-    .field-type-select,
-    .field-label-input,
-    .field-regex-input {
-      @apply w-full p-2 mb-2 border border-gray-200 rounded text-sm;
-
-      html.dark & {
-        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input */
-      }
-
-      &:focus {
-        @apply outline-none border-blue-500 ring-2 ring-blue-200;
-
-        html.dark & {
-          @apply border-blue-500 ring-blue-700; /* Темная тема для focus */
-        }
-      }
-    }
-
-    .field-required-checkbox {
-      @apply mr-2;
-    }
-
-    .remove-field-button {
-      @apply bg-red-500 text-white border-none py-1.5 px-3 rounded cursor-pointer text-sm;
-
-      html.dark & {
-        @apply bg-red-600; /* Темная тема для кнопки */
-      }
-
-      &:hover {
-        @apply bg-red-600;
-
-        html.dark & {
-          @apply bg-red-700; /* Темная тема для hover */
-        }
-      }
-    }
-  }
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 1rem;
 }
 
+.form-builder-container .add-field-button {
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.form-builder-container .add-field-button:hover {
+  background-color: #2563eb;
+}
+
+html.dark .form-builder-container .add-field-button {
+  background-color: #2563eb;
+}
+
+html.dark .form-builder-container .add-field-button:hover {
+  background-color: #1d4ed8;
+}
+
+.form-builder-container .field-container {
+  margin-bottom: 1rem;
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #f9fafb;
+}
+
+html.dark .form-builder-container .field-container {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.form-builder-container .field-type-select,
+.form-builder-container .field-label-input,
+.form-builder-container .field-regex-input {
+  width: 100%;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.form-builder-container .field-type-select:focus,
+.form-builder-container .field-label-input:focus,
+.form-builder-container .field-regex-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+html.dark .form-builder-container .field-type-select,
+html.dark .form-builder-container .field-label-input,
+html.dark .form-builder-container .field-regex-input {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+html.dark .form-builder-container .field-type-select:focus,
+html.dark .form-builder-container .field-label-input:focus,
+html.dark .form-builder-container .field-regex-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-builder-container .field-required-checkbox {
+  margin-right: 0.5rem;
+}
+
+.form-builder-container .remove-field-button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.form-builder-container .remove-field-button:hover {
+  background-color: #dc2626;
+}
+
+html.dark .form-builder-container .remove-field-button {
+  background-color: #dc2626;
+}
+
+html.dark .form-builder-container .remove-field-button:hover {
+  background-color: #b91c1c;
+}
+
+/* Стили для контейнера опций */
 .options-container {
-  @apply mt-2;
-
-  .option-container {
-    @apply flex gap-2 items-center;
-
-    .option-input {
-      @apply flex-1 p-1.5 border border-gray-200 rounded text-sm;
-
-      html.dark & {
-        @apply bg-gray-700 border-gray-600 text-gray-100; /* Темная тема для input */
-      }
-
-      &:focus {
-        @apply outline-none border-blue-500 ring-2 ring-blue-200;
-
-        html.dark & {
-          @apply border-blue-500 ring-blue-700; /* Темная тема для focus */
-        }
-      }
-    }
-
-    .remove-option-button {
-      @apply bg-red-500 text-white border-none py-1 px-2 rounded cursor-pointer text-xs;
-
-      html.dark & {
-        @apply bg-red-600; /* Темная тема для кнопки */
-      }
-
-      &:hover {
-        @apply bg-red-600;
-
-        html.dark & {
-          @apply bg-red-700; /* Темная тема для hover */
-        }
-      }
-    }
-  }
+  margin-top: 0.5rem;
 }
 
+.options-container .option-container {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 0.5rem;
+}
+
+.options-container .option-input {
+  flex: 1;
+  padding: 0.5rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.options-container .option-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+html.dark .options-container .option-input {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+html.dark .options-container .option-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.options-container .remove-option-button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.25rem;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+}
+
+.options-container .remove-option-button:hover {
+  background-color: #dc2626;
+}
+
+html.dark .options-container .remove-option-button {
+  background-color: #dc2626;
+}
+
+html.dark .options-container .remove-option-button:hover {
+  background-color: #b91c1c;
+}
+
+/* Основные стили построителя форм */
 .form-builder {
-  @apply w-full max-w-2xl;
+  width: 100%;
+  max-width: 800px;
+  margin: 0 auto;
 }
 
 .add-option-button {
-  @apply bg-blue-500 text-white border-none py-1.5 px-3 rounded cursor-pointer text-sm mt-2 hidden;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  margin-top: 0.5rem;
+  transition: background-color 0.2s ease;
+  display: none;
+}
+
+.add-option-button:hover {
+  background-color: #2563eb;
+}
+
+html.dark .add-option-button {
+  background-color: #2563eb;
+}
+
+html.dark .add-option-button:hover {
+  background-color: #1d4ed8;
+}
+
+/* Стили для вкладок */
+.form-builder-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+html.dark .form-builder-tabs {
+  border-bottom-color: #374151;
+}
+
+.form-builder-tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.form-builder-tab:hover {
+  color: #374151;
+}
+
+.form-builder-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+html.dark .form-builder-tab {
+  color: #9ca3af;
+}
+
+html.dark .form-builder-tab:hover {
+  color: #d1d5db;
+}
+
+html.dark .form-builder-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* Стили для панелей */
+.form-builder-panel {
+  display: none;
+}
+
+.form-builder-panel.active {
+  display: block;
+}
+
+/* Стили для кнопок действий */
+.form-builder-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+html.dark .form-builder-actions {
+  border-top-color: #374151;
+}
+
+.form-builder-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.form-builder-button.primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.form-builder-button.primary:hover {
+  background-color: #2563eb;
+}
+
+.form-builder-button.secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.form-builder-button.secondary:hover {
+  background-color: #4b5563;
+}
+
+.form-builder-button.danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.form-builder-button.danger:hover {
+  background-color: #dc2626;
+}
+
+html.dark .form-builder-button.secondary {
+  background-color: #4b5563;
+}
+
+html.dark .form-builder-button.secondary:hover {
+  background-color: #374151;
+}
+
+/* Стили для списка полей */
+.fields-list {
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+}
+
+html.dark .fields-list {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.field-item {
+  padding: 0.75rem;
+  border-bottom: 1px solid #f3f4f6;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.field-item:hover {
+  background-color: #f9fafb;
+}
+
+.field-item.selected {
+  background-color: #dbeafe;
+  border-left: 3px solid #3b82f6;
+}
+
+html.dark .field-item {
+  border-bottom-color: #374151;
+}
+
+html.dark .field-item:hover {
+  background-color: #374151;
+}
+
+html.dark .field-item.selected {
+  background-color: #1e3a8a;
+  border-left-color: #3b82f6;
+}
+
+/* Стили для редактора полей */
+.field-editor {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+}
+
+html.dark .field-editor {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+.field-editor-group {
+  margin-bottom: 1rem;
+}
+
+.field-editor-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.5rem;
+}
+
+html.dark .field-editor-label {
+  color: #d1d5db;
+}
+
+.field-editor-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  transition: all 0.2s ease;
+}
+
+.field-editor-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+html.dark .field-editor-input {
+  background-color: #374151;
+  border-color: #4b5563;
+  color: #f9fafb;
+}
+
+html.dark .field-editor-input:focus {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+/* Стили для предпросмотра форм */
+.form-preview-container {
+  padding: 1rem;
+  background-color: #ffffff;
+  border-radius: 0.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+html.dark .form-preview-container {
+  background-color: #1f2937;
+  border-color: #374151;
+}
+
+.preview-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+html.dark .preview-title {
+  color: #f9fafb;
+}
+
+/* Стили для вкладок предпросмотра */
+.preview-tabs {
+  display: flex;
+  border-bottom: 1px solid #e5e7eb;
+  margin-bottom: 1rem;
+}
+
+html.dark .preview-tabs {
+  border-bottom-color: #374151;
+}
+
+.preview-tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #6b7280;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+}
+
+.preview-tab:hover {
+  color: #374151;
+}
+
+.preview-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+html.dark .preview-tab {
+  color: #9ca3af;
+}
+
+html.dark .preview-tab:hover {
+  color: #d1d5db;
+}
+
+html.dark .preview-tab.active {
+  color: #3b82f6;
+  border-bottom-color: #3b82f6;
+}
+
+/* Стили для панелей предпросмотра */
+.preview-panel {
+  @apply mt-6 p-4 border-t border-gray-200 bg-gray-50;
 
   html.dark & {
-    @apply bg-blue-600; /* Темная тема для кнопки */
+    @apply border-gray-700 bg-gray-900;
+  }
+
+  .preview-title {
+    @apply text-lg font-semibold mb-4 text-gray-900;
+
+    html.dark & {
+      @apply text-gray-100;
+    }
+  }
+
+  .preview-content {
+    @apply bg-white border border-gray-200 rounded-lg p-4 text-center;
+    margin: auto;
+
+    html.dark & {
+      @apply bg-gray-800 border-gray-700;
+    }
+
+    > .generated-form {
+      margin: auto;
+    }
+  }
+
+  .no-preview-message {
+    @apply text-center text-gray-500 text-sm;
+
+    html.dark & {
+      @apply text-gray-400;
+    }
+  }
+}
+
+/* Стили для основного контента */
+.builder-content {
+  display: flex;
+  gap: 1rem;
+  height: 100%;
+}
+
+/* Стили для шаблонов */
+.templates-content {
+  padding: 1rem;
+}
+
+.templates-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+html.dark .templates-title {
+  color: #f9fafb;
+}
+
+.category-section {
+  margin-bottom: 1.5rem;
+}
+
+.category-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+  color: #374151;
+}
+
+html.dark .category-title {
+  color: #d1d5db;
+}
+
+.templates-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+.template-card {
+  padding: 1rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  background-color: #ffffff;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.template-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transform: translateY(-1px);
+}
+
+html.dark .template-card {
+  border-color: #374151;
+  background-color: #1f2937;
+}
+
+html.dark .template-card:hover {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+.template-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: #374151;
+}
+
+html.dark .template-title {
+  color: #f9fafb;
+}
+
+.template-description {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+}
+
+html.dark .template-description {
+  color: #9ca3af;
+}
+
+.fields-count {
+  font-size: 0.75rem;
+  color: #6b7280;
+  margin-bottom: 0.75rem;
+}
+
+html.dark .fields-count {
+  color: #9ca3af;
+}
+
+/* Стили для панелей */
+.form-settings {
+  width: 320px;
+  padding: 1rem;
+  border-right: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+html.dark .form-settings {
+  border-right-color: #374151;
+  background-color: #1f2937;
+}
+
+.settings-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+html.dark .settings-title {
+  color: #f9fafb;
+}
+
+.setting-group {
+  margin-bottom: 1rem;
+}
+
+/* Стили для сообщений */
+.no-form-message {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 2rem;
+  font-size: 0.875rem;
+}
+
+html.dark .no-form-message {
+  color: #9ca3af;
+}
+
+/* Стили для предпросмотра */
+.preview-content {
+  height: 100%;
+  padding: 1rem;
+}
+
+/* Дополнительные стили для кнопок */
+.form-builder-button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  display: inline-block;
+}
+
+.form-builder-button.primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.form-builder-button.primary:hover {
+  background-color: #2563eb;
+}
+
+.form-builder-button.secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.form-builder-button.secondary:hover {
+  background-color: #4b5563;
+}
+
+.form-builder-button.danger {
+  background-color: #ef4444;
+  color: white;
+}
+
+.form-builder-button.danger:hover {
+  background-color: #dc2626;
+}
+
+html.dark .form-builder-button.secondary {
+  background-color: #4b5563;
+}
+
+html.dark .form-builder-button.secondary:hover {
+  background-color: #374151;
+}
+
+/* Стили для панелей */
+.fields-panel {
+  width: 320px;
+  padding: 1rem;
+  border-right: 1px solid #e5e7eb;
+  background-color: #f9fafb;
+}
+
+html.dark .fields-panel {
+  border-right-color: #374151;
+  background-color: #1f2937;
+}
+
+.fields-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.fields-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+html.dark .fields-title {
+  color: #f9fafb;
+}
+
+.add-field-button {
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  font-size: 1.125rem;
+  border-radius: 0.375rem;
+}
+
+/* Стили для панели редактирования */
+.field-editor-panel {
+  flex: 1;
+  padding: 1rem;
+  background-color: #ffffff;
+}
+
+html.dark .field-editor-panel {
+  background-color: #1f2937;
+}
+
+.editor-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+html.dark .editor-title {
+  color: #f9fafb;
+}
+
+.editor-content {
+  height: 100%;
+  overflow-y: auto;
+}
+
+/* Стили для элементов полей */
+.field-title {
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+
+html.dark .field-title {
+  color: #f9fafb;
+}
+
+.field-type {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin-bottom: 0.5rem;
+}
+
+html.dark .field-type {
+  color: #9ca3af;
+}
+
+.field-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+.field-action-button {
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  font-size: 0.75rem;
+  border-radius: 0.25rem;
+}
+
+/* Стили для сообщений */
+.no-field-message {
+  text-align: center;
+  color: #6b7280;
+  margin-top: 2rem;
+  font-size: 0.875rem;
+}
+
+html.dark .no-field-message {
+  color: #9ca3af;
+}
+
+/* Стили для заголовков */
+.fields-title,
+.settings-title,
+.editor-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: #374151;
+}
+
+html.dark .fields-title,
+html.dark .settings-title,
+html.dark .editor-title {
+  color: #f9fafb;
+}
+
+/* Стили для модалок */
+.form-builder-modal,
+.templates-modal {
+  @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl;
+  min-width: 800px;
+  max-width: 90vw;
+  max-height: 80vh;
+  overflow: hidden;
+
+  html.dark & {
+    @apply bg-gray-800 border border-gray-700;
+  }
+
+  .popup-content {
+    @apply p-6;
+    max-height: calc(80vh - 120px);
+    overflow-y: auto;
+  }
+}
+
+/* Стили для контента модалок */
+.form-builder-modal-content,
+.templates-modal-content {
+  @apply space-y-6;
+}
+
+/* Стили для панелей настроек */
+.form-settings-panel {
+  @apply p-4 border-b border-gray-200 bg-gray-50;
+
+  html.dark & {
+    @apply border-gray-700 bg-gray-900;
+  }
+
+  .settings-title {
+    @apply text-lg font-semibold mb-4 text-gray-900;
+
+    html.dark & {
+      @apply text-gray-100;
+    }
+  }
+
+  .setting-group {
+    @apply mb-4;
+
+    label {
+      @apply block text-sm font-medium text-gray-700 mb-2;
+
+      html.dark & {
+        @apply text-gray-300;
+      }
+    }
+
+    input,
+    select {
+      @apply w-full p-2 border border-gray-300 rounded-md text-sm transition-colors;
+
+      &:focus {
+        @apply outline-none ring-2 ring-blue-500 border-blue-500;
+      }
+
+      html.dark & {
+        @apply bg-gray-700 border-gray-600 text-gray-100;
+
+        &:focus {
+          @apply border-blue-500;
+        }
+      }
+    }
+  }
+}
+
+/* Стили для основного контента */
+.form-builder-main {
+  @apply flex gap-6;
+  height: 500px;
+}
+
+/* Стили для панелей */
+.fields-panel,
+.field-editor-panel {
+  @apply bg-white border border-gray-200 rounded-lg;
+
+  html.dark & {
+    @apply bg-gray-800 border-gray-700;
+  }
+}
+
+.fields-panel {
+  @apply w-80 flex flex-col;
+
+  .fields-header {
+    @apply flex justify-between items-center p-4 border-b border-gray-200;
+
+    html.dark & {
+      @apply border-gray-700;
+    }
+
+    .fields-title {
+      @apply text-lg font-semibold text-gray-900;
+
+      html.dark & {
+        @apply text-gray-100;
+      }
+    }
+
+    .add-field-button {
+      @apply w-8 h-8 bg-blue-500 text-white border-none rounded-md cursor-pointer text-lg font-bold transition-colors;
+
+      &:hover {
+        @apply bg-blue-600;
+      }
+
+      html.dark & {
+        @apply bg-blue-600;
+
+        &:hover {
+          @apply bg-blue-700;
+        }
+      }
+    }
+  }
+
+  .fields-list {
+    @apply flex-1 overflow-y-auto p-2 space-y-2;
+  }
+}
+
+.field-editor-panel {
+  @apply flex-1 flex flex-col;
+
+  .editor-title {
+    @apply text-lg font-semibold p-4 border-b border-gray-200 text-gray-900;
+
+    html.dark & {
+      @apply border-gray-700 text-gray-100;
+    }
+  }
+
+  .field-editor-content {
+    @apply flex-1 overflow-y-auto;
+  }
+}
+
+/* Стили для элементов полей */
+.field-item {
+  @apply p-3 border border-gray-200 rounded-md cursor-pointer transition-all hover:bg-gray-50;
+
+  html.dark & {
+    @apply border-gray-700 hover:bg-gray-700;
+  }
+
+  &.selected {
+    @apply bg-blue-50 border-blue-300;
+
+    html.dark & {
+      @apply bg-blue-900 border-blue-600;
+    }
+  }
+
+  .field-title {
+    @apply font-medium text-gray-900 mb-1;
+
+    html.dark & {
+      @apply text-gray-100;
+    }
+  }
+
+  .field-type {
+    @apply text-sm text-gray-500 mb-2;
+
+    html.dark & {
+      @apply text-gray-400;
+    }
+  }
+
+  .field-actions {
+    @apply flex gap-1;
+
+    .field-action-button {
+      @apply w-6 h-6 p-0 text-xs border border-gray-300 rounded transition-colors;
+
+      &:hover:not(:disabled) {
+        @apply bg-gray-100;
+      }
+
+      &:disabled {
+        @apply opacity-50 cursor-not-allowed;
+      }
+
+      html.dark & {
+        @apply border-gray-600;
+
+        &:hover:not(:disabled) {
+          @apply bg-gray-700;
+        }
+      }
+    }
+  }
+}
+
+/* Стили для сообщений */
+.no-fields,
+.no-field-message {
+  @apply text-center text-gray-500 mt-8 text-sm;
+
+  html.dark & {
+    @apply text-gray-400;
+  }
+}
+
+/* Стили для шаблонов */
+.templates-grid {
+  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+}
+
+.template-card {
+  @apply p-4 border border-gray-200 rounded-lg bg-white cursor-pointer transition-all hover:shadow-md;
+
+  html.dark & {
+    @apply border-gray-700 bg-gray-800 hover:shadow-lg;
   }
 
   &:hover {
-    @apply bg-blue-600;
+    @apply transform -translate-y-1;
+  }
+
+  .template-card-header {
+    @apply flex justify-between items-start mb-3;
+
+    .template-card-title {
+      @apply text-lg font-semibold text-gray-900;
+
+      html.dark & {
+        @apply text-gray-100;
+      }
+    }
+
+    .template-card-category {
+      @apply text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full;
+
+      html.dark & {
+        @apply bg-blue-900 text-blue-200;
+      }
+    }
+  }
+
+  .template-card-description {
+    @apply text-sm text-gray-600 mb-3;
 
     html.dark & {
-      @apply bg-blue-700; /* Темная тема для hover */
+      @apply text-gray-400;
     }
+  }
+
+  .template-card-fields {
+    @apply text-xs text-gray-500 mb-3;
+
+    html.dark & {
+      @apply text-gray-400;
+    }
+  }
+}
+
+/* Стили для поиска и фильтров */
+.search-container,
+.filter-container {
+  @apply mb-4;
+
+  label {
+    @apply block text-sm font-medium text-gray-700 mb-2;
+
+    html.dark & {
+      @apply text-gray-300;
+    }
+  }
+
+  input,
+  select {
+    @apply w-full p-2 border border-gray-300 rounded-md text-sm transition-colors;
+
+    &:focus {
+      @apply outline-none ring-2 ring-blue-500 border-blue-500;
+    }
+
+    html.dark & {
+      @apply bg-gray-700 border-gray-600 text-gray-100;
+
+      &:focus {
+        @apply border-blue-500;
+      }
+    }
+  }
+}
+
+/* Стили для предпросмотра */
+.form-preview-container {
+  @apply bg-white border border-gray-200 rounded-lg shadow-lg;
+
+  html.dark & {
+    @apply bg-gray-800 border-gray-700;
+  }
+
+  .preview-title {
+    @apply text-lg font-semibold p-4 border-b border-gray-200 text-gray-900;
+
+    html.dark & {
+      @apply border-gray-700 text-gray-100;
+    }
+  }
+
+  .preview-content {
+    @apply p-4;
+  }
+}
+
+/* Стили для кнопок */
+.form-builder-button {
+  @apply px-4 py-2 border-none rounded-md cursor-pointer font-medium transition-colors text-sm;
+
+  &.primary {
+    @apply bg-blue-500 text-white;
+
+    &:hover {
+      @apply bg-blue-600;
+    }
+
+    html.dark & {
+      @apply bg-blue-600;
+
+      &:hover {
+        @apply bg-blue-700;
+      }
+    }
+  }
+
+  &.secondary {
+    @apply bg-gray-500 text-white;
+
+    &:hover {
+      @apply bg-gray-600;
+    }
+
+    html.dark & {
+      @apply bg-gray-600;
+
+      &:hover {
+        @apply bg-gray-700;
+      }
+    }
+  }
+
+  &.danger {
+    @apply bg-red-500 text-white;
+
+    &:hover {
+      @apply bg-red-600;
+    }
+
+    html.dark & {
+      @apply bg-red-600;
+
+      &:hover {
+        @apply bg-red-700;
+      }
+    }
+  }
+}
+
+/* Responsive стили */
+@media (max-width: 1024px) {
+  .form-builder-modal,
+  .templates-modal {
+    min-width: 90vw;
+    max-width: 95vw;
+  }
+
+  .form-builder-main {
+    @apply flex-col;
+    height: auto;
+  }
+
+  .fields-panel {
+    @apply w-full;
+    height: 300px;
+  }
+
+  .templates-grid {
+    @apply grid-cols-1 md:grid-cols-2;
+  }
+}
+
+@media (max-width: 768px) {
+  .form-builder-modal,
+  .templates-modal {
+    @apply w-full h-full max-w-none max-h-none rounded-none;
+    transform: none;
+    top: 0;
+    left: 0;
+  }
+
+  .templates-grid {
+    @apply grid-cols-1;
+  }
+
+  .form-preview-container {
+    @apply w-full max-w-none;
+    left: 0;
+    transform: none;
   }
 }
