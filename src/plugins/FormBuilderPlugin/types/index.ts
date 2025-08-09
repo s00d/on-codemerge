@@ -8,11 +8,29 @@ export interface FieldConfig {
 }
 
 export type FieldType =
-  | 'text' | 'textarea' | 'select' | 'checkbox' | 'radio'
-  | 'button' | 'file' | 'date' | 'time' | 'range' | 'email'
-  | 'password' | 'number' | 'tel' | 'url' | 'color'
-  | 'datetime-local' | 'month' | 'week' | 'hidden' | 'image'
-  | 'submit' | 'reset';
+  | 'text'
+  | 'textarea'
+  | 'select'
+  | 'checkbox'
+  | 'radio'
+  | 'button'
+  | 'file'
+  | 'date'
+  | 'time'
+  | 'range'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'tel'
+  | 'url'
+  | 'color'
+  | 'datetime-local'
+  | 'month'
+  | 'week'
+  | 'hidden'
+  | 'image'
+  | 'submit'
+  | 'reset';
 
 export interface FieldOptions {
   readonly name?: string;
@@ -36,7 +54,15 @@ export interface FieldOptions {
   readonly src?: string;
   readonly alt?: string;
   readonly options?: readonly string[];
-  readonly autocomplete?: 'on' | 'off' | 'name' | 'email' | 'tel' | 'url' | 'current-password' | 'new-password';
+  readonly autocomplete?:
+    | 'on'
+    | 'off'
+    | 'name'
+    | 'email'
+    | 'tel'
+    | 'url'
+    | 'current-password'
+    | 'new-password';
 }
 
 export interface ValidationRules {

@@ -10,9 +10,7 @@ import { Resizer } from '../../utils/Resizer';
 
 export class PDFEmbedPlugin implements Plugin {
   name = 'pdf-embed';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+P', description: 'Insert PDF', command: 'pdf-embed', icon: '📄' },
-  ];
+  hotkeys = [{ keys: 'Ctrl+Alt+P', description: 'Insert PDF', command: 'pdf-embed', icon: '📄' }];
 
   private editor: HTMLEditor | null = null;
   private insertPopup: PopupManager | null = null;
@@ -27,7 +25,11 @@ export class PDFEmbedPlugin implements Plugin {
       closeOnClickOutside: true,
       items: this.buildPopupItems(),
       buttons: [
-        { label: editor.t('Cancel'), variant: 'secondary', onClick: () => this.insertPopup?.hide() },
+        {
+          label: editor.t('Cancel'),
+          variant: 'secondary',
+          onClick: () => this.insertPopup?.hide(),
+        },
         { label: editor.t('Insert'), variant: 'primary', onClick: () => this.handleInsert() },
       ],
     });
@@ -122,5 +124,3 @@ export class PDFEmbedPlugin implements Plugin {
     this.editor = null;
   }
 }
-
-

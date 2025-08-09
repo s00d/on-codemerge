@@ -133,5 +133,3 @@ export class MentionsPlugin implements Plugin {
     this.editor = null;
   }
 }
-
-

@@ -61,10 +61,10 @@ export class DuplicateFormCommand implements Command {
     return {
       ...formConfig,
       id: `form_${Date.now()}_duplicate`,
-      fields: formConfig.fields.map(field => ({
+      fields: formConfig.fields.map((field) => ({
         ...field,
-        id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
-      }))
+        id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+      })),
     };
   }
 }

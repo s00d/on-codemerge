@@ -18,9 +18,7 @@ import { DuplicateFormCommand } from './commands/DuplicateFormCommand';
 
 export class FormBuilderPlugin implements Plugin {
   name = 'form-builder';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+F', description: 'Insert form', command: 'form', icon: '📝' },
-  ];
+  hotkeys = [{ keys: 'Ctrl+Alt+F', description: 'Insert form', command: 'form', icon: '📝' }];
 
   private editor!: HTMLEditor;
   private formPopup: FormPopup | null = null;
@@ -56,34 +54,38 @@ export class FormBuilderPlugin implements Plugin {
    */
   private openFormBuilder(): void {
     const formBuilderModal = new FormBuilderModal(this.editor);
-    formBuilderModal.show((formConfig: FormConfig) => {
-      const formHtml = this.formManager.createForm(formConfig);
+    formBuilderModal.show(
+      (formConfig: FormConfig) => {
+        const formHtml = this.formManager.createForm(formConfig);
 
-      // Восстанавливаем позицию курсора и вставляем форму
-      this.editor.ensureEditorFocus();
-      const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
+        // Восстанавливаем позицию курсора и вставляем форму
+        this.editor.ensureEditorFocus();
+        const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
 
-      if (range) {
-        const formElement = document.createElement('div');
-        formElement.innerHTML = formHtml;
+        if (range) {
+          const formElement = document.createElement('div');
+          formElement.innerHTML = formHtml;
 
-        // Получаем элемент формы
-        const formNode = formElement.firstElementChild;
+          // Получаем элемент формы
+          const formNode = formElement.firstElementChild;
 
-        if (formNode) {
-          range.deleteContents();
-          range.insertNode(formNode);
-          range.collapse(false);
-          this.editor.getSelector()?.saveSelection();
+          if (formNode) {
+            range.deleteContents();
+            range.insertNode(formNode);
+            range.collapse(false);
+            this.editor.getSelector()?.saveSelection();
+          }
+        } else {
+          // Fallback: если не удалось восстановить позицию, используем insertContent
+          this.editor.insertContent(formHtml);
         }
-      } else {
-        // Fallback: если не удалось восстановить позицию, используем insertContent
-        this.editor.insertContent(formHtml);
-      }
 
-      this.editor.insertContent(createLineBreak());
-      // destroy не нужен, popup просто скрывается
-    }, false, null);
+        this.editor.insertContent(createLineBreak());
+        // destroy не нужен, popup просто скрывается
+      },
+      false,
+      null
+    );
   }
 
   /**
@@ -97,11 +99,15 @@ export class FormBuilderPlugin implements Plugin {
         onClick: (element: HTMLElement | null) => {
           if (element && element.tagName === 'FORM') {
             const formBuilderModal = new FormBuilderModal(this.editor);
-            formBuilderModal.show((_formConfig: FormConfig) => {
-              // destroy не нужен, popup просто скрывается
-            }, true, element);
+            formBuilderModal.show(
+              (_formConfig: FormConfig) => {
+                // destroy не нужен, popup просто скрывается
+              },
+              true,
+              element
+            );
           }
-        }
+        },
       },
       {
         label: this.editor.t('Duplicate Form'),
@@ -111,7 +117,7 @@ export class FormBuilderPlugin implements Plugin {
             const command = new DuplicateFormCommand(this.editor, element);
             command.execute();
           }
-        }
+        },
       },
       {
         label: this.editor.t('Delete Form'),
@@ -121,8 +127,8 @@ export class FormBuilderPlugin implements Plugin {
             const command = new DeleteFormCommand(this.editor, element);
             command.execute();
           }
-        }
-      }
+        },
+      },
     ];
 
     this.contextMenu = new ContextMenu(this.editor, buttons);

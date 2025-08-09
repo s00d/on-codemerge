@@ -77,7 +77,9 @@ export class AnchorLinkPlugin implements Plugin {
     a.className = 'anchor-link';
     const editorContainer = this.editor.getContainer();
     const isInsideEditor =
-      !!range && editorContainer.contains(range.startContainer) && editorContainer.contains(range.endContainer);
+      !!range &&
+      editorContainer.contains(range.startContainer) &&
+      editorContainer.contains(range.endContainer);
 
     if (range && isInsideEditor) {
       range.insertNode(a);
@@ -96,7 +98,11 @@ export class AnchorLinkPlugin implements Plugin {
   }
 
   private slugify(text: string): string {
-    return text.toLowerCase().trim().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-');
+    return text
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-');
   }
 
   destroy(): void {
@@ -105,5 +111,3 @@ export class AnchorLinkPlugin implements Plugin {
     this.editor = null;
   }
 }
-
-

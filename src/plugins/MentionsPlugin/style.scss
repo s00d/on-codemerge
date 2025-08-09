@@ -4,7 +4,7 @@
   background: white;
   border: 1px solid #e5e7eb;
   border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   padding: 4px;
 }
 
@@ -13,7 +13,9 @@
   cursor: pointer;
   border-radius: 4px;
 }
-.mentions-item:hover { background: #f3f4f6; }
+.mentions-item:hover {
+  background: #f3f4f6;
+}
 
 .mention {
   background: #eef2ff;
@@ -21,5 +23,3 @@
   padding: 0 4px;
   border-radius: 4px;
 }
-
-

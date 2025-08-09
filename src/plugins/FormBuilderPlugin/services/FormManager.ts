@@ -5,7 +5,8 @@ export class FormManager {
   private fieldsConfig: FieldConfig[] = [];
   private currentFormId: string | null = null;
   private currentFormAction: string = '';
-  private currentFormMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' = 'POST';
+  private currentFormMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' =
+    'POST';
   private editor: HTMLEditor;
 
   constructor(editor: HTMLEditor) {
@@ -21,7 +22,7 @@ export class FormManager {
     if (typeof typeOrField === 'string') {
       // Создаем поле по типу
       const fieldId = `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      
+
       // Базовые опции для всех полей
       let baseOptions: FieldOptions = {
         name: fieldId,
@@ -47,7 +48,7 @@ export class FormManager {
           required: false,
         },
         position: this.fieldsConfig.length,
-        ...options
+        ...options,
       };
     } else {
       // Используем готовый FieldConfig
@@ -55,7 +56,7 @@ export class FormManager {
         ...typeOrField,
         ...options,
         id: options?.id || typeOrField.id || this.generateFieldId(),
-        position: this.fieldsConfig.length
+        position: this.fieldsConfig.length,
       };
     }
 
@@ -66,15 +67,15 @@ export class FormManager {
    * Обновляет поле по ID
    */
   updateField(fieldId: string, updates: Partial<FieldConfig>): boolean {
-    const index = this.fieldsConfig.findIndex(field => field.id === fieldId);
+    const index = this.fieldsConfig.findIndex((field) => field.id === fieldId);
     if (index !== -1) {
       const currentField = this.fieldsConfig[index];
-      
+
       // Если обновляются опции, правильно объединяем их
       if (updates.options && currentField.options) {
         updates.options = { ...currentField.options, ...updates.options };
       }
-      
+
       this.fieldsConfig[index] = { ...currentField, ...updates };
       return true;
     }
@@ -85,7 +86,7 @@ export class FormManager {
    * Удаляет поле по ID
    */
   removeField(fieldId: string): boolean {
-    const index = this.fieldsConfig.findIndex(field => field.id === fieldId);
+    const index = this.fieldsConfig.findIndex((field) => field.id === fieldId);
     if (index !== -1) {
       this.fieldsConfig.splice(index, 1);
       // Обновляем позиции
@@ -100,7 +101,7 @@ export class FormManager {
    * Перемещает поле
    */
   moveField(fieldId: string, newPosition: number): boolean {
-    const currentIndex = this.fieldsConfig.findIndex(field => field.id === fieldId);
+    const currentIndex = this.fieldsConfig.findIndex((field) => field.id === fieldId);
     if (currentIndex === -1 || newPosition < 0 || newPosition >= this.fieldsConfig.length) {
       return false;
     }
@@ -120,7 +121,7 @@ export class FormManager {
    * Возвращает поле по ID
    */
   getField(fieldId: string): FieldConfig | undefined {
-    return this.fieldsConfig.find(field => field.id === fieldId);
+    return this.fieldsConfig.find((field) => field.id === fieldId);
   }
 
   /**
@@ -147,7 +148,7 @@ export class FormManager {
       method,
       action,
       className: 'generated-form',
-      fields: this.getFields()
+      fields: this.getFields(),
     };
   }
 
@@ -159,7 +160,7 @@ export class FormManager {
 
     let formHtml = `<form id="${id}" method="${method}" action="${action}" class="${className}">`;
 
-    fields.forEach(field => {
+    fields.forEach((field) => {
       formHtml += this.createFieldHTML(field);
     });
 
@@ -211,7 +212,7 @@ export class FormManager {
         const multiple = options?.multiple ? ' multiple' : '';
         fieldHtml += `<select id="${id}" name="${options?.name || id}"${commonAttrs}${multiple}>`;
         if (options?.options) {
-          options.options.forEach(option => {
+          options.options.forEach((option) => {
             fieldHtml += `<option value="${option}">${option}</option>`;
           });
         }
@@ -394,7 +395,10 @@ export class FormManager {
     // Parse form fields
     const inputs = form.querySelectorAll('input, select, textarea');
     inputs.forEach((input, index) => {
-      const field = this.parseField(input as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, index);
+      const field = this.parseField(
+        input as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
+        index
+      );
       if (field) {
         fields.push(field);
       }
@@ -405,14 +409,17 @@ export class FormManager {
       method: form.method as 'GET' | 'POST',
       action: form.action,
       className: form.className,
-      fields
+      fields,
     };
   }
 
   /**
    * Parse field element
    */
-  private parseField(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement, index: number): FieldConfig | null {
+  private parseField(
+    input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
+    index: number
+  ): FieldConfig | null {
     let type: string;
 
     if (input.tagName === 'TEXTAREA') {
@@ -441,9 +448,15 @@ export class FormManager {
         readonly: (input as HTMLInputElement | HTMLTextAreaElement).readOnly,
         disabled: input.disabled,
         multiple: (input as HTMLSelectElement).multiple,
-        min: (input as HTMLInputElement).min ? parseInt((input as HTMLInputElement).min) : undefined,
-        max: (input as HTMLInputElement).max ? parseInt((input as HTMLInputElement).max) : undefined,
-        step: (input as HTMLInputElement).step ? parseFloat((input as HTMLInputElement).step) : undefined,
+        min: (input as HTMLInputElement).min
+          ? parseInt((input as HTMLInputElement).min)
+          : undefined,
+        max: (input as HTMLInputElement).max
+          ? parseInt((input as HTMLInputElement).max)
+          : undefined,
+        step: (input as HTMLInputElement).step
+          ? parseFloat((input as HTMLInputElement).step)
+          : undefined,
         rows: (input as HTMLTextAreaElement).rows,
         cols: (input as HTMLTextAreaElement).cols,
         accept: (input as HTMLInputElement).accept,
@@ -451,25 +464,31 @@ export class FormManager {
         maxlength: (input as HTMLInputElement | HTMLTextAreaElement).maxLength,
         minlength: (input as HTMLInputElement | HTMLTextAreaElement).minLength,
         src: (input as HTMLInputElement).src,
-        alt: (input as HTMLInputElement).alt
+        alt: (input as HTMLInputElement).alt,
       },
       validation: {
         required: input.required,
         pattern: (input as HTMLInputElement).pattern,
         minLength: (input as HTMLInputElement | HTMLTextAreaElement).minLength,
         maxLength: (input as HTMLInputElement | HTMLTextAreaElement).maxLength,
-        min: (input as HTMLInputElement).min ? parseInt((input as HTMLInputElement).min) : undefined,
-        max: (input as HTMLInputElement).max ? parseInt((input as HTMLInputElement).max) : undefined,
-        step: (input as HTMLInputElement).step ? parseFloat((input as HTMLInputElement).step) : undefined
+        min: (input as HTMLInputElement).min
+          ? parseInt((input as HTMLInputElement).min)
+          : undefined,
+        max: (input as HTMLInputElement).max
+          ? parseInt((input as HTMLInputElement).max)
+          : undefined,
+        step: (input as HTMLInputElement).step
+          ? parseFloat((input as HTMLInputElement).step)
+          : undefined,
       },
-      position: index
+      position: index,
     };
 
     // Parse select options
     if (type === 'select') {
       const select = input as HTMLSelectElement;
       const options: string[] = [];
-      select.querySelectorAll('option').forEach(option => {
+      select.querySelectorAll('option').forEach((option) => {
         options.push(option.value);
       });
       field.options = { ...field.options!, options };
@@ -500,7 +519,11 @@ export class FormManager {
     }
 
     // Use placeholder or name as fallback
-    return (input as HTMLInputElement | HTMLTextAreaElement).placeholder || input.name || this.editor.t('Untitled Field');
+    return (
+      (input as HTMLInputElement | HTMLTextAreaElement).placeholder ||
+      input.name ||
+      this.editor.t('Untitled Field')
+    );
   }
   /**
    * Обновляет action URL формы
@@ -539,7 +562,7 @@ export class FormManager {
       method: this.currentFormMethod,
       action: this.currentFormAction,
       className: 'generated-form',
-      fields: this.getFields()
+      fields: this.getFields(),
     };
   }
 

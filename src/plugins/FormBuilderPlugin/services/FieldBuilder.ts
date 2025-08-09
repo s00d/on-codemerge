@@ -5,9 +5,9 @@ export class FieldBuilder {
    * Создает поле с предустановленными настройками
    */
   createPresetField(
-    type: FieldType, 
-    label: string, 
-    options?: Partial<FieldOptions>, 
+    type: FieldType,
+    label: string,
+    options?: Partial<FieldOptions>,
     validation?: ValidationRules
   ): FieldConfig {
     const id = this.generateFieldId();
@@ -22,12 +22,12 @@ export class FieldBuilder {
         className: 'form-input',
         placeholder: this.getDefaultPlaceholder(type),
         ...this.getDefaultOptions(type),
-        ...options
+        ...options,
       },
       validation: {
         ...this.getDefaultValidation(type),
-        ...validation
-      }
+        ...validation,
+      },
     };
   }
 
@@ -65,7 +65,7 @@ export class FieldBuilder {
       reset: '',
       file: 'Choose file',
       hidden: '',
-      image: ''
+      image: '',
     };
 
     return placeholders[type] || '';

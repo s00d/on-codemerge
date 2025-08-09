@@ -609,18 +609,12 @@ export class HTMLEditor {
     this.mutationObserver.disconnect();
 
     // Удаляем все обработчики событий
-    if (this.boundClickToFocus)
-      this.container.removeEventListener('click', this.boundClickToFocus);
-    if (this.boundDragStart)
-      this.container.removeEventListener('dragstart', this.boundDragStart);
-    if (this.boundDragEnd)
-      this.container.removeEventListener('dragend', this.boundDragEnd);
-    if (this.boundDragEnter)
-      this.container.removeEventListener('dragenter', this.boundDragEnter);
-    if (this.boundDragOver)
-      this.container.removeEventListener('dragover', this.boundDragOver);
-    if (this.boundDragLeave)
-      this.container.removeEventListener('dragleave', this.boundDragLeave);
+    if (this.boundClickToFocus) this.container.removeEventListener('click', this.boundClickToFocus);
+    if (this.boundDragStart) this.container.removeEventListener('dragstart', this.boundDragStart);
+    if (this.boundDragEnd) this.container.removeEventListener('dragend', this.boundDragEnd);
+    if (this.boundDragEnter) this.container.removeEventListener('dragenter', this.boundDragEnter);
+    if (this.boundDragOver) this.container.removeEventListener('dragover', this.boundDragOver);
+    if (this.boundDragLeave) this.container.removeEventListener('dragleave', this.boundDragLeave);
     if (this.boundDrop) this.container.removeEventListener('drop', this.boundDrop);
     if (this.boundPaste) this.container.removeEventListener('paste', this.boundPaste);
 

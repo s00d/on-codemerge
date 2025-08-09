@@ -69,7 +69,7 @@ export class TemplatesModal {
     const categoryNames = this.templateManager.getCategoryNames();
 
     categorySelect.innerHTML = '<option value="all">All Categories</option>';
-    categories.forEach(category => {
+    categories.forEach((category) => {
       const option = document.createElement('option');
       option.value = category;
       option.textContent = categoryNames[category];
@@ -95,9 +95,11 @@ export class TemplatesModal {
     this.templatesContainer.innerHTML = '';
 
     const templates = this.templateManager.getTemplates();
-    const filteredTemplates = templates.filter(template => {
-      const matchesCategory = this.selectedCategory === 'all' || template.category === this.selectedCategory;
-      const matchesSearch = !this.searchInput?.value ||
+    const filteredTemplates = templates.filter((template) => {
+      const matchesCategory =
+        this.selectedCategory === 'all' || template.category === this.selectedCategory;
+      const matchesSearch =
+        !this.searchInput?.value ||
         template.name.toLowerCase().includes(this.searchInput.value.toLowerCase()) ||
         template.description.toLowerCase().includes(this.searchInput.value.toLowerCase());
 
@@ -111,7 +113,7 @@ export class TemplatesModal {
       return;
     }
 
-    filteredTemplates.forEach(template => {
+    filteredTemplates.forEach((template) => {
       const templateCard = this.createTemplateCard(template);
       this.templatesContainer!.appendChild(templateCard);
     });

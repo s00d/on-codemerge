@@ -28,9 +28,10 @@ export class MentionsMenu {
   }
 
   private buildItems(query: string): PopupItem[] {
-    const filtered = (query
-      ? this.allMentions.filter((m) => m.label.toLowerCase().includes(query.toLowerCase()))
-      : this.allMentions
+    const filtered = (
+      query
+        ? this.allMentions.filter((m) => m.label.toLowerCase().includes(query.toLowerCase()))
+        : this.allMentions
     ).slice(0, 30);
 
     const list = createContainer('mentions-list');
@@ -81,5 +82,3 @@ export class MentionsMenu {
     this.popup.destroy();
   }
 }
-
-

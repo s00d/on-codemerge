@@ -1,9 +1,9 @@
-import {PopupManager} from '../../../core/ui/PopupManager';
-import type {HTMLEditor} from '../../../app';
-import type {FieldConfig, FieldType, FormConfig} from '../types';
-import {FormManager} from '../services/FormManager';
-import {FieldEditor} from './FieldEditor';
-import {FormPreview} from './FormPreview';
+import { PopupManager } from '../../../core/ui/PopupManager';
+import type { HTMLEditor } from '../../../app';
+import type { FieldConfig, FieldType, FormConfig } from '../types';
+import { FormManager } from '../services/FormManager';
+import { FieldEditor } from './FieldEditor';
+import { FormPreview } from './FormPreview';
 import {
   createButton,
   createContainer,
@@ -12,7 +12,7 @@ import {
   createLineBreak,
   createSelectField,
 } from '../../../utils/helpers';
-import {TemplatesModal} from './TemplatesModal';
+import { TemplatesModal } from './TemplatesModal';
 
 export class FormBuilderModal {
   private readonly editor: HTMLEditor;
@@ -85,10 +85,18 @@ export class FormBuilderModal {
     const container = createContainer('form-builder-modal-content');
 
     // --- Кнопка шаблонов ---
-    const headerPanel = createContainer('form-builder-header-panel flex justify-between items-center mb-2');
+    const headerPanel = createContainer(
+      'form-builder-header-panel flex justify-between items-center mb-2'
+    );
     const title = createContainer('form-builder-title text-xl font-bold');
-    title.textContent = this.isEditMode ? this.editor.t('Edit Form') : this.editor.t('Form Builder');
-    const templatesButton = createButton(this.editor.t('Templates'), () => this.openTemplatesModal(), 'secondary');
+    title.textContent = this.isEditMode
+      ? this.editor.t('Edit Form')
+      : this.editor.t('Form Builder');
+    const templatesButton = createButton(
+      this.editor.t('Templates'),
+      () => this.openTemplatesModal(),
+      'secondary'
+    );
     headerPanel.appendChild(title);
     headerPanel.appendChild(templatesButton);
     container.appendChild(headerPanel);
@@ -406,7 +414,7 @@ export class FormBuilderModal {
   private removeField(fieldId: string): void {
     if (confirm(this.editor.t('Are you sure you want to delete this field?'))) {
       const fields = this.formManager.getFields();
-      const currentIndex = fields.findIndex(f => f.id === fieldId);
+      const currentIndex = fields.findIndex((f) => f.id === fieldId);
 
       this.formManager.removeField(fieldId);
 
@@ -488,7 +496,11 @@ export class FormBuilderModal {
     }
   }
 
-  public show(callback: (formConfig: FormConfig) => void, editMode: boolean = false, existingFormElement: HTMLElement | null = null): void {
+  public show(
+    callback: (formConfig: FormConfig) => void,
+    editMode: boolean = false,
+    existingFormElement: HTMLElement | null = null
+  ): void {
     this.callback = callback;
     this.isEditMode = editMode;
     this.existingFormElement = existingFormElement;
@@ -525,7 +537,9 @@ export class FormBuilderModal {
       headerTitle.textContent = this.editor.t('Edit Form');
     }
 
-    const saveButton = this.popup?.getElement().querySelector('.popup-footer button[data-variant="primary"]');
+    const saveButton = this.popup
+      ?.getElement()
+      .querySelector('.popup-footer button[data-variant="primary"]');
     if (saveButton) {
       saveButton.textContent = this.editor.t('Update Form');
     }
@@ -538,7 +552,9 @@ export class FormBuilderModal {
       headerTitle.textContent = this.editor.t('Form Builder');
     }
 
-    const saveButton = this.popup?.getElement().querySelector('.popup-footer button[data-variant="primary"]');
+    const saveButton = this.popup
+      ?.getElement()
+      .querySelector('.popup-footer button[data-variant="primary"]');
     if (saveButton) {
       saveButton.textContent = this.editor.t('Save Form');
     }
@@ -546,13 +562,17 @@ export class FormBuilderModal {
 
   private updateFormSettings(): void {
     // Обновляем метод формы
-    const methodSelect = this.popup?.getElement().querySelector('.form-settings-panel select') as HTMLSelectElement;
+    const methodSelect = this.popup
+      ?.getElement()
+      .querySelector('.form-settings-panel select') as HTMLSelectElement;
     if (methodSelect) {
       methodSelect.value = this.formManager.getFormMethod();
     }
 
     // Обновляем Action URL
-    const urlInput = this.popup?.getElement().querySelector('.form-settings-panel input[type="text"]') as HTMLInputElement;
+    const urlInput = this.popup
+      ?.getElement()
+      .querySelector('.form-settings-panel input[type="text"]') as HTMLInputElement;
     if (urlInput) {
       urlInput.value = this.formManager.getFormAction() || '';
     }
@@ -590,34 +610,38 @@ export class FormBuilderModal {
       if (template && template.config) {
         // Создаем новую модалку с загруженным шаблоном
         const newFormBuilderModal = new FormBuilderModal(this.editor);
-        newFormBuilderModal.show((formConfig: FormConfig) => {
-          // Создаем форму с использованием formManager, как в основном файле
-          const formHtml = this.formManager.createForm(formConfig);
+        newFormBuilderModal.show(
+          (formConfig: FormConfig) => {
+            // Создаем форму с использованием formManager, как в основном файле
+            const formHtml = this.formManager.createForm(formConfig);
 
-          // Восстанавливаем позицию курсора и вставляем форму
-          this.editor.ensureEditorFocus();
-          const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
+            // Восстанавливаем позицию курсора и вставляем форму
+            this.editor.ensureEditorFocus();
+            const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
 
-          if (range) {
-            const formElement = document.createElement('div');
-            formElement.innerHTML = formHtml;
+            if (range) {
+              const formElement = document.createElement('div');
+              formElement.innerHTML = formHtml;
 
-            // Получаем элемент формы
-            const formNode = formElement.firstElementChild;
+              // Получаем элемент формы
+              const formNode = formElement.firstElementChild;
 
-            if (formNode) {
-              range.deleteContents();
-              range.insertNode(formNode);
-              range.collapse(false);
-              this.editor.getSelector()?.saveSelection();
+              if (formNode) {
+                range.deleteContents();
+                range.insertNode(formNode);
+                range.collapse(false);
+                this.editor.getSelector()?.saveSelection();
+              }
+            } else {
+              // Fallback: если не удалось восстановить позицию, используем insertContent
+              this.editor?.insertContent(formHtml);
             }
-          } else {
-            // Fallback: если не удалось восстановить позицию, используем insertContent
-            this.editor?.insertContent(formHtml);
-          }
 
-          this.editor?.insertContent(createLineBreak());
-        }, false, null);
+            this.editor?.insertContent(createLineBreak());
+          },
+          false,
+          null
+        );
 
         // Загружаем шаблон в новую модалку
         newFormBuilderModal.loadFormConfig(template.config);
@@ -674,18 +698,19 @@ export class FormBuilderModal {
       case 'select':
       case 'radio':
         baseOptions.options = currentField.options?.options || [];
-        baseOptions.multiple = newType === 'select' ? (currentField.options?.multiple || false) : false;
+        baseOptions.multiple =
+          newType === 'select' ? currentField.options?.multiple || false : false;
         // Если опций нет, добавляем пустую опцию
         if (baseOptions.options.length === 0) {
-          const defaultText = newType === 'radio'
-            ? this.editor.t('New Radio')
-            : this.editor.t('Option 1');
+          const defaultText =
+            newType === 'radio' ? this.editor.t('New Radio') : this.editor.t('Option 1');
           baseOptions.options = [defaultText];
         }
         break;
       case 'checkbox':
         // Для чекбокса сохраняем только базовые опции, опции не нужны
-        baseOptions.value = currentField.options?.value || currentField.label || this.editor.t('New Checkbox');
+        baseOptions.value =
+          currentField.options?.value || currentField.label || this.editor.t('New Checkbox');
         baseOptions.checked = currentField.options?.checked || false;
         break;
       case 'number':
@@ -730,7 +755,7 @@ export class FormBuilderModal {
     // Обновляем поле в FormManager с новым типом и очищенными опциями
     const updates: Partial<FieldConfig> = {
       type: newType,
-      options: baseOptions
+      options: baseOptions,
     };
 
     // Обрабатываем валидацию в зависимости от типа

@@ -62,5 +62,3 @@ export class TrackChangesPlugin implements Plugin {
     this.editor = null;
   }
 }
-
-

@@ -40,10 +40,8 @@ export class FormPopup {
     // Template selection
     const templateSection = createContainer('template-section');
     const templateLabel = createLabel(this.editor.t('Template (optional):'));
-    this.templateSelect = createSelectField(
-      this.getTemplateOptions(),
-      '',
-      (value) => this.handleTemplateChange(value)
+    this.templateSelect = createSelectField(this.getTemplateOptions(), '', (value) =>
+      this.handleTemplateChange(value)
     );
     templateSection.appendChild(templateLabel);
     templateSection.appendChild(this.templateSelect);
@@ -100,10 +98,10 @@ export class FormPopup {
     const templates = this.templateManager.getTemplates();
     const options = [{ value: '', label: this.editor.t('No template') }];
 
-    templates.forEach(template => {
+    templates.forEach((template) => {
       options.push({
         value: template.id,
-        label: template.name
+        label: template.name,
       });
     });
 

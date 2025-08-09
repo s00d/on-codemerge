@@ -23,7 +23,7 @@ export class FormPreview {
     form.method = formConfig.method;
     form.action = formConfig.action;
 
-    formConfig.fields.forEach(field => {
+    formConfig.fields.forEach((field) => {
       const fieldElement = this.createFieldElement(field);
       if (fieldElement) {
         form.appendChild(fieldElement);
@@ -86,7 +86,7 @@ export class FormPreview {
         inputElement.id = id;
         inputElement.setAttribute('name', options?.name || id);
         this.applyCommonAttributes(inputElement, field);
-        
+
         if (options?.rows) {
           inputElement.setAttribute('rows', options.rows.toString());
         }
@@ -100,13 +100,13 @@ export class FormPreview {
         inputElement.id = id;
         inputElement.setAttribute('name', options?.name || id);
         this.applyCommonAttributes(inputElement, field);
-        
+
         if (options?.multiple) {
           inputElement.setAttribute('multiple', '');
         }
 
         if (options?.options) {
-          options.options.forEach(option => {
+          options.options.forEach((option) => {
             const optionElement = document.createElement('option');
             optionElement.value = option;
             optionElement.textContent = option;
@@ -121,21 +121,21 @@ export class FormPreview {
         inputElement.id = id;
         inputElement.setAttribute('name', options?.name || id);
         this.applyCommonAttributes(inputElement, field);
-        
+
         if (options?.checked) {
           inputElement.setAttribute('checked', '');
         }
-        
+
         // Добавляем текст рядом с чекбоксом
         const checkboxText = options?.value || field.label || '';
         if (checkboxText) {
           const checkboxContainer = document.createElement('div');
           checkboxContainer.className = 'checkbox-container';
-          
+
           const labelElement = document.createElement('label');
           labelElement.htmlFor = id;
           labelElement.textContent = checkboxText;
-          
+
           checkboxContainer.appendChild(inputElement);
           checkboxContainer.appendChild(labelElement);
           fieldContainer.appendChild(checkboxContainer);
@@ -159,7 +159,7 @@ export class FormPreview {
             radioInput.setAttribute('name', options?.name || id);
             radioInput.value = option;
             this.applyCommonAttributes(radioInput, field);
-            
+
             if (options?.value === option) {
               radioInput.setAttribute('checked', '');
             }
@@ -181,7 +181,7 @@ export class FormPreview {
         inputElement.id = id;
         inputElement.setAttribute('name', options?.name || id);
         this.applyCommonAttributes(inputElement, field);
-        
+
         if (options?.accept) {
           inputElement.setAttribute('accept', options.accept);
         }
@@ -204,7 +204,7 @@ export class FormPreview {
         inputElement.id = id;
         inputElement.setAttribute('name', options?.name || id);
         this.applyCommonAttributes(inputElement, field);
-        
+
         if (options?.src) {
           inputElement.setAttribute('src', options.src);
         }

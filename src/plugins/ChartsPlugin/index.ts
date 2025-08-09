@@ -123,8 +123,7 @@ export class ChartsPlugin implements Plugin {
     if (selection && selection.rangeCount > 0) {
       const candidate = selection.getRangeAt(0);
       const isInsideEditor =
-        container.contains(candidate.startContainer) &&
-        container.contains(candidate.endContainer);
+        container.contains(candidate.startContainer) && container.contains(candidate.endContainer);
       range = isInsideEditor ? candidate : createRangeAtEnd();
     } else {
       range = createRangeAtEnd();
