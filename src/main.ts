@@ -32,6 +32,10 @@ import {
   AIAssistantPlugin,
   CalendarPlugin,
   TimerPlugin,
+  PDFEmbedPlugin,
+  MentionsPlugin,
+  TrackChangesPlugin,
+  AnchorLinkPlugin,
 } from './app';
 import { MathPlugin } from './plugins/MathPlugin';
 import { LanguagePlugin } from './plugins/LanguagePlugin';
@@ -79,6 +83,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     editor.use(new AIAssistantPlugin());
     editor.use(new CalendarPlugin());
     editor.use(new TimerPlugin());
+    editor.use(new PDFEmbedPlugin());
+    editor.use(new MentionsPlugin([
+      { id: '1', label: 'Alice' },
+      { id: '2', label: 'Bob' },
+      { id: '3', label: 'Charlie' },
+    ]));
+    editor.use(new TrackChangesPlugin());
+    editor.use(new AnchorLinkPlugin());
     editor.use(
       new CollaborationPlugin({
         serverUrl: 'ws://localhost:8080',

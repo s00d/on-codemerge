@@ -36,6 +36,10 @@ import { AIAssistantPlugin } from './plugins/AIAssistantPlugin';
 import { LanguagePlugin } from './plugins/LanguagePlugin';
 import { CalendarPlugin } from './plugins/CalendarPlugin';
 import { TimerPlugin } from './plugins/TimerPlugin';
+import { PDFEmbedPlugin } from './plugins/PDFEmbedPlugin';
+import { MentionsPlugin } from './plugins/MentionsPlugin';
+import { TrackChangesPlugin } from './plugins/TrackChangesPlugin';
+import { AnchorLinkPlugin } from './plugins/AnchorLinkPlugin';
 
 export {
   HTMLEditor,
@@ -73,4 +77,8 @@ export {
   LanguagePlugin,
   CalendarPlugin,
   TimerPlugin,
+  PDFEmbedPlugin,
+  MentionsPlugin,
+  TrackChangesPlugin,
+  AnchorLinkPlugin,
 };
