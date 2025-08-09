@@ -358,13 +358,14 @@ export class BlockPlugin implements Plugin {
 
   destroy(): void {
     if (this.editor) {
-      // Убираем обработчики с document
-      document.removeEventListener('click', this.handleBlockClick);
-      document.removeEventListener('contextmenu', this.handleContextMenu);
-      document.removeEventListener('keydown', this.handleBlockKeydown);
-      document.removeEventListener('blur', this.handleBlockBlur, true);
-      document.removeEventListener('focus', this.handleBlockFocus, true);
-      document.removeEventListener('mousedown', this.handleBlockMouseDown);
+      // Убираем обработчики с контейнера редактора
+      const container = this.editor.getContainer();
+      container.removeEventListener('click', this.handleBlockClick);
+      container.removeEventListener('contextmenu', this.handleContextMenu);
+      container.removeEventListener('keydown', this.handleBlockKeydown);
+      container.removeEventListener('blur', this.handleBlockBlur, true);
+      container.removeEventListener('focus', this.handleBlockFocus, true);
+      container.removeEventListener('mousedown', this.handleBlockMouseDown);
     }
 
     this.editor?.off('block');
