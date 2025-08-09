@@ -27,6 +27,7 @@ export class ResponsivePlugin implements Plugin {
   private isResizing = false;
   private startX = 0;
   private startWidth = 0;
+  private boundHotkeysKeydown?: (e: KeyboardEvent) => void;
 
   constructor() {
     this.viewportManager = new ViewportManager();
@@ -232,7 +233,7 @@ export class ResponsivePlugin implements Plugin {
   }
 
   private setupHotkeys(): void {
-    document.addEventListener('keydown', (e) => {
+    this.boundHotkeysKeydown = (e: KeyboardEvent) => {
       // Горячие клавиши для быстрого переключения viewport'ов
       if (e.ctrlKey && !e.shiftKey && !e.altKey) {
         const key = e.key;
@@ -266,7 +267,8 @@ export class ResponsivePlugin implements Plugin {
           }
         }
       }
-    });
+    };
+    document.addEventListener('keydown', this.boundHotkeysKeydown);
   }
 
   private setViewport(viewport: string): void {
@@ -298,8 +300,6 @@ export class ResponsivePlugin implements Plugin {
     container.appendChild(this.resizeHandle);
 
     this.resizeHandle.addEventListener('mousedown', (e) => this.startResize(e));
-    document.addEventListener('mousemove', (e) => this.onResize(e));
-    document.addEventListener('mouseup', (e) => this.stopResize(e));
   }
 
   private removeResizeHandle(): void {
@@ -316,9 +316,13 @@ export class ResponsivePlugin implements Plugin {
     this.startX = e.clientX;
     this.startWidth = this.editor.getContainer().offsetWidth;
     document.body.style.cursor = 'ew-resize';
+
+    // Навешиваем временные обработчики на документ только на время ресайза
+    document.addEventListener('mousemove', this.onResize);
+    document.addEventListener('mouseup', this.stopResize);
   }
 
-  private onResize(e: MouseEvent): void {
+  private onResize = (e: MouseEvent): void => {
     if (!this.isResizing || !this.editor) return;
     const dx = e.clientX - this.startX;
     let newWidth = this.startWidth + dx;
@@ -327,13 +331,15 @@ export class ResponsivePlugin implements Plugin {
     container.style.width = newWidth + 'px';
     container.style.maxWidth = newWidth + 'px';
     localStorage.setItem('responsive-custom-width', String(newWidth));
-  }
+  };
 
-  private stopResize(_e: MouseEvent): void {
+  private stopResize = (_e: MouseEvent): void => {
     if (!this.isResizing) return;
     this.isResizing = false;
     document.body.style.cursor = '';
-  }
+    document.removeEventListener('mousemove', this.onResize);
+    document.removeEventListener('mouseup', this.stopResize);
+  };
 
   public destroy(): void {
     if (this.toolbarButton && this.toolbarButton.parentElement) {
@@ -351,6 +357,11 @@ export class ResponsivePlugin implements Plugin {
 
     this.viewportManager.destroy();
     this.editor?.off('responsive');
+
+    if (this.boundHotkeysKeydown) {
+      document.removeEventListener('keydown', this.boundHotkeysKeydown);
+      this.boundHotkeysKeydown = undefined;
+    }
 
     this.editor = null;
     this.toolbarButton = null;
