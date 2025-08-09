@@ -1,0 +1,25 @@
+.mentions-dropdown {
+  position: absolute;
+  z-index: 1000;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 4px;
+}
+
+.mentions-item {
+  padding: 6px 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+.mentions-item:hover { background: #f3f4f6; }
+
+.mention {
+  background: #eef2ff;
+  color: #3730a3;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+
