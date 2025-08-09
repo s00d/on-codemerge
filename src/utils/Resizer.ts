@@ -20,6 +20,8 @@ export class Resizer {
   private startWidth = 0; // Начальная ширина элемента
   private startHeight = 0; // Начальная высота элемента
   private options: ResizerOptions; // Настройки ресайзера
+  private boundMouseMove?: (e: MouseEvent) => void;
+  private boundMouseUp?: (e: MouseEvent) => void;
 
   constructor(element: HTMLElement, options: ResizerOptions = {}) {
     this.element = element;
@@ -55,10 +57,8 @@ export class Resizer {
     this.element.style.position = 'relative';
     this.element.appendChild(this.handle);
 
-    // Обработчик для изменения размера
+    // Обработчик для начала изменения размера
     this.handle.addEventListener('mousedown', (e) => this.startResize(e));
-    document.addEventListener('mousemove', (e) => this.resize(e));
-    document.addEventListener('mouseup', () => this.stopResize());
   }
 
   private startResize(e: MouseEvent): void {
@@ -72,6 +72,12 @@ export class Resizer {
     this.options.onResizeStart?.();
 
     e.preventDefault();
+
+    // Навешиваем глобальные обработчики только на время ресайза
+    this.boundMouseMove = (evt: MouseEvent) => this.resize(evt);
+    this.boundMouseUp = () => this.stopResize();
+    document.addEventListener('mousemove', this.boundMouseMove);
+    document.addEventListener('mouseup', this.boundMouseUp);
   }
 
   private resize(e: MouseEvent): void {
@@ -108,13 +114,29 @@ export class Resizer {
 
     // Вызываем событие завершения ресайза
     this.options.onResizeEnd?.();
+
+    // Снимаем глобальные обработчики
+    if (this.boundMouseMove) {
+      document.removeEventListener('mousemove', this.boundMouseMove);
+      this.boundMouseMove = undefined;
+    }
+    if (this.boundMouseUp) {
+      document.removeEventListener('mouseup', this.boundMouseUp);
+      this.boundMouseUp = undefined;
+    }
   }
 
   public destroy(): void {
     if (this.handle) {
       this.handle.remove();
     }
-    document.removeEventListener('mousemove', (e) => this.resize(e));
-    document.removeEventListener('mouseup', () => this.stopResize());
+    if (this.boundMouseMove) {
+      document.removeEventListener('mousemove', this.boundMouseMove);
+      this.boundMouseMove = undefined;
+    }
+    if (this.boundMouseUp) {
+      document.removeEventListener('mouseup', this.boundMouseUp);
+      this.boundMouseUp = undefined;
+    }
   }
 }
