@@ -1,9 +1,7 @@
 ## Mentions Plugin
 
-User mentions triggered by `@` with a dropdown of suggestions.
+User mentions triggered by `@`.
 
-- Type `@name` → a dropdown appears
-- Click an item → inserts a non-editable `.mention` chip
 
 ### Installation
 
@@ -17,16 +15,8 @@ npm install on-codemerge
 import { HTMLEditor, MentionsPlugin } from 'on-codemerge';
 
 const editor = new HTMLEditор(container);
-editor.use(new MentionsPlugin([
-  { id: '1', label: 'Alice' },
-  { id: '2', label: 'Bob' },
-  { id: '3', label: 'Charlie' }
-]));
+editor.use(new MentionsPlugin());
 ```
-
-### How It Works
-
-- Type `@a` → pick from the dropdown → `@Alice` is inserted as `.mention`
 
 ### Demo
 

@@ -8,20 +8,14 @@ import { mentionsIcon } from '../../icons';
 import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { PopupManager, type PopupItem } from '../../core/ui/PopupManager';
 
-type Mention = { id: string; label: string };
-
 export class MentionsPlugin implements Plugin {
   name = 'mentions';
   private editor: HTMLEditor | null = null;
   private popup: PopupManager | null = null;
-  // reserved for future directory-backed mentions
-  private mentions: Mention[] = [];
   // query is handled by MentionsMenu
   private savedCursor: { offset: number } | null = null;
 
-  constructor(mentions: Mention[] = []) {
-    this.mentions = mentions;
-  }
+  constructor() {}
 
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
