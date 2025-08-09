@@ -22,13 +22,14 @@ export class CommentsPlugin implements Plugin {
   constructor() {
     this.manager = new CommentManager();
     this.tooltip = this.createTooltip();
-    document.body.appendChild(this.tooltip);
   }
 
   initialize(editor: HTMLEditor): void {
     this.errorModal = new ErrorModal(editor);
     this.menu = new CommentMenu(editor);
     this.editor = editor;
+    // Размещаем тултип внутри контейнера редактора, чтобы он не выходил за его пределы
+    this.editor.getInnerContainer().appendChild(this.tooltip);
     this.addToolbarButton();
     this.setupEventListeners();
     this.editor.on('comment', () => {
@@ -125,6 +126,11 @@ export class CommentsPlugin implements Plugin {
     }
 
     const range = selection.getRangeAt(0);
+    // Проверяем, что выделение находится внутри редактора
+    if (!this.isRangeInsideEditor(range)) {
+      this.errorModal?.show(this.editor.t('Please select text inside the editor'));
+      return;
+    }
     if (range.collapsed) {
       this.errorModal?.show(this.editor.t('Please select some text to comment on'));
       return;
@@ -136,6 +142,12 @@ export class CommentsPlugin implements Plugin {
         this.insertCommentMarker(comment.id, range);
       }
     });
+  }
+
+  private isRangeInsideEditor(range: Range): boolean {
+    const container = this.editor?.getContainer();
+    if (!container) return false;
+    return container.contains(range.startContainer) && container.contains(range.endContainer);
   }
 
   private editComment(id: string): void {
