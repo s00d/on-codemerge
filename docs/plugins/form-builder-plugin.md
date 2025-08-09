@@ -1,18 +1,21 @@
 # Form Builder Plugin
 
-The Form Builder Plugin provides comprehensive form creation and management capabilities for the on-CodeMerge editor, allowing users to build interactive forms with various field types and validation.
+The Form Builder Plugin provides comprehensive form creation and management capabilities for the on-CodeMerge editor. It allows users to build interactive forms with various field types, validation rules, and templates through an intuitive visual interface.
 
 ## Features
 
-- **Form Creation**: Build forms with drag & drop interface
-- **Field Types**: Text, email, number, select, checkbox, radio, textarea
-- **Field Validation**: Built-in validation rules and custom validation
-- **Form Styling**: Customizable form appearance
-- **Field Groups**: Organize fields into logical groups
-- **Form Templates**: Pre-built form templates
-- **Form Export**: Export forms as HTML or JSON
+- **Visual Form Builder**: Drag & drop interface for creating forms
+- **Rich Field Types**: Text, email, password, number, tel, url, date, time, datetime-local, textarea, select, checkbox, radio, file, range, color, month, week, hidden, image, submit, reset
+- **Enhanced Checkbox Support**: Improved checkbox rendering with proper text alignment and "Checked by Default" option
+- **Form Templates**: Pre-built templates for contact forms, registration, surveys, and payments
+- **Field Validation**: Built-in validation rules including required, pattern, min/max length, min/max values
+- **Real-time Preview**: Live preview of forms as you build them
+- **Form Management**: Edit, duplicate, and delete existing forms
+- **Context Menu**: Right-click context menu for form operations
+- **Keyboard Shortcuts**: Hotkeys for quick form operations
 - **Responsive Design**: Mobile-friendly form layouts
-- **Accessibility**: ARIA labels and keyboard navigation
+- **Accessibility**: ARIA labels and keyboard navigation support
+- **Improved UX**: Better notifications, reactive interface updates, and compact option editors
 
 ## Installation
 
@@ -36,370 +39,572 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 <EditorComponent :activePlugins="['FormBuilderPlugin']" />
 
+## Architecture
+
+The plugin follows a modular architecture with clear separation of concerns:
+
+### Core Components
+
+- **FormBuilderModal**: Main modal for form creation and editing
+- **FormPopup**: Quick form insertion popup
+- **TemplatesModal**: Template selection modal
+- **FieldEditor**: Enhanced field configuration interface with type-specific options
+- **FormPreview**: Live form preview component with improved rendering
+
+### Services
+
+- **FormManager**: Central form state management and HTML generation with improved option handling
+- **TemplateManager**: Template creation and management
+- **FieldBuilder**: Field creation and configuration
+
+### Commands
+
+- **DeleteFormCommand**: Handles form deletion
+- **DuplicateFormCommand**: Handles form duplication
+
 ## API Reference
 
-### Form Methods
+### Plugin Methods
 
 ```javascript
-// Create new form
-const form = formBuilder.createForm();
+// Initialize plugin
+plugin.initialize(editor);
 
+// Destroy plugin
+plugin.destroy();
+```
+
+### FormManager Methods
+
+```javascript
 // Add field to form
-formBuilder.addField(formId, fieldConfig);
+formManager.addField(typeOrField, options);
 
-// Update field
-formBuilder.updateField(formId, fieldId, fieldConfig);
+// Update field with improved option merging
+formManager.updateField(fieldId, updates);
 
 // Remove field
-formBuilder.removeField(formId, fieldId);
+formManager.removeField(fieldId);
 
-// Get form data
-const formData = formBuilder.getFormData(formId);
+// Move field
+formManager.moveField(fieldId, newPosition);
 
-// Export form
-const htmlForm = formBuilder.exportForm(formId, 'html');
+// Get fields
+formManager.getFields();
+
+// Create form configuration
+formManager.createFormConfig(action, method);
+
+// Create HTML form
+formManager.createForm(formConfig);
+
+// Load form from element
+formManager.loadForm(element);
+
+// Parse form element
+formManager.parseForm(element);
+```
+
+### Field Types
+
+The plugin supports all standard HTML input types:
+
+```typescript
+type FieldType =
+  | 'text' | 'textarea' | 'select' | 'checkbox' | 'radio'
+  | 'button' | 'file' | 'date' | 'time' | 'range' | 'email'
+  | 'password' | 'number' | 'tel' | 'url' | 'color'
+  | 'datetime-local' | 'month' | 'week' | 'hidden' | 'image'
+  | 'submit' | 'reset';
 ```
 
 ### Field Configuration
 
-```javascript
+```typescript
 interface FieldConfig {
-  type: 'text' | 'email' | 'number' | 'select' | 'checkbox' | 'radio' | 'textarea';
+  id: string;
+  type: FieldType;
   label: string;
-  name: string;
-  required?: boolean;
-  placeholder?: string;
-  validation?: ValidationRule[];
-  options?: string[]; // For select/radio fields
-  defaultValue?: any;
+  options?: FieldOptions;
+  validation?: ValidationRules;
+  position?: number;
+}
+
+interface FieldOptions {
+  readonly name?: string;
+  readonly id?: string;
+  readonly placeholder?: string;
+  readonly value?: string;
+  readonly className?: string;
+  readonly readonly?: boolean;
+  readonly disabled?: boolean;
+  readonly multiple?: boolean;
+  readonly checked?: boolean; // Enhanced checkbox support
+  readonly min?: number | string; // Support for both numbers and dates
+  readonly max?: number | string; // Support for both numbers and dates
+  readonly step?: number;
+  readonly rows?: number;
+  readonly cols?: number;
+  readonly accept?: string;
+  readonly size?: number;
+  readonly maxlength?: number;
+  readonly minlength?: number;
+  readonly src?: string;
+  readonly alt?: string;
+  readonly options?: readonly string[];
+  readonly autocomplete?: 'on' | 'off' | 'name' | 'email' | 'tel' | 'url' | 'current-password' | 'new-password';
+}
+
+interface ValidationRules {
+  readonly required?: boolean;
+  readonly pattern?: string;
+  readonly minLength?: number;
+  readonly maxLength?: number;
+  readonly min?: number;
+  readonly max?: number;
+  readonly step?: number;
+  readonly email?: boolean;
+  readonly url?: boolean;
+  readonly numeric?: boolean;
+  readonly alphanumeric?: boolean;
+  readonly custom?: (value: string) => true | string;
 }
 ```
 
-## Field Types
+### Form Configuration
 
-### Text Input
-```html
-<input type="text" name="username" placeholder="Enter username" required>
+```typescript
+interface FormConfig {
+  id: string;
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+  action: string;
+  enctype?: 'application/x-www-form-urlencoded' | 'multipart/form-data' | 'text/plain';
+  target?: '_blank' | '_self' | '_parent' | '_top';
+  className?: string;
+  fields: FieldConfig[];
+}
 ```
 
-### Email Input
-```html
-<input type="email" name="email" placeholder="Enter email" required>
-```
+## Enhanced Checkbox Support
 
-### Number Input
-```html
-<input type="number" name="age" min="0" max="120" placeholder="Enter age">
-```
+The plugin now includes improved checkbox functionality:
 
-### Select Dropdown
-```html
-<select name="country" required>
-  <option value="">Select country</option>
-  <option value="us">United States</option>
-  <option value="uk">United Kingdom</option>
-</select>
-```
+### Checkbox Features
 
-### Checkbox
-```html
-<input type="checkbox" name="newsletter" value="yes">
-<label>Subscribe to newsletter</label>
-```
+- **Proper Text Alignment**: Checkbox text displays inline with the checkbox using flexbox layout
+- **Checkbox Text Field**: Dedicated field for editing checkbox text separate from the main label
+- **Checked by Default**: Option to set checkbox as checked by default
+- **Improved Rendering**: Better HTML structure with `.checkbox-container` class
 
-### Radio Buttons
-```html
-<input type="radio" name="gender" value="male">
-<label>Male</label>
-<input type="radio" name="gender" value="female">
-<label>Female</label>
-```
-
-### Textarea
-```html
-<textarea name="message" rows="4" placeholder="Enter your message"></textarea>
-```
-
-## Events
+### Checkbox Configuration
 
 ```javascript
-// Listen to form events
-editor.on('form:created', (form) => {
-  console.log('Form created:', form);
-});
-
-editor.on('field:added', (field) => {
-  console.log('Field added:', field);
-});
-
-editor.on('field:updated', (field) => {
-  console.log('Field updated:', field);
-});
-
-editor.on('form:submitted', (formData) => {
-  console.log('Form submitted:', formData);
-});
+const checkboxField = {
+  id: 'terms',
+  type: 'checkbox',
+  label: 'Terms and Conditions',
+  options: {
+    name: 'terms',
+    value: 'I agree to the terms and conditions', // Checkbox text
+    checked: false // Default state
+  },
+  validation: {
+    required: true
+  }
+};
 ```
+
+### CSS Classes
+
+The plugin includes new CSS classes for improved styling:
+
+```css
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.checkbox-container input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.checkbox-container label {
+  margin: 0;
+  cursor: pointer;
+}
+```
+
+## Keyboard Shortcuts
+
+| Shortcut | Description | Command |
+|----------|-------------|---------|
+| `Ctrl+Alt+F` | Insert form | `form` |
+
+## Form Templates
+
+The plugin includes pre-built templates for common use cases. All templates include proper validation with required fields marked appropriately.
+
+### Contact Form Template
+- Name field (text) - **Required**
+- Email field (email) - **Required**
+- Phone field (tel)
+- Message field (textarea) - **Required**
+
+### Registration Form Template
+- Username field (text) - **Required** (min 3 characters)
+- Email field (email) - **Required**
+- Password field (password) - **Required** (min 6 characters)
+- Confirm Password field (password) - **Required**
+- Terms agreement (checkbox) - **Required**
+
+### Survey Form Template
+- Name field (text) - **Required**
+- Age group (select with options) - **Required**
+- Gender (radio buttons) - **Required**
+- Suggestions (textarea)
+- Service rating (range) - **Required**
+
+### Payment Form Template
+- Card number (text) - **Required** (13-19 digits)
+- Cardholder name (text) - **Required**
+- Expiry date (text) - **Required** (MM/YY format)
+- CVV (text) - **Required** (3-4 digits)
+- Amount (number) - **Required** (min 0.01)
+
+### Order Form Template
+- Product name (text) - **Required**
+- Quantity (number) - **Required** (min 1)
+- Customer name (text) - **Required**
+- Email (email) - **Required**
+- Phone (tel) - **Required**
+- Delivery address (textarea) - **Required**
+- Delivery method (select: Standard, Express, Pickup) - **Required**
+- Special instructions (textarea)
+
+### Feedback Form Template
+- Your name (text) - **Required**
+- Email (email) - **Required**
+- Feedback type (select: Bug Report, Feature Request, General Feedback, Complaint, Praise) - **Required**
+- Subject (text) - **Required**
+- Your feedback (textarea) - **Required**
+- Rating (range) - **Required**
+- Allow contact (checkbox)
+
+### Resume Form Template
+- Full name (text) - **Required**
+- Email (email) - **Required**
+- Phone (tel) - **Required**
+- Position applied for (text) - **Required**
+- Work experience (textarea) - **Required**
+- Education (textarea)
+- Skills (textarea)
+- Resume/CV (file upload) - **Required**
+- Cover letter (textarea)
+- Terms agreement (checkbox) - **Required**
+
+### Booking Form Template
+- Full name (text) - **Required**
+- Email (email) - **Required**
+- Phone (tel) - **Required**
+- Booking date (date) - **Required**
+- Preferred time (time) - **Required**
+- Service type (select: Consultation, Appointment, Meeting, Event, Other) - **Required**
+- Number of people (number) - **Required** (min 1)
+- Special requirements (textarea)
+- Booking confirmation (checkbox) - **Required**
+
+### Newsletter Subscription Template
+- First name (text) - **Required**
+- Last name (text) - **Required**
+- Email address (email) - **Required**
+- Newsletter type (select: General, Technology, Business, Lifestyle, All)
+- Weekly newsletter (checkbox)
+- Monthly newsletter (checkbox)
+- Special offers (checkbox)
+- Email consent (checkbox) - **Required**
+
+### Customer Satisfaction Survey Template
+- Customer name (text) - **Required**
+- Email (email) - **Required**
+- Product/service used (select) - **Required**
+- Overall satisfaction (radio: Very Satisfied to Very Dissatisfied) - **Required**
+- Would you recommend us? (radio: Definitely to Definitely Not) - **Required**
+- Value for money (radio: Excellent to Very Poor) - **Required**
+- What did you like most? (textarea)
+- What could we improve? (textarea)
+- Feedback permission (checkbox)
+
+### Job Application Form Template
+- First name (text) - **Required**
+- Last name (text) - **Required**
+- Email (email) - **Required**
+- Phone (tel) - **Required**
+- Position (text) - **Required**
+- Experience level (select: Entry Level, Mid Level, Senior Level, Executive) - **Required**
+- Why should we hire you? (textarea) - **Required**
+- Previous experience (textarea) - **Required**
+- Resume (file upload) - **Required**
+- Cover letter (file upload)
+- Interview availability (checkbox)
+- Terms agreement (checkbox) - **Required**
+
+### Support Ticket Form Template
+- Full name (text) - **Required**
+- Email (email) - **Required**
+- Phone (tel) - **Required**
+- Issue category (select: Technical Issue, Billing Question, Feature Request, Bug Report, General Inquiry) - **Required**
+- Priority level (select: Low, Medium, High, Critical) - **Required**
+- Subject (text) - **Required**
+- Description of issue (textarea) - **Required**
+- Screenshots/attachments (file upload)
+- Steps to reproduce (textarea)
+- Support terms agreement (checkbox) - **Required**
 
 ## Examples
 
 ### Basic Form Creation
 
 ```javascript
-// Create a contact form
-const contactForm = formBuilder.createForm({
-  title: 'Contact Form',
-  description: 'Please fill out the form below'
-});
+// Create a simple contact form
+const formConfig = {
+  id: 'contact-form',
+  method: 'POST',
+  action: '/contact',
+  className: 'contact-form',
+  fields: [
+    {
+      id: 'name',
+      type: 'text',
+      label: 'Name',
+      options: {
+        name: 'name',
+        placeholder: 'Enter your name'
+      },
+      validation: {
+        required: true
+      }
+    },
+    {
+      id: 'email',
+      type: 'email',
+      label: 'Email',
+      options: {
+        name: 'email',
+        placeholder: 'Enter your email'
+      },
+      validation: {
+        required: true
+      }
+    }
+  ]
+};
 
-// Add fields
-formBuilder.addField(contactForm.id, {
-  type: 'text',
-  label: 'Name',
-  name: 'name',
-  required: true,
-  placeholder: 'Enter your name'
-});
+const formHtml = formManager.createForm(formConfig);
+```
 
-formBuilder.addField(contactForm.id, {
-  type: 'email',
-  label: 'Email',
-  name: 'email',
-  required: true,
-  placeholder: 'Enter your email'
-});
+### Enhanced Checkbox Form
 
-formBuilder.addField(contactForm.id, {
-  type: 'textarea',
-  label: 'Message',
-  name: 'message',
-  required: true,
-  placeholder: 'Enter your message'
-});
+```javascript
+const registrationForm = {
+  id: 'registration',
+  method: 'POST',
+  action: '/register',
+  fields: [
+    {
+      id: 'username',
+      type: 'text',
+      label: 'Username',
+      options: {
+        name: 'username',
+        placeholder: 'Enter username'
+      },
+      validation: {
+        required: true,
+        minLength: 3,
+        pattern: '^[a-zA-Z0-9_]+$'
+      }
+    },
+    {
+      id: 'terms',
+      type: 'checkbox',
+      label: 'Terms and Conditions',
+      options: {
+        name: 'terms',
+        value: 'I agree to the terms and conditions',
+        checked: false
+      },
+      validation: {
+        required: true
+      }
+    },
+    {
+      id: 'newsletter',
+      type: 'checkbox',
+      label: 'Newsletter',
+      options: {
+        name: 'newsletter',
+        value: 'Subscribe to newsletter',
+        checked: true
+      },
+      validation: {
+        required: false
+      }
+    }
+  ]
+};
 ```
 
 ### Form with Validation
 
 ```javascript
-// Create form with validation
-const registrationForm = formBuilder.createForm({
-  title: 'User Registration'
-});
-
-formBuilder.addField(registrationForm.id, {
-  type: 'text',
-  label: 'Username',
-  name: 'username',
-  required: true,
-  validation: [
-    { type: 'minLength', value: 3, message: 'Username must be at least 3 characters' },
-    { type: 'pattern', value: /^[a-zA-Z0-9_]+$/, message: 'Username can only contain letters, numbers, and underscores' }
-  ]
-});
-
-formBuilder.addField(registrationForm.id, {
-  type: 'email',
-  label: 'Email',
-  name: 'email',
-  required: true,
-  validation: [
-    { type: 'email', message: 'Please enter a valid email address' }
-  ]
-});
-```
-
-## Integration Examples
-
-### React Integration
-
-```jsx
-import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, FormBuilderPlugin } from 'on-codemerge';
-
-function MyEditor() {
-  const editorRef = useRef(null);
-  const editorInstance = useRef(null);
-  const [forms, setForms] = useState([]);
-
-  useEffect(() => {
-    if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new FormBuilderPlugin());
-      
-      // Track form events
-      editorInstance.current.on('form:created', (form) => {
-        setForms(prev => [...prev, form]);
-      });
-    }
-
-    return () => {
-      if (editorInstance.current) {
-        editorInstance.current.destroy();
+const registrationForm = {
+  id: 'registration',
+  method: 'POST',
+  action: '/register',
+  fields: [
+    {
+      id: 'username',
+      type: 'text',
+      label: 'Username',
+      options: {
+        name: 'username',
+        placeholder: 'Enter username'
+      },
+      validation: {
+        required: true,
+        minLength: 3,
+        pattern: '^[a-zA-Z0-9_]+$'
       }
-    };
-  }, []);
-
-  return <div ref={editorRef} className="editor-container" />;
-}
+    },
+    {
+      id: 'age',
+      type: 'number',
+      label: 'Age',
+      options: {
+        name: 'age',
+        min: 18,
+        max: 120
+      },
+      validation: {
+        required: true,
+        min: 18,
+        max: 120
+      }
+    }
+  ]
+};
 ```
 
-### Vue Integration
+### Select Field with Options
 
-```vue
-<template>
-  <div>
-    <div class="form-list" v-if="forms.length">
-      <h3>Created Forms:</h3>
-      <ul>
-        <li v-for="form in forms" :key="form.id">{{ form.title }}</li>
-      </ul>
-    </div>
-    <div ref="editorContainer" class="editor-container"></div>
-  </div>
-</template>
-
-<script>
-import { HTMLEditor, FormBuilderPlugin } from 'on-codemerge';
-
-export default {
-  name: 'MyEditor',
-  data() {
-    return {
-      editor: null,
-      forms: []
-    };
+```javascript
+const selectField = {
+  id: 'country',
+  type: 'select',
+  label: 'Country',
+  options: {
+    name: 'country',
+    options: ['United States', 'Canada', 'United Kingdom', 'Germany', 'France']
   },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new FormBuilderPlugin());
-    
-    this.editor.on('form:created', (form) => {
-      this.forms.push(form);
-    });
-  },
-  beforeDestroy() {
-    if (this.editor) {
-      this.editor.destroy();
-    }
+  validation: {
+    required: true
   }
 };
-</script>
+```
+
+## Recent Improvements
+
+### Version 2.0.0
+
+- **Enhanced Checkbox Support**: Improved checkbox rendering with proper text alignment and dedicated text field
+- **Fixed Option Merging**: Resolved issues with option updates not preserving existing values
+- **Improved Type Safety**: Better TypeScript support with proper readonly properties
+- **Better UX**: Compact option editors, improved notifications, and reactive interface updates
+- **CSS Improvements**: Added `.checkbox-container` class for proper checkbox layout
+- **Bug Fixes**: Fixed checkbox text reset issue when toggling "Checked by Default"
+
+### Key Changes
+
+1. **Checkbox Rendering**: Checkboxes now display text inline using flexbox layout
+2. **Option Persistence**: Field options are properly preserved during updates
+3. **Type Safety**: Improved TypeScript definitions with proper readonly properties
+4. **User Experience**: Better notifications and more responsive interface
+5. **Code Quality**: Modular architecture with clear separation of concerns
+
+## Events
+
+The plugin emits various events that you can listen to:
+
+```javascript
+// Form creation events
+editor.on('form', () => {
+  console.log('Form builder opened');
+});
+
+editor.on('create-form', () => {
+  console.log('Create form triggered');
+});
+
+editor.on('show-templates', () => {
+  console.log('Templates modal opened');
+});
+
+editor.on('edit-form', () => {
+  console.log('Edit form triggered');
+});
+
+editor.on('duplicate-form', () => {
+  console.log('Duplicate form triggered');
+});
+
+editor.on('delete-form', () => {
+  console.log('Delete form triggered');
+});
 ```
 
 ## Styling
 
-### Default Styles
+The plugin includes comprehensive styling with support for both light and dark themes. Key CSS classes:
+
+- `.form-builder-modal`: Main modal container
+- `.form-settings`: Form settings panel
+- `.fields-list`: Fields list container
+- `.field-editor`: Field editor panel
+- `.preview-panel`: Preview panel
+- `.preview-content`: Preview content container
+- `.generated-form`: Generated form styling
+- `.checkbox-container`: Enhanced checkbox layout
+
+### Custom Styling
+
+You can customize the appearance by overriding CSS variables:
 
 ```css
-/* Form container */
-.form-container {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 20px;
-  margin: 20px 0;
+:root {
+  --border-color: #e5e7eb;
+  --error-color: #ef4444;
+  --success-color: #10b981;
 }
-
-/* Form fields */
-.form-field {
-  margin-bottom: 16px;
-}
-
-.form-label {
-  display: block;
-  font-weight: 500;
-  margin-bottom: 4px;
-  color: #374151;
-}
-
-.form-input {
-  width: 100%;
-  padding: 8px 12px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.2s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-/* Form buttons */
-.form-button {
-  background-color: #3b82f6;
-  color: white;
-  padding: 8px 16px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.form-button:hover {
-  background-color: #1d4ed8;
-}
-
-/* Validation styles */
-.form-input.error {
-  border-color: #ef4444;
-}
-
-.error-message {
-  color: #ef4444;
-  font-size: 12px;
-  margin-top: 4px;
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Form not creating**
-   - Check plugin initialization
-   - Verify form builder is working
-   - Check for JavaScript errors
-   - Ensure proper permissions
-
-2. **Fields not adding**
-   - Check field configuration
-   - Verify field types are supported
-   - Check for validation errors
-   - Ensure form ID is valid
-
-3. **Validation not working**
-   - Check validation rules syntax
-   - Verify validation types are supported
-   - Check for JavaScript errors
-   - Ensure validation is enabled
-
-### Debug Mode
-
-```javascript
-// Add console logging
-console.log('Form Builder plugin initialized');
-
-// Check form events
-editor.on('form:created', (form) => {
-  console.log('Form created:', form);
-});
-
-// Check field events
-editor.on('field:added', (field) => {
-  console.log('Field added:', field);
-});
 ```
 
 ## Browser Support
 
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
+The plugin supports all modern browsers that support:
+- ES6+ features
+- CSS Grid and Flexbox
+- HTML5 form elements
+- Drag and Drop API
+
+## Performance
+
+The plugin is optimized for performance with:
+- Lazy loading of components
+- Efficient DOM manipulation
+- Minimal re-renders
+- Memory leak prevention through proper cleanup
+- Improved option merging to reduce unnecessary updates
 
 ## License
 

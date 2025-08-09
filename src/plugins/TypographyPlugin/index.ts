@@ -21,6 +21,7 @@ export class TypographyPlugin implements Plugin {
   private editor: HTMLEditor | null = null;
   private menu: TypographyMenu | null = null;
   private toolbarButton: HTMLElement | null = null;
+  private boundKeyDown?: (e: KeyboardEvent) => void;
 
   constructor() {}
 
@@ -30,7 +31,8 @@ export class TypographyPlugin implements Plugin {
     this.addToolbarButton();
     this.setupEventListeners();
 
-    document.addEventListener('keydown', this.handleKeyDown);
+    this.boundKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
+    document.addEventListener('keydown', this.boundKeyDown);
     this.editor.on('typography', () => {
       this.editor?.ensureEditorFocus();
       this.showMenu();
@@ -121,7 +123,10 @@ export class TypographyPlugin implements Plugin {
       this.editor.getContainer().removeEventListener('click', this.handleClick);
     }
 
-    document.removeEventListener('keydown', this.handleKeyDown);
+    if (this.boundKeyDown) {
+      document.removeEventListener('keydown', this.boundKeyDown);
+      this.boundKeyDown = undefined;
+    }
 
     if (this.toolbarButton && this.toolbarButton.parentElement) {
       this.toolbarButton.parentElement.removeChild(this.toolbarButton);
