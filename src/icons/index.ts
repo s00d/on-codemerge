@@ -84,6 +84,11 @@ import lazyTableIcon from './lazy-table.svg?raw';
 import globeIcon from './globe.svg?raw';
 import calendarIcon from './calendar.svg?raw';
 import timerIcon from './timer.svg?raw';
+import mentionsIcon from './mentions.svg?raw';
+import trackChangesIcon from './track-changes.svg?raw';
+import tocIcon from './toc.svg?raw';
+import outlinePanelIcon from './outline.svg?raw';
+import anchorAddIcon from './anchor.svg?raw';
 
 export {
   alignCenterIcon,
@@ -172,4 +177,9 @@ export {
   globeIcon,
   calendarIcon,
   timerIcon,
+  mentionsIcon,
+  trackChangesIcon,
+  tocIcon,
+  outlinePanelIcon,
+  anchorAddIcon,
 };
