@@ -22,6 +22,15 @@ export class HTMLEditor {
   private selector: Selector;
   private _disableObserver = false;
   private notificationManager: NotificationManager;
+  private boundHandleSelectionChange?: (e: Event) => void;
+  private boundClickToFocus?: (e: MouseEvent) => void;
+  private boundDragStart?: (e: DragEvent) => void;
+  private boundDragEnd?: (e: DragEvent) => void;
+  private boundDragEnter?: (e: DragEvent) => void;
+  private boundDragOver?: (e: DragEvent) => void;
+  private boundDragLeave?: (e: DragEvent) => void;
+  private boundDrop?: (e: DragEvent) => void;
+  private boundPaste?: (e: ClipboardEvent) => void;
 
   constructor(innerContainer: HTMLElement) {
     // Создаем новый внутренний контейнер
@@ -48,30 +57,32 @@ export class HTMLEditor {
     this.textFormatter = new TextFormatter(this.container);
     this.selector = new Selector(this.container);
 
-    this.container.addEventListener('click', (e) => {
-      // Проверяем, не кликнули ли мы на блок
+    this.boundClickToFocus = (e: MouseEvent) => {
       const target = e.target as Element;
       const block = target.closest('.editor-block');
-
-      // Если кликнули на блок, не устанавливаем фокус на контейнер
-      if (block) {
-        return;
-      }
-
-      // Только если кликнули на пустое место, устанавливаем фокус
+      if (block) return;
       this.container.focus();
-    });
+    };
+    this.boundDragStart = (e: DragEvent) => this.handleDragStart(e);
+    this.boundDragEnd = (e: DragEvent) => this.handleDragEnd(e);
+    this.boundDragEnter = (e: DragEvent) => this.handleDragEnter(e);
+    this.boundDragOver = (e: DragEvent) => this.handleDragOver(e);
+    this.boundDragLeave = (e: DragEvent) => this.handleDragLeave(e);
+    this.boundDrop = (e: DragEvent) => this.handleDrop(e);
+    this.boundPaste = (e: ClipboardEvent) => this.handlePaste(e);
 
-    this.container.addEventListener('dragstart', (e) => this.handleDragStart(e));
-    this.container.addEventListener('dragend', (e) => this.handleDragEnd(e));
-    this.container.addEventListener('dragenter', (e) => this.handleDragEnter(e));
-    this.container.addEventListener('dragover', (e) => this.handleDragOver(e));
-    this.container.addEventListener('dragleave', (e) => this.handleDragLeave(e));
-    this.container.addEventListener('drop', (e) => this.handleDrop(e));
+    this.container.addEventListener('click', this.boundClickToFocus);
+    this.container.addEventListener('dragstart', this.boundDragStart);
+    this.container.addEventListener('dragend', this.boundDragEnd);
+    this.container.addEventListener('dragenter', this.boundDragEnter);
+    this.container.addEventListener('dragover', this.boundDragOver);
+    this.container.addEventListener('dragleave', this.boundDragLeave);
+    this.container.addEventListener('drop', this.boundDrop);
 
-    this.container.addEventListener('paste', (e) => this.handlePaste(e));
+    this.container.addEventListener('paste', this.boundPaste);
 
-    document.addEventListener('selectionchange', (e) => this.handleSelectionChange(e));
+    this.boundHandleSelectionChange = (e: Event) => this.handleSelectionChange(e);
+    document.addEventListener('selectionchange', this.boundHandleSelectionChange);
 
     // Инициализация MutationObserver
     this.mutationObserver = new MutationObserver((mutations) => this.handleMutations(mutations));
@@ -598,24 +609,26 @@ export class HTMLEditor {
     this.mutationObserver.disconnect();
 
     // Удаляем все обработчики событий
-    this.container.removeEventListener('click', (e) => {
-      // Проверяем, не кликнули ли мы на блок
-      const target = e.target as Element;
-      const block = target.closest('.editor-block');
+    if (this.boundClickToFocus)
+      this.container.removeEventListener('click', this.boundClickToFocus);
+    if (this.boundDragStart)
+      this.container.removeEventListener('dragstart', this.boundDragStart);
+    if (this.boundDragEnd)
+      this.container.removeEventListener('dragend', this.boundDragEnd);
+    if (this.boundDragEnter)
+      this.container.removeEventListener('dragenter', this.boundDragEnter);
+    if (this.boundDragOver)
+      this.container.removeEventListener('dragover', this.boundDragOver);
+    if (this.boundDragLeave)
+      this.container.removeEventListener('dragleave', this.boundDragLeave);
+    if (this.boundDrop) this.container.removeEventListener('drop', this.boundDrop);
+    if (this.boundPaste) this.container.removeEventListener('paste', this.boundPaste);
 
-      // Если кликнули на блок, не устанавливаем фокус на контейнер
-      if (block) {
-        return;
-      }
-
-      // Только если кликнули на пустое место, устанавливаем фокус
-      this.container.focus();
-    });
-    this.container.removeEventListener('dragenter', (e) => this.handleDragEnter(e));
-    this.container.removeEventListener('dragover', (e) => this.handleDragOver(e));
-    this.container.removeEventListener('dragleave', (e) => this.handleDragLeave(e));
-    this.container.removeEventListener('drop', (e) => this.handleDrop(e));
-    this.container.removeEventListener('paste', (e) => this.handlePaste(e));
+    // Удаляем глобальные обработчики
+    if (this.boundHandleSelectionChange) {
+      document.removeEventListener('selectionchange', this.boundHandleSelectionChange);
+      this.boundHandleSelectionChange = undefined as any;
+    }
 
     // Очищаем подписчиков на изменения контента
     this.contentChangeCallbacks = [];

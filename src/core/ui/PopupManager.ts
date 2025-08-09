@@ -57,6 +57,7 @@ export class PopupManager {
   private overlay: HTMLElement;
   private footer: PopupFooter | null = null;
   private isVisible = false;
+  private boundDocumentKeydown?: (e: KeyboardEvent) => void;
 
   constructor(editor: HTMLEditor, options: PopupOptions = {}) {
     const { className = '', closeOnClickOutside = true, items = [] } = options;
@@ -87,17 +88,21 @@ export class PopupManager {
 
     if (closeOnClickOutside) {
       this.overlay.addEventListener('mousedown', (e) => {
+        // Не даем событию уйти за пределы редактора
+        e.stopPropagation();
         if (this.isVisible && !this.popup.contains(e.target as Node)) {
           this.hide();
         }
       });
     }
 
-    document.addEventListener('keydown', (e) => {
+    // Храним ссылку на обработчик, чтобы можно было удалить
+    this.boundDocumentKeydown = (e: KeyboardEvent) => {
       if (this.isVisible && e.key === 'Escape') {
         this.hide();
       }
-    });
+    };
+    document.addEventListener('keydown', this.boundDocumentKeydown);
   }
 
   private createPopup(className: string): HTMLElement {
@@ -593,6 +598,12 @@ export class PopupManager {
   }
 
   public destroy(): void {
+    // Снимаем глобальные обработчики
+    if (this.boundDocumentKeydown) {
+      document.removeEventListener('keydown', this.boundDocumentKeydown);
+      this.boundDocumentKeydown = undefined;
+    }
+
     this.popup.remove();
   }
 }
