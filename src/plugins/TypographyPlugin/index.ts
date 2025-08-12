@@ -74,7 +74,7 @@ export class TypographyPlugin implements Plugin {
   private insertTab(): void {
     if (!this.editor) return;
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);
@@ -107,7 +107,7 @@ export class TypographyPlugin implements Plugin {
   private applyStyle(style: string): void {
     if (!this.editor) return;
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);

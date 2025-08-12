@@ -44,7 +44,7 @@ export class AnchorLinkPlugin implements Plugin {
       onClick: () => {
         if (!this.editor) return;
         // Сохраняем выделение/курсор до открытия попапа
-        const selection = window.getSelection();
+        const selection = this.editor.getTextFormatter()?.getSelection();
         this.savedSelectedText = selection?.toString() || '';
         this.savedCursor = this.editor.saveCursorPosition();
         this.popup?.show();
@@ -68,7 +68,7 @@ export class AnchorLinkPlugin implements Plugin {
       this.editor.ensureEditorFocus();
     }
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null;
     const a = document.createElement('a');
     a.id = id;

@@ -45,7 +45,7 @@ export class TrackChangesPlugin implements Plugin {
     // Простейшая подсветка вставок: оборачиваем новые текстовые узлы
     // В полноценном варианте нужно сравнение с предыдущей версией, но каркас — достаточно
     // Для демо: если вставлен текстовый узел, выделим родителя
-    const selection = window.getSelection();
+    const selection = this.editor?.getTextFormatter()?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       const el = (range.startContainer as HTMLElement).parentElement;

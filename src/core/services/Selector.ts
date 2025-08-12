@@ -11,7 +11,7 @@ export class Selector {
   private selectedCells: HTMLElement[] = [];
 
   public saveSelection(): void {
-    const selection = window.getSelection();
+    const selection = window.getSelection(); // В Selector нет доступа к editor
 
     if (selection && selection.rangeCount > 0) {
       this.lastSelection = selection.getRangeAt(0).cloneRange();
@@ -68,7 +68,7 @@ export class Selector {
     }
 
     // Восстанавливаем выделение
-    const selection = window.getSelection();
+    const selection = window.getSelection(); // В Selector нет доступа к editor
     if (selection) {
       selection.removeAllRanges();
       selection.addRange(this.lastSelection);

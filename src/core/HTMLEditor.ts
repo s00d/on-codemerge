@@ -291,7 +291,7 @@ export class HTMLEditor {
   }
 
   private async handleSelectionChange(event: Event): Promise<void> {
-    const selection = window.getSelection();
+    const selection = this.textFormatter?.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);
@@ -450,7 +450,7 @@ export class HTMLEditor {
   }
 
   public insertTextAtCursor(text: string): void {
-    const selection = window.getSelection();
+    const selection = this.textFormatter?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       range.deleteContents();
@@ -541,7 +541,7 @@ export class HTMLEditor {
   }
 
   private getSelectionInsideContainer(): Selection | null {
-    const selection = window.getSelection();
+    const selection = this.textFormatter?.getSelection();
     return selection && this.isSelectionInsideContainer(selection) ? selection : null;
   }
 
@@ -559,7 +559,7 @@ export class HTMLEditor {
   }
 
   public restoreCursorPosition(position: { offset: number }): void {
-    const selection = window.getSelection();
+    const selection = this.textFormatter?.getSelection();
     if (!selection) return;
 
     const range = document.createRange();
@@ -696,7 +696,7 @@ export class HTMLEditor {
     const container = this.getContainer();
 
     // Проверяем, есть ли уже активное выделение
-    const selection = window.getSelection();
+    const selection = this.textFormatter?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       // Если выделение уже внутри редактора, не трогаем его
@@ -774,7 +774,7 @@ export class HTMLEditor {
   public insertContent(content: string | HTMLElement | DocumentFragment): void {
     this.ensureEditorFocus();
 
-    const selection = window.getSelection();
+    const selection = this.textFormatter?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       range.deleteContents(); // Удаляем текущее выделение, если оно есть

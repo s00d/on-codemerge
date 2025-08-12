@@ -50,7 +50,7 @@ export class MentionsPlugin implements Plugin {
 
   private onInput = (_e: Event): void => {
     if (!this.editor) return;
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (!selection || selection.rangeCount === 0) return;
     const range = selection.getRangeAt(0);
     const node = range.startContainer as Text | HTMLElement;
@@ -75,7 +75,7 @@ export class MentionsPlugin implements Plugin {
     } else {
       this.editor.ensureEditorFocus();
     }
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (!selection || selection.rangeCount === 0) return;
     const range = selection.getRangeAt(0);
     const span = document.createElement('span');

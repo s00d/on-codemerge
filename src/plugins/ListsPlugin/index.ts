@@ -71,7 +71,7 @@ export class ListsPlugin implements Plugin {
   }
 
   private handleSelectionChange(): void {
-    const selection = window.getSelection();
+    const selection = this.editor?.getTextFormatter()?.getSelection();
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
@@ -115,7 +115,7 @@ export class ListsPlugin implements Plugin {
   };
 
   private exitListAndInsertBreak(): void {
-    const selection = window.getSelection();
+    const selection = this.editor?.getTextFormatter()?.getSelection();
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
@@ -147,7 +147,7 @@ export class ListsPlugin implements Plugin {
   private toggleList(type: 'ordered' | 'unordered'): void {
     if (!this.editor) return;
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (!selection || !selection.rangeCount) return;
 
     const range = selection.getRangeAt(0);
@@ -200,8 +200,9 @@ export class ListsPlugin implements Plugin {
     // Восстанавливаем выделение
     const newRange = document.createRange();
     newRange.selectNodeContents(container);
-    window.getSelection()?.removeAllRanges();
-    window.getSelection()?.addRange(newRange);
+    const selection = this.editor?.getTextFormatter()?.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(newRange);
   }
 
   private replaceList(
@@ -260,8 +261,9 @@ export class ListsPlugin implements Plugin {
 
     const newRange = document.createRange();
     newRange.selectNodeContents(list.lastElementChild || list);
-    window.getSelection()?.removeAllRanges();
-    window.getSelection()?.addRange(newRange);
+    const selection = this.editor?.getTextFormatter()?.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(newRange);
   }
 
   private applyListStyles(

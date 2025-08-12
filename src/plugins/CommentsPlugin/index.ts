@@ -120,7 +120,7 @@ export class CommentsPlugin implements Plugin {
       return;
     }
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (!selection || !selection.rangeCount) {
       this.errorModal?.show(this.editor.t('Please select some text to comment on'));
       return;
@@ -209,7 +209,7 @@ export class CommentsPlugin implements Plugin {
       range.setStartAfter(marker);
       range.setEndAfter(marker);
 
-      const selection = window.getSelection();
+      const selection = this.editor!.getTextFormatter()?.getSelection();
       if (selection) {
         selection.removeAllRanges();
         selection.addRange(range);

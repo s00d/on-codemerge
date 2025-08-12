@@ -174,7 +174,7 @@ export class MathPlugin implements Plugin {
 
     this.editor.ensureEditorFocus();
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     let range = this.editor?.getSelector()?.restoreSelection(this.editor.getContainer());
     if (!range) {
       range = document.createRange();

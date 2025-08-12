@@ -72,7 +72,7 @@ export class FootnotesPlugin implements Plugin {
   private insertFootnote(): void {
     if (!this.editor) return;
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (!selection) return;
 
     this.menu?.show((content) => {
@@ -100,7 +100,7 @@ export class FootnotesPlugin implements Plugin {
     ref.setAttribute('data-footnote-id', id);
     ref.textContent = `[${this.manager.getFootnoteNumber(id)}]`;
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       range.deleteContents();

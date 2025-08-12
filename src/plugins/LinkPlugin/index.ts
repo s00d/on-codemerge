@@ -107,7 +107,7 @@ export class LinkPlugin implements Plugin {
     this.editor?.ensureEditorFocus();
 
     // Сохраняем текущий Range (выделение) при открытии модального окна
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (selection && selection.rangeCount > 0) {
       this.currentRange = selection.getRangeAt(0).cloneRange();
     }

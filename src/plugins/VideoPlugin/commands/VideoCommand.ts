@@ -14,7 +14,7 @@ export class VideoCommand implements Command {
     video.src = this.dataUrl;
     video.controls = true;
 
-    const selection = window.getSelection();
+    const selection = window.getSelection(); // В Command нет доступа к editor
     const range = selection?.getRangeAt(0);
 
     if (range) {

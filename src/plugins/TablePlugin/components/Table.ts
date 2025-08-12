@@ -1,6 +1,7 @@
 // Table.ts
 import { TableCell } from './TableCell';
 import { createContainer } from '../../../utils/helpers.ts';
+import type { HTMLEditor } from '../../../core/HTMLEditor';
 
 export interface TableOptions {
   hasHeader: boolean;
@@ -10,9 +11,11 @@ export interface TableOptions {
 
 export class Table {
   private element: HTMLElement;
+  private editor?: HTMLEditor;
 
-  constructor(options: TableOptions) {
+  constructor(options: TableOptions, editor?: HTMLEditor) {
     this.element = createContainer('html-editor-table table-modern');
+    this.editor = editor;
     this.initialize(options);
   }
 
@@ -25,7 +28,7 @@ export class Table {
         const headerCell = createContainer('table-header-cell');
         headerCell.textContent = `Column ${j + 1}`; // Заголовок столбца
         headerRow.appendChild(headerCell);
-        new TableCell(headerCell);
+        new TableCell(headerCell, this.editor);
       }
       this.element.appendChild(headerRow);
     }
@@ -36,7 +39,7 @@ export class Table {
         const cell = createContainer('table-cell');
         cell.textContent = `Cell ${i + 1} - ${j + 1}`; // Заголовок столбца
         row.appendChild(cell);
-        new TableCell(cell);
+        new TableCell(cell, this.editor);
       }
       this.element.appendChild(row);
     }
@@ -49,7 +52,7 @@ export class Table {
   public focusFirstCell(): void {
     const firstCell = this.element.querySelector('.table-header-cell, .table-cell');
     if (firstCell instanceof HTMLElement) {
-      new TableCell(firstCell).focus();
+      new TableCell(firstCell, this.editor).focus();
     }
   }
 

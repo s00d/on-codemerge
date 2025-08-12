@@ -13,8 +13,10 @@ export interface InsertLazyTableCommandOptions {
 export class InsertLazyTableCommand implements Command {
   private options: InsertLazyTableCommandOptions;
   private range: Range;
+  private editor: HTMLEditor;
 
-  constructor(_editor: HTMLEditor, options: InsertLazyTableCommandOptions, range: Range) {
+  constructor(editor: HTMLEditor, options: InsertLazyTableCommandOptions, range: Range) {
+    this.editor = editor;
     this.options = options;
     this.range = range.cloneRange();
   }
@@ -22,7 +24,7 @@ export class InsertLazyTableCommand implements Command {
   execute(): void {
     const tableId = this.options.tableId || `lazy-table-${Date.now()}`;
     // Вставляем обычную таблицу (1x1, без заголовка)
-    const table = new Table({ hasHeader: false, rows: 1, cols: 1 });
+    const table = new Table({ hasHeader: false, rows: 1, cols: 1 }, this.editor);
     const tableElement = table.getElement();
     tableElement.id = tableId;
     tableElement.setAttribute('data-lazy-url', this.options.url);

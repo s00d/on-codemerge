@@ -133,7 +133,7 @@ export class SpellCheckerPlugin implements Plugin {
   }
 
   private handleMouseUp(_event: MouseEvent): void {
-    const selection = window.getSelection();
+    const selection = this.editor?.getTextFormatter()?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       const selectedText = range.toString();
@@ -145,7 +145,7 @@ export class SpellCheckerPlugin implements Plugin {
   }
 
   private handleContextMenu(event: MouseEvent): void {
-    const selection = window.getSelection();
+    const selection = this.editor?.getTextFormatter()?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       const selectedText = range.toString();

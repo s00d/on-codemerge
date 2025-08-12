@@ -109,7 +109,7 @@ export class TextFormatter {
   }
 
   private applyStyleToSelectedNodes(styleApplier: (element: HTMLElement) => void): void {
-    const selection = window.getSelection();
+    const selection = this.getSelection();
     if (!selection) return;
 
     const nodesToStyle = this.domUtils.getSelectedRoot(selection, false);
@@ -129,7 +129,7 @@ export class TextFormatter {
     return span;
   }
 
-  private getSelection(): Selection | null {
+  public getSelection(): Selection | null {
     if (this.shadowRoot) {
       // В Shadow DOM используем специальный подход
 
@@ -142,7 +142,7 @@ export class TextFormatter {
       }
 
       // Fallback: проверяем основное выделение
-      const mainSelection = window.getSelection();
+      const mainSelection = window.getSelection(); // Используем window.getSelection() как fallback
       if (!mainSelection || mainSelection.rangeCount === 0) {
         return null;
       }
@@ -164,6 +164,7 @@ export class TextFormatter {
         const activeElement = this.shadowRoot.activeElement;
         if (activeElement && activeElement === this.container) {
           // Создаем фейковое выделение для контейнера
+          const container = this.container; // Сохраняем ссылку
           let currentRangeCount = 1;
           const fakeSelection = {
             get rangeCount() {
@@ -171,7 +172,7 @@ export class TextFormatter {
             },
             getRangeAt: (_index: number) => {
               const range = document.createRange();
-              range.selectNodeContents(this.container);
+              range.selectNodeContents(container);
               return range;
             },
             removeAllRanges: () => {
@@ -180,11 +181,11 @@ export class TextFormatter {
             },
             addRange: (range: Range) => {
               // Добавляем диапазон в выделение
-              if (range && this.container.contains(range.commonAncestorContainer)) {
+              if (range && container.contains(range.commonAncestorContainer)) {
                 currentRangeCount = 1;
               }
             },
-            toString: () => this.container.textContent || '',
+            toString: () => container.textContent || '',
           } as Selection;
 
           return fakeSelection;
@@ -194,12 +195,12 @@ export class TextFormatter {
       }
     } else {
       // Обычный режим - используем window.getSelection()
-      return window.getSelection();
+      return window.getSelection(); // В обычном режиме используем глобальное выделение
     }
   }
 
   hasClass(styleCommand: string): boolean {
-    const selection = window.getSelection();
+    const selection = this.getSelection();
     if (!selection || selection.rangeCount === 0) return false;
 
     const nodesToCheck = this.domUtils.getSelectedRoot(selection, true);
@@ -216,7 +217,7 @@ export class TextFormatter {
   }
 
   getStyle(name: keyof CSSStyleDeclaration): string | null | undefined {
-    const selection = window.getSelection();
+    const selection = this.getSelection();
     if (!selection || selection.rangeCount === 0) return null;
 
     const nodesToCheck = this.domUtils.getSelectedRoot(selection, true);

@@ -38,7 +38,7 @@ export class BlockCommand implements Command {
     this.insertedBlock = block;
 
     // Получаем текущую позицию курсора
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     let range: Range;
 
     if (selection && selection.rangeCount > 0) {

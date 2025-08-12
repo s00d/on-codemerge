@@ -11,8 +11,10 @@ export interface ImportTableFromHTMLCommandOptions {
 export class ImportTableFromHTMLCommand implements Command {
   private options: ImportTableFromHTMLCommandOptions;
   private range: Range;
+  private editor: HTMLEditor;
 
-  constructor(_editor: HTMLEditor, options: ImportTableFromHTMLCommandOptions, range: Range) {
+  constructor(editor: HTMLEditor, options: ImportTableFromHTMLCommandOptions, range: Range) {
+    this.editor = editor;
     this.options = options;
     this.range = range.cloneRange();
   }
@@ -21,7 +23,7 @@ export class ImportTableFromHTMLCommand implements Command {
     const tableId = this.options.tableId || `imported-table-${Date.now()}`;
 
     // Создаем временную таблицу с индикатором загрузки
-    const table = new Table({ hasHeader: false, rows: 1, cols: 1 });
+    const table = new Table({ hasHeader: false, rows: 1, cols: 1 }, this.editor);
     const tableElement = table.getElement();
     tableElement.id = tableId;
     tableElement.classList.add('imported-table');

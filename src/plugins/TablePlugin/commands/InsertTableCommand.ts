@@ -6,18 +6,20 @@ import { createLineBreak } from '../../../utils/helpers.ts';
 export class InsertTableCommand implements Command {
   private options: { rows: number; cols: number; hasHeader: boolean };
   private range: Range;
+  private editor: HTMLEditor;
 
   constructor(
-    _editor: HTMLEditor,
+    editor: HTMLEditor,
     options: { rows: number; cols: number; hasHeader: boolean },
     range: Range
   ) {
+    this.editor = editor;
     this.options = options;
     this.range = range.cloneRange();
   }
 
   execute(): void {
-    const table = new Table(this.options);
+    const table = new Table(this.options, this.editor);
     const tableElement = table.getElement();
     const br = createLineBreak();
 

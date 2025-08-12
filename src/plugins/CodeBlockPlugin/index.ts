@@ -85,7 +85,7 @@ export class CodeBlockPlugin implements Plugin {
 
       const container = this.editor!.getContainer();
 
-      const selection = window.getSelection();
+      const selection = this.editor!.getTextFormatter()?.getSelection();
       let range: Range;
 
       if (selection && selection.rangeCount > 0) {

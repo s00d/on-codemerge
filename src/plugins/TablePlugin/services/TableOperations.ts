@@ -1,7 +1,13 @@
 import { TableCell } from '../components/TableCell';
+import type { HTMLEditor } from '../../../core/HTMLEditor';
 
 export class TableOperations {
-  static addRow(table: HTMLElement, cell: HTMLElement, before: boolean = false): HTMLElement {
+  static addRow(
+    table: HTMLElement,
+    cell: HTMLElement,
+    before: boolean = false,
+    editor?: HTMLEditor
+  ): HTMLElement {
     const rowIndex = Array.from(table.querySelectorAll('.table-header-row, .table-row')).indexOf(
       cell.parentElement as HTMLElement
     );
@@ -16,7 +22,7 @@ export class TableOperations {
       const newCell = document.createElement('div');
       newCell.className = 'table-cell';
       newCell.contentEditable = 'true';
-      new TableCell(newCell);
+      new TableCell(newCell, editor);
       newRow.appendChild(newCell);
     }
 
@@ -30,7 +36,12 @@ export class TableOperations {
     return newRow;
   }
 
-  static addColumn(table: HTMLElement, cell: HTMLElement, before: boolean = false): HTMLElement[] {
+  static addColumn(
+    table: HTMLElement,
+    cell: HTMLElement,
+    before: boolean = false,
+    editor?: HTMLEditor
+  ): HTMLElement[] {
     const cellIndex = Array.from(
       (cell.parentElement as HTMLElement).querySelectorAll('.table-cell, .table-header-cell')
     ).indexOf(cell);
@@ -45,7 +56,7 @@ export class TableOperations {
       if (row.classList.contains('table-row')) {
         newCell.contentEditable = 'true';
       }
-      new TableCell(newCell);
+      new TableCell(newCell, editor);
 
       const cells = row.querySelectorAll('.table-cell, .table-header-cell');
       if (before) {

@@ -56,7 +56,7 @@ export class BlockStylePlugin {
   }
 
   private handleSelectionChange(): void {
-    const selection = window.getSelection();
+    const selection = this.editor?.getTextFormatter()?.getSelection();
     if (!selection || selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);

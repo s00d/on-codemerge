@@ -90,7 +90,7 @@ export class FileUploadPlugin implements Plugin {
 
     this.editor?.ensureEditorFocus();
 
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     if (selection && selection.rangeCount > 0) {
       const range = selection.getRangeAt(0);
       range.deleteContents();

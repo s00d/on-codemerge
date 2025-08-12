@@ -108,7 +108,7 @@ export class ChartsPlugin implements Plugin {
 
     // Create a new range at the end if no selection exists
     const container = this.editor.getContainer();
-    const selection = window.getSelection();
+    const selection = this.editor.getTextFormatter()?.getSelection();
     let range: Range;
 
     const createRangeAtEnd = () => {
