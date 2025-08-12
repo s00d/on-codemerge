@@ -48,7 +48,6 @@ document.addEventListener('DOMContentLoaded', async () => {
       mode: 'shadowRoot',
     });
 
-
     // Примеры других режимов:
 
     // const editor = new HTMLEditor(appDiv, {

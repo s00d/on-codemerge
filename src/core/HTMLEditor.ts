@@ -132,6 +132,15 @@ export class HTMLEditor {
           shadowRoot.appendChild(newStyle);
         });
       }
+
+      // Копируем link элементы со стилями (включая prefetch в production)
+      const linkElements = document.querySelectorAll('link[rel="stylesheet"], link[rel="prefetch"]');
+      linkElements.forEach((link) => {
+        const newLink = document.createElement('link');
+        newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для Shadow DOM
+        newLink.href = (link as HTMLLinkElement).href;
+        shadowRoot.appendChild(newLink);
+      });
     } catch (error) {
       // Fallback: копируем стили
       const styleElements = document.querySelectorAll('style');
@@ -139,6 +148,15 @@ export class HTMLEditor {
         const newStyle = document.createElement('style');
         newStyle.textContent = style.textContent || '';
         shadowRoot.appendChild(newStyle);
+      });
+
+      // Fallback для link элементов
+      const linkElements = document.querySelectorAll('link[rel="stylesheet"], link[rel="prefetch"]');
+      linkElements.forEach((link) => {
+        const newLink = document.createElement('link');
+        newLink.rel = 'stylesheet';
+        newLink.href = (link as HTMLLinkElement).href;
+        shadowRoot.appendChild(newLink);
       });
     }
   }
@@ -154,11 +172,11 @@ export class HTMLEditor {
         iframeDocument.head.appendChild(newStyle);
       });
 
-      // Копируем link элементы со стилями
-      const linkElements = document.querySelectorAll('link[rel="stylesheet"]');
+      // Копируем link элементы со стилями (включая prefetch в production)
+      const linkElements = document.querySelectorAll('link[rel="stylesheet"], link[rel="prefetch"]');
       linkElements.forEach((link) => {
         const newLink = iframeDocument.createElement('link');
-        newLink.rel = 'stylesheet';
+        newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для iframe
         newLink.href = (link as HTMLLinkElement).href;
         iframeDocument.head.appendChild(newLink);
       });
