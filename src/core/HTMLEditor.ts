@@ -168,7 +168,7 @@ export class HTMLEditor {
 
     // Если страница уже загружена, применяем стили сразу
     if (document.readyState === 'complete') {
-      applyStyles()
+      applyStyles();
     } else {
       // Иначе ждем полной загрузки страницы
       window.addEventListener('load', applyStyles);
@@ -209,7 +209,7 @@ export class HTMLEditor {
 
     // Если страница уже загружена, применяем стили сразу
     if (document.readyState === 'complete') {
-      applyStyles()
+      applyStyles();
     } else {
       // Иначе ждем полной загрузки страницы
       window.addEventListener('load', applyStyles);
