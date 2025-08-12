@@ -200,18 +200,3 @@ editor.addStyle(`
 **Performance issues:**
 - Shadow DOM mode provides good balance of isolation and performance
 - Iframe mode may have slight performance overhead due to isolation
-
-## Demo
-<script setup>
-import EditorComponent from '../components/EditorComponent.vue';
-</script>
-
-### Direct Mode (Default)
-<EditorComponent :showDescription=false />
-
-### Shadow DOM Mode
-<EditorComponent :showDescription=false mode="shadowRoot" />
-
-### Iframe Mode
-<EditorComponent :showDescription=false mode="iframe" />
-
