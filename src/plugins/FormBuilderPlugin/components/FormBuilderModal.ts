@@ -604,6 +604,9 @@ export class FormBuilderModal {
     // Закрываем текущую модалку
     this.popup?.hide();
 
+    // Сохраняем позицию курсора перед открытием модального окна шаблонов
+    const savedPosition = this.editor.saveCursorPosition();
+
     // Открываем модалку шаблонов
     this.templatesModal?.show((template) => {
       if (template && template.config) {
@@ -611,32 +614,17 @@ export class FormBuilderModal {
         const newFormBuilderModal = new FormBuilderModal(this.editor);
         newFormBuilderModal.show(
           (formConfig: FormConfig) => {
+            // Восстанавливаем позицию курсора
+            if (savedPosition) {
+              this.editor.restoreCursorPosition(savedPosition);
+            }
+            
             // Создаем форму с использованием formManager, как в основном файле
             const formHtml = this.formManager.createForm(formConfig);
 
-            // Восстанавливаем позицию курсора и вставляем форму
-            this.editor.ensureEditorFocus();
-            const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
-
-            if (range) {
-              const formElement = document.createElement('div');
-              formElement.innerHTML = formHtml;
-
-              // Получаем элемент формы
-              const formNode = formElement.firstElementChild;
-
-              if (formNode) {
-                range.deleteContents();
-                range.insertNode(formNode);
-                range.collapse(false);
-                this.editor.getSelector()?.saveSelection();
-              }
-            } else {
-              // Fallback: если не удалось восстановить позицию, используем insertContent
-              this.editor?.insertContent(formHtml);
-            }
-
-            this.editor?.insertContent(createLineBreak());
+            // Вставляем форму используя встроенный метод insertContent
+            this.editor.insertContent(formHtml);
+            this.editor.insertContent(createLineBreak());
           },
           false,
           null

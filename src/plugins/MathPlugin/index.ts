@@ -31,7 +31,6 @@ export class MathPlugin implements Plugin {
     this.setupMathEvents();
     this.editor.on('math', () => {
       this.insertMath();
-      this.editor?.getSelector()?.saveSelection();
     });
 
     this.editor.on('drag-start', ({ e }: { e: DragEvent }) => {
@@ -55,11 +54,6 @@ export class MathPlugin implements Plugin {
 
     this.editor.on('drag-drop', ({ e }: { e: DragEvent }) => {
       this.handleDrop(e);
-    });
-
-    this.editor.on('math', () => {
-      this.editor?.getSelector()?.saveSelection();
-      this.insertMath();
     });
   }
 
@@ -117,7 +111,6 @@ export class MathPlugin implements Plugin {
       icon: mathIcon,
       title: this.editor?.t('Insert Math'),
       onClick: () => {
-        this.editor?.getSelector()?.saveSelection();
         this.insertMath();
       },
     });
@@ -172,31 +165,24 @@ export class MathPlugin implements Plugin {
   private insertMath(): void {
     if (!this.editor) return;
 
-    this.editor.ensureEditorFocus();
-
-    const selection = this.editor.getTextFormatter()?.getSelection();
-    let range = this.editor?.getSelector()?.restoreSelection(this.editor.getContainer());
-    if (!range) {
-      range = document.createRange();
-      range.selectNodeContents(this.editor.getContainer());
-      range.collapse(false);
-    }
+    // Сохраняем позицию курсора перед открытием меню
+    const savedPosition = this.editor.saveCursorPosition();
 
     this.menu?.show((mathElement) => {
       if (!this.editor) return;
+
+      // Восстанавливаем позицию курсора
+      if (savedPosition) {
+        this.editor.restoreCursorPosition(savedPosition);
+      }
 
       const wrapper = createSpan('math-wrapper my-4');
       wrapper.draggable = true;
       wrapper.appendChild(mathElement);
       wrapper.appendChild(createLineBreak());
 
-      range.deleteContents();
-      range.insertNode(wrapper);
-
-      range.setStartAfter(wrapper);
-      range.setEndAfter(wrapper);
-      selection?.removeAllRanges();
-      selection?.addRange(range);
+      // Используем встроенный метод insertContent для вставки математической формулы
+      this.editor.insertContent(wrapper);
     });
   }
 

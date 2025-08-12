@@ -114,8 +114,15 @@ export class TablePlugin implements Plugin {
     this.setupKeyboardShortcuts();
 
     this.editor.on('table', () => {
-      this.editor?.getSelector()?.saveSelection();
-      this.popup?.show((options) => this.insertTable(options));
+      // Сохраняем позицию курсора перед открытием popup
+      const savedPosition = this.editor?.saveCursorPosition();
+      this.popup?.show((options) => {
+        // Восстанавливаем позицию курсора
+        if (savedPosition) {
+          this.editor?.restoreCursorPosition(savedPosition);
+        }
+        this.insertTable(options);
+      });
     });
   }
 
@@ -126,8 +133,15 @@ export class TablePlugin implements Plugin {
         icon: tableIcon,
         title: this.editor?.t('Insert Table'),
         onClick: () => {
-          this.editor?.getSelector()?.saveSelection();
-          this.popup?.show((options) => this.insertTable(options));
+          // Сохраняем позицию курсора перед открытием popup
+          const savedPosition = this.editor?.saveCursorPosition();
+          this.popup?.show((options) => {
+            // Восстанавливаем позицию курсора
+            if (savedPosition) {
+              this.editor?.restoreCursorPosition(savedPosition);
+            }
+            this.insertTable(options);
+          });
         },
       });
       toolbar.appendChild(button);
@@ -152,13 +166,28 @@ export class TablePlugin implements Plugin {
     if (!this.editor) return;
 
     this.editor.on('insert-table', () => {
-      this.popup?.show((options) => this.insertTable(options));
+      // Сохраняем позицию курсора перед открытием popup
+      const savedPosition = this.editor?.saveCursorPosition();
+      this.popup?.show((options) => {
+        // Восстанавливаем позицию курсора
+        if (savedPosition) {
+          this.editor?.restoreCursorPosition(savedPosition);
+        }
+        this.insertTable(options);
+      });
     });
 
     this.editor.on('insert-lazy-table', () => {
-      this.editor?.getSelector()?.saveSelection();
-      const range = this.editor?.getSelector()?.getSelection();
-      if (range) {
+      // Сохраняем позицию курсора перед открытием модального окна
+      const savedPosition = this.editor?.saveCursorPosition();
+      if (savedPosition) {
+        this.editor?.restoreCursorPosition(savedPosition);
+      }
+      
+      // Получаем текущий диапазон после восстановления позиции
+      const selection = this.editor?.getTextFormatter()?.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
         new LazyTableModal(this.editor!, range).show();
       }
     });
@@ -172,9 +201,16 @@ export class TablePlugin implements Plugin {
     });
 
     this.editor.on('import-from-html', () => {
-      this.editor?.getSelector()?.saveSelection();
-      const range = this.editor?.getSelector()?.getSelection();
-      if (range) {
+      // Сохраняем позицию курсора перед открытием модального окна
+      const savedPosition = this.editor?.saveCursorPosition();
+      if (savedPosition) {
+        this.editor?.restoreCursorPosition(savedPosition);
+      }
+      
+      // Получаем текущий диапазон после восстановления позиции
+      const selection = this.editor?.getTextFormatter()?.getSelection();
+      if (selection && selection.rangeCount > 0) {
+        const range = selection.getRangeAt(0);
         const modal = new LazyTableModal(this.editor!, range);
         modal.show();
       }
@@ -506,15 +542,8 @@ export class TablePlugin implements Plugin {
       table.appendChild(row);
     }
 
-    // Вставляем таблицу в редактор
-    this.editor.ensureEditorFocus();
-    const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
-    if (range) {
-      range.deleteContents();
-      range.insertNode(table);
-      range.collapse(false);
-      this.editor.getSelector()?.saveSelection();
-    }
+    // Вставляем таблицу в редактор используя встроенный метод
+    this.editor.insertContent(table);
 
     // Сохраняем таблицу в селекторе
     this.editor.getSelector()?.saveTable(table);

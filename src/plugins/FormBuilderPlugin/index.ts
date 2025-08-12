@@ -53,34 +53,23 @@ export class FormBuilderPlugin implements Plugin {
    * Open form builder modal
    */
   private openFormBuilder(): void {
+    // Сохраняем позицию курсора перед открытием модального окна
+    const savedPosition = this.editor.saveCursorPosition();
+    
     const formBuilderModal = new FormBuilderModal(this.editor);
     formBuilderModal.show(
       (formConfig: FormConfig) => {
+        // Восстанавливаем позицию курсора
+        if (savedPosition) {
+          this.editor.restoreCursorPosition(savedPosition);
+        }
+        
         const formHtml = this.formManager.createForm(formConfig);
 
-        // Восстанавливаем позицию курсора и вставляем форму
-        this.editor.ensureEditorFocus();
-        const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
-
-        if (range) {
-          const formElement = document.createElement('div');
-          formElement.innerHTML = formHtml;
-
-          // Получаем элемент формы
-          const formNode = formElement.firstElementChild;
-
-          if (formNode) {
-            range.deleteContents();
-            range.insertNode(formNode);
-            range.collapse(false);
-            this.editor.getSelector()?.saveSelection();
-          }
-        } else {
-          // Fallback: если не удалось восстановить позицию, используем insertContent
-          this.editor.insertContent(formHtml);
-        }
-
+        // Вставляем форму используя встроенный метод insertContent
+        this.editor.insertContent(formHtml);
         this.editor.insertContent(createLineBreak());
+        
         // destroy не нужен, popup просто скрывается
       },
       false,
@@ -173,7 +162,6 @@ export class FormBuilderPlugin implements Plugin {
         icon: formIcon,
         title: this.editor.t('Insert Form'),
         onClick: () => {
-          this.editor?.getSelector()?.saveSelection();
           this.openFormBuilder();
         },
       });

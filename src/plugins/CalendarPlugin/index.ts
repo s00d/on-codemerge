@@ -158,11 +158,15 @@ export class CalendarPlugin implements Plugin {
     if (!this.editor) return;
 
     // Сохраняем позицию курсора перед открытием меню
-    this.editor.getSelector()?.saveSelection();
+    const savedPosition = this.editor.saveCursorPosition();
 
     // Сначала показываем список календарей
     this.menu?.show((calendarData: Calendar) => {
       if (this.editor) {
+        // Восстанавливаем позицию курсора перед вставкой
+        if (savedPosition) {
+          this.editor.restoreCursorPosition(savedPosition);
+        }
         this.insertCalendar(calendarData);
       }
     });
@@ -173,26 +177,8 @@ export class CalendarPlugin implements Plugin {
 
     const calendarHtml = this.manager.generateCalendarHTML(calendarData);
 
-    // Восстанавливаем позицию курсора и вставляем календарь
-    this.editor.ensureEditorFocus();
-    const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
-
-    if (range) {
-      const calendarElement = document.createElement('div');
-      calendarElement.innerHTML = calendarHtml;
-      const calendarNode = calendarElement.firstElementChild;
-
-      if (calendarNode) {
-        range.deleteContents();
-        range.insertNode(calendarNode);
-        range.collapse(false);
-        this.editor.getSelector()?.saveSelection();
-      }
-    } else {
-      // Fallback: если не удалось восстановить позицию, используем insertContent
-      this.editor.insertContent(calendarHtml);
-    }
-
+    // Используем встроенный метод insertContent для вставки календаря
+    this.editor.insertContent(calendarHtml);
     this.editor.insertContent(createLineBreak());
   }
 

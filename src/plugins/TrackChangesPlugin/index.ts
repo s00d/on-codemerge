@@ -21,21 +21,77 @@ export class TrackChangesPlugin implements Plugin {
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
+    
+    // Проверяем, не добавлена ли уже кнопка
+    if (toolbar.querySelector('[data-track-changes-button]')) {
+      return;
+    }
+    
     const button = createToolbarButton({
       icon: trackChangesIcon,
       title: this.editor?.t('Track Changes'),
       onClick: () => this.toggle(),
     });
+    
+    // Добавляем атрибут для идентификации
+    button.setAttribute('data-track-changes-button', 'true');
+    
     toolbar.appendChild(button);
   }
 
   private toggle(): void {
     this.enabled = !this.enabled;
-    if (this.enabled) {
-      this.editor?.showInfoNotification(this.editor.t('Track changes enabled'));
-    } else {
-      this.editor?.showInfoNotification(this.editor.t('Track changes disabled'));
+    
+    // Показываем уведомление внутри редактора вместо глобального
+    if (this.editor) {
+      const message = this.enabled 
+        ? this.editor.t('Track changes enabled') 
+        : this.editor.t('Track changes disabled');
+      
+      // Создаем временное уведомление внутри редактора
+      this.showInlineNotification(message);
     }
+  }
+
+  private showInlineNotification(message: string): void {
+    if (!this.editor) return;
+    
+    const domContext = this.editor.getDOMContext();
+    if (!domContext) return;
+    
+    // Удаляем предыдущие уведомления, если они есть
+    const existingNotifications = domContext.querySelectorAll('.track-changes-notification');
+    existingNotifications.forEach(notification => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    });
+    
+    const notification = document.createElement('div');
+    notification.className = 'track-changes-notification';
+    notification.id = `track-changes-notification-${Date.now()}`;
+    notification.textContent = message;
+    notification.style.cssText = `
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: #3b82f6;
+      color: white;
+      padding: 8px 16px;
+      border-radius: 6px;
+      font-size: 14px;
+      z-index: 1000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    `;
+
+    domContext.appendChild(notification);
+
+    // Автоматически удаляем через 3 секунды
+    setTimeout(() => {
+      if (notification.parentNode) {
+        notification.parentNode.removeChild(notification);
+      }
+    }, 3000);
   }
 
   private handleInput = (e: Event): void => {

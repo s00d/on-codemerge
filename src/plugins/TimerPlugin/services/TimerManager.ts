@@ -180,9 +180,8 @@ export class TimerManager {
     const updateScript = `
       <script>
         (function() {
-          const timerId = '${timer.id}';
-          const targetDate = new Date('${targetDate.toISOString()}');
-          const expiredText = '${this.editor.t('Time expired')}';
+          const targetDate = new Date('${timer.targetDate}T${timer.targetTime}');
+          const expiredText = '${this.editor.t('Timer expired') || 'Timer expired'}';
           
           function updateTimer() {
             const now = new Date();
@@ -190,7 +189,7 @@ export class TimerManager {
             
             if (diff <= 0) {
               // Таймер истек
-              const countdownEl = this.editor.getDOMContext().getElementById('timer-countdown-' + timerId);
+              const countdownEl = document.querySelector('[data-timer-id="${timer.id}"] .timer-countdown');
               if (countdownEl) {
                 countdownEl.innerHTML = '<div class="timer-expired">' + expiredText + '</div>';
               }
@@ -202,15 +201,18 @@ export class TimerManager {
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
             
-            const daysEl = this.editor.getDOMContext().getElementById('timer-days-' + timerId);
-            const hoursEl = this.editor.getDOMContext().getElementById('timer-hours-' + timerId);
-            const minutesEl = this.editor.getDOMContext().getElementById('timer-minutes-' + timerId);
-            const secondsEl = this.editor.getDOMContext().getElementById('timer-seconds-' + timerId);
-            
-            if (daysEl) daysEl.textContent = days;
-            if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
-            if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
-            if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+            const timerElement = document.querySelector('[data-timer-id="${timer.id}"]');
+            if (timerElement) {
+              const daysEl = timerElement.querySelector('.timer-days');
+              const hoursEl = timerElement.querySelector('.timer-hours');
+              const minutesEl = timerElement.querySelector('.timer-minutes');
+              const secondsEl = timerElement.querySelector('.timer-seconds');
+              
+              if (daysEl) daysEl.textContent = days;
+              if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
+              if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
+              if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
+            }
           }
           
           // Обновляем каждую секунду

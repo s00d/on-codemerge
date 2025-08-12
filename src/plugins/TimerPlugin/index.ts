@@ -133,11 +133,15 @@ export class TimerPlugin implements Plugin {
     if (!this.editor) return;
 
     // Сохраняем позицию курсора перед открытием меню
-    this.editor.getSelector()?.saveSelection();
+    const savedPosition = this.editor.saveCursorPosition();
 
     // Показываем меню таймеров
     this.menu?.show((timerData: Timer) => {
       if (this.editor) {
+        // Восстанавливаем позицию курсора перед вставкой
+        if (savedPosition) {
+          this.editor.restoreCursorPosition(savedPosition);
+        }
         this.insertTimer(timerData);
       }
     });
@@ -148,36 +152,8 @@ export class TimerPlugin implements Plugin {
 
     const timerHtml = this.manager.generateTimerHTML(timerData);
 
-    // Восстанавливаем позицию курсора и вставляем таймер
-    this.editor.ensureEditorFocus();
-    const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
-
-    if (range) {
-      const timerElement = document.createElement('div');
-      timerElement.innerHTML = timerHtml;
-
-      // Получаем элемент таймера и скрипт
-      const timerNode = timerElement.firstElementChild;
-      const scriptNode = timerElement.querySelector('script');
-
-      if (timerNode) {
-        range.deleteContents();
-        range.insertNode(timerNode);
-
-        // Добавляем скрипт после элемента таймера
-        if (scriptNode) {
-          scriptNode.setAttribute('data-timer-id', timerData.id);
-          range.insertNode(scriptNode);
-        }
-
-        range.collapse(false);
-        this.editor.getSelector()?.saveSelection();
-      }
-    } else {
-      // Fallback: если не удалось восстановить позицию, используем insertContent
-      this.editor.insertContent(timerHtml);
-    }
-
+    // Используем встроенный метод insertContent для вставки таймера
+    this.editor.insertContent(timerHtml);
     this.editor.insertContent(createLineBreak());
   }
 
@@ -208,10 +184,12 @@ export class TimerPlugin implements Plugin {
         }
 
         // Заменяем элемент таймера
-        element.parentNode.replaceChild(newTimerElement, element);
+        if (element.parentNode) {
+          element.parentNode.replaceChild(newTimerElement, element);
+        }
 
         // Добавляем новый скрипт, если он есть
-        if (newScript) {
+        if (newScript && element.parentNode) {
           newScript.setAttribute('data-timer-id', timerId);
           element.parentNode.appendChild(newScript);
         }

@@ -78,28 +78,21 @@ export class CodeBlockPlugin implements Plugin {
   private insertCodeBlock(): void {
     if (!this.editor) return;
 
+    // Сохраняем текущую позицию курсора перед открытием модального окна
+    const savedPosition = this.editor.saveCursorPosition();
+
     this.modal?.show((code, language) => {
-      const block = this.createCodeBlock(code, language);
-
-      this.editor!.ensureEditorFocus();
-
-      const container = this.editor!.getContainer();
-
-      const selection = this.editor!.getTextFormatter()?.getSelection();
-      let range: Range;
-
-      if (selection && selection.rangeCount > 0) {
-        range = selection.getRangeAt(0);
-      } else {
-        range = document.createRange();
-        range.selectNodeContents(container);
-        range.collapse(false);
+      // Восстанавливаем позицию курсора
+      if (savedPosition) {
+        this.editor!.restoreCursorPosition(savedPosition);
       }
-
-      range.deleteContents();
-      range.insertNode(block);
-      range.collapse(false);
-
+      
+      // Создаем HTML для блока кода
+      const block = this.createCodeBlock(code, language);
+      
+      // Используем встроенный метод insertContent из ядра
+      this.editor!.insertContent(block);
+      
       // Подсветка синтаксиса
       const codeElement = block.querySelector('code');
       if (codeElement) {

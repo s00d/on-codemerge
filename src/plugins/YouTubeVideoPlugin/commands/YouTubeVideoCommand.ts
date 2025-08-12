@@ -4,8 +4,10 @@ import { createIframe } from '../../../utils/helpers.ts';
 
 export class YouTubeVideoCommand implements Command {
   private videoUrl: string;
+  private editor: HTMLEditor;
 
-  constructor(_editor: HTMLEditor, videoUrl: string) {
+  constructor(editor: HTMLEditor, videoUrl: string) {
+    this.editor = editor;
     this.videoUrl = videoUrl;
   }
 
@@ -20,14 +22,8 @@ export class YouTubeVideoCommand implements Command {
     iframe.frameBorder = '0';
     iframe.allowFullscreen = true;
 
-    const selection = window.getSelection(); // В Command нет доступа к editor
-    const range = selection?.getRangeAt(0);
-
-    if (range) {
-      range.deleteContents();
-      range.insertNode(iframe);
-      range.collapse(false);
-    }
+    // Используем встроенный метод insertContent для вставки YouTube видео
+    this.editor.insertContent(iframe);
   }
 
   private extractYouTubeVideoId(url: string): string | null {

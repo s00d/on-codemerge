@@ -29,27 +29,8 @@ export class DuplicateFormCommand implements Command {
     // Создаем HTML дублированной формы
     const formHtml = this.formManager.createForm(duplicatedConfig);
 
-    // Восстанавливаем позицию курсора и вставляем форму
-    this.editor.ensureEditorFocus();
-    const range = this.editor.getSelector()?.restoreSelection(this.editor.getContainer());
-
-    if (range) {
-      const formElement = document.createElement('div');
-      formElement.innerHTML = formHtml;
-
-      // Получаем элемент формы
-      const formNode = formElement.firstElementChild;
-
-      if (formNode) {
-        range.deleteContents();
-        range.insertNode(formNode);
-        range.collapse(false);
-        this.editor.getSelector()?.saveSelection();
-      }
-    } else {
-      // Fallback: если не удалось восстановить позицию, вставляем после исходной формы
-      this.formElement.insertAdjacentHTML('afterend', formHtml);
-    }
+    // Вставляем дублированную форму после исходной формы
+    this.formElement.insertAdjacentHTML('afterend', formHtml);
 
     // Добавляем перенос строки
     this.editor.insertContent(createLineBreak());

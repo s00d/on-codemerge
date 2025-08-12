@@ -4,8 +4,10 @@ import { createVideo } from '../../../utils/helpers.ts';
 
 export class VideoCommand implements Command {
   private dataUrl: string;
+  private editor: HTMLEditor;
 
-  constructor(_editor: HTMLEditor, dataUrl: string) {
+  constructor(editor: HTMLEditor, dataUrl: string) {
+    this.editor = editor;
     this.dataUrl = dataUrl;
   }
 
@@ -14,13 +16,7 @@ export class VideoCommand implements Command {
     video.src = this.dataUrl;
     video.controls = true;
 
-    const selection = window.getSelection(); // В Command нет доступа к editor
-    const range = selection?.getRangeAt(0);
-
-    if (range) {
-      range.deleteContents();
-      range.insertNode(video);
-      range.collapse(false);
-    }
+    // Используем встроенный метод insertContent для вставки видео
+    this.editor.insertContent(video);
   }
 }

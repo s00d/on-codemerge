@@ -56,7 +56,9 @@ export class Selector {
   }
 
   public restoreSelection(container: HTMLElement): Range | null {
-    if (!this.lastSelection) return null;
+    if (!this.lastSelection) {
+      return null;
+    }
 
     // Проверяем, что начальный и конечный узлы диапазона находятся внутри контейнера
     const startContainer = this.lastSelection.startContainer;
