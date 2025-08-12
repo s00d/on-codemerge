@@ -183,7 +183,7 @@ export class TablePlugin implements Plugin {
       if (savedPosition) {
         this.editor?.restoreCursorPosition(savedPosition);
       }
-      
+
       // Получаем текущий диапазон после восстановления позиции
       const selection = this.editor?.getTextFormatter()?.getSelection();
       if (selection && selection.rangeCount > 0) {
@@ -206,7 +206,7 @@ export class TablePlugin implements Plugin {
       if (savedPosition) {
         this.editor?.restoreCursorPosition(savedPosition);
       }
-      
+
       // Получаем текущий диапазон после восстановления позиции
       const selection = this.editor?.getTextFormatter()?.getSelection();
       if (selection && selection.rangeCount > 0) {

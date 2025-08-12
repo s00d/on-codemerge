@@ -618,7 +618,7 @@ export class FormBuilderModal {
             if (savedPosition) {
               this.editor.restoreCursorPosition(savedPosition);
             }
-            
+
             // Создаем форму с использованием formManager, как в основном файле
             const formHtml = this.formManager.createForm(formConfig);
 

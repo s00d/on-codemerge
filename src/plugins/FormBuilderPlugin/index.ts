@@ -55,7 +55,7 @@ export class FormBuilderPlugin implements Plugin {
   private openFormBuilder(): void {
     // Сохраняем позицию курсора перед открытием модального окна
     const savedPosition = this.editor.saveCursorPosition();
-    
+
     const formBuilderModal = new FormBuilderModal(this.editor);
     formBuilderModal.show(
       (formConfig: FormConfig) => {
@@ -63,13 +63,13 @@ export class FormBuilderPlugin implements Plugin {
         if (savedPosition) {
           this.editor.restoreCursorPosition(savedPosition);
         }
-        
+
         const formHtml = this.formManager.createForm(formConfig);
 
         // Вставляем форму используя встроенный метод insertContent
         this.editor.insertContent(formHtml);
         this.editor.insertContent(createLineBreak());
-        
+
         // destroy не нужен, popup просто скрывается
       },
       false,

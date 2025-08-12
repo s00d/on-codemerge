@@ -21,33 +21,33 @@ export class TrackChangesPlugin implements Plugin {
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
-    
+
     // Проверяем, не добавлена ли уже кнопка
     if (toolbar.querySelector('[data-track-changes-button]')) {
       return;
     }
-    
+
     const button = createToolbarButton({
       icon: trackChangesIcon,
       title: this.editor?.t('Track Changes'),
       onClick: () => this.toggle(),
     });
-    
+
     // Добавляем атрибут для идентификации
     button.setAttribute('data-track-changes-button', 'true');
-    
+
     toolbar.appendChild(button);
   }
 
   private toggle(): void {
     this.enabled = !this.enabled;
-    
+
     // Показываем уведомление внутри редактора вместо глобального
     if (this.editor) {
-      const message = this.enabled 
-        ? this.editor.t('Track changes enabled') 
+      const message = this.enabled
+        ? this.editor.t('Track changes enabled')
         : this.editor.t('Track changes disabled');
-      
+
       // Создаем временное уведомление внутри редактора
       this.showInlineNotification(message);
     }
@@ -55,18 +55,18 @@ export class TrackChangesPlugin implements Plugin {
 
   private showInlineNotification(message: string): void {
     if (!this.editor) return;
-    
+
     const domContext = this.editor.getDOMContext();
     if (!domContext) return;
-    
+
     // Удаляем предыдущие уведомления, если они есть
     const existingNotifications = domContext.querySelectorAll('.track-changes-notification');
-    existingNotifications.forEach(notification => {
+    existingNotifications.forEach((notification) => {
       if (notification.parentNode) {
         notification.parentNode.removeChild(notification);
       }
     });
-    
+
     const notification = document.createElement('div');
     notification.className = 'track-changes-notification';
     notification.id = `track-changes-notification-${Date.now()}`;

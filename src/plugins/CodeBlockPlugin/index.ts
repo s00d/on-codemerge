@@ -86,13 +86,13 @@ export class CodeBlockPlugin implements Plugin {
       if (savedPosition) {
         this.editor!.restoreCursorPosition(savedPosition);
       }
-      
+
       // Создаем HTML для блока кода
       const block = this.createCodeBlock(code, language);
-      
+
       // Используем встроенный метод insertContent из ядра
       this.editor!.insertContent(block);
-      
+
       // Подсветка синтаксиса
       const codeElement = block.querySelector('code');
       if (codeElement) {
