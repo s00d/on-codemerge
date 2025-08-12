@@ -134,7 +134,9 @@ export class HTMLEditor {
       }
 
       // Копируем link элементы со стилями (включая prefetch в production)
-      const linkElements = document.querySelectorAll('link[rel="stylesheet"], link[rel="prefetch"]');
+      const linkElements = document.querySelectorAll(
+        'link[rel="stylesheet"], link[rel="prefetch"]'
+      );
       linkElements.forEach((link) => {
         const newLink = document.createElement('link');
         newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для Shadow DOM
@@ -151,7 +153,9 @@ export class HTMLEditor {
       });
 
       // Fallback для link элементов
-      const linkElements = document.querySelectorAll('link[rel="stylesheet"], link[rel="prefetch"]');
+      const linkElements = document.querySelectorAll(
+        'link[rel="stylesheet"], link[rel="prefetch"]'
+      );
       linkElements.forEach((link) => {
         const newLink = document.createElement('link');
         newLink.rel = 'stylesheet';
@@ -173,7 +177,9 @@ export class HTMLEditor {
       });
 
       // Копируем link элементы со стилями (включая prefetch в production)
-      const linkElements = document.querySelectorAll('link[rel="stylesheet"], link[rel="prefetch"]');
+      const linkElements = document.querySelectorAll(
+        'link[rel="stylesheet"], link[rel="prefetch"]'
+      );
       linkElements.forEach((link) => {
         const newLink = iframeDocument.createElement('link');
         newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для iframe
