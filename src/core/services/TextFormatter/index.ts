@@ -4,18 +4,28 @@ import { StyleManager } from './StyleManager';
 export class TextFormatter {
   private domUtils: DomUtils;
   private readonly styleManager: StyleManager;
+  private shadowRoot: ShadowRoot | null = null;
 
-  constructor(private container: HTMLElement) {
+  constructor(
+    private container: HTMLElement,
+    shadowRoot?: ShadowRoot
+  ) {
     this.domUtils = new DomUtils(container);
     this.styleManager = new StyleManager();
+    this.shadowRoot = shadowRoot || null;
   }
 
   toggleStyle(styleCommand: string): void {
-    const selection = window.getSelection();
-    if (!selection) return;
+    // Получаем выделение в зависимости от контекста
+    const selection = this.getSelection();
+    if (!selection) {
+      return;
+    }
 
     const nodesToStyle = this.domUtils.getSelectedRoot(selection);
-    if (!nodesToStyle) return;
+    if (!nodesToStyle) {
+      return;
+    }
 
     nodesToStyle.forEach((node) => {
       // Обернуть текстовый узел в <span>, если это необходимо
@@ -117,6 +127,75 @@ export class TextFormatter {
     node.parentNode?.replaceChild(span, node);
     span.appendChild(node);
     return span;
+  }
+
+  private getSelection(): Selection | null {
+    if (this.shadowRoot) {
+      // В Shadow DOM используем специальный подход
+
+      // Попробуем получить выделение из Shadow DOM напрямую
+      if ('getSelection' in this.shadowRoot) {
+        const shadowSelection = (this.shadowRoot as any).getSelection();
+        if (shadowSelection && shadowSelection.rangeCount > 0) {
+          return shadowSelection;
+        }
+      }
+
+      // Fallback: проверяем основное выделение
+      const mainSelection = window.getSelection();
+      if (!mainSelection || mainSelection.rangeCount === 0) {
+        return null;
+      }
+
+      // Проверяем, находится ли выделение в нашем Shadow DOM
+      const range = mainSelection.getRangeAt(0);
+      const commonAncestor = range.commonAncestorContainer;
+
+      // Проверяем, находится ли выделение в нашем Shadow DOM
+      if (
+        this.shadowRoot.contains(commonAncestor) ||
+        (commonAncestor.nodeType === Node.ELEMENT_NODE &&
+          this.shadowRoot.contains(commonAncestor as Element))
+      ) {
+        return mainSelection;
+      } else {
+        // Попробуем найти выделение внутри Shadow DOM альтернативным способом
+        // Проверим, есть ли активный элемент внутри Shadow DOM
+        const activeElement = this.shadowRoot.activeElement;
+        if (activeElement && activeElement === this.container) {
+          // Создаем фейковое выделение для контейнера
+          let currentRangeCount = 1;
+          const fakeSelection = {
+            get rangeCount() {
+              return currentRangeCount;
+            },
+            getRangeAt: (_index: number) => {
+              const range = document.createRange();
+              range.selectNodeContents(this.container);
+              return range;
+            },
+            removeAllRanges: () => {
+              // Сбрасываем выделение - ничего не выделено
+              currentRangeCount = 0;
+            },
+            addRange: (range: Range) => {
+              // Добавляем диапазон в выделение
+              if (range && this.container.contains(range.commonAncestorContainer)) {
+                currentRangeCount = 1;
+              }
+            },
+            toString: () => this.container.textContent || '',
+          } as Selection;
+
+          return fakeSelection;
+        }
+
+        return null;
+      }
+    } else {
+      // Обычный режим - используем window.getSelection()
+      return window.getSelection();
+    }
   }
 
   hasClass(styleCommand: string): boolean {

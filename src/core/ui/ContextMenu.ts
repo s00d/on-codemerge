@@ -57,7 +57,7 @@ export class ContextMenu {
       ...options,
     };
     this.menu = this.createMenu();
-    document.body.appendChild(this.menu);
+    this.editor.getDOMContext().appendChild(this.menu);
     this.setupEventListeners();
   }
 
@@ -288,11 +288,11 @@ export class ContextMenu {
 
   private setupEventListeners(): void {
     if (this.options.closeOnClickOutside) {
-      document.addEventListener('click', this.handleClickOutside);
+      this.editor.getDOMContext().addEventListener('click', this.handleClickOutside);
     }
 
     if (this.options.closeOnEscape) {
-      document.addEventListener('keydown', this.handleEscapeKey);
+      this.editor.getDOMContext().addEventListener('keydown', this.handleEscapeKey);
     }
 
     // Обработка свайпов на мобильных устройствах
@@ -384,14 +384,14 @@ export class ContextMenu {
     }
   }
 
-  private handleClickOutside = (e: MouseEvent): void => {
-    if (!this.menu.contains(e.target as Node)) {
+  private handleClickOutside = (e: Event): void => {
+    if (!this.menu.contains((e as MouseEvent).target as Node)) {
       this.hide();
     }
   };
 
-  private handleEscapeKey = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape') {
+  private handleEscapeKey = (e: Event): void => {
+    if ((e as KeyboardEvent).key === 'Escape') {
       this.hide();
     }
   };
@@ -537,10 +537,10 @@ export class ContextMenu {
 
     // Удаляем обработчики событий
     if (this.options.closeOnClickOutside) {
-      document.removeEventListener('click', this.handleClickOutside);
+      this.editor.getDOMContext().removeEventListener('click', this.handleClickOutside);
     }
     if (this.options.closeOnEscape) {
-      document.removeEventListener('keydown', this.handleEscapeKey);
+      this.editor.getDOMContext().removeEventListener('keydown', this.handleEscapeKey);
     }
 
     // Уничтожаем вложенные меню

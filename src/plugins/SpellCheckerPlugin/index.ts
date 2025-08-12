@@ -293,7 +293,7 @@ export class SpellCheckerPlugin implements Plugin {
     this.editor?.getInnerContainer().appendChild(menu);
 
     // Удаляем меню при клике вне его
-    document.addEventListener('click', () => menu.remove(), { once: true });
+    this.editor?.getDOMContext().addEventListener('click', () => menu.remove(), { once: true });
   }
 
   private replaceMisspelledWord(range: Range, replacement: string): void {

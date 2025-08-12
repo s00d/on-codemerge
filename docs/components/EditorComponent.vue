@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h1>on-CodeMerge</h1>
-    <div>
+    <h1 v-if="showDescription">on-CodeMerge</h1>
+    <div v-if="showDescription">
       A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and
       view their code in real time, exactly as it will appear in the final product. This intuitive
       tool for developers of all skill levels.
@@ -72,6 +72,14 @@ export default {
       type: String,
       default: '',
     },
+    mode: {
+      type: String,
+      default: 'direct'
+    },
+    showDescription: {
+      type: Boolean,
+      default: true
+    },
   },
   data() {
     return {
@@ -81,8 +89,29 @@ export default {
   },
   mounted() {
     if (this.$refs.editorContainer) {
-      const editor = new HTMLEditor(this.$refs.editorContainer);
+      // Инициализируем редактор в зависимости от режима
+      let editorOptions = { 
+          mode: this.mode
+      };
+      const editor = new HTMLEditor(this.$refs.editorContainer, editorOptions);
 
+      // Для iframe режима ждем готовности
+      if (this.mode === 'iframe') {
+        this.initializeEditorAfterIframeReady(editor);
+      } else {
+        this.initializeEditor(editor);
+      }
+    }
+  },
+
+  methods: {
+    async initializeEditorAfterIframeReady(editor) {
+      // Ждем готовности iframe
+      await editor.waitForIframeReady();
+      this.initializeEditor(editor);
+    },
+
+    initializeEditor(editor) {
       if (this.language) {
         editor.setLocale(this.language);
       }
@@ -155,7 +184,7 @@ export default {
         this.previewContent = newContent;
       });
 
-      editor.setHtml('awfa waw awf awf aw&nbsp; <table class="html-editor-table"> <tbody> <tr> <td contenteditable="true">Cell 1 - 1 </td> <td contenteditable="true">Cell 1 - 2 </td> </tr> </tbody> </table> <br class="">\n')
+      editor.setHtml('awfa waw awf awf aw&nbsp; <table class="html-editor-table"> <tbody> <tr> <td contenteditable="true">Cell 1 - 1 </td> <td contenteditable="true">Cell 1 - 2 </td> </tr> </tbody> </table> <br class="">\n');
     }
   },
 };

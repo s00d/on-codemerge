@@ -1,6 +1,3 @@
-import './style.scss';
-import './public.scss';
-
 import type { Plugin } from '../../core/Plugin';
 import type { HTMLEditor } from '../../core/HTMLEditor';
 // no-op

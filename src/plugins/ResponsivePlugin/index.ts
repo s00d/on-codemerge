@@ -27,7 +27,7 @@ export class ResponsivePlugin implements Plugin {
   private isResizing = false;
   private startX = 0;
   private startWidth = 0;
-  private boundHotkeysKeydown?: (e: KeyboardEvent) => void;
+  private boundHotkeysKeydown?: (e: Event) => void;
 
   constructor() {
     this.viewportManager = new ViewportManager();
@@ -233,10 +233,14 @@ export class ResponsivePlugin implements Plugin {
   }
 
   private setupHotkeys(): void {
-    this.boundHotkeysKeydown = (e: KeyboardEvent) => {
+    this.boundHotkeysKeydown = (e: Event) => {
       // Горячие клавиши для быстрого переключения viewport'ов
-      if (e.ctrlKey && !e.shiftKey && !e.altKey) {
-        const key = e.key;
+      if (
+        (e as KeyboardEvent).ctrlKey &&
+        !(e as KeyboardEvent).shiftKey &&
+        !(e as KeyboardEvent).altKey
+      ) {
+        const key = (e as KeyboardEvent).key;
         const viewportMap: Record<string, string> = {
           '1': 'mobile',
           '2': 'tablet',
@@ -256,11 +260,14 @@ export class ResponsivePlugin implements Plugin {
       }
 
       // Стрелки для переключения между viewport'ами
-      if (e.ctrlKey && (e.key === 'ArrowLeft' || e.key === 'ArrowRight')) {
+      if (
+        (e as KeyboardEvent).ctrlKey &&
+        ((e as KeyboardEvent).key === 'ArrowLeft' || (e as KeyboardEvent).key === 'ArrowRight')
+      ) {
         e.preventDefault();
         const container = this.editor?.getContainer();
         if (container) {
-          if (e.key === 'ArrowRight') {
+          if ((e as KeyboardEvent).key === 'ArrowRight') {
             this.viewportManager.nextViewport();
           } else {
             this.viewportManager.previousViewport();
@@ -268,7 +275,7 @@ export class ResponsivePlugin implements Plugin {
         }
       }
     };
-    document.addEventListener('keydown', this.boundHotkeysKeydown);
+    this.editor?.getDOMContext().addEventListener('keydown', this.boundHotkeysKeydown);
   }
 
   private setViewport(viewport: string): void {
@@ -318,13 +325,13 @@ export class ResponsivePlugin implements Plugin {
     document.body.style.cursor = 'ew-resize';
 
     // Навешиваем временные обработчики на документ только на время ресайза
-    document.addEventListener('mousemove', this.onResize);
-    document.addEventListener('mouseup', this.stopResize);
+    this.editor?.getDOMContext().addEventListener('mousemove', this.onResize);
+    this.editor?.getDOMContext().addEventListener('mouseup', this.stopResize);
   }
 
-  private onResize = (e: MouseEvent): void => {
+  private onResize = (e: Event): void => {
     if (!this.isResizing || !this.editor) return;
-    const dx = e.clientX - this.startX;
+    const dx = (e as MouseEvent).clientX - this.startX;
     let newWidth = this.startWidth + dx;
     newWidth = Math.max(320, Math.min(newWidth, 1920));
     const container = this.editor.getContainer();
@@ -333,12 +340,12 @@ export class ResponsivePlugin implements Plugin {
     localStorage.setItem('responsive-custom-width', String(newWidth));
   };
 
-  private stopResize = (_e: MouseEvent): void => {
+  private stopResize = (_e: Event): void => {
     if (!this.isResizing) return;
     this.isResizing = false;
     document.body.style.cursor = '';
-    document.removeEventListener('mousemove', this.onResize);
-    document.removeEventListener('mouseup', this.stopResize);
+    this.editor?.getDOMContext().removeEventListener('mousemove', this.onResize);
+    this.editor?.getDOMContext().removeEventListener('mouseup', this.stopResize);
   };
 
   public destroy(): void {
@@ -359,7 +366,7 @@ export class ResponsivePlugin implements Plugin {
     this.editor?.off('responsive');
 
     if (this.boundHotkeysKeydown) {
-      document.removeEventListener('keydown', this.boundHotkeysKeydown);
+      this.editor?.getDOMContext().removeEventListener('keydown', this.boundHotkeysKeydown);
       this.boundHotkeysKeydown = undefined;
     }
 

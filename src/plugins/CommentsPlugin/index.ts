@@ -28,8 +28,9 @@ export class CommentsPlugin implements Plugin {
     this.errorModal = new ErrorModal(editor);
     this.menu = new CommentMenu(editor);
     this.editor = editor;
-    // Размещаем тултип внутри контейнера редактора, чтобы он не выходил за его пределы
-    this.editor.getInnerContainer().appendChild(this.tooltip);
+
+    this.editor.getDOMContext()!.appendChild(this.tooltip);
+
     this.addToolbarButton();
     this.setupEventListeners();
     this.editor.on('comment', () => {

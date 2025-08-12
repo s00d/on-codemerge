@@ -503,7 +503,7 @@ export class FormManager {
   private getFieldLabel(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): string {
     // Try to find label by for attribute
     if (input.id) {
-      const label = document.querySelector(`label[for="${input.id}"]`);
+      const label = this.editor.getDOMContext().querySelector(`label[for="${input.id}"]`);
       if (label) {
         return label.textContent || '';
       }

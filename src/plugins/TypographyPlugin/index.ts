@@ -21,17 +21,18 @@ export class TypographyPlugin implements Plugin {
   private editor: HTMLEditor | null = null;
   private menu: TypographyMenu | null = null;
   private toolbarButton: HTMLElement | null = null;
-  private boundKeyDown?: (e: KeyboardEvent) => void;
+  private boundKeyDown?: (e: Event) => void;
 
   constructor() {}
 
   initialize(editor: HTMLEditor): void {
-    this.menu = new TypographyMenu(editor);
     this.editor = editor;
+    this.menu = new TypographyMenu(editor);
     this.addToolbarButton();
     this.setupEventListeners();
+    this.setupKeyboardEvents();
 
-    this.boundKeyDown = (e: KeyboardEvent) => this.handleKeyDown(e);
+    this.boundKeyDown = (e: Event) => this.handleKeyDown(e);
     document.addEventListener('keydown', this.boundKeyDown);
     this.editor.on('typography', () => {
       this.editor?.ensureEditorFocus();
@@ -41,25 +42,53 @@ export class TypographyPlugin implements Plugin {
 
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: typographyIcon,
-      title: this.editor?.t('Typography'),
-      onClick: () => this.showMenu(),
-    });
-    toolbar.appendChild(this.toolbarButton);
+    if (toolbar) {
+      this.toolbarButton = createToolbarButton({
+        icon: typographyIcon,
+        title: this.editor?.t('Typography') || 'Typography',
+        onClick: () => this.showMenu(),
+      });
+      toolbar.appendChild(this.toolbarButton);
+    }
   }
 
   private setupEventListeners(): void {
-    if (!this.editor) return;
-
-    // Добавляем обработчик события click
-    this.editor.getContainer().addEventListener('click', this.handleClick);
+    if (this.editor) {
+      this.editor.getContainer().addEventListener('click', this.handleClick);
+    }
   }
 
-  private handleKeyDown(e: KeyboardEvent): void {
-    if (e.ctrlKey && e.key === 't') {
+  private setupKeyboardEvents(): void {
+    if (!this.editor) return;
+
+    this.boundKeyDown = (e: Event) => {
+      if ((e as KeyboardEvent).key === 'Tab') {
+        e.preventDefault();
+        this.insertTab();
+      }
+    };
+
+    this.editor.getDOMContext().addEventListener('keydown', this.boundKeyDown);
+  }
+
+  private insertTab(): void {
+    if (!this.editor) return;
+
+    const selection = window.getSelection();
+    if (!selection || selection.rangeCount === 0) return;
+
+    const range = selection.getRangeAt(0);
+    const tabNode = document.createTextNode('\t');
+    range.deleteContents();
+    range.insertNode(tabNode);
+    range.setStartAfter(tabNode);
+    range.setEndAfter(tabNode);
+    selection.removeAllRanges();
+    selection.addRange(range);
+  }
+
+  private handleKeyDown(e: Event): void {
+    if ((e as KeyboardEvent).ctrlKey && (e as KeyboardEvent).key === 't') {
       e.preventDefault();
       this.showMenu();
     }
@@ -124,7 +153,7 @@ export class TypographyPlugin implements Plugin {
     }
 
     if (this.boundKeyDown) {
-      document.removeEventListener('keydown', this.boundKeyDown);
+      this.editor?.getDOMContext().removeEventListener('keydown', this.boundKeyDown);
       this.boundKeyDown = undefined;
     }
 

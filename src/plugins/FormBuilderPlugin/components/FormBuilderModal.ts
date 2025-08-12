@@ -68,17 +68,14 @@ export class FormBuilderModal {
   }
 
   private setupCloseHandlers(): void {
-    // Перехватываем закрытие через крестик
-    const closeButton = this.popup?.getElement().querySelector('.close-button');
-    if (closeButton) {
-      closeButton.addEventListener('click', () => {
-        this.popup?.hide();
+    // Обработчик Escape для закрытия модалки
+    this.handleEscapeKey = (e: Event) => {
+      if ((e as KeyboardEvent).key === 'Escape' && this.popup?.isOpen()) {
+        this.popup.hide();
         this.destroy();
-      });
-    }
-
-    // Перехватываем закрытие через Escape
-    document.addEventListener('keydown', this.handleEscapeKey);
+      }
+    };
+    this.editor.getDOMContext().addEventListener('keydown', this.handleEscapeKey);
   }
 
   private createContent(): HTMLElement {
@@ -524,7 +521,9 @@ export class FormBuilderModal {
     this.popup?.show();
     // Автофокус на поле Action URL
     setTimeout(() => {
-      const urlInput = document.getElementById('form-action-url') as HTMLInputElement;
+      const urlInput = this.editor
+        .getDOMContext()
+        .getElementById('form-action-url') as HTMLInputElement;
       if (urlInput) urlInput.focus();
     }, 0);
     this.updatePreview();
@@ -580,7 +579,7 @@ export class FormBuilderModal {
 
   public destroy(): void {
     // Удаляем обработчики событий
-    document.removeEventListener('keydown', this.handleEscapeKey);
+    this.editor.getDOMContext().removeEventListener('keydown', this.handleEscapeKey);
 
     if (this.popup) {
       this.popup.destroy();
@@ -594,9 +593,9 @@ export class FormBuilderModal {
     }
   }
 
-  private handleEscapeKey = (e: KeyboardEvent): void => {
-    if (e.key === 'Escape' && this.popup?.isOpen()) {
-      this.popup.hide();
+  private handleEscapeKey = (e: Event): void => {
+    if ((e as KeyboardEvent).key === 'Escape' && this.popup?.isOpen()) {
+      this.popup?.hide();
       this.destroy();
     }
   };

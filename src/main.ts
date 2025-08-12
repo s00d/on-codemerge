@@ -41,9 +41,38 @@ import { MathPlugin } from './plugins/MathPlugin';
 import { LanguagePlugin } from './plugins/LanguagePlugin';
 
 document.addEventListener('DOMContentLoaded', async () => {
-  const editorElement = document.getElementById('editor');
-  if (editorElement) {
-    const editor = new HTMLEditor(editorElement);
+  const appDiv = document.getElementById('app');
+  if (appDiv) {
+    // Создаем редактор с поддержкой shadow-dom - используем новый формат параметров
+    const editor = new HTMLEditor(appDiv, {
+      mode: 'shadowRoot',
+    });
+
+    // Примеры других режимов:
+
+    // Web Component режим (автоматически создает Shadow DOM):
+    // const editor = new HTMLEditor(editorContainer, {
+    //   mode: 'webComponent',
+    //   componentName: 'my-html-editor',
+    //   isolated: true // закрытый Shadow DOM для полной изоляции
+    // });
+
+    // Embed режим (для встраивания в другие сайты):
+    // const editor = new HTMLEditor(editorContainer, {
+    //   mode: 'embed',
+    //   origin: 'https://example.com',
+    //   allowCrossOrigin: true
+    // });
+
+    // iframe режим:
+    // const editor = new HTMLEditor(editorContainer, {
+    //   mode: 'iframe'
+    // });
+
+    // Теперь редактор автоматически использует shadow-dom через DOMContext
+    // Все вызовы document.getElementById, document.querySelector и т.д.
+    // будут работать с shadow-dom, а не с основным документом
+    // Плагины получают доступ к shadow-dom через editor.getDOMContext()
 
     // await editor.setLocale('ru');
 
@@ -103,7 +132,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     );
     editor.use(new LanguagePlugin());
 
-    // Создаем элементы для вывода HTML и превью
+    // Создаем элементы для вывода HTML и превью ВНЕ shadow-dom на основной странице
     const resultContainer = document.createElement('div');
     resultContainer.innerHTML = `
       <hr />
@@ -117,9 +146,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         <div id="preview" class="preview"></div>
       </div>
     `;
-    editorElement.parentNode?.insertBefore(resultContainer, editorElement.nextSibling);
 
-    // Получаем элементы для вывода
+    // Добавляем result и preview ВНЕ shadow-dom, после shadow-host
+    appDiv.parentNode?.insertBefore(resultContainer, appDiv.nextSibling);
+
+    // Получаем элементы для вывода с основной страницы
     const resultElement = document.getElementById('result');
     const previewElement = document.getElementById('preview');
 

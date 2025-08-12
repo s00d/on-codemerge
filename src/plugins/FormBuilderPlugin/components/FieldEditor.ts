@@ -1111,14 +1111,14 @@ export class FieldEditor {
       }
     });
 
-    // Close modal on Escape key
-    const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+    // Обработчик Escape для закрытия
+    const handleEscape = (e: Event) => {
+      if ((e as KeyboardEvent).key === 'Escape') {
         modal.remove();
-        document.removeEventListener('keydown', handleEscape);
+        this.editor.getDOMContext().removeEventListener('keydown', handleEscape);
       }
     };
-    document.addEventListener('keydown', handleEscape);
+    this.editor.getDOMContext().addEventListener('keydown', handleEscape);
 
     document.body.appendChild(modal);
   }

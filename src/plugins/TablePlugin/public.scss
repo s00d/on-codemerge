@@ -5,7 +5,7 @@
   border: 1px solid #e0e0e0; // Рамка вокруг всей таблицы
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); // Легкая тень для таблицы
   background-color: #ffffff; // Белый фон таблицы
-  transition: all 0.3s ease;
+  // transition: all 0.3s ease;
 
   html.dark & {
     border-color: #374151; // Рамка для темной темы
@@ -42,7 +42,7 @@
     display: table-cell;
     height: 24px;
     cursor: text;
-    transition: all 0.2s ease;
+    // transition: all 0.2s ease;
     padding: var(--cell-padding);
     border-color: var(--border-color);
     vertical-align: top;
@@ -262,9 +262,6 @@
 
 // Анимации и эффекты
 .html-editor-table {
-  // Анимация появления
-  animation: tableFadeIn 0.3s ease-in-out;
-
   // Эффект при фокусе на ячейке
   .table-cell:focus,
   .table-header-cell:focus {
@@ -307,18 +304,6 @@
       background-color: #92400e;
       border-color: #fbbf24;
     }
-  }
-}
-
-// Анимация появления таблицы
-@keyframes tableFadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
   }
 }
 
@@ -406,7 +391,7 @@
     border: 1px solid #e0e0e0;
     background-color: #f8f9fa;
     cursor: pointer;
-    transition: all 0.2s ease;
+    // transition: all 0.2s ease;
 
     html.dark & {
       border-color: #374151;
@@ -697,7 +682,7 @@
 .table-header-cell[data-colspan],
 .table-cell[data-rowspan],
 .table-header-cell[data-rowspan] {
-  transition: all 0.3s ease;
+  // transition: all 0.3s ease;
 
   &:hover {
     transform: scale(1.02);
@@ -763,7 +748,7 @@
     // Анимация появления
     opacity: 0;
     transform: translateX(-10px);
-    transition: all 0.2s ease;
+    // transition: all 0.2s ease;
 
     &.visible {
       opacity: 1;
@@ -1059,7 +1044,7 @@
   border-radius: 8px;
   padding: 1rem;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
+  // transition: all 0.2s ease;
 
   &:hover {
     transform: translateY(-2px);
@@ -1104,7 +1089,7 @@
 .responsive-table {
   @media (max-width: var(--responsive-breakpoint)) {
     .table-row {
-      transition: all 0.2s ease-in-out;
+      // transition: all 0.2s ease-in-out;
 
       &:hover {
         box-shadow:

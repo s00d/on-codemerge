@@ -222,12 +222,23 @@ export class ResponsiveMenu {
         this.popup.hide();
       });
     });
+
+    // Обработчик Escape для закрытия
+    this.editor.getDOMContext().addEventListener('keydown', (e: Event) => {
+      if ((e as KeyboardEvent).key === 'Escape') {
+        this.popup?.hide();
+      }
+    });
   }
 
   private setupHotkeys(): void {
-    document.addEventListener('keydown', (e) => {
-      if (e.ctrlKey && !e.shiftKey && !e.altKey) {
-        const key = e.key;
+    this.editor.getDOMContext().addEventListener('keydown', (e: Event) => {
+      if (
+        (e as KeyboardEvent).ctrlKey &&
+        !(e as KeyboardEvent).shiftKey &&
+        !(e as KeyboardEvent).altKey
+      ) {
+        const key = (e as KeyboardEvent).key;
         const viewportMap: Record<string, Viewport> = {
           '1': 'mobile',
           '2': 'tablet',
@@ -256,7 +267,7 @@ export class ResponsiveMenu {
 
     // Обновляем UI если меню открыто
     if (this.popup) {
-      const buttons = document.querySelectorAll('.viewport-btn');
+      const buttons = this.editor.getDOMContext().querySelectorAll('.viewport-btn');
       buttons.forEach((btn) => {
         const btnElement = btn as HTMLElement;
         const isActive = btnElement.dataset.viewport === viewport;

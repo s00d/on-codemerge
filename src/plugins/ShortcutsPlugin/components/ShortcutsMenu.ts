@@ -172,7 +172,9 @@ export class ShortcutsMenu {
       this.popup.show();
 
       // Принудительно центрируем попап и устанавливаем размеры
-      const popupElement = document.querySelector('.shortcuts-menu') as HTMLElement;
+      const popupElement = this.editor
+        .getDOMContext()
+        .querySelector('.shortcuts-menu') as HTMLElement;
       if (popupElement) {
         popupElement.style.position = 'fixed';
         popupElement.style.top = '50%';

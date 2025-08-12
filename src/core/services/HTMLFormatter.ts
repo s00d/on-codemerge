@@ -16,16 +16,23 @@ export class HTMLFormatter {
     const { indentSize } = { ...this.defaultOptions, ...this.options };
 
     // Удаляем все элементы с классом resize-handle
-    html = html.replace(/<[^>]*class="[^"]*\bresize-handle\b[^"]*"[^>]*>/g, '');
+    html = html.replace(/<[^>]*class="[^"]*\bresize-handle\b[^"]*"[^>]*>.*?<\/[^>]*>/g, '');
+    html = html.replace(/<[^>]*class="[^"]*\bresize-handle\b[^"]*"[^>]*\/?>/g, '');
 
     // Удаляем атрибуты contenteditable="true" и class="selected"
     html = html.replace(/\s*draggable="true"\s*/g, ' ');
     html = html.replace(/\s*contenteditable="true"\s*/g, ' ');
-    html = html.replace(/\s*class="selected"\s*/g, ' ');
+    html = html.replace(/\sselected\s*/g, ' ');
+    html = html.replace(/\shover\s*/g, ' ');
     html = html.replace(/\bdragging\b/g, '');
 
-    // Удаляем style="position: relative;" из <th> и <td>
-    html = html.replace(/(<(th|td)[^>]*)\s*style="position:\s*relative;"\s*/g, '$1');
+    // Очищаем лишние пробелы в class атрибутах
+    html = html.replace(/class="\s+([^"]*)\s+"/g, 'class="$1"');
+    html = html.replace(/class="\s+([^"]*)"/g, 'class="$1"');
+    html = html.replace(/class="([^"]*)\s+"/g, 'class="$1"');
+
+    // Удаляем style="position: relative;" из всех элементов
+    html = html.replace(/(<[^>]*)\s*style="position:\s*relative;"\s*/g, '$1');
 
     // Разделяем по тегам, сохраняя атрибуты с символами > или <
     const parts = html.split(/(<[^>]+>)/g).filter(Boolean);

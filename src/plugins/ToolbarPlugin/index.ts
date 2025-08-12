@@ -9,15 +9,17 @@ export class ToolbarPlugin implements Plugin {
   name = 'toolbar';
 
   private toolbar: HTMLElement | null = null;
+  private editor: HTMLEditor | null = null;
 
-  initialize(_editor: HTMLEditor): void {
+  initialize(editor: HTMLEditor): void {
+    this.editor = editor;
     this.createToolbar();
   }
 
   private createToolbar(): void {
     this.toolbar = createContainer('editor-toolbar');
 
-    const editorElement = document.querySelector('.html-editor');
+    const editorElement = this.editor?.getDOMContext().querySelector('.html-editor');
     if (editorElement?.parentNode && this.toolbar) {
       editorElement.parentNode.insertBefore(this.toolbar, editorElement);
     }

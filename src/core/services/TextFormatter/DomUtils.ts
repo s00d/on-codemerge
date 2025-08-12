@@ -16,7 +16,12 @@ export class DomUtils {
     const nodesToProcess: Node[] = [];
     const deepestNodes: Node[] = [];
 
-    if (!this.container.contains(range.commonAncestorContainer)) {
+    // Проверяем, находится ли range в контейнере или в его Shadow DOM
+    const isInContainer =
+      this.container.contains(range.commonAncestorContainer) ||
+      this.container.getRootNode().contains(range.commonAncestorContainer);
+
+    if (!isInContainer) {
       return [];
     }
 
@@ -69,7 +74,13 @@ export class DomUtils {
 
   private handleCollapsedRange(selection: Selection, range: Range): Node[] {
     const currentNode = selection.anchorNode;
-    if (!currentNode || !this.container.contains(currentNode)) return [];
+    if (!currentNode) return [];
+
+    // Проверяем, находится ли узел в контейнере или в его Shadow DOM
+    const isInContainer =
+      this.container.contains(currentNode) || this.container.getRootNode().contains(currentNode);
+
+    if (!isInContainer) return [];
 
     let span: HTMLElement = document.createElement('span');
     if (currentNode.nodeType === Node.ELEMENT_NODE && (currentNode as Element).tagName === 'SPAN') {

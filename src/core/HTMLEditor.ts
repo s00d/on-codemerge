@@ -4,10 +4,17 @@ import { LocaleManager } from './services/LocaleManager';
 import { TextFormatter } from './services/TextFormatter';
 import { Selector } from './services/Selector';
 import { NotificationManager } from './ui/NotificationManager';
+import { DOMContext } from './DOMContext';
 import type { ShortcutCategories } from './types.ts';
 
 type Callback = (...data: any[]) => void;
 type ContentCallback = (value: string) => void;
+
+export interface EditorOptions {
+  mode: 'direct' | 'shadowRoot' | 'iframe';
+  shadowRoot?: ShadowRoot;
+  iframe?: HTMLIFrameElement;
+}
 
 export class HTMLEditor {
   private innerContainer: HTMLElement;
@@ -31,8 +38,24 @@ export class HTMLEditor {
   private boundDragLeave?: (e: DragEvent) => void;
   private boundDrop?: (e: DragEvent) => void;
   private boundPaste?: (e: ClipboardEvent) => void;
+  private domContext: DOMContext;
+  private options: EditorOptions;
 
-  constructor(innerContainer: HTMLElement) {
+  constructor(innerContainer: HTMLElement, options: EditorOptions = { mode: 'direct' }) {
+    this.options = options;
+
+    // Инициализируем DOMContext
+    this.domContext = new DOMContext(options.shadowRoot || undefined, options.iframe || undefined);
+
+    // Обрабатываем разные режимы
+    let actualContainer = innerContainer;
+
+    if (options.mode === 'shadowRoot') {
+      actualContainer = this.setupShadowRootMode(innerContainer);
+    } else if (options.mode === 'iframe') {
+      actualContainer = this.setupIframeMode(innerContainer);
+    }
+
     // Создаем новый внутренний контейнер
     this.container = document.createElement('div');
     this.container.className = 'html-editor';
@@ -47,14 +70,14 @@ export class HTMLEditor {
 
     // this.container.draggable = true;
 
-    innerContainer.appendChild(this.container);
+    actualContainer.appendChild(this.container);
 
     this.innerContainer = innerContainer;
 
     this.plugins = new DefaultPluginManager();
     this.eventHandlers = new Map();
     this.formatter = new HTMLFormatter();
-    this.textFormatter = new TextFormatter(this.container);
+    this.textFormatter = new TextFormatter(this.container, options.shadowRoot || undefined);
     this.selector = new Selector(this.container);
 
     this.boundClickToFocus = (e: MouseEvent) => {
@@ -82,7 +105,7 @@ export class HTMLEditor {
     this.container.addEventListener('paste', this.boundPaste);
 
     this.boundHandleSelectionChange = (e: Event) => this.handleSelectionChange(e);
-    document.addEventListener('selectionchange', this.boundHandleSelectionChange);
+    this.domContext.addEventListener('selectionchange', this.boundHandleSelectionChange);
 
     // Инициализация MutationObserver
     this.mutationObserver = new MutationObserver((mutations) => this.handleMutations(mutations));
@@ -92,6 +115,135 @@ export class HTMLEditor {
       characterData: true, // Отслеживаем изменения текста
       attributes: true, // Отслеживаем изменения атрибутов
     });
+  }
+
+  // Применение стилей к Shadow DOM
+  private applyStylesToShadowDOM(shadowRoot: ShadowRoot): void {
+    try {
+      // Пробуем использовать adoptedStyleSheets (современный способ)
+      if (document.adoptedStyleSheets && document.adoptedStyleSheets.length > 0) {
+        shadowRoot.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
+      } else {
+        // Fallback: копируем стили как раньше
+        const styleElements = document.querySelectorAll('style');
+        styleElements.forEach((style, _index) => {
+          const newStyle = document.createElement('style');
+          newStyle.textContent = style.textContent || '';
+          shadowRoot.appendChild(newStyle);
+        });
+      }
+    } catch (error) {
+      // Fallback: копируем стили
+      const styleElements = document.querySelectorAll('style');
+      styleElements.forEach((style, _index) => {
+        const newStyle = document.createElement('style');
+        newStyle.textContent = style.textContent || '';
+        shadowRoot.appendChild(newStyle);
+      });
+    }
+  }
+
+  // Применение стилей к iframe
+  private applyStylesToIframe(iframeDocument: Document): void {
+    try {
+      // Копируем все стили из основного документа в iframe
+      const styleElements = document.querySelectorAll('style');
+      styleElements.forEach((style) => {
+        const newStyle = iframeDocument.createElement('style');
+        newStyle.textContent = style.textContent || '';
+        iframeDocument.head.appendChild(newStyle);
+      });
+
+      // Копируем link элементы со стилями
+      const linkElements = document.querySelectorAll('link[rel="stylesheet"]');
+      linkElements.forEach((link) => {
+        const newLink = iframeDocument.createElement('link');
+        newLink.rel = 'stylesheet';
+        newLink.href = (link as HTMLLinkElement).href;
+        iframeDocument.head.appendChild(newLink);
+      });
+
+      // Пробуем использовать adoptedStyleSheets если поддерживается
+      if (document.adoptedStyleSheets && iframeDocument.adoptedStyleSheets) {
+        iframeDocument.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
+      }
+    } catch (error) {
+      console.warn('Failed to apply styles to iframe:', error);
+    }
+  }
+
+  private setupShadowRootMode(innerContainer: HTMLElement): HTMLElement {
+    if (this.options.shadowRoot) {
+      // Используем переданный shadowRoot
+      this.applyStylesToShadowDOM(this.options.shadowRoot);
+      return innerContainer;
+    } else {
+      // Создаем новый shadowRoot
+      const shadowRoot = innerContainer.attachShadow({ mode: 'open' });
+      this.options.shadowRoot = shadowRoot;
+      this.domContext = new DOMContext(shadowRoot);
+      this.applyStylesToShadowDOM(shadowRoot);
+
+      // Создаем контейнер внутри shadowRoot
+      const shadowContainer = document.createElement('div');
+      shadowContainer.className = 'shadow-editor-container';
+      shadowRoot.appendChild(shadowContainer);
+      return shadowContainer;
+    }
+  }
+
+  private setupIframeMode(innerContainer: HTMLElement): HTMLElement {
+    if (this.options.iframe) {
+      // Используем переданный iframe
+      if (this.options.iframe.contentDocument?.body) {
+        return this.options.iframe.contentDocument.body;
+      }
+      // Если iframe еще не загружен, возвращаем innerContainer
+      return innerContainer;
+    } else {
+      // Создаем новый iframe
+      const iframe = document.createElement('iframe');
+      iframe.style.border = 'none';
+      iframe.style.width = '100%';
+      iframe.style.height = '100%';
+      iframe.style.minHeight = '500px'; // Минимальная высота
+      iframe.style.display = 'block';
+      iframe.style.overflow = 'hidden';
+      innerContainer.appendChild(iframe);
+
+      // Создаем Promise для ожидания загрузки iframe
+      const iframeReady = new Promise<void>((resolve) => {
+        iframe.onload = () => {
+          if (iframe.contentDocument) {
+            iframe.contentDocument.body.style.margin = '0';
+            iframe.contentDocument.body.style.padding = '0';
+            iframe.contentDocument.body.style.minHeight = '100vh'; // Минимальная высота на весь экран
+            iframe.contentDocument.body.style.height = '100%';
+            iframe.contentDocument.body.style.width = '100%';
+            iframe.contentDocument.body.style.overflow = 'auto';
+
+            // Копируем стили внутрь iframe
+            this.applyStylesToIframe(iframe.contentDocument);
+
+            // Перемещаем редактор внутрь iframe
+            if (this.container.parentElement) {
+              iframe.contentDocument.body.appendChild(this.container);
+            }
+
+            // Обновляем DOMContext для работы с iframe
+            this.domContext = new DOMContext(undefined, iframe);
+
+            resolve();
+          }
+        };
+      });
+
+      // Сохраняем Promise для использования в будущем
+      (this as any).iframeReady = iframeReady;
+
+      this.options.iframe = iframe;
+      return innerContainer; // Временно возвращаем innerContainer
+    }
   }
 
   private async handleSelectionChange(event: Event): Promise<void> {
@@ -285,6 +437,54 @@ export class HTMLEditor {
       return (toolbarPlugin as any).getToolbar();
     }
     return null;
+  }
+
+  public getDOMContext(): DOMContext {
+    return this.domContext;
+  }
+
+  public getMode(): string {
+    return this.options.mode;
+  }
+
+  public getShadowRoot(): ShadowRoot | undefined {
+    return this.options.shadowRoot;
+  }
+
+  public getIframe(): HTMLIFrameElement | undefined {
+    return this.options.iframe;
+  }
+
+  /**
+   * Adds CSS styles depending on the editor's operating mode
+   * @param styles - CSS strings or CSS object
+   */
+  public addStyle(cssString: string): void {
+    if (this.options.mode === 'direct') {
+      // In direct mode, add styles to head
+      const styleElement = document.createElement('style');
+      styleElement.textContent = cssString;
+      document.head.appendChild(styleElement);
+    } else if (this.options.shadowRoot) {
+      // In Shadow DOM mode, add styles to shadowRoot
+      const styleElement = document.createElement('style');
+      styleElement.textContent = cssString;
+      this.options.shadowRoot.appendChild(styleElement);
+    } else if (this.options.iframe?.contentDocument) {
+      // In iframe mode, add styles to iframe
+      const styleElement = this.options.iframe.contentDocument.createElement('style');
+      styleElement.textContent = cssString;
+      this.options.iframe.contentDocument.head.appendChild(styleElement);
+    }
+  }
+
+  /**
+   * Ожидает готовности iframe (только для iframe режима)
+   */
+  public async waitForIframeReady(): Promise<void> {
+    if (this.options.mode === 'iframe' && (this as any).iframeReady) {
+      await (this as any).iframeReady;
+    }
   }
 
   private isSelectionInsideContainer(selection: Selection): boolean {
@@ -620,7 +820,7 @@ export class HTMLEditor {
 
     // Удаляем глобальные обработчики
     if (this.boundHandleSelectionChange) {
-      document.removeEventListener('selectionchange', this.boundHandleSelectionChange);
+      this.domContext.removeEventListener('selectionchange', this.boundHandleSelectionChange);
       this.boundHandleSelectionChange = undefined as any;
     }
 

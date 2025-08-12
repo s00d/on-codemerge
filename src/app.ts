@@ -1,84 +1,43 @@
 import './index.scss';
 import './public.scss';
 
-import { HTMLEditor } from './core/HTMLEditor';
-import { TablePlugin } from './plugins/TablePlugin';
-import { ToolbarPlugin } from './plugins/ToolbarPlugin';
-import { ImagePlugin } from './plugins/ImagePlugin';
-import { BlockPlugin } from './plugins/BlockPlugin';
-import { HTMLViewerPlugin } from './plugins/HTMLViewerPlugin';
-import { CodeBlockPlugin } from './plugins/CodeBlockPlugin';
-import { TemplatesPlugin } from './plugins/TemplatesPlugin';
-import { ExportPlugin } from './plugins/ExportPlugin';
-import { HistoryPlugin } from './plugins/HistoryPlugin';
-import { ChartsPlugin } from './plugins/ChartsPlugin';
-import { FileUploadPlugin } from './plugins/FileUploadPlugin';
-import { ShortcutsPlugin } from './plugins/ShortcutsPlugin';
-import { ColorPlugin } from './plugins/ColorPlugin';
-import { TypographyPlugin } from './plugins/TypographyPlugin';
-import { ToolbarDividerPlugin } from './plugins/ToolbarDividerPlugin';
-import { ListsPlugin } from './plugins/ListsPlugin';
-import { CommentsPlugin } from './plugins/CommentsPlugin';
-import { FooterPlugin } from './plugins/FooterPlugin';
-import { FootnotesPlugin } from './plugins/FootnotesPlugin';
-import { ResponsivePlugin } from './plugins/ResponsivePlugin';
-import { LinkPlugin } from './plugins/LinkPlugin';
-import { VideoPlugin } from './plugins/VideoPlugin';
-import { YouTubeVideoPlugin } from './plugins/YouTubeVideoPlugin';
-import { FontPlugin } from './plugins/FontPlugin';
-import { AlignmentPlugin } from './plugins/AlignmentPlugin';
-import { CollaborationPlugin } from './plugins/CollaborationPlugin';
-import { FormBuilderPlugin } from './plugins/FormBuilderPlugin';
-import { SpellCheckerPlugin } from './plugins/SpellCheckerPlugin';
-import { BlockStylePlugin } from './plugins/BlockStylePlugin';
-import { MathPlugin } from './plugins/MathPlugin';
-import { AIAssistantPlugin } from './plugins/AIAssistantPlugin';
-import { LanguagePlugin } from './plugins/LanguagePlugin';
-import { CalendarPlugin } from './plugins/CalendarPlugin';
-import { TimerPlugin } from './plugins/TimerPlugin';
-import { PDFEmbedPlugin } from './plugins/PDFEmbedPlugin';
-import { MentionsPlugin } from './plugins/MentionsPlugin';
-import { TrackChangesPlugin } from './plugins/TrackChangesPlugin';
-import { AnchorLinkPlugin } from './plugins/AnchorLinkPlugin';
-
-export {
-  HTMLEditor,
-  ToolbarPlugin,
-  ToolbarDividerPlugin,
-  AlignmentPlugin,
-  TablePlugin,
-  ImagePlugin,
-  BlockPlugin,
-  HTMLViewerPlugin,
-  CodeBlockPlugin,
-  TemplatesPlugin,
-  ExportPlugin,
-  HistoryPlugin,
-  ChartsPlugin,
-  ShortcutsPlugin,
-  ColorPlugin,
-  TypographyPlugin,
-  ListsPlugin,
-  CommentsPlugin,
-  FootnotesPlugin,
-  FooterPlugin,
-  ResponsivePlugin,
-  LinkPlugin,
-  VideoPlugin,
-  YouTubeVideoPlugin,
-  FileUploadPlugin,
-  FontPlugin,
-  CollaborationPlugin,
-  FormBuilderPlugin,
-  SpellCheckerPlugin,
-  BlockStylePlugin,
-  MathPlugin,
-  AIAssistantPlugin,
-  LanguagePlugin,
-  CalendarPlugin,
-  TimerPlugin,
-  PDFEmbedPlugin,
-  MentionsPlugin,
-  TrackChangesPlugin,
-  AnchorLinkPlugin,
-};
+export { HTMLEditor, type EditorOptions } from './core/HTMLEditor';
+export { DOMContext } from './core/DOMContext';
+export { ToolbarPlugin } from './plugins/ToolbarPlugin';
+export { ToolbarDividerPlugin } from './plugins/ToolbarDividerPlugin';
+export { AlignmentPlugin } from './plugins/AlignmentPlugin';
+export { TablePlugin } from './plugins/TablePlugin';
+export { ImagePlugin } from './plugins/ImagePlugin';
+export { BlockPlugin } from './plugins/BlockPlugin';
+export { HTMLViewerPlugin } from './plugins/HTMLViewerPlugin';
+export { CodeBlockPlugin } from './plugins/CodeBlockPlugin';
+export { TemplatesPlugin } from './plugins/TemplatesPlugin';
+export { ExportPlugin } from './plugins/ExportPlugin';
+export { HistoryPlugin } from './plugins/HistoryPlugin';
+export { ChartsPlugin } from './plugins/ChartsPlugin';
+export { ShortcutsPlugin } from './plugins/ShortcutsPlugin';
+export { ColorPlugin } from './plugins/ColorPlugin';
+export { TypographyPlugin } from './plugins/TypographyPlugin';
+export { ListsPlugin } from './plugins/ListsPlugin';
+export { CommentsPlugin } from './plugins/CommentsPlugin';
+export { FootnotesPlugin } from './plugins/FootnotesPlugin';
+export { FooterPlugin } from './plugins/FooterPlugin';
+export { ResponsivePlugin } from './plugins/ResponsivePlugin';
+export { LinkPlugin } from './plugins/LinkPlugin';
+export { VideoPlugin } from './plugins/VideoPlugin';
+export { YouTubeVideoPlugin } from './plugins/YouTubeVideoPlugin';
+export { FileUploadPlugin } from './plugins/FileUploadPlugin';
+export { FontPlugin } from './plugins/FontPlugin';
+export { CollaborationPlugin } from './plugins/CollaborationPlugin';
+export { FormBuilderPlugin } from './plugins/FormBuilderPlugin';
+export { SpellCheckerPlugin } from './plugins/SpellCheckerPlugin';
+export { BlockStylePlugin } from './plugins/BlockStylePlugin';
+export { MathPlugin } from './plugins/MathPlugin';
+export { AIAssistantPlugin } from './plugins/AIAssistantPlugin';
+export { LanguagePlugin } from './plugins/LanguagePlugin';
+export { CalendarPlugin } from './plugins/CalendarPlugin';
+export { TimerPlugin } from './plugins/TimerPlugin';
+export { PDFEmbedPlugin } from './plugins/PDFEmbedPlugin';
+export { MentionsPlugin } from './plugins/MentionsPlugin';
+export { TrackChangesPlugin } from './plugins/TrackChangesPlugin';
+export { AnchorLinkPlugin } from './plugins/AnchorLinkPlugin';

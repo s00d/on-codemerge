@@ -190,7 +190,7 @@ export class TimerManager {
             
             if (diff <= 0) {
               // Таймер истек
-              const countdownEl = document.getElementById('timer-countdown-' + timerId);
+              const countdownEl = this.editor.getDOMContext().getElementById('timer-countdown-' + timerId);
               if (countdownEl) {
                 countdownEl.innerHTML = '<div class="timer-expired">' + expiredText + '</div>';
               }
@@ -202,10 +202,10 @@ export class TimerManager {
             const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
             const seconds = Math.floor((diff % (1000 * 60)) / 1000);
             
-            const daysEl = document.getElementById('timer-days-' + timerId);
-            const hoursEl = document.getElementById('timer-hours-' + timerId);
-            const minutesEl = document.getElementById('timer-minutes-' + timerId);
-            const secondsEl = document.getElementById('timer-seconds-' + timerId);
+            const daysEl = this.editor.getDOMContext().getElementById('timer-days-' + timerId);
+            const hoursEl = this.editor.getDOMContext().getElementById('timer-hours-' + timerId);
+            const minutesEl = this.editor.getDOMContext().getElementById('timer-minutes-' + timerId);
+            const secondsEl = this.editor.getDOMContext().getElementById('timer-seconds-' + timerId);
             
             if (daysEl) daysEl.textContent = days;
             if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');

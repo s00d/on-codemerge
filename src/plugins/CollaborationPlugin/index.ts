@@ -1,3 +1,6 @@
+import './style.scss';
+import './public.scss';
+
 import type { HTMLEditor } from '../../app';
 import { PopupManager } from '../../core/ui/PopupManager';
 import type { Plugin } from '../../core/Plugin';

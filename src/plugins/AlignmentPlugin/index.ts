@@ -28,16 +28,22 @@ export class AlignmentPlugin implements Plugin {
     this.addToolbarButtons();
 
     // Подписываемся на события выравнивания
-    this.editor.on('align_left', () => this.editor?.getTextFormatter()?.toggleStyle('alignLeft'));
-    this.editor.on('align_center', () =>
-      this.editor?.getTextFormatter()?.toggleStyle('alignCenter')
-    );
-    this.editor.on('align_right', () => this.editor?.getTextFormatter()?.toggleStyle('alignRight'));
-    this.editor.on('align_justify', () =>
-      this.editor?.getTextFormatter()?.toggleStyle('alignJustify')
-    );
+    this.editor.on('align_left', () => {
+      this.editor?.getTextFormatter()?.toggleStyle('alignLeft');
+    });
+    this.editor.on('align_center', () => {
+      this.editor?.getTextFormatter()?.toggleStyle('alignCenter');
+    });
+    this.editor.on('align_right', () => {
+      this.editor?.getTextFormatter()?.toggleStyle('alignRight');
+    });
+    this.editor.on('align_justify', () => {
+      this.editor?.getTextFormatter()?.toggleStyle('alignJustify');
+    });
 
-    this.editor.on('selectionchange', () => this.handleSelectionChange());
+    this.editor.on('selectionchange', () => {
+      this.handleSelectionChange();
+    });
   }
 
   private addToolbarButtons(): void {
@@ -62,6 +68,7 @@ export class AlignmentPlugin implements Plugin {
           this.handleSelectionChange();
         },
       });
+
       toolbar.appendChild(button);
       this.toolbarButtons.set(command, button);
     });

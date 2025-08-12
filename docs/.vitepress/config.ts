@@ -79,6 +79,7 @@ export default defineConfig({
           { text: 'Kotlin Spring Boot', link: '/integrations/kotlin-spring' },
           { text: 'Flutter', link: '/integrations/flutter' },
           { text: 'Electron', link: '/integrations/electron' },
+          { text: 'Editor Modes', link: '/integrations/editor-modes' },
         ],
       },
       { text: 'Plugin Development', link: '/plugin-development-guide' },

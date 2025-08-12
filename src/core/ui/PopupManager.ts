@@ -57,9 +57,11 @@ export class PopupManager {
   private overlay: HTMLElement;
   private footer: PopupFooter | null = null;
   private isVisible = false;
-  private boundDocumentKeydown?: (e: KeyboardEvent) => void;
+  private boundDocumentKeydown?: (e: Event) => void;
+  private editor: HTMLEditor;
 
   constructor(editor: HTMLEditor, options: PopupOptions = {}) {
+    this.editor = editor;
     const { className = '', closeOnClickOutside = true, items = [] } = options;
 
     this.popup = this.createPopup(className);
@@ -83,8 +85,8 @@ export class PopupManager {
       this.setContent(this.createContentFromItems(items));
     }
 
-    editor.getInnerContainer().appendChild(this.overlay);
-    editor.getInnerContainer().appendChild(this.popup);
+    this.editor.getDOMContext()!.appendChild(this.overlay);
+    this.editor.getDOMContext()!.appendChild(this.popup);
 
     if (closeOnClickOutside) {
       this.overlay.addEventListener('mousedown', (e) => {
@@ -97,12 +99,12 @@ export class PopupManager {
     }
 
     // Храним ссылку на обработчик, чтобы можно было удалить
-    this.boundDocumentKeydown = (e: KeyboardEvent) => {
-      if (this.isVisible && e.key === 'Escape') {
+    this.boundDocumentKeydown = (e: Event) => {
+      if (this.isVisible && (e as KeyboardEvent).key === 'Escape') {
         this.hide();
       }
     };
-    document.addEventListener('keydown', this.boundDocumentKeydown);
+    this.editor.getDOMContext().addEventListener('keydown', this.boundDocumentKeydown);
   }
 
   private createPopup(className: string): HTMLElement {
@@ -600,7 +602,7 @@ export class PopupManager {
   public destroy(): void {
     // Снимаем глобальные обработчики
     if (this.boundDocumentKeydown) {
-      document.removeEventListener('keydown', this.boundDocumentKeydown);
+      this.editor.getDOMContext().removeEventListener('keydown', this.boundDocumentKeydown);
       this.boundDocumentKeydown = undefined;
     }
 
