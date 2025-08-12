@@ -48,26 +48,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       mode: 'shadowRoot',
     });
 
+
     // Примеры других режимов:
 
-    // Web Component режим (автоматически создает Shadow DOM):
-    // const editor = new HTMLEditor(editorContainer, {
-    //   mode: 'webComponent',
-    //   componentName: 'my-html-editor',
-    //   isolated: true // закрытый Shadow DOM для полной изоляции
-    // });
-
-    // Embed режим (для встраивания в другие сайты):
-    // const editor = new HTMLEditor(editorContainer, {
-    //   mode: 'embed',
-    //   origin: 'https://example.com',
-    //   allowCrossOrigin: true
+    // const editor = new HTMLEditor(appDiv, {
+    //   mode: 'direct',
     // });
 
     // iframe режим:
     // const editor = new HTMLEditor(editorContainer, {
     //   mode: 'iframe'
     // });
+
+    // await editor.waitForIframeReady()
 
     // Теперь редактор автоматически использует shadow-dom через DOMContext
     // Все вызовы document.getElementById, document.querySelector и т.д.
