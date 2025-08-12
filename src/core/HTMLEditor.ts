@@ -119,80 +119,100 @@ export class HTMLEditor {
 
   // Применение стилей к Shadow DOM
   private applyStylesToShadowDOM(shadowRoot: ShadowRoot): void {
-    try {
-      // Пробуем использовать adoptedStyleSheets (современный способ)
-      if (document.adoptedStyleSheets && document.adoptedStyleSheets.length > 0) {
-        shadowRoot.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
-      } else {
-        // Fallback: копируем стили как раньше
+    const applyStyles = () => {
+      try {
+        // Пробуем использовать adoptedStyleSheets (современный способ)
+        if (document.adoptedStyleSheets && document.adoptedStyleSheets.length > 0) {
+          shadowRoot.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
+        } else {
+          // Fallback: копируем стили как раньше
+          const styleElements = document.querySelectorAll('style');
+          styleElements.forEach((style, _index) => {
+            const newStyle = document.createElement('style');
+            newStyle.textContent = style.textContent || '';
+            shadowRoot.appendChild(newStyle);
+          });
+        }
+
+        // Копируем link элементы со стилями (включая prefetch в production)
+        const linkElements = document.querySelectorAll(
+          'link[rel="modulepreload"], link[rel="preload"], link[rel="preload stylesheet"]'
+        );
+        linkElements.forEach((link) => {
+          const newLink = document.createElement('link');
+          newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для Shadow DOM
+          newLink.href = (link as HTMLLinkElement).href;
+          shadowRoot.appendChild(newLink);
+        });
+      } catch (error) {
+        // Fallback: копируем стили
         const styleElements = document.querySelectorAll('style');
         styleElements.forEach((style, _index) => {
           const newStyle = document.createElement('style');
           newStyle.textContent = style.textContent || '';
           shadowRoot.appendChild(newStyle);
         });
+
+        // Fallback для link элементов
+        const linkElements = document.querySelectorAll(
+          'link[rel="modulepreload"], link[rel="preload"], link[rel="preload stylesheet"]'
+        );
+        linkElements.forEach((link) => {
+          const newLink = document.createElement('link');
+          newLink.rel = 'stylesheet';
+          newLink.href = (link as HTMLLinkElement).href;
+          shadowRoot.appendChild(newLink);
+        });
       }
+    };
 
-      // Копируем link элементы со стилями (включая prefetch в production)
-      const linkElements = document.querySelectorAll(
-        'link[rel="stylesheet"], link[rel="prefetch"]'
-      );
-      linkElements.forEach((link) => {
-        const newLink = document.createElement('link');
-        newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для Shadow DOM
-        newLink.href = (link as HTMLLinkElement).href;
-        shadowRoot.appendChild(newLink);
-      });
-    } catch (error) {
-      // Fallback: копируем стили
-      const styleElements = document.querySelectorAll('style');
-      styleElements.forEach((style, _index) => {
-        const newStyle = document.createElement('style');
-        newStyle.textContent = style.textContent || '';
-        shadowRoot.appendChild(newStyle);
-      });
-
-      // Fallback для link элементов
-      const linkElements = document.querySelectorAll(
-        'link[rel="stylesheet"], link[rel="prefetch"]'
-      );
-      linkElements.forEach((link) => {
-        const newLink = document.createElement('link');
-        newLink.rel = 'stylesheet';
-        newLink.href = (link as HTMLLinkElement).href;
-        shadowRoot.appendChild(newLink);
-      });
+    // Если страница уже загружена, применяем стили сразу
+    if (document.readyState === 'complete') {
+      applyStyles()
+    } else {
+      // Иначе ждем полной загрузки страницы
+      window.addEventListener('load', applyStyles);
     }
   }
 
   // Применение стилей к iframe
   private applyStylesToIframe(iframeDocument: Document): void {
-    try {
-      // Копируем все стили из основного документа в iframe
-      const styleElements = document.querySelectorAll('style');
-      styleElements.forEach((style) => {
-        const newStyle = iframeDocument.createElement('style');
-        newStyle.textContent = style.textContent || '';
-        iframeDocument.head.appendChild(newStyle);
-      });
+    const applyStyles = () => {
+      try {
+        // Копируем все стили из основного документа в iframe
+        const styleElements = document.querySelectorAll('style');
+        styleElements.forEach((style) => {
+          const newStyle = iframeDocument.createElement('style');
+          newStyle.textContent = style.textContent || '';
+          iframeDocument.head.appendChild(newStyle);
+        });
 
-      // Копируем link элементы со стилями (включая prefetch в production)
-      const linkElements = document.querySelectorAll(
-        'link[rel="stylesheet"], link[rel="prefetch"]'
-      );
-      linkElements.forEach((link) => {
-        const newLink = iframeDocument.createElement('link');
-        newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для iframe
-        newLink.href = (link as HTMLLinkElement).href;
-        iframeDocument.head.appendChild(newLink);
-      });
+        // Копируем link элементы со стилями (включая prefetch в production)
+        const linkElements = document.querySelectorAll(
+          'link[rel="modulepreload"], link[rel="preload"], link[rel="preload stylesheet"]'
+        );
+        linkElements.forEach((link) => {
+          const newLink = iframeDocument.createElement('link');
+          newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для iframe
+          newLink.href = (link as HTMLLinkElement).href;
+          iframeDocument.head.appendChild(newLink);
+        });
 
-      // Пробуем использовать adoptedStyleSheets если поддерживается
-      if (document.adoptedStyleSheets && iframeDocument.adoptedStyleSheets) {
-        iframeDocument.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
+        // Пробуем использовать adoptedStyleSheets если поддерживается
+        if (document.adoptedStyleSheets && iframeDocument.adoptedStyleSheets) {
+          iframeDocument.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
+        }
+      } catch (error) {
+        console.warn('Failed to apply styles to iframe:', error);
       }
-    } catch (error) {
-      console.warn('Failed to apply styles to iframe:', error);
+    };
+
+    // Если страница уже загружена, применяем стили сразу
+    if (document.readyState === 'complete') {
+      applyStyles()
+    } else {
+      // Иначе ждем полной загрузки страницы
+      window.addEventListener('load', applyStyles);
     }
   }
 
