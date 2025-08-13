@@ -1,8 +1,10 @@
-[![npm version](https://badge.fury.io/js/on-codemerge.svg)](https://badge.fury.io/js/on-codemerge)
-[![npm downloads](https://img.shields.io/npm/dw/on-codemerge)](https://badge.fury.io/js/on-codemerge)
-[![NPM license](https://img.shields.io/npm/l/on-codemerge)](https://github.com/on-org/on-codemerge/blob/master/LICENSE)
-[![npm type definitions](https://img.shields.io/npm/types/on-codemerge)](https://github.com/on-org/on-codemerge)
-[![GitHub Repo stars](https://img.shields.io/github/stars/s00d/on-codemerge?style=social)](https://github.com/s00d/on-codemerge)
+[![npm version](https://img.shields.io/npm/v/on-codemerge/latest?style=for-the-badge)](https://www.npmjs.com/package/on-codemerge)
+[![npm downloads](https://img.shields.io/npm/dw/on-codemerge?style=for-the-badge)](https://www.npmjs.com/package/on-codemerge)
+[![npm license](https://img.shields.io/npm/l/on-codemerge?style=for-the-badge)](https://github.com/on-org/on-codemerge/blob/master/LICENSE)
+[![npm type definitions](https://img.shields.io/npm/types/on-codemerge?style=for-the-badge)](https://github.com/on-org/on-codemerge)
+[![GitHub issues](https://img.shields.io/badge/github-issues-orange?style=for-the-badge)](https://github.com/s00d/on-codemerge/issues)
+[![GitHub stars](https://img.shields.io/badge/github-stars-yellow?style=for-the-badge)](https://github.com/s00d/on-codemerge/stargazers)
+[![Donate](https://img.shields.io/badge/Donate-Donationalerts-ff4081?style=for-the-badge)](https://www.donationalerts.com/r/s00d88)
 
 # on-codemerge
 
