@@ -18,6 +18,7 @@ export class CommentsPlugin implements Plugin {
   private menu: CommentMenu | null = null;
   private errorModal: ErrorModal | null = null;
   private tooltip: HTMLElement;
+  private toolbarButton: HTMLElement | null = null;
 
   constructor() {
     this.manager = new CommentManager();
@@ -47,12 +48,12 @@ export class CommentsPlugin implements Plugin {
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
     if (toolbar) {
-      const button = createToolbarButton({
+      this.toolbarButton = createToolbarButton({
         icon: commentIcon,
         title: this.editor?.t('Insert Comment'),
         onClick: () => this.addComment(),
       });
-      toolbar.appendChild(button);
+      toolbar.appendChild(this.toolbarButton);
     }
   }
 
@@ -228,6 +229,12 @@ export class CommentsPlugin implements Plugin {
     // Уничтожаем все UI компоненты
     if (this.tooltip && this.tooltip.parentElement) {
       this.tooltip.parentElement.removeChild(this.tooltip);
+    }
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     if (this.menu) {

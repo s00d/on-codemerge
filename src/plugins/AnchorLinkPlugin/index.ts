@@ -12,6 +12,7 @@ export class AnchorLinkPlugin implements Plugin {
   private editor: HTMLEditor | null = null;
   private popup: PopupManager | null = null;
   private savedCursor: { offset: number } | null = null;
+  private toolbarButton: HTMLElement | null = null;
   private savedSelectedText: string = '';
 
   initialize(editor: HTMLEditor): void {
@@ -37,20 +38,22 @@ export class AnchorLinkPlugin implements Plugin {
 
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-    const button = createToolbarButton({
-      icon: anchorAddIcon,
-      title: this.editor?.t('Insert Anchor'),
-      onClick: () => {
-        if (!this.editor) return;
-        // Сохраняем выделение/курсор до открытия попапа
-        const selection = this.editor.getTextFormatter()?.getSelection();
-        this.savedSelectedText = selection?.toString() || '';
-        this.savedCursor = this.editor.saveCursorPosition();
-        this.popup?.show();
-      },
-    });
-    toolbar.appendChild(button);
+    if (toolbar) {
+      this.toolbarButton = createToolbarButton({
+        icon: anchorAddIcon,
+        title: this.editor?.t('Insert Anchor'),
+        onClick: () => {
+          this.editor?.ensureEditorFocus();
+          const cursor = this.editor?.saveCursorPosition();
+          if (cursor) {
+            this.savedCursor = cursor;
+          }
+          this.savedSelectedText = this.editor?.getTextFormatter()?.getSelection()?.toString() || '';
+          this.popup?.show();
+        },
+      });
+      toolbar.appendChild(this.toolbarButton);
+    }
   }
 
   private insert(): void {
@@ -110,6 +113,12 @@ export class AnchorLinkPlugin implements Plugin {
     if (this.popup) {
       this.popup.destroy();
       this.popup = null;
+    }
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     // Отписываемся от всех событий

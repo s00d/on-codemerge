@@ -13,13 +13,14 @@ export class PDFEmbedPlugin implements Plugin {
   hotkeys = [{ keys: 'Ctrl+Alt+P', description: 'Insert PDF', command: 'pdf-embed', icon: '📄' }];
 
   private editor: HTMLEditor | null = null;
-  private insertPopup: PopupManager | null = null;
+  private popup: PopupManager | null = null;
+  private toolbarButton: HTMLElement | null = null;
 
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
     this.addToolbarButton();
 
-    this.insertPopup = new PopupManager(editor, {
+    this.popup = new PopupManager(editor, {
       title: editor.t('Insert PDF'),
       className: 'pdf-embed-popup',
       closeOnClickOutside: true,
@@ -28,7 +29,7 @@ export class PDFEmbedPlugin implements Plugin {
         {
           label: editor.t('Cancel'),
           variant: 'secondary',
-          onClick: () => this.insertPopup?.hide(),
+          onClick: () => this.popup?.hide(),
         },
         { label: editor.t('Insert'), variant: 'primary', onClick: () => this.handleInsert() },
       ],
@@ -39,14 +40,14 @@ export class PDFEmbedPlugin implements Plugin {
 
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    const button = createToolbarButton({
-      icon: pdfIcon,
-      title: this.editor?.t('Insert PDF'),
-      onClick: () => this.openModal(),
-    });
-    toolbar.appendChild(button);
+    if (toolbar) {
+      this.toolbarButton = createToolbarButton({
+        icon: pdfIcon,
+        title: this.editor?.t('Insert PDF'),
+        onClick: () => this.openModal(),
+      });
+      toolbar.appendChild(this.toolbarButton);
+    }
   }
 
   private buildPopupItems(): PopupItem[] {
@@ -74,17 +75,17 @@ export class PDFEmbedPlugin implements Plugin {
   }
 
   private openModal(): void {
-    this.insertPopup?.show();
+    this.popup?.show();
     // Focus URL input
-    this.insertPopup?.setFocus('pdf-url');
+    this.popup?.setFocus('pdf-url');
   }
 
   private handleInsert(): void {
-    if (!this.editor || !this.insertPopup) return;
+    if (!this.editor || !this.popup) return;
 
-    const url = String(this.insertPopup.getValue('pdf-url') || '').trim();
-    const width = Number(this.insertPopup.getValue('pdf-width') || 800);
-    const height = Number(this.insertPopup.getValue('pdf-height') || 600);
+    const url = String(this.popup.getValue('pdf-url') || '').trim();
+    const width = Number(this.popup.getValue('pdf-width') || 800);
+    const height = Number(this.popup.getValue('pdf-height') || 600);
 
     if (!url) {
       this.editor.showWarningNotification(this.editor.t('Please provide PDF URL'));
@@ -114,20 +115,26 @@ export class PDFEmbedPlugin implements Plugin {
     });
 
     this.editor.insertContent(wrapper);
-    this.insertPopup.hide();
+    this.popup.hide();
   }
 
   destroy(): void {
+    // Уничтожаем все UI компоненты
+    if (this.popup) {
+      this.popup.destroy();
+      this.popup = null;
+    }
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
+    }
+
     // Отписываемся от всех событий
     this.editor?.off('pdf-embed');
     this.editor?.off('pdf-insert');
     this.editor?.off('pdf-error');
-
-    // Уничтожаем все UI компоненты
-    if (this.insertPopup) {
-      this.insertPopup.destroy();
-      this.insertPopup = null;
-    }
 
     // Очищаем все ссылки
     this.editor = null;

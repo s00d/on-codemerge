@@ -26,6 +26,7 @@ export class FormBuilderPlugin implements Plugin {
   private contextMenu: ContextMenu | null = null;
   private formManager!: FormManager;
   private templateManager!: TemplateManager;
+  private toolbarButton: HTMLElement | null = null;
 
   constructor() {}
 
@@ -156,16 +157,14 @@ export class FormBuilderPlugin implements Plugin {
    * Add toolbar button
    */
   private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
+    const toolbar = this.editor.getToolbar();
     if (toolbar) {
-      const button = createToolbarButton({
+      this.toolbarButton = createToolbarButton({
         icon: formIcon,
         title: this.editor.t('Insert Form'),
-        onClick: () => {
-          this.openFormBuilder();
-        },
+        onClick: () => this.openFormBuilder(),
       });
-      toolbar.appendChild(button);
+      toolbar.appendChild(this.toolbarButton);
     }
   }
 
@@ -185,6 +184,12 @@ export class FormBuilderPlugin implements Plugin {
     if (this.templatesModal) {
       this.templatesModal.destroy();
       this.templatesModal = null;
+    }
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     // Удаляем обработчик событий

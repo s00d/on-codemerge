@@ -10,6 +10,7 @@ export class TrackChangesPlugin implements Plugin {
   name = 'track-changes';
   private editor: HTMLEditor | null = null;
   private enabled = false;
+  private toolbarButton: HTMLElement | null = null;
 
   initialize(editor: HTMLEditor): void {
     this.editor = editor;
@@ -27,16 +28,16 @@ export class TrackChangesPlugin implements Plugin {
       return;
     }
 
-    const button = createToolbarButton({
+    this.toolbarButton = createToolbarButton({
       icon: trackChangesIcon,
       title: this.editor?.t('Track Changes'),
       onClick: () => this.toggle(),
     });
 
     // Добавляем атрибут для идентификации
-    button.setAttribute('data-track-changes-button', 'true');
+    this.toolbarButton.setAttribute('data-track-changes-button', 'true');
 
-    toolbar.appendChild(button);
+    toolbar.appendChild(this.toolbarButton);
   }
 
   private toggle(): void {
@@ -120,9 +121,9 @@ export class TrackChangesPlugin implements Plugin {
     container.removeEventListener('input', this.handleInput);
 
     // Удаляем кнопку из тулбара
-    const button = container.querySelector('[data-track-changes-button]');
-    if (button && button.parentElement) {
-      button.parentElement.removeChild(button);
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     // Отписываемся от всех событий

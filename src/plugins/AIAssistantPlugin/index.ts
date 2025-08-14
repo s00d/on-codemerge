@@ -45,6 +45,7 @@ export class AIAssistantPlugin implements Plugin {
   private structurePrompt: string = defaultStructurePrompt;
   private prompt: string = defaultPrompt;
   private driverOptions: any = {};
+  private toolbarButton: HTMLElement | null = null;
   private drivers: { [key: string]: AIDriver<any> } = {};
 
   constructor() {
@@ -73,7 +74,7 @@ export class AIAssistantPlugin implements Plugin {
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
     if (toolbar) {
-      const aiButton = createToolbarButton({
+      this.toolbarButton = createToolbarButton({
         icon: aiAssistantIcon,
         title: 'AI Assistant',
         onClick: () => {
@@ -81,7 +82,7 @@ export class AIAssistantPlugin implements Plugin {
         },
       });
 
-      toolbar.appendChild(aiButton);
+      toolbar.appendChild(this.toolbarButton);
     }
   }
 
@@ -271,6 +272,12 @@ export class AIAssistantPlugin implements Plugin {
     if (this.popup) {
       this.popup.destroy();
       this.popup = null;
+    }
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     // Отписываемся от всех событий

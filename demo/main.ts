@@ -35,7 +35,7 @@ interface PluginInfo {
 }
 
 class DemoApp {
-    private editor: HTMLEditor | null = null;
+    private editor!: HTMLEditor;
     private outputElement!: HTMLElement;
     private pluginStatusElement!: HTMLElement;
     private memoryInfoElement!: HTMLElement;
@@ -55,10 +55,9 @@ class DemoApp {
             throw new Error('Editor container not found');
         }
 
-        // Создаем экземпляр редактора
         this.editor = new HTMLEditor(editorContainer, { mode: 'direct' });
 
-        // Регистрируем плагины и сохраняем информацию о них
+        // Регистрируем плагины
         this.registerPlugin('toolbar', new ToolbarPlugin());
         this.registerPlugin('typography', new TypographyPlugin());
         this.registerPlugin('table', new TablePlugin());
@@ -75,14 +74,12 @@ class DemoApp {
     }
 
     private registerPlugin(name: string, plugin: any): void {
-        if (this.editor) {
-            this.editor.use(plugin);
-            this.plugins.set(name, {
-                name,
-                instance: plugin,
-                enabled: true
-            });
-        }
+        this.editor.use(plugin);
+        this.plugins.set(name, {
+            name,
+            instance: plugin,
+            enabled: true
+        });
     }
 
     private setupEventListeners(): void {
@@ -90,10 +87,47 @@ class DemoApp {
         this.pluginStatusElement = document.getElementById('pluginStatus') as HTMLElement;
         this.memoryInfoElement = document.getElementById('memoryInfo') as HTMLElement;
 
-        // Кнопки управления плагинами
         this.setupPluginToggles();
+        this.setupControlButtons();
+        this.setupContentButtons();
 
-        // Кнопки управления редактором
+        // Подписываемся на изменения контента для автоматического обновления HTML Output
+        this.editor.subscribeToContentChange((newContent) => {
+            console.log('Content changed, updating HTML Output');
+            this.updateHtmlOutput(newContent);
+        });
+
+        this.editor.on('contentChange', () => {
+            console.log('Content changed');
+        });
+    }
+
+    private setupPluginToggles(): void {
+        const pluginIds = [
+            'toolbar-plugin', 'typography-plugin', 'table-plugin', 'image-plugin',
+            'link-plugin', 'lists-plugin', 'color-plugin', 'alignment-plugin',
+            'block-plugin', 'codeblock-plugin', 'export-plugin'
+        ];
+
+        pluginIds.forEach(pluginId => {
+            const checkbox = document.getElementById(pluginId) as HTMLInputElement;
+            if (checkbox) {
+                // Toolbar нельзя отключать
+                if (pluginId === 'toolbar-plugin') {
+                    checkbox.disabled = true;
+                    checkbox.title = 'Toolbar plugin cannot be disabled';
+                }
+                
+                checkbox.addEventListener('change', (e) => {
+                    const target = e.target as HTMLInputElement;
+                    const pluginName = pluginId.replace('-plugin', '');
+                    this.togglePlugin(pluginName, target.checked);
+                });
+            }
+        });
+    }
+
+    private setupControlButtons(): void {
         document.getElementById('reloadEditor')?.addEventListener('click', () => {
             this.reloadEditor();
         });
@@ -105,8 +139,9 @@ class DemoApp {
         document.getElementById('checkMemory')?.addEventListener('click', () => {
             this.checkMemory();
         });
+    }
 
-        // Кнопки контента
+    private setupContentButtons(): void {
         document.getElementById('getContent')?.addEventListener('click', () => {
             this.getContent();
         });
@@ -122,71 +157,37 @@ class DemoApp {
         document.getElementById('focusEditor')?.addEventListener('click', () => {
             this.focusEditor();
         });
-
-        // Слушаем изменения в редакторе
-        if (this.editor) {
-            this.editor.on('contentChange', () => {
-                console.log('Content changed');
-            });
-        }
-    }
-
-    private setupPluginToggles(): void {
-        const pluginIds = [
-            'toolbar-plugin', 'typography-plugin', 'table-plugin', 'image-plugin',
-            'link-plugin', 'lists-plugin', 'color-plugin', 'alignment-plugin',
-            'block-plugin', 'codeblock-plugin', 'export-plugin'
-        ];
-
-        pluginIds.forEach(pluginId => {
-            const checkbox = document.getElementById(pluginId) as HTMLInputElement;
-            if (checkbox) {
-                checkbox.addEventListener('change', (e) => {
-                    const target = e.target as HTMLInputElement;
-                    const pluginName = pluginId.replace('-plugin', '');
-                    this.togglePlugin(pluginName, target.checked);
-                });
-            }
-        });
     }
 
     private togglePlugin(pluginName: string, enabled: boolean): void {
         const pluginInfo = this.plugins.get(pluginName);
-        if (!pluginInfo || !this.editor) {
-            console.warn(`Plugin ${pluginName} not found or editor not available`);
+        if (!pluginInfo) return;
+
+        // Toolbar нельзя отключать - это основной плагин
+        if (pluginName === 'toolbar' && !enabled) {
+            console.warn('Toolbar plugin cannot be disabled');
+            const checkbox = document.getElementById('toolbar-plugin') as HTMLInputElement;
+            if (checkbox) {
+                checkbox.checked = true; // Возвращаем checkbox в положение "включено"
+            }
             return;
         }
 
-        console.log(`Toggling plugin ${pluginName}: ${enabled ? 'enable' : 'disable'}`);
-        console.log(`Current state: enabled=${pluginInfo.enabled}, hasDestroy=${!!pluginInfo.instance.destroy}`);
-
         try {
             if (enabled && !pluginInfo.enabled) {
-                // Плагин уже зарегистрирован, просто отмечаем как включенный
+                // Включаем плагин - заново регистрируем
+                this.editor.use(pluginInfo.instance);
                 pluginInfo.enabled = true;
                 console.log(`Plugin ${pluginName} enabled`);
             } else if (!enabled && pluginInfo.enabled) {
                 // Отключаем плагин
-                if (pluginInfo.instance.destroy) {
-                    console.log(`Calling destroy() on plugin ${pluginName}`);
-                    pluginInfo.instance.destroy();
-                } else {
-                    console.warn(`Plugin ${pluginName} has no destroy method`);
-                }
-                // Удаляем плагин из редактора
-                const removed = this.editor.remove(pluginName);
-                if (removed) {
-                    console.log(`Plugin ${pluginName} removed from editor`);
-                } else {
-                    console.warn(`Failed to remove plugin ${pluginName} from editor`);
-                }
+                this.editor.remove(pluginName);
                 pluginInfo.enabled = false;
                 console.log(`Plugin ${pluginName} disabled`);
             }
             this.updatePluginStatus();
         } catch (error) {
             console.error(`Error toggling plugin ${pluginName}:`, error);
-            // Возвращаем checkbox в предыдущее состояние
             const checkbox = document.getElementById(`${pluginName}-plugin`) as HTMLInputElement;
             if (checkbox) {
                 checkbox.checked = !enabled;
@@ -194,95 +195,62 @@ class DemoApp {
         }
     }
 
-    private removePluginFromEditor(pluginName: string): void {
-        // Теперь используем встроенный метод remove
-        if (this.editor) {
-            const removed = this.editor.remove(pluginName);
-            if (removed) {
-                console.log(`Plugin ${pluginName} removed from editor`);
-            } else {
-                console.warn(`Failed to remove plugin ${pluginName} from editor`);
-            }
-        }
-    }
-
     private reloadEditor(): void {
-        try {
-            if (!this.editor) return;
+        const currentContent = this.editor.getHtml();
+        const pluginStates = new Map<string, boolean>();
 
-            // Сохраняем текущий контент и состояние плагинов
-            const currentContent = this.editor.getHtml();
-            const pluginStates = new Map<string, boolean>();
-            this.plugins.forEach((pluginInfo, name) => {
-                pluginStates.set(name, pluginInfo.enabled);
+        this.plugins.forEach((pluginInfo, name) => {
+            pluginStates.set(name, pluginInfo.enabled);
+        });
+
+        this.destroyEditor();
+
+        setTimeout(() => {
+            this.initializeEditor();
+
+            pluginStates.forEach((enabled, pluginName) => {
+                const pluginInfo = this.plugins.get(pluginName);
+                if (pluginInfo) {
+                    pluginInfo.enabled = enabled;
+                    const checkbox = document.getElementById(`${pluginName}-plugin`) as HTMLInputElement;
+                    if (checkbox) {
+                        checkbox.checked = enabled;
+                    }
+                }
             });
 
-            // Уничтожаем текущий редактор
-            this.destroyEditor();
-
-            // Создаем новый редактор
-            setTimeout(() => {
-                this.initializeEditor();
-                
-                // Восстанавливаем состояние плагинов
-                pluginStates.forEach((enabled, pluginName) => {
-                    const pluginInfo = this.plugins.get(pluginName);
-                    if (pluginInfo) {
-                        pluginInfo.enabled = enabled;
-                        // Обновляем checkbox
-                        const checkbox = document.getElementById(`${pluginName}-plugin`) as HTMLInputElement;
-                        if (checkbox) {
-                            checkbox.checked = enabled;
-                        }
-                    }
-                });
-                
-                this.setupEventListeners();
-                if (this.editor) {
-                    this.editor.setHtml(currentContent);
-                }
-                this.updatePluginStatus();
-                console.log('Editor reloaded successfully');
-            }, 100);
-        } catch (error) {
-            console.error('Error reloading editor:', error);
-        }
+            this.setupEventListeners();
+            this.editor.setHtml(currentContent);
+            // HTML Output обновится автоматически через subscribeToContentChange
+            this.updatePluginStatus();
+            console.log('Editor reloaded successfully');
+        }, 100);
     }
 
     private destroyEditor(): void {
-        try {
-            if (this.editor) {
-                // Уничтожаем все плагины
-                this.plugins.forEach((pluginInfo, name) => {
-                    if (pluginInfo.enabled && pluginInfo.instance.destroy) {
-                        try {
-                            pluginInfo.instance.destroy();
-                            console.log(`Plugin ${name} destroyed`);
-                        } catch (error) {
-                            console.error(`Error destroying plugin ${name}:`, error);
-                        }
-                    }
-                });
-
-                // Уничтожаем редактор
-                this.editor.destroy();
-                this.editor = null;
-
-                // Очищаем контейнер
-                const editorContainer = document.getElementById('editor');
-                if (editorContainer) {
-                    editorContainer.innerHTML = '';
+        this.plugins.forEach((pluginInfo, name) => {
+            if (pluginInfo.enabled && pluginInfo.instance.destroy) {
+                try {
+                    pluginInfo.instance.destroy();
+                    console.log(`Plugin ${name} destroyed`);
+                } catch (error) {
+                    console.error(`Error destroying plugin ${name}:`, error);
                 }
-
-                // Очищаем плагины
-                this.plugins.clear();
-
-                this.updatePluginStatus();
-                console.log('Editor destroyed successfully');
             }
-        } catch (error) {
-            console.error('Error destroying editor:', error);
+        });
+
+        this.editor.destroy();
+        // @ts-ignore - editor будет пересоздан в reloadEditor
+        this.editor = null;
+
+        const editorContainer = document.getElementById('editor');
+        if (editorContainer) {
+            editorContainer.innerHTML = '';
         }
+
+        this.plugins.clear();
+        this.updatePluginStatus();
+        console.log('Editor destroyed successfully');
     }
 
     private checkMemory(): void {
@@ -314,23 +282,18 @@ class DemoApp {
 
         const enabledCount = Array.from(this.plugins.values()).filter(p => p.enabled).length;
         const totalCount = this.plugins.size;
-        
-        // Проверяем, какие плагины имеют метод destroy
-        const pluginsWithDestroy = Array.from(this.plugins.values())
-            .filter(p => p.instance.destroy)
-            .map(p => p.name);
+
         const pluginsWithoutDestroy = Array.from(this.plugins.values())
             .filter(p => !p.instance.destroy)
             .map(p => p.name);
-        
+
         let statusText = `Status: ${enabledCount}/${totalCount} plugins enabled`;
         if (pluginsWithoutDestroy.length > 0) {
             statusText += ` | Plugins without destroy: ${pluginsWithoutDestroy.join(', ')}`;
         }
-        
+        statusText += ` | Toolbar: always enabled`;
+
         this.pluginStatusElement.textContent = statusText;
-        
-        // Обновляем информацию о памяти
         this.checkMemory();
     }
 
@@ -354,19 +317,14 @@ class DemoApp {
             </ul>
         `;
 
-        if (this.editor) {
-            this.editor.setHtml(this.initialContent);
-        }
+        this.editor.setHtml(this.initialContent);
+        // HTML Output обновится автоматически через subscribeToContentChange
     }
 
     private getContent(): void {
         try {
-            if (!this.editor) {
-                this.outputElement.innerHTML = '<p style="color: red;">Editor not loaded</p>';
-                return;
-            }
             const content = this.editor.getHtml();
-            this.outputElement.innerHTML = `<pre>${this.escapeHtml(content)}</pre>`;
+            this.updateHtmlOutput(content);
             console.log('Content retrieved:', content);
         } catch (error) {
             console.error('Error getting content:', error);
@@ -391,10 +349,9 @@ class DemoApp {
         `;
 
         try {
-            if (this.editor) {
-                this.editor.setHtml(sampleContent);
-                console.log('Content set successfully');
-            }
+            this.editor.setHtml(sampleContent);
+            // HTML Output обновится автоматически через subscribeToContentChange
+            console.log('Content set successfully');
         } catch (error) {
             console.error('Error setting content:', error);
         }
@@ -402,10 +359,8 @@ class DemoApp {
 
     private clearContent(): void {
         try {
-            if (this.editor) {
-                this.editor.setHtml('');
-            }
-            this.outputElement.innerHTML = '';
+            this.editor.setHtml('');
+            this.updateHtmlOutput('');
             console.log('Content cleared');
         } catch (error) {
             console.error('Error clearing content:', error);
@@ -414,13 +369,15 @@ class DemoApp {
 
     private focusEditor(): void {
         try {
-            if (this.editor) {
-                this.editor.ensureEditorFocus();
-                console.log('Editor focused');
-            }
+            this.editor.ensureEditorFocus();
+            console.log('Editor focused');
         } catch (error) {
             console.error('Error focusing editor:', error);
         }
+    }
+
+    private updateHtmlOutput(newContent: string): void {
+        this.outputElement.innerHTML = `<pre>${this.escapeHtml(newContent)}</pre>`;
     }
 
     private escapeHtml(text: string): string {

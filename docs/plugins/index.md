@@ -97,6 +97,32 @@ const editor = new HTMLEditor(container);
 // Register plugins
 editor.use(new ToolbarPlugin());
 editor.use(new AlignmentPlugin());
+
+// Remove plugins when no longer needed
+editor.remove('toolbar'); // Removes plugin by name
+editor.remove('alignment'); // Removes plugin by name
+
+// Check available plugins
+const plugins = editor.getPlugins();
+console.log('Available plugins:', Array.from(plugins.keys()));
+```
+
+### Plugin Lifecycle Management
+
+```javascript
+// Dynamic plugin management
+const editor = new HTMLEditor(container);
+
+// Add plugins as needed
+editor.use(new TablePlugin());
+editor.use(new ImagePlugin());
+
+// Remove specific plugins
+editor.remove('table'); // Removes TablePlugin
+editor.remove('image'); // Removes ImagePlugin
+
+// Re-add plugins if needed
+editor.use(new TablePlugin()); // Plugin can be re-registered
 ```
 
 ### Plugin Configuration Examples
@@ -116,6 +142,14 @@ editor.use(new CollaborationPlugin({
   serverUrl: 'ws://your-websocket-server.com',
   autoStart: true,
 }));
+
+// Conditional plugin loading
+if (userHasPermission('admin')) {
+  editor.use(new AIAssistantPlugin());
+} else {
+  // Remove AI plugin if user doesn't have permission
+  editor.remove('ai-assistant');
+}
 ```
 
 ## Plugin Dependencies
@@ -126,12 +160,55 @@ Some plugins may have dependencies on other plugins. For example:
 - **BlockPlugin** is often required for content manipulation plugins
 - **HistoryPlugin** is recommended for undo/redo functionality
 
+## Plugin Management Methods
+
+The HTMLEditor provides several methods for managing plugins:
+
+### `editor.use(plugin)`
+Registers and initializes a plugin.
+
+```javascript
+editor.use(new TablePlugin());
+```
+
+### `editor.remove(pluginName)`
+Removes a plugin by name. Returns `true` if successful, `false` otherwise.
+
+```javascript
+const success = editor.remove('table');
+if (success) {
+    console.log('TablePlugin removed successfully');
+}
+```
+
+### `editor.getPlugins()`
+Returns a Map of all registered plugins.
+
+```javascript
+const plugins = editor.getPlugins();
+console.log('Registered plugins:', Array.from(plugins.keys()));
+```
+
+### Plugin Cleanup
+
+When removing plugins, the editor automatically:
+- Calls the plugin's `destroy()` method if it exists
+- Removes the plugin from the internal registry
+- Cleans up any associated event listeners and resources
+
+```javascript
+// Example: Clean plugin removal
+editor.remove('spellchecker'); // Automatically calls destroy() if available
+```
+
 ## Performance Considerations
 
 - Load only the plugins you need to minimize bundle size
+- Use `editor.remove(pluginName)` to unload plugins when they're no longer needed
 - Some plugins (like SpellCheckerPlugin) may require additional configuration
 - CollaborationPlugin requires a WebSocket server for full functionality
 - AIAssistantPlugin may require API keys for external AI services
+- Removing unused plugins can help reduce memory usage and improve performance
 
 ## Browser Support
 
@@ -150,4 +227,7 @@ If you encounter issues with any plugin:
 3. Check browser console for errors
 4. Ensure proper initialization order
 5. Review plugin configuration options
+6. Use `editor.remove(pluginName)` to properly unload problematic plugins
+7. Check if plugin has a `destroy()` method for proper cleanup
+8. Verify plugin names match exactly when using `remove()` method
 

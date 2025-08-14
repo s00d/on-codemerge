@@ -114,6 +114,16 @@
             cursor: pointer;
         }
         
+        .plugin-toggle input[type="checkbox"]:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .plugin-toggle input[type="checkbox"]:disabled + span {
+            opacity: 0.7;
+            color: #6c757d;
+        }
+        
         .plugin-toggle span {
             font-size: 14px;
             color: #495057;

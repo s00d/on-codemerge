@@ -98,6 +98,7 @@ export class TablePlugin implements Plugin {
   private exportService: TableExportService | null = null;
   private currentResizer: Resizer | null = null;
   private selectedCells: HTMLElement[] = [];
+  private toolbarButton: HTMLElement | null = null;
 
   constructor() {}
 
@@ -144,6 +145,10 @@ export class TablePlugin implements Plugin {
           });
         },
       });
+      
+      // Сохраняем ссылку на кнопку
+      this.toolbarButton = button;
+      
       toolbar.appendChild(button);
     }
   }
@@ -551,6 +556,12 @@ export class TablePlugin implements Plugin {
 
   destroy(): void {
     if (!this.editor) return;
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
+    }
 
     const container = this.editor.getContainer();
     if (container) {

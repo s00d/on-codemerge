@@ -21,6 +21,7 @@ export class YouTubeVideoPlugin implements Plugin {
     },
   ];
   private editor: HTMLEditor | null = null;
+  private toolbarButton: HTMLElement | null = null;
   private menu: YouTubeVideoMenu | null = null;
   private contextMenu: YouTubeVideoContextMenu | null = null;
   private resizer: ResizableElement;
@@ -60,12 +61,12 @@ export class YouTubeVideoPlugin implements Plugin {
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
     if (toolbar) {
-      const button = createToolbarButton({
+      this.toolbarButton = createToolbarButton({
         icon: youtubeIcon,
         title: this.editor?.t('Insert YouTube Video'),
         onClick: () => this.openModal(),
       });
-      toolbar.appendChild(button);
+      toolbar.appendChild(this.toolbarButton);
     }
   }
 
@@ -110,10 +111,10 @@ export class YouTubeVideoPlugin implements Plugin {
 
     this.resizer.detach();
 
-    const toolbar = this.editor?.getToolbar();
-    const button = toolbar?.querySelector(`[title="${this.editor?.t('Insert YouTube Video')}"]`);
-    if (button) {
-      button.remove();
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     this.editor?.off('youtube-video');

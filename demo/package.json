@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "on-codemerge": "file:../"
+    "on-codemerge": "latest"
   },
   "devDependencies": {
     "vite": "^6.3.5",

@@ -22,6 +22,7 @@ export class BlockPlugin implements Plugin {
   private activeBlock: HTMLElement | null = null;
   private currentResizer: Resizer | null = null;
   private isProcessing = false;
+  private toolbarButton: HTMLElement | null = null;
 
   initialize(editor: HTMLEditor): void {
     this.contextMenu = new BlockContextMenu(editor);
@@ -45,12 +46,12 @@ export class BlockPlugin implements Plugin {
     const toolbar = this.editor?.getToolbar();
     if (!toolbar) return;
 
-    const button = createToolbarButton({
+    this.toolbarButton = createToolbarButton({
       icon: blockIcon,
       title: this.editor?.t('Insert Block') || 'Insert Block',
       onClick: () => this.insertBlock(),
     });
-    toolbar.appendChild(button);
+    toolbar.appendChild(this.toolbarButton);
   }
 
   private setupBlockEvents(): void {
@@ -386,6 +387,12 @@ export class BlockPlugin implements Plugin {
 
     // Деактивируем текущий блок
     this.deactivateBlock();
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
+    }
 
     // Очищаем все ссылки
     this.editor = null;

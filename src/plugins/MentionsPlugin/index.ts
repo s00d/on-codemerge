@@ -11,6 +11,7 @@ export class MentionsPlugin implements Plugin {
   private popup: PopupManager | null = null;
   // query is handled by MentionsMenu
   private savedCursor: { offset: number } | null = null;
+  private toolbarButton: HTMLElement | null = null;
 
   constructor() {}
 
@@ -30,7 +31,7 @@ export class MentionsPlugin implements Plugin {
     // Toolbar button (opens popup)
     const toolbar = editor.getToolbar();
     if (toolbar) {
-      const btn = createToolbarButton({
+      this.toolbarButton = createToolbarButton({
         icon: mentionsIcon,
         title: editor.t('Mentions'),
         onClick: () => {
@@ -42,7 +43,7 @@ export class MentionsPlugin implements Plugin {
           });
         },
       });
-      toolbar.appendChild(btn);
+      toolbar.appendChild(this.toolbarButton);
     }
     const container = editor.getContainer();
     container.addEventListener('input', this.onInput);
@@ -126,6 +127,12 @@ export class MentionsPlugin implements Plugin {
     if (this.popup) {
       this.popup.destroy();
       this.popup = null;
+    }
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     // Отписываемся от всех событий

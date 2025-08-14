@@ -14,6 +14,7 @@ export class VideoPlugin implements Plugin {
   name = 'video';
   hotkeys = [{ keys: 'Ctrl+Alt+V', description: 'Insert video', command: 'video', icon: '🎥' }];
   private editor: HTMLEditor | null = null;
+  private toolbarButton: HTMLElement | null = null;
   private uploader: VideoUploader;
   private contextMenu: VideoContextMenu | null = null;
   private resizer: ResizableElement;
@@ -36,12 +37,12 @@ export class VideoPlugin implements Plugin {
   private addToolbarButton(): void {
     const toolbar = this.editor?.getToolbar();
     if (toolbar) {
-      const button = createToolbarButton({
+      this.toolbarButton = createToolbarButton({
         icon: videoIcon,
         title: this.editor?.t('Insert Video'),
         onClick: () => this.handleVideoUpload(),
       });
-      toolbar.appendChild(button);
+      toolbar.appendChild(this.toolbarButton);
     }
   }
 
@@ -116,6 +117,12 @@ export class VideoPlugin implements Plugin {
     if (this.contextMenu) {
       this.contextMenu.destroy();
       this.contextMenu = null;
+    }
+
+    // Удаляем кнопку из тулбара
+    if (this.toolbarButton) {
+      this.toolbarButton.remove();
+      this.toolbarButton = null;
     }
 
     // Отписываемся от всех событий
