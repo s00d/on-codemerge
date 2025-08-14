@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>on-codemerge Demo</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+            font-size: 2.5em;
+            font-weight: 300;
+        }
+        
+        .header p {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .editor-container {
+            border: 2px solid #e1e5e9;
+            border-radius: 8px;
+            min-height: 500px;
+            margin: 20px 0;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+        
+        .controls h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .plugin-controls {
+            margin: 20px 0;
+        }
+        
+        .plugin-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .plugin-group h4 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 16px;
+        }
+        
+        .plugin-toggles {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+        }
+        
+        .plugin-toggle {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .plugin-toggle:hover {
+            background-color: #f8f9fa;
+        }
+        
+        .plugin-toggle input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            cursor: pointer;
+        }
+        
+        .plugin-toggle span {
+            font-size: 14px;
+            color: #495057;
+        }
+        
+        .plugin-status {
+            margin-top: 15px;
+            padding: 10px;
+            background: #e9ecef;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+        
+        .memory-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            border-radius: 4px;
+            font-size: 12px;
+            color: #0c5460;
+        }
+        
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            background: #007bff;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+        
+        button.secondary {
+            background: #6c757d;
+        }
+        
+        button.secondary:hover {
+            background: #545b62;
+        }
+        
+        .output {
+            margin-top: 20px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+        }
+        
+        .output h3 {
+            margin-top: 0;
+            color: #495057;
+        }
+        
+        .output-content {
+            background: white;
+            padding: 15px;
+            border-radius: 4px;
+            border: 1px solid #dee2e6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e1e5e9;
+            text-align: center;
+        }
+        
+        .feature-card h4 {
+            color: #495057;
+            margin-top: 0;
+        }
+        
+        .feature-card p {
+            color: #6c757d;
+            margin-bottom: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>on-codemerge</h1>
+            <p>Powerful WYSIWYG editor for creating rich content</p>
+        </div>
+        
+        <div class="content">
+            <div class="features">
+                <div class="feature-card">
+                    <h4>🎨 Rich Formatting</h4>
+                    <p>Support for text, tables, images and much more</p>
+                </div>
+                <div class="feature-card">
+                    <h4>🔌 Plugins</h4>
+                    <p>Modular architecture with many built-in plugins</p>
+                </div>
+                <div class="feature-card">
+                    <h4>📱 Responsive</h4>
+                    <p>Works on all devices and browsers</p>
+                </div>
+                <div class="feature-card">
+                    <h4>⚡ Performance</h4>
+                    <p>Fast operation even with large documents</p>
+                </div>
+            </div>
+            
+            <h2>Try the Editor</h2>
+            <p>The editor below demonstrates the main capabilities of on-codemerge. You can:</p>
+            <ul>
+                <li>Enter and edit text</li>
+                <li>Format content (bold, italic, underlined)</li>
+                <li>Create headings of different levels</li>
+                <li>Add lists</li>
+                <li>Insert tables</li>
+                <li>And much more!</li>
+            </ul>
+            
+            <div class="editor-container" id="editor"></div>
+            
+            <div class="controls">
+                <h3>Plugin Management</h3>
+                <div class="plugin-controls">
+                    <div class="plugin-group">
+                        <h4>Core Plugins</h4>
+                        <div class="plugin-toggles">
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="toolbar-plugin" checked>
+                                <span>Toolbar</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="typography-plugin" checked>
+                                <span>Typography</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="table-plugin" checked>
+                                <span>Table</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="image-plugin" checked>
+                                <span>Image</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="plugin-group">
+                        <h4>Formatting Plugins</h4>
+                        <div class="plugin-toggles">
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="link-plugin" checked>
+                                <span>Link</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="lists-plugin" checked>
+                                <span>Lists</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="color-plugin" checked>
+                                <span>Color</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="alignment-plugin" checked>
+                                <span>Alignment</span>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="plugin-group">
+                        <h4>Advanced Plugins</h4>
+                        <div class="plugin-toggles">
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="block-plugin" checked>
+                                <span>Block</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="codeblock-plugin" checked>
+                                <span>Code Block</span>
+                            </label>
+                            <label class="plugin-toggle">
+                                <input type="checkbox" id="export-plugin" checked>
+                                <span>Export</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button id="reloadEditor" class="secondary">Reload Editor</button>
+                    <button id="destroyEditor" class="secondary">Destroy Editor</button>
+                    <button id="checkMemory" class="secondary">Check Memory</button>
+                </div>
+                <div class="plugin-status" id="pluginStatus">
+                    Status: All plugins loaded
+                </div>
+                <div class="memory-info" id="memoryInfo">
+                    Memory: Click "Check Memory" to see usage
+                </div>
+            </div>
+            
+            <div class="controls">
+                <h3>Content Controls</h3>
+                <div class="button-group">
+                    <button id="getContent">Get HTML</button>
+                    <button id="setContent">Set Content</button>
+                    <button id="clearContent" class="secondary">Clear</button>
+                    <button id="focusEditor" class="secondary">Focus Editor</button>
+                </div>
+            </div>
+            
+            <div class="output">
+                <h3>HTML Output</h3>
+                <div class="output-content" id="output"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script type="module" src="./main.ts"></script>
+</body>
+</html>

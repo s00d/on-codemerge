@@ -117,10 +117,24 @@ export class MentionsPlugin implements Plugin {
 
   destroy(): void {
     if (!this.editor) return;
+
     const container = this.editor.getContainer();
+    // Удаляем все обработчики событий
     container.removeEventListener('input', this.onInput);
-    this.popup?.destroy();
-    this.popup = null;
+
+    // Уничтожаем все UI компоненты
+    if (this.popup) {
+      this.popup.destroy();
+      this.popup = null;
+    }
+
+    // Отписываемся от всех событий
+    this.editor.off('mentions');
+    this.editor.off('mention-insert');
+    this.editor.off('mention-error');
+
+    // Очищаем все ссылки
     this.editor = null;
+    this.savedCursor = null;
   }
 }

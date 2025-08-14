@@ -267,10 +267,21 @@ export class AIAssistantPlugin implements Plugin {
   }
 
   destroy(): void {
+    // Уничтожаем все UI компоненты
     if (this.popup) {
       this.popup.destroy();
       this.popup = null;
     }
+
+    // Отписываемся от всех событий
+    this.editor?.off('ai-assistant');
+    this.editor?.off('ai-request');
+    this.editor?.off('ai-response');
+    this.editor?.off('ai-error');
+
+    // Очищаем все ссылки
     this.editor = null;
+    this.driver = null;
+    this.driverOptions = {};
   }
 }

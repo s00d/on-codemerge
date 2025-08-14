@@ -368,10 +368,12 @@ export class BlockPlugin implements Plugin {
       container.removeEventListener('mousedown', this.handleBlockMouseDown);
     }
 
+    // Отписываемся от всех событий
     this.editor?.off('block');
     this.editor?.off('block-text');
     this.editor?.off('block-container');
 
+    // Уничтожаем все UI компоненты
     if (this.currentResizer) {
       this.currentResizer.destroy();
       this.currentResizer = null;
@@ -382,7 +384,10 @@ export class BlockPlugin implements Plugin {
       this.contextMenu = null;
     }
 
+    // Деактивируем текущий блок
     this.deactivateBlock();
+
+    // Очищаем все ссылки
     this.editor = null;
     this.activeBlock = null;
   }

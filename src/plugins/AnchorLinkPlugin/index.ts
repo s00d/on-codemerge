@@ -106,8 +106,20 @@ export class AnchorLinkPlugin implements Plugin {
   }
 
   destroy(): void {
-    this.popup?.destroy();
-    this.popup = null;
+    // Уничтожаем все UI компоненты
+    if (this.popup) {
+      this.popup.destroy();
+      this.popup = null;
+    }
+
+    // Отписываемся от всех событий
+    this.editor?.off('anchor-link');
+    this.editor?.off('anchor-insert');
+    this.editor?.off('anchor-error');
+
+    // Очищаем все ссылки
     this.editor = null;
+    this.savedCursor = null;
+    this.savedSelectedText = '';
   }
 }

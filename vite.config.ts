@@ -33,7 +33,7 @@ export default defineConfig({
     banner( `${packageJson.name} v${packageJson.version} @author ${packageJson.author} @license ${packageJson.license} @homepage ${packageJson.homepage} @repository ${packageJson.repository.url} Copyright (c) ${new Date().getFullYear()} ${packageJson.author} - Built on ${new Date().toISOString()}`),
   ],
   build: {
-    cssCodeSplit: true,
+    cssCodeSplit: true, // Включаем разделение CSS для генерации отдельных файлов
     lib: {
       entry: {
         app: './src/app.ts',
@@ -49,6 +49,16 @@ export default defineConfig({
         preserveModules: true,
         dir: 'dist',
         exports: 'named',
+        // Настройки для правильной генерации CSS
+        // assetFileNames: (assetInfo) => {
+        //   if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+        //     return '[name][extname]';
+        //   }
+        //   if (assetInfo.name && assetInfo.name.endsWith('.scss')) {
+        //     return '[name].css';
+        //   }
+        //   return '[name][extname]';
+        // },
       },
     },
   },

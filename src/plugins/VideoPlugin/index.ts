@@ -107,20 +107,25 @@ export class VideoPlugin implements Plugin {
   public destroy(): void {
     if (this.editor) {
       const container = this.editor.getContainer();
+      // Удаляем все обработчики событий
       container.removeEventListener('contextmenu', this.handleContextMenu);
       container.removeEventListener('click', this.handleClick);
     }
 
+    // Уничтожаем все UI компоненты
     if (this.contextMenu) {
       this.contextMenu.destroy();
       this.contextMenu = null;
     }
 
+    // Отписываемся от всех событий
     this.editor?.off('video');
     this.editor?.off('file-drop');
 
+    // Отключаем resizer
     this.resizer.detach();
 
+    // Очищаем все ссылки
     this.editor = null;
     this.uploader = null!;
     this.resizer = null!;

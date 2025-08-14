@@ -118,9 +118,18 @@ export class PDFEmbedPlugin implements Plugin {
   }
 
   destroy(): void {
+    // Отписываемся от всех событий
     this.editor?.off('pdf-embed');
-    this.insertPopup?.destroy();
-    this.insertPopup = null;
+    this.editor?.off('pdf-insert');
+    this.editor?.off('pdf-error');
+
+    // Уничтожаем все UI компоненты
+    if (this.insertPopup) {
+      this.insertPopup.destroy();
+      this.insertPopup = null;
+    }
+
+    // Очищаем все ссылки
     this.editor = null;
   }
 }

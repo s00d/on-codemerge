@@ -114,7 +114,24 @@ export class TrackChangesPlugin implements Plugin {
 
   destroy(): void {
     if (!this.editor) return;
-    this.editor.getContainer().removeEventListener('input', this.handleInput);
+
+    const container = this.editor.getContainer();
+    // Удаляем все обработчики событий
+    container.removeEventListener('input', this.handleInput);
+
+    // Удаляем кнопку из тулбара
+    const button = container.querySelector('[data-track-changes-button]');
+    if (button && button.parentElement) {
+      button.parentElement.removeChild(button);
+    }
+
+    // Отписываемся от всех событий
+    this.editor.off('track-changes');
+    this.editor.off('track-changes-enabled');
+    this.editor.off('track-changes-disabled');
+
+    // Очищаем все ссылки
     this.editor = null;
+    this.enabled = false;
   }
 }

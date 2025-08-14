@@ -173,6 +173,7 @@ export class FormBuilderPlugin implements Plugin {
    * Destroy plugin
    */
   destroy(): void {
+    // Уничтожаем все UI компоненты
     if (this.contextMenu) {
       this.contextMenu.destroy();
       this.contextMenu = null;
@@ -193,6 +194,12 @@ export class FormBuilderPlugin implements Plugin {
         container.removeEventListener('contextmenu', this.handleFormContextMenu);
       }
     }
+
+    // Отписываемся от всех событий
+    this.editor?.off('form-builder');
+
+    // Очищаем все ссылки
+    this.editor = null!;
   }
 }
 

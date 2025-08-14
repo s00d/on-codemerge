@@ -554,6 +554,7 @@ export class TablePlugin implements Plugin {
 
     const container = this.editor.getContainer();
     if (container) {
+      // Удаляем все обработчики событий
       container.removeEventListener('click', this.handleClick);
       container.removeEventListener('contextmenu', this.handleContextMenu);
       container.removeEventListener('keydown', this.handleKeydown);
@@ -562,6 +563,7 @@ export class TablePlugin implements Plugin {
       container.removeEventListener('mouseout', this.handleMouseOut);
     }
 
+    // Уничтожаем все UI компоненты
     if (this.popup) {
       this.popup.destroy();
       this.popup = null;
@@ -587,12 +589,19 @@ export class TablePlugin implements Plugin {
       this.currentResizer = null;
     }
 
+    // Очищаем сервисы
     if (this.exportService) {
       this.exportService = null;
     }
 
-    this.editor?.off('table');
-    this.editor?.getSelector()?.clearTable();
+    // Отписываемся от всех событий
+    this.editor.off('table');
+
+    // Очищаем селектор таблиц
+    this.editor.getSelector()?.clearTable();
+
+    // Очищаем все ссылки
     this.editor = null;
+    this.selectedCells = [];
   }
 }

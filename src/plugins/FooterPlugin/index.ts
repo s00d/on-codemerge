@@ -11,6 +11,7 @@ export class FooterPlugin implements Plugin {
   private editor: HTMLEditor | null = null;
   private calculator: StatisticsCalculator;
   private renderer: FooterRenderer | null = null;
+  private unsubscribe: (() => void) | null = null;
 
   constructor() {
     this.calculator = new StatisticsCalculator();
@@ -35,7 +36,7 @@ export class FooterPlugin implements Plugin {
   private setupEventListeners(): void {
     if (!this.editor) return;
 
-    this.editor.subscribeToContentChange(() => {
+    this.unsubscribe = this.editor.subscribeToContentChange(() => {
       this.updateStatistics();
     });
   }
@@ -46,5 +47,26 @@ export class FooterPlugin implements Plugin {
     const content = this.editor.getContainer().innerHTML;
     const stats = this.calculator.calculate(content);
     this.renderer?.update(stats);
+  }
+
+  destroy(): void {
+    // Отписываемся от изменений контента
+    if (this.unsubscribe) {
+      this.unsubscribe();
+      this.unsubscribe = null;
+    }
+
+    // Удаляем footer из DOM
+    if (this.renderer) {
+      const footer = this.renderer['element'];
+      if (footer && footer.parentElement) {
+        footer.parentElement.removeChild(footer);
+      }
+      this.renderer = null;
+    }
+
+    // Очищаем ссылки
+    this.editor = null;
+    this.calculator = null!;
   }
 }

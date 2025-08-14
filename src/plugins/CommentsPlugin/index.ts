@@ -59,16 +59,10 @@ export class CommentsPlugin implements Plugin {
   private setupEventListeners(): void {
     if (!this.editor) return;
 
-    const container = this.editor.getContainer();
-
     // Сохраняем ссылки на обработчики, чтобы их можно было удалить
     this.handleMouseOver = this.handleMouseOver.bind(this);
     this.handleMouseOut = this.handleMouseOut.bind(this);
     this.handleClick = this.handleClick.bind(this);
-
-    container.addEventListener('mouseover', this.handleMouseOver);
-    container.addEventListener('mouseout', this.handleMouseOut);
-    container.addEventListener('click', this.handleClick);
   }
 
   private handleMouseOver(e: MouseEvent): void {
@@ -225,20 +219,31 @@ export class CommentsPlugin implements Plugin {
   public destroy(): void {
     if (this.editor) {
       const container = this.editor.getContainer();
+      // Удаляем все обработчики событий
       container.removeEventListener('mouseover', this.handleMouseOver);
       container.removeEventListener('mouseout', this.handleMouseOut);
       container.removeEventListener('click', this.handleClick);
     }
 
+    // Уничтожаем все UI компоненты
     if (this.tooltip && this.tooltip.parentElement) {
       this.tooltip.parentElement.removeChild(this.tooltip);
     }
 
-    this.menu?.destroy();
-    this.errorModal?.destroy();
+    if (this.menu) {
+      this.menu.destroy();
+      this.menu = null;
+    }
 
+    if (this.errorModal) {
+      this.errorModal.destroy();
+      this.errorModal = null;
+    }
+
+    // Отписываемся от всех событий
     this.editor?.off('comment');
 
+    // Очищаем все ссылки
     this.editor = null;
     this.menu = null;
     this.errorModal = null;
