@@ -38,10 +38,15 @@ export class ToolbarDividerPlugin implements Plugin {
   }
 
   destroy(): void {
+    if (!this.editor) return;
+
     // Удаляем разделитель из DOM, если он существует
     if (this.divider) {
       this.divider.remove();
       this.divider = null;
     }
+
+    // Очищаем ссылку на редактор
+    this.editor = null;
   }
 }
