@@ -598,6 +598,16 @@ export class HTMLEditor {
     plugin.initialize(this);
   }
 
+  public remove(pluginName: string): boolean {
+    try {
+      this.plugins.unregister(pluginName);
+      return true;
+    } catch (error) {
+      console.warn(`Failed to remove plugin ${pluginName}:`, error);
+      return false;
+    }
+  }
+
   public getPlugins(): Map<string, Plugin> {
     return this.plugins.getPlugins();
   }

@@ -19,14 +19,14 @@ import 'on-codemerge/public.css';
 
 // Импортируем стили плагинов
 import 'on-codemerge/plugins/TablePlugin/public.css';
-import 'on-codemerge/plugins/ImagePlugin/public.css';
+// import 'on-codemerge/plugins/ImagePlugin/public.css';
 import 'on-codemerge/plugins/LinkPlugin/public.css';
 import 'on-codemerge/plugins/ListsPlugin/public.css';
-import 'on-codemerge/plugins/ColorPlugin/public.css';
+// import 'on-codemerge/plugins/ColorPlugin/public.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';
 import 'on-codemerge/plugins/BlockPlugin/public.css';
 import 'on-codemerge/plugins/CodeBlockPlugin/public.css';
-import 'on-codemerge/plugins/ExportPlugin/public.css';
+// import 'on-codemerge/plugins/ExportPlugin/public.css';
 
 interface PluginInfo {
     name: string;
@@ -92,7 +92,7 @@ class DemoApp {
 
         // Кнопки управления плагинами
         this.setupPluginToggles();
-        
+
         // Кнопки управления редактором
         document.getElementById('reloadEditor')?.addEventListener('click', () => {
             this.reloadEditor();
@@ -152,18 +152,33 @@ class DemoApp {
 
     private togglePlugin(pluginName: string, enabled: boolean): void {
         const pluginInfo = this.plugins.get(pluginName);
-        if (!pluginInfo || !this.editor) return;
+        if (!pluginInfo || !this.editor) {
+            console.warn(`Plugin ${pluginName} not found or editor not available`);
+            return;
+        }
+
+        console.log(`Toggling plugin ${pluginName}: ${enabled ? 'enable' : 'disable'}`);
+        console.log(`Current state: enabled=${pluginInfo.enabled}, hasDestroy=${!!pluginInfo.instance.destroy}`);
 
         try {
             if (enabled && !pluginInfo.enabled) {
-                // Включаем плагин
-                this.editor.use(pluginInfo.instance);
+                // Плагин уже зарегистрирован, просто отмечаем как включенный
                 pluginInfo.enabled = true;
                 console.log(`Plugin ${pluginName} enabled`);
             } else if (!enabled && pluginInfo.enabled) {
                 // Отключаем плагин
                 if (pluginInfo.instance.destroy) {
+                    console.log(`Calling destroy() on plugin ${pluginName}`);
                     pluginInfo.instance.destroy();
+                } else {
+                    console.warn(`Plugin ${pluginName} has no destroy method`);
+                }
+                // Удаляем плагин из редактора
+                const removed = this.editor.remove(pluginName);
+                if (removed) {
+                    console.log(`Plugin ${pluginName} removed from editor`);
+                } else {
+                    console.warn(`Failed to remove plugin ${pluginName} from editor`);
                 }
                 pluginInfo.enabled = false;
                 console.log(`Plugin ${pluginName} disabled`);
@@ -179,19 +194,49 @@ class DemoApp {
         }
     }
 
+    private removePluginFromEditor(pluginName: string): void {
+        // Теперь используем встроенный метод remove
+        if (this.editor) {
+            const removed = this.editor.remove(pluginName);
+            if (removed) {
+                console.log(`Plugin ${pluginName} removed from editor`);
+            } else {
+                console.warn(`Failed to remove plugin ${pluginName} from editor`);
+            }
+        }
+    }
+
     private reloadEditor(): void {
         try {
             if (!this.editor) return;
-            
-            // Сохраняем текущий контент
+
+            // Сохраняем текущий контент и состояние плагинов
             const currentContent = this.editor.getHtml();
-            
+            const pluginStates = new Map<string, boolean>();
+            this.plugins.forEach((pluginInfo, name) => {
+                pluginStates.set(name, pluginInfo.enabled);
+            });
+
             // Уничтожаем текущий редактор
             this.destroyEditor();
-            
+
             // Создаем новый редактор
             setTimeout(() => {
                 this.initializeEditor();
+                
+                // Восстанавливаем состояние плагинов
+                pluginStates.forEach((enabled, pluginName) => {
+                    const pluginInfo = this.plugins.get(pluginName);
+                    if (pluginInfo) {
+                        pluginInfo.enabled = enabled;
+                        // Обновляем checkbox
+                        const checkbox = document.getElementById(`${pluginName}-plugin`) as HTMLInputElement;
+                        if (checkbox) {
+                            checkbox.checked = enabled;
+                        }
+                    }
+                });
+                
                 this.setupEventListeners();
                 if (this.editor) {
                     this.editor.setHtml(currentContent);
@@ -222,7 +267,7 @@ class DemoApp {
                 // Уничтожаем редактор
                 this.editor.destroy();
                 this.editor = null;
-                
+
                 // Очищаем контейнер
                 const editorContainer = document.getElementById('editor');
                 if (editorContainer) {
@@ -231,7 +276,7 @@ class DemoApp {
 
                 // Очищаем плагины
                 this.plugins.clear();
-                
+
                 this.updatePluginStatus();
                 console.log('Editor destroyed successfully');
             }
@@ -269,7 +314,24 @@ class DemoApp {
 
         const enabledCount = Array.from(this.plugins.values()).filter(p => p.enabled).length;
         const totalCount = this.plugins.size;
-        this.pluginStatusElement.textContent = `Status: ${enabledCount}/${totalCount} plugins enabled`;
+        
+        // Проверяем, какие плагины имеют метод destroy
+        const pluginsWithDestroy = Array.from(this.plugins.values())
+            .filter(p => p.instance.destroy)
+            .map(p => p.name);
+        const pluginsWithoutDestroy = Array.from(this.plugins.values())
+            .filter(p => !p.instance.destroy)
+            .map(p => p.name);
+        
+        let statusText = `Status: ${enabledCount}/${totalCount} plugins enabled`;
+        if (pluginsWithoutDestroy.length > 0) {
+            statusText += ` | Plugins without destroy: ${pluginsWithoutDestroy.join(', ')}`;
+        }
+        
+        this.pluginStatusElement.textContent = statusText;
+        
+        // Обновляем информацию о памяти
+        this.checkMemory();
     }
 
     private loadInitialContent(): void {
