@@ -202,10 +202,10 @@ Below is a list of all available plugins for **On-Codemerge** and their function
 | **YouTubeVideoPlugin**   | Allows embedding YouTube videos directly into the editor.                                                                                               |
 | **FileUploadPlugin**     | Provides functionality to upload and manage files.                                                                                                      |
 | **LanguagePlugin**       | Adds a button to switch the editor language. Shows the current locale, allows selecting from supported languages, and saves the choice in localStorage. |
-| **PDFEmbedPlugin**       | Embeds PDF via iframe with resizable container. |
-| **MentionsPlugin**       | Adds @mentions with a dropdown and non-editable mention chips. |
-| **TrackChangesPlugin**   | Basic track changes highlighting for inserts (demo level). |
-| **AnchorLinkPlugin**     | Inserts anchors and links with generated IDs. |
+| **PDFEmbedPlugin**       | Embeds PDF via iframe with resizable container.                                                                                                         |
+| **MentionsPlugin**       | Adds @mentions with a dropdown and non-editable mention chips.                                                                                          |
+| **TrackChangesPlugin**   | Basic track changes highlighting for inserts (demo level).                                                                                              |
+| **AnchorLinkPlugin**     | Inserts anchors and links with generated IDs.                                                                                                           |
 
 
 ---

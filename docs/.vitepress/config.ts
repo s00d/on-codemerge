@@ -16,7 +16,6 @@ export default defineConfig({
     nav: [
       { text: 'Home', link: '/' },
       { text: 'Core', link: '/core' },
-      { text: 'Styles', link: '/styles' },
       {
         text: 'Plugins',
         items: [
