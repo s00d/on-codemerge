@@ -66,7 +66,7 @@ export class ExportService {
   private formatHTML(html: string): string {
     const doctype = '<!DOCTYPE html>\n';
     const cssFiles = [
-      'https://cdn.jsdelivr.net/npm/on-codemerge/dist/index.css',
+      'https://cdn.jsdelivr.net/npm/on-codemerge/dist/public.css',
       'https://cdn.jsdelivr.net/npm/on-codemerge/dist/plugins/BlockPlugin/public.css',
       'https://cdn.jsdelivr.net/npm/on-codemerge/dist/plugins/ChartsPlugin/public.css',
       'https://cdn.jsdelivr.net/npm/on-codemerge/dist/plugins/CodeBlockPlugin/public.css',

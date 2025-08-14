@@ -87,6 +87,9 @@ importers:
       vite:
         specifier: ^6.3.5
         version: 6.3.5(@types/node@22.15.34)(jiti@1.21.7)(sass-embedded@1.83.0)(sass@1.89.2)(yaml@2.6.1)
+      vite-plugin-banner:
+        specifier: ^0.8.1
+        version: 0.8.1
       vite-plugin-dts:
         specifier: ^4.5.4
         version: 4.5.4(@types/node@22.15.34)(rollup@4.44.1)(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.34)(jiti@1.21.7)(sass-embedded@1.83.0)(sass@1.89.2)(yaml@2.6.1))
@@ -3653,6 +3656,9 @@ packages:
 
   vfile@6.0.3:
     resolution: {integrity: sha512-KzIbH/9tXat2u30jf+smMwFCsno4wHVdNmzFyL+T/L3UGqqk6JKfVqOFOZEpZSHADH1k40ab6NUIXZq422ov3Q==}
+
+  vite-plugin-banner@0.8.1:
+    resolution: {integrity: sha512-0+gGguHk3MH0HvzMSOCJC6fGgH4+jtY9KlKVZh+hwwE+PBkGVzY8xe657JL74vEgbeUJD37XjVqTrmve8XvZBQ==}
 
   vite-plugin-dts@4.5.4:
     resolution: {integrity: sha512-d4sOM8M/8z7vRXHHq/ebbblfaxENjogAAekcfcDCCwAyvGqnPrc7f4NZbvItS+g4WTgerW0xDwSz5qz11JT3vg==}
@@ -7784,6 +7790,8 @@ snapshots:
     dependencies:
       '@types/unist': 3.0.3
       vfile-message: 4.0.2
+
+  vite-plugin-banner@0.8.1: {}
 
   vite-plugin-dts@4.5.4(@types/node@22.15.34)(rollup@4.44.1)(typescript@5.8.3)(vite@6.3.5(@types/node@22.15.34)(jiti@1.21.7)(sass-embedded@1.83.0)(sass@1.89.2)(yaml@2.6.1)):
     dependencies:
