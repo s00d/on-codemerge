@@ -10,7 +10,8 @@ import {
     AlignmentPlugin,
     BlockPlugin,
     CodeBlockPlugin,
-    ExportPlugin
+    ExportPlugin,
+    ToolbarDividerPlugin
 } from 'on-codemerge';
 
 // Import styles
@@ -61,6 +62,7 @@ class DemoApp {
         // Register plugins
         this.registerPlugin(new ToolbarPlugin());
         this.registerPlugin(new TypographyPlugin());
+        this.registerPlugin(new ToolbarDividerPlugin());
         this.registerPlugin(new TablePlugin());
         this.registerPlugin(new ImagePlugin());
         this.registerPlugin(new LinkPlugin());

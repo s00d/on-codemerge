@@ -39,9 +39,9 @@ export class ToolbarDividerPlugin implements Plugin {
 
   destroy(): void {
     // Удаляем разделитель из DOM, если он существует
-    if (this.divider && this.divider.parentElement) {
-      this.divider.parentElement.removeChild(this.divider);
+    if (this.divider) {
+      this.divider.remove();
+      this.divider = null;
     }
-    this.divider = null; // Очищаем ссылку
   }
 }
