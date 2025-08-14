@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       on-codemerge:
-        specifier: latest
-        version: 1.2.8
+        specifier: 1.2.9
+        version: 1.2.9
     devDependencies:
       typescript:
         specifier: ^5.8.3
@@ -324,8 +324,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  on-codemerge@1.2.8:
-    resolution: {integrity: sha512-3ZhY84sTUJjvnI2q8HyhfqtgnUAUohsV9olRjHCDoWSZgg05k8zS489kHHBo0RhTev/WQKR8EY1z0EpWAA6dqQ==}
+  on-codemerge@1.2.9:
+    resolution: {integrity: sha512-Md+dC/EFjb5em8J8oSbAt0/odMK/j4zpsdJjfJErnLPHTXDg63qa4YnTMbTZ0Uad3vbIG28Gd9f8rYa+PLOQzw==}
 
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
@@ -605,7 +605,7 @@ snapshots:
 
   nanoid@3.3.11: {}
 
-  on-codemerge@1.2.8:
+  on-codemerge@1.2.9:
     dependencies:
       mathjax-full: 3.2.2
       spellchecker-wasm: 0.3.3

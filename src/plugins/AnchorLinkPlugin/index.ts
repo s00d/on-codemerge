@@ -48,7 +48,8 @@ export class AnchorLinkPlugin implements Plugin {
           if (cursor) {
             this.savedCursor = cursor;
           }
-          this.savedSelectedText = this.editor?.getTextFormatter()?.getSelection()?.toString() || '';
+          this.savedSelectedText =
+            this.editor?.getTextFormatter()?.getSelection()?.toString() || '';
           this.popup?.show();
         },
       });

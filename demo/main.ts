@@ -67,7 +67,7 @@ class DemoApp {
         this.registerPlugin('color', new ColorPlugin());
         this.registerPlugin('alignment', new AlignmentPlugin());
         this.registerPlugin('block', new BlockPlugin());
-        this.registerPlugin('codeblock', new CodeBlockPlugin());
+        this.registerPlugin('code-block', new CodeBlockPlugin());
         this.registerPlugin('export', new ExportPlugin());
 
         console.log('Editor initialized successfully');
@@ -106,7 +106,7 @@ class DemoApp {
         const pluginIds = [
             'toolbar-plugin', 'typography-plugin', 'table-plugin', 'image-plugin',
             'link-plugin', 'lists-plugin', 'color-plugin', 'alignment-plugin',
-            'block-plugin', 'codeblock-plugin', 'export-plugin'
+            'block-plugin', 'code-block-plugin', 'export-plugin'
         ];
 
         pluginIds.forEach(pluginId => {

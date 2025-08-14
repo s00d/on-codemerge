@@ -145,10 +145,10 @@ export class TablePlugin implements Plugin {
           });
         },
       });
-      
+
       // Сохраняем ссылку на кнопку
       this.toolbarButton = button;
-      
+
       toolbar.appendChild(button);
     }
   }
