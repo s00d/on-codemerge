@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "on-codemerge": "1.2.9"
+    "on-codemerge": "1.2.10"
   },
   "devDependencies": {
     "vite": "^6.3.5",
