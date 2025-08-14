@@ -10,80 +10,80 @@ On-Codemerge comes with a comprehensive set of plugins that extend its functiona
 
 ### Essential Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
-| **ToolbarPlugin** | Adds a customizable toolbar for quick access to editor features. | [View Details](./toolbar-plugin.md) |
-| **ToolbarDividerPlugin** | Adds visual dividers in the toolbar for better organization. | [View Details](./toolbar-divider-plugin.md) |
+| Plugin                   | Description                                                      | Documentation                               |
+|--------------------------|------------------------------------------------------------------|---------------------------------------------|
+| **ToolbarPlugin**        | Adds a customizable toolbar for quick access to editor features. | [View Details](./toolbar-plugin.md)         |
+| **ToolbarDividerPlugin** | Adds visual dividers in the toolbar for better organization.     | [View Details](./toolbar-divider-plugin.md) |
 
 ### Text Formatting Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
-| **FontPlugin** | Provides options to change font family, size, and style. | [View Details](./font-plugin.md) |
-| **TypographyPlugin** | Adds advanced typography options like line height, letter spacing, etc. | [View Details](./typography-plugin.md) |
-| **ColorPlugin** | Provides options to change text and background colors. | [View Details](./color-plugin.md) |
-| **AlignmentPlugin** | Allows alignment of text (left, center, right, justify). | [View Details](./alignment-plugin.md) |
-| **BlockStylePlugin** | Class and style editor for custom styling. | [View Details](./block-style-plugin.md) |
+| Plugin               | Description                                                             | Documentation                           |
+|----------------------|-------------------------------------------------------------------------|-----------------------------------------|
+| **FontPlugin**       | Provides options to change font family, size, and style.                | [View Details](./font-plugin.md)        |
+| **TypographyPlugin** | Adds advanced typography options like line height, letter spacing, etc. | [View Details](./typography-plugin.md)  |
+| **ColorPlugin**      | Provides options to change text and background colors.                  | [View Details](./color-plugin.md)       |
+| **AlignmentPlugin**  | Allows alignment of text (left, center, right, justify).                | [View Details](./alignment-plugin.md)   |
+| **BlockStylePlugin** | Class and style editor for custom styling.                              | [View Details](./block-style-plugin.md) |
 
 ### Content Creation Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
-| **BlockPlugin** | Adds support for block-level elements like paragraphs, headings, etc. | [View Details](./block-plugin.md) |
-| **ListsPlugin** | Enables creation of ordered and unordered lists. | [View Details](./lists-plugin.md) |
-| **TablePlugin** | Enables creation and editing of tables. | [View Details](./table-plugin.md) |
-| **TemplatesPlugin** | Provides pre-designed templates for quick content creation. | [View Details](./templates-plugin.md) |
+| Plugin              | Description                                                           | Documentation                         |
+|---------------------|-----------------------------------------------------------------------|---------------------------------------|
+| **BlockPlugin**     | Adds support for block-level elements like paragraphs, headings, etc. | [View Details](./block-plugin.md)     |
+| **ListsPlugin**     | Enables creation of ordered and unordered lists.                      | [View Details](./lists-plugin.md)     |
+| **TablePlugin**     | Enables creation and editing of tables.                               | [View Details](./table-plugin.md)     |
+| **TemplatesPlugin** | Provides pre-designed templates for quick content creation.           | [View Details](./templates-plugin.md) |
 
 ### Media Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
-| **ImagePlugin** | Allows inserting and managing images in the editor. | [View Details](./image-plugin.md) |
-| **VideoPlugin** | Enables embedding and managing video files. | [View Details](./video-plugin.md) |
+| Plugin                 | Description                                               | Documentation                             |
+|------------------------|-----------------------------------------------------------|-------------------------------------------|
+| **ImagePlugin**        | Allows inserting and managing images in the editor.       | [View Details](./image-plugin.md)         |
+| **VideoPlugin**        | Enables embedding and managing video files.               | [View Details](./video-plugin.md)         |
 | **YouTubeVideoPlugin** | Allows embedding YouTube videos directly into the editor. | [View Details](./youtube-video-plugin.md) |
-| **FileUploadPlugin** | Provides functionality to upload and manage files. | [View Details](./file-upload-plugin.md) |
+| **FileUploadPlugin**   | Provides functionality to upload and manage files.        | [View Details](./file-upload-plugin.md)   |
 
 ### Code and Technical Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
-| **CodeBlockPlugin** | Adds syntax-highlighted code blocks for programming languages. | [View Details](./code-block-plugin.md) |
-| **MathPlugin** | Enables mathematical expressions and equations. | [View Details](./math-plugin.md) |
-| **HTMLViewerPlugin** | Displays the raw HTML content of the editor. | [View Details](./html-viewer-plugin.md) |
+| Plugin               | Description                                                    | Documentation                           |
+|----------------------|----------------------------------------------------------------|-----------------------------------------|
+| **CodeBlockPlugin**  | Adds syntax-highlighted code blocks for programming languages. | [View Details](./code-block-plugin.md)  |
+| **MathPlugin**       | Enables mathematical expressions and equations.                | [View Details](./math-plugin.md)        |
+| **HTMLViewerPlugin** | Displays the raw HTML content of the editor.                   | [View Details](./html-viewer-plugin.md) |
 
 ### Interactive Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
-| **LinkPlugin** | Allows inserting and managing hyperlinks. | [View Details](./link-plugin.md) |
-| **ChartsPlugin** | Allows embedding and editing charts in the editor. | [View Details](./charts-plugin.md) |
+| Plugin                | Description                                         | Documentation                            |
+|-----------------------|-----------------------------------------------------|------------------------------------------|
+| **LinkPlugin**        | Allows inserting and managing hyperlinks.           | [View Details](./link-plugin.md)         |
+| **ChartsPlugin**      | Allows embedding and editing charts in the editor.  | [View Details](./charts-plugin.md)       |
 | **FormBuilderPlugin** | Form builder plugin for creating interactive forms. | [View Details](./form-builder-plugin.md) |
 
 ### Collaboration and Communication Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
+| Plugin                  | Description                                                  | Documentation                             |
+|-------------------------|--------------------------------------------------------------|-------------------------------------------|
 | **CollaborationPlugin** | Enables real-time collaborative editing with multiple users. | [View Details](./collaboration-plugin.md) |
-| **CommentsPlugin** | Adds support for comments and annotations in the editor. | [View Details](./comments-plugin.md) |
-| **FootnotesPlugin** | Allows adding footnotes to the content. | [View Details](./footnotes-plugin.md) |
+| **CommentsPlugin**      | Adds support for comments and annotations in the editor.     | [View Details](./comments-plugin.md)      |
+| **FootnotesPlugin**     | Allows adding footnotes to the content.                      | [View Details](./footnotes-plugin.md)     |
 
 ### Utility Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
-| **HistoryPlugin** | Adds undo/redo functionality for tracking changes. | [View Details](./history-plugin.md) |
-| **ExportPlugin** | Enables exporting editor content to various formats (e.g., HTML, PDF). | [View Details](./export-plugin.md) |
-| **ShortcutsPlugin** | Adds keyboard shortcuts for faster editing. | [View Details](./shortcuts-plugin.md) |
-| **ResponsivePlugin** | Ensures the editor content is responsive across devices. | [View Details](./responsive-plugin.md) |
-| **LanguagePlugin** | Provides language switching capabilities. | [View Details](./language-plugin.md) |
-| **SpellCheckerPlugin** | Provides spell-checking functionality. | [View Details](./spell-checker-plugin.md) |
+| Plugin                 | Description                                                            | Documentation                             |
+|------------------------|------------------------------------------------------------------------|-------------------------------------------|
+| **HistoryPlugin**      | Adds undo/redo functionality for tracking changes.                     | [View Details](./history-plugin.md)       |
+| **ExportPlugin**       | Enables exporting editor content to various formats (e.g., HTML, PDF). | [View Details](./export-plugin.md)        |
+| **ShortcutsPlugin**    | Adds keyboard shortcuts for faster editing.                            | [View Details](./shortcuts-plugin.md)     |
+| **ResponsivePlugin**   | Ensures the editor content is responsive across devices.               | [View Details](./responsive-plugin.md)    |
+| **LanguagePlugin**     | Provides language switching capabilities.                              | [View Details](./language-plugin.md)      |
+| **SpellCheckerPlugin** | Provides spell-checking functionality.                                 | [View Details](./spell-checker-plugin.md) |
 
 ### AI and Advanced Plugins
 
-| Plugin | Description | Documentation |
-|--------|-------------|---------------|
+| Plugin                | Description                                            | Documentation                            |
+|-----------------------|--------------------------------------------------------|------------------------------------------|
 | **AIAssistantPlugin** | AI-powered assistant for content creation and editing. | [View Details](./ai-assistant-plugin.md) |
-| **FooterPlugin** | Adds a footer section to the editor. | [View Details](./footer-plugin.md) |
+| **FooterPlugin**      | Adds a footer section to the editor.                   | [View Details](./footer-plugin.md)       |
 
 ## Plugin Configuration
 
@@ -165,17 +165,27 @@ Some plugins may have dependencies on other plugins. For example:
 The HTMLEditor provides several methods for managing plugins:
 
 ### `editor.use(plugin)`
-Registers and initializes a plugin.
+Registers and initializes a plugin.  Returns `true` if successful, `false` otherwise.
 
 ```javascript
 editor.use(new TablePlugin());
 ```
 
-### `editor.remove(pluginName)`
-Removes a plugin by name. Returns `true` if successful, `false` otherwise.
+### `editor.remove(pluginName | plugin)`
+Removes a plugin by name or plugin instance. Returns `true` if successful, `false` otherwise.
 
 ```javascript
+// Remove by plugin name
 const success = editor.remove('table');
+if (success) {
+    console.log('TablePlugin removed successfully');
+}
+
+// Remove by plugin instance
+import { TablePlugin } from 'on-codemerge';
+const tablePlugin = new TablePlugin();
+editor.use(tablePlugin); // Register the plugin first
+const success = editor.remove(tablePlugin);
 if (success) {
     console.log('TablePlugin removed successfully');
 }
@@ -197,14 +207,20 @@ When removing plugins, the editor automatically:
 - Cleans up any associated event listeners and resources
 
 ```javascript
-// Example: Clean plugin removal
+// Example: Clean plugin removal by name
 editor.remove('spellchecker'); // Automatically calls destroy() if available
+
+// Example: Clean plugin removal by instance
+const spellcheckerPlugin = editor.getPlugins().get('spellchecker');
+if (spellcheckerPlugin) {
+    editor.remove(spellcheckerPlugin); // Automatically calls destroy() if available
+}
 ```
 
 ## Performance Considerations
 
 - Load only the plugins you need to minimize bundle size
-- Use `editor.remove(pluginName)` to unload plugins when they're no longer needed
+- Use `editor.remove(pluginName)` or `editor.remove(pluginInstance)` to unload plugins when they're no longer needed
 - Some plugins (like SpellCheckerPlugin) may require additional configuration
 - CollaborationPlugin requires a WebSocket server for full functionality
 - AIAssistantPlugin may require API keys for external AI services
@@ -227,7 +243,7 @@ If you encounter issues with any plugin:
 3. Check browser console for errors
 4. Ensure proper initialization order
 5. Review plugin configuration options
-6. Use `editor.remove(pluginName)` to properly unload problematic plugins
+6. Use `editor.remove(pluginName)` or `editor.remove(pluginInstance)` to properly unload problematic plugins
 7. Check if plugin has a `destroy()` method for proper cleanup
-8. Verify plugin names match exactly when using `remove()` method
+8. Verify plugin names match exactly when using `remove()` method, or pass the plugin instance directly
 

@@ -1,17 +1,17 @@
 import {
-    HTMLEditor,
-    ToolbarPlugin,
-    TypographyPlugin,
-    TablePlugin,
-    ImagePlugin,
-    LinkPlugin,
-    ListsPlugin,
-    ColorPlugin,
     AlignmentPlugin,
     BlockPlugin,
     CodeBlockPlugin,
+    ColorPlugin,
     ExportPlugin,
-    ToolbarDividerPlugin
+    HTMLEditor,
+    ImagePlugin,
+    LinkPlugin,
+    ListsPlugin,
+    TablePlugin,
+    ToolbarDividerPlugin,
+    ToolbarPlugin,
+    TypographyPlugin
 } from 'on-codemerge';
 
 // Import styles
@@ -27,6 +27,7 @@ import 'on-codemerge/plugins/ListsPlugin/public.css';
 import 'on-codemerge/plugins/AlignmentPlugin/public.css';
 import 'on-codemerge/plugins/BlockPlugin/public.css';
 import 'on-codemerge/plugins/CodeBlockPlugin/public.css';
+
 // import 'on-codemerge/plugins/ExportPlugin/public.css';
 
 interface PluginInfo {
@@ -95,7 +96,7 @@ class DemoApp {
         this.editor.on('contentChange', () => {
             // Content change event handled
         });
-        
+
         // Setup plugin toggles after all event listeners are set up
         this.setupPluginToggles();
     }
@@ -110,9 +111,9 @@ class DemoApp {
             // Get the actual plugin name from the instance
             const actualPluginName = plugin.name;
             const pluginId = `${actualPluginName}-plugin`;
-            
+
             console.log('setupPluginToggles', pluginName, '->', actualPluginName, '->', pluginId);
-            
+
             let checkbox: HTMLInputElement;
             if (createNew) {
                 // Create new checkbox
@@ -126,17 +127,16 @@ class DemoApp {
                     return;
                 }
             }
-            
+
             // Check if plugin is currently active
-            const isActive = this.editor.getPlugins().has(actualPluginName);
-            checkbox.checked = isActive;
-            
+            checkbox.checked = this.editor.getPlugins().has(actualPluginName);
+
             // Toolbar cannot be disabled
             if (actualPluginName === 'toolbar') {
                 checkbox.disabled = true;
                 checkbox.title = 'Toolbar plugin cannot be disabled';
             }
-            
+
             // Add event listener only if creating new
             if (createNew) {
                 checkbox.addEventListener('change', (e) => {
@@ -154,27 +154,27 @@ class DemoApp {
         // Create checkbox container
         const container = document.createElement('div');
         container.className = 'plugin-toggle';
-        
+
         // Create checkbox
         const checkbox = document.createElement('input');
         checkbox.type = 'checkbox';
         checkbox.id = pluginId;
         checkbox.checked = true;
-        
+
         // Create label
         const label = document.createElement('span');
         label.textContent = this.formatPluginName(pluginName);
-        
+
         // Assemble
         container.appendChild(checkbox);
         container.appendChild(label);
-        
+
         // Add to plugin controls container
         const pluginControls = document.querySelector('.plugin-toggles');
         if (pluginControls) {
             pluginControls.appendChild(container);
         }
-        
+
         return checkbox;
     }
 
@@ -256,9 +256,8 @@ class DemoApp {
                 // Enable plugin - re-register it using stored instance
                 this.editor.use(pluginInstance);
             } else {
-                // Disable plugin - use the actual plugin name from instance
-                const actualPluginName = pluginInstance.name;
-                const result = this.editor.remove(actualPluginName);
+                // Disable plugin - pass plugin instance directly
+                const result = this.editor.remove(pluginInstance);
             }
             this.updatePluginStatus();
         } catch (error) {
@@ -280,13 +279,13 @@ class DemoApp {
         }
 
         this.isReloading = true;
-        
+
         // Update UI to show reloading state
         this.updateReloadingState(true);
 
         // Save content before destroying editor
         const currentContent = this.editor.getHtml();
-        
+
         this.destroyEditor();
 
         setTimeout(() => {
@@ -299,7 +298,7 @@ class DemoApp {
                     checkbox.checked = true; // Plugin is active
                 }
             });
-            
+
             // Re-setup plugin toggles after reload (but don't create new checkboxes)
             this.setupPluginToggles();
 
@@ -307,7 +306,7 @@ class DemoApp {
             this.editor.setHtml(currentContent);
             // HTML Output will be updated automatically via subscribeToContentChange
             this.updatePluginStatus();
-            
+
             // Update UI to show completed state
             this.updateReloadingState(false);
             this.isReloading = false;

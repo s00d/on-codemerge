@@ -593,16 +593,24 @@ export class HTMLEditor {
     this.container.focus();
   }
 
-  public use(plugin: Plugin): void {
-    this.plugins.register(plugin);
-    plugin.initialize(this);
+  public use(plugin: Plugin): boolean {
+    try {
+      this.plugins.register(plugin);
+      plugin.initialize(this);
+      return true;
+    } catch (error) {
+      console.warn(`Failed to remove plugin ${plugin.name}:`, error);
+      return false;
+    }
   }
 
-  public remove(pluginName: string): boolean {
+  public remove(pluginOrName: string | Plugin): boolean {
     try {
+      const pluginName = typeof pluginOrName === 'string' ? pluginOrName : pluginOrName.name;
       this.plugins.unregister(pluginName);
       return true;
     } catch (error) {
+      const pluginName = typeof pluginOrName === 'string' ? pluginOrName : pluginOrName.name;
       console.warn(`Failed to remove plugin ${pluginName}:`, error);
       return false;
     }
