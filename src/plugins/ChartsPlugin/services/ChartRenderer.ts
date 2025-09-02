@@ -32,31 +32,47 @@ export class ChartRenderer {
     type: ChartType,
     data: ChartPoint[] | ChartSeries[],
     options: ChartOptions
-  ): HTMLCanvasElement {
+  ): HTMLImageElement {
     const canvas = createCanvas();
-    canvas.className = 'chart-canvas';
     const dpr = window.devicePixelRatio || 1;
+
     canvas.width = options.width * dpr;
     canvas.height = options.height * dpr;
     canvas.style.width = `${options.width}px`;
     canvas.style.height = `${options.height}px`;
-    canvas.style.display = 'block';
-    canvas.style.margin = 'auto';
+
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       throw new Error('Failed to get 2D context');
     }
-    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+    // Scale context for retina displays
+    ctx.scale(dpr, dpr);
+
+    // Set default styles
     ctx.font = '14px Inter, system-ui, sans-serif';
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
+
     const renderer = this.renderers.get(type);
     if (renderer) {
+      // Normalize data to multi-series format
       const normalizedData = normalizeChartData(data);
+
+      // For pie/doughnut charts, use only first series
       const chartData =
         type === 'pie' || type === 'doughnut' ? normalizedData[0]?.data || [] : normalizedData;
+
       renderer.render(ctx, chartData, options);
     }
-    return canvas;
+
+    // Convert canvas to Data URL and create an image
+    const img = new Image();
+    img.className = 'svg-chart';
+    img.src = canvas.toDataURL('image/png');
+    img.width = options.width;
+    img.height = options.height;
+
+    return img;
   }
 }
