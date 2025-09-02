@@ -60,25 +60,75 @@ export class BlockStylePlugin {
     if (!selection || selection.rangeCount === 0) return;
 
     const range = selection.getRangeAt(0);
-    const parentElement = range.commonAncestorContainer.parentElement;
+    let targetElement: HTMLElement | null = null;
 
     if (!this.editor) {
       return;
     }
 
-    if (parentElement === this.editor?.getContainer()) {
+    // Если выделение находится на текстовом узле, получаем его родительский элемент
+    if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+      targetElement = range.commonAncestorContainer.parentElement;
+    } else if (range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE) {
+      targetElement = range.commonAncestorContainer as HTMLElement;
+    }
+
+    // Если выделение находится прямо в контейнере редактора
+    if (targetElement === this.editor?.getContainer()) {
       this.selectedElement = null;
       this.toolbarButton?.classList.remove('active');
       return;
     }
 
-    if (parentElement && this.isBlockElement(parentElement)) {
-      this.selectedElement = parentElement;
-      this.toolbarButton?.classList.add('active');
-    } else {
-      this.selectedElement = null;
-      this.toolbarButton?.classList.remove('active');
+    // Ищем ближайший блочный элемент
+    if (targetElement) {
+      const blockElement = this.findNearestBlockElement(targetElement);
+      if (blockElement && this.isBlockElement(blockElement)) {
+        this.selectedElement = blockElement;
+        this.toolbarButton?.classList.add('active');
+        console.log('BlockStylePlugin: Selected element:', blockElement.tagName, blockElement);
+        return;
+      }
     }
+
+    this.selectedElement = null;
+    this.toolbarButton?.classList.remove('active');
+    console.log('BlockStylePlugin: No block element found');
+  }
+
+  private findNearestBlockElement(element: HTMLElement): HTMLElement | null {
+    let current: HTMLElement | null = element;
+
+    while (current && current !== this.editor?.getContainer()) {
+      if (this.isBlockElement(current)) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+
+    return null;
+  }
+
+  private getCurrentBlockElement(): HTMLElement | null {
+    const selection = this.editor?.getTextFormatter()?.getSelection();
+    if (!selection || selection.rangeCount === 0) return null;
+
+    const range = selection.getRangeAt(0);
+    let targetElement: HTMLElement | null = null;
+
+    // Если выделение находится на текстовом узле, получаем его родительский элемент
+    if (range.commonAncestorContainer.nodeType === Node.TEXT_NODE) {
+      targetElement = range.commonAncestorContainer.parentElement;
+    } else if (range.commonAncestorContainer.nodeType === Node.ELEMENT_NODE) {
+      targetElement = range.commonAncestorContainer as HTMLElement;
+    }
+
+    if (!targetElement || targetElement === this.editor?.getContainer()) {
+      return null;
+    }
+
+    // Ищем ближайший блочный элемент
+    return this.findNearestBlockElement(targetElement);
   }
 
   private isBlockElement(element: HTMLElement): boolean {
@@ -350,7 +400,23 @@ export class BlockStylePlugin {
   }
 
   private showPopup(): void {
-    if (!this.selectedElement || !this.popup) return;
+    if (!this.popup) return;
+
+    // Получаем текущий блочный элемент при открытии попапа
+    const currentBlockElement = this.getCurrentBlockElement();
+    console.log('BlockStylePlugin: showPopup called, currentBlockElement:', currentBlockElement);
+
+    // Если нет выделенного элемента, показываем сообщение
+    if (!currentBlockElement) {
+      const container = document.createElement('div');
+      container.innerHTML = '<p>Please select a block element to style.</p>';
+      this.popup.setContent(container);
+      this.popup.show();
+      return;
+    }
+
+    // Сохраняем текущий элемент для использования в applyStyles
+    this.selectedElement = currentBlockElement;
 
     // Создаем общий контейнер
     const container = document.createElement('div');
