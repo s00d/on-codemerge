@@ -56,16 +56,19 @@ export class TemplatesMenu {
   }
 
   private showNewForm(): void {
+    // Уничтожаем текущий попап перед созданием нового
+    this.popup.destroy();
+    
     const form = new TemplateForm(this.editor, (data) => {
       this.manager.saveTemplate(data);
-      this.popup.hide();
+      this.popup.destroy();
       this.popup = this.createMainPopup();
       this.updateContent();
       this.popup.show();
     });
 
     this.popup = new PopupManager(this.editor, {
-      title: this.editor.t('New'),
+      title: this.editor.t('New Template'),
       className: 'templates-menu',
       closeOnClickOutside: true,
       buttons: [
@@ -73,6 +76,7 @@ export class TemplatesMenu {
           label: this.editor.t('Cancel'),
           variant: 'secondary',
           onClick: () => {
+            this.popup.destroy();
             this.popup = this.createMainPopup();
             this.updateContent();
             this.popup.show();
@@ -106,11 +110,14 @@ export class TemplatesMenu {
   }
 
   private showEditForm(template: Template): void {
+    // Уничтожаем текущий попап перед созданием нового
+    this.popup.destroy();
+    
     const form = new TemplateForm(
       this.editor,
       (data) => {
         this.manager.updateTemplate(template.id, data);
-        this.popup.hide();
+        this.popup.destroy();
         this.popup = this.createMainPopup();
         this.updateContent();
         this.popup.show();
@@ -119,7 +126,7 @@ export class TemplatesMenu {
     );
 
     this.popup = new PopupManager(this.editor, {
-      title: this.editor.t('Edit'),
+      title: this.editor.t('Edit Template'),
       className: 'templates-menu',
       closeOnClickOutside: true,
       buttons: [
@@ -127,6 +134,7 @@ export class TemplatesMenu {
           label: this.editor.t('Cancel'),
           variant: 'secondary',
           onClick: () => {
+            this.popup.destroy();
             this.popup = this.createMainPopup();
             this.updateContent();
             this.popup.show();
@@ -173,6 +181,13 @@ export class TemplatesMenu {
 
   public show(onSelect: (template: Template) => void): void {
     this.onSelect = onSelect;
+    
+    // Убеждаемся, что у нас есть правильный попап
+    if (this.popup) {
+      this.popup.destroy();
+    }
+    this.popup = this.createMainPopup();
+    
     this.updateContent();
     this.popup.show();
   }
@@ -181,9 +196,7 @@ export class TemplatesMenu {
     // Уничтожение всплывающего окна
     if (this.popup) {
       this.popup.hide(); // Скрыть всплывающее окно
-      if (typeof this.popup.destroy === 'function') {
-        this.popup.destroy(); // Если есть метод destroy, вызвать его
-      }
+      this.popup.destroy(); // Уничтожить попап
       this.popup = null!; // Очистить ссылку
     }
 

@@ -606,6 +606,12 @@ export class PopupManager {
       this.boundDocumentKeydown = undefined;
     }
 
-    this.popup.remove();
+    // Удаляем попап и overlay, если они еще существуют в DOM
+    if (this.popup && this.popup.parentNode) {
+      this.popup.remove();
+    }
+    if (this.overlay && this.overlay.parentNode) {
+      this.overlay.remove();
+    }
   }
 }
