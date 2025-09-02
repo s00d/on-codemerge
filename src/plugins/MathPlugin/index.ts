@@ -154,8 +154,8 @@ export class MathPlugin implements Plugin {
       const math = (e.target as Element).closest('.math-container');
       if (math instanceof HTMLElement) {
         e.preventDefault();
-        const mouseX = (e as MouseEvent).clientX + window.scrollX;
-        const mouseY = (e as MouseEvent).clientY + window.scrollY;
+              const mouseX = (e as MouseEvent).clientX;
+      const mouseY = (e as MouseEvent).clientY;
 
         this.contextMenu?.show(math, mouseX, mouseY);
       }

@@ -70,8 +70,8 @@ export class VideoPlugin implements Plugin {
     const video = (e.target as Element).closest('video');
     if (video instanceof HTMLVideoElement) {
       e.preventDefault();
-      const mouseX = (e as MouseEvent).clientX + window.scrollX;
-      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+      const mouseX = (e as MouseEvent).clientX;
+      const mouseY = (e as MouseEvent).clientY;
 
       console.log('Mouse coordinates with scroll:', mouseX, mouseY);
 

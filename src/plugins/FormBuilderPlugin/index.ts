@@ -145,8 +145,8 @@ export class FormBuilderPlugin implements Plugin {
       e.preventDefault();
 
       // Получаем координаты мыши с учётом прокрутки страницы
-      const mouseX = (e as MouseEvent).clientX + window.scrollX;
-      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+      const mouseX = (e as MouseEvent).clientX;
+      const mouseY = (e as MouseEvent).clientY;
 
       // Показываем контекстное меню
       this.contextMenu?.show(form, mouseX, mouseY);

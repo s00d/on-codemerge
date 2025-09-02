@@ -92,10 +92,10 @@ export class LinkPlugin implements Plugin {
     const link = (e.target as Element).closest('a');
     if (link instanceof HTMLAnchorElement) {
       e.preventDefault();
-      const mouseX = (e as MouseEvent).clientX + window.scrollX;
-      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+      const mouseX = (e as MouseEvent).clientX;
+      const mouseY = (e as MouseEvent).clientY;
 
-      console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+      console.log('Mouse coordinates:', mouseX, mouseY);
 
       this.contextMenu?.show(link, mouseX, mouseY);
     }

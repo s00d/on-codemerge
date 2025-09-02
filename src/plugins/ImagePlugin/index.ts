@@ -73,8 +73,8 @@ export class ImagePlugin implements Plugin {
       if (image.classList.contains('svg-img')) return;
       if (image.classList.contains('svg-chart')) return;
       e.preventDefault();
-      const mouseX = (e as MouseEvent).clientX + window.scrollX;
-      const mouseY = (e as MouseEvent).clientY + window.scrollY;
+      const mouseX = (e as MouseEvent).clientX;
+      const mouseY = (e as MouseEvent).clientY;
 
       console.log('Mouse coordinates with scroll:', mouseX, mouseY);
 

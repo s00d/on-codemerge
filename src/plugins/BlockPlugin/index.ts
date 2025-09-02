@@ -157,8 +157,8 @@ export class BlockPlugin implements Plugin {
     const block = (e.target as Element).closest('.editor-block');
     if (block instanceof HTMLElement) {
       e.preventDefault();
-      const mouseX = e.clientX + window.scrollX;
-      const mouseY = e.clientY + window.scrollY;
+      const mouseX = e.clientX;
+      const mouseY = e.clientY;
 
       this.contextMenu?.show(block, mouseX, mouseY);
     }

@@ -79,10 +79,10 @@ export class YouTubeVideoPlugin implements Plugin {
       const iframe = (e.target as Element).closest('iframe');
       if (iframe instanceof HTMLIFrameElement && iframe.src.includes('youtube.com')) {
         e.preventDefault();
-        const mouseX = (e as MouseEvent).clientX + window.scrollX;
-        const mouseY = (e as MouseEvent).clientY + window.scrollY;
+        const mouseX = (e as MouseEvent).clientX;
+        const mouseY = (e as MouseEvent).clientY;
 
-        console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+        console.log('Mouse coordinates:', mouseX, mouseY);
 
         this.contextMenu?.show(iframe, mouseX, mouseY);
       }

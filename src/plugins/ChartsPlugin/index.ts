@@ -81,10 +81,10 @@ export class ChartsPlugin implements Plugin {
       const chart = (e.target as Element).closest('.chart-container');
       if (chart instanceof HTMLElement) {
         e.preventDefault();
-        const mouseX = (e as MouseEvent).clientX + window.scrollX;
-        const mouseY = (e as MouseEvent).clientY + window.scrollY;
+        const mouseX = (e as MouseEvent).clientX;
+        const mouseY = (e as MouseEvent).clientY;
 
-        console.log('Mouse coordinates with scroll:', mouseX, mouseY);
+        console.log('Mouse coordinates:', mouseX, mouseY);
 
         this.contextMenu?.show(chart, mouseX, mouseY);
       }
