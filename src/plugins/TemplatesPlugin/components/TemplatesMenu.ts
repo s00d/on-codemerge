@@ -58,7 +58,7 @@ export class TemplatesMenu {
   private showNewForm(): void {
     // Уничтожаем текущий попап перед созданием нового
     this.popup.destroy();
-    
+
     const form = new TemplateForm(this.editor, (data) => {
       this.manager.saveTemplate(data);
       this.popup.destroy();
@@ -112,7 +112,7 @@ export class TemplatesMenu {
   private showEditForm(template: Template): void {
     // Уничтожаем текущий попап перед созданием нового
     this.popup.destroy();
-    
+
     const form = new TemplateForm(
       this.editor,
       (data) => {
@@ -181,13 +181,13 @@ export class TemplatesMenu {
 
   public show(onSelect: (template: Template) => void): void {
     this.onSelect = onSelect;
-    
+
     // Убеждаемся, что у нас есть правильный попап
     if (this.popup) {
       this.popup.destroy();
     }
     this.popup = this.createMainPopup();
-    
+
     this.updateContent();
     this.popup.show();
   }
