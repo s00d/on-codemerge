@@ -46,6 +46,15 @@ export class DOMContext {
     listener: EventListener,
     options?: boolean | AddEventListenerOptions
   ): void {
+    if (type === 'selectionchange') {
+      if (this.isIframeMode && this.iframe?.contentDocument) {
+        this.iframe.contentDocument.addEventListener(type, listener, options);
+      } else {
+        document.addEventListener(type, listener, options);
+      }
+      return;
+    }
+
     if (this.isShadowMode && this.shadowRoot) {
       this.shadowRoot.addEventListener(type, listener, options);
     } else if (this.isIframeMode && this.iframe?.contentDocument) {
@@ -56,6 +65,15 @@ export class DOMContext {
   }
 
   removeEventListener(type: string, listener: EventListener): void {
+    if (type === 'selectionchange') {
+      if (this.isIframeMode && this.iframe?.contentDocument) {
+        this.iframe.contentDocument.removeEventListener(type, listener);
+      } else {
+        document.removeEventListener(type, listener);
+      }
+      return;
+    }
+
     if (this.isShadowMode && this.shadowRoot) {
       this.shadowRoot.removeEventListener(type, listener);
     } else if (this.isIframeMode && this.iframe?.contentDocument) {

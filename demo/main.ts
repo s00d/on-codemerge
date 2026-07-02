@@ -58,7 +58,15 @@ class DemoApp {
             throw new Error('Editor container not found');
         }
 
-        this.editor = new HTMLEditor(editorContainer, { mode: 'direct' });
+        const formatDebug =
+            new URLSearchParams(window.location.search).get('formatDebug') === '1' ||
+            localStorage.getItem('on-codemerge:format-debug') === '1';
+
+        this.editor = new HTMLEditor(editorContainer, { mode: 'direct', formatDebug });
+
+        if (formatDebug) {
+            this.setupFormatDebugPanel();
+        }
 
         // Register plugins
         this.registerPlugin(new ToolbarPlugin());
@@ -481,6 +489,34 @@ class DemoApp {
             reloadButton.textContent = isReloading ? 'Reloading...' : 'Reload Editor';
             reloadButton.style.backgroundColor = isReloading ? '#ccc' : '#4CAF50';
         }
+    }
+
+    private setupFormatDebugPanel(): void {
+        let panel = document.getElementById('format-debug-panel') as HTMLPreElement | null;
+        if (!panel) {
+            panel = document.createElement('pre');
+            panel.id = 'format-debug-panel';
+            panel.style.cssText =
+                'margin:16px 0;padding:12px;background:#1e1e1e;color:#d4d4d4;border-radius:8px;font-size:12px;max-height:320px;overflow:auto;white-space:pre-wrap;';
+            const output = document.getElementById('output');
+            output?.parentElement?.insertBefore(panel, output);
+        }
+
+        const render = () => {
+            const map = this.editor.getTextFormatter()?.getLastDebugMap();
+            if (map && typeof (window as any).formatDebugMapToString === 'function') {
+                panel!.textContent = (window as any).formatDebugMapToString(map);
+            } else if (map) {
+                panel!.textContent = JSON.stringify(map, null, 2);
+            }
+        };
+
+        document.addEventListener('selectionchange', () => {
+            window.setTimeout(render, 0);
+        });
+
+        this.editor.subscribeToContentChange(() => render());
+        render();
     }
 }
 

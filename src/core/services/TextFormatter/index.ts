@@ -1,43 +1,78 @@
 import { DomUtils } from './DomUtils';
 import { StyleManager } from './StyleManager';
+import {
+  formatDebugMapToString,
+  isFormatDebugEnabled,
+  type FormatDebugMap,
+} from './FormatDebugMap';
+import { FormatDebugTracer } from './FormatDebugTracer';
 
 export class TextFormatter {
   private domUtils: DomUtils;
   private readonly styleManager: StyleManager;
   private shadowRoot: ShadowRoot | null = null;
+  private readonly debugTracer = new FormatDebugTracer();
 
   constructor(
     private container: HTMLElement,
-    shadowRoot?: ShadowRoot
+    shadowRoot?: ShadowRoot,
+    formatDebug?: boolean
   ) {
     this.domUtils = new DomUtils(container);
     this.styleManager = new StyleManager();
     this.shadowRoot = shadowRoot || null;
+
+    if (formatDebug ?? isFormatDebugEnabled()) {
+      this.enableFormatDebug(true);
+    }
+  }
+
+  enableFormatDebug(enabled: boolean): void {
+    this.debugTracer.setEnabled(enabled);
+    this.domUtils.setTracer(enabled ? this.debugTracer : null);
+  }
+
+  isFormatDebugEnabled(): boolean {
+    return this.debugTracer.isEnabled();
+  }
+
+  getLastDebugMap(): FormatDebugMap | null {
+    return this.debugTracer.getLastMap();
   }
 
   toggleStyle(styleCommand: string): void {
-    // Получаем выделение в зависимости от контекста
     const selection = this.getSelection();
-    if (!selection) {
+    if (!selection || selection.rangeCount === 0) {
       return;
     }
 
-    const nodesToStyle = this.domUtils.getSelectedRoot(selection);
-    if (!nodesToStyle) {
+    if (this.styleManager.isBlockStyle(styleCommand)) {
+      this.toggleBlockStyle(styleCommand, selection);
       return;
     }
+
+    this.debugTracer.begin(styleCommand, this.container, selection);
+
+    const nodesToStyle = this.domUtils.getSelectedRoot(selection, false, styleCommand);
+    if (!nodesToStyle || nodesToStyle.length === 0) {
+      this.debugTracer.setAction('noop');
+      const map = this.debugTracer.end(this.container);
+      if (map) this.debugTracer.logToConsole(map, formatDebugMapToString);
+      return;
+    }
+
+    let action: 'apply' | 'remove' = 'apply';
 
     nodesToStyle.forEach((node) => {
-      // Обернуть текстовый узел в <span>, если это необходимо
       if (node.nodeType === Node.TEXT_NODE) {
         node = this.wrapTextNodeInSpan(node);
       }
 
-      // Применить или удалить стиль
       const element = node as HTMLElement;
       const isFormatted = this.styleManager.has(element, styleCommand);
 
       if (isFormatted) {
+        action = 'remove';
         this.domUtils.removeStyleFromNode(
           node,
           styleCommand,
@@ -51,6 +86,48 @@ export class TextFormatter {
         );
       }
     });
+
+    this.debugTracer.setAction(action);
+    const map = this.debugTracer.end(this.container);
+    if (map) this.debugTracer.logToConsole(map, formatDebugMapToString);
+  }
+
+  private toggleBlockStyle(styleCommand: string, selection: Selection): void {
+    this.debugTracer.begin(styleCommand, this.container, selection);
+
+    const range = selection.getRangeAt(0);
+    const blockElements = this.domUtils.findBlockElementsInRange(range);
+
+    this.debugTracer.step(
+      'findBlockElements',
+      blockElements.map((el) => el.tagName),
+      blockElements.length === 0 ? 'no_blocks_found' : 'blocks_in_range'
+    );
+
+    if (blockElements.length === 0) {
+      this.debugTracer.setAction('noop');
+      const map = this.debugTracer.end(this.container);
+      if (map) this.debugTracer.logToConsole(map, formatDebugMapToString);
+      return;
+    }
+
+    const isCompletelyStyled = blockElements.every((el) =>
+      this.styleManager.has(el, styleCommand)
+    );
+    const action = isCompletelyStyled ? 'remove' : 'apply';
+
+    blockElements.forEach((element) => {
+      if (isCompletelyStyled) {
+        this.styleManager.remove(element, styleCommand);
+      } else {
+        this.styleManager.set(element, styleCommand);
+      }
+    });
+
+    this.debugTracer.setNodesToModify(blockElements, this.container);
+    this.debugTracer.setAction(action);
+    const map = this.debugTracer.end(this.container);
+    if (map) this.debugTracer.logToConsole(map, formatDebugMapToString);
   }
 
   setColor(color: string): void {
@@ -84,7 +161,7 @@ export class TextFormatter {
   applyBlock(tag: keyof HTMLElementTagNameMap = 'span'): void {
     this.applyStyleToSelectedNodes((element) => {
       const newElement = document.createElement(tag);
-      newElement.textContent = element.textContent; // Копируем только текст
+      newElement.textContent = element.textContent;
       newElement.classList.add('format-text-block');
 
       if (element.parentNode) {
@@ -96,7 +173,7 @@ export class TextFormatter {
   clearBlock(): void {
     this.applyStyleToSelectedNodes((element) => {
       const newElement = document.createElement('span');
-      newElement.textContent = element.textContent; // Копируем только текст
+      newElement.textContent = element.textContent;
       element.style.removeProperty('font-family');
       element.style.removeProperty('font-size');
       element.style.removeProperty('line-height');
@@ -131,27 +208,22 @@ export class TextFormatter {
 
   public getSelection(): Selection | null {
     if (this.shadowRoot) {
-      // В Shadow DOM используем специальный подход
-
-      // Попробуем получить выделение из Shadow DOM напрямую
       if ('getSelection' in this.shadowRoot) {
-        const shadowSelection = (this.shadowRoot as any).getSelection();
+        const shadowSelection = (this.shadowRoot as ShadowRoot & { getSelection(): Selection })
+          .getSelection();
         if (shadowSelection && shadowSelection.rangeCount > 0) {
           return shadowSelection;
         }
       }
 
-      // Fallback: проверяем основное выделение
-      const mainSelection = window.getSelection(); // Используем window.getSelection() как fallback
+      const mainSelection = window.getSelection();
       if (!mainSelection || mainSelection.rangeCount === 0) {
         return null;
       }
 
-      // Проверяем, находится ли выделение в нашем Shadow DOM
       const range = mainSelection.getRangeAt(0);
       const commonAncestor = range.commonAncestorContainer;
 
-      // Проверяем, находится ли выделение в нашем Shadow DOM
       if (
         this.shadowRoot.contains(commonAncestor) ||
         (commonAncestor.nodeType === Node.ELEMENT_NODE &&
@@ -159,12 +231,9 @@ export class TextFormatter {
       ) {
         return mainSelection;
       } else {
-        // Попробуем найти выделение внутри Shadow DOM альтернативным способом
-        // Проверим, есть ли активный элемент внутри Shadow DOM
         const activeElement = this.shadowRoot.activeElement;
         if (activeElement && activeElement === this.container) {
-          // Создаем фейковое выделение для контейнера
-          const container = this.container; // Сохраняем ссылку
+          const container = this.container;
           let currentRangeCount = 1;
           const fakeSelection = {
             get rangeCount() {
@@ -176,11 +245,9 @@ export class TextFormatter {
               return range;
             },
             removeAllRanges: () => {
-              // Сбрасываем выделение - ничего не выделено
               currentRangeCount = 0;
             },
             addRange: (range: Range) => {
-              // Добавляем диапазон в выделение
               if (range && container.contains(range.commonAncestorContainer)) {
                 currentRangeCount = 1;
               }
@@ -194,8 +261,7 @@ export class TextFormatter {
         return null;
       }
     } else {
-      // Обычный режим - используем window.getSelection()
-      return window.getSelection(); // В обычном режиме используем глобальное выделение
+      return window.getSelection();
     }
   }
 
@@ -203,14 +269,38 @@ export class TextFormatter {
     const selection = this.getSelection();
     if (!selection || selection.rangeCount === 0) return false;
 
-    const nodesToCheck = this.domUtils.getSelectedRoot(selection, true);
-    if (!nodesToCheck) return false;
+    if (this.styleManager.isBlockStyle(styleCommand)) {
+      const range = selection.getRangeAt(0);
+      const blocks = this.domUtils.findBlockElementsInRange(range);
+      return blocks.length > 0 && blocks.every((el) => this.styleManager.has(el, styleCommand));
+    }
 
-    // Проверяем, применен ли стиль к любому из выделенных узлов
-    return nodesToCheck.some((node) => {
-      if (node.nodeType === Node.ELEMENT_NODE) {
-        const element = node as HTMLElement;
-        return this.styleManager.has(element, styleCommand);
+    const range = selection.getRangeAt(0);
+
+    if (range.collapsed) {
+      const nodesToCheck = this.domUtils.getSelectedRoot(selection, true, styleCommand);
+      return (
+        nodesToCheck?.some((node) => {
+          if (node.nodeType === Node.ELEMENT_NODE) {
+            return this.styleManager.has(node as HTMLElement, styleCommand);
+          }
+          return false;
+        }) ?? false
+      );
+    }
+
+    const textNodes = this.domUtils.collectTextNodesInRangeForRead(range).filter(
+      (n) => n.textContent?.trim()
+    );
+    if (textNodes.length === 0) return false;
+
+    return textNodes.every((textNode) => {
+      let parent = textNode.parentElement;
+      while (parent && parent !== this.container) {
+        if (this.styleManager.has(parent, styleCommand)) {
+          return true;
+        }
+        parent = parent.parentElement;
       }
       return false;
     });
@@ -223,7 +313,6 @@ export class TextFormatter {
     const nodesToCheck = this.domUtils.getSelectedRoot(selection, true);
     if (!nodesToCheck) return null;
 
-    // Проверяем, применен ли стиль к любому из выделенных узлов
     for (const nodesToCheckItem of nodesToCheck) {
       if (nodesToCheckItem.nodeType === Node.ELEMENT_NODE) {
         const element = nodesToCheckItem as HTMLElement;

@@ -80,6 +80,14 @@ const styleConfig: { [p: string]: Config } = {
 };
 
 export class StyleManager {
+  getConfig(styleCommand: string): Config | undefined {
+    return styleConfig[styleCommand];
+  }
+
+  isBlockStyle(styleCommand: string): boolean {
+    return !!styleConfig[styleCommand]?.block;
+  }
+
   set(element: HTMLElement, styleCommand: string): void {
     const config = styleConfig[styleCommand];
     if (config.block) {

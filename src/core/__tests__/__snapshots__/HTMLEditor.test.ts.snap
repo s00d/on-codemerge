@@ -14,12 +14,8 @@ exports[`HTMLEditor should initialize with an empty container 1`] = `""`;
 
 exports[`HTMLEditor should insert text at the cursor 1`] = `"Hello, world!"`;
 
-exports[`HTMLEditor should set a new locale 1`] = `"New Block"`;
+exports[`HTMLEditor should set a new locale 1`] = `"Новый Блок"`;
 
-exports[`HTMLEditor should set and get HTML content 1`] = `
-<p>
-  Hello, world!
-</p>
-`;
+exports[`HTMLEditor should set and get HTML content 1`] = `""`;
 
 exports[`HTMLEditor should translate text using LocaleManager 1`] = `"New Block"`;

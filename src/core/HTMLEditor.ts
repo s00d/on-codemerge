@@ -14,6 +14,7 @@ export interface EditorOptions {
   mode: 'direct' | 'shadowRoot' | 'iframe';
   shadowRoot?: ShadowRoot;
   iframe?: HTMLIFrameElement;
+  formatDebug?: boolean;
 }
 
 export class HTMLEditor {
@@ -77,7 +78,11 @@ export class HTMLEditor {
     this.plugins = new DefaultPluginManager();
     this.eventHandlers = new Map();
     this.formatter = new HTMLFormatter();
-    this.textFormatter = new TextFormatter(this.container, options.shadowRoot || undefined);
+    this.textFormatter = new TextFormatter(
+      this.container,
+      options.shadowRoot || undefined,
+      options.formatDebug
+    );
     this.selector = new Selector(this.container);
 
     this.boundClickToFocus = (e: MouseEvent) => {
@@ -117,61 +122,51 @@ export class HTMLEditor {
     });
   }
 
+  private static readonly STYLE_SYNC_ATTR = 'data-cm-style-sync';
+
+  private syncDocumentStylesToShadowRoot(shadowRoot: ShadowRoot): void {
+    shadowRoot.querySelectorAll(`[${HTMLEditor.STYLE_SYNC_ATTR}]`).forEach((el) => el.remove());
+
+    if (document.adoptedStyleSheets?.length) {
+      shadowRoot.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
+    }
+
+    document.querySelectorAll('style').forEach((style) => {
+      const clone = document.createElement('style');
+      clone.setAttribute(HTMLEditor.STYLE_SYNC_ATTR, '');
+      clone.textContent = style.textContent || '';
+      shadowRoot.appendChild(clone);
+    });
+
+    document
+      .querySelectorAll(
+        'link[rel="stylesheet"], link[rel="modulepreload"], link[rel="preload"], link[rel="preload stylesheet"]'
+      )
+      .forEach((link) => {
+        const newLink = document.createElement('link');
+        newLink.setAttribute(HTMLEditor.STYLE_SYNC_ATTR, '');
+        newLink.rel = 'stylesheet';
+        newLink.href = (link as HTMLLinkElement).href;
+        shadowRoot.appendChild(newLink);
+      });
+  }
+
   // Применение стилей к Shadow DOM
   private applyStylesToShadowDOM(shadowRoot: ShadowRoot): void {
-    const applyStyles = () => {
-      try {
-        // Пробуем использовать adoptedStyleSheets (современный способ)
-        if (document.adoptedStyleSheets && document.adoptedStyleSheets.length > 0) {
-          shadowRoot.adoptedStyleSheets = Array.from(document.adoptedStyleSheets);
-        } else {
-          // Fallback: копируем стили как раньше
-          const styleElements = document.querySelectorAll('style');
-          styleElements.forEach((style, _index) => {
-            const newStyle = document.createElement('style');
-            newStyle.textContent = style.textContent || '';
-            shadowRoot.appendChild(newStyle);
-          });
-        }
+    const applyStyles = () => this.syncDocumentStylesToShadowRoot(shadowRoot);
 
-        // Копируем link элементы со стилями (включая prefetch в production)
-        const linkElements = document.querySelectorAll(
-          'link[rel="modulepreload"], link[rel="preload"], link[rel="preload stylesheet"]'
-        );
-        linkElements.forEach((link) => {
-          const newLink = document.createElement('link');
-          newLink.rel = 'stylesheet'; // Всегда делаем stylesheet для Shadow DOM
-          newLink.href = (link as HTMLLinkElement).href;
-          shadowRoot.appendChild(newLink);
-        });
-      } catch (error) {
-        // Fallback: копируем стили
-        const styleElements = document.querySelectorAll('style');
-        styleElements.forEach((style, _index) => {
-          const newStyle = document.createElement('style');
-          newStyle.textContent = style.textContent || '';
-          shadowRoot.appendChild(newStyle);
-        });
-
-        // Fallback для link элементов
-        const linkElements = document.querySelectorAll(
-          'link[rel="modulepreload"], link[rel="preload"], link[rel="preload stylesheet"]'
-        );
-        linkElements.forEach((link) => {
-          const newLink = document.createElement('link');
-          newLink.rel = 'stylesheet';
-          newLink.href = (link as HTMLLinkElement).href;
-          shadowRoot.appendChild(newLink);
-        });
-      }
-    };
-
-    // Если страница уже загружена, применяем стили сразу
     if (document.readyState === 'complete') {
       applyStyles();
     } else {
-      // Иначе ждем полной загрузки страницы
-      window.addEventListener('load', applyStyles);
+      window.addEventListener('load', applyStyles, { once: true });
+    }
+
+    if (import.meta.hot) {
+      import.meta.hot.on('vite:afterUpdate', () => {
+        if (this.options.shadowRoot) {
+          this.syncDocumentStylesToShadowRoot(this.options.shadowRoot);
+        }
+      });
     }
   }
 
@@ -563,34 +558,68 @@ export class HTMLEditor {
     if (!selection) return;
 
     const range = document.createRange();
-    let node: Node = this.container;
-    let offset = position.offset;
+    let remaining = position.offset;
 
-    // Ищем узел и смещение для восстановления позиции курсора
     const walker = document.createTreeWalker(this.container, NodeFilter.SHOW_TEXT);
     while (walker.nextNode()) {
       const textNode = walker.currentNode as Text;
-      if (offset <= textNode.length) {
-        node = textNode;
-        break;
+      const length = textNode.length;
+
+      if (remaining < length) {
+        range.setStart(textNode, remaining);
+        range.collapse(true);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        this.container.focus();
+        return;
       }
-      offset -= textNode.length;
+
+      if (remaining === length) {
+        const nextText = this.findNextTextNode(textNode);
+        if (nextText) {
+          range.setStart(nextText, 0);
+          range.collapse(true);
+          selection.removeAllRanges();
+          selection.addRange(range);
+          this.container.focus();
+          return;
+        }
+      }
+
+      remaining -= length;
     }
 
-    // Если узел не текстовый или смещение выходит за пределы, корректируем позицию
-    if (node.nodeType !== Node.TEXT_NODE || offset < 0 || offset > (node as Text).length) {
-      // Если смещение выходит за пределы, устанавливаем курсор в конец контейнера
-      node = this.container;
-      offset = this.container.childNodes.length;
+    const lastWalker = document.createTreeWalker(this.container, NodeFilter.SHOW_TEXT);
+    let lastText: Text | null = null;
+    while (lastWalker.nextNode()) {
+      lastText = lastWalker.currentNode as Text;
     }
 
-    range.setStart(node, offset);
-    range.collapse(true);
+    if (lastText) {
+      range.setStart(lastText, lastText.length);
+      range.collapse(true);
+    } else {
+      range.selectNodeContents(this.container);
+      range.collapse(false);
+    }
 
     selection.removeAllRanges();
     selection.addRange(range);
-
     this.container.focus();
+  }
+
+  private findNextTextNode(node: Text): Text | null {
+    const walker = document.createTreeWalker(this.container, NodeFilter.SHOW_TEXT);
+    let found = false;
+    while (walker.nextNode()) {
+      if (found) {
+        return walker.currentNode as Text;
+      }
+      if (walker.currentNode === node) {
+        found = true;
+      }
+    }
+    return null;
   }
 
   public use(plugin: Plugin): boolean {
