@@ -111,9 +111,7 @@ export class TextFormatter {
       return;
     }
 
-    const isCompletelyStyled = blockElements.every((el) =>
-      this.styleManager.has(el, styleCommand)
-    );
+    const isCompletelyStyled = blockElements.every((el) => this.styleManager.has(el, styleCommand));
     const action = isCompletelyStyled ? 'remove' : 'apply';
 
     blockElements.forEach((element) => {
@@ -209,8 +207,9 @@ export class TextFormatter {
   public getSelection(): Selection | null {
     if (this.shadowRoot) {
       if ('getSelection' in this.shadowRoot) {
-        const shadowSelection = (this.shadowRoot as ShadowRoot & { getSelection(): Selection })
-          .getSelection();
+        const shadowSelection = (
+          this.shadowRoot as ShadowRoot & { getSelection(): Selection }
+        ).getSelection();
         if (shadowSelection && shadowSelection.rangeCount > 0) {
           return shadowSelection;
         }
@@ -289,9 +288,9 @@ export class TextFormatter {
       );
     }
 
-    const textNodes = this.domUtils.collectTextNodesInRangeForRead(range).filter(
-      (n) => n.textContent?.trim()
-    );
+    const textNodes = this.domUtils
+      .collectTextNodesInRangeForRead(range)
+      .filter((n) => n.textContent?.trim());
     if (textNodes.length === 0) return false;
 
     return textNodes.every((textNode) => {

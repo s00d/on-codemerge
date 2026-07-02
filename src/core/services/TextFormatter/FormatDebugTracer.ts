@@ -53,12 +53,7 @@ export class FormatDebugTracer {
     };
   }
 
-  step(
-    step: string,
-    output?: unknown,
-    decision?: string,
-    input?: unknown
-  ): void {
+  step(step: string, output?: unknown, decision?: string, input?: unknown): void {
     if (!this.enabled || !this.current) return;
 
     const entry: PipelineStep = { step };

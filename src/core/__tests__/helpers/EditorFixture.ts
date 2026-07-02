@@ -49,7 +49,10 @@ export class EditorFixture {
   }
 
   normalizedHtml(): string {
-    return this.html.replace(/\u200B/g, '').replace(/>\s+</g, '><').trim();
+    return this.html
+      .replace(/\u200B/g, '')
+      .replace(/>\s+</g, '><')
+      .trim();
   }
 
   getSelectionText(): string {

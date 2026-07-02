@@ -41,10 +41,19 @@ describe('TextFormatter selection matrix', () => {
               const styledEls = fixture.container.querySelectorAll(`.${className}`);
               expect(styledEls.length).toBeGreaterThan(0);
 
-              if (scenario.id.includes('line2') || scenario.id.startsWith('partial_word') || scenario.id.startsWith('cursor_') || scenario.id === 'drag_range_offsets' || scenario.id === 'full_word') {
+              if (
+                scenario.id.includes('line2') ||
+                scenario.id.startsWith('partial_word') ||
+                scenario.id.startsWith('cursor_') ||
+                scenario.id === 'drag_range_offsets' ||
+                scenario.id === 'full_word'
+              ) {
                 const hasSelectedFragment = Array.from(styledEls).some((el) => {
                   const t = el.textContent ?? '';
-                  return selectedText.trim().split(/\s+/).some((part) => part && t.includes(part));
+                  return selectedText
+                    .trim()
+                    .split(/\s+/)
+                    .some((part) => part && t.includes(part));
                 });
                 expect(hasSelectedFragment || html.includes(className)).toBe(true);
               }

@@ -27,14 +27,10 @@ export class DomUtils {
 
   findBlockElementsInRange(range: Range): HTMLElement[] {
     const blocks = new Set<HTMLElement>();
-    const walker = document.createTreeWalker(
-      this.container,
-      NodeFilter.SHOW_ELEMENT,
-      {
-        acceptNode: (node) =>
-          range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
-      }
-    );
+    const walker = document.createTreeWalker(this.container, NodeFilter.SHOW_ELEMENT, {
+      acceptNode: (node) =>
+        range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+    });
 
     while (walker.nextNode()) {
       const el = walker.currentNode as HTMLElement;
@@ -157,16 +153,12 @@ export class DomUtils {
 
   private collectTextNodesInRange(range: Range): Text[] {
     const nodes: Text[] = [];
-    const walker = document.createTreeWalker(
-      range.commonAncestorContainer,
-      NodeFilter.SHOW_TEXT,
-      {
-        acceptNode: (node) =>
-          range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
-      }
-    );
+    const walker = document.createTreeWalker(range.commonAncestorContainer, NodeFilter.SHOW_TEXT, {
+      acceptNode: (node) =>
+        range.intersectsNode(node) ? NodeFilter.FILTER_ACCEPT : NodeFilter.FILTER_REJECT,
+    });
 
-    let currentNode: Node | null = range.startContainer;
+    const currentNode: Node | null = range.startContainer;
 
     if (currentNode.nodeType === Node.TEXT_NODE) {
       if (range.intersectsNode(currentNode)) {
@@ -350,8 +342,7 @@ export class DomUtils {
     if (!anchorNode) return [];
 
     const isInContainer =
-      this.container.contains(anchorNode) ||
-      this.container.getRootNode().contains(anchorNode);
+      this.container.contains(anchorNode) || this.container.getRootNode().contains(anchorNode);
 
     if (!isInContainer) return [];
 
@@ -376,8 +367,7 @@ export class DomUtils {
     if (!anchorNode) return [];
 
     const isInContainer =
-      this.container.contains(anchorNode) ||
-      this.container.getRootNode().contains(anchorNode);
+      this.container.contains(anchorNode) || this.container.getRootNode().contains(anchorNode);
 
     if (!isInContainer) return [];
 
@@ -399,7 +389,11 @@ export class DomUtils {
     selection.removeAllRanges();
     selection.addRange(range);
 
-    this.tracer?.step('handleCollapsedRange', getNodePath(span, this.container), 'insert_zwsp_span');
+    this.tracer?.step(
+      'handleCollapsedRange',
+      getNodePath(span, this.container),
+      'insert_zwsp_span'
+    );
     return [span];
   }
 

@@ -71,8 +71,7 @@ export function buildDomTree(container: HTMLElement): DomTreeEntry[] {
 
     if (node.nodeType === Node.ELEMENT_NODE) {
       const el = node as HTMLElement;
-      const classes =
-        el.classList.length > 0 ? `.${Array.from(el.classList).join('.')}` : '';
+      const classes = el.classList.length > 0 ? `.${Array.from(el.classList).join('.')}` : '';
       entries.push({
         path,
         nodeType: el.tagName,
@@ -118,8 +117,7 @@ export function describeNode(node: Node): { nodeType: string; label: string } {
   }
   if (node.nodeType === Node.ELEMENT_NODE) {
     const el = node as HTMLElement;
-    const classes =
-      el.classList.length > 0 ? `.${Array.from(el.classList).join('.')}` : '';
+    const classes = el.classList.length > 0 ? `.${Array.from(el.classList).join('.')}` : '';
     return { nodeType: el.tagName, label: `${el.tagName.toLowerCase()}${classes}` };
   }
   return { nodeType: String(node.nodeType), label: node.nodeName };
@@ -185,8 +183,7 @@ export function formatDebugMapToString(map: FormatDebugMap): string {
   lines.push('', 'Pipeline:');
   map.pipeline.forEach((step, index) => {
     const decision = step.decision ? ` (${step.decision})` : '';
-    const output =
-      step.output !== undefined ? ` → ${JSON.stringify(step.output)}` : '';
+    const output = step.output !== undefined ? ` → ${JSON.stringify(step.output)}` : '';
     lines.push(`  ${index + 1}. ${step.step}${decision}${output}`);
   });
 

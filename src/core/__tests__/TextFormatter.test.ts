@@ -55,9 +55,7 @@ describe('TextFormatter', () => {
       fixture.container.innerHTML = 'Hello <span class="format-bold">beautiful world</span>';
       fixture.selection.selectByText('world');
       fixture.toggle('bold');
-      expect(fixture.html).toBe(
-        'Hello <span class="format-bold">beautiful </span>world'
-      );
+      expect(fixture.html).toBe('Hello <span class="format-bold">beautiful </span>world');
     });
   });
 

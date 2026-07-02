@@ -83,9 +83,7 @@ export class SelectionHelper {
   }
 
   public selectByText(text: string, parentSelector?: string): void {
-    const parent = parentSelector
-      ? this.container.querySelector(parentSelector)
-      : this.container;
+    const parent = parentSelector ? this.container.querySelector(parentSelector) : this.container;
     if (!parent) {
       throw new Error(`Parent selector "${parentSelector}" not found for selectByText.`);
     }
