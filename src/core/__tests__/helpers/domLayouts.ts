@@ -15,6 +15,7 @@ export const DOM_LAYOUTS = {
     html: 'Line one<br>Line two',
     line1Text: 'Line one',
     line2Text: 'Line two',
+    line1Selector: undefined,
     line2Selector: undefined,
   },
   divAfterBr: {
@@ -22,6 +23,7 @@ export const DOM_LAYOUTS = {
     html: 'Line one<div>Line two</div>',
     line1Text: 'Line one',
     line2Text: 'Line two',
+    line1Selector: undefined,
     line2Selector: 'div',
   },
   twoDivs: {
@@ -37,6 +39,7 @@ export const DOM_LAYOUTS = {
     html: 'Line one<div><br></div>Line two',
     line1Text: 'Line one',
     line2Text: 'Line two',
+    line1Selector: undefined,
     line2Selector: undefined,
   },
   line1Bold: {
@@ -44,6 +47,7 @@ export const DOM_LAYOUTS = {
     html: '<span class="format-bold">Line one</span><div>Line two</div>',
     line1Text: 'Line one',
     line2Text: 'Line two',
+    line1Selector: undefined,
     line2Selector: 'div',
   },
   twoParagraphs: {
@@ -67,6 +71,7 @@ export const DOM_LAYOUTS = {
     html: '<span class="format-bold">Line one</span><div>Line two</div>',
     line1Text: 'Line one',
     line2Text: 'Line two',
+    line1Selector: undefined,
     line2Selector: 'div',
   },
 } as const satisfies Record<string, DomLayout>;

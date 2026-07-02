@@ -2,7 +2,6 @@ import {
   buildDomTree,
   type FormatDebugAction,
   type FormatDebugMap,
-  type NodeRef,
   type PipelineStep,
   nodeToRef,
   publishFormatDebugMap,

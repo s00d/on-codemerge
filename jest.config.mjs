@@ -16,5 +16,6 @@ export default {
   moduleNameMapper: {
     '\\.(scss|css)$': 'identity-obj-proxy',
     '\\.svg\\?raw$': '<rootDir>/src/__mocks__/svgMock.ts',
+    '^.+/utils/viteHmr(\\.ts)?$': '<rootDir>/src/__mocks__/viteHmr.ts',
   },
 };

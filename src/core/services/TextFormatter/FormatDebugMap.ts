@@ -100,7 +100,7 @@ export function getNodePath(node: Node, container: HTMLElement): string {
   let current: Node | null = node;
 
   while (current && current !== container) {
-    const parent = current.parentNode;
+    const parent: Node | null = current.parentNode;
     if (!parent) break;
     const index = Array.from(parent.childNodes).indexOf(current as ChildNode);
     parts.unshift(index);

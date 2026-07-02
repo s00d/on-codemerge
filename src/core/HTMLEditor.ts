@@ -6,6 +6,7 @@ import { Selector } from './services/Selector';
 import { NotificationManager } from './ui/NotificationManager';
 import { DOMContext } from './DOMContext';
 import type { ShortcutCategories } from './types.ts';
+import { onViteAfterUpdate } from '../utils/viteHmr';
 
 type Callback = (...data: any[]) => void;
 type ContentCallback = (value: string) => void;
@@ -161,13 +162,11 @@ export class HTMLEditor {
       window.addEventListener('load', applyStyles, { once: true });
     }
 
-    if (import.meta.hot) {
-      import.meta.hot.on('vite:afterUpdate', () => {
-        if (this.options.shadowRoot) {
-          this.syncDocumentStylesToShadowRoot(this.options.shadowRoot);
-        }
-      });
-    }
+    onViteAfterUpdate(() => {
+      if (this.options.shadowRoot) {
+        this.syncDocumentStylesToShadowRoot(this.options.shadowRoot);
+      }
+    });
   }
 
   // Применение стилей к iframe
