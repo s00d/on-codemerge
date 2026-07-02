@@ -1,0 +1,110 @@
+src/core/__tests__/helpers/formatScenarios.ts
+  s_84db9e28c84c3b::t_7dd34f75bd59e1 1-15
+src/__mocks__/svgMock.ts
+  s_84db9e28c84c3b::t_12260790da07fb 1
+src/core/__tests__/helpers/SelectionHelper.ts
+  s_84db9e28c84c3b::t_8b083e7c2f144a 70-82
+  s_84db9e28c84c3b::t_e625daaaa1a450 1-3,8-69,83-120
+  s_84db9e28c84c3b::t_af4957d6a540e8 4-7
+tsconfig.test.json
+  s_84db9e28c84c3b::t_93fee1e04b7d57 1-9
+src/core/__tests__/TextFormatterHistory.test.ts
+  s_84db9e28c84c3b::t_761c17c32e2644 66
+  s_84db9e28c84c3b::t_d5f895235cbe77 132
+  s_84db9e28c84c3b::t_d5c5369393d5ec 8-12,41-45,48-51,55-56,60,62,71,73,76,80,93-94,98,110-111,115,124-125,129
+  s_84db9e28c84c3b::t_2dc0225f25fa9e 104
+  s_84db9e28c84c3b::t_15a3ad7ec5ed70 105
+  s_84db9e28c84c3b::t_67bb18c788ffea 1-7,13-40,46-47,52-54,57-59,61,63-65,67-70,72,74-75,77-79,81-92,95-97,99-103,106-109,112-114,116-121,126-128,131,134-135
+  s_84db9e28c84c3b::t_7028ef26ba073a 122-123,130,133
+src/core/services/TextFormatter/FormatDebugMap.ts
+  s_84db9e28c84c3b::t_86799ff0ffef93 1-226
+src/core/services/TextFormatter/FormatDebugTracer.ts
+  s_84db9e28c84c3b::t_8f6ca880a57a6d 108
+  s_84db9e28c84c3b::t_d87e23358ce1ca 1-107,109-111
+jest.config.mjs
+  s_84db9e28c84c3b::t_757c5d58ba92fb 3,5-10,17-18
+  s_84db9e28c84c3b::t_8861306c8fcbf3 13
+src/core/__tests__/helpers/selectionScenarios.ts
+  s_84db9e28c84c3b::t_5348937f66dd8f 27
+  s_84db9e28c84c3b::t_829f01d49e40fa 1-26,28-199
+src/core/DOMContext.ts
+  s_84db9e28c84c3b::t_cd9136f24c6382 49-57,68-76
+src/core/__tests__/TextFormatter.debug.test.ts
+  s_84db9e28c84c3b::t_5de69695492b2e 1-127
+src/core/HTMLEditor.ts
+  s_84db9e28c84c3b::t_ac337ec641bb73 81-85
+  s_84db9e28c84c3b::t_d80489df363385 17
+  s_84db9e28c84c3b::t_91db146ea66b6c 125,127-128,130-156,161-169,623
+  s_84db9e28c84c3b::t_a8a2bdcdb413da 600
+  s_84db9e28c84c3b::t_061307415fc524 567-568,575-586,588,611-622
+  s_84db9e28c84c3b::t_e6c6ea2bfc2fc3 561,566,569-574,589,592-595,598-599,601-604
+  s_84db9e28c84c3b::t_e211a2424422f3 624
+src/__tests__/svg.d.ts
+  s_84db9e28c84c3b::t_7ebdce04db208a 1-4
+src/core/services/TextFormatter/StyleManager.ts
+  s_84db9e28c84c3b::t_f1aa9d14ca258f 83-90
+src/core/__tests__/helpers/domLayouts.ts
+  s_84db9e28c84c3b::t_cf764a35d4672a 1-2,12-17,19-39,41-48,73-74
+  s_84db9e28c84c3b::t_a5e248138a4897 3-11,18,40,49-72
+src/core/services/TextFormatter/DomUtils.ts
+  s_84db9e28c84c3b::t_983e4426042a5d 240-245,258-262,278-282
+  s_84db9e28c84c3b::t_c00289db06a74a 17,21,58
+  s_84db9e28c84c3b::t_70db40569eb400 283-284
+  s_84db9e28c84c3b::t_7f902c74769f16 70,75-78,87-91,105-107,109-111,132-135,137-138,146-147,149-150,158-159,168,183-184,188,195,200,207,209-239,307,310,312-347,375-376,379-380,384-385,391,394-396,413,419,427,430-435,439-445,452,470,472-474,483-486,495-512,514
+  s_84db9e28c84c3b::t_dd275a203e7cdf 285-294,299-306,308-309
+  s_84db9e28c84c3b::t_5508e2784cb492 114-118,120,126-127,129
+  s_84db9e28c84c3b::t_021c8c06dcd11d 246-257
+  s_84db9e28c84c3b::t_9c627c7e7fed38 1-3,5-6,9-15,26-55,66,71-74,79-84,92-103,121-125,139-145,154,386-390,402,471
+  s_84db9e28c84c3b::t_6bc4653f99434c 348-373
+  s_84db9e28c84c3b::t_9fec08cb05c1b4 263-277
+  s_84db9e28c84c3b::t_b752da2fdf18ea 25
+  s_84db9e28c84c3b::t_5dc84a65fa11fd 104,108,208
+  s_84db9e28c84c3b::t_ee5b8d675c1db3 295-298
+  s_84db9e28c84c3b::t_b6bdb2e26f702b 421-426
+  s_84db9e28c84c3b::t_02993b793e8480 160-167,169-182,185-187,189-194,196-199,201-206
+  s_84db9e28c84c3b::t_da2d44badddabb 16
+  s_84db9e28c84c3b::t_01fa4281f7c042 311
+src/core/__tests__/TextFormatter.test.ts
+  s_84db9e28c84c3b::t_e697d89d6372f9 201
+  s_84db9e28c84c3b::t_1c826463a34dd4 221
+  s_84db9e28c84c3b::t_684cc5672b821d 1-26,32-82,86-104,125-137,146-153,155-157,159-162,164-166,169-200,202-220,222-307
+  s_84db9e28c84c3b::t_7e66e114cafce6 145,154,158,163,167-168
+  s_84db9e28c84c3b::t_0393bd83a5cf5f 83-85
+  s_84db9e28c84c3b::t_da00c928d6dc75 139-144
+  s_84db9e28c84c3b::t_b90b7982da9241 105-124
+  s_84db9e28c84c3b::t_f9927c97f1e3b9 27-31
+  s_84db9e28c84c3b::t_be2da658e4304c 138
+src/core/__tests__/TextFormatter.selection.matrix.test.ts
+  s_84db9e28c84c3b::t_a84d88ab900e5c 1-71
+demo/main.ts
+  s_84db9e28c84c3b::t_a98ccca9fbda56 61-69
+  s_84db9e28c84c3b::t_794b0bbae8583a 493-520
+src/core/services/TextFormatter/index.ts
+  s_84db9e28c84c3b::t_f13d65f83bbc44 45,56-57
+  s_84db9e28c84c3b::t_601df673cbaa60 62,278,280-303
+  s_84db9e28c84c3b::t_91ffee7d556ace 3-8,14,18-19,24-40,49-50,54-55,58-60,63-65,75,89-130,164,176,212-213,219,236,264,272-276
+  s_84db9e28c84c3b::t_5dc84a65fa11fd 61,279
+src/core/__tests__/helpers/EditorFixture.ts
+  s_84db9e28c84c3b::t_a1842ef022f3b1 1,3-9,11,13-15,17-21,23-36,47-52,69-70
+  s_84db9e28c84c3b::t_447cee4155594c 2,10,12,16,22,37-46,53-68
+src/core/__tests__/__snapshots__/HTMLEditor.test.ts.snap
+  s_84db9e28c84c3b::t_2219e8b38350b3 17,19
+src/core/__tests__/__snapshots__/TextFormatter.debug.test.ts.snap
+  s_84db9e28c84c3b::t_1c79e2b9080a01 1-60
+---
+{
+  "schema_version": "authorship/3.0.0",
+  "git_ai_version": "1.6.9",
+  "base_commit_sha": "3954c839dc1097d21bbc7f813252b41babbc70cc",
+  "prompts": {},
+  "sessions": {
+    "s_84db9e28c84c3b": {
+      "agent_id": {
+        "tool": "cursor",
+        "id": "8a0d977c-8d15-4a81-ba67-6674fa90e69c",
+        "model": "default"
+      },
+      "human_author": "Pavel Kuzmin <Virus191288@gmail.com>"
+    }
+  }
+}
