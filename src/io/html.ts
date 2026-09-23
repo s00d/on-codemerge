@@ -118,6 +118,21 @@ function docToHTMLInner(
   if (doc.type === 'blockquote') {
     return `<blockquote>${(doc.content ?? []).map((n) => docToHTMLInner(n, publishers)).join('')}</blockquote>`;
   }
+  if (doc.type === 'horizontalRule') {
+    return '<hr />';
+  }
+  if (doc.type === 'image') {
+    const src = escapeAttr(allowedLinkHref(asAttr(doc.attrs?.src)));
+    const alt = escapeAttr(asAttr(doc.attrs?.alt));
+    const width = Number(doc.attrs?.width ?? 0);
+    const height = Number(doc.attrs?.height ?? 0);
+    const size = (width > 0 ? ` width="${width}"` : '') + (height > 0 ? ` height="${height}"` : '');
+    const dataAttrs = Object.entries(doc.attrs ?? {})
+      .filter(([k]) => !['src', 'alt', 'width', 'height'].includes(k))
+      .map(([k, v]) => ` data-${escapeAttr(camelToKebab(k))}="${escapeAttr(asAttr(v))}"`)
+      .join('');
+    return `<img src="${src}" alt="${alt}"${size}${dataAttrs} />`;
+  }
   if (doc.type === 'text') {
     let html = escapeHTML(doc.text ?? '');
     for (const mark of doc.marks ?? []) {
@@ -266,6 +281,9 @@ function wrapMark(mark: Mark, html: string): string {
     }
     case 'misspelled': {
       return `<span class="misspelled-word" data-mark="misspelled">${html}</span>`;
+    }
+    case 'code': {
+      return `<code>${html}</code>`;
     }
     default: {
       const tag = MARK_TAG[mark.type] ?? 'span';
@@ -471,20 +489,32 @@ function parseBlock(node: ChildNode): DocNode | null {
     return { content: [{ type: 'text', text: '' }], type: 'paragraph' };
   }
   if (tag === 'blockquote') {
-    // Flatten to paragraph(s); nested structure is not modeled yet.
     const inner = [...el.childNodes]
       .map((c) => parseBlock(c))
       .filter((b): b is DocNode => b !== null);
-    if (inner.length === 1 && inner[0].type === 'paragraph') {
-      return inner[0];
-    }
-    if (inner.length > 0) {
-      return inner[0];
-    }
-    return { content: parseInline(el), type: 'paragraph' };
+    return {
+      type: 'blockquote',
+      content: inner.length > 0 ? inner : [{ type: 'paragraph', content: parseInline(el) }],
+    };
   }
   if (tag === 'hr') {
-    return { content: [{ type: 'text', text: '' }], type: 'paragraph' };
+    return { type: 'horizontalRule', attrs: {} };
+  }
+  if (tag === 'img') {
+    const attrs: Record<string, unknown> = {
+      ...parseDataAttrs(el),
+      src: allowedLinkHref(el.getAttribute('src') ?? ''),
+      alt: el.getAttribute('alt') ?? '',
+    };
+    const w = Number(el.getAttribute('width') || el.dataset.width || 0);
+    const h = Number(el.getAttribute('height') || el.dataset.height || 0);
+    if (w > 0) {
+      attrs.width = w;
+    }
+    if (h > 0) {
+      attrs.height = h;
+    }
+    return { type: 'image', attrs };
   }
   // Fallback: treat as paragraph
   return { content: parseInline(el), type: 'paragraph' };
@@ -534,6 +564,38 @@ function parseInline(el: HTMLElement): DocNode[] {
           attrs.rel = rel;
         }
         next.push({ type: 'link', attrs });
+      }
+      if (tag === 'code') {
+        next.push({ type: 'code' });
+      }
+      if (tag === 'mark' && e.hasAttribute('data-comment')) {
+        next.push({
+          type: 'comment',
+          attrs: { id: e.getAttribute('data-comment') ?? '', text: e.getAttribute('title') ?? '' },
+        });
+      }
+      if (tag === 'sup' || (tag === 'span' && e.classList.contains('ocm-footnote'))) {
+        const fid = e.getAttribute('data-footnote');
+        if (fid !== null) {
+          next.push({ type: 'footnote', attrs: { id: fid } });
+        }
+      }
+      if (tag === 'span' && e.classList.contains('ocm-mention')) {
+        next.push({
+          type: 'mention',
+          attrs: { id: e.getAttribute('data-mention-id') ?? '' },
+        });
+      }
+      if (tag === 'span' || tag === 'mark') {
+        const markType = e.getAttribute('data-mark');
+        if (markType === 'insertion' || markType === 'deletion' || markType === 'misspelled') {
+          next.push({ type: markType });
+        } else if (
+          markType &&
+          !['bold', 'italic', 'underline', 'strike', 'link'].includes(markType)
+        ) {
+          next.push({ type: markType });
+        }
       }
       if (tag === 'span') {
         const color = cssColorToHex(e.style.color);
