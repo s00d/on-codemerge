@@ -1,29 +1,17 @@
-> Archive: on-codemerge **v1** API (`HTMLEditor`, class plugins). Current docs: [Guide](/guide/editor) · [Migrate](/guide/migration-v1-to-v2).
+# Anchor Link Plugin
 
-## Anchor Link Plugin
+> Archive: on-codemerge **v1** (`HTMLEditor`, `editor.use(new …Plugin())`). Current: [Plugins](/plugins/) · [Migrate](/guide/migration-v1-to-v2).
 
-Insert anchors and links to sections (auto-generate ID from selection if empty).
 
-- The `#` button opens a popup with Anchor ID and Text
-- Inserts an `.anchor-link` at the current cursor position
+Insert in-document anchors and jump links.
 
-### Installation
+## Usage
 
-```bash
-npm install on-codemerge
-```
-
-### Basic Usage
-
-```javascript
+```js
 import { HTMLEditor, AnchorLinkPlugin } from 'on-codemerge';
 
 const editor = new HTMLEditor(container);
 editor.use(new AnchorLinkPlugin());
 ```
 
-### How It Works
-
-1) Select a phrase in the document
-2) Click `#` in the toolbar → fill Anchor ID and Text → Insert
-
+Import editor CSS once at app level (`on-codemerge/index.css`, `on-codemerge/public.css`).

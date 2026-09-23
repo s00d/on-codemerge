@@ -1,73 +1,25 @@
 # Vue 3
 
-> Archive: on-codemerge **v1** API (`HTMLEditor`, class plugins). Current docs: [Guide](/guide/editor) · [Migrate](/guide/migration-v1-to-v2).
+> Archive: v1 API. Current guides: [Integrate](/integrate/).
 
+Boot **HTMLEditor** on a host element, register plugins, import CSS.
 
-Welcome to the Vue-specific documentation for **On-Codemerge**, a versatile web editor designed for seamless integration into Vue.js projects.
+## Example
 
-## Getting Started with Vue
-
-To use On-Codemerge in a Vue.js application, install the package:
-
-```bash
-npm i --save on-codemerge
-```
-
-## Vue Integration Example
-
-Here's an example of how to integrate On-Codemerge into a Vue.js project:
-
-```vue title="MyEditorComponent.vue"
-<template>
-  <div ref="editorRef"></div>
-</template>
-
-<script setup lang="ts">
-import { onMounted, ref, watch } from 'vue';
-import { HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
-import 'on-codemerge/public.css';
+```vue
+<template><div ref="host" /></template>
+<script setup>
+import { onMounted, onBeforeUnmount, ref } from 'vue';
+import { HTMLEditor, ToolbarPlugin } from 'on-codemerge';
 import 'on-codemerge/index.css';
-import 'on-codemerge/plugins/ToolbarPlugin/style.css';
-import 'on-codemerge/plugins/AlignmentPlugin/public.css';
-import 'on-codemerge/plugins/AlignmentPlugin/style.css';
+import 'on-codemerge/public.css';
 
-interface Props {
-  value: string;
-}
-
-const props = defineProps<Props>();
-const editorRef = ref<HTMLElement | null>(null);
-const editor = ref<HTMLEditor | null>(null);
-
-onMounted(async () => {
-  if (editorRef.value) {
-    editor.value = new HTMLEditor(editorRef.value);
-
-    await editor.value.setLocale('ru');
-
-    editor.value.use(new ToolbarPlugin());
-    editor.value.use(new AlignmentPlugin());
-
-    editor.value.setHtml(props.value || 'Initial content goes here');
-
-    editor.value.subscribeToContentChange((newContent) => {
-      emit('update:value', newContent);
-    });
-  }
+const host = ref(null);
+let editor;
+onMounted(() => {
+  editor = new HTMLEditor(host.value);
+  editor.use(new ToolbarPlugin());
 });
-
-watch(() => props.value, (newValue) => {
-  if (editor.value && editor.value.getHtml() !== newValue) {
-    editor.value.setHtml(newValue);
-  }
-});
+onBeforeUnmount(() => editor?.destroy());
 </script>
-
-<style>
-  @import 'on-codemerge/public.css';
-  @import 'on-codemerge/index.css';
-  @import 'on-codemerge/plugins/ToolbarPlugin/style.css';
-  @import 'on-codemerge/plugins/AlignmentPlugin/public.css';
-  @import 'on-codemerge/plugins/AlignmentPlugin/style.css';
-</style>
 ```

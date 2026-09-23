@@ -1,22 +1,17 @@
-> Archive: on-codemerge **v1** API (`HTMLEditor`, class plugins). Current docs: [Guide](/guide/editor) · [Migrate](/guide/migration-v1-to-v2).
+# Mentions Plugin
 
-## Mentions Plugin
-
-User mentions triggered by `@`.
+> Archive: on-codemerge **v1** (`HTMLEditor`, `editor.use(new …Plugin())`). Current: [Plugins](/plugins/) · [Migrate](/guide/migration-v1-to-v2).
 
 
-### Installation
+`@mention` autocomplete.
 
-```bash
-npm install on-codemerge
-```
+## Usage
 
-### Basic Usage
-
-```javascript
+```js
 import { HTMLEditor, MentionsPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditор(container);
+const editor = new HTMLEditor(container);
 editor.use(new MentionsPlugin());
 ```
 
+Import editor CSS once at app level (`on-codemerge/index.css`, `on-codemerge/public.css`).
