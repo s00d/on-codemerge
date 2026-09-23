@@ -1,86 +1,74 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
+import { PopupController, h } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import { ExportService } from '../services/ExportService';
 import { htmlIcon, markdownIcon, textIcon, pdfIcon } from '../../../icons';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 
 export class ExportMenu {
-  private popup: PopupManager;
-  private exportService: ExportService;
-  private content: string = '';
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
+  private readonly exportService = new ExportService();
 
-  constructor(editor: HTMLEditor) {
-    this.popup = new PopupManager(editor, {
-      title: editor.t('Export'),
-      className: 'example-popup',
+  constructor(editor: EditorAPI, scope: DisposableScope) {
+    this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
+  }
+
+  private formatsView(): ViewSpec {
+    const formats: { id: string; label: string; icon: string }[] = [
+      { id: 'html', label: this.editor.t('export.htmlFile'), icon: htmlIcon },
+      {
+        id: 'markdown',
+        label: this.editor.t('export.markdownFile'),
+        icon: markdownIcon,
+      },
+      { id: 'text', label: this.editor.t('export.plainText'), icon: textIcon },
+      { id: 'pdf', label: this.editor.t('export.printPdfFile') || 'Print / PDF', icon: pdfIcon },
+    ];
+    return h(
+      'div',
+      { class: 'export-formats' },
+      ...formats.map((f) =>
+        h(
+          'button',
+          {
+            class: 'export-format-btn',
+            attrs: { type: 'button' },
+            on: {
+              click: () => {
+                this.exportService.export(this.editor, f.id);
+                this.popups.close();
+              },
+            },
+          },
+          h('span', {
+            props: { innerHTML: f.icon },
+            class: 'export-format-icon',
+          }),
+          f.label
+        )
+      )
+    );
+  }
+
+  show(): void {
+    this.popups.open({
+      title: this.editor.t('export.title'),
+      className: 'export-menu',
       closeOnClickOutside: true,
       items: [
         {
-          type: 'button',
-          id: 'submit-button',
-          value: 'html',
-          icon: htmlIcon,
-          text: editor.t(`HTML File`),
-          buttonVariant: 'primary',
-          onChange: (format) => {
-            this.exportService.export(this.content, format.toString());
-            this.popup.hide();
-          },
+          type: 'view',
+          id: 'export-formats',
+          view: () => this.formatsView(),
         },
+      ],
+      buttons: [
         {
-          type: 'button',
-          id: 'submit-button',
-          value: 'markdown',
-          icon: markdownIcon,
-          text: editor.t(`Markdown File`),
-          buttonVariant: 'primary',
-          onChange: (format) => {
-            this.exportService.export(this.content, format.toString());
-            this.popup.hide();
-          },
-        },
-        {
-          type: 'button',
-          id: 'submit-button',
-          value: 'text',
-          icon: textIcon,
-          text: editor.t(`Plain Text`),
-          buttonVariant: 'primary',
-          onChange: (format) => {
-            this.exportService.export(this.content, format.toString());
-            this.popup.hide();
-          },
-        },
-        {
-          type: 'button',
-          id: 'submit-button',
-          value: 'pdf',
-          icon: pdfIcon,
-          text: editor.t(`Print / PDF File`),
-          buttonVariant: 'primary',
-          onChange: (format) => {
-            this.exportService.export(this.content, format.toString());
-            this.popup.hide();
-          },
+          label: this.editor.t('common.cancel'),
+          variant: 'secondary',
+          onClick: () => {},
         },
       ],
     });
-    this.exportService = new ExportService();
-  }
-
-  public show(content: string): void {
-    this.content = content;
-    this.popup.show();
-  }
-
-  public destroy(): void {
-    // Уничтожаем PopupManager
-    if (this.popup) {
-      this.popup.destroy(); // Предполагается, что у PopupManager есть метод destroy
-    }
-
-    // Очищаем ссылки
-    this.popup = null!;
-    this.exportService = null!;
-    this.content = '';
   }
 }

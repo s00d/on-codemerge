@@ -1,103 +1,103 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
+import { definePlugin, setBlockAttr, core, findAncestorPath } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
 import { alignLeftIcon, alignCenterIcon, alignRightIcon, alignJustifyIcon } from '../../icons';
-export class AlignmentPlugin implements Plugin {
-  name = 'alignment';
-  hotkeys = [
-    { keys: 'Ctrl+B', description: 'Bold text', command: 'bold', icon: '𝐁' },
-    { keys: 'Ctrl+I', description: 'Italic text', command: 'italic', icon: '𝐼' },
-    { keys: 'Ctrl+U', description: 'Underline text', command: 'underline', icon: 'U̲' },
-    {
-      keys: 'Ctrl+Shift+D',
-      description: 'Strikethrough text',
-      command: 'strikethrough',
-      icon: 'S̶',
+
+function selectedAlign(editor: EditorAPI): string {
+  const state = editor.getState();
+  const path = state.selection.anchor.path;
+  if (path.length === 0) {
+    return '';
+  }
+  try {
+    const cell = findAncestorPath(state.doc, path, 'tableCell');
+    if (cell) {
+      return String(core.getNodeAt(state.doc, cell).attrs?.align ?? '');
+    }
+    const listItem = findAncestorPath(state.doc, path, 'listItem');
+    if (listItem) {
+      return String(core.getNodeAt(state.doc, listItem).attrs?.align ?? '');
+    }
+    const root = core.getNodeAt(state.doc, [path[0] ?? 0]);
+    return String(root.attrs?.align ?? '');
+  } catch {
+    return '';
+  }
+}
+
+export function AlignmentPlugin() {
+  return definePlugin({
+    name: 'alignment',
+    commands: {
+      alignLeft: setBlockAttr('align', 'left'),
+      alignCenter: setBlockAttr('align', 'center'),
+      alignRight: setBlockAttr('align', 'right'),
+      alignJustify: setBlockAttr('align', 'justify'),
     },
-  ];
-  private editor: HTMLEditor | null = null;
-  private toolbarButtons: Map<string, HTMLElement> = new Map();
-
-  constructor() {}
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.addToolbarButtons();
-
-    // Подписываемся на события выравнивания
-    this.editor.on('align_left', () => {
-      this.editor?.getTextFormatter()?.toggleStyle('alignLeft');
-    });
-    this.editor.on('align_center', () => {
-      this.editor?.getTextFormatter()?.toggleStyle('alignCenter');
-    });
-    this.editor.on('align_right', () => {
-      this.editor?.getTextFormatter()?.toggleStyle('alignRight');
-    });
-    this.editor.on('align_justify', () => {
-      this.editor?.getTextFormatter()?.toggleStyle('alignJustify');
-    });
-
-    this.editor.on('selectionchange', () => {
-      this.handleSelectionChange();
-    });
-  }
-
-  private addToolbarButtons(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    // Массив кнопок для выравнивания
-    const buttons = [
-      { icon: alignLeftIcon, title: 'Align Left', command: 'alignLeft' },
-      { icon: alignCenterIcon, title: 'Align Center', command: 'alignCenter' },
-      { icon: alignRightIcon, title: 'Align Right', command: 'alignRight' },
-      { icon: alignJustifyIcon, title: 'Align Justify', command: 'alignJustify' },
-    ];
-
-    // Создаем кнопки и добавляем их в тулбар
-    buttons.forEach(({ icon, title, command }) => {
-      const button = createToolbarButton({
-        icon,
-        title: this.editor?.t(title) || title,
-        onClick: () => {
-          this.editor?.getTextFormatter()?.toggleStyle(command);
-          this.handleSelectionChange();
+    hotkeys: [
+      { keys: 'Mod-Shift-l', command: 'alignLeft', description: 'Align left' },
+      { keys: 'Mod-Shift-e', command: 'alignCenter', description: 'Align center' },
+      { keys: 'Mod-Shift-r', command: 'alignRight', description: 'Align right' },
+      { keys: 'Mod-Shift-j', command: 'alignJustify', description: 'Justify' },
+    ],
+    setup(ctx) {
+      const editor = ctx.editor;
+      const buttons = [
+        {
+          id: 'align-left',
+          icon: alignLeftIcon,
+          title: 'Align Left',
+          cmd: 'alignLeft',
+          value: 'left',
+          order: 30,
         },
-      });
-
-      toolbar.appendChild(button);
-      this.toolbarButtons.set(command, button);
-    });
-  }
-
-  private handleSelectionChange(): void {
-    // Проверяем, какие стили применены к выделенному тексту
-    this.toolbarButtons.forEach((button, style) => {
-      const isActive = this.editor?.getTextFormatter()?.hasClass(style);
-      if (isActive) {
-        button.classList.add('active'); // Добавляем класс для активной кнопки
-      } else {
-        button.classList.remove('active'); // Убираем класс, если стиль не применен
+        {
+          id: 'align-center',
+          icon: alignCenterIcon,
+          title: 'Align Center',
+          cmd: 'alignCenter',
+          value: 'center',
+          order: 31,
+        },
+        {
+          id: 'align-right',
+          icon: alignRightIcon,
+          title: 'Align Right',
+          cmd: 'alignRight',
+          value: 'right',
+          order: 32,
+        },
+        {
+          id: 'align-justify',
+          icon: alignJustifyIcon,
+          title: 'Justify',
+          cmd: 'alignJustify',
+          value: 'justify',
+          order: 33,
+        },
+      ];
+      for (const b of buttons) {
+        ctx.toolbar.add({
+          id: b.id,
+          icon: b.icon,
+          title: editor.t(b.title) || b.title,
+          group: 'format',
+          order: b.order,
+          active: () => selectedAlign(editor) === b.value,
+          onClick: () => editor.command(b.cmd),
+        });
       }
-    });
-  }
-
-  public destroy(): void {
-    this.toolbarButtons.forEach((button) => button.remove());
-    this.toolbarButtons.clear();
-
-    this.editor?.off('selectionchange');
-
-    // Отписываемся от событий
-    this.editor?.off('align_left');
-    this.editor?.off('align_center');
-    this.editor?.off('align_right');
-    this.editor?.off('align_justify');
-
-    this.editor = null;
-  }
+      ctx.scope.disposable(
+        editor.on('selectionChanged', () => {
+          editor.toolbar.refresh();
+        })
+      );
+      ctx.scope.disposable(
+        editor.on('docChanged', () => {
+          editor.toolbar.refresh();
+        })
+      );
+    },
+  });
 }

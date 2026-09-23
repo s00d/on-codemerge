@@ -15,51 +15,41 @@ The Video Plugin provides video embedding and management capabilities for the on
 - **Video Context Menu**: Right-click video options
 - **Video Validation**: File type and size validation
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, VideoPlugin } from 'on-codemerge';
+import { Editor, VideoPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new VideoPlugin());
+const editor = new Editor(container, {
+  plugins: [VideoPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['VideoPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Video Methods
+Factory: `VideoPlugin()`.
 
-```javascript
-// Insert video from URL
-editor.insertVideo(url, options);
+| Command       |                                 |
+| ------------- | ------------------------------- |
+| `insertVideo` | `editor.command('insertVideo')` |
 
-// Upload video file
-editor.uploadVideo(file);
+### Keyboard shortcuts
 
-// Get video info
-const videoInfo = editor.getVideoInfo(videoId);
+| Shortcut    | Command       |
+| ----------- | ------------- |
+| `Mod-Alt-v` | `insertVideo` |
 
-// Update video properties
-editor.updateVideo(videoId, properties);
-
-// Remove video
-editor.removeVideo(videoId);
-
-// Get all videos
-const videos = editor.getVideos();
-```
+> **Note:** No factory options. Command `insertVideo` — no `editor.insertVideo`/`uploadVideo`.
 
 ## Supported Video Formats
 
@@ -70,66 +60,11 @@ const videos = editor.getVideos();
 - **MOV**: Apple format
 - **WMV**: Windows format
 
-## Events
-
-```javascript
-// Listen to video events
-editor.on('video:inserted', (video) => {
-  console.log('Video inserted:', video);
-});
-
-editor.on('video:uploaded', (video) => {
-  console.log('Video uploaded:', video);
-});
-
-editor.on('video:removed', (videoId) => {
-  console.log('Video removed:', videoId);
-});
-
-editor.on('video:error', (error) => {
-  console.log('Video error:', error);
-});
-```
-
 ## Examples
 
 ### Basic Video Usage
 
-```javascript
-// Initialize video plugin
-const editor = new HTMLEditor(container);
-editor.use(new VideoPlugin());
-
-// Insert video from URL
-editor.insertVideo('https://example.com/video.mp4', {
-  width: '100%',
-  height: '300px',
-  autoplay: false,
-  controls: true
-});
-
-// Upload video file
-const fileInput = document.getElementById('video-file');
-fileInput.addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  editor.uploadVideo(file);
-});
-```
-
 ### Video Configuration
-
-```javascript
-// Configure video plugin
-const videoPlugin = new VideoPlugin({
-  maxFileSize: 100 * 1024 * 1024, // 100MB
-  allowedFormats: ['mp4', 'webm', 'ogg'],
-  uploadUrl: '/api/upload-video',
-  thumbnailGenerator: true,
-  autoResize: true
-});
-
-editor.use(videoPlugin);
-```
 
 ## Integration Examples
 
@@ -137,7 +72,7 @@ editor.use(videoPlugin);
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, VideoPlugin } from 'on-codemerge';
+import { Editor, VideoPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -146,15 +81,15 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new VideoPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(VideoPlugin());
+
       editorInstance.current.on('video:inserted', (video) => {
-        setVideos(prev => [...prev, video]);
+        setVideos((prev) => [...prev, video]);
       });
-      
+
       editorInstance.current.on('video:removed', (videoId) => {
-        setVideos(prev => prev.filter(v => v.id !== videoId));
+        setVideos((prev) => prev.filter((v) => v.id !== videoId));
       });
     }
     return () => {
@@ -181,17 +116,17 @@ function MyEditor() {
   </div>
 </template>
 <script>
-import { HTMLEditor, VideoPlugin } from 'on-codemerge';
+import { Editor, VideoPlugin } from 'on-codemerge';
 export default {
   data() { return { editor: null, videos: [] }; },
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new VideoPlugin());
-    
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [VideoPlugin()] in Editor(...) */;
+
     this.editor.on('video:inserted', video => {
       this.videos.push(video);
     });
-    
+
     this.editor.on('video:removed', videoId => {
       this.videos = this.videos.filter(v => v.id !== videoId);
     });
@@ -291,4 +226,4 @@ export default {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

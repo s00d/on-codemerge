@@ -1,112 +1,75 @@
 import type { ChartMenu } from './ChartMenu';
 import { editIcon, deleteIcon, exportIcon } from '../../../icons';
 import type { ChartType } from '../types';
-import { ContextMenu } from '../../../core/ui/ContextMenu.ts';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { downloadUrl } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
+import { pathFromEl, removeAtomAt } from '../../../utils/atomPath';
 
 export class ChartContextMenu {
-  private contextMenu: ContextMenu;
   private activeChart: HTMLElement | null = null;
-  private editor: HTMLEditor;
+  private readonly editor: EditorAPI;
 
   constructor(
-    editor: HTMLEditor,
-    private chartMenu: ChartMenu
+    editor: EditorAPI,
+    private readonly chartMenu: ChartMenu
   ) {
     this.editor = editor;
-    // Создаем контекстное меню с кнопками
-    this.contextMenu = new ContextMenu(
-      editor,
+  }
+
+  show(chart: HTMLElement, x: number, y: number): void {
+    this.activeChart = chart;
+    const shell = chart.closest<HTMLElement>('[data-ocm-atom="1"]') ?? chart;
+    const t = (k: string) => this.editor.t(k) || k;
+    this.editor.ui.menu.open(
       [
         {
-          label: editor.t('Edit'),
+          label: t('common.edit'),
           icon: editIcon,
-          action: 'edit',
-          onClick: () => this.handleEdit(),
+          onClick: () => {
+            if (!this.activeChart) {
+              return;
+            }
+            const type = this.activeChart.dataset.chartType as ChartType;
+            if (type && this.activeChart.dataset.chartData) {
+              this.chartMenu.edit(this.activeChart);
+            }
+          },
         },
         {
-          label: editor.t('Export PNG'),
+          label: t('charts.exportPng'),
           icon: exportIcon,
-          action: 'export',
-          onClick: () => this.handleExport(),
+          onClick: () => {
+            if (!this.activeChart) {
+              return;
+            }
+            const img = this.activeChart.querySelector('img.svg-chart') as HTMLImageElement | null;
+            if (img?.src) {
+              downloadUrl(img.src, 'chart.png');
+              return;
+            }
+            const canvas = this.activeChart.querySelector('canvas');
+            if (canvas) {
+              downloadUrl(canvas.toDataURL('image/png'), 'chart.png');
+            }
+          },
         },
+        { type: 'divider' },
         {
-          label: editor.t('Delete'),
+          label: t('common.delete'),
           icon: deleteIcon,
-          action: 'delete',
-          className: 'text-red-600',
-          onClick: () => this.handleDelete(),
+          variant: 'danger',
+          onClick: () => {
+            removeAtomAt(pathFromEl(shell) ?? shell, (cmd) => this.editor.run(cmd as never));
+          },
         },
       ],
-      { orientation: 'vertical' } // Ориентация меню (вертикальная)
+      x,
+      y
     );
   }
 
-  private handleEdit(): void {
-    if (!this.activeChart) return;
-
-    const type = this.activeChart.getAttribute('data-chart-type') as ChartType;
-    const dataStr = this.activeChart.getAttribute('data-chart-data');
-
-    if (type && dataStr) {
-      try {
-        this.chartMenu.edit(this.activeChart);
-      } catch (e) {
-        console.error('Failed to parse chart data:', e);
-      }
-    }
-  }
-
-  private handleDelete(): void {
-    if (this.activeChart) {
-      this.activeChart.remove();
-    }
-  }
-
-  private handleExport(): void {
-    if (!this.activeChart) return;
-    // Пробуем найти img/svg-chart или canvas внутри activeChart
-    const img = this.activeChart.querySelector('img.svg-chart') as HTMLImageElement;
-    if (img && img.src) {
-      const link = document.createElement('a');
-      link.href = img.src;
-      link.download = 'chart.png';
-      // Вставляем временную ссылку рядом с редактором, чтобы не трогать body
-      (this.editor.getInnerContainer() || document.body).appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-    } else {
-      const canvas = this.activeChart.querySelector('canvas') as HTMLCanvasElement;
-      if (canvas) {
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'chart.png';
-        (this.editor.getInnerContainer() || document.body).appendChild(link);
-        link.click();
-        link.parentNode?.removeChild(link);
-      }
-    }
-  }
-
-  public show(chart: HTMLElement, x: number, y: number): void {
-    this.activeChart = chart;
-    this.contextMenu.show(chart, x, y); // Показываем контекстное меню
-  }
-
-  public hide(): void {
-    this.contextMenu.hide(); // Скрываем контекстное меню
+  destroy(): void {
     this.activeChart = null;
-  }
-
-  public destroy(): void {
-    // Если у ContextMenu есть метод destroy, вызываем его
-    if (typeof this.contextMenu.destroy === 'function') {
-      this.contextMenu.destroy();
-    }
-
-    // Очищаем ссылки
-    this.contextMenu = null!;
-    this.activeChart = null;
-    this.chartMenu = null!;
+    this.editor.ui.menu.hide();
   }
 }

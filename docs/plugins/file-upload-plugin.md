@@ -15,96 +15,46 @@ The File Upload Plugin provides comprehensive file upload and management capabil
 - **Toolbar Integration**: Easy access via toolbar button
 - **Keyboard Shortcuts**: Quick upload commands
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, FileUploadPlugin } from 'on-codemerge';
+import { Editor, FileUploadPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new FileUploadPlugin());
+const editor = new Editor(container, {
+  plugins: [FileUploadPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['FileUploadPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Plugin Configuration
+Factory: `FileUploadPlugin(config?)` — options: `Partial<UploadConfig>`.
 
-```javascript
-interface UploadConfig {
-  endpoints?: {
-    upload?: string;    // Upload endpoint URL
-    download?: string;  // Download endpoint URL
-  };
-  maxFileSize?: number; // Maximum file size in bytes
-  allowedTypes?: string[]; // Allowed MIME types
-  useEmulation?: boolean;  // Use emulation mode
-}
+| Command      |                                |
+| ------------ | ------------------------------ |
+| `insertFile` | `editor.command('insertFile')` |
 
-const fileUploadPlugin = new FileUploadPlugin({
-  maxFileSize: 5 * 1024 * 1024, // 5MB
-  allowedTypes: ['image/*', 'application/pdf'],
-  useEmulation: false,
-  endpoints: {
-    upload: 'https://api.example.com/upload',
-    download: 'https://api.example.com/download'
-  }
-});
-```
+### Keyboard shortcuts
 
-### File Upload Methods
+| Shortcut    | Command      |
+| ----------- | ------------ |
+| `Mod-Alt-u` | `insertFile` |
 
-```javascript
-// Upload file
-const file = new File(['content'], 'document.txt', { type: 'text/plain' });
-const uploadedFile = await fileUploader.uploadFile(file);
-
-// Download file
-await fileUploader.downloadFile(fileId);
-
-// Get file information
-const fileInfo = fileUploader.getFile(fileId);
-
-// Format file size
-const formattedSize = fileUploader.formatFileSize(1024 * 1024); // "1.0 MB"
-```
-
-### File Operations
-
-```javascript
-// Insert file link in content
-fileUploadPlugin.insertFileLink({
-  id: 'file-123',
-  name: 'document.pdf',
-  size: 1024 * 1024
-});
-
-// Handle file link clicks
-fileUploadPlugin.onFileLinkClick((fileId) => {
-  console.log('File link clicked:', fileId);
-});
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+U` | Upload file | `file-upload` |
+> **Note:** Command `insertFile` (not `insertFileLink`).
 
 ## Supported File Types
 
 ### Default Configuration
+
 - **Max File Size**: 10MB
 - **Allowed Types**: All file types (`*/*`)
 - **Mode**: Emulation (local storage)
@@ -113,45 +63,16 @@ fileUploadPlugin.onFileLinkClick((fileId) => {
 
 ```javascript
 // Images
-allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp']
+allowedTypes: ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
 
 // Documents
-allowedTypes: ['application/pdf', 'text/plain', 'application/msword']
+allowedTypes: ['application/pdf', 'text/plain', 'application/msword'];
 
 // Archives
-allowedTypes: ['application/zip', 'application/x-rar-compressed']
+allowedTypes: ['application/zip', 'application/x-rar-compressed'];
 
 // Media
-allowedTypes: ['video/mp4', 'audio/mpeg', 'audio/wav']
-```
-
-## Events
-
-```javascript
-// Listen to file upload events
-editor.on('file:upload-started', (file) => {
-  console.log('Upload started:', file.name);
-});
-
-editor.on('file:upload-progress', (progress) => {
-  console.log('Upload progress:', progress);
-});
-
-editor.on('file:upload-completed', (file) => {
-  console.log('Upload completed:', file);
-});
-
-editor.on('file:upload-error', (error) => {
-  console.error('Upload error:', error);
-});
-
-editor.on('file:download-started', (fileId) => {
-  console.log('Download started:', fileId);
-});
-
-editor.on('file:download-completed', (fileId) => {
-  console.log('Download completed:', fileId);
-});
+allowedTypes: ['video/mp4', 'audio/mpeg', 'audio/wav'];
 ```
 
 ## Examples
@@ -160,7 +81,7 @@ editor.on('file:download-completed', (fileId) => {
 
 ```javascript
 // Simple file upload
-const fileUploadPlugin = new FileUploadPlugin();
+const fileUploadPlugin = FileUploadPlugin();
 editor.use(fileUploadPlugin);
 
 // Upload file programmatically
@@ -181,21 +102,6 @@ fileInput.onchange = async (e) => {
 
 ### Server Integration
 
-```javascript
-// Configure with server endpoints
-const fileUploadPlugin = new FileUploadPlugin({
-  endpoints: {
-    upload: 'https://api.example.com/upload',
-    download: 'https://api.example.com/download'
-  },
-  maxFileSize: 50 * 1024 * 1024, // 50MB
-  allowedTypes: ['image/*', 'application/pdf'],
-  useEmulation: false
-});
-
-editor.use(fileUploadPlugin);
-```
-
 ### Custom File Validation
 
 ```javascript
@@ -203,7 +109,7 @@ editor.use(fileUploadPlugin);
 const customFileUploader = new FileUploader({
   maxFileSize: 2 * 1024 * 1024, // 2MB
   allowedTypes: ['image/jpeg', 'image/png'],
-  useEmulation: true
+  useEmulation: true,
 });
 
 // Add custom validation
@@ -219,105 +125,7 @@ customFileUploader.validateFile = (file) => {
 
 ### React Integration
 
-```jsx
-import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, FileUploadPlugin } from 'on-codemerge';
-
-function MyEditor() {
-  const editorRef = useRef(null);
-  const editorInstance = useRef(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  useEffect(() => {
-    if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      
-      const fileUploadPlugin = new FileUploadPlugin({
-        maxFileSize: 5 * 1024 * 1024,
-        allowedTypes: ['image/*', 'application/pdf']
-      });
-      
-      editorInstance.current.use(fileUploadPlugin);
-      
-      // Track upload progress
-      editorInstance.current.on('file:upload-progress', (progress) => {
-        setUploadProgress(progress);
-      });
-    }
-
-    return () => {
-      if (editorInstance.current) {
-        editorInstance.current.destroy();
-      }
-    };
-  }, []);
-
-  return (
-    <div>
-      {uploadProgress > 0 && uploadProgress < 100 && (
-        <div className="upload-progress">
-          Uploading: {uploadProgress}%
-        </div>
-      )}
-      <div ref={editorRef} className="editor-container" />
-    </div>
-  );
-}
-```
-
 ### Vue Integration
-
-```vue
-<template>
-  <div>
-    <div class="upload-status" v-if="uploadStatus">
-      {{ uploadStatus }}
-    </div>
-    <div ref="editorContainer" class="editor-container"></div>
-  </div>
-</template>
-
-<script>
-import { HTMLEditor, FileUploadPlugin } from 'on-codemerge';
-
-export default {
-  name: 'MyEditor',
-  data() {
-    return {
-      editor: null,
-      uploadStatus: ''
-    };
-  },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    
-    const fileUploadPlugin = new FileUploadPlugin({
-      maxFileSize: 10 * 1024 * 1024,
-      allowedTypes: ['*/*']
-    });
-    
-    this.editor.use(fileUploadPlugin);
-    
-    // Track upload status
-    this.editor.on('file:upload-started', () => {
-      this.uploadStatus = 'Uploading...';
-    });
-    
-    this.editor.on('file:upload-completed', () => {
-      this.uploadStatus = 'Upload completed!';
-      setTimeout(() => {
-        this.uploadStatus = '';
-      }, 3000);
-    });
-  },
-  beforeDestroy() {
-    if (this.editor) {
-      this.editor.destroy();
-    }
-  }
-};
-</script>
-```
 
 ## Styling
 
@@ -439,11 +247,11 @@ export default {
     max-width: 90vw;
     margin: 0 16px;
   }
-  
+
   .file-upload-area {
     padding: 30px 15px;
   }
-  
+
   .file-link {
     padding: 12px 16px;
     font-size: 16px;
@@ -475,9 +283,7 @@ interface UploadedFile {
 ### File Link HTML
 
 ```html
-<a class="file-link" data-file-id="file-123">
-  📎 document.pdf (1.2 MB)
-</a>
+<a class="file-link" data-file-id="file-123"> 📎 document.pdf (1.2 MB) </a>
 ```
 
 ## Troubleshooting
@@ -558,4 +364,4 @@ console.log('File type allowed:', isValid);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

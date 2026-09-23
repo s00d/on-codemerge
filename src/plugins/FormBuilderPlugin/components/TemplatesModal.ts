@@ -1,169 +1,156 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
-import type { HTMLEditor } from '../../../app';
+import { PopupController, foreign, h, mount } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { FormTemplate } from '../types';
 import { TemplateManager } from '../services/TemplateManager';
-import {
-  createContainer,
-  createButton,
-  createLabel,
-  createInputField,
-} from '../../../utils/helpers';
 
+/** Form templates picker — ViewSpec grid; search/filter keep focus via mount.update. */
 export class TemplatesModal {
-  private editor: HTMLEditor;
-  private popup: PopupManager;
-  private templateManager: TemplateManager;
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
+  private readonly templateManager: TemplateManager;
   private callback: ((template: FormTemplate) => void) | null = null;
-  private searchInput: HTMLInputElement | null = null;
-  private templatesContainer: HTMLElement | null = null;
-  private selectedCategory: string = 'all';
+  private search = '';
+  private selectedCategory = 'all';
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
     this.templateManager = new TemplateManager(editor);
     this.templateManager.initialize();
+  }
 
-    this.popup = new PopupManager(editor, {
-      title: editor.t('Form Templates'),
-      className: 'templates-modal',
-      closeOnClickOutside: true,
-      buttons: [
-        {
-          label: editor.t('Cancel'),
-          variant: 'secondary',
-          onClick: () => this.popup.hide(),
-        },
-      ],
-      items: [
-        {
-          type: 'custom',
-          id: 'templates-content',
-          content: () => this.createContent(),
-        },
-      ],
+  private filtered(): FormTemplate[] {
+    return this.templateManager.getTemplates().filter((template) => {
+      const matchesCategory =
+        this.selectedCategory === 'all' || template.category === this.selectedCategory;
+      const q = this.search.toLowerCase();
+      const matchesSearch =
+        !q ||
+        template.name.toLowerCase().includes(q) ||
+        template.description.toLowerCase().includes(q);
+      return matchesCategory && matchesSearch;
     });
   }
 
-  private createContent(): HTMLElement {
-    const container = createContainer('templates-modal-content');
+  private gridView(): ViewSpec {
+    const templates = this.filtered();
+    const categoryNames = this.templateManager.getCategoryNames();
 
-    // Поиск
-    const searchContainer = createContainer('search-container');
-    const searchLabel = createLabel('Search templates:');
-    this.searchInput = createInputField('text', 'Search templates...', '', (_value) => {
-      this.renderTemplates();
-    });
-    searchContainer.appendChild(searchLabel);
-    searchContainer.appendChild(this.searchInput);
-    container.appendChild(searchContainer);
+    if (templates.length === 0) {
+      return h('div', { class: 'no-templates' }, this.editor.t('templates.noTemplatesFound'));
+    }
 
-    // Фильтр по категориям
-    const filterContainer = createContainer('filter-container');
-    const filterLabel = createLabel('Category:');
-    const categorySelect = createInputField('select', '', 'all', (value) => {
-      this.selectedCategory = value;
-      this.renderTemplates();
-    });
+    return h(
+      'div',
+      { class: 'templates-grid' },
+      ...templates.map((template) =>
+        h('div', { class: 'template-card' }, [
+          h('div', { class: 'template-card-header' }, [
+            h('div', { class: 'template-card-title' }, template.name),
+            h(
+              'div',
+              { class: 'template-card-category' },
+              categoryNames[template.category] ?? template.category
+            ),
+          ]),
+          h('div', { class: 'template-card-description' }, template.description),
+          h('div', { class: 'template-card-fields' }, `${template.config.fields.length} fields`),
+          h(
+            'button',
+            {
+              class: 'ocm-popup__btn ocm-popup__btn--primary',
+              attrs: { type: 'button' },
+              on: {
+                click: () => {
+                  this.selectTemplate(template);
+                },
+              },
+            },
+            this.editor.t('templates.useTemplate')
+          ),
+        ])
+      )
+    );
+  }
 
+  private bodyView(): ViewSpec {
     const categories = this.templateManager.getCategories();
     const categoryNames = this.templateManager.getCategoryNames();
 
-    categorySelect.innerHTML = '<option value="all">All Categories</option>';
-    categories.forEach((category) => {
-      const option = document.createElement('option');
-      option.value = category;
-      option.textContent = categoryNames[category];
-      categorySelect.appendChild(option);
+    return foreign((host, scope) => {
+      host.className = 'templates-modal-content';
+      let grid: MountHandle | null = null;
+      const refreshGrid = () => grid?.update(this.gridView());
+
+      const shell = mount(
+        host,
+        h('div', { class: 'templates-shell' }, [
+          h('div', { class: 'search-container' }, [
+            h('label', null, 'Search templates:'),
+            h('input', {
+              class: 'w-full p-2 border rounded',
+              attrs: { type: 'text', placeholder: 'Search templates...' },
+              props: { value: this.search },
+              on: {
+                input: (e) => {
+                  this.search = (e.target as HTMLInputElement).value;
+                  refreshGrid();
+                },
+              },
+            }),
+          ]),
+          h('div', { class: 'filter-container' }, [
+            h('label', null, 'Category:'),
+            h(
+              'select',
+              {
+                class: 'w-full p-2 border rounded',
+                props: { value: this.selectedCategory },
+                on: {
+                  change: (e) => {
+                    this.selectedCategory = (e.target as HTMLSelectElement).value;
+                    refreshGrid();
+                  },
+                },
+              },
+              h('option', { attrs: { value: 'all' } }, 'All Categories'),
+              ...categories.map((category) =>
+                h('option', { attrs: { value: category } }, categoryNames[category] ?? category)
+              )
+            ),
+          ]),
+          foreign((gridHost, gScope) => {
+            grid = mount(gridHost, this.gridView());
+            gScope.own(grid);
+          }),
+        ])
+      );
+      scope.own(shell);
     });
-
-    filterContainer.appendChild(filterLabel);
-    filterContainer.appendChild(categorySelect);
-    container.appendChild(filterContainer);
-
-    // Контейнер для шаблонов
-    this.templatesContainer = createContainer('templates-grid');
-    container.appendChild(this.templatesContainer);
-
-    this.renderTemplates();
-
-    return container;
-  }
-
-  private renderTemplates(): void {
-    if (!this.templatesContainer) return;
-
-    this.templatesContainer.innerHTML = '';
-
-    const templates = this.templateManager.getTemplates();
-    const filteredTemplates = templates.filter((template) => {
-      const matchesCategory =
-        this.selectedCategory === 'all' || template.category === this.selectedCategory;
-      const matchesSearch =
-        !this.searchInput?.value ||
-        template.name.toLowerCase().includes(this.searchInput.value.toLowerCase()) ||
-        template.description.toLowerCase().includes(this.searchInput.value.toLowerCase());
-
-      return matchesCategory && matchesSearch;
-    });
-
-    if (filteredTemplates.length === 0) {
-      const noTemplates = createContainer('no-templates');
-      noTemplates.textContent = this.editor.t('No templates found');
-      this.templatesContainer.appendChild(noTemplates);
-      return;
-    }
-
-    filteredTemplates.forEach((template) => {
-      const templateCard = this.createTemplateCard(template);
-      this.templatesContainer!.appendChild(templateCard);
-    });
-  }
-
-  private createTemplateCard(template: FormTemplate): HTMLElement {
-    const card = createContainer('template-card');
-
-    const header = createContainer('template-card-header');
-    const title = createContainer('template-card-title');
-    title.textContent = template.name;
-    const category = createContainer('template-card-category');
-    category.textContent = this.templateManager.getCategoryNames()[template.category];
-    header.appendChild(title);
-    header.appendChild(category);
-
-    const description = createContainer('template-card-description');
-    description.textContent = template.description;
-
-    const fieldsInfo = createContainer('template-card-fields');
-    fieldsInfo.textContent = `${template.config.fields.length} fields`;
-
-    const useButton = createButton(
-      this.editor.t('Use Template'),
-      () => this.selectTemplate(template),
-      'primary'
-    );
-
-    card.appendChild(header);
-    card.appendChild(description);
-    card.appendChild(fieldsInfo);
-    card.appendChild(useButton);
-
-    return card;
   }
 
   private selectTemplate(template: FormTemplate): void {
     this.callback?.(template);
-    this.popup.hide();
+    this.popups.close();
   }
 
   public show(callback: (template: FormTemplate) => void): void {
     this.callback = callback;
-    this.popup.show();
-  }
-
-  public destroy(): void {
-    this.popup.destroy();
-    this.callback = null;
-    this.searchInput = null;
-    this.templatesContainer = null;
+    this.search = '';
+    this.selectedCategory = 'all';
+    this.popups.open({
+      title: this.editor.t('templates.formTemplates'),
+      className: 'templates-modal',
+      size: 'lg',
+      closeOnClickOutside: true,
+      items: [{ type: 'view', id: 'templates-content', view: () => this.bodyView() }],
+      buttons: [
+        {
+          label: this.editor.t('common.cancel'),
+          variant: 'secondary',
+          onClick: () => {},
+        },
+      ],
+    });
   }
 }

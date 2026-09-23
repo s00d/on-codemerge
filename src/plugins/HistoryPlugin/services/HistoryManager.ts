@@ -2,8 +2,8 @@ import type { HistoryState } from '../types';
 
 export class HistoryManager {
   private states: HistoryState[] = [{ content: '', timestamp: 0 }];
-  private currentIndex: number = 0;
-  private maxStates: number = 100;
+  private currentIndex = 0;
+  private readonly maxStates: number = 100;
 
   constructor() {
     this.clear();
@@ -35,7 +35,9 @@ export class HistoryManager {
   }
 
   public undo(): string | null {
-    if (this.currentIndex <= 0) return null;
+    if (this.currentIndex <= 0) {
+      return null;
+    }
 
     this.currentIndex--;
     const state = this.getCurrentState();
@@ -46,7 +48,9 @@ export class HistoryManager {
   }
 
   public redo(): string | null {
-    if (this.currentIndex >= this.states.length - 1) return null;
+    if (this.currentIndex >= this.states.length - 1) {
+      return null;
+    }
 
     this.currentIndex++;
     const state = this.getCurrentState();
@@ -57,6 +61,7 @@ export class HistoryManager {
   }
 
   public getCurrentState(): HistoryState | null {
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
     return this.states[this.currentIndex] || null;
   }
 

@@ -1,1016 +1,241 @@
-/* Стили для интерфейса построителя форм */
-.form-builder-container {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-.form-builder-container .add-field-button {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.form-builder-container .add-field-button:hover {
-  background-color: #2563eb;
-}
-
-html.dark .form-builder-container .add-field-button {
-  background-color: #2563eb;
-}
-
-html.dark .form-builder-container .add-field-button:hover {
-  background-color: #1d4ed8;
-}
-
-.form-builder-container .field-container {
-  margin-bottom: 1rem;
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: #f9fafb;
-}
-
-html.dark .form-builder-container .field-container {
-  border-color: #374151;
-  background-color: #1f2937;
-}
-
-.form-builder-container .field-type-select,
-.form-builder-container .field-label-input,
-.form-builder-container .field-regex-input {
-  width: 100%;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.form-builder-container .field-type-select:focus,
-.form-builder-container .field-label-input:focus,
-.form-builder-container .field-regex-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-html.dark .form-builder-container .field-type-select,
-html.dark .form-builder-container .field-label-input,
-html.dark .form-builder-container .field-regex-input {
-  background-color: #374151;
-  border-color: #4b5563;
-  color: #f9fafb;
-}
-
-html.dark .form-builder-container .field-type-select:focus,
-html.dark .form-builder-container .field-label-input:focus,
-html.dark .form-builder-container .field-regex-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.form-builder-container .field-required-checkbox {
-  margin-right: 0.5rem;
-}
-
-.form-builder-container .remove-field-button {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.form-builder-container .remove-field-button:hover {
-  background-color: #dc2626;
-}
-
-html.dark .form-builder-container .remove-field-button {
-  background-color: #dc2626;
-}
-
-html.dark .form-builder-container .remove-field-button:hover {
-  background-color: #b91c1c;
-}
-
-/* Стили для контейнера опций */
-.options-container {
-  margin-top: 0.5rem;
-}
-
-.options-container .option-container {
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  margin-bottom: 0.5rem;
-}
-
-.options-container .option-input {
-  flex: 1;
-  padding: 0.5rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.options-container .option-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-html.dark .options-container .option-input {
-  background-color: #374151;
-  border-color: #4b5563;
-  color: #f9fafb;
-}
-
-html.dark .options-container .option-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-.options-container .remove-option-button {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 0.25rem 0.5rem;
-  border-radius: 0.25rem;
-  cursor: pointer;
-  font-size: 0.75rem;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
-}
-
-.options-container .remove-option-button:hover {
-  background-color: #dc2626;
-}
-
-html.dark .options-container .remove-option-button {
-  background-color: #dc2626;
-}
-
-html.dark .options-container .remove-option-button:hover {
-  background-color: #b91c1c;
-}
-
-/* Основные стили построителя форм */
-.form-builder {
-  width: 100%;
-  max-width: 800px;
-  margin: 0 auto;
-}
-
-.add-option-button {
-  background-color: #3b82f6;
-  color: white;
-  border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  margin-top: 0.5rem;
-  transition: background-color 0.2s ease;
-  display: none;
-}
-
-.add-option-button:hover {
-  background-color: #2563eb;
-}
-
-html.dark .add-option-button {
-  background-color: #2563eb;
-}
-
-html.dark .add-option-button:hover {
-  background-color: #1d4ed8;
-}
-
-/* Стили для вкладок */
-.form-builder-tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 1rem;
-}
-
-html.dark .form-builder-tabs {
-  border-bottom-color: #374151;
-}
-
-.form-builder-tab {
-  padding: 0.75rem 1.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.form-builder-tab:hover {
-  color: #374151;
-}
-
-.form-builder-tab.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
-}
-
-html.dark .form-builder-tab {
-  color: #9ca3af;
-}
-
-html.dark .form-builder-tab:hover {
-  color: #d1d5db;
-}
-
-html.dark .form-builder-tab.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
-}
-
-/* Стили для панелей */
-.form-builder-panel {
-  display: none;
-}
-
-.form-builder-panel.active {
-  display: block;
-}
-
-/* Стили для кнопок действий */
-.form-builder-actions {
-  display: flex;
-  gap: 0.5rem;
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
-}
-
-html.dark .form-builder-actions {
-  border-top-color: #374151;
-}
-
-.form-builder-button {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-}
-
-.form-builder-button.primary {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.form-builder-button.primary:hover {
-  background-color: #2563eb;
-}
-
-.form-builder-button.secondary {
-  background-color: #6b7280;
-  color: white;
-}
-
-.form-builder-button.secondary:hover {
-  background-color: #4b5563;
-}
-
-.form-builder-button.danger {
-  background-color: #ef4444;
-  color: white;
-}
-
-.form-builder-button.danger:hover {
-  background-color: #dc2626;
-}
-
-html.dark .form-builder-button.secondary {
-  background-color: #4b5563;
-}
-
-html.dark .form-builder-button.secondary:hover {
-  background-color: #374151;
-}
-
-/* Стили для списка полей */
-.fields-list {
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: #ffffff;
-}
-
-html.dark .fields-list {
-  border-color: #374151;
-  background-color: #1f2937;
-}
-
-.field-item {
-  padding: 0.75rem;
-  border-bottom: 1px solid #f3f4f6;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.field-item:hover {
-  background-color: #f9fafb;
-}
-
-.field-item.selected {
-  background-color: #dbeafe;
-  border-left: 3px solid #3b82f6;
-}
-
-html.dark .field-item {
-  border-bottom-color: #374151;
-}
-
-html.dark .field-item:hover {
-  background-color: #374151;
-}
-
-html.dark .field-item.selected {
-  background-color: #1e3a8a;
-  border-left-color: #3b82f6;
-}
-
-/* Стили для редактора полей */
-.field-editor {
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: #ffffff;
-}
-
-html.dark .field-editor {
-  border-color: #374151;
-  background-color: #1f2937;
-}
-
-.field-editor-group {
-  margin-bottom: 1rem;
-}
-
-.field-editor-label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.5rem;
-}
-
-html.dark .field-editor-label {
-  color: #d1d5db;
-}
-
-.field-editor-input {
-  width: 100%;
-  padding: 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
-  font-size: 0.875rem;
-  transition: all 0.2s ease;
-}
-
-.field-editor-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-html.dark .field-editor-input {
-  background-color: #374151;
-  border-color: #4b5563;
-  color: #f9fafb;
-}
-
-html.dark .field-editor-input:focus {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-}
-
-/* Стили для предпросмотра форм */
-.form-preview-container {
-  padding: 1rem;
-  background-color: #ffffff;
-  border-radius: 0.5rem;
-  border: 1px solid #e5e7eb;
-}
-
-html.dark .form-preview-container {
-  background-color: #1f2937;
-  border-color: #374151;
-}
-
-.preview-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #374151;
-}
-
-html.dark .preview-title {
-  color: #f9fafb;
-}
-
-/* Стили для вкладок предпросмотра */
-.preview-tabs {
-  display: flex;
-  border-bottom: 1px solid #e5e7eb;
-  margin-bottom: 1rem;
-}
-
-html.dark .preview-tabs {
-  border-bottom-color: #374151;
-}
-
-.preview-tab {
-  padding: 0.75rem 1.5rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #6b7280;
-  border-bottom: 2px solid transparent;
-  transition: all 0.2s ease;
-}
-
-.preview-tab:hover {
-  color: #374151;
-}
-
-.preview-tab.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
-}
-
-html.dark .preview-tab {
-  color: #9ca3af;
-}
-
-html.dark .preview-tab:hover {
-  color: #d1d5db;
-}
-
-html.dark .preview-tab.active {
-  color: #3b82f6;
-  border-bottom-color: #3b82f6;
-}
-
-/* Стили для панелей предпросмотра */
-.preview-panel {
-  @apply mt-6 p-4 border-t border-gray-200 bg-gray-50;
-
-  html.dark & {
-    @apply border-gray-700 bg-gray-900;
+@reference "../../tailwind.css";
+
+/* Wide shell: fields | editor | preview. Default popup --lg is too narrow. */
+.ocm-popup.form-builder-modal {
+  top: 3%;
+  width: min(100% - 1.5rem, 80rem);
+  height: min(94vh, 58rem);
+  max-height: min(94vh, 58rem);
+
+  .ocm-popup__content {
+    @apply flex min-h-0 flex-1 flex-col gap-0 overflow-hidden px-3 py-2;
   }
 
-  .preview-title {
-    @apply text-lg font-semibold mb-4 text-gray-900;
-
-    html.dark & {
-      @apply text-gray-100;
-    }
+  .ocm-popup__row {
+    @apply min-h-0 flex-1 overflow-hidden;
   }
 
-  .preview-content {
-    @apply bg-white border border-gray-200 rounded-lg p-4 text-center;
-    margin: auto;
-
-    html.dark & {
-      @apply bg-gray-800 border-gray-700;
-    }
-
-    > .generated-form {
-      margin: auto;
-    }
+  .ocm-popup-view {
+    @apply flex h-full min-h-0 flex-col;
   }
 
-  .no-preview-message {
-    @apply text-center text-gray-500 text-sm;
-
-    html.dark & {
-      @apply text-gray-400;
-    }
+  .ocm-popup__footer {
+    @apply shrink-0;
   }
 }
 
-/* Стили для основного контента */
-.builder-content {
-  display: flex;
-  gap: 1rem;
-  height: 100%;
+.ocm-popup.templates-modal {
+  width: min(100% - 2rem, 56rem);
+  max-height: min(90vh, 48rem);
 }
 
-/* Стили для шаблонов */
-.templates-content {
-  padding: 1rem;
-}
-
-.templates-title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  color: #374151;
-}
-
-html.dark .templates-title {
-  color: #f9fafb;
-}
-
-.category-section {
-  margin-bottom: 1.5rem;
-}
-
-.category-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: #374151;
-}
-
-html.dark .category-title {
-  color: #d1d5db;
-}
-
-.templates-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1rem;
-}
-
-.template-card {
-  padding: 1rem;
-  border: 1px solid #e5e7eb;
-  border-radius: 0.5rem;
-  background-color: #ffffff;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.template-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-  transform: translateY(-1px);
-}
-
-html.dark .template-card {
-  border-color: #374151;
-  background-color: #1f2937;
-}
-
-html.dark .template-card:hover {
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
-}
-
-.template-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 0.5rem;
-  color: #374151;
-}
-
-html.dark .template-title {
-  color: #f9fafb;
-}
-
-.template-description {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
-}
-
-html.dark .template-description {
-  color: #9ca3af;
-}
-
-.fields-count {
-  font-size: 0.75rem;
-  color: #6b7280;
-  margin-bottom: 0.75rem;
-}
-
-html.dark .fields-count {
-  color: #9ca3af;
-}
-
-/* Стили для панелей */
-.form-settings {
-  width: 320px;
-  padding: 1rem;
-  border-right: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-html.dark .form-settings {
-  border-right-color: #374151;
-  background-color: #1f2937;
-}
-
-.settings-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #374151;
-}
-
-html.dark .settings-title {
-  color: #f9fafb;
-}
-
-.setting-group {
-  margin-bottom: 1rem;
-}
-
-/* Стили для сообщений */
-.no-form-message {
-  text-align: center;
-  color: #6b7280;
-  margin-top: 2rem;
-  font-size: 0.875rem;
-}
-
-html.dark .no-form-message {
-  color: #9ca3af;
-}
-
-/* Стили для предпросмотра */
-.preview-content {
-  height: 100%;
-  padding: 1rem;
-}
-
-/* Дополнительные стили для кнопок */
-.form-builder-button {
-  padding: 0.75rem 1.5rem;
-  border: none;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-size: 0.875rem;
-  font-weight: 500;
-  transition: all 0.2s ease;
-  text-decoration: none;
-  display: inline-block;
-}
-
-.form-builder-button.primary {
-  background-color: #3b82f6;
-  color: white;
-}
-
-.form-builder-button.primary:hover {
-  background-color: #2563eb;
-}
-
-.form-builder-button.secondary {
-  background-color: #6b7280;
-  color: white;
-}
-
-.form-builder-button.secondary:hover {
-  background-color: #4b5563;
-}
-
-.form-builder-button.danger {
-  background-color: #ef4444;
-  color: white;
-}
-
-.form-builder-button.danger:hover {
-  background-color: #dc2626;
-}
-
-html.dark .form-builder-button.secondary {
-  background-color: #4b5563;
-}
-
-html.dark .form-builder-button.secondary:hover {
-  background-color: #374151;
-}
-
-/* Стили для панелей */
-.fields-panel {
-  width: 320px;
-  padding: 1rem;
-  border-right: 1px solid #e5e7eb;
-  background-color: #f9fafb;
-}
-
-html.dark .fields-panel {
-  border-right-color: #374151;
-  background-color: #1f2937;
-}
-
-.fields-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-
-.fields-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #374151;
-}
-
-html.dark .fields-title {
-  color: #f9fafb;
-}
-
-.add-field-button {
-  width: 2rem;
-  height: 2rem;
-  padding: 0;
-  font-size: 1.125rem;
-  border-radius: 0.375rem;
-}
-
-/* Стили для панели редактирования */
-.field-editor-panel {
-  flex: 1;
-  padding: 1rem;
-  background-color: #ffffff;
-}
-
-html.dark .field-editor-panel {
-  background-color: #1f2937;
-}
-
-.editor-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #374151;
-}
-
-html.dark .editor-title {
-  color: #f9fafb;
-}
-
-.editor-content {
-  height: 100%;
-  overflow-y: auto;
-}
-
-/* Стили для элементов полей */
-.field-title {
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.25rem;
-}
-
-html.dark .field-title {
-  color: #f9fafb;
-}
-
-.field-type {
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-bottom: 0.5rem;
-}
-
-html.dark .field-type {
-  color: #9ca3af;
-}
-
-.field-actions {
-  display: flex;
-  gap: 0.25rem;
-  margin-top: 0.5rem;
-}
-
-.field-action-button {
-  width: 1.5rem;
-  height: 1.5rem;
-  padding: 0;
-  font-size: 0.75rem;
-  border-radius: 0.25rem;
-}
-
-/* Стили для сообщений */
-.no-field-message {
-  text-align: center;
-  color: #6b7280;
-  margin-top: 2rem;
-  font-size: 0.875rem;
-}
-
-html.dark .no-field-message {
-  color: #9ca3af;
-}
-
-/* Стили для заголовков */
-.fields-title,
-.settings-title,
-.editor-title {
-  font-size: 1.125rem;
-  font-weight: 600;
-  margin-bottom: 1rem;
-  color: #374151;
-}
-
-html.dark .fields-title,
-html.dark .settings-title,
-html.dark .editor-title {
-  color: #f9fafb;
-}
-
-/* Стили для модалок */
-.form-builder-modal,
-.templates-modal {
-  @apply fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white rounded-lg shadow-xl;
-  min-width: 800px;
-  max-width: 90vw;
-  max-height: 80vh;
-  overflow: hidden;
-
-  html.dark & {
-    @apply bg-gray-800 border border-gray-700;
-  }
-
-  .popup-content {
-    @apply p-6;
-    max-height: calc(80vh - 120px);
-    overflow-y: auto;
-  }
-}
-
-/* Стили для контента модалок */
 .form-builder-modal-content,
 .templates-modal-content {
-  @apply space-y-6;
+  @apply flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden;
 }
 
-/* Стили для панелей настроек */
+.form-builder-toolbar {
+  @apply flex shrink-0 flex-wrap items-end gap-2;
+}
+
 .form-settings-panel {
-  @apply p-4 border-b border-gray-200 bg-gray-50;
+  @apply min-w-0 flex-1;
 
-  html.dark & {
-    @apply border-gray-700 bg-gray-900;
-  }
-
-  .settings-title {
-    @apply text-lg font-semibold mb-4 text-gray-900;
-
-    html.dark & {
-      @apply text-gray-100;
-    }
+  .form-settings-inner {
+    @apply flex flex-wrap items-end gap-2;
   }
 
   .setting-group {
-    @apply mb-4;
+    @apply mb-0;
 
     label {
-      @apply block text-sm font-medium text-gray-700 mb-2;
+      @apply mb-0.5 block text-xs font-medium text-ocm-text-muted;
 
       html.dark & {
-        @apply text-gray-300;
+        @apply text-zinc-300;
       }
     }
 
-    input,
-    select {
-      @apply w-full p-2 border border-gray-300 rounded-md text-sm transition-colors;
+    &--method {
+      @apply w-28 shrink-0;
+    }
+
+    &--action {
+      @apply min-w-[12rem] flex-1;
+    }
+  }
+
+  .form-settings-control {
+    @apply w-full rounded-ocm-sm border border-ocm-border bg-ocm-surface px-2 py-1.5 text-sm text-ocm-text transition-colors;
+
+    &:focus {
+      @apply border-ocm-accent outline-none ring-2 ring-ocm-accent;
+    }
+
+    html.dark & {
+      @apply border-zinc-600 bg-zinc-700 text-zinc-100;
 
       &:focus {
-        @apply outline-none ring-2 ring-blue-500 border-blue-500;
-      }
-
-      html.dark & {
-        @apply bg-gray-700 border-gray-600 text-gray-100;
-
-        &:focus {
-          @apply border-blue-500;
-        }
+        @apply border-ocm-accent;
       }
     }
   }
 }
 
-/* Стили для основного контента */
-.form-builder-main {
-  @apply flex gap-6;
-  height: 500px;
+.form-builder-templates-btn {
+  @apply shrink-0;
 }
 
-/* Стили для панелей */
+#form-action-url:focus {
+  @apply border-ocm-accent outline-none ring-2 ring-ocm-accent/25;
+}
+
+.form-builder-main {
+  @apply grid min-h-0 min-w-0 flex-1 gap-2 overflow-hidden;
+  grid-template-columns: 14rem minmax(0, 1fr) minmax(18rem, 1.15fr);
+  grid-template-rows: minmax(0, 1fr);
+}
+
 .fields-panel,
-.field-editor-panel {
-  @apply bg-white border border-gray-200 rounded-lg;
+.field-editor-panel,
+.preview-panel {
+  @apply flex min-h-0 min-w-0 flex-col overflow-hidden rounded-ocm border border-ocm-border bg-ocm-surface;
 
   html.dark & {
-    @apply bg-gray-800 border-gray-700;
+    @apply border-zinc-700 bg-zinc-800;
   }
+}
+
+.fields-panel-inner,
+.field-editor-panel-inner,
+.preview-panel-inner {
+  @apply flex h-full min-h-0 flex-col;
 }
 
 .fields-panel {
-  @apply w-80 flex flex-col;
-
   .fields-header {
-    @apply flex justify-between items-center p-4 border-b border-gray-200;
+    @apply flex shrink-0 items-center justify-between border-b border-ocm-border px-3 py-2;
 
     html.dark & {
-      @apply border-gray-700;
+      @apply border-zinc-700;
     }
 
     .fields-title {
-      @apply text-lg font-semibold text-gray-900;
+      @apply text-sm font-semibold text-ocm-text;
 
       html.dark & {
-        @apply text-gray-100;
+        @apply text-zinc-100;
       }
     }
 
     .add-field-button {
-      @apply w-8 h-8 bg-blue-500 text-white border-none rounded-md cursor-pointer text-lg font-bold transition-colors;
+      @apply size-7 cursor-pointer rounded-ocm-sm border-none bg-ocm-accent text-lg font-bold leading-none text-white transition-colors;
 
       &:hover {
-        @apply bg-blue-600;
+        @apply bg-sky-700;
       }
 
       html.dark & {
-        @apply bg-blue-600;
+        @apply bg-sky-600;
 
         &:hover {
-          @apply bg-blue-700;
+          @apply bg-sky-500;
         }
       }
     }
   }
 
   .fields-list {
-    @apply flex-1 overflow-y-auto p-2 space-y-2;
+    @apply min-h-0 flex-1 space-y-2 overflow-y-auto p-2;
+    scrollbar-gutter: stable;
   }
 }
 
 .field-editor-panel {
-  @apply flex-1 flex flex-col;
-
   .editor-title {
-    @apply text-lg font-semibold p-4 border-b border-gray-200 text-gray-900;
+    @apply shrink-0 border-b border-ocm-border px-3 py-2 text-sm font-semibold text-ocm-text;
 
     html.dark & {
-      @apply border-gray-700 text-gray-100;
+      @apply border-zinc-700 text-zinc-100;
     }
   }
 
   .field-editor-content {
-    @apply flex-1 overflow-y-auto;
+    @apply min-h-0 flex-1 overflow-x-hidden overflow-y-auto p-3;
+    scrollbar-gutter: stable;
   }
 }
 
-/* Стили для элементов полей */
-.field-item {
-  @apply p-3 border border-gray-200 rounded-md cursor-pointer transition-all hover:bg-gray-50;
+.preview-panel {
+  @apply bg-ocm-surface-muted;
 
   html.dark & {
-    @apply border-gray-700 hover:bg-gray-700;
+    @apply bg-zinc-900;
+  }
+
+  .preview-title {
+    @apply shrink-0 border-b border-ocm-border px-3 py-2 text-sm font-semibold text-ocm-text;
+
+    html.dark & {
+      @apply border-zinc-700 text-zinc-100;
+    }
+  }
+
+  .preview-content {
+    @apply min-h-0 flex-1 overflow-y-auto p-3;
+    scrollbar-gutter: stable;
+
+    > .generated-form {
+      @apply mx-auto my-0 max-w-md rounded-ocm border border-ocm-border bg-ocm-surface p-4 text-left;
+      border-left: 3px solid var(--color-ocm-accent, #0284c7);
+
+      html.dark & {
+        @apply border-zinc-700 bg-zinc-800;
+      }
+    }
+  }
+
+  .no-preview-message {
+    @apply py-8 text-center text-sm text-ocm-text-muted;
+
+    html.dark & {
+      @apply text-zinc-400;
+    }
+  }
+}
+
+.field-item {
+  @apply cursor-grab rounded-ocm-sm border border-ocm-border p-3 transition-all hover:bg-ocm-surface-muted;
+
+  html.dark & {
+    @apply border-zinc-700 hover:bg-zinc-700;
+  }
+
+  &:active {
+    @apply cursor-grabbing;
   }
 
   &.selected {
-    @apply bg-blue-50 border-blue-300;
+    @apply border-ocm-accent bg-ocm-accent-soft;
 
     html.dark & {
-      @apply bg-blue-900 border-blue-600;
+      @apply border-sky-600 bg-sky-950;
     }
   }
 
   .field-title {
-    @apply font-medium text-gray-900 mb-1;
+    @apply mb-1 font-medium text-ocm-text;
 
     html.dark & {
-      @apply text-gray-100;
+      @apply text-zinc-100;
     }
   }
 
   .field-type {
-    @apply text-sm text-gray-500 mb-2;
+    @apply mb-2 text-sm text-ocm-text-muted;
 
     html.dark & {
-      @apply text-gray-400;
+      @apply text-zinc-400;
     }
   }
 
@@ -1018,211 +243,149 @@ html.dark .editor-title {
     @apply flex gap-1;
 
     .field-action-button {
-      @apply w-6 h-6 p-0 text-xs border border-gray-300 rounded transition-colors;
+      @apply size-6 rounded-ocm-sm border border-ocm-border p-0 text-xs transition-colors;
 
       &:hover:not(:disabled) {
-        @apply bg-gray-100;
+        @apply bg-ocm-surface-muted;
       }
 
       &:disabled {
-        @apply opacity-50 cursor-not-allowed;
+        @apply cursor-not-allowed opacity-50;
       }
 
       html.dark & {
-        @apply border-gray-600;
+        @apply border-zinc-600;
 
         &:hover:not(:disabled) {
-          @apply bg-gray-700;
+          @apply bg-zinc-600;
         }
       }
     }
   }
 }
 
-/* Стили для сообщений */
 .no-fields,
-.no-field-message {
-  @apply text-center text-gray-500 mt-8 text-sm;
+.no-field-message,
+.no-templates {
+  @apply mt-8 text-center text-sm text-ocm-text-muted;
 
   html.dark & {
-    @apply text-gray-400;
+    @apply text-zinc-400;
   }
 }
 
-/* Стили для шаблонов */
 .templates-grid {
-  @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4;
+  @apply grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3;
 }
 
 .template-card {
-  @apply p-4 border border-gray-200 rounded-lg bg-white cursor-pointer transition-all hover:shadow-md;
+  @apply cursor-pointer rounded-ocm border border-ocm-border bg-ocm-surface p-4 transition-all hover:shadow-md;
 
   html.dark & {
-    @apply border-gray-700 bg-gray-800 hover:shadow-lg;
+    @apply border-zinc-700 bg-zinc-800 hover:shadow-lg;
   }
 
   &:hover {
-    @apply transform -translate-y-1;
+    @apply -translate-y-0.5;
   }
 
   .template-card-header {
-    @apply flex justify-between items-start mb-3;
+    @apply mb-3 flex items-start justify-between;
 
     .template-card-title {
-      @apply text-lg font-semibold text-gray-900;
+      @apply text-lg font-semibold text-ocm-text;
 
       html.dark & {
-        @apply text-gray-100;
+        @apply text-zinc-100;
       }
     }
 
     .template-card-category {
-      @apply text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded-full;
+      @apply rounded-full bg-ocm-accent-soft px-2 py-1 text-xs text-sky-800;
 
       html.dark & {
-        @apply bg-blue-900 text-blue-200;
+        @apply bg-sky-950 text-sky-200;
       }
     }
   }
 
   .template-card-description {
-    @apply text-sm text-gray-600 mb-3;
+    @apply mb-3 text-sm text-ocm-text-muted;
 
     html.dark & {
-      @apply text-gray-400;
+      @apply text-zinc-400;
     }
   }
 
   .template-card-fields {
-    @apply text-xs text-gray-500 mb-3;
+    @apply mb-3 text-xs text-ocm-text-muted;
 
     html.dark & {
-      @apply text-gray-400;
+      @apply text-zinc-400;
     }
   }
 }
 
-/* Стили для поиска и фильтров */
 .search-container,
 .filter-container {
   @apply mb-4;
 
   label {
-    @apply block text-sm font-medium text-gray-700 mb-2;
+    @apply mb-2 block text-sm font-medium text-ocm-text-muted;
 
     html.dark & {
-      @apply text-gray-300;
+      @apply text-zinc-300;
     }
   }
 
   input,
   select {
-    @apply w-full p-2 border border-gray-300 rounded-md text-sm transition-colors;
+    @apply w-full rounded-ocm-sm border border-ocm-border bg-ocm-surface p-2 text-sm text-ocm-text transition-colors;
 
     &:focus {
-      @apply outline-none ring-2 ring-blue-500 border-blue-500;
+      @apply border-ocm-accent outline-none ring-2 ring-ocm-accent;
     }
 
     html.dark & {
-      @apply bg-gray-700 border-gray-600 text-gray-100;
+      @apply border-zinc-600 bg-zinc-700 text-zinc-100;
 
       &:focus {
-        @apply border-blue-500;
+        @apply border-ocm-accent;
       }
     }
   }
 }
 
-/* Стили для предпросмотра */
-.form-preview-container {
-  @apply bg-white border border-gray-200 rounded-lg shadow-lg;
+.field-editor-container {
+  @apply mb-0 border-0 bg-transparent p-0 shadow-none;
 
-  html.dark & {
-    @apply bg-gray-800 border-gray-700;
+  .form-checkbox {
+    @apply size-4 shrink-0 cursor-pointer rounded border border-ocm-border accent-[var(--color-ocm-accent,#0284c7)];
   }
 
-  .preview-title {
-    @apply text-lg font-semibold p-4 border-b border-gray-200 text-gray-900;
-
-    html.dark & {
-      @apply border-gray-700 text-gray-100;
-    }
-  }
-
-  .preview-content {
-    @apply p-4;
+  .checkboxes-group {
+    @apply flex flex-wrap items-center gap-x-4 gap-y-2;
   }
 }
 
-/* Стили для кнопок */
-.form-builder-button {
-  @apply px-4 py-2 border-none rounded-md cursor-pointer font-medium transition-colors text-sm;
-
-  &.primary {
-    @apply bg-blue-500 text-white;
-
-    &:hover {
-      @apply bg-blue-600;
-    }
-
-    html.dark & {
-      @apply bg-blue-600;
-
-      &:hover {
-        @apply bg-blue-700;
-      }
-    }
-  }
-
-  &.secondary {
-    @apply bg-gray-500 text-white;
-
-    &:hover {
-      @apply bg-gray-600;
-    }
-
-    html.dark & {
-      @apply bg-gray-600;
-
-      &:hover {
-        @apply bg-gray-700;
-      }
-    }
-  }
-
-  &.danger {
-    @apply bg-red-500 text-white;
-
-    &:hover {
-      @apply bg-red-600;
-    }
-
-    html.dark & {
-      @apply bg-red-600;
-
-      &:hover {
-        @apply bg-red-700;
-      }
-    }
-  }
-}
-
-/* Responsive стили */
-@media (max-width: 1024px) {
-  .form-builder-modal,
-  .templates-modal {
-    min-width: 90vw;
-    max-width: 95vw;
+/* Tablet: fields | editor on top, preview full-width below. */
+@media (max-width: 1100px) {
+  .ocm-popup.form-builder-modal {
+    width: min(100% - 1rem, 96vw);
+    height: min(94vh, 54rem);
   }
 
   .form-builder-main {
-    @apply flex-col;
-    height: auto;
+    grid-template-columns: 13rem minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(14rem, 1fr);
   }
 
-  .fields-panel {
-    @apply w-full;
-    height: 300px;
+  .preview-panel {
+    grid-column: 1 / -1;
+
+    .preview-content > .generated-form {
+      @apply max-w-2xl;
+    }
   }
 
   .templates-grid {
@@ -1230,22 +393,100 @@ html.dark .editor-title {
   }
 }
 
-@media (max-width: 768px) {
-  .form-builder-modal,
-  .templates-modal {
-    @apply w-full h-full max-w-none max-h-none rounded-none;
+/* Phone: stacked panes inside a scrolling shell; modal goes fullscreen. */
+@media (max-width: 720px) {
+  .ocm-popup.form-builder-modal,
+  .ocm-popup.templates-modal {
+    @apply top-0 left-0 h-full max-h-none w-full max-w-none rounded-none;
     transform: none;
-    top: 0;
-    left: 0;
+  }
+
+  .form-builder-modal-content {
+    @apply gap-2 overflow-y-auto;
+  }
+
+  .form-builder-main {
+    @apply h-auto overflow-visible;
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+
+  .fields-panel {
+    min-height: 12rem;
+    max-height: 16rem;
+  }
+
+  .field-editor-panel {
+    min-height: 20rem;
+  }
+
+  .preview-panel {
+    min-height: 16rem;
   }
 
   .templates-grid {
     @apply grid-cols-1;
   }
+}
 
-  .form-preview-container {
-    @apply w-full max-w-none;
-    left: 0;
-    transform: none;
+/* Atom skin inlined for VitePress HMR — keep in sync with styles/atoms/form.scss */
+.generated-form {
+  @apply my-3 flex w-full max-w-md flex-col gap-2.5 rounded-xl border border-ocm-border bg-ocm-surface p-3 font-sans;
+  border-left: 3px solid var(--color-ocm-accent, #0284c7);
+
+  .form-field {
+    @apply flex flex-col gap-1;
+
+    label {
+      @apply text-[11px] font-medium text-ocm-text-muted;
+    }
+
+    input,
+    textarea,
+    select {
+      @apply w-full rounded-lg border border-ocm-border bg-ocm-input px-2.5 py-1.5 text-sm text-ocm-text transition-[border-color,box-shadow] duration-100;
+
+      &:focus {
+        @apply border-ocm-accent outline-none ring-2 ring-ocm-accent/20;
+      }
+
+      &::placeholder {
+        @apply text-ocm-text-muted/70;
+      }
+    }
+
+    textarea {
+      @apply min-h-[4.5rem] resize-y;
+    }
+  }
+
+  .form-field.required-field > label::after {
+    content: ' *';
+    @apply text-ocm-danger;
+  }
+
+  .submit-button {
+    @apply mt-0.5 cursor-pointer rounded-lg border-0 bg-ocm-accent px-3 py-1.5 text-sm font-semibold text-white transition-opacity duration-100;
+
+    &:hover {
+      @apply opacity-90;
+    }
+
+    &:active {
+      @apply opacity-80;
+    }
+  }
+
+  .checkbox-container {
+    @apply flex items-center gap-2;
+
+    input[type='checkbox'],
+    input[type='radio'] {
+      @apply size-3.5 shrink-0 rounded border-ocm-border text-ocm-accent;
+    }
+
+    label {
+      @apply m-0 text-sm text-ocm-text;
+    }
   }
 }

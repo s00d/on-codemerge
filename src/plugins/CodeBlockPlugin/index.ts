@@ -1,197 +1,128 @@
 import './style.scss';
-import './public.scss';
-
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin, insertAtomAfter, attrString, foreign } from '@on-codemerge/sdk';
+import type { WidgetContext, ViewSpec } from '@on-codemerge/sdk';
 import { CodeBlockModal } from './components/CodeBlockModal';
 import { CodeBlockContextMenu } from './components/CodeBlockContextMenu';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { SyntaxHighlighter } from './services/SyntaxHighlighter';
+import { renderCodeBlockDom } from './widgets/renderCodeBlockDom';
+import { replaceChildrenWithHtml } from '../../utils/domHtml';
 import { insertIcon } from '../../icons';
-import {
-  createButton,
-  createCode,
-  createContainer,
-  createPre,
-  createSpan,
-} from '../../utils/helpers.ts';
 
-export class CodeBlockPlugin implements Plugin {
-  name = 'code-block';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+Q', description: 'Insert code block', command: 'code-block', icon: '</>' },
-  ];
-  private editor: HTMLEditor | null = null;
-  private modal: CodeBlockModal | null = null;
-  private contextMenu: CodeBlockContextMenu | null = null;
-  private highlighter: SyntaxHighlighter;
-  private toolbarButton: HTMLElement | null = null;
+export function CodeBlockPlugin() {
+  const highlighter = new SyntaxHighlighter();
+  let openModal:
+    | ((code?: string, language?: string, onSave?: (c: string, l: string) => void) => void)
+    | null = null;
 
-  constructor() {
-    this.highlighter = new SyntaxHighlighter();
-  }
-
-  initialize(editor: HTMLEditor): void {
-    this.contextMenu = new CodeBlockContextMenu(editor, (block) => this.editCodeBlock(block));
-    this.modal = new CodeBlockModal(editor);
-
-    this.editor = editor;
-    this.addToolbarButton();
-    this.setupEventListeners();
-    this.editor.on('code-block', () => {
-      this.insertCodeBlock();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: insertIcon,
-      title: this.editor?.t('Insert Code Block') ?? 'Insert Code Block',
-      onClick: () => this.insertCodeBlock(),
-    });
-    toolbar.appendChild(this.toolbarButton);
-  }
-
-  private setupEventListeners(): void {
-    if (!this.editor) return;
-
-    const container = this.editor.getContainer();
-
-    // Обработка правого клика для контекстного меню
-    container.addEventListener('contextmenu', (e) => {
-      const codeBlock = (e.target as Element).closest('.code-block');
-      if (codeBlock instanceof HTMLElement) {
-        e.preventDefault();
-        const mouseX = (e as MouseEvent).clientX;
-        const mouseY = (e as MouseEvent).clientY;
-
-        console.log('Mouse coordinates:', mouseX, mouseY);
-
-        this.contextMenu?.show(codeBlock, mouseX, mouseY);
-      }
-    });
-  }
-
-  private insertCodeBlock(): void {
-    if (!this.editor) return;
-
-    // Сохраняем текущую позицию курсора перед открытием модального окна
-    const savedPosition = this.editor.saveCursorPosition();
-
-    this.modal?.show((code, language) => {
-      // Восстанавливаем позицию курсора
-      if (savedPosition) {
-        this.editor!.restoreCursorPosition(savedPosition);
-      }
-
-      // Создаем HTML для блока кода
-      const block = this.createCodeBlock(code, language);
-
-      // Используем встроенный метод insertContent из ядра
-      this.editor!.insertContent(block);
-
-      // Подсветка синтаксиса
-      const codeElement = block.querySelector('code');
-      if (codeElement) {
-        this.highlighter.highlight(codeElement);
-      }
-    });
-  }
-
-  private editCodeBlock(block: HTMLElement): void {
-    const codeElement = block.querySelector('code');
-    const languageElement = block.querySelector('.code-language');
-
-    if (codeElement && languageElement) {
-      const code = codeElement.textContent || '';
-      const language = languageElement.textContent || 'plaintext';
-
-      this.modal?.show(
-        (newCode, newLanguage) => {
-          codeElement.textContent = newCode;
-          codeElement.className = `language-${newLanguage}`;
-          languageElement.textContent = newLanguage;
-
-          // Подсветка синтаксиса
-          this.highlighter.highlight(codeElement);
-        },
-        code,
-        language
+  return definePlugin({
+    commands: {
+      insertCodeBlock: () => {
+        openModal?.('', 'plaintext');
+        return null;
+      },
+    },
+    hotkeys: [{ keys: 'Mod-Alt-q', command: 'insertCodeBlock', description: 'Insert code block' }],
+    name: 'code-block',
+    nodes: [
+      {
+        name: 'code_block',
+        group: 'atom',
+        atom: true,
+        attrs: { language: 'plaintext', code: '' },
+      },
+    ],
+    setup(ctx) {
+      const editor = ctx.editor;
+      const modal = new CodeBlockModal(editor, ctx.scope);
+      openModal = (code = '', language = 'plaintext', onSave) => {
+        modal.show(
+          (newCode, newLanguage) => {
+            if (onSave) {
+              onSave(newCode, newLanguage);
+              return;
+            }
+            editor.run(insertAtomAfter('code_block', { code: newCode, language: newLanguage }));
+          },
+          code,
+          language
+        );
+      };
+      const contextMenu = ctx.own(
+        new CodeBlockContextMenu(editor, (block) => {
+          const codeElement = block.querySelector('code');
+          const languageElement = block.querySelector('.code-language');
+          if (!codeElement || !languageElement) {
+            return;
+          }
+          const code = codeElement.textContent || '';
+          const language = languageElement.textContent || 'plaintext';
+          openModal?.(code, language, (newCode, newLanguage) => {
+            const pathRaw =
+              block.dataset.ocmPath ??
+              block.dataset.ocmBlock ??
+              block.closest<HTMLElement>('[data-ocm-path]')?.dataset.ocmPath ??
+              block.closest<HTMLElement>('[data-ocm-block]')?.dataset.ocmBlock;
+            if (pathRaw !== undefined && pathRaw !== null) {
+              const path = pathRaw.includes('.')
+                ? pathRaw.split('.').map(Number)
+                : [Number(pathRaw)];
+              editor.run(() => [
+                {
+                  type: 'set_attrs',
+                  path,
+                  attrs: { code: newCode, language: newLanguage },
+                },
+              ]);
+            }
+          });
+        })
       );
-    }
-  }
 
-  private createCodeBlock(code: string, language: string): HTMLElement {
-    const block = createContainer(`code-block`);
-    const uniqueId = `code-block-${Math.random().toString(36).substring(2, 11)}`; // Генерация уникального ID
-    block.id = uniqueId; // Присвоение уникального ID
+      ctx.toolbar.add({
+        id: 'code-block',
+        icon: insertIcon,
+        title: editor.t('codeBlock.insert'),
+        menu: 'insert',
+        order: 45,
+        onClick: () => openModal?.(),
+      });
 
-    // Создание заголовка блока
-    const header = createContainer('code-header');
-    header.className = 'code-header';
-
-    const languageSpan = createSpan('code-language', language);
-    const copyButton = createButton(this.editor?.t('Copy') ?? 'Copy', () => {});
-    copyButton.className = 'copy-button';
-    copyButton.title = this.editor?.t('Copy to clipboard') ?? 'Copy to clipboard';
-    const copied = this.editor?.t('Copied!');
-
-    // Использование onclick для сохранения функциональности в HTML
-    copyButton.setAttribute(
-      'onclick',
-      `
-      const codeElement = document.getElementById('${uniqueId}').querySelector('code');
-      if (codeElement) {
-        navigator.clipboard.writeText(codeElement.textContent || '');
-        this.textContent = '${copied}';
-        setTimeout(() => {
-          this.textContent = '${copyButton.textContent}';
-        }, 2000);
-      }
-    `
-    );
-
-    header.appendChild(languageSpan);
-    header.appendChild(copyButton);
-
-    // Создание контейнера для кода
-    const pre = createPre();
-    const codeElement = createCode(`language-${language}`, code);
-    codeElement.contentEditable = 'true';
-
-    pre.appendChild(codeElement);
-
-    // Сборка структуры
-    block.appendChild(header);
-    block.appendChild(pre);
-
-    return block;
-  }
-
-  /**
-   * Очистка ресурсов плагина
-   */
-  public destroy(): void {
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
-    }
-
-    if (this.modal) {
-      this.modal.destroy();
-      this.modal = null;
-    }
-
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
-
-    this.editor?.off('code-block');
-
-    this.editor = null;
-    this.highlighter = null!;
-  }
+      ctx.onDom('host', 'contextmenu', (e) => {
+        const codeBlock = (e.target as Element).closest(
+          '.code-block, [data-ocm-type="code_block"]'
+        );
+        if (!(codeBlock instanceof HTMLElement)) {
+          return;
+        }
+        e.preventDefault();
+        contextMenu.show(codeBlock, e.clientX, e.clientY);
+      });
+    },
+    widgets: {
+      code_block: {
+        render(attrs, wctx: WidgetContext): ViewSpec {
+          const t = (k: string) => wctx.editor.t(k) || k;
+          return foreign((host, scope) => {
+            host.className = 'ocm-atom';
+            const code = attrString(attrs.code);
+            const language = attrString(attrs.language, 'plaintext');
+            const openEdit = () => {
+              openModal?.(code, language, (newCode, newLanguage) => {
+                wctx.updateAttrs({ code: newCode, language: newLanguage });
+              });
+            };
+            const block = renderCodeBlockDom(code, language, t, openEdit);
+            host.append(block);
+            const codeElement = block.querySelector('code');
+            if (codeElement) {
+              replaceChildrenWithHtml(codeElement, highlighter.highlightHtml(code, language));
+            }
+            scope.disposable(() => {
+              host.replaceChildren();
+            });
+          });
+        },
+      },
+    },
+  });
 }

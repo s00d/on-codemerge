@@ -1,28 +1,9 @@
-/* Math editor */
-.math-editor {
-  @apply space-y-4;
+@reference "../../tailwind.css";
 
-  .math-input {
-    @apply w-full p-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500;
-  }
-
-  .math-buttons {
-    @apply flex gap-2;
-
-    button {
-      @apply px-4 py-2 rounded-md text-sm font-medium bg-blue-500 text-white hover:bg-blue-600;
-    }
-  }
-}
-
-.preview-math-container {
-  @apply bg-gray-50 rounded-lg flex items-center justify-center p-4;
-  height: 100px;
-}
+/* Math menu chrome — most classes are Tailwind on ViewSpec. */
 
 .math-wrapper {
   &.dragging {
-    opacity: 0.5;
-    border: 2px dashed blue;
+    @apply opacity-50 border-2 border-dashed border-ocm-accent;
   }
 }

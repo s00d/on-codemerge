@@ -1,13 +1,13 @@
-/* Responsive Plugin Styles */
+@reference "../../tailwind.css";
 
-/* Viewport Indicator */
 .viewport-indicator {
-  @apply flex items-center gap-2 px-3 py-1.5 bg-gray-100 rounded-lg text-sm font-medium text-gray-700 cursor-pointer hover:bg-gray-200 transition-all duration-200 border border-gray-200;
+  @apply flex cursor-pointer items-center gap-2 rounded-ocm border border-ocm-border bg-ocm-surface-muted px-3 py-1.5 text-sm font-medium text-ocm-text transition-all duration-200 hover:bg-ocm-surface-hover;
 
   .viewport-icon {
-    @apply text-gray-600;
+    @apply text-ocm-text-muted;
+
     svg {
-      @apply w-4 h-4;
+      @apply size-4;
     }
   }
 
@@ -16,37 +16,32 @@
   }
 
   .viewport-width {
-    @apply text-xs text-gray-500 font-mono;
+    @apply font-mono text-xs text-ocm-text-muted;
   }
 
   &:hover {
-    @apply shadow-sm border-gray-300;
-    transform: translateY(-1px);
+    @apply -translate-y-px border-ocm-text-muted shadow-sm;
   }
 
   &:active {
-    transform: translateY(0);
+    @apply translate-y-0;
   }
 }
 
-/* Responsive Menu */
 .responsive-menu {
-  @apply max-w-2xl w-full;
-
   .viewport-btn {
     @apply w-full text-left transition-all duration-200;
 
     &:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      @apply -translate-y-0.5 shadow-md;
     }
 
     &:active {
-      transform: translateY(0);
+      @apply translate-y-0;
     }
 
     svg {
-      @apply text-gray-600;
+      @apply text-ocm-text-muted;
     }
 
     .screen-preview {
@@ -54,13 +49,10 @@
 
       &::before {
         content: '';
-        @apply absolute inset-0 bg-gradient-to-br from-blue-50 to-indigo-50 rounded opacity-50;
+        @apply absolute inset-0 rounded bg-gradient-to-br from-ocm-accent-soft to-ocm-accent-soft opacity-50;
       }
     }
-  }
 
-  /* Анимации для кнопок */
-  .viewport-btn {
     animation: fadeInUp 0.3s ease-out;
 
     @for $i from 1 through 6 {
@@ -71,36 +63,27 @@
   }
 }
 
-/* Анимации */
+/* @apply disallowed inside @keyframes — keep raw keyframe stops */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(1.25rem);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
 
-/* Editor Container Transitions */
 .html-editor {
-  @apply transition-all duration-300 ease-in-out;
-  min-width: 320px;
+  @apply min-w-80 transition-[width,margin,max-width,padding] duration-300 ease-in-out will-change-[width,margin];
 
-  /* Плавные переходы для всех свойств */
-  transition-property: width, margin, max-width, padding;
-
-  /* Улучшенная производительность */
-  will-change: width, margin;
-
-  /* Тень при изменении размера */
   &:not([style*='width: 100%']) {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    @apply shadow-lg;
   }
 }
 
-/* Responsive Breakpoints */
 @media (max-width: 768px) {
   .viewport-indicator {
     @apply px-2 py-1 text-xs;
@@ -119,97 +102,36 @@
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  .viewport-indicator {
-    @apply bg-gray-800 text-gray-200 border-gray-700;
-
-    &:hover {
-      @apply bg-gray-700 border-gray-600;
-    }
-
-    .viewport-icon svg {
-      @apply text-gray-400;
-    }
-
-    .viewport-width {
-      @apply text-gray-400;
-    }
-  }
-
-  .responsive-menu {
-    .viewport-btn {
-      @apply border-gray-700 bg-gray-800 text-gray-200;
-
-      &:hover {
-        @apply border-blue-400 bg-gray-700;
-      }
-
-      &.border-blue-500 {
-        @apply border-blue-400 bg-blue-900/20;
-      }
-    }
-  }
-}
-
-/* Интеграция с TablePlugin */
 .html-editor-table {
   @apply transition-all duration-300 ease-in-out;
 
-  /* Адаптация таблиц к viewport'у */
   &.responsive-table {
     @apply w-full overflow-x-auto;
   }
 }
 
-/* Улучшенные hover эффекты */
 .viewport-btn {
-  position: relative;
-  overflow: hidden;
+  @apply relative overflow-hidden;
 
   &::before {
     content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.1), transparent);
-    transition: left 0.5s;
+    @apply absolute top-0 -left-full h-full w-full bg-gradient-to-r from-transparent via-ocm-accent/10 to-transparent transition-[left] duration-500;
   }
 
   &:hover::before {
-    left: 100%;
+    @apply left-full;
   }
 }
 
-/* Drag-resize handle */
 .html-editor-responsive-resize-handle {
-  position: absolute;
-  top: 0;
-  right: -8px;
-  width: 16px;
-  height: 100%;
-  cursor: ew-resize;
-  z-index: 20;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-}
+  @apply absolute top-0 -right-2 z-ocm-toolbar flex h-full w-4 cursor-ew-resize items-center justify-center bg-transparent;
 
-.html-editor-responsive-resize-handle::after {
-  content: '';
-  display: block;
-  width: 4px;
-  height: 40px;
-  border-radius: 2px;
-  background: #b3b3b3;
-  opacity: 0.5;
-  transition: background 0.2s;
-}
+  &::after {
+    content: '';
+    @apply block h-10 w-1 rounded-sm bg-ocm-text-muted/80 opacity-50 transition-colors;
+  }
 
-.html-editor-responsive-resize-handle:hover::after {
-  background: #2563eb;
-  opacity: 0.8;
+  &:hover::after {
+    @apply bg-ocm-accent opacity-80;
+  }
 }

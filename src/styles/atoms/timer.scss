@@ -1,0 +1,74 @@
+/* Countdown atom — keep in sync with TimerPlugin/style.scss atom rules. */
+
+.timer-widget {
+  @apply my-3 max-w-md rounded-xl border border-ocm-border bg-ocm-surface p-3 font-sans;
+  border-left: 3px solid var(--timer-color, var(--color-ocm-accent, #0284c7));
+}
+
+.timer-top {
+  @apply flex flex-col gap-2.5;
+}
+
+.timer-meta {
+  @apply min-w-0;
+}
+
+.timer-title-row {
+  @apply flex items-center gap-2;
+}
+
+.timer-title {
+  @apply m-0 truncate text-sm font-semibold tracking-tight text-ocm-text;
+}
+
+.timer-category {
+  @apply shrink-0 rounded-md bg-ocm-accent-soft px-1.5 py-0.5 text-[10px] leading-none font-semibold text-ocm-accent;
+}
+
+.timer-sub {
+  @apply mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs text-ocm-text-muted;
+}
+
+.timer-description {
+  @apply text-ocm-text-muted;
+}
+
+.timer-target-date {
+  @apply text-ocm-text-muted;
+}
+
+.timer-target-label {
+  @apply text-ocm-text-muted/80;
+}
+
+.timer-countdown {
+  @apply flex items-end justify-start gap-0.5;
+}
+
+.timer-unit {
+  @apply flex w-11 flex-col items-center gap-0.5 sm:w-12;
+}
+
+.timer-value {
+  @apply text-xl leading-none font-semibold tracking-tight text-ocm-text tabular-nums sm:text-2xl;
+}
+
+.timer-label {
+  @apply text-[9px] leading-none font-medium tracking-wider text-ocm-text-muted uppercase;
+}
+
+.timer-sep {
+  @apply mb-3.5 px-0.5 text-lg leading-none font-semibold text-ocm-border select-none sm:mb-4 sm:text-xl;
+}
+
+.timer-expired {
+  @apply rounded-lg bg-ocm-danger-soft px-3 py-2 text-center text-sm font-semibold text-ocm-danger;
+}
+
+.timer-tags {
+  @apply mt-2 flex flex-wrap gap-1 border-t border-ocm-border-subtle pt-2;
+}
+
+.timer-tag {
+  @apply rounded-md bg-ocm-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-ocm-text-muted;
+}

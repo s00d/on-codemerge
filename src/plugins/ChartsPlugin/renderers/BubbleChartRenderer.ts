@@ -10,13 +10,13 @@ export class BubbleChartRenderer extends BaseChartRenderer {
       return;
     }
 
-    const orientation = options.orientation || 'vertical';
+    const orientation = options.orientation ?? 'vertical';
 
     // Find data ranges
     const allPoints = data.flatMap((series) => series.data);
-    const xMax = Math.max(...allPoints.map((p) => p.x || 0));
-    const yMax = Math.max(...allPoints.map((p) => p.y || 0));
-    const rMax = Math.max(...allPoints.map((p) => p.r || 0));
+    const xMax = Math.max(...allPoints.map((p) => p.x ?? 0));
+    const yMax = Math.max(...allPoints.map((p) => p.y ?? 0));
+    const rMax = Math.max(...allPoints.map((p) => p.r ?? 0));
 
     // Draw background
     this.drawBackground(ctx, options);
@@ -27,7 +27,7 @@ export class BubbleChartRenderer extends BaseChartRenderer {
       this.drawAxes(ctx, options, xMax, yMax);
       // Draw bubbles from largest to smallest
       data.forEach((series) => {
-        const sortedData = [...series.data].sort((a, b) => (b.value || 0) - (a.value || 0));
+        const sortedData = [...series.data].toSorted((a, b) => (b.value || 0) - (a.value || 0));
         series = { ...series, data: sortedData };
         this.drawBubbles(ctx, series, xMax, yMax, rMax, options);
       });
@@ -36,7 +36,7 @@ export class BubbleChartRenderer extends BaseChartRenderer {
       this.drawHorizontalAxes(ctx, options, xMax, yMax);
       // Draw horizontal bubbles from largest to smallest
       data.forEach((series) => {
-        const sortedData = [...series.data].sort((a, b) => (b.value || 0) - (a.value || 0));
+        const sortedData = [...series.data].toSorted((a, b) => (b.value || 0) - (a.value || 0));
         series = { ...series, data: sortedData };
         this.drawHorizontalBubbles(ctx, series, xMax, yMax, rMax, options);
       });
@@ -57,15 +57,23 @@ export class BubbleChartRenderer extends BaseChartRenderer {
     rMax: number,
     options: ChartOptions
   ): void {
-    const { padding } = this.getDimensions(options);
+    const { padding, width, height } = this.getDimensions(options);
+    if (xMax <= 0 || yMax <= 0 || rMax <= 0) {
+      return;
+    }
+    const xScale = width / xMax;
+    const yScale = height / yMax;
+    const rScale = Math.min(width, height) / (rMax * 20);
     const colors = this.getColors(options);
 
     series.data.forEach((point) => {
-      if (!point.x || !point.y || !point.r) return;
+      if (point.x === undefined || point.y === undefined || point.r === undefined) {
+        return;
+      }
 
-      const x = padding + point.x * xMax;
-      const y = options.height - padding - point.y * yMax;
-      const radius = point.r * rMax;
+      const x = padding + point.x * xScale;
+      const y = options.height - padding - point.y * yScale;
+      const radius = point.r * rScale;
 
       // Draw bubble
       ctx.beginPath();
@@ -73,13 +81,13 @@ export class BubbleChartRenderer extends BaseChartRenderer {
 
       // Create gradient
       const gradient = ctx.createRadialGradient(x - radius / 3, y - radius / 3, 0, x, y, radius);
-      gradient.addColorStop(0, this.colorWithOpacity(point.color || colors[0], 0.6));
-      gradient.addColorStop(1, this.colorWithOpacity(point.color || colors[0], 0.2));
+      gradient.addColorStop(0, this.colorWithOpacity(point.color ?? colors[0], 0.6));
+      gradient.addColorStop(1, this.colorWithOpacity(point.color ?? colors[0], 0.2));
 
       ctx.fillStyle = gradient;
       ctx.fill();
 
-      ctx.strokeStyle = point.color || colors[0];
+      ctx.strokeStyle = point.color ?? colors[0];
       ctx.lineWidth = 2;
       ctx.stroke();
     });
@@ -196,13 +204,18 @@ export class BubbleChartRenderer extends BaseChartRenderer {
     options: ChartOptions
   ): void {
     const { padding, width, height } = this.getDimensions(options);
+    if (xMax <= 0 || yMax <= 0 || rMax <= 0) {
+      return;
+    }
     const xScale = height / xMax; // swapped
     const yScale = width / yMax; // swapped
     const rScale = Math.min(width, height) / (rMax * 20);
     const colors = this.getColors(options);
 
     series.data.forEach((point) => {
-      if (!point.x || !point.y || !point.r) return;
+      if (point.x === undefined || point.y === undefined || point.r === undefined) {
+        return;
+      }
 
       const x = padding + point.y * xScale; // swapped
       const y = options.height - padding - point.x * yScale; // swapped
@@ -214,13 +227,13 @@ export class BubbleChartRenderer extends BaseChartRenderer {
 
       // Create gradient
       const gradient = ctx.createRadialGradient(x - radius / 3, y - radius / 3, 0, x, y, radius);
-      gradient.addColorStop(0, this.colorWithOpacity(point.color || colors[0], 0.6));
-      gradient.addColorStop(1, this.colorWithOpacity(point.color || colors[0], 0.2));
+      gradient.addColorStop(0, this.colorWithOpacity(point.color ?? colors[0], 0.6));
+      gradient.addColorStop(1, this.colorWithOpacity(point.color ?? colors[0], 0.2));
 
       ctx.fillStyle = gradient;
       ctx.fill();
 
-      ctx.strokeStyle = point.color || colors[0];
+      ctx.strokeStyle = point.color ?? colors[0];
       ctx.lineWidth = 2;
       ctx.stroke();
     });

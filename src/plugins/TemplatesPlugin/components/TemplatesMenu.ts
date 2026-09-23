@@ -1,214 +1,194 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
+import { PopupController, h } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import type { TemplateManager } from '../services/TemplateManager';
 import type { Template } from '../types';
-import { TemplatesList } from './TemplatesList';
-import { TemplateForm } from './TemplateForm';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import { formatDate } from '../utils/formatters';
+import { deleteIcon, editIcon } from '../../../icons';
 
+/** Templates chrome — PopupController + ViewSpec (no destroy/hide). */
 export class TemplatesMenu {
-  private popup: PopupManager;
-  private editor: HTMLEditor;
-  private manager: TemplateManager;
-  private list: TemplatesList;
+  private readonly popups: PopupController;
+  private readonly editor: EditorAPI;
+  private readonly manager: TemplateManager;
   private onSelect: ((template: Template) => void) | null = null;
 
-  constructor(manager: TemplateManager, editor: HTMLEditor) {
+  constructor(manager: TemplateManager, editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
     this.manager = manager;
-    this.list = new TemplatesList(
-      this.editor,
-      (template) => this.handleSelect(template),
-      (template) => this.showEditForm(template),
-      (template) => this.handleDelete(template)
-    );
-
-    // Initialize main popup
-    this.popup = this.createMainPopup();
-    this.updateContent();
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
   }
 
-  private createMainPopup(): PopupManager {
-    return new PopupManager(this.editor, {
-      title: this.editor.t('Templates'),
+  private listView(): ViewSpec {
+    const templates = this.manager.getTemplates();
+    if (templates.length === 0) {
+      return h(
+        'div',
+        { class: 'text-center text-gray-500 py-4' },
+        this.editor.t('templates.noTemplatesYetClickNewTemplateToCreateOne') ||
+          'No templates yet. Click "New Template" to create one.'
+      );
+    }
+
+    return h(
+      'div',
+      { class: 'space-y-2' },
+      ...templates.map((template) =>
+        h(
+          'div',
+          {
+            class: 'template-item',
+            attrs: { 'data-template-id': template.id },
+            on: {
+              click: () => {
+                this.handleSelect(template);
+              },
+            },
+          },
+          h('div', { class: 'flex items-center justify-between p-3 rounded-lg cursor-pointer' }, [
+            h('div', null, [
+              h('div', { class: 'font-medium' }, template.name),
+              h(
+                'div',
+                { class: 'text-xs text-gray-500' },
+                `${this.editor.t('common.updated')} ${formatDate(template.updatedAt)}`
+              ),
+            ]),
+            h('div', { class: 'flex items-center gap-2' }, [
+              h('button', {
+                class: 'edit-button p-1 text-gray-500 hover:text-gray-700 rounded',
+                attrs: { type: 'button', title: this.editor.t('common.edit') },
+                props: { innerHTML: editIcon },
+                on: {
+                  click: (e) => {
+                    e.stopPropagation();
+                    this.showEditForm(template);
+                  },
+                },
+              }),
+              h('button', {
+                class: 'delete-button p-1 text-gray-500 hover:text-red-600 rounded',
+                attrs: { type: 'button', title: this.editor.t('common.delete') },
+                props: { innerHTML: deleteIcon },
+                on: {
+                  click: (e) => {
+                    e.stopPropagation();
+                    this.handleDelete(template);
+                  },
+                },
+              }),
+            ]),
+          ])
+        )
+      )
+    );
+  }
+
+  private openMain(): void {
+    this.popups.open({
+      title: this.editor.t('common.templates'),
       className: 'templates-menu',
+      size: 'lg',
       closeOnClickOutside: true,
       buttons: [
         {
-          label: this.editor.t('New Template'),
+          label: this.editor.t('templates.newTemplate'),
           variant: 'primary',
-          onClick: () => this.showNewForm(),
+          onClick: () => {
+            this.showNewForm();
+            return true;
+          },
         },
       ],
-      items: [
-        {
-          type: 'custom',
-          id: 'templates-content',
-          content: () => this.list.getElement(),
-        },
-      ],
+      items: [{ type: 'view', id: 'templates-content', view: () => this.listView() }],
     });
   }
 
-  private updateContent(): void {
-    const templates = this.manager.getTemplates();
-    this.list.setTemplates(templates);
-    this.popup.setContent(this.list.getElement());
+  private openForm(
+    title: string,
+    initial: { name: string; content: string },
+    submitLabel: string,
+    onSave: (data: { name: string; content: string }) => void
+  ): void {
+    this.popups.open({
+      title: this.editor.t(title),
+      className: 'templates-menu',
+      size: 'lg',
+      closeOnClickOutside: true,
+      items: [
+        {
+          type: 'input',
+          id: 'name',
+          label: this.editor.t('common.name'),
+          placeholder: this.editor.t('templates.templateName'),
+          value: initial.name,
+        },
+        {
+          type: 'textarea',
+          id: 'content',
+          label: this.editor.t('common.content'),
+          placeholder: this.editor.t('common.content'),
+          value: initial.content,
+        },
+      ],
+      buttons: [
+        {
+          label: this.editor.t('common.cancel'),
+          variant: 'secondary',
+          onClick: () => {
+            this.openMain();
+            return true;
+          },
+        },
+        {
+          label: this.editor.t(submitLabel),
+          variant: 'primary',
+          onClick: (values) => {
+            const name = String(values.name ?? '').trim();
+            const content = String(values.content ?? '');
+            if (!name) {
+              return true;
+            }
+            onSave({ name, content });
+            return true;
+          },
+        },
+      ],
+    });
   }
 
   private showNewForm(): void {
-    // Уничтожаем текущий попап перед созданием нового
-    this.popup.destroy();
-
-    const form = new TemplateForm(this.editor, (data) => {
+    this.openForm('New Template', { name: '', content: '' }, 'Save', (data) => {
       this.manager.saveTemplate(data);
-      this.popup.destroy();
-      this.popup = this.createMainPopup();
-      this.updateContent();
-      this.popup.show();
+      this.openMain();
     });
-
-    this.popup = new PopupManager(this.editor, {
-      title: this.editor.t('New Template'),
-      className: 'templates-menu',
-      closeOnClickOutside: true,
-      buttons: [
-        {
-          label: this.editor.t('Cancel'),
-          variant: 'secondary',
-          onClick: () => {
-            this.popup.destroy();
-            this.popup = this.createMainPopup();
-            this.updateContent();
-            this.popup.show();
-          },
-        },
-        {
-          label: this.editor.t('Save'),
-          variant: 'primary',
-          onClick: () => {
-            const formEl = form.getElement().querySelector('form');
-            if (formEl) {
-              const submitEvent = new Event('submit', {
-                bubbles: true,
-                cancelable: true,
-              });
-              formEl.dispatchEvent(submitEvent);
-            }
-          },
-        },
-      ],
-      items: [
-        {
-          type: 'custom',
-          id: 'template-form',
-          content: () => form.getElement(),
-        },
-      ],
-    });
-
-    this.popup.show();
   }
 
   private showEditForm(template: Template): void {
-    // Уничтожаем текущий попап перед созданием нового
-    this.popup.destroy();
-
-    const form = new TemplateForm(
-      this.editor,
+    this.openForm(
+      'Edit Template',
+      { name: template.name, content: template.content },
+      'Update',
       (data) => {
         this.manager.updateTemplate(template.id, data);
-        this.popup.destroy();
-        this.popup = this.createMainPopup();
-        this.updateContent();
-        this.popup.show();
-      },
-      template
+        this.openMain();
+      }
     );
-
-    this.popup = new PopupManager(this.editor, {
-      title: this.editor.t('Edit Template'),
-      className: 'templates-menu',
-      closeOnClickOutside: true,
-      buttons: [
-        {
-          label: this.editor.t('Cancel'),
-          variant: 'secondary',
-          onClick: () => {
-            this.popup.destroy();
-            this.popup = this.createMainPopup();
-            this.updateContent();
-            this.popup.show();
-          },
-        },
-        {
-          label: this.editor.t('Update'),
-          variant: 'primary',
-          onClick: () => {
-            const formEl = form.getElement().querySelector('form');
-            if (formEl) {
-              const submitEvent = new Event('submit', {
-                bubbles: true,
-                cancelable: true,
-              });
-              formEl.dispatchEvent(submitEvent);
-            }
-          },
-        },
-      ],
-      items: [
-        {
-          type: 'custom',
-          id: 'template-form',
-          content: () => form.getElement(),
-        },
-      ],
-    });
-
-    this.popup.show();
   }
 
   private handleSelect(template: Template): void {
     this.onSelect?.(template);
-    this.popup.hide();
+    this.popups.close();
   }
 
   private handleDelete(template: Template): void {
-    if (confirm(this.editor.t('Are you sure you want to delete this template?'))) {
+    if (confirm(this.editor.t('templates.areYouSureYouWantToDeleteThisTemplate'))) {
       this.manager.deleteTemplate(template.id);
-      this.updateContent();
+      this.openMain();
     }
   }
 
   public show(onSelect: (template: Template) => void): void {
     this.onSelect = onSelect;
-
-    // Убеждаемся, что у нас есть правильный попап
-    if (this.popup) {
-      this.popup.destroy();
-    }
-    this.popup = this.createMainPopup();
-
-    this.updateContent();
-    this.popup.show();
-  }
-
-  public destroy(): void {
-    // Уничтожение всплывающего окна
-    if (this.popup) {
-      this.popup.hide(); // Скрыть всплывающее окно
-      this.popup.destroy(); // Уничтожить попап
-      this.popup = null!; // Очистить ссылку
-    }
-
-    // Уничтожение списка шаблонов
-    if (this.list) {
-      this.list.destroy();
-      this.list = null!; // Очистить ссылку
-    }
-
-    // Очистка ссылок на другие объекты
-    this.editor = null!;
-    this.manager = null!;
-    this.onSelect = null;
+    this.openMain();
   }
 }

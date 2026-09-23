@@ -1,127 +1,88 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
-import { createButton, createContainer, createP, createTextarea } from '../../../utils/helpers.ts';
+import { PopupController } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI } from '@on-codemerge/sdk';
 
+/** Declarative comment popup — lifetime via PopupController. */
 export class CommentMenu {
-  private editor: HTMLEditor;
-  private popup: PopupManager;
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
   private callback: ((content: string, action: 'save' | 'delete') => void) | null = null;
+  private draft = '';
+  private showDelete = false;
 
-  // Ссылки на элементы
-  private textarea: HTMLTextAreaElement | null = null;
-  private deleteButton: HTMLButtonElement | null = null;
-
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
-    this.popup = new PopupManager(editor, {
-      title: editor.t('Insert Comment'),
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
+  }
+
+  private open(): void {
+    const buttons: {
+      label: string;
+      variant: 'primary' | 'secondary' | 'danger';
+      onClick: (values: Record<string, string | boolean | number>) => void | boolean;
+    }[] = [
+      {
+        label: this.editor.t('common.cancel'),
+        variant: 'secondary',
+        onClick: () => {},
+      },
+      {
+        label: this.editor.t('common.save'),
+        variant: 'primary',
+        onClick: (values) => {
+          const content = String(values['comment-text'] ?? this.draft).trim();
+          if (!content) {
+            return true;
+          }
+          this.callback?.(content, 'save');
+          return false;
+        },
+      },
+    ];
+    if (this.showDelete) {
+      buttons.splice(1, 0, {
+        label: this.editor.t('comments.deleteComment'),
+        variant: 'danger',
+        onClick: () => {
+          this.callback?.('', 'delete');
+          return false;
+        },
+      });
+    }
+
+    this.popups.open({
+      title: this.editor.t('comments.insert'),
       className: 'comment-menu',
+      size: 'sm',
       closeOnClickOutside: true,
-      buttons: [
-        {
-          label: editor.t('Cancel'),
-          variant: 'secondary',
-          onClick: () => this.popup.hide(),
-        },
-        {
-          label: editor.t('Save'),
-          variant: 'primary',
-          onClick: () => this.handleSubmit(),
-        },
-      ],
       items: [
         {
-          type: 'custom',
-          id: 'comment-content',
-          content: () => this.createContent(),
+          type: 'textarea',
+          id: 'comment-text',
+          label: this.editor.t('comments.comment'),
+          placeholder: this.editor.t('comments.addYourComment'),
+          value: this.draft,
+          onChange: (v) => {
+            this.draft = String(v);
+          },
+        },
+        {
+          type: 'text',
+          id: 'comment-hint',
+          value: this.editor.t('comments.useCommentsToProvideFeedbackOrSuggestions'),
         },
       ],
+      buttons,
     });
-  }
-
-  private createContent(): HTMLElement {
-    // Основной контейнер
-    const container = createContainer('p-4');
-
-    // Текстовое поле для ввода комментария
-    this.textarea = createTextarea('Add your comment...');
-    this.textarea.className =
-      'comment-content w-full h-32 p-2 border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500';
-
-    // Контейнер для подсказки и кнопки удаления
-    const footer = createContainer('flex justify-between items-center mt-4');
-
-    // Подсказка
-    const hint = createP(
-      'text-sm text-gray-500',
-      this.editor.t('Use comments to provide feedback or suggestions.')
-    );
-
-    // Кнопка удаления комментария
-    this.deleteButton = createButton(this.editor.t('Delete Comment'), () => {
-      if (this.callback) {
-        this.callback('', 'delete');
-        this.popup.hide();
-      }
-    });
-    this.deleteButton.className =
-      'delete-comment hidden px-3 py-1.5 text-sm text-red-600 hover:text-red-700 transition-colors';
-
-    // Сборка структуры
-    footer.appendChild(hint);
-    footer.appendChild(this.deleteButton);
-    container.appendChild(this.textarea);
-    container.appendChild(footer);
-
-    return container;
-  }
-
-  private handleSubmit(): void {
-    if (this.textarea && this.callback) {
-      const content = this.textarea.value.trim();
-      if (content) {
-        this.callback(content, 'save');
-        this.popup.hide();
-      }
-    }
   }
 
   public show(
     callback: (content: string, action: 'save' | 'delete') => void,
-    initialContent: string = '',
-    showDelete: boolean = false
+    initialContent = '',
+    showDelete = false
   ): void {
     this.callback = callback;
-
-    if (this.textarea && this.deleteButton) {
-      // Устанавливаем начальные значения
-      this.textarea.value = initialContent;
-      this.deleteButton.classList.toggle('hidden', !showDelete);
-
-      this.popup.show();
-      this.textarea.focus();
-    }
-  }
-
-  public destroy(): void {
-    // Удаляем обработчики событий
-    if (this.deleteButton) {
-      this.deleteButton.removeEventListener('click', () => {
-        if (this.callback) {
-          this.callback('', 'delete');
-          this.popup.hide();
-        }
-      });
-    }
-
-    // Уничтожаем PopupManager
-    this.popup.destroy();
-
-    // Очищаем ссылки
-    this.editor = null!;
-    this.popup = null!;
-    this.callback = null;
-    this.textarea = null;
-    this.deleteButton = null;
+    this.draft = initialContent;
+    this.showDelete = showDelete;
+    this.open();
   }
 }

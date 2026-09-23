@@ -1,61 +1,37 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin } from '@on-codemerge/sdk';
 import { ExportMenu } from './components/ExportMenu';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { exportIcon } from '../../icons';
 
-export class ExportPlugin implements Plugin {
-  name = 'export';
-  hotkeys = [{ keys: 'Ctrl+Alt+E', description: 'Export document', command: 'export', icon: '📤' }];
-  private editor: HTMLEditor | null = null;
-  private menu: ExportMenu | null = null;
-  private toolbarButton: HTMLElement | null = null;
+export function ExportPlugin() {
+  let openExport: (() => void) | null = null;
 
-  constructor() {}
-
-  initialize(editor: HTMLEditor): void {
-    this.menu = new ExportMenu(editor);
-    this.editor = editor;
-    this.addToolbarButton();
-    this.editor.on('export', () => {
-      this.showExportMenu();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: exportIcon,
-      title: this.editor?.t('Export') ?? '',
-      onClick: () => this.showExportMenu(),
-    });
-    toolbar.appendChild(this.toolbarButton);
-  }
-
-  private showExportMenu(): void {
-    if (!this.editor) return;
-    const content = this.editor.getContainer().innerHTML;
-    this.menu?.show(content);
-  }
-
-  public destroy(): void {
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
-    }
-
-    if (this.menu) {
-      this.menu.destroy();
-      this.menu = null;
-    }
-
-    this.editor?.off('export');
-    this.editor = null;
-
-    this.toolbarButton = null;
-  }
+  return definePlugin({
+    name: 'export',
+    hotkeys: [{ keys: 'Mod-Alt-e', command: 'exportDoc', description: 'Export' }],
+    commands: {
+      exportDoc: () => {
+        openExport?.();
+        return null;
+      },
+    },
+    setup(ctx) {
+      const editor = ctx.editor;
+      const menu = new ExportMenu(editor, ctx.scope);
+      openExport = () => {
+        menu.show();
+      };
+      ctx.toolbar.add({
+        id: 'export',
+        icon: exportIcon,
+        title: editor.t('export.title'),
+        menu: 'tools',
+        order: 80,
+        onClick: () => {
+          openExport?.();
+        },
+      });
+    },
+  });
 }

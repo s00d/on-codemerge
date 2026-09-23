@@ -18,21 +18,15 @@ interface GenerateCompletionResponse {
 
 // Типизация для параметров Ollama
 export interface OllamaOptions extends DriverOptions {
-  apiUrl?: number; // Штраф за частоту
-  frequencyPenalty?: number; // Штраф за частоту
-  presencePenalty?: number; // Штраф за присутствие
-  min?: number; // Минимальное значение для параметров
-  max?: number; // Максимальное значение для параметров
-  stream?: boolean; // Включение потокового ответа
+  apiUrl?: string;
+  frequencyPenalty?: number;
+  presencePenalty?: number;
+  min?: number;
+  max?: number;
+  stream?: boolean;
 }
 
 export class OllamaDriver implements AIDriver<OllamaOptions> {
-  // private apiKey: string;
-
-  constructor(_apiKey: string) {
-    // this.apiKey = apiKey;
-  }
-
   getOptionsDescription(): OptionsDescription {
     return {
       model: {
@@ -43,7 +37,7 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
       apiUrl: {
         type: 'input',
         label: 'Api Url',
-        default: '',
+        default: 'http://localhost:11434',
       },
       maxTokens: {
         type: 'number',
@@ -56,29 +50,29 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
         type: 'number',
         label: 'Temperature',
         default: 0.7,
-        min: 0.0,
-        max: 2.0,
+        min: 0,
+        max: 2,
       },
       topP: {
         type: 'number',
         label: 'Top P',
-        default: 1.0,
-        min: 0.0,
-        max: 1.0,
+        default: 1,
+        min: 0,
+        max: 1,
       },
       frequencyPenalty: {
         type: 'number',
         label: 'Frequency Penalty',
-        default: 0.0,
-        min: 0.0,
-        max: 2.0,
+        default: 0,
+        min: 0,
+        max: 2,
       },
       presencePenalty: {
         type: 'number',
         label: 'Presence Penalty',
-        default: 0.0,
-        min: 0.0,
-        max: 2.0,
+        default: 0,
+        min: 0,
+        max: 2,
       },
     };
   }
@@ -88,18 +82,19 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
    * Поддерживает потоковые и не потоковые ответы.
    */
   async generateText(prompt: string, options?: OllamaOptions): Promise<string> {
+    const baseUrl = options?.apiUrl || 'http://localhost:11434';
     const requestBody = {
-      model: options?.model || '',
-      prompt: prompt,
-      max_tokens: options?.maxTokens || 100,
-      temperature: options?.temperature || 0.7,
-      top_p: options?.topP || 1.0,
-      frequency_penalty: options?.frequencyPenalty || 0.0,
-      presence_penalty: options?.presencePenalty || 0.0,
-      stream: options?.stream || false, // По умолчанию отключаем потоковый ответ
+      model: options?.model || 'llama2',
+      prompt,
+      max_tokens: options?.maxTokens ?? 100,
+      temperature: options?.temperature ?? 0.7,
+      top_p: options?.topP ?? 1,
+      frequency_penalty: options?.frequencyPenalty ?? 0,
+      presence_penalty: options?.presencePenalty ?? 0,
+      stream: options?.stream ?? false,
     };
 
-    const response = await fetch(`${options?.apiUrl}/api/generate`, {
+    const response = await fetch(`${baseUrl}/api/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -119,19 +114,20 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
       if (reader) {
         while (true) {
           const { done, value } = await reader.read();
-          if (done) break;
+          if (done) {
+            break;
+          }
 
           const chunk = new TextDecoder().decode(value);
-          const parsedChunk: GenerateCompletionResponse = JSON.parse(chunk);
+          const parsedChunk = JSON.parse(chunk) as GenerateCompletionResponse;
           result += parsedChunk.response;
         }
       }
 
       return result;
-    } else {
-      // Обработка не потокового ответа
-      const data: GenerateCompletionResponse = await response.json();
-      return data.response;
     }
+    // Обработка не потокового ответа
+    const data = (await response.json()) as GenerateCompletionResponse;
+    return data.response;
   }
 }

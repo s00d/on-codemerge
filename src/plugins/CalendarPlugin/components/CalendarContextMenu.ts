@@ -1,15 +1,13 @@
 import type { Calendar, CalendarEvent } from '../types';
-import type { HTMLEditor } from '../../../core/HTMLEditor';
-import { ContextMenu } from '../../../core/ui/ContextMenu';
-import { editIcon, deleteIcon, copyIcon, exportIcon } from '../../../icons';
+import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
+import { copyIcon, deleteIcon, editIcon, exportIcon, insertIcon, uploadIcon } from '../../../icons';
 
 export class CalendarContextMenu {
-  private editor: HTMLEditor;
-  private onAction: (action: string, target: Calendar | CalendarEvent) => void;
-  private currentContextMenu: ContextMenu | null = null;
+  private readonly editor: EditorAPI;
+  private readonly onAction: (action: string, target: Calendar | CalendarEvent) => void;
 
   constructor(
-    editor: HTMLEditor,
+    editor: EditorAPI,
     onAction: (action: string, target: Calendar | CalendarEvent) => void
   ) {
     this.editor = editor;
@@ -17,170 +15,62 @@ export class CalendarContextMenu {
   }
 
   public show(target: Calendar | CalendarEvent, x: number, y: number): void {
-    // Уничтожаем предыдущее меню, если оно есть
-    if (this.currentContextMenu) {
-      this.currentContextMenu.destroy();
-    }
-
-    const menuItems = this.getMenuItems(target);
-    this.currentContextMenu = new ContextMenu(this.editor, menuItems);
-
-    // Находим элемент календаря или события в DOM
-    let element: HTMLElement;
-    if ('events' in target) {
-      // Calendar
-      element = this.editor
-        .getContainer()
-        .querySelector(`[data-calendar-id="${target.id}"]`) as HTMLElement;
-    } else {
-      // Event
-      element = this.editor
-        .getContainer()
-        .querySelector(`[data-event-id="${target.id}"]`) as HTMLElement;
-    }
-
-    if (element) {
-      this.currentContextMenu.show(element, x, y);
-    }
+    this.editor.ui.menu.open(this.getMenuItems(target), x, y);
   }
 
   public hide(): void {
-    if (this.currentContextMenu) {
-      this.currentContextMenu.hide();
-    }
+    /* ContextMenuService closes on outside click */
   }
 
-  private getMenuItems(target: Calendar | CalendarEvent) {
+  private getMenuItems(target: Calendar | CalendarEvent): MenuItem[] {
+    const t = (k: string) => this.editor.t(k) || k;
+    const act = (action: string) => () => {
+      this.onAction(action, target);
+    };
+
     if ('events' in target) {
-      // Calendar menu
       return [
+        { type: 'group', groupTitle: t('calendar.title') },
         {
-          type: 'group' as const,
-          groupTitle: this.editor.t('Calendar'),
-          subMenu: [
-            {
-              type: 'button' as const,
-              title: this.editor.t('Add Event'),
-              icon: '➕',
-              action: 'add-event',
-              onClick: () => this.executeAction('add-event', target),
-              hotkey: 'Ctrl+Shift+E',
-            },
-            {
-              type: 'button' as const,
-              title: this.editor.t('Edit Calendar'),
-              icon: editIcon,
-              action: 'edit-calendar',
-              onClick: () => this.executeAction('edit-calendar', target),
-              hotkey: 'Ctrl+E',
-            },
-          ],
+          label: t('calendar.addEvent'),
+          icon: insertIcon,
+          onClick: act('add-event'),
         },
+        { label: t('calendar.editCalendar'), icon: editIcon, onClick: act('edit-calendar') },
+        { type: 'divider' },
+        { type: 'group', groupTitle: t('common.actions') },
+        { label: t('calendar.copyCalendar'), icon: copyIcon, onClick: act('copy-calendar') },
+        { label: t('calendar.exportCalendar'), icon: exportIcon, onClick: act('export-calendar') },
         {
-          type: 'divider' as const,
+          label: t('calendar.importCalendar'),
+          icon: uploadIcon,
+          onClick: act('import-calendar'),
         },
+        { type: 'divider' },
         {
-          type: 'group' as const,
-          groupTitle: this.editor.t('Actions'),
-          subMenu: [
-            {
-              type: 'button' as const,
-              title: this.editor.t('Copy Calendar'),
-              icon: copyIcon,
-              action: 'copy-calendar',
-              onClick: () => this.executeAction('copy-calendar', target),
-              hotkey: 'Ctrl+C',
-            },
-            {
-              type: 'button' as const,
-              title: this.editor.t('Export Calendar'),
-              icon: exportIcon,
-              action: 'export-calendar',
-              onClick: () => this.executeAction('export-calendar', target),
-              hotkey: 'Ctrl+Shift+X',
-            },
-            {
-              type: 'button' as const,
-              title: this.editor.t('Import Calendar'),
-              icon: '📥',
-              action: 'import-calendar',
-              onClick: () => this.executeAction('import-calendar', target),
-              hotkey: 'Ctrl+Shift+I',
-            },
-          ],
-        },
-        {
-          type: 'divider' as const,
-        },
-        {
-          type: 'group' as const,
-          groupTitle: this.editor.t('Delete'),
-          subMenu: [
-            {
-              type: 'button' as const,
-              title: this.editor.t('Delete Calendar'),
-              icon: deleteIcon,
-              action: 'delete-calendar',
-              onClick: () => this.executeAction('delete-calendar', target),
-              variant: 'danger' as const,
-              hotkey: 'Delete',
-            },
-          ],
-        },
-      ];
-    } else {
-      // Event menu
-      return [
-        {
-          type: 'group' as const,
-          groupTitle: this.editor.t('Event'),
-          subMenu: [
-            {
-              type: 'button' as const,
-              title: this.editor.t('Edit Event'),
-              icon: editIcon,
-              action: 'edit-event',
-              onClick: () => this.executeAction('edit-event', target),
-              hotkey: 'Ctrl+E',
-            },
-            {
-              type: 'button' as const,
-              title: this.editor.t('Copy Event'),
-              icon: copyIcon,
-              action: 'copy-event',
-              onClick: () => this.executeAction('copy-event', target),
-              hotkey: 'Ctrl+C',
-            },
-          ],
-        },
-        {
-          type: 'divider' as const,
-        },
-        {
-          type: 'group' as const,
-          groupTitle: this.editor.t('Delete'),
-          subMenu: [
-            {
-              type: 'button' as const,
-              title: this.editor.t('Delete Event'),
-              icon: deleteIcon,
-              action: 'delete-event',
-              onClick: () => this.executeAction('delete-event', target),
-              variant: 'danger' as const,
-              hotkey: 'Delete',
-            },
-          ],
+          label: t('calendar.deleteCalendar'),
+          icon: deleteIcon,
+          variant: 'danger',
+          onClick: act('delete-calendar'),
         },
       ];
     }
-  }
 
-  private executeAction(action: string, target: Calendar | CalendarEvent): void {
-    this.onAction(action, target);
-    this.hide();
+    return [
+      { type: 'group', groupTitle: t('calendar.event') },
+      { label: t('calendar.editEvent'), icon: editIcon, onClick: act('edit-event') },
+      { label: t('calendar.copyEvent'), icon: copyIcon, onClick: act('copy-event') },
+      { type: 'divider' },
+      {
+        label: t('calendar.deleteEvent'),
+        icon: deleteIcon,
+        variant: 'danger',
+        onClick: act('delete-event'),
+      },
+    ];
   }
 
   public destroy(): void {
-    this.currentContextMenu?.destroy();
+    this.editor.ui.menu.hide();
   }
 }

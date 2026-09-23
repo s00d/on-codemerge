@@ -76,22 +76,30 @@ export class FieldBuilder {
    */
   private getDefaultOptions(type: FieldType): Partial<FieldOptions> {
     switch (type) {
-      case 'email':
+      case 'email': {
         return { autocomplete: 'email' };
-      case 'password':
+      }
+      case 'password': {
         return { autocomplete: 'current-password' };
-      case 'tel':
+      }
+      case 'tel': {
         return { autocomplete: 'tel' };
-      case 'url':
+      }
+      case 'url': {
         return { autocomplete: 'url' };
-      case 'file':
+      }
+      case 'file': {
         return { accept: '*/*' };
-      case 'range':
+      }
+      case 'range': {
         return { min: 0, max: 100, step: 1 };
-      case 'number':
+      }
+      case 'number': {
         return { min: 0, step: 1 };
-      default:
+      }
+      default: {
         return {};
+      }
     }
   }
 
@@ -100,18 +108,24 @@ export class FieldBuilder {
    */
   private getDefaultValidation(type: FieldType): ValidationRules {
     switch (type) {
-      case 'email':
+      case 'email': {
         return { required: true, email: true };
-      case 'password':
+      }
+      case 'password': {
         return { required: true, minLength: 6 };
-      case 'tel':
+      }
+      case 'tel': {
         return { pattern: '^[+]?[0-9\\s\\-\\(\\)]{10,}$' };
-      case 'url':
+      }
+      case 'url': {
         return { url: true };
-      case 'number':
+      }
+      case 'number': {
         return { numeric: true };
-      default:
+      }
+      default: {
         return {};
+      }
     }
   }
 }

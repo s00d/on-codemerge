@@ -1,11 +1,15 @@
 import type { Template, CreateTemplateData } from '../types';
 
 export class TemplateManager {
-  private storageKey = 'html-editor-templates';
+  private readonly storageKey = 'html-editor-templates';
 
   public getTemplates(): Template[] {
     const stored = localStorage.getItem(this.storageKey);
-    return stored ? JSON.parse(stored) : [];
+    if (stored === null || stored === '') {
+      return [];
+    }
+    const parsed: unknown = JSON.parse(stored);
+    return Array.isArray(parsed) ? (parsed as Template[]) : [];
   }
 
   public saveTemplate(data: CreateTemplateData): Template {

@@ -1,268 +1,247 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin, insertAtomAfter, attrString, foreign, h } from '@on-codemerge/sdk';
+import type { ViewSpec } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
 import { TimerMenu } from './components/TimerMenu';
 import { TimerManager } from './services/TimerManager';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { timerIcon } from '../../icons';
 import type { Timer } from './types';
 import { TimerContextMenu } from './components/TimerContextMenu';
-import { createLineBreak } from '../../utils/helpers';
+import { pathFromEl } from '../../utils/atomPath';
+import { downloadJson, pickJsonFile, mountTimerView, tickTimerWidget } from './widgets/domOps';
 
-export class TimerPlugin implements Plugin {
-  name = 'timer';
-  hotkeys = [{ keys: 'Ctrl+Alt+D', description: 'Insert timer', command: 'timer', icon: '⏱️' }];
-  private editor: HTMLEditor | null = null;
-  private menu: TimerMenu | null = null;
-  private manager!: TimerManager;
-  private toolbarButton: HTMLElement | null = null;
-  private contextMenu: TimerContextMenu | null = null;
+function serializeTimer(timer: Timer): string {
+  return JSON.stringify({
+    ...timer,
+    targetDate:
+      timer.targetDate instanceof Date ? timer.targetDate.toISOString() : timer.targetDate,
+  });
+}
 
-  constructor() {
-    // TimerManager будет создан в initialize с передачей editor
+function parseTimer(raw: unknown): Timer | null {
+  if (typeof raw !== 'string' || !raw.trim()) {
+    return null;
   }
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.manager = new TimerManager(editor);
-    this.menu = new TimerMenu(this.manager, editor);
-    this.contextMenu = new TimerContextMenu(this.manager, editor);
-
-    this.addToolbarButton();
-    this.setupEventListeners();
-    this.startTimerUpdates();
-
-    // Регистрируем команду
-    editor.on('timer', () => this.showTimerMenu());
+  try {
+    const t = JSON.parse(raw) as Timer;
+    t.targetDate = new Date(t.targetDate);
+    return t;
+  } catch {
+    return null;
   }
+}
 
-  private addToolbarButton(): void {
-    if (!this.editor) return;
+export function TimerPlugin() {
+  let editor!: EditorAPI;
+  let manager!: TimerManager;
+  let menu!: TimerMenu;
+  let contextMenu!: TimerContextMenu;
+  let openTimerMenu: (() => void) | null = null;
 
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      this.toolbarButton = createToolbarButton({
+  const refreshTimers = () => {
+    editor.host.querySelectorAll<HTMLElement>('.timer-widget').forEach((element) => {
+      const timerId = element.dataset.timerId;
+      if (!timerId) {
+        return;
+      }
+      let timerData = manager.getTimer(timerId);
+      if (!timerData) {
+        const raw = element.dataset.timerPayload;
+        const parsed = parseTimer(raw);
+        if (parsed) {
+          manager.ensureTimer(parsed);
+          timerData = parsed;
+        }
+      }
+      if (!timerData) {
+        return;
+      }
+      tickTimerWidget(element, manager.getTimeLeft(timerData), editor.t('timer.timeExpired'));
+    });
+  };
+
+  const persistTimer = (timer: Timer) => {
+    editor.host
+      .querySelectorAll<HTMLElement>('[data-ocm-type="timer"], .ocm-timer-atom')
+      .forEach((el) => {
+        const widget = el.querySelector<HTMLElement>('.timer-widget') ?? el;
+        const id = widget.dataset.timerId;
+        if (id !== timer.id) {
+          return;
+        }
+        const path = pathFromEl(el);
+        if (!path) {
+          return;
+        }
+        editor.run(() => [
+          {
+            type: 'set_attrs',
+            path,
+            attrs: { payload: serializeTimer(timer), title: timer.title },
+          },
+        ]);
+      });
+  };
+
+  const handleContextAction = (action: string, target: Timer) => {
+    switch (action) {
+      case 'edit-timer': {
+        menu.showEditTimerForm(target);
+        break;
+      }
+      case 'copy-timer': {
+        try {
+          manager.copyTimer(target.id);
+          editor.notify(editor.t('timer.timerCopiedSuccessfully'));
+          refreshTimers();
+        } catch {
+          editor.notify(editor.t('timer.failedToCopyTimer'));
+        }
+        break;
+      }
+      case 'export-timer': {
+        try {
+          downloadJson(`timer-${target.id}.json`, JSON.stringify(target, null, 2));
+        } catch {
+          editor.notify(editor.t('export.exportFailed'));
+        }
+        break;
+      }
+      case 'import-timer': {
+        pickJsonFile((text) => {
+          try {
+            manager.importTimer(text);
+            editor.notify(editor.t('timer.timerImportedSuccessfully'));
+            refreshTimers();
+          } catch {
+            editor.notify(editor.t('common.importFailed'));
+          }
+        });
+        break;
+      }
+      case 'delete-timer': {
+        manager.deleteTimer(target.id);
+        refreshTimers();
+        break;
+      }
+    }
+  };
+
+  return definePlugin({
+    name: 'timer',
+    commands: {
+      insertTimer: () => {
+        openTimerMenu?.();
+        return null;
+      },
+    },
+    hotkeys: [{ keys: 'Mod-Alt-d', command: 'insertTimer', description: 'Insert timer' }],
+    nodes: [
+      {
+        name: 'timer',
+        group: 'atom',
+        atom: true,
+        attrs: { payload: '', title: 'Timer', align: '' },
+      },
+    ],
+    setup(ctx) {
+      editor = ctx.editor;
+      manager = new TimerManager(editor);
+      menu = new TimerMenu(manager, editor, ctx.scope);
+      contextMenu = ctx.own(new TimerContextMenu(manager, editor));
+
+      openTimerMenu = () => {
+        menu.show((timerData: Timer) => {
+          manager.ensureTimer(timerData);
+          editor.run(
+            insertAtomAfter('timer', {
+              payload: serializeTimer(timerData),
+              title: timerData.title,
+              align: '',
+            })
+          );
+          persistTimer(timerData);
+        });
+      };
+
+      ctx.toolbar.add({
+        id: 'timer',
         icon: timerIcon,
-        title: this.editor.t('Timer'),
-        onClick: () => this.showTimerMenu(),
+        title: editor.t('timer.title'),
+        menu: 'insert',
+        order: 46,
+        onClick: () => openTimerMenu?.(),
       });
 
-      toolbar.appendChild(this.toolbarButton);
-    }
-  }
-
-  private setupEventListeners(): void {
-    if (!this.editor) return;
-
-    // Обработка кликов по таймерам
-    this.editor.getContainer().addEventListener('click', (e) => this.handleTimerClick(e));
-
-    // Обработка контекстного меню
-    this.editor.getContainer().addEventListener('contextmenu', (e) => this.handleContextMenu(e));
-  }
-
-  private handleTimerClick(e: MouseEvent): void {
-    const target = e.target as Element;
-    const timerElement = target.closest('.timer-widget');
-
-    if (!timerElement) return;
-
-    const timerId = timerElement.getAttribute('data-timer-id');
-    if (!timerId) return;
-
-    const timer = this.manager.getTimer(timerId);
-    if (!timer) return;
-
-    // Открываем форму редактирования
-    this.menu?.showEditTimerForm(timer);
-  }
-
-  private handleContextMenu(e: MouseEvent): void {
-    const target = e.target as Element;
-    const timerElement = target.closest('.timer-widget');
-
-    if (!timerElement) return;
-
-    e.preventDefault();
-
-    const timerId = timerElement.getAttribute('data-timer-id');
-    if (!timerId) return;
-
-    const timer = this.manager.getTimer(timerId);
-    if (!timer) return;
-
-    this.contextMenu?.show(e, timer, (action: string) => {
-      this.handleContextMenuAction(action, timer);
-    });
-  }
-
-  private handleContextMenuAction(action: string, target: Timer): void {
-    switch (action) {
-      case 'edit-timer':
-        this.menu?.showEditTimerForm(target);
-        break;
-      case 'copy-timer':
-        try {
-          this.manager.copyTimer(target.id);
-          this.editor?.showSuccessNotification(
-            this.editor?.t('Timer copied successfully') || 'Timer copied successfully'
-          );
-          this.refreshTimers();
-        } catch (error) {
-          this.editor?.showErrorNotification(
-            this.editor?.t('Failed to copy timer') || 'Failed to copy timer'
-          );
+      ctx.onDom('host', 'click', (e) => {
+        const timerElement = (e.target as Element).closest<HTMLElement>('.timer-widget');
+        if (!timerElement) {
+          return;
         }
-        break;
-      case 'export-timer':
-        this.showExportDialog(target);
-        break;
-      case 'import-timer':
-        this.showImportDialog();
-        break;
-      case 'delete-timer':
-        this.manager.deleteTimer(target.id);
-        this.refreshTimers();
-        break;
-    }
-  }
-
-  private showTimerMenu(): void {
-    if (!this.editor) return;
-
-    // Сохраняем позицию курсора перед открытием меню
-    const savedPosition = this.editor.saveCursorPosition();
-
-    // Показываем меню таймеров
-    this.menu?.show((timerData: Timer) => {
-      if (this.editor) {
-        // Восстанавливаем позицию курсора перед вставкой
-        if (savedPosition) {
-          this.editor.restoreCursorPosition(savedPosition);
+        const timerId = timerElement.dataset.timerId;
+        if (!timerId) {
+          return;
         }
-        this.insertTimer(timerData);
-      }
-    });
-  }
-
-  private insertTimer(timerData: Timer): void {
-    if (!this.editor) return;
-
-    const timerHtml = this.manager.generateTimerHTML(timerData);
-
-    // Используем встроенный метод insertContent для вставки таймера
-    this.editor.insertContent(timerHtml);
-    this.editor.insertContent(createLineBreak());
-  }
-
-  private refreshTimers(): void {
-    const timerElements = this.editor?.getContainer().querySelectorAll('.timer-widget');
-
-    timerElements?.forEach((element) => {
-      const timerId = element.getAttribute('data-timer-id');
-      if (!timerId) return;
-
-      const timerData = this.manager.getTimer(timerId);
-      if (!timerData) return;
-
-      // Обновляем весь таймер используя метод из менеджера
-      const updatedHtml = this.manager.generateTimerHTML(timerData);
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = updatedHtml;
-
-      // Получаем новый элемент таймера и скрипт
-      const newTimerElement = tempDiv.firstElementChild;
-      const newScript = tempDiv.querySelector('script');
-
-      if (newTimerElement && element.parentNode) {
-        // Удаляем старый скрипт, если он есть
-        const oldScript = element.parentNode.querySelector(`script[data-timer-id="${timerId}"]`);
-        if (oldScript) {
-          oldScript.remove();
+        const timer = manager.getTimer(timerId);
+        if (timer) {
+          menu.showEditTimerForm(timer);
         }
+      });
 
-        // Заменяем элемент таймера
-        if (element.parentNode) {
-          element.parentNode.replaceChild(newTimerElement, element);
+      ctx.onDom('host', 'contextmenu', (e) => {
+        const timerElement = (e.target as Element).closest<HTMLElement>('.timer-widget');
+        if (!timerElement) {
+          return;
         }
-
-        // Добавляем новый скрипт, если он есть
-        if (newScript && element.parentNode) {
-          newScript.setAttribute('data-timer-id', timerId);
-          element.parentNode.appendChild(newScript);
+        e.preventDefault();
+        const timerId = timerElement.dataset.timerId;
+        if (!timerId) {
+          return;
         }
-      }
-    });
-  }
+        const timer = manager.getTimer(timerId);
+        if (!timer) {
+          return;
+        }
+        contextMenu.show(e, timer, (action) => {
+          handleContextAction(action, timer);
+        });
+      });
 
-  private startTimerUpdates(): void {
-    // Обновляем таймеры каждую секунду
-    setInterval(() => {
-      this.refreshTimers();
-    }, 1000);
-  }
-
-  private showExportDialog(timer: Timer): void {
-    try {
-      const data = JSON.stringify(timer, null, 2);
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `timer-${timer.id}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      this.editor?.showErrorNotification(this.editor.t('Export failed') || 'Export failed');
-    }
-  }
-
-  private showImportDialog(): void {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const timer = JSON.parse(e.target?.result as string);
-            this.manager.importTimer(timer);
-            this.editor?.showSuccessNotification(
-              this.editor?.t('Timer imported successfully') || 'Timer imported successfully'
-            );
-            this.refreshTimers();
-          } catch (error) {
-            this.editor?.showErrorNotification(this.editor?.t('Import failed') || 'Import failed');
-          }
-        };
-        reader.readAsText(file);
-      }
-    };
-    input.click();
-  }
-
-  public destroy(): void {
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
-    }
-
-    if (this.menu) {
-      this.menu.destroy();
-      this.menu = null;
-    }
-
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
-
-    this.editor?.off('timer');
-    this.editor = null;
-    this.manager = null!;
-    this.toolbarButton = null;
-  }
+      ctx.interval(1000, refreshTimers);
+    },
+    widgets: {
+      timer: {
+        render(attrs): ViewSpec {
+          return foreign((host, scope) => {
+            const payload = parseTimer(attrs.payload);
+            if (payload) {
+              manager.ensureTimer(payload);
+            }
+            const align = attrString(attrs.align, '');
+            const spec = payload
+              ? manager.timerView(payload)
+              : h('div', { class: 'timer-widget' }, attrString(attrs.title, 'Timer'));
+            mountTimerView(host, spec, scope, align);
+            const widget = host.querySelector('.timer-widget');
+            if (widget instanceof HTMLElement && payload) {
+              widget.dataset.timerPayload = serializeTimer(payload);
+            }
+          });
+        },
+      },
+    },
+    publish: {
+      node: 'timer',
+      runtime: 'timer',
+      render: (attrs) => {
+        const payload = parseTimer(attrs.payload);
+        if (!payload) {
+          return h('div', { attrs: { 'data-node': 'timer' } });
+        }
+        manager.ensureTimer(payload);
+        return manager.timerView(payload, { align: attrString(attrs.align, '') });
+      },
+    },
+  });
 }

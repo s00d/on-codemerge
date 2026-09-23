@@ -12,77 +12,54 @@ The Image Plugin provides comprehensive image management capabilities for the on
 - **File Type Support**: All common image formats (JPEG, PNG, GIF, WebP, etc.)
 - **Responsive Images**: Automatic responsive behavior
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, ImagePlugin } from 'on-codemerge';
+import { Editor, ImagePlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new ImagePlugin());
+const editor = new Editor(container, {
+  plugins: [ImagePlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['ImagePlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Image Upload
+Factory: `ImagePlugin()`.
 
-```javascript
-// Insert image programmatically
-editor.executeCommand('image', {
-  src: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...',
-  alt: 'My Image',
-  className: 'max-w-full h-auto rounded-lg'
-});
+| Command       |                                 |
+| ------------- | ------------------------------- |
+| `insertImage` | `editor.command('insertImage')` |
 
-// Handle file drop event
-editor.on('file-drop', (e) => {
-  if (e.type.startsWith('image/')) {
-    // Image will be automatically inserted
-    console.log('Image dropped:', e.content);
-  }
-});
-```
+### Keyboard shortcuts
 
-### Image Operations
+| Shortcut    | Command       |
+| ----------- | ------------- |
+| `Mod-Alt-i` | `insertImage` |
 
-```javascript
-// Get all images in editor
-const images = editor.getContainer().querySelectorAll('img');
-
-// Set image properties
-const image = document.querySelector('img');
-image.style.float = 'left';
-image.style.marginRight = '1rem';
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+I` | Insert image | `image` |
+> **Note:** Command `insertImage` (not `image`).
 
 ## Context Menu
 
 Right-click on an image to access:
 
 ### Alignment Options
+
 - **Align Left**: Float image to the left with right margin
 - **Align Center**: Center image with auto margins
 - **Align Right**: Float image to the right with left margin
 
 ### Image Operations
+
 - **Remove**: Delete the image from the editor
 
 ## Image Upload Process
@@ -90,12 +67,15 @@ Right-click on an image to access:
 The plugin handles image upload through several methods:
 
 ### 1. Toolbar Button
+
 Click the image button in the toolbar to open file selection dialog.
 
 ### 2. Drag & Drop
+
 Drag image files directly into the editor area.
 
 ### 3. Programmatic Upload
+
 Use the API to insert images programmatically.
 
 ## Image Resizing
@@ -121,66 +101,52 @@ const dataUrl = await imageUploader.readFileAsDataUrl(file);
 // Returns base64 data URL
 ```
 
-## Events
-
-```javascript
-// Listen to image events
-editor.on('image:inserted', (image) => {
-  console.log('Image inserted:', image);
-});
-
-editor.on('image:removed', (image) => {
-  console.log('Image removed:', image);
-});
-
-editor.on('image:resized', (image, dimensions) => {
-  console.log('Image resized:', image, dimensions);
-});
-
-// File drop events
-editor.on('file-drop', (e) => {
-  if (e.type.startsWith('image/')) {
-    console.log('Image file dropped:', e.content);
-  }
-});
-```
-
 ## Examples
 
 ### Basic Image
 
 ```html
-<img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..." 
-     alt="Sample Image" 
-     class="max-w-full h-auto rounded-lg">
+<img
+  src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ..."
+  alt="Sample Image"
+  class="max-w-full h-auto rounded-lg"
+/>
 ```
 
 ### Aligned Image
 
 ```html
 <!-- Left aligned -->
-<img src="image.jpg" 
-     alt="Left aligned image" 
-     style="float: left; margin-right: 1rem; max-width: 100%; height: auto; border-radius: 0.5rem;">
+<img
+  src="image.jpg"
+  alt="Left aligned image"
+  style="float: left; margin-right: 1rem; max-width: 100%; height: auto; border-radius: 0.5rem;"
+/>
 
 <!-- Center aligned -->
-<img src="image.jpg" 
-     alt="Center aligned image" 
-     style="float: none; display: block; margin-left: auto; margin-right: auto; max-width: 100%; height: auto; border-radius: 0.5rem;">
+<img
+  src="image.jpg"
+  alt="Center aligned image"
+  style="float: none; display: block; margin-left: auto; margin-right: auto; max-width: 100%; height: auto; border-radius: 0.5rem;"
+/>
 
 <!-- Right aligned -->
-<img src="image.jpg" 
-     alt="Right aligned image" 
-     style="float: right; margin-left: 1rem; max-width: 100%; height: auto; border-radius: 0.5rem;">
+<img
+  src="image.jpg"
+  alt="Right aligned image"
+  style="float: right; margin-left: 1rem; max-width: 100%; height: auto; border-radius: 0.5rem;"
+/>
 ```
 
 ### Responsive Image
 
 ```html
-<img src="image.jpg" 
-     alt="Responsive image" 
-     class="max-w-full h-auto rounded-lg"
-     style="max-width: 100%; height: auto;">
+<img
+  src="image.jpg"
+  alt="Responsive image"
+  class="max-w-full h-auto rounded-lg"
+  style="max-width: 100%; height: auto;"
+/>
 ```
 
 ## Image Formats Support
@@ -200,6 +166,7 @@ The plugin supports all common image formats:
 ### Default Styles
 
 Images get the following default classes:
+
 - `max-w-full` - Maximum width 100%
 - `h-auto` - Automatic height
 - `rounded-lg` - Rounded corners
@@ -228,22 +195,13 @@ Images get the following default classes:
 }
 ```
 
-## Configuration Options
-
-```javascript
-const imagePlugin = new ImagePlugin();
-
-// The plugin can be configured with custom options
-// (Currently uses default configuration)
-```
-
 ## Integration Examples
 
 ### React Integration
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, ImagePlugin } from 'on-codemerge';
+import { Editor, ImagePlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -251,8 +209,8 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new ImagePlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(ImagePlugin());
     }
 
     return () => {
@@ -274,13 +232,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, ImagePlugin } from 'on-codemerge';
+import { Editor, ImagePlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new ImagePlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [ImagePlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -352,5 +310,5 @@ editor.on('file-drop', (e) => {
 
 ## License
 
-MIT License - see LICENSE file for details. 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.
+MIT License - see LICENSE file for details.

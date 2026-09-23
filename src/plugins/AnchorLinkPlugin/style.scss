@@ -1,7 +1,9 @@
+@reference "../../tailwind.css";
+
 .anchor-link {
-  color: #2563eb;
-  text-decoration: none;
-}
-.anchor-link:hover {
-  text-decoration: underline;
+  @apply text-ocm-accent no-underline;
+
+  &:hover {
+    @apply underline;
+  }
 }

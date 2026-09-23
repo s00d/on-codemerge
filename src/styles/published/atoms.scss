@@ -1,0 +1,221 @@
+/* Published atom / mark skins — used by editor + standalone public.css.
+   Loaded via published-sheet.scss (meta.load-css + @reference).
+   Shared skins also imported from plugin style.scss for VitePress. */
+
+/* —— Tables (not-prose on host so prose table defaults don't fight) ——
+   `table` (display:table) must stay explicit: hosts like VitePress `.vp-doc table
+   { display:block }` otherwise stretch the border while columns stay content-sized. */
+table.html-editor-table {
+  @apply table my-4 w-full table-fixed border-collapse border border-ocm-border bg-ocm-surface shadow-sm;
+
+  html.dark & {
+    @apply border-zinc-700 bg-zinc-800 shadow-md;
+  }
+
+  td,
+  th {
+    @apply relative h-6 min-w-0 cursor-text border border-ocm-border p-2 align-top;
+
+    html.dark & {
+      @apply border-zinc-600;
+    }
+
+    p {
+      @apply m-0 p-0;
+    }
+  }
+
+  th {
+    @apply border-b-2 bg-ocm-surface-muted font-semibold text-ocm-text;
+
+    html.dark & {
+      @apply bg-zinc-700 text-zinc-100;
+    }
+  }
+
+  tbody tr:nth-child(even) {
+    @apply bg-ocm-surface-muted;
+
+    html.dark & {
+      @apply bg-zinc-900/40;
+    }
+  }
+
+  tbody tr:hover {
+    @apply bg-zinc-100;
+
+    html.dark & {
+      @apply bg-zinc-700/60;
+    }
+  }
+
+  &.table-responsive {
+    @media (max-width: 768px) {
+      @apply block overflow-x-auto whitespace-nowrap;
+    }
+  }
+}
+
+.html-editor-table.table-modern {
+  @apply overflow-hidden rounded border-0 shadow-sm;
+
+  html.dark & {
+    @apply shadow-md;
+  }
+
+  td,
+  th {
+    @apply border-0 border-r border-ocm-border;
+
+    html.dark & {
+      @apply border-zinc-600;
+    }
+
+    &:last-child {
+      @apply border-r-0;
+    }
+  }
+}
+
+.html-editor-table.table-bordered {
+  td,
+  th {
+    @apply border-2 border-ocm-border;
+
+    html.dark & {
+      @apply border-zinc-500;
+    }
+  }
+}
+
+.html-editor-table.table-striped {
+  tbody tr:nth-child(even) {
+    @apply bg-sky-50;
+
+    html.dark & {
+      @apply bg-sky-950/40;
+    }
+  }
+
+  tbody tr:nth-child(odd) {
+    @apply bg-ocm-surface;
+
+    html.dark & {
+      @apply bg-zinc-800;
+    }
+  }
+
+  th {
+    @apply bg-sky-100 text-sky-900;
+
+    html.dark & {
+      @apply bg-sky-900 text-sky-100;
+    }
+  }
+}
+
+/* —— Math (MathML, no KaTeX) —— */
+.math-container {
+  @apply relative mb-2.5 box-border flex w-fit max-w-full items-center justify-center overflow-visible rounded-ocm border border-ocm-border bg-ocm-surface px-3 py-2;
+}
+
+.ocm-math,
+.ocm-math-content {
+  @apply text-center text-ocm-text;
+
+  math {
+    @apply max-w-full;
+  }
+}
+
+.ocm-math-error {
+  @apply text-left text-sm text-ocm-danger;
+}
+
+.math-wrapper {
+  @apply my-2.5 block w-full;
+}
+
+/* —— Track changes —— */
+.tracked-insert {
+  @apply outline outline-1 outline-dashed outline-lime-500;
+}
+
+.tracked-delete {
+  @apply outline outline-1 outline-dashed outline-red-400;
+}
+
+/* —— Mentions / footnotes (export classes from io/html.ts) —— */
+.ocm-mention {
+  @apply rounded-ocm-sm bg-ocm-accent-soft px-1 text-ocm-accent;
+}
+
+.ocm-footnote {
+  @apply cursor-pointer align-super text-[0.75em] leading-none text-ocm-accent hover:text-sky-600;
+
+  html.dark & {
+    @apply hover:text-sky-300;
+  }
+}
+
+.ocm-footnotes {
+  @apply mt-8 list-none border-t border-ocm-border pt-8;
+
+  &.is-empty {
+    @apply text-ocm-text-muted;
+  }
+}
+
+.ocm-footnote-item {
+  @apply mb-2 text-sm text-ocm-text-muted;
+}
+
+/* —— Charts —— */
+.chart-container {
+  @apply relative min-h-[300px] overflow-hidden rounded-lg border border-ocm-border bg-ocm-surface shadow-sm;
+}
+
+/* —— Code (editor widget + exported pre) —— */
+.code-block {
+  @apply my-4 overflow-hidden rounded-ocm border border-ocm-border font-mono;
+
+  .code-header {
+    @apply flex items-center justify-between border-b border-ocm-border bg-ocm-surface-muted px-4 py-2;
+  }
+
+  .code-language {
+    @apply text-sm text-ocm-text-muted transition-colors hover:text-ocm-text;
+  }
+
+  .copy-button {
+    @apply rounded-ocm-sm p-1.5 text-ocm-text-muted transition-colors hover:bg-ocm-surface-muted hover:text-ocm-text;
+  }
+
+  pre {
+    @apply m-0 overflow-x-auto bg-ocm-surface-muted p-4;
+    tab-size: 2;
+  }
+
+  code {
+    @apply block text-sm leading-relaxed outline-none;
+  }
+}
+
+.code-block-pre {
+  @apply whitespace-pre;
+  tab-size: 2;
+
+  code {
+    @apply block overflow-x-auto bg-transparent p-4;
+  }
+}
+
+/* —— Forms / Timer / Calendar atoms (shared skins) —— */
+@import '../atoms/form.scss';
+@import '../atoms/timer.scss';
+@import '../atoms/calendar.scss';
+
+/* —— PDF —— */
+.pdf-embed-container.ocm-resize--selected {
+  @apply outline-none;
+}

@@ -1,4 +1,5 @@
-import { type Token, TokenType, type LanguageDefinition } from '../types';
+import { TokenType } from '../types';
+import type { Token, LanguageDefinition } from '../types';
 
 export function tokenize(code: string, language: LanguageDefinition): Token[] {
   const tokens: Token[] = [];
@@ -15,7 +16,7 @@ export function tokenize(code: string, language: LanguageDefinition): Token[] {
 
 function findNextToken(code: string, language: LanguageDefinition): Token {
   // Check for whitespace first
-  const whitespace = code.match(/^\s+/);
+  const whitespace = /^\s+/.exec(code);
   if (whitespace) {
     return { type: TokenType.Text, value: whitespace[0] };
   }
@@ -45,8 +46,9 @@ function findNextToken(code: string, language: LanguageDefinition): Token {
   }
 
   // Check for keywords
+  // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
   if (language.keywords) {
-    const word = code.match(/^[a-zA-Z_]\w*/);
+    const word = /^[a-zA-Z_]\w*/.exec(code);
     if (word && language.keywords.includes(word[0])) {
       return { type: TokenType.Keyword, value: word[0] };
     }

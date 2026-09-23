@@ -1,4 +1,4 @@
- # Timer Plugin
+# Timer Plugin
 
 The Timer Plugin provides comprehensive countdown timer functionality for the on-CodeMerge editor, allowing users to create, edit, and manage countdown timers with real-time updates through an intuitive interface.
 
@@ -21,37 +21,54 @@ The Timer Plugin provides comprehensive countdown timer functionality for the on
 - **Dark Mode Support**: Automatic theme adaptation
 - **Expiration Handling**: Automatic display when timer expires
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, TimerPlugin } from 'on-codemerge';
+import { Editor, TimerPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new TimerPlugin());
+const editor = new Editor(container, {
+  plugins: [TimerPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['TimerPlugin']" />
 
+## Public API (v2)
+
+Factory: `TimerPlugin()`.
+
+| Command       |                                 |
+| ------------- | ------------------------------- |
+| `insertTimer` | `editor.command('insertTimer')` |
+
+### Keyboard shortcuts
+
+| Shortcut    | Command       |
+| ----------- | ------------- |
+| `Mod-Alt-d` | `insertTimer` |
+
+> **Note:** No `timer:*` editor events — updates live on the atom.
+
 ## User Interface
 
 ### Toolbar Button
+
 The plugin adds a timer button to the editor toolbar. Click it to open the timer creation menu.
 
 ### Context Menu
+
 Right-click on any timer to access the context menu with the following options:
 
 #### Timer Actions
+
 - **Edit Timer**: Modify timer details including title, description, target date/time, and category
 - **Copy Timer**: Duplicate the timer with automatic naming
 - **Export Timer**: Download timer data as JSON file
@@ -59,126 +76,11 @@ Right-click on any timer to access the context menu with the following options:
 - **Delete Timer**: Remove the timer
 
 ### Modal Forms
+
 The plugin uses modal forms for creating and editing timers:
 
 - **Timer Form**: Comprehensive form with all timer fields including validation
 - **Real-time Preview**: Live preview of countdown display during creation/editing
-
-## API Reference
-
-### Timer Methods
-
-```javascript
-// Create a new timer
-const timer = timerManager.createTimer({
-  title: 'Project Deadline',
-  description: 'Final submission deadline',
-  targetDate: new Date('2024-12-31'),
-  targetTime: '23:59',
-  category: 'Work',
-  tags: ['deadline', 'important']
-});
-
-// Get all timers
-const timers = timerManager.getTimers();
-
-// Get specific timer
-const timer = timerManager.getTimer(timerId);
-
-// Update timer
-timerManager.updateTimer(timerId, {
-  title: 'Updated Project Deadline',
-  targetDate: new Date('2024-12-30')
-});
-
-// Delete timer
-timerManager.deleteTimer(timerId);
-
-// Copy timer (new feature)
-const copiedTimer = timerManager.copyTimer(timerId);
-
-// Export timer data
-const exportData = timerManager.exportTimer(timerId);
-
-// Import timer data
-const newTimer = timerManager.importTimer(exportData);
-
-// Get time left for a timer
-const timeLeft = timerManager.getTimeLeft(timer);
-console.log(`${timeLeft.days} days, ${timeLeft.hours} hours remaining`);
-```
-
-### Timer Data Structure
-
-```typescript
-interface Timer {
-  id: string;           // Unique timer identifier
-  title: string;        // Timer title
-  description?: string; // Timer description
-  targetDate: Date;     // Target date
-  targetTime: string;   // Target time (HH:mm format)
-  color?: string;       // Timer color (hex)
-  category?: string;    // Timer category
-  tags?: string[];      // Timer tags
-  isActive: boolean;    // Timer active status
-  createdAt: number;    // Creation timestamp
-  updatedAt: number;    // Last update timestamp
-}
-
-interface TimerTimeLeft {
-  days: number;         // Days remaining
-  hours: number;        // Hours remaining
-  minutes: number;      // Minutes remaining
-  seconds: number;      // Seconds remaining
-  isExpired: boolean;   // Whether timer has expired
-}
-```
-
-### Form Data Interfaces
-
-```typescript
-interface CreateTimerData {
-  title: string;
-  description?: string;
-  targetDate: Date;
-  targetTime: string;
-  color?: string;
-  category?: string;
-  tags?: string[];
-}
-
-interface UpdateTimerData {
-  title?: string;
-  description?: string;
-  targetDate?: Date;
-  targetTime?: string;
-  color?: string;
-  category?: string;
-  tags?: string[];
-  isActive?: boolean;
-}
-```
-
-## Events
-
-```javascript
-// Listen to timer events
-editor.on('timer:created', (timer) => {
-  console.log('Timer created:', timer);
-});
-
-editor.on('timer:updated', (timer) => {
-  console.log('Timer updated:', timer);
-});
-
-editor.on('timer:deleted', (timerId) => {
-  console.log('Timer deleted:', timerId);
-});
-
-editor.on('timer:expired', (timer) => {
-  console.log('Timer expired:', timer);
-});
-```
 
 ## Examples
 
@@ -218,9 +120,7 @@ editor.on('timer:expired', (timer) => {
 ### Timer with Custom Styling
 
 ```html
-<div class="timer-widget" 
-     data-timer-id="urgent-deadline"
-     style="--timer-color: #dc2626">
+<div class="timer-widget" data-timer-id="urgent-deadline" style="--timer-color: #dc2626">
   <div class="timer-header">
     <h3 class="timer-title">Urgent Deadline</h3>
     <div class="timer-category">Critical</div>
@@ -245,7 +145,7 @@ const timer = timerManager.createTimer({
   targetTime: '14:00',
   category: 'Meeting',
   tags: ['team', 'sync'],
-  color: '#3b82f6'
+  color: '#3b82f6',
 });
 
 // Copy a timer
@@ -274,7 +174,7 @@ if (timeLeft.isExpired) {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, TimerPlugin } from 'on-codemerge';
+import { Editor, TimerPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -282,14 +182,14 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new TimerPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(TimerPlugin());
+
       // Listen to timer events
       editorInstance.current.on('timer:created', (timer) => {
         console.log('New timer:', timer);
       });
-      
+
       editorInstance.current.on('timer:expired', (timer) => {
         console.log('Timer expired:', timer);
       });
@@ -314,14 +214,14 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, TimerPlugin } from 'on-codemerge';
+import { Editor, TimerPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new TimerPlugin());
-    
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [TimerPlugin()] in Editor(...) */;
+
     // Listen to timer events
     this.editor.on('timer:expired', (timer) => {
       this.$notify({
@@ -340,15 +240,10 @@ export default {
 </script>
 ```
 
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+D` | Insert timer | `timer` |
-
 ## Timer Widget Structure
 
 ### HTML Structure
+
 ```html
 <div class="timer-widget" data-timer-id="timer-123">
   <div class="timer-header">
@@ -384,6 +279,7 @@ export default {
 ```
 
 ### CSS Classes
+
 - `.timer-widget`: Main timer container
 - `.timer-header`: Header with title and category
 - `.timer-title`: Timer title
@@ -410,7 +306,7 @@ export default {
   --timer-color: #3b82f6; /* Default timer color */
 }
 
-.timer-widget[style*="--timer-color: #dc2626"] {
+.timer-widget[style*='--timer-color: #dc2626'] {
   --timer-color: #dc2626; /* Red for urgent timers */
 }
 ```
@@ -475,15 +371,15 @@ The timer plugin automatically updates countdown displays every second using emb
 
 ```javascript
 // Automatic timer update script (embedded in each timer)
-(function() {
+(function () {
   const timerId = 'timer-123';
   const targetDate = new Date('2024-12-31T23:59:00');
   const expiredText = 'Time expired';
-  
+
   function updateTimer() {
     const now = new Date();
     const diff = targetDate.getTime() - now.getTime();
-    
+
     if (diff <= 0) {
       // Timer expired
       const countdownEl = document.getElementById('timer-countdown-' + timerId);
@@ -492,20 +388,26 @@ The timer plugin automatically updates countdown displays every second using emb
       }
       return;
     }
-    
+
     // Update countdown values
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
     const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-    
+
     // Update DOM elements
     document.getElementById('timer-days-' + timerId).textContent = days;
-    document.getElementById('timer-hours-' + timerId).textContent = hours.toString().padStart(2, '0');
-    document.getElementById('timer-minutes-' + timerId).textContent = minutes.toString().padStart(2, '0');
-    document.getElementById('timer-seconds-' + timerId).textContent = seconds.toString().padStart(2, '0');
+    document.getElementById('timer-hours-' + timerId).textContent = hours
+      .toString()
+      .padStart(2, '0');
+    document.getElementById('timer-minutes-' + timerId).textContent = minutes
+      .toString()
+      .padStart(2, '0');
+    document.getElementById('timer-seconds-' + timerId).textContent = seconds
+      .toString()
+      .padStart(2, '0');
   }
-  
+
   // Update every second
   updateTimer();
   setInterval(updateTimer, 1000);
@@ -531,8 +433,8 @@ const timers = [
     tags: ['deadline', 'important'],
     isActive: true,
     createdAt: 1703123456789,
-    updatedAt: 1703123456789
-  }
+    updatedAt: 1703123456789,
+  },
 ];
 ```
 
@@ -546,7 +448,7 @@ try {
   const timer = timerManager.createTimer({
     title: '', // Empty title will throw error
     targetDate: new Date('2024-12-31'),
-    targetTime: '23:59'
+    targetTime: '23:59',
   });
 } catch (error) {
   console.error('Timer creation failed:', error.message);

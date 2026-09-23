@@ -1,0 +1,115 @@
+/* Compact calendar atom — keep in sync with CalendarPlugin/style.scss */
+
+.calendar-widget {
+  @apply my-3 max-w-md rounded-xl border border-ocm-border bg-ocm-surface font-sans;
+  border-left: 3px solid var(--color-ocm-accent, #0284c7);
+}
+
+.calendar-widget .calendar-header {
+  @apply flex items-center justify-between gap-2 border-b border-ocm-border-subtle px-3 py-2;
+}
+
+.calendar-widget .calendar-title {
+  @apply m-0 truncate text-sm font-semibold tracking-tight text-ocm-text;
+}
+
+.calendar-widget .calendar-body {
+  @apply p-2;
+}
+
+.calendar-widget .calendar-events {
+  @apply flex flex-col gap-1;
+}
+
+.calendar-widget .calendar-empty {
+  @apply px-2 py-4 text-center text-xs text-ocm-text-muted;
+}
+
+.calendar-event {
+  @apply relative cursor-pointer rounded-lg border border-transparent px-2.5 py-2 pl-3 transition-colors duration-100;
+
+  &:hover {
+    @apply bg-ocm-surface-hover;
+  }
+
+  &::before {
+    content: '';
+    @apply absolute top-2 bottom-2 left-0 w-0.5 rounded-full;
+    background: var(--event-color, var(--color-ocm-accent, #0284c7));
+  }
+}
+
+.event-title-row {
+  @apply flex items-center gap-1.5;
+}
+
+.event-title {
+  @apply m-0 min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-ocm-text;
+}
+
+.event-priority {
+  @apply shrink-0 rounded-md px-1.5 py-0.5 text-[10px] leading-none font-semibold uppercase;
+
+  &.priority-high {
+    @apply bg-ocm-danger-soft text-ocm-danger;
+  }
+
+  &.priority-medium {
+    @apply bg-amber-50 text-amber-700;
+
+    html.dark & {
+      @apply bg-amber-950/50 text-amber-300;
+    }
+  }
+
+  &.priority-low {
+    @apply bg-emerald-50 text-emerald-700;
+
+    html.dark & {
+      @apply bg-emerald-950/50 text-emerald-300;
+    }
+  }
+}
+
+.event-category {
+  @apply shrink-0 rounded-md bg-ocm-accent-soft px-1.5 py-0.5 text-[10px] leading-none font-semibold text-ocm-accent;
+}
+
+.event-sub {
+  @apply mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs text-ocm-text-muted;
+}
+
+.event-date {
+  @apply font-medium text-ocm-text;
+}
+
+.event-time {
+  @apply tabular-nums;
+}
+
+.event-description {
+  @apply w-full text-xs leading-snug text-ocm-text-muted;
+}
+
+.event-location,
+.event-duration,
+.event-attendees,
+.event-reminder {
+  @apply text-ocm-text-muted;
+}
+
+.event-reminder {
+  @apply font-medium text-amber-600;
+
+  html.dark & {
+    @apply text-amber-400;
+  }
+}
+
+.event-tags {
+  @apply mt-1.5 flex flex-wrap gap-1;
+}
+
+.event-tag {
+  @apply rounded-md bg-ocm-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-ocm-text-muted;
+}

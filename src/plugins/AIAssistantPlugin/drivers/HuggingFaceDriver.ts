@@ -7,7 +7,7 @@ export interface HuggingFaceOptions extends DriverOptions {
 }
 
 export class HuggingFaceDriver implements AIDriver<HuggingFaceOptions> {
-  private apiKey: string;
+  private readonly apiKey: string;
 
   constructor(apiKey: string) {
     this.apiKey = apiKey;
@@ -56,7 +56,7 @@ export class HuggingFaceDriver implements AIDriver<HuggingFaceOptions> {
       topP: {
         type: 'number',
         label: 'Top P',
-        default: 1.0,
+        default: 1,
       },
       topK: {
         type: 'number',
@@ -66,14 +66,14 @@ export class HuggingFaceDriver implements AIDriver<HuggingFaceOptions> {
       repetitionPenalty: {
         type: 'number',
         label: 'Repetition Penalty',
-        default: 1.0,
+        default: 1,
       },
     };
   }
 
   async generateText(prompt: string, options?: HuggingFaceOptions): Promise<string> {
     const response = await fetch(
-      `https://api-inference.huggingface.co/models/${options?.model || 'gpt2'}`,
+      `https://api-inference.huggingface.co/models/${options?.model ?? 'gpt2'}`,
       {
         method: 'POST',
         headers: {
@@ -83,11 +83,11 @@ export class HuggingFaceDriver implements AIDriver<HuggingFaceOptions> {
         body: JSON.stringify({
           inputs: prompt,
           parameters: {
-            max_length: options?.maxLength || 100,
-            temperature: options?.temperature || 0.7,
-            top_p: options?.topP || 1.0,
-            top_k: options?.topK || 50,
-            repetition_penalty: options?.repetitionPenalty || 1.0,
+            max_length: options?.maxLength ?? 100,
+            temperature: options?.temperature ?? 0.7,
+            top_p: options?.topP ?? 1,
+            top_k: options?.topK ?? 50,
+            repetition_penalty: options?.repetitionPenalty ?? 1,
           },
         }),
       }
@@ -97,7 +97,14 @@ export class HuggingFaceDriver implements AIDriver<HuggingFaceOptions> {
       throw new Error('Failed to generate text with Hugging Face');
     }
 
-    const data = await response.json();
-    return data[0].generated_text;
+    const data: unknown = await response.json();
+    if (!Array.isArray(data) || data.length === 0) {
+      throw new Error('Invalid AI response');
+    }
+    const first = data[0] as { generated_text?: string };
+    if (typeof first.generated_text !== 'string') {
+      throw new TypeError('Invalid AI response');
+    }
+    return first.generated_text;
   }
 }

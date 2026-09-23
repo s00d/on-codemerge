@@ -1,12 +1,18 @@
 import { defineConfig } from 'vite';
+import { scssPreprocessorOptions } from '../scripts/scss-vite-options.ts';
 
 export default defineConfig({
-  server: {
-    port: 3001,
-    open: true
-  },
   build: {
+    outDir: 'dist',
     target: 'es2015',
-    outDir: 'dist'
-  }
+  },
+  css: {
+    preprocessorOptions: {
+      scss: scssPreprocessorOptions,
+    },
+  },
+  server: {
+    open: true,
+    port: 3001,
+  },
 });

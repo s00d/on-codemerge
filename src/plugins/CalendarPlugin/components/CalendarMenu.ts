@@ -1,113 +1,127 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
+import { PopupController, foreign, h } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import type { CalendarManager } from '../services/CalendarManager';
-import { CategoryManager } from '../services';
+import { CategoryManager } from '../services/CategoryManager';
 import type { Calendar, CalendarEvent } from '../types';
 import { CalendarForm } from './CalendarForm';
 import { EventForm } from './EventForm';
-import type { HTMLEditor } from '../../../core/HTMLEditor';
 
+/** Calendar chrome — lists via ViewSpec; forms via foreign + mountInto. */
 export class CalendarMenu {
-  private popup: PopupManager;
-  private editor: HTMLEditor;
-  private manager: CalendarManager;
-  private categoryManager: CategoryManager;
+  private readonly popups: PopupController;
+  private readonly editor: EditorAPI;
+  private readonly manager: CalendarManager;
+  private readonly categoryManager: CategoryManager;
   private onSelect: ((calendar: Calendar) => void) | null = null;
-  private onImport?: () => void;
+  private readonly onImport?: () => void;
 
   constructor(
     manager: CalendarManager,
-    editor: HTMLEditor,
-    onImport?: () => void,
+    editor: EditorAPI,
+    onImport: (() => void) | undefined,
+    scope: DisposableScope,
     categoryManager?: CategoryManager
   ) {
     this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
     this.manager = manager;
-    this.categoryManager = categoryManager || new CategoryManager();
+    this.categoryManager = categoryManager ?? new CategoryManager();
     this.onImport = onImport;
-    this.popup = this.createMainPopup();
   }
 
-  private createMainPopup(): PopupManager {
-    return new PopupManager(this.editor, {
-      title: this.editor.t('Calendar'),
+  private listView(): ViewSpec {
+    const calendars = this.manager.getCalendars();
+    if (calendars.length === 0) {
+      return h('div', { class: 'empty-state' }, [
+        h('p', null, this.editor.t('calendar.noCalendarsFound')),
+        h('p', null, this.editor.t('calendar.createYourFirstCalendarToGetStarted')),
+      ]);
+    }
+    return h(
+      'div',
+      { class: 'calendars-list' },
+      ...calendars.map((calendar) => {
+        const events = this.manager.getEvents(calendar.id);
+        return h(
+          'div',
+          {
+            class: 'calendar-item',
+            on: {
+              click: () => {
+                this.handleSelectCalendar(calendar);
+              },
+            },
+          },
+          h('div', { class: 'calendar-info' }, [
+            h('h4', { class: 'calendar-title' }, calendar.title),
+            h('p', { class: 'calendar-description' }, calendar.description ?? ''),
+            h(
+              'span',
+              { class: 'calendar-events-count' },
+              `${events.length} ${this.editor.t('common.events')}`
+            ),
+          ]),
+          h('div', { class: 'calendar-actions' }, [
+            h(
+              'button',
+              {
+                class: 'btn-edit',
+                attrs: { type: 'button', title: this.editor.t('common.edit') },
+                on: {
+                  click: (e) => {
+                    e.stopPropagation();
+                    this.showEditCalendarForm(calendar);
+                  },
+                },
+              },
+              this.editor.t('common.edit')
+            ),
+            h(
+              'button',
+              {
+                class: 'btn-delete',
+                attrs: { type: 'button', title: this.editor.t('common.delete') },
+                on: {
+                  click: (e) => {
+                    e.stopPropagation();
+                    this.handleDeleteCalendar(calendar);
+                  },
+                },
+              },
+              this.editor.t('common.delete')
+            ),
+          ])
+        );
+      })
+    );
+  }
+
+  private openMainPopup(): void {
+    this.popups.open({
+      title: this.editor.t('calendar.title'),
       className: 'calendar-menu',
+      size: 'md',
       closeOnClickOutside: true,
       buttons: [
         {
-          label: this.editor.t('Import'),
+          label: this.editor.t('common.import'),
           variant: 'secondary',
-          onClick: () => this.showImportDialog(),
+          onClick: () => {
+            this.showImportDialog();
+            return true;
+          },
         },
         {
-          label: this.editor.t('New Calendar'),
+          label: this.editor.t('calendar.newCalendar'),
           variant: 'primary',
-          onClick: () => this.showNewCalendarForm(),
+          onClick: () => {
+            this.showNewCalendarForm();
+            return true;
+          },
         },
       ],
-      items: [
-        {
-          type: 'custom',
-          id: 'calendars-content',
-          content: () => this.createCalendarsList(),
-        },
-      ],
+      items: [{ type: 'view', id: 'calendars-content', view: () => this.listView() }],
     });
-  }
-
-  private createCalendarsList(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'calendars-list';
-
-    const calendars = this.manager.getCalendars();
-
-    if (calendars.length === 0) {
-      const emptyState = document.createElement('div');
-      emptyState.className = 'empty-state';
-      emptyState.innerHTML = `
-        <p>${this.editor.t('No calendars found')}</p>
-        <p>${this.editor.t('Create your first calendar to get started')}</p>
-      `;
-      container.appendChild(emptyState);
-    } else {
-      calendars.forEach((calendar) => {
-        const calendarItem = this.createCalendarItem(calendar);
-        container.appendChild(calendarItem);
-      });
-    }
-
-    return container;
-  }
-
-  private createCalendarItem(calendar: Calendar): HTMLElement {
-    const events = this.manager.getEvents(calendar.id);
-    const item = document.createElement('div');
-    item.className = 'calendar-item';
-    item.innerHTML = `
-      <div class="calendar-info">
-        <h4 class="calendar-title">${calendar.title}</h4>
-        <p class="calendar-description">${calendar.description || ''}</p>
-        <span class="calendar-events-count">${events.length} events</span>
-      </div>
-      <div class="calendar-actions">
-        <button class="btn-edit" title="${this.editor.t('Edit')}">✏️</button>
-        <button class="btn-delete" title="${this.editor.t('Delete')}">🗑️</button>
-      </div>
-    `;
-
-    // Обработчики событий
-    item.addEventListener('click', (e) => {
-      if ((e.target as Element).classList.contains('btn-edit')) {
-        e.stopPropagation();
-        this.showEditCalendarForm(calendar);
-      } else if ((e.target as Element).classList.contains('btn-delete')) {
-        e.stopPropagation();
-        this.handleDeleteCalendar(calendar);
-      } else {
-        this.handleSelectCalendar(calendar);
-      }
-    });
-
-    return item;
   }
 
   private createFormPopup(
@@ -116,52 +130,54 @@ export class CalendarMenu {
     submitLabel: string,
     onCancel?: () => void
   ): void {
-    this.popup = new PopupManager(this.editor, {
-      title: this.editor.t(title),
+    this.popups.open({
+      title: this.editor.t(title) || title,
       className: 'calendar-menu',
+      size: 'md',
       closeOnClickOutside: true,
       buttons: [
         {
-          label: this.editor.t('Cancel'),
+          label: this.editor.t('common.cancel'),
           variant: 'secondary',
-          onClick: onCancel || (() => this.popup.hide()),
+          onClick: () => {
+            onCancel?.();
+            return true;
+          },
         },
         {
-          label: this.editor.t(submitLabel),
+          label: this.editor.t(submitLabel) || submitLabel,
           variant: 'primary',
           onClick: () => {
-            this.editor!.ensureEditorFocus();
             form.submit();
+            return true;
           },
         },
       ],
       items: [
         {
-          type: 'custom',
+          type: 'view',
           id: 'form-content',
-          content: () => form.getElement(),
+          view: () =>
+            foreign((host, scope) => {
+              form.mountInto(host);
+              scope.disposable(() => {
+                form.destroy();
+              });
+            }),
         },
       ],
     });
-
-    this.popup.show();
   }
 
   public showNewCalendarForm(onCalendarCreated?: (calendar: Calendar) => void): void {
     const form = new CalendarForm(this.editor, (data) => {
       const newCalendar = this.manager.createCalendar(data);
-      this.popup.hide();
-      this.popup = this.createMainPopup();
-      this.popup.show();
-
-      if (onCalendarCreated && newCalendar) {
-        onCalendarCreated(newCalendar);
-      }
+      this.popups.close();
+      this.openMainPopup();
+      onCalendarCreated?.(newCalendar);
     });
-
     this.createFormPopup('New Calendar', form, 'Create', () => {
-      this.popup = this.createMainPopup();
-      this.popup.show();
+      this.openMainPopup();
     });
   }
 
@@ -170,36 +186,32 @@ export class CalendarMenu {
       this.editor,
       (data) => {
         this.manager.updateCalendar(calendar.id, data);
-        this.popup.hide();
-        this.popup = this.createMainPopup();
-        this.popup.show();
+        this.popups.close();
+        this.openMainPopup();
       },
       calendar
     );
-
     this.createFormPopup('Edit Calendar', form, 'Update', () => {
-      this.popup = this.createMainPopup();
-      this.popup.show();
+      this.openMainPopup();
     });
   }
 
   private handleSelectCalendar(calendar: Calendar): void {
     this.onSelect?.(calendar);
-    this.popup.hide();
+    this.popups.close();
   }
 
   private handleDeleteCalendar(calendar: Calendar): void {
-    if (confirm(this.editor.t('Are you sure you want to delete this calendar?'))) {
+    if (confirm(this.editor.t('calendar.areYouSureYouWantToDeleteThisCalendar') || 'Delete?')) {
       this.manager.deleteCalendar(calendar.id);
-      this.popup.hide();
-      this.popup = this.createMainPopup();
-      this.popup.show();
+      this.popups.close();
+      this.openMainPopup();
     }
   }
 
   public show(onSelect: (calendar: Calendar) => void): void {
     this.onSelect = onSelect;
-    this.popup.show();
+    this.openMainPopup();
   }
 
   public showEditEvent(event: CalendarEvent, onUpdate: (event: CalendarEvent) => void): void {
@@ -207,16 +219,13 @@ export class CalendarMenu {
       this.editor,
       (data) => {
         const updatedEvent = this.manager.updateEvent(event.id, data);
-        this.popup.hide();
+        this.popups.close();
         onUpdate(updatedEvent);
       },
       event,
       this.categoryManager
     );
-
-    this.createFormPopup('Edit Event', form, 'Update', () => {
-      this.popup.hide();
-    });
+    this.createFormPopup('Edit Event', form, 'Update');
   }
 
   public showCreateEvent(calendarId: string, onCreate: (event: CalendarEvent) => void): void {
@@ -224,35 +233,16 @@ export class CalendarMenu {
       this.editor,
       (data) => {
         const newEvent = this.manager.createEvent(data, calendarId);
-        this.popup.hide();
+        this.popups.close();
         onCreate(newEvent);
       },
       undefined,
       this.categoryManager
     );
-
-    this.createFormPopup('New Event', form, 'Create', () => {
-      this.popup.hide();
-    });
+    this.createFormPopup('New Event', form, 'Create');
   }
 
   public showImportDialog(): void {
-    if (this.onImport) {
-      this.onImport();
-    }
-  }
-
-  public destroy(): void {
-    if (this.popup) {
-      this.popup.hide();
-      if (typeof this.popup.destroy === 'function') {
-        this.popup.destroy();
-      }
-      this.popup = null!;
-    }
-
-    this.editor = null!;
-    this.manager = null!;
-    this.onSelect = null;
+    this.onImport?.();
   }
 }

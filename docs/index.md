@@ -1,177 +1,95 @@
 ---
-# https://vitepress.dev/reference/default-theme-home-page
 layout: home
 
 hero:
-  name: "OnCodemerge Docs"
-  text: "A WYSIWYG editor for on-codemerge"
+  name: 'OnCodemerge Docs'
+  text: 'Plugin-oriented virtual document editor'
   actions:
     - theme: brand
-      text: Docs
-      link: /docs
+      text: Editor API
+      link: /guide/editor
+    - theme: alt
+      text: Plugins
+      link: /plugins/
+    - theme: alt
+      text: Integrate
+      link: /integrate/
 ---
-
-A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and
-view their code in real time, exactly as it will appear in the final product. This intuitive
-tool for developers of all skill levels.
-
----
-
-# Introduction
-
-Welcome to the documentation for **On-Codemerge**, a versatile web editor designed for seamless integration and functionality.
 
 <script setup>
 import EditorComponent from './components/EditorComponent.vue';
 </script>
 
+# Introduction
+
+Welcome to the documentation for **On-Codemerge** v2 — a WYSIWYG editor built around a **JSON document** as source of truth. The toolbar, modals, and menus live in the **core SDK**. Plugins register commands and UI hooks via factory functions (`XPlugin()`).
+
 <EditorComponent />
+
+## Page chrome
+
+Embed the editor as page content: sticky toolbar and footer stay hidden; click the document to open the **same toolbar** in a popup.
+
+```ts
+new Editor(host, {
+  chrome: 'page',
+  plugins: createDefaultPlugins(),
+});
+```
+
+<EditorComponent chrome="page" :showDescription="false" />
 
 ## Getting Started
 
-Start by installing **On-Codemerge** in your project.
-
 ### Installation
 
-To install `on-codemerge`, run one of the following commands in your project directory, depending on your preferred package manager:
-
-#### Using npm
 ```bash
 npm install --save on-codemerge
+# or: yarn add on-codemerge / pnpm add on-codemerge / bun add on-codemerge
 ```
 
-#### Using yarn
-```bash
-yarn add on-codemerge
-```
-
-#### Using pnpm
-```bash
-pnpm add on-codemerge
-```
-
-#### Using bun
-```bash
-bun add on-codemerge
-```
-
-## Integration Example
-
-Here's a basic example of integrating On-Codemerge into a vanilla JavaScript project:
+### Integration Example
 
 ```typescript
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
-import 'on-codemerge/plugins/ToolbarPlugin/style.css';
-import 'on-codemerge/plugins/AlignmentPlugin/public.css';
-import 'on-codemerge/plugins/AlignmentPlugin/style.css';
+import { Editor, createDefaultPlugins } from 'on-codemerge';
 
-import {HTMLEditor, ToolbarPlugin, AlignmentPlugin } from 'on-codemerge';
+document.addEventListener('DOMContentLoaded', () => {
+  void (async () => {
+    const host = document.getElementById('app');
+    if (!host) return;
 
-document.addEventListener('DOMContentLoaded', async () => {
-  const appElement = document.getElementById('app');
-  if (appElement) {
-    const editor = new HTMLEditor(editorElement);
-
-    await editor.setLocale('ru');
-
-    editor.use(new ToolbarPlugin());
-    editor.use(new AlignmentPlugin());
-    // ... register other modules
-
-    editor.subscribeToContentChange((newContent?: string) => {
-      console.log(newContent)
+    const editor = new Editor(host, {
+      plugins: createDefaultPlugins(),
     });
 
-    // Optional: Set initial content
-    editor.setHtml('Your initial content here');
-    console.log(editor.getHtml());
-  }
+    await editor.setLocale('en');
+
+    editor.on('docChanged', () => {
+      console.log(editor.getJSON());
+    });
+
+    // Boundaries (JSON is SoT):
+    editor.setHTML('<p>Your initial content here</p>');
+    console.log(editor.getHTML());
+    editor.setMarkdown('# Hello\n\nFrom **Markdown**');
+    console.log(editor.getMarkdown());
+    console.log(editor.getPublishedDocument()); // full page HTML + public.css/js when needed
+  })();
 });
 ```
 
 ## Available Plugins
 
-On-Codemerge comes with a comprehensive set of plugins that extend its functionality. Each plugin adds unique features to the editor, making it a powerful tool for web content creation and editing.
+On-Codemerge ships with a full plugin ecosystem (tables, lists, media, collaboration, and more).
 
 **[View all available plugins →](/plugins/)**
 
----
+## Next Steps
 
-## Supported Locales
-
-**On-Codemerge** supports multiple locales to cater to a global audience. Below is the list of available locales:
-
-| Locale Code | Language             | File Name |
-|-------------|----------------------|-----------|
-| `ar`        | Arabic               | `ar.json` |
-| `cs`        | Czech                | `cs.json` |
-| `de`        | German               | `de.json` |
-| `en`        | English              | `en.json` |
-| `es`        | Spanish              | `es.json` |
-| `fr`        | French               | `fr.json` |
-| `hi`        | Hindi                | `hi.json` |
-| `id`        | Indonesian           | `id.json` |
-| `it`        | Italian              | `it.json` |
-| `ja`        | Japanese             | `ja.json` |
-| `ko`        | Korean               | `ko.json` |
-| `nl`        | Dutch                | `nl.json` |
-| `pl`        | Polish               | `pl.json` |
-| `pt`        | Portuguese           | `pt.json` |
-| `ru`        | Russian              | `ru.json` |
-| `th`        | Thai                 | `th.json` |
-| `tr`        | Turkish              | `tr.json` |
-| `vi`        | Vietnamese           | `vi.json` |
-| `zh`        | Chinese (Simplified) | `zh.json` |
-
-### Setting a Locale
-
-To set a locale in **On-Codemerge**, use the `setLocale` method:
-
-```typescript
-await editor.setLocale('ru'); // Set locale to Russian
-```
-
-### Translating Placeholders
-
-You can use placeholders in your translations to dynamically insert values. For example:
-
-```json
-{
-  "File size exceeds {{max}} limit": "File size exceeds {{max}} limit"
-}
-```
-
-In your code, you can pass the `max` parameter when translating:
-
-```typescript
-editor.t('File size exceeds {{max}} limit', { max: '10MB' });
-```
-
-This will output: `File size exceeds 10MB limit`.
-
-### Fallback Locale
-
-If a translation key is missing in the current locale, **On-Codemerge** will fall back to the default locale (`en` by default). You can change the fallback locale using the `setFallbackLocale` method:
-
-```typescript
-editor.setFallbackLocale('en'); // Set fallback locale to English
-```
-
-### Getting the Current Locale
-
-To retrieve the currently active locale, use the `getCurrentLocale` method:
-
-```typescript
-const currentLocale = editor.getCurrentLocale();
-console.log(currentLocale); // Outputs: 'ru' (if Russian is set)
-```
-
-### Getting Loaded Locales
-
-To get a list of all loaded locales, use the `getLoadedLocales` method:
-
-```typescript
-const loadedLocales = editor.getLoadedLocales();
-console.log(loadedLocales); // Outputs: ['en', 'ru', 'es']
-```
+- [Editor API](/guide/editor) — JSON / HTML / Markdown / published
+- [SDK reference](/guide/sdk) — `on-codemerge/sdk` public surface
+- [Document model](/guide/document-model) — JSON document & operations
+- [Authoring plugins](/guide/authoring-plugins) — `definePlugin`
+- [Integrate](/integrate/) — React, Vue, Laravel, and more

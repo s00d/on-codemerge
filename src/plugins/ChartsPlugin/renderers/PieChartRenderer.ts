@@ -1,9 +1,10 @@
 import type { ChartPoint, ChartOptions } from '../types';
 import { BaseChartRenderer } from './BaseChartRenderer';
+import { validateChartData } from '../utils/validation';
 
 export class PieChartRenderer extends BaseChartRenderer {
   public render(ctx: CanvasRenderingContext2D, data: ChartPoint[], options: ChartOptions): void {
-    if (!data || data.length === 0) {
+    if (!validateChartData(data)) {
       this.drawNoDataMessage(ctx, options);
       return;
     }
@@ -17,7 +18,7 @@ export class PieChartRenderer extends BaseChartRenderer {
       return;
     }
 
-    const orientation = options.orientation || 'vertical';
+    const orientation = options.orientation ?? 'vertical';
     const { centerX, centerY, radius } = this.getCircleDimensions(options);
 
     // Draw background
@@ -38,7 +39,7 @@ export class PieChartRenderer extends BaseChartRenderer {
     this.drawAxisLabels(ctx, options);
 
     // Draw legend
-    this.drawLegend(ctx, data as any[], options);
+    this.drawLegend(ctx, data, options);
   }
 
   private drawVerticalSlices(
@@ -53,14 +54,16 @@ export class PieChartRenderer extends BaseChartRenderer {
     let startAngle = -Math.PI / 2;
     const colors = this.getColors(options);
     data.forEach((item, i) => {
-      if (!item.value || item.value <= 0) return;
+      if (!item.value || item.value <= 0) {
+        return;
+      }
       const sliceAngle = (item.value / total) * (Math.PI * 2);
       const endAngle = startAngle + sliceAngle;
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.arc(centerX, centerY, radius, startAngle, endAngle);
       ctx.closePath();
-      const color = item.color || colors[i % colors.length];
+      const color = item.color ?? colors[i % colors.length];
       const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
       gradient.addColorStop(0, this.colorWithOpacity(color, 0.8));
       gradient.addColorStop(1, color);
@@ -85,14 +88,16 @@ export class PieChartRenderer extends BaseChartRenderer {
     let startAngle = Math.PI / 2; // Start from right instead of top
     const colors = this.getColors(options);
     data.forEach((item, i) => {
-      if (!item.value || item.value <= 0) return;
+      if (!item.value || item.value <= 0) {
+        return;
+      }
       const sliceAngle = (item.value / total) * (Math.PI * 2);
       const endAngle = startAngle + sliceAngle;
       ctx.beginPath();
       ctx.moveTo(centerX, centerY);
       ctx.arc(centerX, centerY, radius, startAngle, endAngle);
       ctx.closePath();
-      const color = item.color || colors[i % colors.length];
+      const color = item.color ?? colors[i % colors.length];
       const gradient = ctx.createRadialGradient(centerX, centerY, 0, centerX, centerY, radius);
       gradient.addColorStop(0, this.colorWithOpacity(color, 0.8));
       gradient.addColorStop(1, color);
@@ -116,7 +121,9 @@ export class PieChartRenderer extends BaseChartRenderer {
   ): void {
     let startAngle = -Math.PI / 2;
     data.forEach((item, _i) => {
-      if (!item.value || item.value <= 0) return;
+      if (!item.value || item.value <= 0) {
+        return;
+      }
       const sliceAngle = (item.value / total) * (Math.PI * 2);
       const midAngle = startAngle + sliceAngle / 2;
       const labelRadius = radius * 1.2;
@@ -148,7 +155,9 @@ export class PieChartRenderer extends BaseChartRenderer {
   ): void {
     let startAngle = Math.PI / 2; // Start from right
     data.forEach((item, _i) => {
-      if (!item.value || item.value <= 0) return;
+      if (!item.value || item.value <= 0) {
+        return;
+      }
       const sliceAngle = (item.value / total) * (Math.PI * 2);
       const midAngle = startAngle + sliceAngle / 2;
       const labelRadius = radius * 1.2;

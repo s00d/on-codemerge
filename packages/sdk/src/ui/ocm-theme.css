@@ -1,0 +1,54 @@
+/* Shared OCM design tokens — imported by src/tailwind.css and referenced from sdk.scss */
+@theme {
+  --radius-ocm: 0.75rem;
+  --radius-ocm-sm: 0.5rem;
+
+  --color-ocm-surface: #fff;
+  --color-ocm-surface-muted: #fafafa;
+  --color-ocm-surface-hover: #f4f4f5;
+  --color-ocm-border: #e4e4e7;
+  --color-ocm-border-subtle: #f4f4f5;
+  --color-ocm-text: #18181b;
+  --color-ocm-text-muted: #71717a;
+  --color-ocm-accent: #0284c7;
+  --color-ocm-accent-soft: #e0f2fe;
+  --color-ocm-danger: #dc2626;
+  --color-ocm-danger-soft: #fef2f2;
+  --color-ocm-overlay: rgb(9 9 11 / 0.4);
+  --color-ocm-toolbar: rgb(255 255 255 / 0.95);
+  --color-ocm-input: #fff;
+  --color-ocm-notify: #18181b;
+
+  --shadow-ocm: 0 20px 40px -12px rgb(0 0 0 / 0.18);
+
+  --z-index-ocm-toolbar: 20;
+  --z-index-ocm-overlay: 1000;
+  --z-index-ocm-popup: 1001;
+  --z-index-ocm-menu: 1100;
+  --z-index-ocm-notify: 1200;
+
+  --container-ocm-popup-sm: 20rem;
+  --container-ocm-popup-md: 28rem;
+  --container-ocm-popup-lg: 40rem;
+}
+
+/* Host page owns `html.dark` (e.g. class="mac dark"). Flip tokens only — no media query. */
+html.dark {
+  --color-ocm-surface: #18181b;
+  --color-ocm-surface-muted: #27272a;
+  --color-ocm-surface-hover: #3f3f46;
+  --color-ocm-border: #3f3f46;
+  --color-ocm-border-subtle: #27272a;
+  --color-ocm-text: #fafafa;
+  --color-ocm-text-muted: #a1a1aa;
+  --color-ocm-accent: #38bdf8;
+  --color-ocm-accent-soft: rgb(14 165 233 / 0.18);
+  --color-ocm-danger: #f87171;
+  --color-ocm-danger-soft: rgb(248 113 113 / 0.15);
+  --color-ocm-overlay: rgb(0 0 0 / 0.55);
+  --color-ocm-toolbar: rgb(24 24 27 / 0.92);
+  --color-ocm-input: #27272a;
+  --color-ocm-notify: #27272a;
+  --shadow-ocm: 0 20px 40px -12px rgb(0 0 0 / 0.45);
+  color-scheme: dark;
+}

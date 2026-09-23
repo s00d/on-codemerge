@@ -13,22 +13,22 @@ The Responsive Plugin provides responsive design and preview capabilities for th
 - **Adaptive Layout**: Editor adapts to selected viewport
 - **Event Hooks**: Listen to viewport changes
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, ResponsivePlugin } from 'on-codemerge';
+import { Editor, ResponsivePlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-const editor = new HTMLEditor(container);
-editor.use(new ResponsivePlugin());
+const editor = new Editor(container, {
+  plugins: [ResponsivePlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
@@ -55,8 +55,8 @@ const breakpoints = editor.getBreakpoints();
 
 ## Keyboard Shortcuts
 
-| Shortcut | Description | Command |
-|----------|-------------|---------|
+| Shortcut     | Description          | Command           |
+| ------------ | -------------------- | ----------------- |
 | `Ctrl+Alt+R` | Open responsive menu | `responsive-menu` |
 
 ## Events
@@ -97,7 +97,9 @@ editor.addBreakpoint('wide', { width: 1200, height: 800 });
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, ResponsivePlugin } from 'on-codemerge';
+import { Editor, ResponsivePlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -106,8 +108,8 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new ResponsivePlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      // v2: pass ResponsivePlugin() in Editor constructor plugins: [...]
       editorInstance.current.on('viewport:changed', setViewport);
     }
     return () => {
@@ -129,15 +131,23 @@ function MyEditor() {
   </div>
 </template>
 <script>
-import { HTMLEditor, ResponsivePlugin } from 'on-codemerge';
+import { Editor, ResponsivePlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 export default {
-  data() { return { editor: null, viewport: 'desktop' }; },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new ResponsivePlugin());
-    this.editor.on('viewport:changed', v => { this.viewport = v; });
+  data() {
+    return { editor: null, viewport: 'desktop' };
   },
-  beforeDestroy() { if (this.editor) this.editor.destroy(); }
+  mounted() {
+    this.editor = new Editor(this.$refs.editorContainer);
+    this.this.editor // use plugins: [ResponsivePlugin()];
+      .on('viewport:changed', (v) => {
+        this.viewport = v;
+      });
+  },
+  beforeDestroy() {
+    if (this.editor) this.editor.destroy();
+  },
 };
 </script>
 ```
@@ -169,7 +179,9 @@ export default {
   border: 1px solid #d1d5db;
   border-radius: 8px;
   overflow: hidden;
-  transition: width 0.2s, height 0.2s;
+  transition:
+    width 0.2s,
+    height 0.2s;
 }
 ```
 
@@ -193,4 +205,4 @@ export default {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

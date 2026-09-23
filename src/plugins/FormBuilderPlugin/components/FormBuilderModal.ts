@@ -1,23 +1,16 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
-import type { HTMLEditor } from '../../../app';
+import { PopupController, foreign, h, mount } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { FieldConfig, FieldType, FormConfig } from '../types';
 import { FormManager } from '../services/FormManager';
 import { FieldEditor } from './FieldEditor';
 import { FormPreview } from './FormPreview';
-import {
-  createButton,
-  createContainer,
-  createInputField,
-  createLabel,
-  createLineBreak,
-  createSelectField,
-} from '../../../utils/helpers';
 import { TemplatesModal } from './TemplatesModal';
 
+/** Form builder — ViewSpec chrome; FieldEditor/FormPreview via mountInto. */
 export class FormBuilderModal {
-  private readonly editor: HTMLEditor;
-  private popup: PopupManager | null = null;
-  private formManager: FormManager;
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
+  private readonly formManager: FormManager;
   private fieldEditor: FieldEditor | null = null;
   private formPreview: FormPreview | null = null;
   private callback: ((formConfig: FormConfig) => void) | null = null;
@@ -26,273 +19,334 @@ export class FormBuilderModal {
   private previewContainer: HTMLElement | null = null;
   private fieldsListContainer: HTMLElement | null = null;
   private fieldEditorContainer: HTMLElement | null = null;
-  private isEditMode: boolean = false;
-  private existingFormElement: HTMLElement | null = null;
-  private templatesModal: TemplatesModal | null = null;
+  private fieldsListMount: MountHandle | null = null;
+  private settingsMount: MountHandle | null = null;
+  private methodSelect: HTMLSelectElement | null = null;
+  private urlInput: HTMLInputElement | null = null;
+  private isEditMode = false;
+  private readonly templatesModal: TemplatesModal | null = null;
+  private dragStartIndex: number | null = null;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
     this.formManager = new FormManager(editor);
-    this.templatesModal = new TemplatesModal(editor);
+    this.templatesModal = new TemplatesModal(editor, scope);
+  }
 
-    this.popup = new PopupManager(editor, {
-      title: editor.t('Form Builder'),
+  private t(k: string): string {
+    return this.editor.t(k) || k;
+  }
+
+  private settingsView(): ViewSpec {
+    const methods = ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'] as const;
+    return h('div', { class: 'form-settings-inner' }, [
+      h('div', { class: 'setting-group setting-group--method' }, [
+        h('label', null, this.t('formBuilder.method')),
+        h(
+          'select',
+          {
+            class: 'form-settings-control',
+            ref: 'methodSelect',
+            props: { value: this.formManager.getFormMethod() },
+            on: {
+              change: (e) => {
+                this.methodSelect = e.target as HTMLSelectElement;
+                this.formManager.updateFormMethod(this.methodSelect.value as FormConfig['method']);
+              },
+            },
+          },
+          ...methods.map((m) =>
+            h(
+              'option',
+              {
+                attrs: { value: m },
+                props: { selected: this.formManager.getFormMethod() === m },
+              },
+              m
+            )
+          )
+        ),
+      ]),
+      h('div', { class: 'setting-group setting-group--action' }, [
+        h('label', null, this.t('formBuilder.actionUrl')),
+        h('input', {
+          class: 'form-settings-control',
+          attrs: {
+            type: 'text',
+            id: 'form-action-url',
+            placeholder: this.t('formBuilder.enterFormActionUrl'),
+          },
+          ref: 'urlInput',
+          props: { value: this.formManager.getFormAction() || '' },
+          on: {
+            input: (e) => {
+              this.urlInput = e.target as HTMLInputElement;
+              this.formManager.updateFormAction(this.urlInput.value);
+            },
+          },
+        }),
+      ]),
+    ]);
+  }
+
+  private fieldsListView(): ViewSpec {
+    const fields = this.formManager.getFields();
+    if (fields.length === 0) {
+      return h('div', { class: 'no-fields' }, this.t('formBuilder.noFieldsAddedYet'));
+    }
+    return h(
+      'div',
+      { class: 'fields-list-inner' },
+      ...fields.map((field, index) =>
+        h(
+          'div',
+          {
+            class: `field-item${this.selectedFieldId === field.id ? ' selected' : ''}`,
+            attrs: { draggable: true },
+            on: {
+              dragstart: (e) => {
+                this.handleDragStart(e, index);
+              },
+              dragover: (e) => {
+                this.handleDragOver(e, index);
+              },
+              drop: (e) => {
+                this.handleDrop(e, index);
+              },
+              click: () => {
+                this.selectField(field.id);
+              },
+            },
+          },
+          [
+            h('div', { class: 'field-title' }, field.label || this.t('formBuilder.untitledField')),
+            h('div', { class: 'field-type' }, field.type),
+            h('div', { class: 'field-actions' }, [
+              h(
+                'button',
+                {
+                  class: 'field-action-button',
+                  attrs: { type: 'button', disabled: index === 0 ? true : undefined },
+                  on: {
+                    click: (e) => {
+                      e.stopPropagation();
+                      this.moveField(field.id, index - 1);
+                    },
+                  },
+                },
+                '↑'
+              ),
+              h(
+                'button',
+                {
+                  class: 'field-action-button',
+                  attrs: {
+                    type: 'button',
+                    disabled: index === fields.length - 1 ? true : undefined,
+                  },
+                  on: {
+                    click: (e) => {
+                      e.stopPropagation();
+                      this.moveField(field.id, index + 1);
+                    },
+                  },
+                },
+                '↓'
+              ),
+              h(
+                'button',
+                {
+                  class: 'field-action-button',
+                  attrs: { type: 'button' },
+                  on: {
+                    click: (e) => {
+                      e.stopPropagation();
+                      this.removeField(field.id);
+                    },
+                  },
+                },
+                '×'
+              ),
+            ]),
+          ]
+        )
+      )
+    );
+  }
+
+  private builderView(): ViewSpec {
+    return h('div', { class: 'form-builder-modal-content' }, [
+      h('div', { class: 'form-builder-toolbar' }, [
+        foreign((host, scope) => {
+          host.className = 'form-settings-panel';
+          this.settingsMount?.destroy();
+          this.settingsMount = mount(host, this.settingsView());
+          const refs = this.settingsMount.refs;
+          // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+          this.methodSelect = (refs.methodSelect as HTMLSelectElement) || null;
+          // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+          this.urlInput = (refs.urlInput as HTMLInputElement) || null;
+          scope.disposable(() => {
+            this.settingsMount?.destroy();
+            this.settingsMount = null;
+            this.methodSelect = null;
+            this.urlInput = null;
+          });
+        }),
+        h(
+          'button',
+          {
+            class: 'ocm-popup__btn form-builder-templates-btn',
+            attrs: { type: 'button' },
+            on: {
+              click: () => {
+                this.openTemplatesModal();
+              },
+            },
+          },
+          this.t('common.templates')
+        ),
+      ]),
+      h('div', { class: 'form-builder-main' }, [
+        foreign((host, scope) => {
+          host.className = 'fields-panel';
+          const shell = mount(
+            host,
+            h('div', { class: 'fields-panel-inner' }, [
+              h('div', { class: 'fields-header' }, [
+                h('div', { class: 'fields-title' }, this.t('formBuilder.formFields')),
+                h(
+                  'button',
+                  {
+                    class: 'add-field-button',
+                    attrs: { type: 'button' },
+                    on: {
+                      click: () => {
+                        this.addField();
+                      },
+                    },
+                  },
+                  '+'
+                ),
+              ]),
+              h('div', { class: 'fields-list', ref: 'fieldsList' }),
+            ])
+          );
+          this.fieldsListContainer = shell.refs.fieldsList ?? null;
+          this.renderFieldsListWithoutPreview();
+          scope.own(shell);
+          scope.disposable(() => {
+            this.fieldsListMount?.destroy();
+            this.fieldsListMount = null;
+            this.fieldsListContainer = null;
+          });
+        }),
+        foreign((host, scope) => {
+          host.className = 'field-editor-panel';
+          const shell = mount(
+            host,
+            h('div', { class: 'field-editor-panel-inner' }, [
+              h('div', { class: 'editor-title' }, this.t('formBuilder.fieldEditor')),
+              h('div', { class: 'field-editor-content', ref: 'fieldEditor' }),
+            ])
+          );
+          this.fieldEditorContainer = shell.refs.fieldEditor ?? null;
+          this.fieldEditor ??= new FieldEditor(
+            (fieldId, updates) => {
+              this.updateField(fieldId, updates);
+            },
+            (fieldId) => {
+              this.removeField(fieldId);
+            },
+            (fieldId) => {
+              this.cloneField(fieldId);
+            },
+            this.editor,
+            this.formManager,
+            (fieldId, newType) => {
+              this.onFieldTypeChange(fieldId, newType);
+            },
+            (fieldId) => {
+              this.onOptionsChange(fieldId);
+            }
+          );
+          this.renderFieldEditor();
+          scope.own(shell);
+          scope.disposable(() => {
+            this.fieldEditor?.destroy();
+            this.fieldEditorContainer = null;
+          });
+        }),
+        foreign((host, scope) => {
+          host.className = 'preview-panel';
+          const shell = mount(
+            host,
+            h('div', { class: 'preview-panel-inner' }, [
+              h('div', { class: 'preview-title' }, this.t('math.formPreview')),
+              h('div', { class: 'preview-content', ref: 'preview' }),
+            ])
+          );
+          this.previewContainer = shell.refs.preview ?? null;
+          // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+          this.formPreview = this.previewContainer
+            ? new FormPreview(this.previewContainer, this.editor)
+            : null;
+          this.updatePreview();
+          scope.own(shell);
+          scope.disposable(() => {
+            this.formPreview?.destroy();
+            this.previewContainer = null;
+            this.formPreview = null;
+          });
+        }),
+      ]),
+    ]);
+  }
+
+  private openBuilder(title: string, saveLabel: string): void {
+    this.popups.open({
+      title: this.t(title),
       className: 'form-builder-modal',
+      size: 'lg',
       closeOnClickOutside: true,
       buttons: [
         {
-          label: editor.t('Cancel'),
+          label: this.t('common.cancel'),
           variant: 'secondary',
           onClick: () => {
-            this.popup?.hide();
-            this.destroy();
+            this.popups.close();
           },
         },
         {
-          label: editor.t('Save Form'),
+          label: this.t(saveLabel),
           variant: 'primary',
-          onClick: () => this.saveForm(),
+          onClick: () => {
+            this.saveForm();
+          },
         },
       ],
       items: [
         {
-          type: 'custom',
+          type: 'view',
           id: 'form-builder-content',
-          content: () => this.createContent(),
+          view: () => this.builderView(),
         },
       ],
     });
-
-    // Перехватываем закрытие через крестик и Escape
-    this.setupCloseHandlers();
-  }
-
-  private setupCloseHandlers(): void {
-    // Обработчик Escape для закрытия модалки
-    this.handleEscapeKey = (e: Event) => {
-      if ((e as KeyboardEvent).key === 'Escape' && this.popup?.isOpen()) {
-        this.popup.hide();
-        this.destroy();
-      }
-    };
-    this.editor.getDOMContext().addEventListener('keydown', this.handleEscapeKey);
-  }
-
-  private createContent(): HTMLElement {
-    const container = createContainer('form-builder-modal-content');
-
-    // --- Кнопка шаблонов ---
-    const headerPanel = createContainer(
-      'form-builder-header-panel flex justify-between items-center mb-2'
-    );
-    const title = createContainer('form-builder-title text-xl font-bold');
-    title.textContent = this.isEditMode
-      ? this.editor.t('Edit Form')
-      : this.editor.t('Form Builder');
-    const templatesButton = createButton(
-      this.editor.t('Templates'),
-      () => this.openTemplatesModal(),
-      'secondary'
-    );
-    headerPanel.appendChild(title);
-    headerPanel.appendChild(templatesButton);
-    container.appendChild(headerPanel);
-
-    // Настройки формы
-    const formSettings = this.createFormSettings();
-    container.appendChild(formSettings);
-
-    // Основной контент
-    const mainContent = createContainer('form-builder-main');
-
-    // Панель полей
-    const fieldsPanel = this.createFieldsPanel();
-    mainContent.appendChild(fieldsPanel);
-
-    // Панель редактирования поля
-    const fieldEditorPanel = this.createFieldEditorPanel();
-    mainContent.appendChild(fieldEditorPanel);
-
-    container.appendChild(mainContent);
-
-    // Предпросмотр под редактором в той же модалке
-    const previewPanel = this.createPreviewPanel();
-    container.appendChild(previewPanel);
-
-    return container;
-  }
-
-  private createFormSettings(): HTMLElement {
-    const settings = createContainer('form-settings-panel');
-
-    const title = createContainer('settings-title');
-    title.textContent = this.editor.t('Form Settings');
-    settings.appendChild(title);
-
-    // Метод формы
-    const methodContainer = createContainer('setting-group');
-    const methodLabel = createLabel(this.editor.t('Method:'));
-    const methodSelect = createSelectField(
-      [
-        { value: 'GET', label: 'GET' },
-        { value: 'POST', label: 'POST' },
-        { value: 'PUT', label: 'PUT' },
-        { value: 'DELETE', label: 'DELETE' },
-        { value: 'PATCH', label: 'PATCH' },
-      ],
-      this.formManager.getFormMethod(),
-      (value) => {
-        this.formManager.updateFormMethod(value as any);
-      }
-    );
-    methodContainer.appendChild(methodLabel);
-    methodContainer.appendChild(methodSelect);
-    settings.appendChild(methodContainer);
-
-    // URL формы
-    const urlContainer = createContainer('setting-group');
-    const urlLabel = createLabel(this.editor.t('Action URL:'));
-    const urlInput = createInputField(
-      'text',
-      this.editor.t('Enter form action URL'),
-      this.formManager.getFormAction(),
-      (value) => {
-        this.formManager.updateFormAction(value);
-      }
-    );
-    urlInput.id = 'form-action-url';
-    urlContainer.appendChild(urlLabel);
-    urlContainer.appendChild(urlInput);
-    settings.appendChild(urlContainer);
-
-    return settings;
-  }
-
-  private createFieldsPanel(): HTMLElement {
-    const panel = createContainer('fields-panel');
-
-    const header = createContainer('fields-header');
-    const title = createContainer('fields-title');
-    title.textContent = this.editor.t('Form Fields');
-
-    const addButton = createButton('+', () => this.addField(), 'primary');
-    addButton.className = 'add-field-button';
-
-    header.appendChild(title);
-    header.appendChild(addButton);
-    panel.appendChild(header);
-
-    this.fieldsListContainer = createContainer('fields-list');
-    panel.appendChild(this.fieldsListContainer);
-
-    this.renderFieldsList();
-
-    return panel;
-  }
-
-  private createFieldEditorPanel(): HTMLElement {
-    const panel = createContainer('field-editor-panel');
-
-    const title = createContainer('editor-title');
-    title.textContent = this.editor.t('Field Editor');
-    panel.appendChild(title);
-
-    this.fieldEditorContainer = createContainer('field-editor-content');
-    panel.appendChild(this.fieldEditorContainer);
-
-    if (!this.fieldEditor) {
-      this.fieldEditor = new FieldEditor(
-        (fieldId, updates) => this.updateField(fieldId, updates),
-        (fieldId) => this.removeField(fieldId),
-        (fieldId) => this.cloneField(fieldId),
-        this.editor,
-        this.formManager,
-        (fieldId, newType) => this.onFieldTypeChange(fieldId, newType),
-        (fieldId) => this.onOptionsChange(fieldId)
-      );
-    }
-
-    return panel;
-  }
-
-  private createPreviewPanel(): HTMLElement {
-    const panel = createContainer('preview-panel');
-
-    const title = createContainer('preview-title');
-    title.textContent = this.editor.t('Form Preview');
-    panel.appendChild(title);
-
-    const previewContent = createContainer('preview-content');
-    panel.appendChild(previewContent);
-
-    if (!this.formPreview) {
-      this.formPreview = new FormPreview(previewContent, this.editor);
-    }
-
-    // Сохраняем ссылку на контейнер предпросмотра
-    this.previewContainer = previewContent;
-
-    return panel;
   }
 
   private renderFieldsList(): void {
-    if (!this.fieldsListContainer) return;
+    this.renderFieldsListWithoutPreview();
+    this.updatePreview();
+  }
 
-    this.fieldsListContainer.innerHTML = '';
-
-    const fields = this.formManager.getFields();
-
-    if (fields.length === 0) {
-      const noFields = createContainer('no-fields');
-      noFields.textContent = this.editor.t('No fields added yet');
-      this.fieldsListContainer.appendChild(noFields);
+  private renderFieldsListWithoutPreview(): void {
+    if (!this.fieldsListContainer) {
       return;
     }
-
-    fields.forEach((field, index) => {
-      const fieldItem = createContainer('field-item');
-      fieldItem.setAttribute('draggable', 'true');
-      fieldItem.addEventListener('dragstart', (e) => this.handleDragStart(e, index));
-      fieldItem.addEventListener('dragover', (e) => this.handleDragOver(e, index));
-      fieldItem.addEventListener('drop', (e) => this.handleDrop(e, index));
-
-      if (this.selectedFieldId === field.id) {
-        fieldItem.classList.add('selected');
-      }
-
-      const fieldTitle = createContainer('field-title');
-      fieldTitle.textContent = field.label || this.editor.t('Untitled Field');
-
-      const fieldType = createContainer('field-type');
-      fieldType.textContent = field.type;
-
-      const fieldActions = createContainer('field-actions');
-
-      const upButton = createButton('↑', () => this.moveField(field.id, index - 1), 'secondary');
-      upButton.className = 'field-action-button';
-      upButton.disabled = index === 0;
-
-      const downButton = createButton('↓', () => this.moveField(field.id, index + 1), 'secondary');
-      downButton.className = 'field-action-button';
-      downButton.disabled = index === fields.length - 1;
-
-      const removeButton = createButton('×', () => this.removeField(field.id), 'danger');
-      removeButton.className = 'field-action-button';
-
-      fieldActions.appendChild(upButton);
-      fieldActions.appendChild(downButton);
-      fieldActions.appendChild(removeButton);
-
-      fieldItem.appendChild(fieldTitle);
-      fieldItem.appendChild(fieldType);
-      fieldItem.appendChild(fieldActions);
-
-      fieldItem.addEventListener('click', () => this.selectField(field.id));
-
-      this.fieldsListContainer!.appendChild(fieldItem);
-    });
-
-    this.updatePreview();
+    this.fieldsListMount?.destroy();
+    this.fieldsListMount = mount(this.fieldsListContainer, this.fieldsListView());
   }
 
   private selectField(fieldId: string): void {
@@ -302,103 +356,46 @@ export class FormBuilderModal {
   }
 
   private renderFieldEditor(): void {
-    if (!this.fieldEditorContainer || !this.fieldEditor) return;
-
-    this.fieldEditorContainer.innerHTML = '';
+    if (!this.fieldEditorContainer || !this.fieldEditor) {
+      return;
+    }
+    this.fieldEditorContainer.replaceChildren();
 
     if (this.selectedFieldId) {
       const field = this.formManager.getField(this.selectedFieldId);
       if (field) {
-        const fieldEditorElement = this.fieldEditor.createFieldEditor(field);
-        this.fieldEditorContainer.appendChild(fieldEditorElement);
+        this.fieldEditor.mountInto(this.fieldEditorContainer, field);
+        return;
       }
-    } else {
-      const noFieldMessage = createContainer('no-field-message');
-      noFieldMessage.textContent = this.editor.t('Select a field to edit');
-      this.fieldEditorContainer.appendChild(noFieldMessage);
     }
+    mount(
+      this.fieldEditorContainer,
+      h('div', { class: 'no-field-message' }, this.t('formBuilder.selectAFieldToEdit'))
+    );
   }
 
   private updateFieldEditorTitle(): void {
-    if (!this.fieldEditorContainer || !this.selectedFieldId) return;
-
+    if (!this.fieldEditorContainer || !this.selectedFieldId) {
+      return;
+    }
     const field = this.formManager.getField(this.selectedFieldId);
-    if (!field) return;
-
-    // Находим заголовок в редакторе поля и обновляем его
+    if (!field) {
+      return;
+    }
     const titleElement = this.fieldEditorContainer.querySelector('.field-title');
     if (titleElement) {
-      titleElement.textContent = field.label || this.editor.t('Untitled Field');
+      titleElement.replaceChildren(new Text(field.label || this.t('formBuilder.untitledField')));
     }
   }
 
   private addField(type: FieldType = 'text'): void {
     this.formManager.addField(type);
-
-    // Получаем список полей и выбираем последнее добавленное
     const fields = this.formManager.getFields();
     if (fields.length > 0) {
-      this.selectedFieldId = fields[fields.length - 1].id;
+      this.selectedFieldId = fields.at(-1)!.id;
     }
-
     this.renderFieldsList();
     this.renderFieldEditor();
-  }
-
-  private renderFieldsListWithoutPreview(): void {
-    if (!this.fieldsListContainer) return;
-
-    this.fieldsListContainer.innerHTML = '';
-
-    const fields = this.formManager.getFields();
-
-    if (fields.length === 0) {
-      const noFields = createContainer('no-fields');
-      noFields.textContent = this.editor.t('No fields added yet');
-      this.fieldsListContainer.appendChild(noFields);
-      return;
-    }
-
-    fields.forEach((field, index) => {
-      const fieldItem = createContainer('field-item');
-
-      if (this.selectedFieldId === field.id) {
-        fieldItem.classList.add('selected');
-      }
-
-      const fieldTitle = createContainer('field-title');
-      fieldTitle.textContent = field.label || this.editor.t('Untitled Field');
-
-      const fieldType = createContainer('field-type');
-      fieldType.textContent = field.type;
-
-      const fieldActions = createContainer('field-actions');
-
-      const upButton = createButton('↑', () => this.moveField(field.id, index - 1), 'secondary');
-      upButton.className = 'field-action-button';
-      upButton.disabled = index === 0;
-
-      const downButton = createButton('↓', () => this.moveField(field.id, index + 1), 'secondary');
-      downButton.className = 'field-action-button';
-      downButton.disabled = index === fields.length - 1;
-
-      const removeButton = createButton('×', () => this.removeField(field.id), 'danger');
-      removeButton.className = 'field-action-button';
-
-      fieldActions.appendChild(upButton);
-      fieldActions.appendChild(downButton);
-      fieldActions.appendChild(removeButton);
-
-      fieldItem.appendChild(fieldTitle);
-      fieldItem.appendChild(fieldType);
-      fieldItem.appendChild(fieldActions);
-
-      fieldItem.addEventListener('click', () => this.selectField(field.id));
-
-      this.fieldsListContainer!.appendChild(fieldItem);
-    });
-
-    // НЕ вызываем updatePreview() здесь
   }
 
   private updateField(fieldId: string, updates: Partial<FieldConfig>): void {
@@ -409,52 +406,46 @@ export class FormBuilderModal {
   }
 
   private removeField(fieldId: string): void {
-    if (confirm(this.editor.t('Are you sure you want to delete this field?'))) {
-      const fields = this.formManager.getFields();
-      const currentIndex = fields.findIndex((f) => f.id === fieldId);
-
-      this.formManager.removeField(fieldId);
-
-      // Выбираем подходящее поле после удаления
-      const remainingFields = this.formManager.getFields();
-      if (remainingFields.length > 0) {
-        // Если удаляемое поле было выбрано, выбираем соседнее или последнее
-        if (this.selectedFieldId === fieldId) {
-          if (currentIndex < remainingFields.length) {
-            // Выбираем поле на той же позиции
-            this.selectedFieldId = remainingFields[currentIndex].id;
-          } else {
-            // Выбираем последнее поле
-            this.selectedFieldId = remainingFields[remainingFields.length - 1].id;
-          }
-        }
-      } else {
-        // Если полей не осталось, сбрасываем выбор
-        this.selectedFieldId = null;
-      }
-
-      this.renderFieldsListWithoutPreview();
-      this.renderFieldEditor();
+    if (!confirm(this.t('formBuilder.areYouSureYouWantToDeleteThisField'))) {
+      return;
     }
+
+    const fields = this.formManager.getFields();
+    const currentIndex = fields.findIndex((f) => f.id === fieldId);
+    this.formManager.removeField(fieldId);
+
+    const remainingFields = this.formManager.getFields();
+    if (remainingFields.length > 0) {
+      if (this.selectedFieldId === fieldId) {
+        this.selectedFieldId =
+          currentIndex < remainingFields.length
+            ? remainingFields[currentIndex].id
+            : remainingFields.at(-1)!.id;
+      }
+    } else {
+      this.selectedFieldId = null;
+    }
+
+    this.renderFieldsListWithoutPreview();
+    this.renderFieldEditor();
+    this.updatePreview();
   }
 
   private cloneField(fieldId: string): void {
     const field = this.formManager.getField(fieldId);
-    if (field) {
-      const clonedField = {
-        ...field,
-        id: `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        label: `${field.label} (Copy)`,
-      };
-
-      this.formManager.addField(field.type, clonedField);
-
-      // Выбираем склонированное поле
-      this.selectedFieldId = clonedField.id;
-
-      this.renderFieldsListWithoutPreview();
-      this.renderFieldEditor();
+    if (!field) {
+      return;
     }
+    const clonedField = {
+      ...field,
+      id: `field_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`,
+      label: `${field.label} (Copy)`,
+    };
+    this.formManager.addField(field.type, clonedField);
+    this.selectedFieldId = clonedField.id;
+    this.renderFieldsListWithoutPreview();
+    this.renderFieldEditor();
+    this.updatePreview();
   }
 
   private moveField(fieldId: string, newPosition: number): void {
@@ -463,180 +454,68 @@ export class FormBuilderModal {
   }
 
   private updatePreview(): void {
-    if (!this.previewContainer || !this.formPreview) return;
-
+    if (!this.previewContainer || !this.formPreview) {
+      return;
+    }
     const formConfig = this.formManager.getFormConfig();
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
     if (formConfig && formConfig.fields.length > 0) {
       this.formPreview.createPreview(formConfig);
     } else {
-      // Показываем сообщение о том, что нет полей для предпросмотра
-      this.previewContainer.innerHTML = '<p class="no-preview-message">No fields to preview</p>';
+      this.formPreview.destroy();
+      mount(this.previewContainer, h('p', { class: 'no-preview-message' }, 'No fields to preview'));
     }
   }
 
   private saveForm(): void {
     const formConfig = this.formManager.getFormConfig();
-    if (!formConfig) return;
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+    if (!formConfig) {
+      return;
+    }
 
-    if (this.isEditMode && this.existingFormElement) {
-      // Режим редактирования - заменяем существующую форму
-      if (confirm(this.editor.t('Are you sure you want to update this form?'))) {
-        this.existingFormElement.outerHTML = this.formManager.createForm(formConfig);
-        this.popup?.hide();
-        this.destroy();
+    if (this.isEditMode) {
+      if (!confirm(this.t('formBuilder.areYouSureYouWantToUpdateThisForm'))) {
+        return;
       }
-    } else {
-      // Режим создания - вставляем новую форму
-      this.callback?.(formConfig);
-      this.popup?.hide();
-      this.destroy();
+    }
+
+    this.callback?.(formConfig);
+    this.popups.close();
+  }
+
+  private updateFormSettings(): void {
+    if (this.methodSelect) {
+      this.methodSelect.value = this.formManager.getFormMethod();
+    }
+    if (this.urlInput) {
+      this.urlInput.value = this.formManager.getFormAction() || '';
     }
   }
 
   public show(
     callback: (formConfig: FormConfig) => void,
-    editMode: boolean = false,
+    editMode = false,
     existingFormElement: HTMLElement | null = null
   ): void {
     this.callback = callback;
     this.isEditMode = editMode;
-    this.existingFormElement = existingFormElement;
 
-    // Если режим редактирования, загружаем существующую форму
     if (editMode && existingFormElement) {
+      this.openBuilder('formBuilder.editForm', 'formBuilder.updateForm');
       this.formManager.loadForm(existingFormElement);
-      // Обновляем заголовок и кнопки для режима редактирования
-      this.updatePopupForEditMode();
-      // Обновляем интерфейс с загруженными данными
       this.updateFormSettings();
       this.renderFieldsListWithoutPreview();
       this.renderFieldEditor();
     } else {
-      // Режим создания - очищаем данные
       this.selectedFieldId = null;
-      // Обновляем заголовок и кнопки для режима создания
-      this.updatePopupForCreateMode();
+      this.openBuilder('formBuilder.title', 'formBuilder.saveForm');
     }
 
-    this.popup?.show();
-    // Автофокус на поле Action URL
-    setTimeout(() => {
-      const urlInput = this.editor
-        .getDOMContext()
-        .getElementById('form-action-url') as HTMLInputElement;
-      if (urlInput) urlInput.focus();
-    }, 0);
+    globalThis.setTimeout(() => this.urlInput?.focus(), 0);
     this.updatePreview();
   }
 
-  private updatePopupForEditMode(): void {
-    // Обновляем заголовок и кнопки для режима редактирования
-    const headerTitle = this.popup?.getElement().querySelector('.popup-header-title');
-    if (headerTitle) {
-      headerTitle.textContent = this.editor.t('Edit Form');
-    }
-
-    const saveButton = this.popup
-      ?.getElement()
-      .querySelector('.popup-footer button[data-variant="primary"]');
-    if (saveButton) {
-      saveButton.textContent = this.editor.t('Update Form');
-    }
-  }
-
-  private updatePopupForCreateMode(): void {
-    // Обновляем заголовок и кнопки для режима создания
-    const headerTitle = this.popup?.getElement().querySelector('.popup-header-title');
-    if (headerTitle) {
-      headerTitle.textContent = this.editor.t('Form Builder');
-    }
-
-    const saveButton = this.popup
-      ?.getElement()
-      .querySelector('.popup-footer button[data-variant="primary"]');
-    if (saveButton) {
-      saveButton.textContent = this.editor.t('Save Form');
-    }
-  }
-
-  private updateFormSettings(): void {
-    // Обновляем метод формы
-    const methodSelect = this.popup
-      ?.getElement()
-      .querySelector('.form-settings-panel select') as HTMLSelectElement;
-    if (methodSelect) {
-      methodSelect.value = this.formManager.getFormMethod();
-    }
-
-    // Обновляем Action URL
-    const urlInput = this.popup
-      ?.getElement()
-      .querySelector('.form-settings-panel input[type="text"]') as HTMLInputElement;
-    if (urlInput) {
-      urlInput.value = this.formManager.getFormAction() || '';
-    }
-  }
-
-  public destroy(): void {
-    // Удаляем обработчики событий
-    this.editor.getDOMContext().removeEventListener('keydown', this.handleEscapeKey);
-
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
-    if (this.fieldEditor) {
-      this.fieldEditor = null;
-    }
-    if (this.formPreview) {
-      this.formPreview = null;
-    }
-  }
-
-  private handleEscapeKey = (e: Event): void => {
-    if ((e as KeyboardEvent).key === 'Escape' && this.popup?.isOpen()) {
-      this.popup?.hide();
-      this.destroy();
-    }
-  };
-
-  private openTemplatesModal(): void {
-    // Закрываем текущую модалку
-    this.popup?.hide();
-
-    // Сохраняем позицию курсора перед открытием модального окна шаблонов
-    const savedPosition = this.editor.saveCursorPosition();
-
-    // Открываем модалку шаблонов
-    this.templatesModal?.show((template) => {
-      if (template && template.config) {
-        // Создаем новую модалку с загруженным шаблоном
-        const newFormBuilderModal = new FormBuilderModal(this.editor);
-        newFormBuilderModal.show(
-          (formConfig: FormConfig) => {
-            // Восстанавливаем позицию курсора
-            if (savedPosition) {
-              this.editor.restoreCursorPosition(savedPosition);
-            }
-
-            // Создаем форму с использованием formManager, как в основном файле
-            const formHtml = this.formManager.createForm(formConfig);
-
-            // Вставляем форму используя встроенный метод insertContent
-            this.editor.insertContent(formHtml);
-            this.editor.insertContent(createLineBreak());
-          },
-          false,
-          null
-        );
-
-        // Загружаем шаблон в новую модалку
-        newFormBuilderModal.loadFormConfig(template.config);
-      }
-    });
-  }
-
-  // Добавляем метод для загрузки конфигурации формы
   public loadFormConfig(formConfig: FormConfig): void {
     this.formManager.loadFormConfig(formConfig);
     this.selectedFieldId = null;
@@ -646,136 +525,153 @@ export class FormBuilderModal {
     this.updatePreview();
   }
 
-  // Добавляю методы drag and drop
-  private dragStartIndex: number | null = null;
+  private openTemplatesModal(): void {
+    this.popups.close();
+    this.templatesModal?.show((template) => {
+      // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+      if (!template?.config) {
+        return;
+      }
+      this.openBuilder(
+        this.isEditMode ? 'formBuilder.editForm' : 'formBuilder.title',
+        this.isEditMode ? 'formBuilder.updateForm' : 'formBuilder.saveForm'
+      );
+      this.loadFormConfig(template.config);
+    });
+  }
+
   private handleDragStart(e: DragEvent, index: number): void {
     this.dragStartIndex = index;
-    e.dataTransfer?.setData('text/plain', index.toString());
+    e.dataTransfer?.setData('text/plain', String(index));
   }
+
   private handleDragOver(e: DragEvent, _index: number): void {
     e.preventDefault();
   }
+
   private handleDrop(e: DragEvent, index: number): void {
     e.preventDefault();
     if (this.dragStartIndex !== null && this.dragStartIndex !== index) {
       const fields = this.formManager.getFields();
       const field = fields[this.dragStartIndex];
-      this.formManager.moveField(field.id, index);
-      this.renderFieldsListWithoutPreview();
+      // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+      if (field) {
+        this.formManager.moveField(field.id, index);
+        this.renderFieldsListWithoutPreview();
+      }
       this.dragStartIndex = null;
     }
   }
 
   private onFieldTypeChange(fieldId: string, newType: FieldType): void {
-    // Получаем текущее поле
     const currentField = this.formManager.getField(fieldId);
-    if (!currentField) return;
+    if (!currentField) {
+      return;
+    }
 
-    // Создаем базовые опции для нового типа
-    const baseOptions: any = {
-      name: currentField.options?.name || fieldId,
-      placeholder: currentField.options?.placeholder || '',
-      className: currentField.options?.className || '',
-      readonly: currentField.options?.readonly || false,
-      disabled: currentField.options?.disabled || false,
+    const baseOptions: Record<string, unknown> = {
+      name: currentField.options?.name ?? fieldId,
+      placeholder: currentField.options?.placeholder ?? '',
+      className: currentField.options?.className ?? '',
+      readonly: currentField.options?.readonly ?? false,
+      disabled: currentField.options?.disabled ?? false,
     };
 
-    // Добавляем специфичные опции в зависимости от типа
     switch (newType) {
       case 'select':
-      case 'radio':
-        baseOptions.options = currentField.options?.options || [];
+      case 'radio': {
+        baseOptions.options = currentField.options?.options ?? [];
         baseOptions.multiple =
-          newType === 'select' ? currentField.options?.multiple || false : false;
-        // Если опций нет, добавляем пустую опцию
-        if (baseOptions.options.length === 0) {
-          const defaultText =
-            newType === 'radio' ? this.editor.t('New Radio') : this.editor.t('Option 1');
-          baseOptions.options = [defaultText];
+          newType === 'select' ? (currentField.options?.multiple ?? false) : false;
+        if ((baseOptions.options as unknown[]).length === 0) {
+          baseOptions.options = [
+            newType === 'radio' ? this.t('formBuilder.newRadio') : this.t('common.option1'),
+          ];
         }
         break;
-      case 'checkbox':
-        // Для чекбокса сохраняем только базовые опции, опции не нужны
+      }
+      case 'checkbox': {
         baseOptions.value =
-          currentField.options?.value || currentField.label || this.editor.t('New Checkbox');
-        baseOptions.checked = currentField.options?.checked || false;
+          (currentField.options?.value ?? currentField.label) || this.t('formBuilder.newCheckbox');
+        baseOptions.checked = currentField.options?.checked ?? false;
         break;
+      }
       case 'number':
-      case 'range':
-        baseOptions.min = currentField.options?.min || '';
-        baseOptions.max = currentField.options?.max || '';
-        baseOptions.step = currentField.options?.step || '';
+      case 'range': {
+        baseOptions.min = currentField.options?.min ?? '';
+        baseOptions.max = currentField.options?.max ?? '';
+        baseOptions.step = currentField.options?.step ?? '';
         break;
-      case 'textarea':
-        baseOptions.rows = currentField.options?.rows || 3;
-        baseOptions.cols = currentField.options?.cols || 50;
+      }
+      case 'textarea': {
+        baseOptions.rows = currentField.options?.rows ?? 3;
+        baseOptions.cols = currentField.options?.cols ?? 50;
         break;
-      case 'file':
-        baseOptions.accept = currentField.options?.accept || '';
-        baseOptions.multiple = currentField.options?.multiple || false;
+      }
+      case 'file': {
+        baseOptions.accept = currentField.options?.accept ?? '';
+        baseOptions.multiple = currentField.options?.multiple ?? false;
         break;
+      }
       case 'date':
       case 'time':
       case 'datetime-local':
       case 'month':
-      case 'week':
-        baseOptions.min = currentField.options?.min || '';
-        baseOptions.max = currentField.options?.max || '';
+      case 'week': {
+        baseOptions.min = currentField.options?.min ?? '';
+        baseOptions.max = currentField.options?.max ?? '';
         break;
+      }
       case 'text':
       case 'email':
       case 'password':
       case 'tel':
-      case 'url':
-        baseOptions.maxlength = currentField.options?.maxlength || '';
-        baseOptions.minlength = currentField.options?.minlength || '';
+      case 'url': {
+        baseOptions.maxlength = currentField.options?.maxlength ?? '';
+        baseOptions.minlength = currentField.options?.minlength ?? '';
         break;
-      case 'color':
-        baseOptions.value = currentField.options?.value || '#000000';
+      }
+      case 'color': {
+        baseOptions.value = currentField.options?.value ?? '#000000';
         break;
-      case 'image':
-        baseOptions.src = currentField.options?.src || '';
-        baseOptions.alt = currentField.options?.alt || '';
+      }
+      case 'image': {
+        baseOptions.src = currentField.options?.src ?? '';
+        baseOptions.alt = currentField.options?.alt ?? '';
         break;
+      }
+      case 'button':
+      case 'hidden':
+      case 'reset':
+      case 'submit': {
+        break;
+      }
     }
 
-    // Обновляем поле в FormManager с новым типом и очищенными опциями
     const updates: Partial<FieldConfig> = {
       type: newType,
       options: baseOptions,
     };
 
-    // Обрабатываем валидацию в зависимости от типа
     if (currentField.validation) {
       const validation = { ...currentField.validation };
-
-      // Очищаем несовместимые правила валидации
       if (newType !== 'email' && newType !== 'url') {
         delete validation.email;
         delete validation.url;
       }
-
       if (newType !== 'number' && newType !== 'range') {
         delete validation.numeric;
       }
-
       updates.validation = validation;
     }
 
     this.formManager.updateField(fieldId, updates);
-
-    // Пересоздаем интерфейс редактора поля
     this.renderFieldEditor();
-
-    // Обновляем предпросмотр
     this.updatePreview();
   }
 
   private onOptionsChange(_fieldId: string): void {
-    // Пересоздаем интерфейс редактора поля
     this.renderFieldEditor();
-
-    // Обновляем предпросмотр
     this.updatePreview();
   }
 }

@@ -1,0 +1,352 @@
+@reference "./tw-ref.css";
+
+/* Unlayered semantic chrome — beats VitePress resets & @layer utilities.
+   Tokens: @theme in src/tailwind.css (bg-ocm-*, rounded-ocm, z-ocm-*, …). */
+
+.ocm-editor-root {
+  @apply relative flex w-full min-h-0 flex-col overflow-hidden rounded-ocm-sm border border-ocm-border;
+}
+
+.ocm-editor-root--page {
+  @apply h-full min-h-[100vh] rounded-none border-0 shadow-none;
+
+  .ocm-toolbar-host {
+    display: none;
+  }
+
+  .ocm-toolbar-host.is-page-open {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    /* Below overlay/popup/menu so dialogs always win. */
+    z-index: var(--z-index-ocm-toolbar, 20);
+    max-width: min(100vw - 1rem, 42rem);
+    overflow: auto;
+    border-radius: var(--radius-ocm-sm, 0.5rem);
+    border: 1px solid var(--color-ocm-border, #e4e4e7);
+    background: var(--color-ocm-surface, #fff);
+    box-shadow: var(--shadow-ocm);
+    backdrop-filter: none;
+
+    .ocm-toolbar {
+      @apply h-auto min-h-10 flex-wrap overflow-visible;
+    }
+  }
+
+  .ocm-editor {
+    @apply min-h-0 flex-1 overflow-auto;
+  }
+
+  .ocm-content {
+    @apply mx-auto min-h-full max-w-3xl px-6 py-10;
+  }
+
+  .ocm-editor-footer,
+  [data-ocm-chrome='footer'] {
+    @apply hidden;
+  }
+}
+
+.ocm-toolbar-host {
+  @apply sticky top-0 z-ocm-toolbar shrink-0 rounded-t-ocm-sm border-b border-ocm-border bg-ocm-toolbar backdrop-blur;
+}
+
+.ocm-toolbar {
+  @apply flex h-10 min-h-10 flex-nowrap items-center gap-0.5 overflow-x-auto px-2;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.ocm-toolbar__btn {
+  @apply inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-ocm-sm border-0 bg-transparent text-ocm-text-muted transition-colors;
+  @apply hover:bg-ocm-surface-hover hover:text-ocm-text;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400;
+  @apply disabled:cursor-not-allowed disabled:opacity-40;
+
+  svg {
+    @apply size-3.5 shrink-0;
+  }
+
+  svg:not([fill='none']) {
+    @apply fill-current;
+  }
+
+  &.is-active {
+    /* Re-state hover so base hover:bg/text don't wipe the active chip. */
+    @apply bg-ocm-accent-soft text-ocm-accent;
+    @apply hover:bg-ocm-accent-soft hover:text-ocm-accent;
+  }
+}
+
+.ocm-toolbar__sep {
+  @apply mx-1.5 h-4 w-px shrink-0 self-center bg-ocm-border-subtle;
+}
+
+.ocm-toolbar__btn--menu {
+  @apply w-auto min-w-7 gap-0.5 px-1.5;
+}
+
+.ocm-toolbar__menu-label {
+  @apply text-xs font-medium;
+}
+
+.ocm-toolbar__chevron {
+  @apply inline-flex size-3.5 opacity-60;
+
+  svg {
+    @apply size-3.5;
+  }
+}
+
+.ocm-toolbar__menu-icon {
+  @apply inline-flex size-4;
+
+  svg {
+    @apply size-4;
+  }
+}
+
+.ocm-toolbar-menu {
+  @apply z-ocm-menu min-w-44 overflow-hidden rounded-ocm border border-ocm-border bg-ocm-surface py-1 shadow-lg;
+}
+
+.ocm-toolbar-menu__item {
+  @apply flex w-full cursor-pointer items-center gap-2 px-3 py-2 text-left text-sm text-ocm-text;
+  @apply hover:bg-ocm-surface-hover hover:text-ocm-text;
+  @apply disabled:cursor-not-allowed disabled:opacity-40;
+
+  &.is-active {
+    @apply bg-ocm-accent-soft text-ocm-accent;
+    @apply hover:bg-ocm-accent-soft hover:text-ocm-accent;
+  }
+}
+
+.ocm-toolbar-menu__icon {
+  @apply inline-flex size-4 shrink-0;
+
+  svg {
+    @apply size-4;
+  }
+}
+
+.ocm-toolbar-menu__label {
+  @apply truncate;
+}
+
+.ocm-popup-overlay {
+  @apply fixed inset-0 z-ocm-overlay bg-ocm-overlay;
+}
+
+.ocm-portal {
+  @apply pointer-events-none;
+}
+
+.ocm-portal-host {
+  @apply pointer-events-auto;
+}
+
+.ocm-portal-host--transient {
+  @apply contents;
+}
+
+.ocm-popup-layer {
+  /* Wrapper only — children are fixed portals. */
+}
+
+.ocm-popup {
+  @apply fixed top-[10%] left-1/2 z-ocm-popup flex max-h-[min(80vh,40rem)] w-[min(100%-2rem,var(--container-ocm-popup-md))] -translate-x-1/2 flex-col overflow-hidden rounded-ocm border border-ocm-border bg-ocm-surface text-ocm-text shadow-ocm;
+
+  &--sm {
+    @apply max-h-[min(70vh,28rem)] w-[min(100%-2rem,var(--container-ocm-popup-sm))];
+  }
+
+  &--md {
+    @apply w-[min(100%-2rem,var(--container-ocm-popup-md))];
+  }
+
+  &--lg {
+    @apply max-h-[min(85vh,44rem)] w-[min(100%-2rem,var(--container-ocm-popup-lg))];
+  }
+}
+
+.ocm-popup__header {
+  @apply flex shrink-0 items-center justify-between gap-3 border-b border-ocm-border-subtle bg-ocm-surface px-4 py-3 text-sm font-semibold text-ocm-text;
+}
+
+.ocm-popup__close {
+  @apply inline-flex size-8 cursor-pointer items-center justify-center rounded-ocm-sm border-0 bg-transparent text-ocm-text-muted;
+  @apply hover:bg-ocm-surface-hover hover:text-ocm-text;
+}
+
+.ocm-popup__content {
+  @apply flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-4 py-3;
+}
+
+.ocm-popup__row {
+  @apply flex flex-col gap-1.5 text-sm text-ocm-text;
+
+  label {
+    @apply text-xs font-medium text-ocm-text-muted;
+  }
+
+  /* Never stretch checkboxes/radios/file/color to full row width. */
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='color']),
+  textarea,
+  select {
+    @apply w-full rounded-ocm-sm border border-ocm-border bg-ocm-input px-2.5 py-1.5 text-sm text-ocm-text outline-none;
+    @apply focus:border-sky-400 focus:ring-2 focus:ring-ocm-accent-soft;
+  }
+
+  select {
+    @apply cursor-pointer appearance-auto pr-8;
+  }
+
+  &--check {
+    @apply flex-row items-center;
+  }
+}
+
+.ocm-popup__check {
+  @apply flex w-full cursor-pointer items-center gap-2.5 text-sm font-normal text-ocm-text;
+
+  input[type='checkbox'],
+  input[type='radio'] {
+    @apply size-4 shrink-0 cursor-pointer rounded border border-ocm-border bg-ocm-input text-ocm-accent;
+    @apply focus:ring-2 focus:ring-ocm-accent-soft focus:outline-none;
+    accent-color: var(--color-ocm-accent, #0284c7);
+  }
+}
+
+.ocm-popup__footer {
+  @apply flex shrink-0 justify-end gap-2 border-t border-ocm-border-subtle bg-ocm-surface-muted px-4 py-3;
+}
+
+.ocm-popup__btn {
+  @apply inline-flex cursor-pointer items-center justify-center rounded-ocm-sm border border-ocm-border bg-ocm-surface px-3 py-1.5 text-sm font-medium text-ocm-text transition-colors;
+  @apply hover:bg-ocm-surface-hover;
+
+  /* Primary/danger must re-declare hover bg+text: base hover has equal
+     specificity and otherwise leaves washed-out labels. */
+  &--primary {
+    @apply border-ocm-accent bg-ocm-accent text-white;
+    @apply hover:border-sky-600 hover:bg-sky-600 hover:text-white;
+  }
+
+  &--danger {
+    @apply border-ocm-danger bg-ocm-danger text-white;
+    @apply hover:border-red-700 hover:bg-red-700 hover:text-white;
+  }
+}
+
+.ocm-context-menu {
+  @apply fixed z-ocm-menu min-w-44 rounded-ocm-sm border border-ocm-border bg-ocm-surface p-1 shadow-ocm;
+}
+
+.ocm-context-menu__item {
+  @apply flex w-full cursor-pointer items-center gap-2 rounded-[calc(var(--radius-ocm-sm)-2px)] border-0 bg-transparent px-2.5 py-1.5 text-left text-sm text-ocm-text;
+  @apply hover:bg-ocm-surface-hover;
+  @apply disabled:cursor-not-allowed disabled:opacity-40;
+
+  &.is-danger {
+    @apply text-ocm-danger hover:bg-ocm-danger-soft;
+  }
+}
+
+.ocm-menu-icon {
+  @apply inline-flex size-4 shrink-0 items-center justify-center text-ocm-text-muted;
+
+  svg {
+    @apply size-4;
+  }
+
+  svg:not([fill='none']) {
+    @apply fill-current;
+  }
+}
+
+.ocm-context-menu__divider {
+  @apply my-1 h-px bg-ocm-border-subtle;
+}
+
+.ocm-context-menu__group-title {
+  @apply px-2.5 py-1 text-[11px] font-medium tracking-wide text-ocm-text-muted uppercase;
+}
+
+.ocm-menu-subwrap {
+  @apply relative;
+}
+
+.ocm-menu-subwrap__trigger {
+  @apply justify-between gap-3;
+}
+
+.ocm-menu-subwrap__chevron {
+  @apply ml-auto inline-flex shrink-0 opacity-50;
+}
+
+.ocm-menu-subwrap__panel {
+  @apply min-w-40;
+  /* left/right/top set by applyPlaceSubmenu on open */
+}
+
+.ocm-menu-label {
+  @apply truncate;
+}
+
+.ocm-notify-container {
+  @apply fixed top-3 right-3 z-ocm-notify flex flex-col gap-2;
+}
+
+.ocm-notify {
+  @apply max-w-sm rounded-ocm-sm bg-ocm-notify px-3.5 py-2.5 text-sm text-white shadow-lg;
+
+  &--success {
+    @apply bg-emerald-600;
+  }
+  &--error {
+    @apply bg-ocm-danger;
+  }
+  &--warning {
+    @apply bg-amber-500;
+  }
+  &--info {
+    @apply bg-ocm-accent;
+  }
+}
+
+.ocm-editor {
+  @apply min-h-0 w-full flex-1 overflow-hidden bg-ocm-surface;
+}
+
+.ocm-content {
+  @apply min-h-[280px] px-5 py-4 text-ocm-text outline-none;
+
+  [data-ocm-block] {
+    @apply mb-2;
+
+    &:last-child {
+      @apply mb-0;
+    }
+  }
+}
+
+.ocm-editor-footer {
+  @apply flex shrink-0 items-center justify-between gap-4 rounded-b-ocm-sm border-t border-ocm-border-subtle bg-ocm-surface-muted px-4 py-1.5 text-[11px] leading-none tabular-nums text-ocm-text-muted;
+}
+
+[data-ocm-chrome='footer'] {
+  @apply contents;
+}
+
+.ocm-atom {
+  @apply my-2 block rounded-ocm-sm border border-ocm-border bg-ocm-surface-muted px-3 py-2;
+}
+
+.ocm-math,
+.ocm-math-content {
+  @apply text-ocm-text;
+}

@@ -1,211 +1,163 @@
 import './style.scss';
-import './public.scss';
-
-import type { HTMLEditor } from '../../app';
-import type { Plugin } from '../../core/Plugin';
-import { ContextMenu } from '../../core/ui/ContextMenu.ts';
-import { deleteIcon, editIcon, formIcon } from '../../icons/';
-import { FormManager } from './services/FormManager.ts';
-import { TemplateManager } from './services/TemplateManager.ts';
-import { FormPopup } from './components/FormPopup.ts';
-import { TemplatesModal } from './components/TemplatesModal.ts';
-import { FormBuilderModal } from './components/FormBuilderModal.ts';
+import { definePlugin, insertAtomAfter } from '@on-codemerge/sdk';
+import { foreign } from '@on-codemerge/sdk';
+import type { WidgetContext, ViewSpec } from '@on-codemerge/sdk';
+import { deleteIcon, duplicateIcon, editIcon, formIcon } from '../../icons';
+import { TemplateManager } from './services/TemplateManager';
+import { FormBuilderModal } from './components/FormBuilderModal';
+import { mountFormWidget } from './widgets/mountFormWidget';
 import type { FormConfig } from './types';
-import { createToolbarButton } from '../ToolbarPlugin/utils.ts';
-import { createLineBreak } from '../../utils/helpers';
-import { DeleteFormCommand } from './commands/DeleteFormCommand';
-import { DuplicateFormCommand } from './commands/DuplicateFormCommand';
 
-export class FormBuilderPlugin implements Plugin {
-  name = 'form-builder';
-  hotkeys = [{ keys: 'Ctrl+Alt+F', description: 'Insert form', command: 'form', icon: '📝' }];
+export function FormBuilderPlugin() {
+  let openFormBuilder: ((existing?: HTMLElement | null) => void) | null = null;
 
-  private editor!: HTMLEditor;
-  private formPopup: FormPopup | null = null;
-  private templatesModal: TemplatesModal | null = null;
-  private contextMenu: ContextMenu | null = null;
-  private formManager!: FormManager;
-  private templateManager!: TemplateManager;
-  private toolbarButton: HTMLElement | null = null;
-
-  constructor() {}
-
-  /**
-   * Initialize plugin
-   */
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.formPopup = new FormPopup(this.editor);
-    this.templatesModal = new TemplatesModal(this.editor);
-    this.addToolbarButton();
-    this.setupContextMenu();
-    this.setupFormEvents();
-
-    this.formManager = new FormManager(this.editor);
-    this.templateManager = new TemplateManager(this.editor);
-    this.templateManager.initialize();
-
-    this.editor.on('form', () => {
-      this.openFormBuilder();
-    });
-  }
-
-  /**
-   * Open form builder modal
-   */
-  private openFormBuilder(): void {
-    // Сохраняем позицию курсора перед открытием модального окна
-    const savedPosition = this.editor.saveCursorPosition();
-
-    const formBuilderModal = new FormBuilderModal(this.editor);
-    formBuilderModal.show(
-      (formConfig: FormConfig) => {
-        // Восстанавливаем позицию курсора
-        if (savedPosition) {
-          this.editor.restoreCursorPosition(savedPosition);
-        }
-
-        const formHtml = this.formManager.createForm(formConfig);
-
-        // Вставляем форму используя встроенный метод insertContent
-        this.editor.insertContent(formHtml);
-        this.editor.insertContent(createLineBreak());
-
-        // destroy не нужен, popup просто скрывается
+  return definePlugin({
+    commands: {
+      insertForm: () => {
+        openFormBuilder?.();
+        return null;
       },
-      false,
-      null
-    );
-  }
-
-  /**
-   * Setup context menu
-   */
-  private setupContextMenu(): void {
-    const buttons = [
+    },
+    hotkeys: [{ keys: 'Mod-Alt-f', command: 'insertForm', description: 'Insert form' }],
+    name: 'form-builder',
+    nodes: [
       {
-        label: this.editor.t('Edit Form'),
-        icon: editIcon,
-        onClick: (element: HTMLElement | null) => {
-          if (element && element.tagName === 'FORM') {
-            const formBuilderModal = new FormBuilderModal(this.editor);
-            formBuilderModal.show(
-              (_formConfig: FormConfig) => {
-                // destroy не нужен, popup просто скрывается
-              },
-              true,
-              element
+        name: 'form',
+        group: 'atom',
+        atom: true,
+        attrs: { schema: '[]', action: '', align: '' },
+      },
+    ],
+    setup(ctx) {
+      const editor = ctx.editor;
+      const templateManager = new TemplateManager(editor);
+      templateManager.initialize();
+
+      openFormBuilder = (existing?: HTMLElement | null) => {
+        const modal = new FormBuilderModal(editor, ctx.scope);
+        const pathEl = existing?.closest('[data-ocm-path], [data-ocm-block]') ?? existing ?? null;
+        const pathRaw =
+          pathEl instanceof HTMLElement
+            ? (pathEl.dataset.ocmPath ?? pathEl.dataset.ocmBlock ?? '')
+            : '';
+        const atomPath = pathRaw.includes('.')
+          ? pathRaw.split('.').map(Number)
+          : pathRaw === ''
+            ? null
+            : [Number(pathRaw)];
+
+        modal.show(
+          (formConfig: FormConfig) => {
+            if (atomPath && atomPath.every((n) => Number.isFinite(n))) {
+              editor.run(() => [
+                {
+                  type: 'set_attrs',
+                  path: atomPath,
+                  attrs: {
+                    schema: JSON.stringify(formConfig),
+                    action: formConfig.action || '',
+                  },
+                },
+              ]);
+              return;
+            }
+            editor.run(
+              insertAtomAfter('form', {
+                schema: JSON.stringify(formConfig),
+                action: formConfig.action || '',
+                align: '',
+              })
             );
-          }
-        },
-      },
-      {
-        label: this.editor.t('Duplicate Form'),
+          },
+          Boolean(existing),
+          existing ?? null
+        );
+      };
+
+      ctx.toolbar.add({
+        id: 'form',
         icon: formIcon,
-        onClick: (element: HTMLElement | null) => {
-          if (element && element.tagName === 'FORM') {
-            const command = new DuplicateFormCommand(this.editor, element);
-            command.execute();
-          }
-        },
-      },
-      {
-        label: this.editor.t('Delete Form'),
-        icon: deleteIcon,
-        onClick: (element: HTMLElement | null) => {
-          if (element && element.tagName === 'FORM') {
-            const command = new DeleteFormCommand(this.editor, element);
-            command.execute();
-          }
-        },
-      },
-    ];
-
-    this.contextMenu = new ContextMenu(this.editor, buttons);
-  }
-
-  /**
-   * Setup form events
-   */
-  private setupFormEvents(): void {
-    if (!this.editor) return;
-
-    const container = this.editor.getContainer();
-    if (!container) return;
-
-    container.addEventListener('contextmenu', this.handleFormContextMenu);
-  }
-
-  /**
-   * Handle form context menu
-   */
-  private handleFormContextMenu = (e: Event): void => {
-    const form = (e.target as Element).closest('form');
-    if (form instanceof HTMLElement) {
-      e.preventDefault();
-
-      // Получаем координаты мыши с учётом прокрутки страницы
-      const mouseX = (e as MouseEvent).clientX;
-      const mouseY = (e as MouseEvent).clientY;
-
-      // Показываем контекстное меню
-      this.contextMenu?.show(form, mouseX, mouseY);
-    }
-  };
-
-  /**
-   * Add toolbar button
-   */
-  private addToolbarButton(): void {
-    const toolbar = this.editor.getToolbar();
-    if (toolbar) {
-      this.toolbarButton = createToolbarButton({
-        icon: formIcon,
-        title: this.editor.t('Insert Form'),
-        onClick: () => this.openFormBuilder(),
+        title: editor.t('formBuilder.insertForm'),
+        menu: 'insert',
+        order: 53,
+        onClick: () => openFormBuilder?.(),
       });
-      toolbar.appendChild(this.toolbarButton);
-    }
-  }
 
-  /**
-   * Destroy plugin
-   */
-  destroy(): void {
-    // Уничтожаем все UI компоненты
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
-    if (this.formPopup) {
-      this.formPopup.destroy();
-      this.formPopup = null;
-    }
-    if (this.templatesModal) {
-      this.templatesModal.destroy();
-      this.templatesModal = null;
-    }
-
-    // Удаляем кнопку из тулбара
-    if (this.toolbarButton) {
-      this.toolbarButton.remove();
-      this.toolbarButton = null;
-    }
-
-    // Удаляем обработчик событий
-    if (this.editor) {
-      const container = this.editor.getContainer();
-      if (container) {
-        container.removeEventListener('contextmenu', this.handleFormContextMenu);
-      }
-    }
-
-    // Отписываемся от всех событий
-    this.editor?.off('form-builder');
-
-    // Очищаем все ссылки
-    this.editor = null!;
-  }
+      const onCtx = (e: MouseEvent) => {
+        const form = (e.target as Element).closest(
+          'form, .ocm-form-atom, .ocm-form, [data-ocm-type="form"]'
+        );
+        if (!(form instanceof HTMLElement)) {
+          return;
+        }
+        e.preventDefault();
+        editor.ui.menu.open(
+          [
+            {
+              label: editor.t('formBuilder.editForm'),
+              icon: editIcon,
+              onClick: () => openFormBuilder?.(form),
+            },
+            {
+              label: editor.t('formBuilder.duplicateForm'),
+              icon: duplicateIcon,
+              onClick: () => {
+                const pathRaw =
+                  form.dataset.ocmPath ??
+                  form.dataset.ocmBlock ??
+                  form.closest<HTMLElement>('[data-ocm-path], [data-ocm-block]')?.dataset.ocmPath ??
+                  form.closest<HTMLElement>('[data-ocm-block]')?.dataset.ocmBlock;
+                if (!pathRaw) {
+                  return;
+                }
+                const path = pathRaw.includes('.')
+                  ? pathRaw.split('.').map(Number)
+                  : [Number(pathRaw)];
+                try {
+                  const node = editor.getJSON().doc.content?.[path[0]];
+                  if (node?.type === 'form') {
+                    editor.run(insertAtomAfter('form', { ...node.attrs }));
+                  }
+                } catch {
+                  /* ignore */
+                }
+              },
+            },
+            { type: 'divider' },
+            {
+              label: editor.t('common.delete'),
+              icon: deleteIcon,
+              variant: 'danger',
+              onClick: () => {
+                const pathRaw =
+                  form.dataset.ocmPath ??
+                  form.dataset.ocmBlock ??
+                  form.closest<HTMLElement>('[data-ocm-path]')?.dataset.ocmPath ??
+                  form.closest<HTMLElement>('[data-ocm-block]')?.dataset.ocmBlock;
+                if (pathRaw === undefined || pathRaw === null) {
+                  return;
+                }
+                const index = Number(pathRaw.split('.')[0]);
+                editor.run(() => [{ type: 'remove_node', path: [], index }]);
+              },
+            },
+          ],
+          e.clientX,
+          e.clientY
+        );
+      };
+      ctx.onDom('host', 'contextmenu', onCtx);
+    },
+    widgets: {
+      form: {
+        render(attrs, wctx: WidgetContext): ViewSpec {
+          return foreign((host, scope) => {
+            mountFormWidget(host, attrs, () => wctx.editor, scope);
+          });
+        },
+      },
+    },
+  });
 }
 
 export default FormBuilderPlugin;

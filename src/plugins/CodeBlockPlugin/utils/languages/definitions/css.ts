@@ -1,10 +1,11 @@
-import { type LanguageDefinition, TokenType } from '../../../types';
+import { TokenType } from '../../../types';
+import type { LanguageDefinition } from '../../../types';
 
 export const cssDefinition: LanguageDefinition = {
   name: 'css',
   patterns: {
     [TokenType.Comment]: /^\/\*[\s\S]*?\*\//,
-    [TokenType.Selector]: /^[.#]?[\w-]+(?:\[[^\]]+\]|\:{1,2}[\w-]+)*(?=\s*\{)/,
+    [TokenType.Selector]: /^[.#]?[\w-]+(?:\[[^\]]+\]|:{1,2}[\w-]+)*(?=\s*\{)/,
     [TokenType.Property]: /^[-\w]+(?=\s*:)/,
     [TokenType.Value]: /^:[^;]+/,
     [TokenType.String]: /^(['"])(?:\\[\s\S]|(?!\1)[^\\])*\1/,

@@ -1,21 +1,61 @@
-// style.scss
-/* Font popup styles */
-.font-popup {
-  @apply w-[300px];
+@reference "../../tailwind.css";
 
-  .popup-content {
-    @apply space-y-4;
+.ocm-popup.font-settings-modal {
+  width: min(100% - 1.5rem, 28rem);
+
+  .ocm-popup__content {
+    @apply px-1 py-0;
+  }
+}
+
+.fp-panel {
+  @apply flex flex-col gap-4 py-1;
+}
+
+.fp-preview {
+  @apply rounded-xl border border-ocm-border bg-ocm-surface-muted/40 px-4 py-5;
+}
+
+.fp-preview__meta {
+  @apply mb-2 text-[10px] font-semibold tracking-wide text-ocm-text-muted uppercase;
+}
+
+.fp-preview__sample {
+  @apply text-ocm-text;
+}
+
+.fp-section {
+  @apply flex flex-col gap-2;
+}
+
+.fp-section__title {
+  @apply m-0 flex flex-wrap items-baseline gap-x-1 text-xs font-semibold tracking-tight text-ocm-text;
+}
+
+.fp-section__hint {
+  @apply font-normal text-ocm-text-muted;
+}
+
+.fp-select {
+  @apply w-full rounded-lg border border-ocm-border bg-ocm-input px-2.5 py-2 text-sm text-ocm-text;
+
+  &:focus {
+    @apply border-ocm-accent outline-none ring-2 ring-ocm-accent/20;
+  }
+}
+
+.fp-chips {
+  @apply flex flex-wrap gap-1.5;
+}
+
+.fp-chip {
+  @apply min-w-9 cursor-pointer rounded-lg border border-ocm-border bg-transparent px-2.5 py-1.5 text-xs font-medium text-ocm-text-muted transition-colors;
+
+  &:hover {
+    @apply bg-ocm-surface-hover text-ocm-text;
   }
 
-  .popup-item {
-    @apply flex flex-col gap-2;
-
-    label {
-      @apply text-sm font-medium text-gray-700;
-    }
-
-    select {
-      @apply p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500;
-    }
+  &.is-active {
+    @apply border-ocm-accent bg-ocm-accent-soft text-ocm-accent;
   }
 }

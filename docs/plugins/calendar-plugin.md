@@ -20,37 +20,54 @@ The Calendar Plugin provides comprehensive calendar and event management capabil
 - **Responsive Design**: Works seamlessly on all screen sizes
 - **Dark Mode Support**: Automatic theme adaptation
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, CalendarPlugin } from 'on-codemerge';
+import { Editor, CalendarPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new CalendarPlugin());
+const editor = new Editor(container, {
+  plugins: [CalendarPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['CalendarPlugin']" />
 
+## Public API (v2)
+
+Factory: `CalendarPlugin()`.
+
+| Command          |                                    |
+| ---------------- | ---------------------------------- |
+| `insertCalendar` | `editor.command('insertCalendar')` |
+
+### Keyboard shortcuts
+
+| Shortcut    | Command          |
+| ----------- | ---------------- |
+| `Mod-Alt-l` | `insertCalendar` |
+
+> **Note:** No public `calendarManager` API.
+
 ## User Interface
 
 ### Toolbar Button
+
 The plugin adds a calendar button to the editor toolbar. Click it to open the calendar creation menu.
 
 ### Context Menu
+
 Right-click on any calendar or event to access the context menu with the following options:
 
 #### Calendar Actions
+
 - **Add Event**: Create a new event in the calendar
 - **Edit Calendar**: Modify calendar title and description
 - **Copy Calendar**: Duplicate the calendar with all its events
@@ -59,119 +76,22 @@ Right-click on any calendar or event to access the context menu with the followi
 - **Delete Calendar**: Remove the calendar and all its events
 
 #### Event Actions
+
 - **Edit Event**: Modify event details
 - **Copy Event**: Duplicate the event
 - **Delete Event**: Remove the event from calendar
 
 ### Modal Forms
+
 The plugin uses modal forms for creating and editing calendars and events:
 
 - **Calendar Form**: Simple form for calendar title and description
 - **Event Form**: Comprehensive form with all event fields including validation
 
-## API Reference
-
-### Calendar Methods
-
-```javascript
-// Create a new calendar
-const calendar = calendarManager.createCalendar({
-  title: 'My Calendar',
-  description: 'Personal events calendar'
-});
-
-// Get all calendars
-const calendars = calendarManager.getCalendars();
-
-// Get specific calendar
-const calendar = calendarManager.getCalendar(calendarId);
-
-// Update calendar
-calendarManager.updateCalendar(calendarId, {
-  title: 'Updated Calendar Title'
-});
-
-// Delete calendar
-calendarManager.deleteCalendar(calendarId);
-
-// Copy calendar (new feature)
-const copiedCalendar = calendarManager.copyCalendar(calendarId);
-
-// Export calendar data
-const exportData = calendarManager.exportCalendar(calendarId);
-
-// Import calendar data
-const newCalendar = calendarManager.importCalendar(exportData);
-```
-
-### Event Methods
-
-```javascript
-// Create a new event
-const event = calendarManager.createEvent({
-  title: 'Meeting',
-  description: 'Team meeting',
-  date: '2024-01-15',
-  time: '14:00',
-  duration: 60,
-  location: 'Conference Room A',
-  color: '#3b82f6',
-  isAllDay: false
-}, calendarId);
-
-// Get events for a calendar
-const events = calendarManager.getEvents(calendarId);
-
-// Get specific event
-const event = calendarManager.getEvent(eventId);
-
-// Update event
-calendarManager.updateEvent(eventId, {
-  title: 'Updated Meeting Title'
-});
-
-// Delete event
-calendarManager.deleteEvent(eventId);
-
-// Copy event (new feature)
-const copiedEvent = calendarManager.copyEvent(eventId);
-
-// Get events by date
-const events = calendarManager.getEventsByDate('2024-01-15');
-
-// Get events by date range
-const events = calendarManager.getEventsByDateRange('2024-01-01', '2024-01-31');
-```
-
-### Notification System
-
-The plugin integrates with the editor's notification system to provide user feedback:
-
-```javascript
-// Success notifications
-editor.showSuccessNotification('Calendar created successfully');
-editor.showSuccessNotification('Event saved successfully');
-
-// Error notifications
-editor.showErrorNotification('Failed to save calendar');
-editor.showErrorNotification('Invalid event data');
-
-// Warning notifications
-editor.showWarningNotification('Please check your input');
-
-// Info notifications
-editor.showInfoNotification('Processing your request...');
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+C` | Insert calendar | `calendar` |
-
 ## Calendar Widget Structure
 
 ### HTML Structure
+
 ```html
 <div class="calendar-widget" data-calendar-id="calendar-123">
   <div class="calendar-header">
@@ -190,6 +110,7 @@ editor.showInfoNotification('Processing your request...');
 ```
 
 ### CSS Classes
+
 - `.calendar-widget`: Main calendar container
 - `.calendar-header`: Header with title
 - `.calendar-title`: Calendar title
@@ -204,17 +125,17 @@ editor.showInfoNotification('Processing your request...');
 
 ```typescript
 interface CalendarEvent {
-  id: string;           // Unique event identifier
-  title: string;        // Event title
+  id: string; // Unique event identifier
+  title: string; // Event title
   description?: string; // Event description
-  date: string;         // Event date (YYYY-MM-DD)
-  time: string;         // Event time (HH:MM)
-  duration?: number;    // Duration in minutes
-  location?: string;    // Event location
-  color?: string;       // Event color (hex)
-  isAllDay?: boolean;   // All-day event flag
-  createdAt: number;    // Creation timestamp
-  updatedAt: number;    // Last update timestamp
+  date: string; // Event date (YYYY-MM-DD)
+  time: string; // Event time (HH:MM)
+  duration?: number; // Duration in minutes
+  location?: string; // Event location
+  color?: string; // Event color (hex)
+  isAllDay?: boolean; // All-day event flag
+  createdAt: number; // Creation timestamp
+  updatedAt: number; // Last update timestamp
 }
 ```
 
@@ -222,12 +143,12 @@ interface CalendarEvent {
 
 ```typescript
 interface Calendar {
-  id: string;           // Unique calendar identifier
-  title: string;        // Calendar title
+  id: string; // Unique calendar identifier
+  title: string; // Calendar title
   description?: string; // Calendar description
   events: CalendarEvent[]; // Array of events
-  createdAt: number;    // Creation timestamp
-  updatedAt: number;    // Last update timestamp
+  createdAt: number; // Creation timestamp
+  updatedAt: number; // Last update timestamp
 }
 ```
 
@@ -256,35 +177,6 @@ interface UpdateEventData extends Partial<CreateEventData> {}
 interface UpdateCalendarData extends Partial<CreateCalendarData> {}
 ```
 
-## Events
-
-```javascript
-// Listen to calendar events
-editor.on('calendar:created', (calendar) => {
-  console.log('Calendar created:', calendar);
-});
-
-editor.on('calendar:updated', (calendar) => {
-  console.log('Calendar updated:', calendar);
-});
-
-editor.on('calendar:deleted', (calendarId) => {
-  console.log('Calendar deleted:', calendarId);
-});
-
-editor.on('event:created', (event) => {
-  console.log('Event created:', event);
-});
-
-editor.on('event:updated', (event) => {
-  console.log('Event updated:', event);
-});
-
-editor.on('event:deleted', (eventId) => {
-  console.log('Event deleted:', eventId);
-});
-```
-
 ## Examples
 
 ### Basic Calendar Usage
@@ -310,9 +202,7 @@ editor.on('event:deleted', (eventId) => {
 ### Event with Custom Styling
 
 ```html
-<div class="calendar-event" 
-     data-event-id="important-meeting"
-     style="--event-color: #dc2626">
+<div class="calendar-event" data-event-id="important-meeting" style="--event-color: #dc2626">
   <div class="event-time">15:30</div>
   <div class="event-title">Important Meeting</div>
   <div class="event-description">Client presentation</div>
@@ -321,43 +211,13 @@ editor.on('event:deleted', (eventId) => {
 
 ### Working with Calendar Manager
 
-```javascript
-// Create a calendar with events
-const calendar = calendarManager.createCalendar({
-  title: 'Work Schedule',
-  description: 'Daily work activities',
-  events: [
-    {
-      title: 'Team Meeting',
-      description: 'Weekly sync',
-      date: '2024-01-15',
-      time: '10:00',
-      duration: 60,
-      location: 'Conference Room',
-      color: '#3b82f6'
-    }
-  ]
-});
-
-// Copy a calendar
-const copiedCalendar = calendarManager.copyCalendar(calendar.id);
-// Result: "Work Schedule (Copy)"
-
-// Export calendar for backup
-const exportData = calendarManager.exportCalendar(calendar.id);
-// Save exportData to file or send to server
-
-// Import calendar from backup
-const importedCalendar = calendarManager.importCalendar(exportData);
-```
-
 ## Integration Examples
 
 ### React Integration
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, CalendarPlugin } from 'on-codemerge';
+import { Editor, CalendarPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -365,9 +225,9 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new CalendarPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(CalendarPlugin());
+
       // Listen to calendar events
       editorInstance.current.on('calendar:created', (calendar) => {
         console.log('New calendar:', calendar);
@@ -393,13 +253,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, CalendarPlugin } from 'on-codemerge';
+import { Editor, CalendarPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new CalendarPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [CalendarPlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -456,6 +316,7 @@ html.dark .calendar-event {
 ## Best Practices
 
 ### User Experience
+
 - Use descriptive calendar and event titles
 - Provide meaningful descriptions for events
 - Use color coding to categorize events
@@ -463,12 +324,14 @@ html.dark .calendar-event {
 - Include location information when relevant
 
 ### Data Management
+
 - Regularly export important calendars as backup
 - Use the copy feature to create templates
 - Organize events with consistent naming conventions
 - Use the import feature to restore from backups
 
 ### Performance
+
 - Avoid creating too many events in a single calendar
 - Use the date range queries for large datasets
 - Consider archiving old calendars to improve performance
@@ -482,4 +345,4 @@ html.dark .calendar-event {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

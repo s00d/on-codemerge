@@ -1,115 +1,29 @@
+import { h, mount } from '@on-codemerge/sdk';
+import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { ChartPoint } from '../types';
-import { DataRow } from './DataRow';
 import { getRandomColor } from '../utils/colors';
-import type { ChartData } from '../types/ChartData.ts';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
-import { createButton, createContainer } from '../../../utils/helpers.ts';
+import { DataRow } from './DataRow';
 
+/** Chart points editor — ViewSpec + mountInto (no helpers/getElement). */
 export class ChartDataEditor {
-  private container: HTMLElement;
-  private editor: HTMLEditor;
+  private readonly editor: EditorAPI;
+  private readonly onChange: (data: ChartPoint[]) => void;
+  private readonly requiresXY: boolean;
+  private readonly isScatter: boolean;
+  private rows: DataRow[] = [];
   private data: ChartPoint[] = [];
-  private onChange: (data: ChartPoint[]) => void;
-  private requiresXY: boolean;
-  private isScatter: boolean;
-  private dataRows: HTMLDivElement | null = null;
-  private addButton: HTMLButtonElement | null = null;
+  private mountHandle: MountHandle | null = null;
 
   constructor(
-    editor: HTMLEditor,
+    editor: EditorAPI,
     onChange: (data: ChartPoint[]) => void,
     requiresXY = false,
     isScatter = false
   ) {
     this.editor = editor;
-    this.container = createContainer('chart-data-editor');
     this.onChange = onChange;
     this.requiresXY = requiresXY;
     this.isScatter = isScatter;
-    this.initialize();
-  }
-
-  private initialize(): void {
-    // Основной контейнер
-    const mainContainer = createContainer('space-y-4');
-
-    // Заголовок и кнопка добавления
-    const header = createContainer('flex items-center justify-between mb-4');
-
-    const title = createContainer(
-      'text-sm font-medium text-gray-700',
-      this.editor.t('Data Points')
-    );
-
-    this.addButton = createButton(this.editor.t('Add Point'), () => {
-      this.addRow();
-    });
-    this.addButton.className =
-      'add-row-btn px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600';
-
-    header.appendChild(title);
-    header.appendChild(this.addButton);
-
-    // Сетка данных
-    const dataGrid = createContainer('data-grid');
-
-    // Заголовки столбцов
-    const headerGrid = createContainer(`grid ${this.getHeaderGridCols()} gap-2 pb-2 border-b`);
-
-    const labelHeader = createContainer(
-      'text-sm font-medium text-gray-600',
-      this.editor.t('Label')
-    );
-
-    headerGrid.appendChild(labelHeader);
-
-    if (this.requiresXY) {
-      const xHeader = createContainer('text-sm font-medium text-gray-600', this.editor.t('X'));
-      const yHeader = createContainer('text-sm font-medium text-gray-600', this.editor.t('Y'));
-
-      headerGrid.appendChild(xHeader);
-      headerGrid.appendChild(yHeader);
-
-      if (!this.isScatter) {
-        const sizeHeader = createContainer(
-          'text-sm font-medium text-gray-600',
-          this.editor.t('Size')
-        );
-        const colorHeader = createContainer(
-          'text-sm font-medium text-gray-600',
-          this.editor.t('Color')
-        );
-        headerGrid.appendChild(sizeHeader);
-        headerGrid.appendChild(colorHeader);
-      }
-    } else {
-      const valueHeader = createContainer(
-        'text-sm font-medium text-gray-600',
-        this.editor.t('Value')
-      );
-      const colorHeader = createContainer(
-        'text-sm font-medium text-gray-600',
-        this.editor.t('Color')
-      );
-      headerGrid.appendChild(valueHeader);
-      headerGrid.appendChild(colorHeader);
-    }
-
-    // Пустой элемент для выравнивания
-    const emptyHeader = createContainer();
-    headerGrid.appendChild(emptyHeader);
-
-    // Контейнер для строк данных
-    this.dataRows = createContainer('data-rows space-y-2 mt-2');
-
-    // Сборка структуры
-    dataGrid.appendChild(headerGrid);
-    dataGrid.appendChild(this.dataRows);
-    mainContainer.appendChild(header);
-    mainContainer.appendChild(dataGrid);
-    this.container.appendChild(mainContainer);
-
-    // Добавление начальных строк
     this.addInitialRows();
   }
 
@@ -128,7 +42,6 @@ export class ChartDataEditor {
       { label: 'Point 2', value: 20 },
       { label: 'Point 3', value: 15 },
     ];
-
     defaultData.forEach((data) => {
       if (this.requiresXY) {
         data.x = data.value;
@@ -138,77 +51,116 @@ export class ChartDataEditor {
           data.color = getRandomColor();
         }
       }
-      this.addRow(data);
+      this.pushRow(data);
     });
+    this.emit();
   }
 
-  private addRow(data: Partial<ChartPoint> = {}): void {
+  private pushRow(data: Partial<ChartPoint> = {}): void {
     const row = new DataRow(
+      this.editor,
       data,
       this.requiresXY,
       this.isScatter,
-      () => this.updateData(),
       () => {
-        row.element.remove();
-        this.updateData();
+        this.emit();
+      },
+      () => {
+        this.rows = this.rows.filter((r) => r !== row);
+        this.remount();
+        this.emit();
       }
     );
-
-    this.dataRows?.appendChild(row.element);
-    this.updateData();
+    this.rows.push(row);
   }
 
-  private updateData(): void {
-    if (!this.dataRows) return;
-
-    const rows = Array.from(this.dataRows?.querySelectorAll('div'));
-    this.data = rows
-      .map((row) => {
-        const dataRow = new DataRow(
-          {},
-          this.requiresXY,
-          this.isScatter,
-          () => {},
-          () => {}
-        );
-        dataRow.element = row as HTMLElement;
-        return dataRow.getData() as ChartPoint;
-      })
-      .filter((point) => point.label);
-
+  private emit(): void {
+    this.data = this.rows.map((r) => r.getData() as ChartPoint).filter((point) => point.label);
     this.onChange(this.data);
   }
 
-  public getElement(): HTMLElement {
-    return this.container;
+  private remount(): void {
+    if (!this.mountHandle) {
+      return;
+    }
+    this.mountHandle.update(this.view());
   }
 
-  public getData(): ChartPoint[] {
+  view(): ViewSpec {
+    const t = (k: string) => this.editor.t(k) || k;
+    const headers: ViewSpec[] = [
+      h('div', { class: 'text-sm font-medium text-gray-600' }, t('common.label')),
+    ];
+    if (this.requiresXY) {
+      headers.push(
+        h('div', { class: 'text-sm font-medium text-gray-600' }, t('common.x')),
+        h('div', { class: 'text-sm font-medium text-gray-600' }, t('common.y'))
+      );
+      if (!this.isScatter) {
+        headers.push(
+          h('div', { class: 'text-sm font-medium text-gray-600' }, t('common.size')),
+          h('div', { class: 'text-sm font-medium text-gray-600' }, t('common.color'))
+        );
+      }
+    } else {
+      headers.push(
+        h('div', { class: 'text-sm font-medium text-gray-600' }, t('common.value')),
+        h('div', { class: 'text-sm font-medium text-gray-600' }, t('common.color'))
+      );
+    }
+    headers.push(h('div', null));
+
+    return h('div', { class: 'chart-data-editor' }, [
+      h('div', { class: 'space-y-4' }, [
+        h('div', { class: 'flex items-center justify-between mb-4' }, [
+          h('div', { class: 'text-sm font-medium text-gray-700' }, t('common.dataPoints')),
+          h(
+            'button',
+            {
+              class:
+                'add-row-btn px-2 py-1 text-sm bg-blue-500 text-white rounded hover:bg-blue-600',
+              attrs: { type: 'button' },
+              on: {
+                click: () => {
+                  this.pushRow();
+                  this.remount();
+                  this.emit();
+                },
+              },
+            },
+            t('common.addPoint')
+          ),
+        ]),
+        h('div', { class: 'data-grid' }, [
+          h('div', { class: `grid ${this.getHeaderGridCols()} gap-2 pb-2 border-b` }, ...headers),
+          h('div', { class: 'data-rows space-y-2 mt-2' }, ...this.rows.map((r) => r.view())),
+        ]),
+      ]),
+    ]);
+  }
+
+  mountInto(host: HTMLElement): void {
+    this.mountHandle?.destroy();
+    this.mountHandle = mount(host, this.view());
+  }
+
+  getData(): ChartPoint[] {
     return this.data;
   }
 
-  public setData(data: ChartData[]): void {
-    if (this.dataRows) this.dataRows.innerHTML = '';
-    data.forEach((point) => this.addRow(point));
+  setData(data: ChartPoint[]): void {
+    this.rows = [];
+    data.forEach((point) => {
+      this.pushRow(point);
+    });
+    this.remount();
+    this.emit();
   }
 
-  public destroy(): void {
-    // Удаляем обработчик события для кнопки добавления
-    if (this.addButton) {
-      this.addButton.removeEventListener('click', () => this.addRow());
-      this.addButton = null;
-    }
-
-    // Удаляем контейнер из DOM
-    if (this.container.parentElement) {
-      this.container.parentElement.removeChild(this.container);
-    }
-
-    // Очищаем ссылки на внутренние объекты
-    this.dataRows = null;
-    this.container = null!;
-    this.editor = null!;
+  destroy(): void {
+    this.mountHandle?.destroy();
+    this.mountHandle = null;
+    this.rows = [];
     this.data = [];
-    this.onChange = null!;
   }
 }

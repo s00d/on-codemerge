@@ -1,30 +1,68 @@
 import type { Timer, CreateTimerData, UpdateTimerData, TimerTimeLeft } from '../types';
-import type { HTMLEditor } from '../../../core/HTMLEditor';
+import type { EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { h } from '@on-codemerge/sdk';
+import { parseJson } from '../../../utils/asAttr';
+import { atomAlignStyle } from '../../../utils/atomAlign';
+
+function dateReplacer(_key: string, value: unknown): unknown {
+  if (value instanceof Date) {
+    return value.toISOString();
+  }
+  return value;
+}
+
+function pad2(n: number): string {
+  return n.toString().padStart(2, '0');
+}
 
 export class TimerManager {
-  private timersKey = 'html-editor-timers';
-  private editor: HTMLEditor;
+  private readonly timersKey = 'html-editor-timers';
+  private readonly editor: EditorAPI;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI) {
     this.editor = editor;
   }
 
   public getTimers(): Timer[] {
     const stored = localStorage.getItem(this.timersKey);
-    if (!stored) return [];
+    if (stored === null || stored === undefined || stored === '') {
+      return [];
+    }
 
-    const timers = JSON.parse(stored);
+    const parsed = parseJson(stored);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
 
     // Конвертируем строки targetDate обратно в объекты Date
-    return timers.map((timer: any) => ({
-      ...timer,
-      targetDate: new Date(timer.targetDate),
-    }));
+    return parsed.map((timer) => {
+      const t = timer as Timer & { targetDate: string | Date };
+      return {
+        ...t,
+        targetDate: new Date(t.targetDate),
+      };
+    });
   }
 
   public getTimer(id: string): Timer | null {
     const timers = this.getTimers();
-    return timers.find((timer) => timer.id === id) || null;
+    return timers.find((timer) => timer.id === id) ?? null;
+  }
+
+  /** Upsert by id so remounted widgets keep ticking without inventing a new timer. */
+  public ensureTimer(timer: Timer): void {
+    const timers = this.getTimers();
+    const next = {
+      ...timer,
+      targetDate: timer.targetDate instanceof Date ? timer.targetDate : new Date(timer.targetDate),
+    };
+    const idx = timers.findIndex((t) => t.id === next.id);
+    if (idx === -1) {
+      timers.push(next);
+    } else {
+      timers[idx] = next;
+    }
+    localStorage.setItem(this.timersKey, JSON.stringify(timers));
   }
 
   public createTimer(data: CreateTimerData): Timer {
@@ -35,25 +73,16 @@ export class TimerManager {
       description: data.description,
       targetDate: data.targetDate,
       targetTime: data.targetTime,
-      color: data.color || '#3b82f6',
+      color: data.color ?? '#3b82f6',
       category: data.category,
-      tags: data.tags || [],
+      tags: data.tags ?? [],
       isActive: true,
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
 
     timers.push(newTimer);
-    localStorage.setItem(
-      this.timersKey,
-      JSON.stringify(timers, (_key, value) => {
-        // Конвертируем Date в строку для JSON
-        if (value instanceof Date) {
-          return value.toISOString();
-        }
-        return value;
-      })
-    );
+    localStorage.setItem(this.timersKey, JSON.stringify(timers, dateReplacer));
     return newTimer;
   }
 
@@ -72,16 +101,7 @@ export class TimerManager {
     };
 
     timers[index] = updated;
-    localStorage.setItem(
-      this.timersKey,
-      JSON.stringify(timers, (_key, value) => {
-        // Конвертируем Date в строку для JSON
-        if (value instanceof Date) {
-          return value.toISOString();
-        }
-        return value;
-      })
-    );
+    localStorage.setItem(this.timersKey, JSON.stringify(timers, dateReplacer));
     return updated;
   }
 
@@ -97,7 +117,7 @@ export class TimerManager {
       targetDateTime = timer.targetDate;
     } else {
       // Fallback для старых данных, где targetDate была строкой
-      targetDateTime = new Date(`${timer.targetDate}T${timer.targetTime}`);
+      targetDateTime = new Date(`${String(timer.targetDate)}T${timer.targetTime}`);
     }
 
     const now = new Date();
@@ -127,45 +147,17 @@ export class TimerManager {
     };
   }
 
-  // Генерация HTML таймера
-  public generateTimerHTML(timer: Timer): string {
+  /** Timer widget ViewSpec (editor + publish). */
+  public timerView(timer: Timer, opts?: { align?: string }): ViewSpec {
     const timeLeft = this.getTimeLeft(timer);
-    const categoryColor = timer.color || '#3b82f6';
-    const categoryName = timer.category || this.editor.t('General');
+    const categoryName = (timer.category ?? '').trim();
+    const showCategory = categoryName.length > 0;
 
-    const tagsHtml =
-      timer.tags && timer.tags.length > 0
-        ? `<div class="timer-tags">${timer.tags.map((tag) => `<span class="timer-tag">${tag}</span>`).join('')}</div>`
-        : '';
-
-    const timeLeftHtml = timeLeft.isExpired
-      ? `<div class="timer-expired">${this.editor.t('Time expired')}</div>`
-      : `<div class="timer-countdown" id="timer-countdown-${timer.id}">
-          <div class="timer-unit">
-            <span class="timer-value" id="timer-days-${timer.id}">${timeLeft.days}</span>
-            <span class="timer-label">${this.editor.t('days')}</span>
-          </div>
-          <div class="timer-unit">
-            <span class="timer-value" id="timer-hours-${timer.id}">${timeLeft.hours.toString().padStart(2, '0')}</span>
-            <span class="timer-label">${this.editor.t('hours')}</span>
-          </div>
-          <div class="timer-unit">
-            <span class="timer-value" id="timer-minutes-${timer.id}">${timeLeft.minutes.toString().padStart(2, '0')}</span>
-            <span class="timer-label">${this.editor.t('min')}</span>
-          </div>
-          <div class="timer-unit">
-            <span class="timer-value" id="timer-seconds-${timer.id}">${timeLeft.seconds.toString().padStart(2, '0')}</span>
-            <span class="timer-label">${this.editor.t('sec')}</span>
-          </div>
-        </div>`;
-
-    // Форматируем целевую дату
     let targetDate: Date;
     if (timer.targetDate instanceof Date) {
       targetDate = timer.targetDate;
     } else {
-      // Fallback для старых данных
-      targetDate = new Date(`${timer.targetDate}T${timer.targetTime}`);
+      targetDate = new Date(`${String(timer.targetDate)}T${timer.targetTime}`);
     }
 
     const formattedTargetDate = targetDate.toLocaleDateString('ru-RU', {
@@ -176,65 +168,96 @@ export class TimerManager {
       minute: '2-digit',
     });
 
-    // JavaScript для обновления таймера
-    const updateScript = `
-      <script>
-        (function() {
-          const targetDate = new Date('${timer.targetDate}T${timer.targetTime}');
-          const expiredText = '${this.editor.t('Timer expired') || 'Timer expired'}';
-          
-          function updateTimer() {
-            const now = new Date();
-            const diff = targetDate.getTime() - now.getTime();
-            
-            if (diff <= 0) {
-              // Таймер истек
-              const countdownEl = document.querySelector('[data-timer-id="${timer.id}"] .timer-countdown');
-              if (countdownEl) {
-                countdownEl.innerHTML = '<div class="timer-expired">' + expiredText + '</div>';
-              }
-              return;
-            }
-            
-            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-            
-            const timerElement = document.querySelector('[data-timer-id="${timer.id}"]');
-            if (timerElement) {
-              const daysEl = timerElement.querySelector('.timer-days');
-              const hoursEl = timerElement.querySelector('.timer-hours');
-              const minutesEl = timerElement.querySelector('.timer-minutes');
-              const secondsEl = timerElement.querySelector('.timer-seconds');
-              
-              if (daysEl) daysEl.textContent = days;
-              if (hoursEl) hoursEl.textContent = hours.toString().padStart(2, '0');
-              if (minutesEl) minutesEl.textContent = minutes.toString().padStart(2, '0');
-              if (secondsEl) secondsEl.textContent = seconds.toString().padStart(2, '0');
-            }
-          }
-          
-          // Обновляем каждую секунду
-          updateTimer();
-          setInterval(updateTimer, 1000);
-        })();
-      </script>
-    `;
+    const config = {
+      target: targetDate.toISOString(),
+      expiredText: this.editor.t('timer.timerExpired'),
+    };
 
-    return `
-      <div class="timer-widget" data-timer-id="${timer.id}" style="--timer-color: ${timer.color || '#3b82f6'}">
-        <div class="timer-header">
-          <div class="timer-title">${timer.title}</div>
-          <div class="timer-category" style="background-color: ${categoryColor}">${categoryName}</div>
-        </div>
-        ${timer.description ? `<div class="timer-description">${timer.description}</div>` : ''}
-        <div class="timer-target-date">${this.editor.t('Until')}: ${formattedTargetDate}</div>
-        ${timeLeftHtml}
-        ${tagsHtml}
-      </div>
-      ${updateScript}
-    `;
+    const unit = (suffix: string, value: string, label: string) =>
+      h('div', { class: 'timer-unit' }, [
+        h(
+          'span',
+          {
+            class: `timer-value timer-${suffix}`,
+            attrs: { id: `timer-${suffix}-${timer.id}` },
+          },
+          value
+        ),
+        h('span', { class: 'timer-label' }, label),
+      ]);
+
+    const sep = () => h('span', { class: 'timer-sep', attrs: { 'aria-hidden': 'true' } }, ':');
+
+    const countdown = timeLeft.isExpired
+      ? h('div', { class: 'timer-expired' }, this.editor.t('timer.timeExpired'))
+      : h(
+          'div',
+          {
+            class: 'timer-countdown',
+            attrs: { id: `timer-countdown-${timer.id}` },
+          },
+          [
+            unit('days', String(timeLeft.days), this.editor.t('timer.days')),
+            sep(),
+            unit('hours', pad2(timeLeft.hours), this.editor.t('timer.hours')),
+            sep(),
+            unit('minutes', pad2(timeLeft.minutes), this.editor.t('common.min')),
+            sep(),
+            unit('seconds', pad2(timeLeft.seconds), this.editor.t('timer.sec')),
+          ]
+        );
+
+    const metaBits: ViewSpec[] = [];
+    if (timer.description) {
+      metaBits.push(h('span', { class: 'timer-description' }, timer.description));
+    }
+    metaBits.push(
+      h('span', { class: 'timer-target-date' }, [
+        h('span', { class: 'timer-target-label' }, this.editor.t('common.until')),
+        ' ',
+        formattedTargetDate,
+      ])
+    );
+
+    const align = opts?.align ?? '';
+    const alignStyle = atomAlignStyle(align);
+    const style: Record<string, string> = {
+      ...(timer.color ? { ['--timer-color' as string]: timer.color } : {}),
+      ...(Object.keys(alignStyle).length > 0 ? { maxWidth: '28rem', ...alignStyle } : {}),
+    };
+
+    return h(
+      'div',
+      {
+        class: 'timer-widget not-prose',
+        attrs: {
+          'data-node': 'timer',
+          'data-timer-id': timer.id,
+          'data-ocm-runtime': 'timer',
+          'data-ocm-config': JSON.stringify(config),
+        },
+        style: Object.keys(style).length > 0 ? style : undefined,
+      },
+      [
+        h('div', { class: 'timer-top' }, [
+          h('div', { class: 'timer-meta' }, [
+            h('div', { class: 'timer-title-row' }, [
+              h('div', { class: 'timer-title' }, timer.title),
+              showCategory ? h('div', { class: 'timer-category' }, categoryName) : null,
+            ]),
+            h('div', { class: 'timer-sub' }, metaBits),
+          ]),
+          countdown,
+        ]),
+        timer.tags && timer.tags.length > 0
+          ? h(
+              'div',
+              { class: 'timer-tags' },
+              timer.tags.map((tag) => h('span', { class: 'timer-tag' }, tag))
+            )
+          : null,
+      ]
+    );
   }
 
   public exportTimer(id: string): string {
@@ -253,8 +276,19 @@ export class TimerManager {
 
   public importTimer(data: string): Timer {
     try {
-      const importData = JSON.parse(data);
-      const timer = importData.timer;
+      const importData = parseJson(data);
+      if (
+        importData === null ||
+        importData === undefined ||
+        typeof importData !== 'object' ||
+        Array.isArray(importData)
+      ) {
+        throw new Error('Invalid timer data format');
+      }
+      const timer = (importData as { timer?: CreateTimerData }).timer;
+      if (timer === null || timer === undefined) {
+        throw new Error('Invalid timer data format');
+      }
 
       return this.createTimer({
         title: timer.title,
@@ -266,7 +300,7 @@ export class TimerManager {
         tags: timer.tags,
       });
     } catch (error) {
-      throw new Error('Invalid timer data format');
+      throw new Error('Invalid timer data format', { cause: error });
     }
   }
 

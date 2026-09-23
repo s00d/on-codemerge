@@ -15,9 +15,7 @@ export interface OptionDescription {
 }
 
 // Тип для описания всех параметров драйвера
-export interface OptionsDescription {
-  [key: string]: OptionDescription;
-}
+export type OptionsDescription = Record<string, OptionDescription>;
 
 export interface AIDriver<OptionsType> {
   /**

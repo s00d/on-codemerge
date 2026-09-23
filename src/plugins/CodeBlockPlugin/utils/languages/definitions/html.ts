@@ -1,4 +1,5 @@
-import { type LanguageDefinition, TokenType } from '../../../types';
+import { TokenType } from '../../../types';
+import type { LanguageDefinition } from '../../../types';
 
 export const htmlDefinition: LanguageDefinition = {
   name: 'html',
@@ -7,7 +8,7 @@ export const htmlDefinition: LanguageDefinition = {
     [TokenType.Tag]: /^<\/?[^\s>]+/,
     [TokenType.Attribute]: /^\s+[a-zA-Z_:][a-zA-Z0-9_:.-]*(?=\s*=)/,
     [TokenType.String]: /^=\s*(['"])(.*?)\1/,
-    [TokenType.Punctuation]: /^[<>\/=]/,
+    [TokenType.Punctuation]: /^[<>/=]/,
   },
   keywords: [],
 };

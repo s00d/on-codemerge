@@ -13,79 +13,67 @@ The YouTube Video Plugin provides seamless YouTube video embedding capabilities 
 - **Toolbar Integration**: Easy access via toolbar button
 - **Multiple URL Formats**: Support for various YouTube URL formats
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, YouTubeVideoPlugin } from 'on-codemerge';
+import { Editor, YouTubeVideoPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new YouTubeVideoPlugin());
+const editor = new Editor(container, {
+  plugins: [YouTubeVideoPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['YouTubeVideoPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### YouTube Video Creation
+Factory: `YouTubeVideoPlugin()`.
 
-```javascript
-// Insert YouTube video programmatically
-editor.executeCommand('youtube-video');
+| Command         |                                   |
+| --------------- | --------------------------------- |
+| `insertYouTube` | `editor.command('insertYouTube')` |
 
-// Create YouTube video with specific URL
-const videoUrl = 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-editor.executeCommand('insertYouTubeVideo', { url: videoUrl });
-```
+### Keyboard shortcuts
 
-### YouTube Video Operations
+| Shortcut    | Command         |
+| ----------- | --------------- |
+| `Mod-Alt-y` | `insertYouTube` |
 
-```javascript
-// Get all YouTube videos in editor
-const videos = editor.getContainer().querySelectorAll('iframe[src*="youtube.com"]');
-
-// Set video properties
-const video = document.querySelector('iframe[src*="youtube.com"]');
-video.width = '600';
-video.height = '400';
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+Y` | Insert YouTube video | `youtube-video` |
+> **Note:** Command `insertYouTube` (not `insertYouTubeVideo`).
 
 ## Supported YouTube URL Formats
 
 The plugin supports various YouTube URL formats:
 
 ### Standard URLs
+
 - `https://www.youtube.com/watch?v=VIDEO_ID`
 - `https://youtu.be/VIDEO_ID`
 - `https://www.youtube.com/embed/VIDEO_ID`
 
 ### Short URLs
+
 - `https://youtu.be/VIDEO_ID`
 - `https://y2u.be/VIDEO_ID`
 
 ### Mobile URLs
+
 - `https://m.youtube.com/watch?v=VIDEO_ID`
 
 ### Playlist URLs
+
 - `https://www.youtube.com/watch?v=VIDEO_ID&list=PLAYLIST_ID`
 
 ### Live Stream URLs
+
 - `https://www.youtube.com/watch?v=VIDEO_ID&live=1`
 
 ## Context Menu
@@ -93,11 +81,13 @@ The plugin supports various YouTube URL formats:
 Right-click on a YouTube video to access:
 
 ### Video Operations
+
 - **Edit Video**: Open video editor
 - **Copy Video URL**: Copy YouTube URL to clipboard
 - **Delete Video**: Remove video from editor
 
 ### Display Options
+
 - **Video Size**: Adjust video dimensions
 - **Video Alignment**: Left, center, or right alignment
 - **Video Border**: Add or remove borders
@@ -105,83 +95,68 @@ Right-click on a YouTube video to access:
 ## YouTube Video Structure
 
 ### HTML Structure
+
 ```html
-<iframe 
-  src="https://www.youtube.com/embed/VIDEO_ID" 
-  width="800" 
-  height="400" 
-  frameborder="0" 
-  allowfullscreen 
-  class="max-w-full rounded-lg p-2">
+<iframe
+  src="https://www.youtube.com/embed/VIDEO_ID"
+  width="800"
+  height="400"
+  frameborder="0"
+  allowfullscreen
+  class="max-w-full rounded-lg p-2"
+>
 </iframe>
 ```
 
 ### CSS Classes
+
 - `.max-w-full` - Maximum width 100%
 - `.rounded-lg` - Rounded corners
 - `.p-2` - Padding
-
-## Events
-
-```javascript
-// Listen to YouTube video events
-editor.on('youtube-video:inserted', (video) => {
-  console.log('YouTube video inserted:', video);
-});
-
-editor.on('youtube-video:edited', (video) => {
-  console.log('YouTube video edited:', video);
-});
-
-editor.on('youtube-video:deleted', (video) => {
-  console.log('YouTube video deleted:', video);
-});
-
-editor.on('youtube-video:resized', (video, dimensions) => {
-  console.log('YouTube video resized:', video, dimensions);
-});
-```
 
 ## Examples
 
 ### Basic YouTube Video
 
 ```html
-<iframe 
-  src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-  width="800" 
-  height="400" 
-  frameborder="0" 
-  allowfullscreen 
-  class="max-w-full rounded-lg p-2">
+<iframe
+  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+  width="800"
+  height="400"
+  frameborder="0"
+  allowfullscreen
+  class="max-w-full rounded-lg p-2"
+>
 </iframe>
 ```
 
 ### Responsive YouTube Video
 
 ```html
-<iframe 
-  src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-  width="100%" 
-  height="400" 
-  frameborder="0" 
-  allowfullscreen 
+<iframe
+  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+  width="100%"
+  height="400"
+  frameborder="0"
+  allowfullscreen
   class="max-w-full rounded-lg p-2"
-  style="max-width: 100%; height: auto;">
+  style="max-width: 100%; height: auto;"
+>
 </iframe>
 ```
 
 ### YouTube Video with Custom Styling
 
 ```html
-<iframe 
-  src="https://www.youtube.com/embed/dQw4w9WgXcQ" 
-  width="600" 
-  height="300" 
-  frameborder="0" 
-  allowfullscreen 
+<iframe
+  src="https://www.youtube.com/embed/dQw4w9WgXcQ"
+  width="600"
+  height="300"
+  frameborder="0"
+  allowfullscreen
   class="max-w-full rounded-lg p-2"
-  style="border: 2px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+  style="border: 2px solid #e5e7eb; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"
+>
 </iframe>
 ```
 
@@ -196,11 +171,12 @@ const urlPatterns = [
   'https://youtu.be/VIDEO_ID',
   'https://www.youtube.com/embed/VIDEO_ID',
   'https://m.youtube.com/watch?v=VIDEO_ID',
-  'https://www.youtube.com/watch?v=VIDEO_ID&list=PLAYLIST_ID'
+  'https://www.youtube.com/watch?v=VIDEO_ID&list=PLAYLIST_ID',
 ];
 
 // Video ID extraction regex
-const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+const regex =
+  /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
 ```
 
 ## Integration Examples
@@ -209,7 +185,7 @@ const regex = /(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, YouTubeVideoPlugin } from 'on-codemerge';
+import { Editor, YouTubeVideoPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -217,8 +193,8 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new YouTubeVideoPlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(YouTubeVideoPlugin());
     }
 
     return () => {
@@ -240,13 +216,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, YouTubeVideoPlugin } from 'on-codemerge';
+import { Editor, YouTubeVideoPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new YouTubeVideoPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [YouTubeVideoPlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -263,13 +239,13 @@ export default {
 
 ```css
 /* YouTube video styles */
-.html-editor iframe[src*="youtube.com"] {
+.html-editor iframe[src*='youtube.com'] {
   border: 1px solid #e5e7eb;
   border-radius: 0.5rem;
   transition: all 0.2s ease;
 }
 
-.html-editor iframe[src*="youtube.com"]:hover {
+.html-editor iframe[src*='youtube.com']:hover {
   border-color: #3b82f6;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
@@ -415,4 +391,4 @@ console.log('Extracted video ID:', videoId);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

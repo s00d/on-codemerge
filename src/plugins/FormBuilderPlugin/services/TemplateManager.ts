@@ -1,12 +1,12 @@
 import type { FormTemplate, FieldConfig } from '../types';
-import type { HTMLEditor } from '../../../app';
+import type { EditorAPI } from '@on-codemerge/sdk';
 import { FieldBuilder } from './FieldBuilder';
 
 export class TemplateManager {
   private templates: FormTemplate[] = [];
-  private fieldBuilder: FieldBuilder;
+  private readonly fieldBuilder: FieldBuilder;
 
-  constructor(_editor: HTMLEditor) {
+  constructor(_editor: EditorAPI) {
     this.fieldBuilder = new FieldBuilder();
   }
 
@@ -174,7 +174,7 @@ export class TemplateManager {
         'text',
         'Expiry Date',
         {},
-        { required: true, pattern: '^(0[1-9]|1[0-2])\/([0-9]{2})$' }
+        { required: true, pattern: '^(0[1-9]|1[0-2])/([0-9]{2})$' }
       ),
       this.fieldBuilder.createPresetField(
         'text',
@@ -567,7 +567,9 @@ export class TemplateManager {
    */
   exportTemplate(templateId: string): string | null {
     const template = this.getTemplate(templateId);
-    if (!template) return null;
+    if (!template) {
+      return null;
+    }
 
     return JSON.stringify(template, null, 2);
   }

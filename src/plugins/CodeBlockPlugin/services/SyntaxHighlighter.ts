@@ -1,22 +1,16 @@
-import { type LanguageDefinition, type Token, TokenType } from '../types';
+import { TokenType } from '../types';
+import type { LanguageDefinition, Token } from '../types';
 import { getLanguageDefinition } from '../utils/languages';
 
 export class SyntaxHighlighter {
-  public highlight(element: Element): void {
-    const code = element.textContent || '';
-    const language = this.getLanguage(element);
+  /** Pure highlight → HTML (DOM apply only inside `foreign(...)`). */
+  public highlightHtml(code: string, language: string): string {
     const languageDefinition = getLanguageDefinition(language);
-
-    if (languageDefinition) {
-      const tokens = this.tokenize(code, languageDefinition);
-      element.innerHTML = this.renderTokens(tokens);
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+    if (!languageDefinition) {
+      return this.escapeHtml(code);
     }
-  }
-
-  private getLanguage(element: Element): string {
-    const className = element.className;
-    const match = className.match(/language-(\w+)/);
-    return match ? match[1] : 'plaintext';
+    return this.renderTokens(this.tokenize(code, languageDefinition));
   }
 
   private tokenize(code: string, definition: LanguageDefinition): Token[] {
@@ -25,7 +19,7 @@ export class SyntaxHighlighter {
 
     while (remaining) {
       // Check for whitespace first
-      const whitespace = remaining.match(/^\s+/);
+      const whitespace = /^\s+/.exec(remaining);
       if (whitespace) {
         tokens.push({ type: TokenType.Text, value: whitespace[0] });
         remaining = remaining.slice(whitespace[0].length);
@@ -33,8 +27,9 @@ export class SyntaxHighlighter {
       }
 
       // Check for keywords
+      // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
       if (definition.keywords) {
-        const word = remaining.match(/^\b\w+\b/);
+        const word = /^\b\w+\b/.exec(remaining);
         if (word && definition.keywords.includes(word[0])) {
           tokens.push({ type: TokenType.Keyword, value: word[0] });
           remaining = remaining.slice(word[0].length);
@@ -46,9 +41,13 @@ export class SyntaxHighlighter {
       let longestMatch = { length: 0, type: null as TokenType | null, value: '' };
 
       for (const [tokenType, pattern] of Object.entries(definition.patterns)) {
-        if (!pattern) continue;
+        // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+        if (!pattern) {
+          continue;
+        }
 
-        const regex = new RegExp(pattern.source, 'y');
+        const flags = `${pattern.flags.replaceAll('g', '').replaceAll('y', '')}y`;
+        const regex = new RegExp(pattern.source, flags);
         regex.lastIndex = 0;
         const result = regex.exec(remaining);
 
@@ -61,7 +60,7 @@ export class SyntaxHighlighter {
         }
       }
 
-      if (longestMatch.type) {
+      if (longestMatch.type !== undefined && longestMatch.type !== null) {
         tokens.push({ type: longestMatch.type, value: longestMatch.value });
         remaining = remaining.slice(longestMatch.length);
       } else {
@@ -87,10 +86,10 @@ export class SyntaxHighlighter {
 
   private escapeHtml(text: string): string {
     return text
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
+      .replaceAll('&', '&amp;')
+      .replaceAll('<', '&lt;')
+      .replaceAll('>', '&gt;')
+      .replaceAll('"', '&quot;')
+      .replaceAll("'", '&#039;');
   }
 }

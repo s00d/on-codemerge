@@ -1,77 +1,167 @@
+@reference "../../tailwind.css";
+
+/* Atom skin inlined for VitePress HMR — keep in sync with styles/atoms/calendar.scss */
+.calendar-widget {
+  @apply my-3 max-w-md rounded-xl border border-ocm-border bg-ocm-surface font-sans;
+  border-left: 3px solid var(--color-ocm-accent, #0284c7);
+}
+
+.calendar-widget .calendar-header {
+  @apply flex items-center justify-between gap-2 border-b border-ocm-border-subtle px-3 py-2;
+}
+
+.calendar-widget .calendar-title {
+  @apply m-0 truncate text-sm font-semibold tracking-tight text-ocm-text;
+}
+
+.calendar-widget .calendar-body {
+  @apply p-2;
+}
+
+.calendar-widget .calendar-events {
+  @apply flex flex-col gap-1;
+}
+
+.calendar-widget .calendar-empty {
+  @apply px-2 py-4 text-center text-xs text-ocm-text-muted;
+}
+
+.calendar-event {
+  @apply relative cursor-pointer rounded-lg border border-transparent px-2.5 py-2 pl-3 transition-colors duration-100;
+
+  &:hover {
+    @apply bg-ocm-surface-hover;
+  }
+
+  &::before {
+    content: '';
+    @apply absolute top-2 bottom-2 left-0 w-0.5 rounded-full;
+    background: var(--event-color, var(--color-ocm-accent, #0284c7));
+  }
+}
+
+.event-title-row {
+  @apply flex items-center gap-1.5;
+}
+
+.event-title {
+  @apply m-0 min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-ocm-text;
+}
+
+.event-priority {
+  @apply shrink-0 rounded-md px-1.5 py-0.5 text-[10px] leading-none font-semibold uppercase;
+
+  &.priority-high {
+    @apply bg-ocm-danger-soft text-ocm-danger;
+  }
+
+  &.priority-medium {
+    @apply bg-amber-50 text-amber-700;
+
+    html.dark & {
+      @apply bg-amber-950/50 text-amber-300;
+    }
+  }
+
+  &.priority-low {
+    @apply bg-emerald-50 text-emerald-700;
+
+    html.dark & {
+      @apply bg-emerald-950/50 text-emerald-300;
+    }
+  }
+}
+
+.event-category {
+  @apply shrink-0 rounded-md bg-ocm-accent-soft px-1.5 py-0.5 text-[10px] leading-none font-semibold text-ocm-accent;
+}
+
+.event-sub {
+  @apply mt-0.5 flex flex-wrap items-baseline gap-x-2 gap-y-0.5 text-xs text-ocm-text-muted;
+}
+
+.event-date {
+  @apply font-medium text-ocm-text;
+}
+
+.event-time {
+  @apply tabular-nums;
+}
+
+.event-description {
+  @apply w-full text-xs leading-snug text-ocm-text-muted;
+}
+
+.event-location,
+.event-duration,
+.event-attendees,
+.event-reminder {
+  @apply text-ocm-text-muted;
+}
+
+.event-reminder {
+  @apply font-medium text-amber-600;
+
+  html.dark & {
+    @apply text-amber-400;
+  }
+}
+
+.event-tags {
+  @apply mt-1.5 flex flex-wrap gap-1;
+}
+
+.event-tag {
+  @apply rounded-md bg-ocm-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-ocm-text-muted;
+}
+
 .calendar-menu {
   .calendars-list {
-    max-height: 400px;
-    overflow-y: auto;
+    @apply max-h-[400px] overflow-y-auto;
 
     .empty-state {
-      text-align: center;
-      padding: 2rem;
-      color: #6b7280;
+      @apply px-4 py-8 text-center text-sm text-ocm-text-muted;
 
       p {
-        margin: 0.5rem 0;
+        @apply my-1;
       }
     }
 
     .calendar-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem;
-      border: 1px solid #e5e7eb;
-      border-radius: 6px;
-      margin-bottom: 0.75rem;
-      cursor: pointer;
-      transition: all 0.2s;
+      @apply mb-1.5 flex cursor-pointer items-center justify-between gap-2 rounded-lg border border-ocm-border px-3 py-2.5 transition-colors duration-150;
 
       &:hover {
-        background: #f9fafb;
-        border-color: #d1d5db;
+        @apply bg-ocm-surface-hover;
       }
 
       .calendar-info {
-        flex: 1;
+        @apply min-w-0 flex-1;
 
         .calendar-title {
-          margin: 0 0 0.25rem 0;
-          font-weight: 600;
-          color: #374151;
+          @apply m-0 mb-0.5 text-sm font-semibold text-ocm-text;
         }
 
         .calendar-description {
-          margin: 0 0 0.5rem 0;
-          font-size: 0.875rem;
-          color: #6b7280;
+          @apply m-0 mb-1.5 truncate text-xs text-ocm-text-muted;
         }
 
         .calendar-events-count {
-          font-size: 0.75rem;
-          color: #9ca3af;
-          background: #f3f4f6;
-          padding: 0.25rem 0.5rem;
-          border-radius: 4px;
+          @apply inline-flex rounded-md bg-ocm-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-ocm-text-muted;
         }
       }
 
       .calendar-actions {
-        display: flex;
-        gap: 0.5rem;
+        @apply flex shrink-0 gap-0.5;
 
         button {
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 0.25rem;
-          border-radius: 4px;
-          transition: background-color 0.2s;
+          @apply cursor-pointer rounded-md border-0 bg-transparent p-1 text-ocm-text-muted transition-colors;
 
           &:hover {
-            background: #f3f4f6;
+            @apply bg-ocm-surface-muted text-ocm-text;
           }
 
           &.btn-delete:hover {
-            background: #fef2f2;
-            color: #dc2626;
+            @apply bg-ocm-danger-soft text-ocm-danger;
           }
         }
       }
@@ -84,53 +174,102 @@
   .calendar-form,
   .event-form {
     .form-group {
-      margin-bottom: 1rem;
+      @apply mb-2.5;
 
       label {
-        display: block;
-        margin-bottom: 0.5rem;
-        font-weight: 500;
-        color: #374151;
+        @apply mb-1 block text-[11px] font-medium text-ocm-text-muted;
       }
 
       input,
       textarea {
-        width: 100%;
-        padding: 0.75rem;
-        border: 1px solid #d1d5db;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        transition: border-color 0.2s;
+        @apply w-full rounded-lg border border-ocm-border bg-ocm-input px-2.5 py-1.5 text-sm transition-[border-color,box-shadow] duration-100;
 
         &:focus {
-          outline: none;
-          border-color: #3b82f6;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+          @apply border-ocm-accent outline-none ring-2 ring-ocm-accent/20;
         }
       }
 
       textarea {
-        resize: vertical;
-        min-height: 80px;
+        @apply min-h-[4.5rem] resize-y;
       }
     }
 
     .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
+      @apply grid grid-cols-2 gap-2.5;
     }
 
     .checkbox-label {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      cursor: pointer;
+      @apply flex cursor-pointer items-center gap-2;
 
       input[type='checkbox'] {
-        width: auto;
-        margin: 0;
+        @apply m-0 w-auto;
       }
     }
+  }
+}
+
+.calendar-reminders-container {
+  @apply pointer-events-none fixed top-4 right-4 z-[10000] max-w-xs;
+}
+
+.calendar-reminder {
+  @apply pointer-events-auto mb-2 max-w-xs overflow-hidden rounded-xl border border-ocm-border bg-ocm-surface text-ocm-text shadow-ocm;
+  animation: reminderSlideIn 0.28s ease-out;
+}
+
+.calendar-reminder .reminder-header {
+  @apply flex items-center gap-2 border-b border-ocm-border-subtle px-3 py-2;
+}
+
+.calendar-reminder .reminder-icon {
+  @apply text-sm;
+}
+
+.calendar-reminder .reminder-title {
+  @apply flex-1 text-sm font-semibold tracking-tight;
+}
+
+.calendar-reminder .reminder-close {
+  @apply flex size-5 cursor-pointer items-center justify-center rounded-md border-0 bg-transparent text-sm text-ocm-text-muted transition-colors;
+
+  &:hover {
+    @apply bg-ocm-surface-hover text-ocm-text;
+  }
+}
+
+.calendar-reminder .reminder-content {
+  @apply px-3 py-2;
+}
+
+.calendar-reminder .reminder-event-title {
+  @apply mb-0.5 text-sm font-semibold tracking-tight;
+}
+
+.calendar-reminder .reminder-event-time,
+.calendar-reminder .reminder-event-location,
+.calendar-reminder .reminder-event-description {
+  @apply mb-0.5 text-xs leading-snug text-ocm-text-muted;
+}
+
+.calendar-reminder .reminder-footer {
+  @apply flex gap-1.5 px-3 pt-0 pb-2;
+}
+
+.calendar-reminder .reminder-priority {
+  @apply rounded-md px-1.5 py-0.5 text-[10px] font-semibold uppercase;
+}
+
+.calendar-reminder .reminder-category {
+  @apply rounded-md bg-ocm-accent-soft px-1.5 py-0.5 text-[10px] font-semibold text-ocm-accent;
+}
+
+@keyframes reminderSlideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
   }
 }

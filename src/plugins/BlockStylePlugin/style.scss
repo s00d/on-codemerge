@@ -1,31 +1,69 @@
-.block-style-editor {
-  @apply w-[500px];
+@reference "../../tailwind.css";
 
-  .popup-content {
-    @apply space-y-4 p-5;
+.block-style-editor {
+  @apply max-h-[min(90vh,40rem)];
+
+  .bs-panel {
+    @apply flex flex-col gap-4;
   }
 
-  .popup-item {
+  .bs-preview {
+    @apply rounded-xl border border-ocm-border bg-ocm-surface p-3;
+  }
+
+  .bs-preview__title {
+    @apply mb-1 text-[10px] font-semibold tracking-wide text-ocm-text-muted uppercase;
+  }
+
+  .bs-preview__sample {
+    @apply leading-snug text-ocm-text;
+  }
+
+  .bs-section {
     @apply flex flex-col gap-2;
+  }
 
-    .style-item {
-      @apply flex items-center gap-2;
+  .bs-section__title {
+    @apply m-0 text-xs font-semibold tracking-tight text-ocm-text;
+  }
+
+  .bs-grid {
+    @apply grid grid-cols-1 gap-2 sm:grid-cols-3;
+  }
+
+  .bs-field {
+    @apply flex flex-col gap-1;
+  }
+
+  .bs-field__label {
+    @apply text-[11px] font-medium text-ocm-text-muted;
+  }
+
+  .bs-field__select {
+    @apply w-full rounded-lg border border-ocm-border bg-ocm-input px-2.5 py-1.5 text-sm text-ocm-text;
+
+    &:focus {
+      @apply border-ocm-accent outline-none ring-2 ring-ocm-accent/20;
+    }
+  }
+
+  .bs-color-tabs {
+    @apply flex flex-wrap gap-1;
+  }
+
+  .bs-color-tab {
+    @apply cursor-pointer rounded-lg border border-ocm-border bg-transparent px-2.5 py-1 text-xs font-medium text-ocm-text-muted transition-colors;
+
+    &:hover {
+      @apply bg-ocm-surface-hover text-ocm-text;
     }
 
-    .style-property-select,
-    .style-value-select,
-    .class-input {
-      @apply flex-1 p-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all m-1;
-
-      border: 1px solid #d1d5db; /* Tailwind's border-gray-300 */
+    &.is-active {
+      @apply border-ocm-accent bg-ocm-accent-soft text-ocm-accent;
     }
+  }
 
-    .remove-button {
-      @apply text-red-500 hover:text-red-700 cursor-pointer;
-    }
-
-    .add-button {
-      @apply mt-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600;
-    }
+  .bs-color-well {
+    @apply mt-1 rounded-xl border border-ocm-border-subtle bg-ocm-surface p-2;
   }
 }

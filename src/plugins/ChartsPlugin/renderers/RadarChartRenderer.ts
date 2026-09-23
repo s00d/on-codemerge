@@ -9,7 +9,7 @@ export class RadarChartRenderer extends BaseChartRenderer {
       return;
     }
 
-    const orientation = options.orientation || 'vertical';
+    const orientation = options.orientation ?? 'vertical';
     const colors = this.getColors(options);
 
     // Draw background
@@ -35,9 +35,9 @@ export class RadarChartRenderer extends BaseChartRenderer {
     options: ChartOptions,
     colors: string[]
   ): void {
-    const { width, height } = this.getDimensions(options);
-    const centerX = width / 2;
-    const centerY = height / 2;
+    const { padding, width, height } = this.getDimensions(options);
+    const centerX = padding + width / 2;
+    const centerY = padding + height / 2;
     const radius = Math.min(width, height) / 3;
 
     const categories = data[0].data.map((p) => p.label || '');
@@ -68,7 +68,7 @@ export class RadarChartRenderer extends BaseChartRenderer {
 
     // Draw data
     data.forEach((series, seriesIndex) => {
-      const color = series.color || colors[seriesIndex % colors.length];
+      const color = series.color ?? colors[seriesIndex % colors.length];
       ctx.beginPath();
       series.data.forEach((point, i) => {
         const angle = (i * 2 * Math.PI) / categories.length - Math.PI / 2;
@@ -109,9 +109,9 @@ export class RadarChartRenderer extends BaseChartRenderer {
     options: ChartOptions,
     colors: string[]
   ): void {
-    const { width, height } = this.getDimensions(options);
-    const centerX = width / 2;
-    const centerY = height / 2;
+    const { padding, width, height } = this.getDimensions(options);
+    const centerX = padding + width / 2;
+    const centerY = padding + height / 2;
     const radius = Math.min(width, height) / 3;
 
     const categories = data[0].data.map((p) => p.label || '');
@@ -142,7 +142,7 @@ export class RadarChartRenderer extends BaseChartRenderer {
 
     // Draw data
     data.forEach((series, seriesIndex) => {
-      const color = series.color || colors[seriesIndex % colors.length];
+      const color = series.color ?? colors[seriesIndex % colors.length];
       ctx.beginPath();
       series.data.forEach((point, i) => {
         const angle = (i * 2 * Math.PI) / categories.length + Math.PI / 2; // Start from right

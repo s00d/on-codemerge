@@ -1,72 +1,67 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin, h, mount, renderDetached } from '@on-codemerge/sdk';
+import type { MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import { StatisticsCalculator } from './services/StatisticsCalculator';
-import { FooterRenderer } from './components/FooterRenderer';
+import type { Statistics } from './services/StatisticsCalculator';
 
-export class FooterPlugin implements Plugin {
-  name = 'footer';
-  private editor: HTMLEditor | null = null;
-  private calculator: StatisticsCalculator;
-  private renderer: FooterRenderer | null = null;
-  private unsubscribe: (() => void) | null = null;
+export function FooterPlugin() {
+  const calculator = new StatisticsCalculator();
 
-  constructor() {
-    this.calculator = new StatisticsCalculator();
-  }
+  return definePlugin({
+    name: 'footer',
+    setup(ctx) {
+      const editor = ctx.editor;
+      let stats: Statistics = {
+        words: 0,
+        characters: 0,
+        charactersNoSpaces: 0,
+        sentences: 0,
+        paragraphs: 0,
+        readingTime: 0,
+      };
+      let footerMount: MountHandle | null = null;
+      const t = (k: string) => editor.t(k) || k;
 
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.renderer = new FooterRenderer(editor);
-    this.setupFooter();
-    this.setupEventListeners();
-  }
+      const view = (): ViewSpec => {
+        const s = stats;
+        return h('div', { class: 'ocm-editor-footer' }, [
+          h('div', { class: 'ocm-editor-footer__group' }, [
+            h('span', null, `${t('common.words')}: ${s.words.toLocaleString()}`),
+            h('span', null, `${t('common.characters')}: ${s.characters.toLocaleString()}`),
+            h(
+              'span',
+              null,
+              `${t('common.charactersWithoutSpaces')}: ${s.charactersNoSpaces.toLocaleString()}`
+            ),
+          ]),
+          h('div', { class: 'ocm-editor-footer__group' }, [
+            h('div', { class: 'collaboration-status' }),
+            h('span', null, `${t('common.sentences')}: ${s.sentences.toLocaleString()}`),
+            h('span', null, `${t('typography.paragraphs')}: ${s.paragraphs.toLocaleString()}`),
+            h('span', null, `${t('common.readingTime')}: ${s.readingTime}`),
+          ]),
+        ]);
+      };
 
-  private setupFooter(): void {
-    if (!this.editor) return;
+      // Core-owned chrome slot (no plugin createElement) — append, never mount onto host
+      // (mount replaces children and would wipe toolbar/content).
+      const chrome = renderDetached(h('div', { attrs: { 'data-ocm-chrome': 'footer' } }));
+      editor.host.append(chrome.el);
+      footerMount = mount(chrome.el, view());
+      ctx.disposable(() => {
+        footerMount?.destroy();
+        footerMount = null;
+        chrome.el.remove();
+        chrome.destroy();
+      });
 
-    const container = this.editor.getContainer();
-    const footer = this.renderer?.createElement();
-    if (footer) container.parentElement?.insertBefore(footer, container.nextSibling);
-    this.updateStatistics();
-  }
-
-  private setupEventListeners(): void {
-    if (!this.editor) return;
-
-    this.unsubscribe = this.editor.subscribeToContentChange(() => {
-      this.updateStatistics();
-    });
-  }
-
-  private updateStatistics(): void {
-    if (!this.editor) return;
-
-    const content = this.editor.getContainer().innerHTML;
-    const stats = this.calculator.calculate(content);
-    this.renderer?.update(stats);
-  }
-
-  destroy(): void {
-    // Отписываемся от изменений контента
-    if (this.unsubscribe) {
-      this.unsubscribe();
-      this.unsubscribe = null;
-    }
-
-    // Удаляем footer из DOM
-    if (this.renderer) {
-      const footer = this.renderer['element'];
-      if (footer && footer.parentElement) {
-        footer.parentElement.removeChild(footer);
-      }
-      this.renderer = null;
-    }
-
-    // Очищаем ссылки
-    this.editor = null;
-    this.calculator = null!;
-  }
+      const update = () => {
+        stats = calculator.calculateFromDoc(editor.getJSON().doc);
+        footerMount?.update(view());
+      };
+      ctx.on('docChanged', update);
+      update();
+    },
+  });
 }

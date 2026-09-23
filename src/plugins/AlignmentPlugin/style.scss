@@ -1,16 +1,16 @@
+@reference "../../tailwind.css";
+
 /* Alignment menu */
 .alignment-menu {
-  @apply max-w-lg w-full;
-
   .alignment-option {
     @apply w-full text-left;
 
     svg {
-      @apply text-gray-600;
+      @apply text-ocm-text-muted;
     }
 
     &:hover svg {
-      @apply text-blue-500;
+      @apply text-ocm-accent;
     }
   }
 }

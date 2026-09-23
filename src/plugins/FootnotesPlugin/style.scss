@@ -1,9 +1,7 @@
-/* Footnote menu */
-.footnote-menu {
-  @apply max-w-lg w-full;
+@reference "../../tailwind.css";
 
+.footnote-menu {
   textarea {
-    @apply font-mono text-sm;
-    white-space: pre-wrap;
+    @apply font-mono text-sm whitespace-pre-wrap;
   }
 }

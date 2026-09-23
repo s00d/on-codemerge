@@ -1,217 +1,260 @@
 <template>
   <div>
     <h1 v-if="showDescription">on-CodeMerge</h1>
-    <div v-if="showDescription">
-      A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and
-      view their code in real time, exactly as it will appear in the final product. This intuitive
-      tool for developers of all skill levels.
-    </div>
+    <p v-if="showDescription">
+      Plugin-oriented editor — toolbar/modals in core, plugins register into SDK.
+    </p>
     <hr />
-    <div ref="editorContainer" class="editorBlock">
-      <!-- Редактор будет инициализирован в этом div -->
-    </div>
-    <hr />
-    <div>
-      Result:
-      <div id="result" class="result">{{ editorContent }}</div>
-    </div>
-    <hr />
-    <div>
-      Preview:
-      <div id="preview" v-html="previewContent" />
-    </div>
+    <div
+      ref="editorContainer"
+      class="editorBlock"
+      :class="{ 'editorBlock--page': chrome === 'page' }"
+    />
+    <template v-if="chrome !== 'page'">
+      <hr />
+      <div>
+        Result (JSON):
+        <pre class="result">{{ editorContent }}</pre>
+      </div>
+      <hr />
+      <div>
+        Preview (published HTML):
+        <div
+          id="preview"
+          ref="preview"
+          class="preview ocm-content prose prose-zinc max-w-none"
+          v-html="previewContent"
+        />
+      </div>
+      <hr />
+      <div>
+        HTML source (published):
+        <pre class="result">{{ previewContent }}</pre>
+      </div>
+    </template>
   </div>
 </template>
 
 <script>
+import { ensurePublishRuntimesRegistered, publishRuntimes } from '../../src/publish/runtimes';
 import {
-  HTMLEditor,
+  Editor,
+  createDefaultPlugins,
   ToolbarPlugin,
   ToolbarDividerPlugin,
+  HistoryPlugin,
+  TypographyPlugin,
+  ColorPlugin,
+  FontPlugin,
+  LinkPlugin,
+  AlignmentPlugin,
+  ListsPlugin,
+  BlockPlugin,
+  BlockStylePlugin,
   TablePlugin,
   ImagePlugin,
-  BlockPlugin,
-  HTMLViewerPlugin,
-  CodeBlockPlugin,
-  TemplatesPlugin,
-  ExportPlugin,
-  HistoryPlugin,
-  ChartsPlugin,
-  ShortcutsPlugin,
-  ColorPlugin,
-  TypographyPlugin,
-  ListsPlugin,
-  CommentsPlugin,
-  FootnotesPlugin,
-  FooterPlugin,
-  ResponsivePlugin,
-  LinkPlugin,
   VideoPlugin,
   YouTubeVideoPlugin,
   FileUploadPlugin,
-  FontPlugin,
-  AlignmentPlugin,
-  CollaborationPlugin,
-  FormBuilderPlugin,
-  SpellCheckerPlugin,
-  BlockStylePlugin,
+  PDFEmbedPlugin,
+  CodeBlockPlugin,
   MathPlugin,
-  AIAssistantPlugin,
-  LanguagePlugin,
+  ChartsPlugin,
   CalendarPlugin,
   TimerPlugin,
+  FormBuilderPlugin,
+  CommentsPlugin,
+  MentionsPlugin,
+  FootnotesPlugin,
+  FooterPlugin,
+  CollaborationPlugin,
+  ShortcutsPlugin,
+  ExportPlugin,
+  HTMLViewerPlugin,
+  TemplatesPlugin,
+  ResponsivePlugin,
+  LanguagePlugin,
+  SpellCheckerPlugin,
+  AIAssistantPlugin,
+  TrackChangesPlugin,
+  AnchorLinkPlugin,
 } from '../../src/app';
 
+// dictionary-en package `exports` only exposes index.js (Node fs) — load Hunspell files as Vite URLs.
+const enAffUrl = new URL('../../node_modules/dictionary-en/index.aff', import.meta.url).href;
+const enDicUrl = new URL('../../node_modules/dictionary-en/index.dic', import.meta.url).href;
+
+const SPELL_DICTIONARIES = {
+  en: { aff: enAffUrl, dic: enDicUrl },
+};
+
+const PLUGIN_MAP = {
+  ToolbarPlugin,
+  ToolbarDividerPlugin,
+  HistoryPlugin,
+  TypographyPlugin,
+  ColorPlugin,
+  FontPlugin,
+  LinkPlugin,
+  AlignmentPlugin,
+  ListsPlugin,
+  BlockPlugin,
+  BlockStylePlugin,
+  TablePlugin,
+  ImagePlugin,
+  VideoPlugin,
+  YouTubeVideoPlugin,
+  FileUploadPlugin,
+  PDFEmbedPlugin,
+  CodeBlockPlugin,
+  MathPlugin,
+  ChartsPlugin,
+  CalendarPlugin,
+  TimerPlugin,
+  FormBuilderPlugin,
+  CommentsPlugin,
+  MentionsPlugin,
+  FootnotesPlugin,
+  FooterPlugin,
+  CollaborationPlugin,
+  ShortcutsPlugin,
+  ExportPlugin,
+  HTMLViewerPlugin,
+  TemplatesPlugin,
+  ResponsivePlugin,
+  LanguagePlugin,
+  SpellCheckerPlugin,
+  AIAssistantPlugin,
+  TrackChangesPlugin,
+  AnchorLinkPlugin,
+};
+
+const DEMO_HTML = `
+<h1>on-CodeMerge demo</h1>
+<p>Hello with <strong>bold</strong>, <em>italic</em>, <u>underline</u> and <s>strike</s>.</p>
+<blockquote>Tip: Enter in a list splits the item; Enter on an empty item exits the list.</blockquote>
+<ul>
+  <li>Bullet one</li>
+  <li>Bullet two</li>
+</ul>
+<ol>
+  <li>Ordered one</li>
+  <li>Ordered two</li>
+</ol>
+<p>Sample table (right-click cells for row/col/merge/sort):</p>
+<table class="html-editor-table not-prose">
+  <tbody>
+    <tr>
+      <td>Cell 1 - 1</td>
+      <td>Cell 1 - 2</td>
+    </tr>
+    <tr>
+      <td>Cell 2 - 1</td>
+      <td>Cell 2 - 2</td>
+    </tr>
+  </tbody>
+</table>
+<p>Edit above — JSON and HTML update below.</p>
+`.trim();
+
+function resolvePlugins(activePlugins) {
+  if (!activePlugins || activePlugins.length === 0) {
+    return createDefaultPlugins();
+  }
+  const names = [...activePlugins];
+  // Essentials so demos always have marks + history when filtering
+  for (const required of ['ToolbarPlugin', 'HistoryPlugin']) {
+    if (!names.includes(required)) {
+      names.unshift(required);
+    }
+  }
+  return names
+    .map((name) => {
+      const factory = PLUGIN_MAP[name];
+      if (!factory) {
+        console.warn(`[EditorComponent] Unknown plugin: ${name}`);
+        return null;
+      }
+      if (name === 'SpellCheckerPlugin') {
+        return SpellCheckerPlugin({ dictionaries: SPELL_DICTIONARIES });
+      }
+      return factory();
+    })
+    .filter(Boolean);
+}
+
+ensurePublishRuntimesRegistered();
+
 export default {
-  props: {
-    activePlugins: {
-      type: Array,
-      default: () => [],
-    },
-    language: {
-      type: String,
-      default: '',
-    },
-    mode: {
-      type: String,
-      default: 'direct'
-    },
-    showDescription: {
-      type: Boolean,
-      default: true
-    },
+  beforeUnmount() {
+    const preview = this.$refs.preview;
+    if (preview instanceof HTMLElement) {
+      publishRuntimes.unboot(preview);
+    }
+    this.editor?.destroy();
   },
   data() {
-    return {
-      editorContent: '',
-      previewContent: '',
-    };
+    return { editorContent: '', previewContent: '', editor: null };
   },
   mounted() {
-    if (this.$refs.editorContainer) {
-      // Инициализируем редактор в зависимости от режима
-      let editorOptions = { 
-          mode: this.mode
-      };
-      const editor = new HTMLEditor(this.$refs.editorContainer, editorOptions);
-
-      // Для iframe режима ждем готовности
-      if (this.mode === 'iframe') {
-        this.initializeEditorAfterIframeReady(editor);
-      } else {
-        this.initializeEditor(editor);
-      }
+    if (!this.$refs.editorContainer) {
+      return;
     }
-  },
-
-  methods: {
-    async initializeEditorAfterIframeReady(editor) {
-      // Ждем готовности iframe
-      await editor.waitForIframeReady();
-      this.initializeEditor(editor);
-    },
-
-    initializeEditor(editor) {
-      if (this.language) {
-        editor.setLocale(this.language);
-      }
-
-      // Список всех плагинов
-      const allPlugins = {
-        ToolbarPlugin,
-        HistoryPlugin,
-        AlignmentPlugin,
-        ToolbarDividerPlugin,
-        FontPlugin,
-        TablePlugin,
-        ImagePlugin,
-        BlockPlugin,
-        HTMLViewerPlugin,
-        CodeBlockPlugin,
-        TemplatesPlugin,
-        ExportPlugin,
-        ChartsPlugin,
-        ShortcutsPlugin,
-        ColorPlugin,
-        TypographyPlugin,
-        ListsPlugin,
-        CommentsPlugin,
-        FootnotesPlugin,
-        FooterPlugin,
-        ResponsivePlugin,
-        LinkPlugin,
-        VideoPlugin,
-        YouTubeVideoPlugin,
-        FileUploadPlugin,
-        // CollaborationPlugin,
-        FormBuilderPlugin,
-        SpellCheckerPlugin,
-        BlockStylePlugin,
-        MathPlugin,
-        AIAssistantPlugin,
-        LanguagePlugin,
-        CalendarPlugin,
-        TimerPlugin,
-      };
-
-      // Если activePlugins пустой, регистрируем все плагины
-      const pluginsToUse = this.activePlugins.length === 0
-        ? Object.keys(allPlugins)
-        : this.activePlugins;
-
-      // ToolbarPlugin всегда должен быть первым
-      if (!pluginsToUse.includes('ToolbarPlugin')) {
-        pluginsToUse.unshift('ToolbarPlugin');
-      }
-
-      // Регистрация плагинов
-      pluginsToUse.forEach((pluginName) => {
-        if (allPlugins[pluginName]) {
-          editor.use(new allPlugins[pluginName]());
-        } else {
-          console.warn(`Плагин "${pluginName}" не найден.`);
+    const editor = new Editor(this.$refs.editorContainer, {
+      chrome: this.chrome,
+      plugins: resolvePlugins(this.activePlugins),
+    });
+    const syncPreviewRuntimes = () => {
+      this.$nextTick(() => {
+        const preview = this.$refs.preview;
+        if (!(preview instanceof HTMLElement)) {
+          return;
         }
+        publishRuntimes.unboot(preview);
+        publishRuntimes.boot(preview);
       });
-
-      editor.use(new CollaborationPlugin({
-        serverUrl: 'wss://on-codemerge-production.up.railway.app/',
-        autoStart: true,
-      }));
-
-      // Подписка на изменения контента
-      editor.subscribeToContentChange((newContent) => {
-        this.editorContent = newContent;
-        this.previewContent = newContent;
-      });
-
-      editor.setHtml('awfa waw awf awf aw&nbsp; <table class="html-editor-table"> <tbody> <tr> <td contenteditable="true">Cell 1 - 1 </td> <td contenteditable="true">Cell 1 - 2 </td> </tr> </tbody> </table> <br class="">\n');
-    }
+    };
+    const sync = () => {
+      const preview = this.$refs.preview;
+      if (preview instanceof HTMLElement) {
+        publishRuntimes.unboot(preview);
+      }
+      this.editorContent = JSON.stringify(editor.getJSON(), null, 2);
+      this.previewContent = editor.getPublishedHTML();
+      syncPreviewRuntimes();
+    };
+    editor.on('docChanged', sync);
+    editor.setHTML(DEMO_HTML);
+    sync();
+    this.editor = editor;
+  },
+  props: {
+    activePlugins: { default: () => [], type: Array },
+    showDescription: { default: true, type: Boolean },
+    chrome: { default: 'bar', type: String },
   },
 };
 </script>
 
 <style scoped>
 .editorBlock {
-  border: 1px solid #ccc;
-  padding: 10px;
   min-height: 200px;
 }
-</style>
-<style>
-.html-editor-table {
-  display: table !important;
-  border-collapse: separate !important;
-  margin: 0 !important;
-  overflow-x: visible !important;
-  width: 100% !important;
+.editorBlock--page {
+  height: 70vh;
+  min-height: 70vh;
 }
-
 .result {
-  width: 100%;
-  height: 300px;
-  overflow: scroll;
-  border: 1px solid #d6d6d6;
+  max-height: 300px;
+  overflow: auto;
+  font-size: 12px;
+  border: 1px solid var(--color-ocm-border, #ddd);
   padding: 10px;
+  white-space: pre-wrap;
+}
+.preview {
+  border: 1px solid var(--color-ocm-border, #ddd);
+  padding: 10px;
+  min-height: 80px;
 }
 </style>
-

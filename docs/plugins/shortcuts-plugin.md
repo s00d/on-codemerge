@@ -13,22 +13,22 @@ The Shortcuts Plugin provides customizable keyboard shortcut management for the 
 - **Event Hooks**: Listen to shortcut events
 - **Accessibility**: Keyboard navigation for all actions
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, ShortcutsPlugin } from 'on-codemerge';
+import { Editor, ShortcutsPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-const editor = new HTMLEditor(container);
-editor.use(new ShortcutsPlugin());
+const editor = new Editor(container, {
+  plugins: [ShortcutsPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
@@ -55,12 +55,12 @@ editor.triggerShortcut('Ctrl+Shift+S');
 
 ## Keyboard Shortcuts
 
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Shift+S` | Save document | `save-document` |
-| `Ctrl+Alt+M` | Insert comment | `comment` |
-| `Ctrl+Alt+E` | Export document | `export` |
-| ... | ... | ... |
+| Shortcut       | Description     | Command         |
+| -------------- | --------------- | --------------- |
+| `Ctrl+Shift+S` | Save document   | `save-document` |
+| `Ctrl+Alt+M`   | Insert comment  | `comment`       |
+| `Ctrl+Alt+E`   | Export document | `export`        |
+| ...            | ...             | ...             |
 
 ## Events
 
@@ -111,7 +111,9 @@ editor.editShortcut('Ctrl+Alt+M', 'comment');
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, ShortcutsPlugin } from 'on-codemerge';
+import { Editor, ShortcutsPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -120,10 +122,10 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new ShortcutsPlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      // v2: pass ShortcutsPlugin() in Editor constructor plugins: [...]
       editorInstance.current.on('shortcut:added', (shortcut, command) => {
-        setShortcuts(prev => [...prev, { shortcut, command }]);
+        setShortcuts((prev) => [...prev, { shortcut, command }]);
       });
     }
     return () => {
@@ -145,17 +147,23 @@ function MyEditor() {
   </div>
 </template>
 <script>
-import { HTMLEditor, ShortcutsPlugin } from 'on-codemerge';
+import { Editor, ShortcutsPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 export default {
-  data() { return { editor: null, shortcuts: [] }; },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new ShortcutsPlugin());
-    this.editor.on('shortcut:added', (shortcut, command) => {
-      this.shortcuts.push({ shortcut, command });
-    });
+  data() {
+    return { editor: null, shortcuts: [] };
   },
-  beforeDestroy() { if (this.editor) this.editor.destroy(); }
+  mounted() {
+    this.editor = new Editor(this.$refs.editorContainer);
+    this.this.editor // use plugins: [ShortcutsPlugin()];
+      .on('shortcut:added', (shortcut, command) => {
+        this.shortcuts.push({ shortcut, command });
+      });
+  },
+  beforeDestroy() {
+    if (this.editor) this.editor.destroy();
+  },
 };
 </script>
 ```
@@ -218,4 +226,4 @@ export default {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

@@ -1,104 +1,140 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
-import { ColorPicker } from './components/ColorPicker';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
+import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
+import type { Command, EditorState } from '@on-codemerge/kernel';
 import { textColorIcon, backgroundColorIcon } from '../../icons';
+import { ColorWell } from '../../utils/ColorWell';
 
-export class ColorPlugin implements Plugin {
-  name = 'color';
-  hotkeys = [
-    { keys: 'Ctrl+Shift+H', description: 'Highlight text', command: 'hilite-color', icon: '🖍️' },
-    { keys: 'Ctrl+Shift+Q', description: 'Change text color', command: 'fore-color', icon: '🎨' },
-  ];
-  private editor: HTMLEditor | null = null;
-  private textColorPicker: ColorPicker | null = null;
-  private bgColorPicker: ColorPicker | null = null;
-  private textColorButton: HTMLElement | null = null; // Храним ссылку на кнопку текстового цвета
-  private bgColorButton: HTMLElement | null = null; // Храним ссылку на кнопку фонового цвета
-
-  constructor() {}
-
-  initialize(editor: HTMLEditor): void {
-    this.textColorPicker = new ColorPicker(editor, editor.t('Text Color'));
-    this.bgColorPicker = new ColorPicker(editor, editor.t('Background Color'));
-
-    this.editor = editor;
-    this.addToolbarButtons();
-    this.editor.on('fore-color', () => {
-      this.showTextColorPicker();
-    });
-    this.editor.on('hilite-color', () => {
-      this.showBgColorPicker();
-    });
+function markColorAtSelection(editor: EditorAPI, markType: string): string | null {
+  const state = editor.getState();
+  const range = core.selectionTextRange(state.selection);
+  if (!range) {
+    return null;
   }
-
-  private showTextColorPicker() {
-    this.textColorPicker?.show((color) => {
-      if (this.editor) {
-        this.editor.getContainer().focus();
-        this.editor?.getTextFormatter()?.setColor(color);
-      }
-    });
+  let para;
+  try {
+    para = core.getNodeAt(state.doc, range.path);
+  } catch {
+    return null;
   }
-
-  private showBgColorPicker() {
-    this.bgColorPicker?.show((color) => {
-      if (this.editor) {
-        this.editor.getContainer().focus();
-        this.editor?.getTextFormatter()?.setBackgroundColor(color);
-      }
-    });
-  }
-
-  private addToolbarButtons(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    // Text color button with "A" icon
-    this.textColorButton = createToolbarButton({
-      icon: textColorIcon,
-      title: this.editor?.t('Text Color') ?? 'Text Color',
-      onClick: () => {
-        this.showTextColorPicker();
-      },
-    });
-
-    // Background color button with filled square icon
-    this.bgColorButton = createToolbarButton({
-      icon: backgroundColorIcon,
-      title: this.editor?.t('Background Color') ?? 'Background Color',
-      onClick: () => {
-        this.showBgColorPicker();
-      },
-    });
-
-    toolbar.appendChild(this.textColorButton);
-    toolbar.appendChild(this.bgColorButton);
-  }
-
-  public destroy(): void {
-    if (this.textColorButton && this.textColorButton.parentElement) {
-      this.textColorButton.parentElement.removeChild(this.textColorButton);
+  const offset = range.from < range.to ? range.from : Math.max(0, range.from - 1);
+  let pos = 0;
+  for (const child of para.content ?? []) {
+    if (child.type !== 'text' || typeof child.text !== 'string') {
+      continue;
     }
-    if (this.bgColorButton && this.bgColorButton.parentElement) {
-      this.bgColorButton.parentElement.removeChild(this.bgColorButton);
+    const len = child.text.length;
+    if (offset >= pos && offset < pos + len) {
+      const mark = child.marks?.find((m) => m.type === markType);
+      const color = mark?.attrs?.color;
+      return typeof color === 'string' ? color : null;
     }
-
-    this.textColorButton = null;
-    this.bgColorButton = null;
-
-    this.textColorPicker?.destroy();
-    this.bgColorPicker?.destroy();
-
-    this.textColorPicker = null;
-    this.bgColorPicker = null;
-
-    this.editor?.off('foreColor');
-    this.editor?.off('hiliteColor');
-
-    this.editor = null;
+    pos += len;
   }
+  return null;
+}
+
+function removeMarkType(markType: string): Command {
+  return (state: EditorState) => {
+    const range = core.selectionTextRange(state.selection);
+    if (!range || range.from === range.to) {
+      return null;
+    }
+    return [
+      {
+        type: 'remove_mark',
+        path: range.path,
+        from: range.from,
+        to: range.to,
+        markType,
+      },
+    ];
+  };
+}
+
+export function ColorPlugin() {
+  let openText: (() => void) | null = null;
+  let openHighlight: (() => void) | null = null;
+
+  return definePlugin({
+    name: 'color',
+    marks: [
+      { name: 'textColor', attrs: { color: '#000000' } },
+      { name: 'highlight', attrs: { color: '#ffff00' } },
+    ],
+    hotkeys: [
+      { keys: 'Mod-Shift-h', command: 'hiliteColor', description: 'Highlight color' },
+      { keys: 'Mod-Shift-q', command: 'foreColor', description: 'Text color' },
+    ],
+    commands: {
+      foreColor: () => {
+        openText?.();
+        return null;
+      },
+      hiliteColor: () => {
+        openHighlight?.();
+        return null;
+      },
+    },
+    setup(ctx) {
+      const editor = ctx.editor;
+      const well = new ColorWell(editor, ctx.scope);
+
+      const applyMark = (markType: 'textColor' | 'highlight', hex: string) => {
+        withMarkTarget(editor, () => {
+          editor.run(setMarkAttrs(markType, { color: hex }));
+        });
+      };
+
+      const clearMark = (markType: 'textColor' | 'highlight') => {
+        withMarkTarget(editor, () => {
+          editor.run(removeMarkType(markType));
+        });
+      };
+
+      openText = () => {
+        well.show({
+          title: editor.t('color.text'),
+          initial: markColorAtSelection(editor, 'textColor') ?? '#111111',
+          onPick: (hex) => {
+            applyMark('textColor', hex);
+          },
+          onClear: () => {
+            clearMark('textColor');
+          },
+        });
+      };
+
+      openHighlight = () => {
+        well.show({
+          title: editor.t('color.background'),
+          initial: markColorAtSelection(editor, 'highlight') ?? '#ffe566',
+          onPick: (hex) => {
+            applyMark('highlight', hex);
+          },
+          onClear: () => {
+            clearMark('highlight');
+          },
+        });
+      };
+
+      ctx.toolbar.add({
+        id: 'fore-color',
+        icon: textColorIcon,
+        title: editor.t('color.text'),
+        group: 'format',
+        order: 15,
+        onClick: () => openText?.(),
+      });
+      ctx.toolbar.add({
+        id: 'hilite-color',
+        icon: backgroundColorIcon,
+        title: editor.t('color.background'),
+        group: 'format',
+        order: 16,
+        onClick: () => openHighlight?.(),
+      });
+    },
+  });
 }

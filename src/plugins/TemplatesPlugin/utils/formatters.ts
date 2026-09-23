@@ -12,13 +12,13 @@ export function formatDate(timestamp: number): string {
     return `${minutes}m ago`;
   }
 
-  if (diffInSeconds < 86400) {
+  if (diffInSeconds < 86_400) {
     const hours = Math.floor(diffInSeconds / 3600);
     return `${hours}h ago`;
   }
 
-  if (diffInSeconds < 604800) {
-    const days = Math.floor(diffInSeconds / 86400);
+  if (diffInSeconds < 604_800) {
+    const days = Math.floor(diffInSeconds / 86_400);
     return `${days}d ago`;
   }
 

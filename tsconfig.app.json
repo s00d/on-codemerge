@@ -3,24 +3,33 @@
     "target": "ES2020",
     "useDefineForClassFields": true,
     "esModuleInterop": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "skipLibCheck": true,
-
-    /* Bundler mode */
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "isolatedModules": true,
     "moduleDetection": "force",
+    "resolveJsonModule": true,
     "noEmit": true,
     "jsx": "react-jsx",
-
-    /* Linting */
     "strict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@on-codemerge/kernel": ["./packages/kernel/src/index.ts"],
+      "@on-codemerge/sdk": ["./packages/sdk/src/index.ts"],
+      "@on-codemerge/sdk/*": ["./packages/sdk/src/*"]
+    }
   },
-  "include": ["src"],
-  "exclude": ["src/**/__tests__/**", "src/__tests__/**", "src/__mocks__/**"]
+  "include": ["src", "packages/kernel/src", "packages/sdk/src"],
+  "exclude": [
+    "**/__tests__/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "src/__mocks__/**",
+    "src/core/**",
+    "src/main.ts"
+  ]
 }

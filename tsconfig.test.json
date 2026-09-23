@@ -1,9 +1,12 @@
 {
   "extends": "./tsconfig.app.json",
   "compilerOptions": {
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "allowImportingTsExtensions": false,
-    "types": ["jest", "node"]
+    "resolveJsonModule": true,
+    "types": ["vitest/globals", "node"],
+    "ignoreDeprecations": "6.0"
   },
-  "include": ["src"]
+  "include": ["src", "packages/kernel/src", "packages/sdk/src", "test", "vitest.*.config.ts"],
+  "exclude": ["src/core/**"]
 }

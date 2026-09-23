@@ -1,19 +1,45 @@
 import type {
   Calendar,
   CalendarEvent,
+  Category,
   CreateCalendarData,
   CreateEventData,
+  Tag,
   UpdateCalendarData,
   UpdateEventData,
 } from '../types';
+import type { ViewSpec } from '@on-codemerge/sdk';
+import { h } from '@on-codemerge/sdk';
 import { CategoryManager } from './CategoryManager';
 import { ReminderService } from './ReminderService';
+import { parseJson } from '../../../utils/asAttr';
+import { atomAlignStyle } from '../../../utils/atomAlign';
+
+function asCalendarArray(value: unknown): Calendar[] {
+  return Array.isArray(value) ? (value as Calendar[]) : [];
+}
+
+function asEventArray(value: unknown): (CalendarEvent & { calendarId: string })[] {
+  return Array.isArray(value) ? (value as (CalendarEvent & { calendarId: string })[]) : [];
+}
+
+function asCategoryArray(value: unknown): Category[] {
+  return Array.isArray(value) ? (value as Category[]) : [];
+}
+
+function asTagArray(value: unknown): Tag[] {
+  return Array.isArray(value) ? (value as Tag[]) : [];
+}
+
+function asCreateEventArray(value: unknown): CreateEventData[] {
+  return Array.isArray(value) ? (value as CreateEventData[]) : [];
+}
 
 export class CalendarManager {
-  private calendarsKey = 'html-editor-calendars';
-  private eventsKey = 'html-editor-calendar-events';
-  private categoryManager: CategoryManager;
-  private reminderService: ReminderService;
+  private readonly calendarsKey = 'html-editor-calendars';
+  private readonly eventsKey = 'html-editor-calendar-events';
+  private readonly categoryManager: CategoryManager;
+  private readonly reminderService: ReminderService;
 
   constructor() {
     this.categoryManager = new CategoryManager();
@@ -22,12 +48,14 @@ export class CalendarManager {
 
   public getCalendars(): Calendar[] {
     const stored = localStorage.getItem(this.calendarsKey);
-    return stored ? JSON.parse(stored) : [];
+    return stored !== null && stored !== undefined && stored !== ''
+      ? asCalendarArray(parseJson(stored))
+      : [];
   }
 
   public getCalendar(id: string): Calendar | null {
     const calendars = this.getCalendars();
-    return calendars.find((cal) => cal.id === id) || null;
+    return calendars.find((cal) => cal.id === id) ?? null;
   }
 
   public createCalendar(data: CreateCalendarData): Calendar {
@@ -82,7 +110,7 @@ export class CalendarManager {
 
   public getEvent(id: string): CalendarEvent | null {
     const allEvents = this.getAllEvents();
-    return allEvents.find((event) => event.id === id) || null;
+    return allEvents.find((event) => event.id === id) ?? null;
   }
 
   public createEvent(data: CreateEventData, calendarId?: string): CalendarEvent {
@@ -97,14 +125,14 @@ export class CalendarManager {
       location: data.location,
       color: data.color,
       isAllDay: data.isAllDay,
-      priority: data.priority || 'medium',
+      priority: data.priority ?? 'medium',
       category: data.category,
-      tags: data.tags || [],
-      attendees: data.attendees || [],
+      tags: data.tags ?? [],
+      attendees: data.attendees ?? [],
       reminder: data.reminder,
       recurring: data.recurring,
-      attachments: data.attachments || [],
-      calendarId: calendarId || 'default',
+      attachments: data.attachments ?? [],
+      calendarId: calendarId ?? 'default',
       createdAt: Date.now(),
       updatedAt: Date.now(),
     };
@@ -113,7 +141,13 @@ export class CalendarManager {
     localStorage.setItem(this.eventsKey, JSON.stringify(allEvents));
 
     // Создаем напоминание, если указано
-    if (newEvent.reminder && calendarId) {
+    if (
+      newEvent.reminder !== null &&
+      newEvent.reminder !== undefined &&
+      calendarId !== null &&
+      calendarId !== undefined &&
+      calendarId !== ''
+    ) {
       this.reminderService.createReminder(newEvent, calendarId);
     }
 
@@ -194,9 +228,9 @@ export class CalendarManager {
 
     return allEvents.filter(
       (event) =>
-        event.title.toLowerCase().includes(lowerQuery) ||
-        event.description?.toLowerCase().includes(lowerQuery) ||
-        event.location?.toLowerCase().includes(lowerQuery) ||
+        (event.title.toLowerCase().includes(lowerQuery) ||
+          event.description?.toLowerCase().includes(lowerQuery)) ??
+        event.location?.toLowerCase().includes(lowerQuery) ??
         event.tags?.some((tag) => tag.toLowerCase().includes(lowerQuery))
     );
   }
@@ -210,53 +244,88 @@ export class CalendarManager {
     return this.reminderService;
   }
 
-  // Генерация HTML с напоминаниями
-  public generateCalendarHTMLWithReminders(calendarId: string): string {
-    const calendar = this.getCalendar(calendarId);
-    if (!calendar) return '';
-
-    const reminderScript = this.reminderService.generateReminderScript(calendarId);
-
-    return `
-      ${this.generateCalendarHTML(calendar)}
-      ${reminderScript}
-    `;
-  }
-
-  // Генерация HTML календаря
-  public generateCalendarHTML(calendar: Calendar): string {
-    const events = this.getEvents(calendar.id);
-
-    // Сортируем события по дате и времени
-    const sortedEvents = events.sort((a, b) => {
+  /** Calendar ViewSpec for editor + publish (optional reminders runtime attrs). */
+  public calendarView(
+    calendar: Calendar,
+    opts?: { publish?: boolean; emptyLabel?: string; align?: string }
+  ): ViewSpec {
+    const events = this.getEvents(calendar.id).toSorted((a, b) => {
       const dateA = new Date(`${a.date}T${a.time}`);
       const dateB = new Date(`${b.date}T${b.time}`);
       return dateA.getTime() - dateB.getTime();
     });
 
-    const eventsHtml = sortedEvents.map((event) => this.generateEventHTML(event)).join('');
+    const attrs: Record<string, string> = {
+      'data-calendar-id': calendar.id,
+    };
+    if (opts?.publish) {
+      attrs['data-node'] = 'calendar';
+      const reminders = this.collectPublishReminders(calendar.id);
+      if (reminders.length > 0) {
+        attrs['data-ocm-runtime'] = 'calendar-reminders';
+        attrs['data-ocm-config'] = JSON.stringify({ reminders });
+      }
+    }
 
-    return `
-      <div class="calendar-widget" data-calendar-id="${calendar.id}">
-        <div class="calendar-header">
-          <h3 class="calendar-title">${calendar.title}</h3>
-        </div>
-        <div class="calendar-body">
-          <div class="calendar-events">
-            ${eventsHtml}
-          </div>
-        </div>
-      </div>
-    `;
+    const alignStyle = atomAlignStyle(opts?.align ?? '');
+    const style =
+      Object.keys(alignStyle).length > 0 ? { maxWidth: '28rem', ...alignStyle } : undefined;
+
+    return h(
+      'div',
+      {
+        class: 'calendar-widget not-prose',
+        attrs,
+        style,
+      },
+      [
+        h('div', { class: 'calendar-header' }, [
+          h('h3', { class: 'calendar-title' }, calendar.title),
+        ]),
+        h('div', { class: 'calendar-body' }, [
+          events.length === 0
+            ? h('div', { class: 'calendar-empty' }, opts?.emptyLabel ?? 'No events')
+            : h(
+                'div',
+                { class: 'calendar-events' },
+                events.map((event) => this.eventView(event))
+              ),
+        ]),
+      ]
+    );
   }
 
-  // Генерация HTML события
-  private generateEventHTML(event: CalendarEvent): string {
-    const priorityClass = event.priority || 'medium';
-    const categoryColor = event.color || '#3b82f6';
-    const categoryName = event.category || 'General';
+  private collectPublishReminders(calendarId: string): {
+    id: string;
+    triggerTime: number;
+    message: string;
+  }[] {
+    const fromStore = this.reminderService.getPublishReminders(calendarId);
+    const fromEvents = this.getEvents(calendarId)
+      .filter((e) => e.reminder !== null && e.reminder !== undefined)
+      .map((e) => {
+        const eventDate = new Date(`${e.date}T${e.time}`);
+        const minutes = Number(e.reminder);
+        return {
+          id: `evt-${e.id}`,
+          triggerTime: eventDate.getTime() - minutes * 60 * 1000,
+          message: `Reminder: ${e.title} starts in ${minutes} minutes`,
+        };
+      });
+    const seen = new Set<string>();
+    return [...fromStore, ...fromEvents].filter((r) => {
+      if (seen.has(r.id)) {
+        return false;
+      }
+      seen.add(r.id);
+      return true;
+    });
+  }
 
-    // Форматируем дату
+  private eventView(event: CalendarEvent): ViewSpec {
+    const priorityClass = event.priority ?? 'medium';
+    const categoryName = (event.category ?? '').trim();
+    const showCategory = categoryName.length > 0;
     const eventDate = new Date(event.date);
     const formattedDate = eventDate.toLocaleDateString('ru-RU', {
       day: 'numeric',
@@ -264,55 +333,56 @@ export class CalendarManager {
       year: 'numeric',
     });
 
-    const tagsHtml =
-      event.tags && event.tags.length > 0
-        ? `<div class="event-tags">${event.tags.map((tag) => `<span class="event-tag">${tag}</span>`).join('')}</div>`
-        : '';
+    const sub: ViewSpec[] = [
+      h('span', { class: 'event-date' }, formattedDate),
+      h('span', { class: 'event-time' }, event.time),
+    ];
+    if (event.location) {
+      sub.push(h('span', { class: 'event-location' }, event.location));
+    }
+    if (event.duration !== null && event.duration !== undefined) {
+      sub.push(h('span', { class: 'event-duration' }, `${event.duration} min`));
+    }
+    if (event.attendees && event.attendees.length > 0) {
+      sub.push(h('span', { class: 'event-attendees' }, event.attendees.join(', ')));
+    }
+    if (event.reminder !== null && event.reminder !== undefined) {
+      sub.push(h('span', { class: 'event-reminder' }, `${event.reminder} min`));
+    }
+    if (event.description) {
+      sub.push(h('span', { class: 'event-description' }, event.description));
+    }
 
-    const attendeesHtml =
-      event.attendees && event.attendees.length > 0
-        ? `<span class="event-attendees">👥 ${event.attendees.join(', ')}</span>`
-        : '';
-
-    const reminderHtml = event.reminder
-      ? `<span class="event-reminder">⏰ ${event.reminder}</span>`
-      : '';
-
-    const locationHtml = event.location
-      ? `<span class="event-location">📍 ${event.location}</span>`
-      : '';
-
-    const durationHtml = event.duration
-      ? `<span class="event-duration">⏱️ ${event.duration} min</span>`
-      : '';
-
-    const metaInfo = [locationHtml, durationHtml, attendeesHtml, reminderHtml]
-      .filter(Boolean)
-      .join(' • ');
-
-    return `
-      <div class="calendar-event" data-event-id="${event.id}" style="--event-color: ${event.color || '#3b82f6'}">
-        <div class="event-header">
-          <div class="event-datetime">
-            <div class="event-date">${formattedDate}</div>
-            <div class="event-time">${event.time}</div>
-          </div>
-          <div class="event-priority priority-${priorityClass}">${priorityClass.toUpperCase()}</div>
-        </div>
-        <div class="event-title">${event.title}</div>
-        ${event.description ? `<div class="event-description">${event.description}</div>` : ''}
-        <div class="event-meta">
-          <div class="event-category" style="background-color: ${categoryColor}">${categoryName}</div>
-          ${metaInfo ? `<div class="event-meta-info">${metaInfo}</div>` : ''}
-        </div>
-        ${tagsHtml}
-      </div>
-    `;
+    return h(
+      'div',
+      {
+        class: 'calendar-event',
+        attrs: { 'data-event-id': event.id },
+        style: event.color ? { ['--event-color' as string]: event.color } : undefined,
+      },
+      [
+        h('div', { class: 'event-title-row' }, [
+          h('div', { class: 'event-title' }, event.title),
+          h('div', { class: `event-priority priority-${priorityClass}` }, priorityClass),
+          showCategory ? h('div', { class: 'event-category' }, categoryName) : null,
+        ]),
+        h('div', { class: 'event-sub' }, sub),
+        event.tags && event.tags.length > 0
+          ? h(
+              'div',
+              { class: 'event-tags' },
+              event.tags.map((tag) => h('span', { class: 'event-tag' }, tag))
+            )
+          : null,
+      ]
+    );
   }
 
   private getAllEvents(): (CalendarEvent & { calendarId: string })[] {
     const stored = localStorage.getItem(this.eventsKey);
-    return stored ? JSON.parse(stored) : [];
+    return stored !== null && stored !== undefined && stored !== ''
+      ? asEventArray(parseJson(stored))
+      : [];
   }
 
   public exportCalendar(id: string): string {
@@ -335,33 +405,47 @@ export class CalendarManager {
 
   public importCalendar(data: string): Calendar {
     try {
-      const importData = JSON.parse(data);
-      const calendar = importData.calendar;
-      const events = importData.events || [];
-      const categories = importData.categories || [];
-      const tags = importData.tags || [];
+      const importData = parseJson(data);
+      if (
+        importData === null ||
+        importData === undefined ||
+        typeof importData !== 'object' ||
+        Array.isArray(importData)
+      ) {
+        throw new Error('Invalid calendar data format');
+      }
+      const payload = importData as {
+        calendar?: { title?: string; description?: string };
+        events?: unknown;
+        categories?: unknown;
+        tags?: unknown;
+      };
+      const calendar = payload.calendar;
+      const events = asCreateEventArray(payload.events ?? []);
+      const categories = asCategoryArray(payload.categories ?? []);
+      const tags = asTagArray(payload.tags ?? []);
 
       // Импортируем категории и теги
-      categories.forEach((cat: any) => {
+      categories.forEach((cat) => {
         this.categoryManager.createCategory(cat.name, cat.color);
       });
 
-      tags.forEach((tag: any) => {
+      tags.forEach((tag) => {
         this.categoryManager.createTag(tag.name, tag.color);
       });
 
       const newCalendar = this.createCalendar({
-        title: calendar.title,
-        description: calendar.description,
+        title: calendar?.title ?? 'Imported',
+        description: calendar?.description,
       });
 
-      events.forEach((eventData: any) => {
+      events.forEach((eventData) => {
         this.createEvent(eventData, newCalendar.id);
       });
 
       return newCalendar;
     } catch (error) {
-      throw new Error('Invalid calendar data format');
+      throw new Error('Invalid calendar data format', { cause: error });
     }
   }
 

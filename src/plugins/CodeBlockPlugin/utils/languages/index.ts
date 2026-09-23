@@ -34,14 +34,20 @@ import { clojureDefinition } from './definitions/clojure';
 const languages: Record<string, LanguageDefinition> = {
   // Web Development
   javascript: javascriptDefinition,
+  js: javascriptDefinition,
   typescript: typescriptDefinition,
+  ts: typescriptDefinition,
+  jsx: javascriptDefinition,
+  tsx: typescriptDefinition,
   html: htmlDefinition,
   css: cssDefinition,
+  scss: cssDefinition,
 
   // Systems Programming
   rust: rustDefinition,
   cpp: cppDefinition,
   'c++': cppDefinition,
+  c: cppDefinition,
 
   // General Purpose
   python: pythonDefinition,
@@ -98,6 +104,7 @@ const languages: Record<string, LanguageDefinition> = {
  * Falls back to plaintext if the language is not supported.
  */
 export function getLanguageDefinition(language: string): LanguageDefinition {
+  // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
   return languages[language.toLowerCase()] || languages.plaintext;
 }
 

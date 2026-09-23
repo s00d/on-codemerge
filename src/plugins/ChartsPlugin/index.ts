@@ -1,178 +1,95 @@
-import './public.scss';
 import './style.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin, insertAtomAfter, foreign } from '@on-codemerge/sdk';
+import type { WidgetContext, ViewSpec } from '@on-codemerge/sdk';
+import { barIcon } from '../../icons';
 import { ChartMenu } from './components/ChartMenu';
-import { ChartContextMenu } from './components/ChartContextMenu';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { CHART_TYPE_CONFIGS } from './constants/chartTypes';
-import { Resizer } from '../../utils/Resizer.ts';
-import { createContainer, createLineBreak } from '../../utils/helpers.ts';
-import type { ChartSeries, ChartType } from './types';
+import { mountChartWidget } from './widgets/mountChartWidget';
 
-export class ChartsPlugin implements Plugin {
-  name = 'charts';
-  hotkeys = [{ keys: 'Ctrl+Alt+G', description: 'Insert chart', command: 'charts', icon: '📊' }];
-  private editor: HTMLEditor | null = null;
-  private menu: ChartMenu | null = null;
-  private contextMenu: ChartContextMenu | null = null;
-  private currentResizer: Resizer | null = null;
-  private toolbarButton: HTMLElement | null = null; // Сохраняем ссылку на кнопку тулбара
+function chartAttrsFromElement(el: HTMLElement): Record<string, unknown> {
+  return {
+    chartType: el.dataset.chartType ?? 'bar',
+    data: el.dataset.chartData ?? '[]',
+    title: el.dataset.chartTitle ?? '',
+    width: Math.trunc(Number(el.style.width)) || 800,
+    height: Math.trunc(Number(el.style.height)) || 400,
+    showLegend: el.dataset.showLegend !== 'false',
+    showGrid: el.dataset.showGrid !== 'false',
+    mode: el.dataset.mode || 'default',
+    orientation: el.dataset.orientation || 'vertical',
+    xAxisLabel: el.dataset.xAxisLabel ?? '',
+    yAxisLabel: el.dataset.yAxisLabel ?? '',
+  };
+}
 
-  constructor() {}
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.menu = new ChartMenu(editor);
-    this.contextMenu = new ChartContextMenu(editor, this.menu);
-    this.addToolbarButton();
-    this.setupChartEvents();
-    this.editor.on('charts', () => {
-      this.insertChart();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: CHART_TYPE_CONFIGS.bar.icon,
-      title: this.editor?.t('Insert Chart'),
-      onClick: () => this.insertChart(),
-    });
-    toolbar.appendChild(this.toolbarButton);
-  }
-
-  private setupChartEvents(): void {
-    if (!this.editor) return;
-
-    const container = this.editor.getContainer();
-
-    // Handle chart clicks for resizing
-    container.addEventListener('click', (e) => {
-      const chart = (e.target as Element).closest('.chart-container');
-      if (chart instanceof HTMLElement) {
-        if (this.currentResizer) {
-          this.currentResizer.destroy();
-          this.currentResizer = null;
-        }
-
-        // Создаем новый Resizer для блока
-        this.currentResizer = new Resizer(chart, {
-          handleSize: 10,
-          handleColor: 'blue',
-          onResizeStart: () => this.editor?.disableObserver(),
-          onResize: (width, height) => {
-            console.log(`Resized to ${width}x${height}`);
-            const type = chart.getAttribute('data-chart-type') as ChartType;
-            const dataStr = chart.getAttribute('data-chart-data') ?? '';
-            const data = JSON.parse(dataStr) as ChartSeries[];
-            this.menu?.redrawChart(chart, type, data, { width, height });
+export function ChartsPlugin() {
+  return definePlugin({
+    commands: {
+      insertChart: insertAtomAfter('chart', {
+        chartType: 'bar',
+        data: JSON.stringify([
+          {
+            name: 'Series 1',
+            data: [
+              { label: 'A', value: 3 },
+              { label: 'B', value: 7 },
+              { label: 'C', value: 5 },
+            ],
           },
-          onResizeEnd: () => this.editor?.enableObserver(),
-        });
-      }
-    });
+        ]),
+        title: 'Chart',
+        width: 800,
+        height: 400,
+      }),
+    },
+    hotkeys: [{ keys: 'Mod-Alt-g', command: 'insertChart', description: 'Insert chart' }],
+    name: 'charts',
+    nodes: [
+      {
+        name: 'chart',
+        group: 'atom',
+        atom: true,
+        attrs: {
+          chartType: 'bar',
+          data: '[]',
+          title: 'Chart',
+          width: 800,
+          height: 400,
+          align: '',
+          showLegend: true,
+          showGrid: true,
+          mode: 'default',
+          orientation: 'vertical',
+          xAxisLabel: '',
+          yAxisLabel: '',
+        },
+      },
+    ],
+    setup(ctx) {
+      const editor = ctx.editor;
+      const menu = new ChartMenu(editor, ctx.scope);
 
-    // Handle context menu
-    container.addEventListener('contextmenu', (e) => {
-      const chart = (e.target as Element).closest('.chart-container');
-      if (chart instanceof HTMLElement) {
-        e.preventDefault();
-        const mouseX = (e as MouseEvent).clientX;
-        const mouseY = (e as MouseEvent).clientY;
-
-        console.log('Mouse coordinates:', mouseX, mouseY);
-
-        this.contextMenu?.show(chart, mouseX, mouseY);
-      }
-    });
-
-    // Handle chart resize events
-    container.addEventListener('chartresize', (e: Event) => {
-      const detail = (e as CustomEvent).detail;
-      const chart = (e.target as Element).closest('.chart-container');
-      if (chart instanceof HTMLElement) {
-        this.menu?.redrawChart(chart, detail.type, detail.data, {
-          width: detail.width,
-          height: detail.height,
-        });
-      }
-    });
-  }
-
-  private insertChart(): void {
-    if (!this.editor) return;
-
-    // Create a new range at the end if no selection exists
-    const container = this.editor.getContainer();
-    const selection = this.editor.getTextFormatter()?.getSelection();
-    let range: Range;
-
-    const createRangeAtEnd = () => {
-      const r = document.createRange();
-      r.selectNodeContents(container);
-      r.collapse(false);
-      selection?.removeAllRanges();
-      selection?.addRange(r);
-      return r;
-    };
-
-    if (selection && selection.rangeCount > 0) {
-      const candidate = selection.getRangeAt(0);
-      const isInsideEditor =
-        container.contains(candidate.startContainer) && container.contains(candidate.endContainer);
-      range = isInsideEditor ? candidate : createRangeAtEnd();
-    } else {
-      range = createRangeAtEnd();
-    }
-
-    // Show chart menu
-    this.menu?.show((chartElement) => {
-      if (!this.editor) return;
-
-      // Insert chart and line break
-      const wrapper = createContainer('chart-wrapper my-4');
-      wrapper.appendChild(chartElement);
-
-      wrapper.appendChild(createLineBreak());
-
-      // Insert at current selection
-      range.deleteContents();
-      range.insertNode(wrapper);
-
-      // Move cursor after chart
-      range.setStartAfter(wrapper);
-      range.setEndAfter(wrapper);
-      selection?.removeAllRanges();
-      selection?.addRange(range);
-    });
-  }
-
-  public destroy(): void {
-    if (this.menu) {
-      this.menu.destroy();
-      this.menu = null;
-    }
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
-
-    if (this.currentResizer) {
-      this.currentResizer.destroy();
-      this.currentResizer = null;
-    }
-
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
-      this.toolbarButton = null;
-    }
-
-    this.editor?.off('charts');
-
-    this.editor = null;
-  }
+      ctx.toolbar.add({
+        id: 'chart',
+        icon: barIcon,
+        title: editor.t('charts.insert'),
+        menu: 'insert',
+        order: 50,
+        onClick: () => {
+          menu.show((chartElement) => {
+            editor.run(insertAtomAfter('chart', chartAttrsFromElement(chartElement)));
+          });
+        },
+      });
+    },
+    widgets: {
+      chart: {
+        render(attrs, wctx: WidgetContext): ViewSpec {
+          return foreign((host, scope) => {
+            mountChartWidget(host, attrs, () => wctx.editor, scope);
+          });
+        },
+      },
+    },
+  });
 }

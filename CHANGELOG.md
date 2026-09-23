@@ -5,66 +5,75 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0] - 2026-09-23
+
+Breaking rewrite of the editor around a virtual JSON document, SDK plugin surface, and published-page CSS/JS split. See [Migration guide: v1 → v2](docs/guide/migration-v1-to-v2.md).
+
+### Added
+
+- **`on-codemerge/kernel`**: document model, operations, selection, transactions (re-exported from the main package)
+- **`on-codemerge/sdk`**: `definePlugin`, ViewSpec UI (`h` / `mount` / portals), popup / toolbar / context-menu / notify
+- **`Editor`**: replaces `HTMLEditor`; JSON is source of truth (`getJSON` / `setJSON`); HTML/MD as boundaries via `src/io/`
+- **Package CSS**: `on-codemerge/index.css` (editor chrome) + `on-codemerge/public.css` + `on-codemerge/public.js` (published page)
+- **Workspace packages**: `@on-codemerge/kernel` / `@on-codemerge/sdk` (private; bundled into `on-codemerge`)
+- **Vitest** unit + e2e (untestutils / Playwright); `oxlint` + `oxfmt`; locale parity (`check:locales`)
+- **Docs**: Guide (`editor`, `sdk`, `document-model`, `authoring-plugins`, migration), Integrate, Plugins catalog
+- Redesigned panels: Typography Styles, Font Settings (browser font detect), Block Style Editor (inline ColorWell), Edit History viewer
+- Atom alignment via AlignmentPlugin for timer / calendar / form; shared muted atom chrome + left accent stripe
+- MathPlugin TeX-subset → AST → MathML (no KaTeX runtime)
+
+### Changed
+
+- Plugins register chrome through SDK only — no plugin-owned toolbar DOM / `document.createElement` (ban script enforced)
+- Toolbar chrome owned by Editor / SDK; `ToolbarPlugin()` only registers text marks; overflow menus `insert` / `review` / `tools` registered by core
+- Styling: Tailwind v4 + `@apply` in plugin `style.scss`; ColorWell for color UI
+- SpellChecker: `typo-js`; dictionaries not bundled — pass Hunspell URLs via options
+- i18n: locales under `src/i18n/locales/` (en + lazy locales)
+- Tooling: pnpm workspace, Vite 8 library build (`preserveModules` + `ocm-package` post-process), publint gate
+
+### Removed
+
+- **`HTMLEditor`**, old `src/core/` (DOMContext, PopupManager, LocaleManager, TextFormatter, …)
+- Per-plugin `public.scss` sprawl and per-plugin CSS package exports — use bundled `index.css` / `public.css`
+- `editor.showToolbar` / `hideToolbar` / `addToolbarTool` / `createToolbarButton`
+- Jest; Prettier / ESLint configs (replaced by oxfmt / oxlint)
+- `ToolbarDividerPlugin` as a real chrome plugin (no-op; separators from toolbar `group`)
+- Bundled spellcheck dictionary texts
+
+### Fixed
+
+- Typography Styles modal layout (vertical rows + sectioned CSS in dist)
+- Font Settings empty content after remount; `t()` interpolation for available font count
+- Block Style color picker closing the parent modal (inline ColorWell)
+- Popup close-on-overlay for Font / Block Style / History
+
+## [1.3.2]
+
+See git history (`chore(package): update version to 1.3.2`).
+
 ## [1.1.0] - 2024-12-19
 
 ### Added
-- **AI Assistant Plugin**: New plugin with configurable options for AI-powered assistance
-- **Calendar Plugin**: Complete calendar management system with events, reminders, and categories
-- **Language Plugin**: Multi-language support with language switching capabilities
-- **Responsive Plugin**: Enhanced responsive design tools with viewport management
-- **Timer Plugin**: Countdown and countup timer functionality with export/import capabilities
-- **Block Plugin**: Advanced block management with split, merge, duplicate, and delete operations
-- **Lazy Table Support**: New lazy table functionality with data filling and editing capabilities
-- **Enhanced Table Plugin**: 
-  - New table commands for responsive design and styling
-  - Cell formatting and border management
-  - Table export/import functionality
-  - Enhanced table context menu
-- **Notification System**: New notification manager for user feedback
-- **Enhanced Documentation**: 
-  - Complete plugin documentation
-  - Integration guides for various frameworks
-  - Plugin development guide
-- **Localization**: Complete translation support for 18 languages including:
-  - Arabic, Czech, German, Spanish, French, Hindi, Indonesian
-  - Italian, Japanese, Korean, Dutch, Polish, Portuguese
-  - Russian, Thai, Turkish, Vietnamese, Chinese
-- **New Icons**: Calendar, globe, lazy table, and timer icons
-- **Locale Management**: Script for checking and synchronizing translation keys
+
+- AI Assistant, Calendar, Language, Responsive, Timer, Block plugins
+- Lazy table support and enhanced Table Plugin commands
+- Notification system and plugin documentation
+- Localization for 18 languages
 
 ### Changed
-- **Core Architecture**: 
-  - Renamed `TableSelection` to `Selector` for improved clarity
-  - Enhanced container parameter handling in Selector
-  - Updated content change callbacks type definitions
-- **Shortcuts System**: Streamlined shortcut management and removed constants file
-- **Charts Plugin**: Added option to hide popup during chart editing
-- **Dark Mode**: Enhanced dark mode styles for various components
-- **Code Style**: Improved consistency with proper semicolons and formatting
 
-### Fixed
-- **Code Style**: Corrected inconsistencies in hotkeys definition
-- **Translation Keys**: Synchronized all translation keys across 18 language files
-- **Missing Translations**: Added comprehensive timer and table-related translations
-
-### Technical Improvements
-- **Testing**: Added comprehensive test suites for plugins
-- **Type Safety**: Enhanced TypeScript type definitions
-- **Performance**: Optimized plugin loading and execution
-- **Accessibility**: Improved keyboard navigation and screen reader support
+- Core architecture and shortcuts cleanup
+- Charts popup behavior; dark mode styles
 
 ## [1.0.28] - 2024-12-19
 
 ### Added
-- AI Assistant plugin with configurable options
-- Container parameter to Selector for improved range handling
 
-### Changed
-- Enhanced dark mode styles for various components
+- AI Assistant plugin; Selector container parameter
 
 ### Fixed
-- Code style inconsistencies in hotkeys definition
-- Missing semicolons for consistency
+
+- Hotkeys / code style inconsistencies
 
 ## [Previous Versions]
 
@@ -83,4 +92,4 @@ When contributing to this project, please update this changelog with your change
 - **Deprecated**: for soon-to-be removed features
 - **Removed**: for now removed features
 - **Fixed**: for any bug fixes
-- **Security**: in case of vulnerabilities 
+- **Security**: in case of vulnerabilities

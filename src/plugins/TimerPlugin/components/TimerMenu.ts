@@ -1,106 +1,115 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
+import { PopupController, foreign, h, pickFile } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import type { TimerManager } from '../services/TimerManager';
 import type { Timer } from '../types';
 import { TimerForm } from './TimerForm';
-import type { HTMLEditor } from '../../../core/HTMLEditor';
 
+/** Timer chrome — lists via ViewSpec; forms via foreign + mountInto. */
 export class TimerMenu {
-  private popup: PopupManager;
-  private editor: HTMLEditor;
-  private manager: TimerManager;
+  private readonly popups: PopupController;
+  private readonly editor: EditorAPI;
+  private readonly manager: TimerManager;
   private onSelect: ((timer: Timer) => void) | null = null;
 
-  constructor(manager: TimerManager, editor: HTMLEditor) {
+  constructor(manager: TimerManager, editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
     this.manager = manager;
-    this.popup = this.createMainPopup();
   }
 
-  private createMainPopup(): PopupManager {
-    return new PopupManager(this.editor, {
-      title: this.editor.t('Timer'),
+  private listView(): ViewSpec {
+    const timers = this.manager.getTimers();
+    if (timers.length === 0) {
+      return h('div', { class: 'empty-state' }, [
+        h('p', null, this.editor.t('timer.noTimersFound')),
+        h('p', null, this.editor.t('timer.createYourFirstTimerToGetStarted')),
+      ]);
+    }
+    return h(
+      'div',
+      { class: 'timers-list' },
+      ...timers.map((timer) => {
+        const timeLeft = this.manager.getTimeLeft(timer);
+        const statusClass = timeLeft.isExpired ? 'expired' : 'active';
+        const statusText = timeLeft.isExpired
+          ? this.editor.t('timer.expired')
+          : this.editor.t('timer.active');
+        return h(
+          'div',
+          {
+            class: 'timer-item',
+            on: {
+              click: () => {
+                this.handleSelectTimer(timer);
+              },
+            },
+          },
+          h('div', { class: 'timer-info' }, [
+            h('h4', { class: 'timer-title' }, timer.title),
+            h('p', { class: 'timer-description' }, timer.description ?? ''),
+            h('div', { class: `timer-status ${statusClass}` }, statusText),
+          ]),
+          h('div', { class: 'timer-actions' }, [
+            h(
+              'button',
+              {
+                class: 'btn-edit',
+                attrs: { type: 'button', title: this.editor.t('common.edit') },
+                on: {
+                  click: (e) => {
+                    e.stopPropagation();
+                    this.showEditTimerForm(timer);
+                  },
+                },
+              },
+              this.editor.t('common.edit')
+            ),
+            h(
+              'button',
+              {
+                class: 'btn-delete',
+                attrs: { type: 'button', title: this.editor.t('common.delete') },
+                on: {
+                  click: (e) => {
+                    e.stopPropagation();
+                    this.handleDeleteTimer(timer);
+                  },
+                },
+              },
+              this.editor.t('common.delete')
+            ),
+          ])
+        );
+      })
+    );
+  }
+
+  private openMainPopup(): void {
+    this.popups.open({
+      title: this.editor.t('timer.title'),
       className: 'timer-menu',
+      size: 'md',
       closeOnClickOutside: true,
       buttons: [
         {
-          label: this.editor.t('Import'),
+          label: this.editor.t('common.import'),
           variant: 'secondary',
-          onClick: () => this.showImportDialog(),
+          onClick: () => {
+            this.showImportDialog();
+            return true;
+          },
         },
         {
-          label: this.editor.t('New Timer'),
+          label: this.editor.t('timer.newTimer'),
           variant: 'primary',
-          onClick: () => this.showNewTimerForm(),
+          onClick: () => {
+            this.showNewTimerForm();
+            return true;
+          },
         },
       ],
-      items: [
-        {
-          type: 'custom',
-          id: 'timers-content',
-          content: () => this.createTimersList(),
-        },
-      ],
+      items: [{ type: 'view', id: 'timers-content', view: () => this.listView() }],
     });
-  }
-
-  private createTimersList(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'timers-list';
-
-    const timers = this.manager.getTimers();
-
-    if (timers.length === 0) {
-      const emptyState = document.createElement('div');
-      emptyState.className = 'empty-state';
-      emptyState.innerHTML = `
-        <p>${this.editor.t('No timers found')}</p>
-        <p>${this.editor.t('Create your first timer to get started')}</p>
-      `;
-      container.appendChild(emptyState);
-    } else {
-      timers.forEach((timer) => {
-        const timerItem = this.createTimerItem(timer);
-        container.appendChild(timerItem);
-      });
-    }
-
-    return container;
-  }
-
-  private createTimerItem(timer: Timer): HTMLElement {
-    const timeLeft = this.manager.getTimeLeft(timer);
-    const item = document.createElement('div');
-    item.className = 'timer-item';
-
-    const statusClass = timeLeft.isExpired ? 'expired' : 'active';
-    const statusText = timeLeft.isExpired ? 'Истек' : 'Активен';
-
-    item.innerHTML = `
-      <div class="timer-info">
-        <h4 class="timer-title">${timer.title}</h4>
-        <p class="timer-description">${timer.description || ''}</p>
-        <div class="timer-status ${statusClass}">${statusText}</div>
-      </div>
-      <div class="timer-actions">
-        <button class="btn-edit" title="${this.editor.t('Edit')}">✏️</button>
-        <button class="btn-delete" title="${this.editor.t('Delete')}">🗑️</button>
-      </div>
-    `;
-
-    // Обработчики событий
-    item.addEventListener('click', (e) => {
-      if ((e.target as Element).classList.contains('btn-edit')) {
-        e.stopPropagation();
-        this.showEditTimerForm(timer);
-      } else if ((e.target as Element).classList.contains('btn-delete')) {
-        e.stopPropagation();
-        this.handleDeleteTimer(timer);
-      } else {
-        this.handleSelectTimer(timer);
-      }
-    });
-
-    return item;
   }
 
   private createFormPopup(
@@ -109,163 +118,110 @@ export class TimerMenu {
     submitLabel: string,
     onCancel?: () => void
   ): void {
-    this.popup = new PopupManager(this.editor, {
-      title: this.editor.t(title),
+    this.popups.open({
+      title: this.editor.t(title) || title,
       className: 'timer-menu',
+      size: 'md',
       closeOnClickOutside: true,
       buttons: [
         {
-          label: this.editor.t('Cancel'),
+          label: this.editor.t('common.cancel'),
           variant: 'secondary',
           onClick: () => {
-            if (onCancel) {
-              onCancel();
-            } else {
-              this.popup.hide();
-            }
+            onCancel?.();
+            return true;
           },
         },
         {
-          label: this.editor.t(submitLabel),
+          label: this.editor.t(submitLabel) || submitLabel,
           variant: 'primary',
           onClick: () => {
-            this.editor!.ensureEditorFocus();
             form.submit();
+            return true;
           },
         },
       ],
       items: [
         {
-          type: 'custom',
+          type: 'view',
           id: 'form-content',
-          content: () => form.getElement(),
+          view: () =>
+            foreign((host, scope) => {
+              form.mountInto(host);
+              scope.disposable(() => {
+                form.destroy();
+              });
+            }),
         },
       ],
     });
-
-    this.popup.show();
   }
 
-  public showNewTimerForm(onTimerCreated?: (timer: Timer) => void): void {
-    // Сначала закрываем текущий popup
-    if (this.popup) {
-      this.popup.hide();
-    }
-
+  public showNewTimerForm(): void {
     const form = new TimerForm(this.editor, (data) => {
-      const newTimer = this.manager.createTimer(data);
-
-      // Закрываем модалку и уничтожаем форму
-      this.popup.hide();
-      form.destroy();
-
-      // Возвращаемся к главному меню
-      this.popup = this.createMainPopup();
-      this.popup.show();
-
-      if (onTimerCreated && newTimer) {
-        onTimerCreated(newTimer);
-      }
+      const created = this.manager.createTimer(data);
+      this.popups.close();
+      this.onSelect?.(created);
+      this.openMainPopup();
     });
-
     this.createFormPopup('New Timer', form, 'Create', () => {
-      // При отмене сначала уничтожаем форму, потом закрываем модалку
-      form.destroy();
-      this.popup.hide();
-      // Возвращаемся к главному меню
-      this.popup = this.createMainPopup();
-      this.popup.show();
+      this.openMainPopup();
     });
   }
 
   public showEditTimerForm(timer: Timer): void {
-    // Сначала закрываем текущий popup
-    if (this.popup) {
-      this.popup.hide();
-    }
-
     const form = new TimerForm(
       this.editor,
       (data) => {
         this.manager.updateTimer(timer.id, data);
-
-        // Закрываем модалку и уничтожаем форму
-        this.popup.hide();
-        form.destroy();
-
-        // Возвращаемся к главному меню
-        this.popup = this.createMainPopup();
-        this.popup.show();
+        this.popups.close();
+        this.openMainPopup();
       },
       timer
     );
-
     this.createFormPopup('Edit Timer', form, 'Update', () => {
-      // При отмене также уничтожаем форму
-      form.destroy();
-      this.popup = this.createMainPopup();
-      this.popup.show();
+      this.openMainPopup();
     });
   }
 
   private handleSelectTimer(timer: Timer): void {
     this.onSelect?.(timer);
-    this.popup.hide();
+    this.popups.close();
   }
 
   private handleDeleteTimer(timer: Timer): void {
-    if (confirm(this.editor.t('Are you sure you want to delete this timer?'))) {
+    if (confirm(this.editor.t('timer.areYouSureYouWantToDeleteThisTimer') || 'Delete?')) {
       this.manager.deleteTimer(timer.id);
-      this.popup.hide();
-      this.popup = this.createMainPopup();
-      this.popup.show();
+      this.popups.close();
+      this.openMainPopup();
     }
   }
 
   public show(onSelect: (timer: Timer) => void): void {
     this.onSelect = onSelect;
-    this.popup.show();
+    this.openMainPopup();
   }
 
   public showImportDialog(): void {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          try {
-            const timer = JSON.parse(e.target?.result as string);
-            this.manager.importTimer(timer);
-            this.editor?.showSuccessNotification(
-              this.editor?.t('Timer imported successfully') || 'Timer imported successfully'
-            );
-            this.popup.hide();
-            this.popup = this.createMainPopup();
-            this.popup.show();
-          } catch (error) {
-            this.editor?.showErrorNotification(this.editor?.t('Import failed') || 'Import failed');
-          }
-        };
-        reader.readAsText(file);
+    void pickFile({ accept: '.json' }).then((files) => {
+      const file = files?.[0];
+      if (!file) {
+        return;
       }
-    };
-    input.click();
-  }
-
-  public destroy(): void {
-    if (this.popup) {
-      this.popup.hide();
-      if (typeof this.popup.destroy === 'function') {
-        this.popup.destroy();
-      }
-      this.popup = null!;
-    }
-
-    this.editor = null!;
-    this.manager = null!;
-    this.onSelect = null;
+      const reader = new FileReader();
+      reader.addEventListener('load', () => {
+        try {
+          const text = typeof reader.result === 'string' ? reader.result : '';
+          this.manager.importTimer(text);
+          this.editor.notify(this.editor.t('timer.timerImportedSuccessfully'));
+          this.popups.close();
+          this.openMainPopup();
+        } catch {
+          this.editor.notify(this.editor.t('common.importFailed'));
+        }
+      });
+      reader.readAsText(file);
+      return;
+    });
   }
 }

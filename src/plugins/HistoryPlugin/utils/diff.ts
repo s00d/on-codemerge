@@ -52,8 +52,7 @@ export function computeDiff(oldText: string, newText: string): DiffChange[] {
 
       if (!foundMatch) {
         // No match found - mark as remove and add
-        changes.push({ type: 'remove', value: oldWords[i] });
-        changes.push({ type: 'add', value: newWords[j] });
+        changes.push({ type: 'remove', value: oldWords[i] }, { type: 'add', value: newWords[j] });
         i++;
         j++;
       }

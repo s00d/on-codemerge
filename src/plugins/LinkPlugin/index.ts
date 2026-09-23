@@ -1,203 +1,125 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
+import type { Command } from '@on-codemerge/kernel';
 import { LinkMenu } from './components/LinkMenu';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { linkIcon, editIcon, deleteIcon } from '../../icons/';
-import { ContextMenu } from '../../core/ui/ContextMenu.ts';
-import { createLink } from '../../utils/helpers.ts';
+import type { LinkData } from './components/LinkMenu';
+import { linkIcon, editIcon, deleteIcon } from '../../icons';
 
-interface LinkData {
-  url: string; // URL ссылки
-  anchor: string; // Текст анкора
-  title: string; // Заголовок ссылки (атрибут title)
-  nofollow: boolean; // Добавить rel="nofollow"
-  targetBlank: boolean; // Открывать ссылку в новой вкладке (target="_blank")
+function applyLink(editor: EditorAPI, data: LinkData): void {
+  withMarkTarget(editor, () => {
+    editor.run(
+      setMarkAttrs('link', {
+        href: data.url,
+        title: data.title,
+        rel: data.nofollow ? 'nofollow' : '',
+        target: data.targetBlank ? '_blank' : '',
+        anchor: data.anchor,
+      })
+    );
+  });
 }
 
-export class LinkPlugin implements Plugin {
-  name = 'link';
-  hotkeys = [{ keys: 'Ctrl+Alt+Z', description: 'Insert link', command: 'link', icon: '🔗' }];
-  private editor: HTMLEditor | null = null;
-  private menu: LinkMenu | null = null;
-  private contextMenu: ContextMenu | null = null;
-  private currentRange: Range | null = null;
-  private toolbarButton: HTMLElement | null = null;
-
-  constructor() {}
-
-  initialize(editor: HTMLEditor): void {
-    this.menu = new LinkMenu(editor);
-    this.contextMenu = new ContextMenu(
-      editor,
-      [
-        {
-          label: this.editor?.t('Edit'),
-          icon: editIcon,
-          iconPosition: 'right',
-          hotkey: 'S',
-          onClick: (activeLink) => {
-            if (activeLink) this.editLink(activeLink as HTMLAnchorElement);
-          },
-        },
-        {
-          type: 'divider',
-        },
-        {
-          label: this.editor?.t('Remove'),
-          icon: deleteIcon,
-          iconPosition: 'right',
-          hotkey: 'D',
-          onClick: (activeLink) => {
-            if (activeLink) this.removeLink(activeLink as HTMLAnchorElement);
-          },
-        },
-      ],
+function removeLinkMark(): Command {
+  return (state) => {
+    const range = core.selectionTextRange(state.selection);
+    if (!range || range.from === range.to) {
+      return null;
+    }
+    return [
       {
-        orientation: 'horizontal',
-      }
-    );
-    this.editor = editor;
-    this.addToolbarButton();
-    this.setupContextMenu();
-    this.editor.on('link', () => {
-      this.openModal();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: linkIcon,
-      title: this.editor?.t('Insert Link'),
-      onClick: () => {
-        this.openModal();
+        type: 'remove_mark',
+        path: range.path,
+        from: range.from,
+        to: range.to,
+        markType: 'link',
       },
-    });
-    toolbar.appendChild(this.toolbarButton);
-  }
-
-  private setupContextMenu(): void {
-    if (!this.editor) return;
-
-    const container = this.editor.getContainer();
-    container.addEventListener('contextmenu', this.handleContextMenu);
-  }
-
-  private handleContextMenu = (e: MouseEvent): void => {
-    const link = (e.target as Element).closest('a');
-    if (link instanceof HTMLAnchorElement) {
-      e.preventDefault();
-      const mouseX = (e as MouseEvent).clientX;
-      const mouseY = (e as MouseEvent).clientY;
-
-      console.log('Mouse coordinates:', mouseX, mouseY);
-
-      this.contextMenu?.show(link, mouseX, mouseY);
-    }
+    ];
   };
+}
 
-  private openModal(): void {
-    if (!this.editor) return;
+export function LinkPlugin() {
+  let openLink: (() => void) | null = null;
 
-    this.editor?.ensureEditorFocus();
-
-    // Сохраняем текущий Range (выделение) при открытии модального окна
-    const selection = this.editor.getTextFormatter()?.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      this.currentRange = selection.getRangeAt(0).cloneRange();
-    }
-
-    const selectedText = selection ? selection.toString().trim() : '';
-
-    this.menu?.show(
-      (linkData) => {
-        this.handleLinkInsertion(linkData, selectedText);
+  return definePlugin({
+    name: 'link',
+    marks: [
+      {
+        name: 'link',
+        attrs: { href: '', title: '', rel: '', target: '', anchor: '' },
       },
-      { anchor: selectedText }
-    );
-  }
+    ],
+    hotkeys: [{ keys: 'Mod-k', command: 'insertLink', description: 'Insert link' }],
+    commands: {
+      insertLink: () => {
+        openLink?.();
+        return null;
+      },
+    },
+    setup(ctx) {
+      const editor = ctx.editor;
+      const t = (k: string) => editor.t(k) || k;
+      const menu = new LinkMenu(editor, ctx.scope);
+      openLink = () => {
+        menu.show((data) => {
+          applyLink(editor, data);
+        });
+      };
 
-  private handleLinkInsertion(linkData: LinkData, selectedText: string): void {
-    if (!this.editor || !this.currentRange) return;
+      ctx.toolbar.add({
+        id: 'link',
+        icon: linkIcon,
+        title: editor.t('link.insert'),
+        group: 'format',
+        order: 17,
+        onClick: () => {
+          openLink?.();
+        },
+      });
 
-    const anchor = linkData.anchor || selectedText;
-    const link = createLink(anchor, linkData.url);
-
-    if (linkData.title) {
-      link.title = linkData.title;
-    }
-
-    if (linkData.nofollow) {
-      link.rel = 'nofollow';
-    }
-
-    if (linkData.targetBlank) {
-      link.target = '_blank';
-    }
-
-    // Вставляем ссылку в сохраненный Range
-    this.currentRange.deleteContents();
-    this.currentRange.insertNode(link);
-    this.currentRange.collapse(false);
-
-    // Сбрасываем сохраненный Range после вставки
-    this.currentRange = null;
-  }
-
-  private editLink(link: HTMLAnchorElement): void {
-    if (!this.editor) return;
-
-    // Начальные данные для редактирования ссылки
-    const initialData: LinkData = {
-      url: link.href,
-      anchor: link.textContent || '',
-      title: link.title,
-      nofollow: link.rel.includes('nofollow'),
-      targetBlank: link.target === '_blank',
-    };
-
-    this.menu?.show((newLinkData) => {
-      link.href = newLinkData.url;
-      link.textContent = newLinkData.anchor || newLinkData.url;
-      link.title = newLinkData.title || '';
-      link.rel = newLinkData.nofollow ? 'nofollow' : '';
-      link.target = newLinkData.targetBlank ? '_blank' : '';
-    }, initialData);
-  }
-
-  private removeLink(link: HTMLAnchorElement): void {
-    if (!this.editor) return;
-
-    const textNode = document.createTextNode(link.textContent || '');
-    link.replaceWith(textNode);
-  }
-
-  destroy(): void {
-    this.editor?.off('link');
-
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
-
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
-      this.toolbarButton = null;
-    }
-
-    const container = this.editor?.getContainer();
-    if (container) {
-      container.removeEventListener('contextmenu', this.handleContextMenu);
-    }
-
-    // Очищаем ссылки на объекты
-    this.menu = null;
-    this.editor = null;
-    this.currentRange = null;
-  }
+      ctx.onDom('host', 'contextmenu', (e) => {
+        const a = (e.target as Element).closest('a');
+        if (!(a instanceof HTMLAnchorElement)) {
+          return;
+        }
+        e.preventDefault();
+        ctx.menu.open(
+          [
+            {
+              label: t('common.edit'),
+              icon: editIcon,
+              onClick: () => {
+                menu.show(
+                  (data) => {
+                    applyLink(editor, data);
+                  },
+                  {
+                    url: a.href,
+                    anchor: a.textContent || '',
+                    title: a.title || '',
+                    nofollow: (a.rel || '').includes('nofollow'),
+                    targetBlank: a.target === '_blank',
+                  }
+                );
+              },
+            },
+            { type: 'divider' },
+            {
+              label: t('common.delete'),
+              icon: deleteIcon,
+              variant: 'danger',
+              onClick: () => {
+                withMarkTarget(editor, () => {
+                  editor.run(removeLinkMark());
+                });
+              },
+            },
+          ],
+          e.clientX,
+          e.clientY
+        );
+      });
+    },
+  });
 }

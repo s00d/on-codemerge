@@ -1,263 +1,114 @@
 # Spell Checker Plugin
 
-The Spell Checker Plugin provides comprehensive spell checking capabilities for the on-CodeMerge editor, supporting multiple languages and offering real-time error detection and correction suggestions.
+Live spell check via [Typo.js](https://github.com/cfinke/Typo.js) (Hunspell). Dictionaries are **not** shipped with `on-codemerge` — you pass `.aff` / `.dic` URLs when creating the plugin.
 
-## Features
-
-- **Multi-language Support**: Spell checking in 20+ languages
-- **Real-time Checking**: Live spell error detection
-- **Error Highlighting**: Visual indication of spelling errors
-- **Correction Suggestions**: Context-aware word suggestions
-- **Custom Dictionaries**: Add custom words and terms
-- **Ignore Words**: Temporarily ignore specific words
-- **Language Detection**: Automatic language detection
-- **Toolbar Integration**: Spell checker menu in toolbar
-- **Keyboard Shortcuts**: Quick spell check commands
-
-## Installation
-
-```bash
-npm install on-codemerge
-```
-
-## Basic Usage
-
-```javascript
-import { HTMLEditor, SpellCheckerPlugin } from 'on-codemerge';
-
-const editor = new HTMLEditor(container);
-editor.use(new SpellCheckerPlugin());
-```
+Toggle: **Tools → Spell Checker** or `Mod-Shift-s`. Misspellings get a `misspelled` mark (red underline).
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['SpellCheckerPlugin']" />
+<EditorComponent :activePlugins="['SpellCheckerPlugin']" :showDescription="false" />
 
-## API Reference
+## Install dictionaries
 
-### Spell Checker Methods
+Use Hunspell packages from [wooorm/dictionaries](https://github.com/wooorm/dictionaries) (npm: `dictionary-<locale>`):
 
-```javascript
-// Check spelling
-editor.checkSpelling();
-
-// Set language
-editor.setSpellCheckLanguage('en');
-
-// Add word to dictionary
-editor.addToDictionary('customword');
-
-// Ignore word
-editor.ignoreWord('ignoredword');
-
-// Get suggestions
-const suggestions = editor.getSuggestions('misspelledword');
+```bash
+npm install dictionary-en
+# optional:
+npm install dictionary-ru dictionary-de dictionary-fr
 ```
 
-## Supported Languages
+Each package contains `index.aff` and `index.dic`.
 
-- English (en)
-- Spanish (es)
-- French (fr)
-- German (de)
-- Italian (it)
-- Portuguese (pt)
-- Russian (ru)
-- Chinese (zh)
-- Japanese (ja)
-- Korean (ko)
-- Arabic (ar)
-- Dutch (nl)
-- Swedish (sv)
-- Norwegian (no)
-- Danish (da)
-- Finnish (fi)
-- Polish (pl)
-- Czech (cs)
-- Hungarian (hu)
-- Turkish (tr)
+| Locale  | Package                                              |
+| ------- | ---------------------------------------------------- |
+| English | `dictionary-en`                                      |
+| Russian | `dictionary-ru`                                      |
+| German  | `dictionary-de`                                      |
+| French  | `dictionary-fr`                                      |
+| Spanish | `dictionary-es`                                      |
+| …       | `dictionary-<code>` — see the repo for the full list |
 
-## Events
+You can also host your own `.aff` / `.dic` files and point URLs at them.
 
-```javascript
-// Listen to spell checker events
-editor.on('spellcheck:started', () => {
-  console.log('Spell check started');
-});
+## Connect to the editor
 
-editor.on('spellcheck:completed', (errors) => {
-  console.log('Spell check completed:', errors);
-});
+### Vite / VitePress
 
-editor.on('spellcheck:error-found', (error) => {
-  console.log('Spelling error found:', error);
+`dictionary-en` only exports `index.js` (uses Node `fs`) — do **not** deep-import `index.aff` via the package name (Vite/Node `exports` will fail). Point at the files with `import.meta.url` (or host them yourself):
+
+```ts
+import { Editor, SpellCheckerPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
+
+const enAff = new URL('../node_modules/dictionary-en/index.aff', import.meta.url).href;
+const enDic = new URL('../node_modules/dictionary-en/index.dic', import.meta.url).href;
+// Or: import enAff from './dicts/en.aff?url' after copying the files into your app.
+
+const editor = new Editor(container, {
+  plugins: [
+    SpellCheckerPlugin({
+      dictionaries: {
+        en: { aff: enAff, dic: enDic },
+        // ru: { aff: ruAff, dic: ruDic },
+      },
+      // defaultLocale: 'en', // fallback when editor locale has no entry
+    }),
+  ],
 });
 ```
 
-## Examples
+Allow asset imports in `vite.config.ts` / VitePress `vite` config if needed:
 
-### Basic Spell Checking
-
-```javascript
-// Initialize spell checker
-const spellChecker = new SpellCheckerPlugin({
-  language: 'en',
-  autoCheck: true
+```ts
+export default defineConfig({
+  assetsInclude: ['**/*.aff', '**/*.dic'],
 });
-
-editor.use(spellChecker);
-
-// Check spelling manually
-editor.checkSpelling();
 ```
 
-### Custom Dictionary
+### Static / public folder
 
-```javascript
-// Add custom words
-editor.addToDictionary('on-codemerge');
-editor.addToDictionary('HTMLEditor');
-editor.addToDictionary('plugin');
+Copy files into `public/dictionaries/` and pass paths:
 
-// Ignore words
-editor.ignoreWord('lorem');
-editor.ignoreWord('ipsum');
-```
-
-## Integration Examples
-
-### React Integration
-
-```jsx
-import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, SpellCheckerPlugin } from 'on-codemerge';
-
-function MyEditor() {
-  const editorRef = useRef(null);
-  const editorInstance = useRef(null);
-  const [spellErrors, setSpellErrors] = useState([]);
-
-  useEffect(() => {
-    if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new SpellCheckerPlugin());
-      
-      editorInstance.current.on('spellcheck:completed', (errors) => {
-        setSpellErrors(errors);
-      });
-    }
-    return () => {
-      if (editorInstance.current) editorInstance.current.destroy();
-    };
-  }, []);
-
-  return (
-    <div>
-      <div>Spell errors: {spellErrors.length}</div>
-      <div ref={editorRef} className="editor-container" />
-    </div>
-  );
-}
-```
-
-### Vue Integration
-
-```vue
-<template>
-  <div>
-    <div>Spell errors: {{ spellErrors.length }}</div>
-    <div ref="editorContainer" class="editor-container"></div>
-  </div>
-</template>
-<script>
-import { HTMLEditor, SpellCheckerPlugin } from 'on-codemerge';
-export default {
-  data() { return { editor: null, spellErrors: [] }; },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new SpellCheckerPlugin());
-    this.editor.on('spellcheck:completed', errors => {
-      this.spellErrors = errors;
-    });
+```ts
+SpellCheckerPlugin({
+  dictionaries: {
+    en: {
+      aff: '/dictionaries/en.aff',
+      dic: '/dictionaries/en.dic',
+    },
   },
-  beforeDestroy() { if (this.editor) this.editor.destroy(); }
+});
+```
+
+### Locale matching
+
+The plugin uses the language part of `editor.getLocale()` (`en-US` → `en`). If that key is missing in `dictionaries`, it falls back to `defaultLocale` (default `'en'`), then to the first configured locale.
+
+## Options
+
+```ts
+type SpellDictionaryFiles = { aff: string; dic: string };
+
+type SpellCheckerOptions = {
+  /** locale → URLs to Hunspell .aff / .dic (required) */
+  dictionaries: Record<string, SpellDictionaryFiles>;
+  /** fallback locale key (default: 'en') */
+  defaultLocale?: string;
 };
-</script>
 ```
 
 ## Styling
 
-```css
-.spell-error {
-  background-color: #fee2e2;
-  border-bottom: 2px solid #ef4444;
-  cursor: pointer;
-}
+Misspelled words use the `misspelled` mark; public CSS paints `.misspelled-word` with a red underline. Override in your app if needed.
 
-.spell-error:hover {
-  background-color: #fecaca;
-}
+## Notes
 
-.spell-suggestions {
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  padding: 8px 0;
-  min-width: 200px;
-}
-
-.spell-suggestion {
-  padding: 8px 16px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.spell-suggestion:hover {
-  background-color: #f3f4f6;
-}
-
-.spell-ignore {
-  color: #6b7280;
-  font-style: italic;
-}
-
-.spell-add {
-  color: #3b82f6;
-  font-weight: 500;
-}
-```
-
-## Troubleshooting
-
-1. **Spell checker not working**
-   - Check if language is supported
-   - Verify dictionary files are loaded
-   - Check for JavaScript errors
-   - Ensure plugin is initialized
-
-2. **No suggestions appearing**
-   - Check if word is in dictionary
-   - Verify suggestion algorithm
-   - Check for network issues
-   - Ensure proper word parsing
-
-3. **Performance issues**
-   - Reduce auto-check frequency
-   - Limit text length for checking
-   - Use worker threads for large documents
-   - Optimize dictionary loading
-
-## Browser Support
-
-- Chrome 60+
-- Firefox 55+
-- Safari 12+
-- Edge 79+
-
-## License
-
-MIT License - see LICENSE file for details. 
+- `SpellCheckerPlugin` is **not** included in `createDefaultPlugins()` — configure dictionaries and add it yourself.
+- Code blocks are skipped.
+- Checking is debounced (~280ms) on `docChanged`.

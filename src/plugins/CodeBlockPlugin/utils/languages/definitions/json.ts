@@ -1,11 +1,12 @@
-import { type LanguageDefinition, TokenType } from '../../../types';
+import { TokenType } from '../../../types';
+import type { LanguageDefinition } from '../../../types';
 
 export const jsonDefinition: LanguageDefinition = {
   name: 'json',
   patterns: {
     [TokenType.String]: /^"(?:\\.|[^"\\])*"/,
     [TokenType.Number]: /^-?\d+(?:\.\d+)?(?:[eE][+-]?\d+)?/,
-    [TokenType.Punctuation]: /^[{}\[\],:]/,
+    [TokenType.Punctuation]: /^[{}[\],:]/,
     [TokenType.Boolean]: /^(?:true|false)\b/,
     [TokenType.Null]: /^null\b/,
   },

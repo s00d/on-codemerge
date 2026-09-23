@@ -15,54 +15,41 @@ The Link Plugin provides comprehensive link management capabilities for the on-C
 - **Link Context Menu**: Right-click link options
 - **Link Auto-detection**: Auto-detect URLs in text
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, LinkPlugin } from 'on-codemerge';
+import { Editor, LinkPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new LinkPlugin());
+const editor = new Editor(container, {
+  plugins: [LinkPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['LinkPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Link Methods
+Factory: `LinkPlugin()`.
 
-```javascript
-// Create link
-editor.createLink(url, text, options);
+| Command      |                                |
+| ------------ | ------------------------------ |
+| `insertLink` | `editor.command('insertLink')` |
 
-// Edit link
-editor.editLink(linkElement, newUrl, newText);
+### Keyboard shortcuts
 
-// Remove link
-editor.removeLink(linkElement);
+| Shortcut | Command      |
+| -------- | ------------ |
+| `Mod-k`  | `insertLink` |
 
-// Get link info
-const linkInfo = editor.getLinkInfo(linkElement);
-
-// Validate link
-const isValid = editor.validateLink(url);
-
-// Get all links
-const links = editor.getAllLinks();
-
-// Update link styling
-editor.updateLinkStyle(linkElement, styles);
-```
+> **Note:** No factory options. Command `insertLink` — no `editor.createLink`.
 
 ## Supported Link Types
 
@@ -74,173 +61,19 @@ editor.updateLinkStyle(linkElement, styles);
 - **Anchor**: Internal page links
 - **JavaScript**: JavaScript links (with security)
 
-## Events
-
-```javascript
-// Listen to link events
-editor.on('link:created', (link) => {
-  console.log('Link created:', link);
-});
-
-editor.on('link:edited', (link) => {
-  console.log('Link edited:', link);
-});
-
-editor.on('link:removed', (link) => {
-  console.log('Link removed:', link);
-});
-
-editor.on('link:clicked', (link) => {
-  console.log('Link clicked:', link);
-});
-
-editor.on('link:error', (error) => {
-  console.log('Link error:', error);
-});
-```
-
 ## Examples
 
 ### Basic Link Usage
 
-```javascript
-// Initialize link plugin
-const editor = new HTMLEditor(container);
-editor.use(new LinkPlugin());
-
-// Create a simple link
-editor.createLink('https://example.com', 'Visit Example');
-
-// Create email link
-editor.createLink('mailto:user@example.com', 'Send Email');
-
-// Create phone link
-editor.createLink('tel:+1234567890', 'Call Us');
-```
-
 ### Link Configuration
 
-```javascript
-// Configure link plugin
-const linkPlugin = new LinkPlugin({
-  autoDetect: true,
-  validateLinks: true,
-  openInNewTab: true,
-  trackClicks: true,
-  allowedProtocols: ['http', 'https', 'mailto', 'tel'],
-  securityCheck: true
-});
-
-editor.use(linkPlugin);
-```
-
 ### Advanced Link Usage
-
-```javascript
-// Create link with custom styling
-editor.createLink('https://example.com', 'Custom Link', {
-  target: '_blank',
-  rel: 'noopener noreferrer',
-  className: 'custom-link',
-  title: 'Visit our website'
-});
-
-// Edit existing link
-const linkElement = document.querySelector('a');
-editor.editLink(linkElement, 'https://newurl.com', 'New Link Text');
-
-// Remove link
-editor.removeLink(linkElement);
-```
 
 ## Integration Examples
 
 ### React Integration
 
-```jsx
-import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, LinkPlugin } from 'on-codemerge';
-
-function MyEditor() {
-  const editorRef = useRef(null);
-  const editorInstance = useRef(null);
-  const [links, setLinks] = useState([]);
-
-  useEffect(() => {
-    if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new LinkPlugin());
-      
-      editorInstance.current.on('link:created', (link) => {
-        setLinks(prev => [...prev, link]);
-      });
-      
-      editorInstance.current.on('link:removed', (linkId) => {
-        setLinks(prev => prev.filter(l => l.id !== linkId));
-      });
-      
-      editorInstance.current.on('link:clicked', (link) => {
-        console.log('Link clicked:', link.url);
-      });
-    }
-    return () => {
-      if (editorInstance.current) editorInstance.current.destroy();
-    };
-  }, []);
-
-  const createSampleLink = () => {
-    editorInstance.current.createLink('https://example.com', 'Sample Link');
-  };
-
-  return (
-    <div>
-      <div>Links: {links.length}</div>
-      <button onClick={createSampleLink}>Add Sample Link</button>
-      <div ref={editorRef} className="editor-container" />
-    </div>
-  );
-}
-```
-
 ### Vue Integration
-
-```vue
-<template>
-  <div>
-    <div>Links: {{ links.length }}</div>
-    <button @click="createSampleLink">Add Sample Link</button>
-    <div ref="editorContainer" class="editor-container"></div>
-  </div>
-</template>
-<script>
-import { HTMLEditor, LinkPlugin } from 'on-codemerge';
-export default {
-  data() { return { editor: null, links: [] }; },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new LinkPlugin());
-    
-    this.editor.on('link:created', link => {
-      this.links.push(link);
-    });
-    
-    this.editor.on('link:removed', linkId => {
-      this.links = this.links.filter(l => l.id !== linkId);
-    });
-    
-    this.editor.on('link:clicked', link => {
-      console.log('Link clicked:', link.url);
-    });
-  },
-  methods: {
-    createSampleLink() {
-      this.editor.createLink('https://example.com', 'Sample Link');
-    }
-  },
-  beforeDestroy() { if (this.editor) this.editor.destroy(); }
-};
-</script>
-```
 
 ## Styling
 
@@ -296,7 +129,7 @@ export default {
   color: #374151;
 }
 
-.link-option input[type="checkbox"] {
+.link-option input[type='checkbox'] {
   width: 16px;
   height: 16px;
   accent-color: #3b82f6;

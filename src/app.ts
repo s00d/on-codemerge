@@ -1,43 +1,96 @@
+import './tailwind.css';
 import './index.scss';
-import './public.scss';
+import './public.css';
+import '@on-codemerge/sdk/ui/sdk.scss';
 
-export { HTMLEditor, type EditorOptions } from './core/HTMLEditor';
-export { DOMContext } from './core/DOMContext';
-export { ToolbarPlugin } from './plugins/ToolbarPlugin';
-export { ToolbarDividerPlugin } from './plugins/ToolbarDividerPlugin';
-export { AlignmentPlugin } from './plugins/AlignmentPlugin';
-export { TablePlugin } from './plugins/TablePlugin';
-export { ImagePlugin } from './plugins/ImagePlugin';
-export { BlockPlugin } from './plugins/BlockPlugin';
-export { HTMLViewerPlugin } from './plugins/HTMLViewerPlugin';
-export { CodeBlockPlugin } from './plugins/CodeBlockPlugin';
-export { TemplatesPlugin } from './plugins/TemplatesPlugin';
-export { ExportPlugin } from './plugins/ExportPlugin';
-export { HistoryPlugin } from './plugins/HistoryPlugin';
-export { ChartsPlugin } from './plugins/ChartsPlugin';
-export { ShortcutsPlugin } from './plugins/ShortcutsPlugin';
-export { ColorPlugin } from './plugins/ColorPlugin';
-export { TypographyPlugin } from './plugins/TypographyPlugin';
-export { ListsPlugin } from './plugins/ListsPlugin';
-export { CommentsPlugin } from './plugins/CommentsPlugin';
-export { FootnotesPlugin } from './plugins/FootnotesPlugin';
-export { FooterPlugin } from './plugins/FooterPlugin';
-export { ResponsivePlugin } from './plugins/ResponsivePlugin';
-export { LinkPlugin } from './plugins/LinkPlugin';
-export { VideoPlugin } from './plugins/VideoPlugin';
-export { YouTubeVideoPlugin } from './plugins/YouTubeVideoPlugin';
-export { FileUploadPlugin } from './plugins/FileUploadPlugin';
-export { FontPlugin } from './plugins/FontPlugin';
-export { CollaborationPlugin } from './plugins/CollaborationPlugin';
-export { FormBuilderPlugin } from './plugins/FormBuilderPlugin';
-export { SpellCheckerPlugin } from './plugins/SpellCheckerPlugin';
-export { BlockStylePlugin } from './plugins/BlockStylePlugin';
-export { MathPlugin } from './plugins/MathPlugin';
-export { AIAssistantPlugin } from './plugins/AIAssistantPlugin';
-export { LanguagePlugin } from './plugins/LanguagePlugin';
-export { CalendarPlugin } from './plugins/CalendarPlugin';
-export { TimerPlugin } from './plugins/TimerPlugin';
-export { PDFEmbedPlugin } from './plugins/PDFEmbedPlugin';
-export { MentionsPlugin } from './plugins/MentionsPlugin';
-export { TrackChangesPlugin } from './plugins/TrackChangesPlugin';
-export { AnchorLinkPlugin } from './plugins/AnchorLinkPlugin';
+export { Editor, type EditorOptions } from './editor/Editor';
+export {
+  core,
+  definePlugin,
+  ToolbarPanel,
+  PopupService,
+  ContextMenuService,
+  NotifyService,
+  insertAtomAfter,
+  setMarkAttrs,
+  setBlockAttr,
+  replaceBlockType,
+  wrapInList,
+  withMarkTarget,
+  type Plugin,
+  type PluginDefinition,
+  type EditorAPI,
+  type ToolbarButton,
+  type ToolbarMenuDef,
+  type PopupOptions,
+  type MenuItem,
+} from '@on-codemerge/sdk';
+
+export {
+  createDefaultPlugins,
+  createCorePlugins,
+  ToolbarPlugin,
+  ToolbarDividerPlugin,
+  HistoryPlugin,
+  TypographyPlugin,
+  ColorPlugin,
+  FontPlugin,
+  LinkPlugin,
+  AlignmentPlugin,
+  ListsPlugin,
+  BlockPlugin,
+  BlockStylePlugin,
+  TablePlugin,
+  ImagePlugin,
+  VideoPlugin,
+  YouTubeVideoPlugin,
+  FileUploadPlugin,
+  PDFEmbedPlugin,
+  CodeBlockPlugin,
+  MathPlugin,
+  ChartsPlugin,
+  CalendarPlugin,
+  TimerPlugin,
+  FormBuilderPlugin,
+  CommentsPlugin,
+  MentionsPlugin,
+  FootnotesPlugin,
+  FooterPlugin,
+  CollaborationPlugin,
+  createOpsCollabBinding,
+  ShortcutsPlugin,
+  ExportPlugin,
+  HTMLViewerPlugin,
+  TemplatesPlugin,
+  ResponsivePlugin,
+  LanguagePlugin,
+  SpellCheckerPlugin,
+  AIAssistantPlugin,
+  TrackChangesPlugin,
+  AnchorLinkPlugin,
+} from './plugins';
+
+export type { SpellCheckerOptions, SpellDictionaryFiles } from './plugins';
+
+export {
+  createDoc,
+  createText,
+  createParagraph,
+  createState,
+  insertText,
+  deleteBackward,
+  splitBlock,
+  toggleMark,
+  docToJSON,
+  docFromJSON,
+  createHistory,
+  type DocNode,
+  type JSONDoc,
+  type EditorState,
+  type Command,
+} from '@on-codemerge/kernel';
+
+export { exportHTML, importHTML, exportMarkdown, importMarkdown } from './io';
+export { docToMarkdown, markdownToDoc } from './io/markdown';
+export { sanitizeHTML } from './io/sanitize';
+export { serializeJSON, parseJSON } from './io/json';

@@ -1,197 +1,179 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
-import {
-  createContainer,
-  createKbd,
-  createLi,
-  createSpan,
-  createUl,
-} from '../../../utils/helpers.ts';
+import { PopupController, foreign, h, mount } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+
+type ShortcutRow = { keys: string; description: string; category: string };
+
+function formatShortcut(keys: string): string {
+  const isMac = typeof navigator !== 'undefined' && /mac/i.test(navigator.platform);
+  return keys
+    .split(/[-+]/)
+    .map((part) => {
+      const p = part.trim();
+      const lower = p.toLowerCase();
+      if (lower === 'mod' || lower === 'cmd' || lower === 'meta') {
+        return isMac ? '⌘' : 'Ctrl';
+      }
+      if (lower === 'ctrl' || lower === 'control') {
+        return isMac ? '⌃' : 'Ctrl';
+      }
+      if (lower === 'shift') {
+        return '⇧';
+      }
+      if (lower === 'alt' || lower === 'option') {
+        return isMac ? '⌥' : 'Alt';
+      }
+      if (lower === 'enter' || lower === 'return') {
+        return '↵';
+      }
+      if (lower === 'backspace') {
+        return '⌫';
+      }
+      if (lower === 'delete') {
+        return '⌦';
+      }
+      if (lower === 'escape' || lower === 'esc') {
+        return '⎋';
+      }
+      if (lower === 'arrowup') {
+        return '↑';
+      }
+      if (lower === 'arrowdown') {
+        return '↓';
+      }
+      if (lower === 'arrowleft') {
+        return '←';
+      }
+      if (lower === 'arrowright') {
+        return '→';
+      }
+      return p.length === 1 ? p.toUpperCase() : p;
+    })
+    .join('');
+}
+
+function categoryLabel(raw: string, t: (k: string) => string): string {
+  if (raw === 'Editing') {
+    return t('Editing') || 'Editing';
+  }
+  return raw
+    .replace(/Plugin$/i, '')
+    .replaceAll(/([a-z])([A-Z])/g, '$1 $2')
+    .replace(/^\w/, (c) => c.toUpperCase());
+}
 
 export class ShortcutsMenu {
-  private popup: PopupManager | null = null;
-  private editor: HTMLEditor;
-  private container: HTMLDivElement | null = null;
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
   }
 
-  initialize(editor: HTMLEditor): void {
-    this.popup = new PopupManager(editor, {
-      title: this.editor.t('Keyboard Shortcuts'),
+  private groupRows(filter: string): Record<string, ShortcutRow[]> {
+    const term = filter.toLowerCase().trim();
+    const rows = this.editor.listShortcuts();
+    const groups: Record<string, ShortcutRow[]> = {};
+    for (const row of rows) {
+      if (
+        term &&
+        !row.description.toLowerCase().includes(term) &&
+        !row.keys.toLowerCase().includes(term) &&
+        !row.category.toLowerCase().includes(term)
+      ) {
+        continue;
+      }
+      const cat = categoryLabel(row.category, (k) => this.editor.t(k));
+      (groups[cat] ??= []).push(row);
+    }
+    return groups;
+  }
+
+  private listSpec(filter: string): ViewSpec {
+    const t = (k: string) => this.editor.t(k) || k;
+    const entries = Object.entries(this.groupRows(filter));
+    if (entries.length === 0) {
+      return h('div', { class: 'shortcuts-empty' }, t('No shortcuts found'));
+    }
+    return h(
+      'div',
+      { class: 'shortcuts-grid' },
+      ...entries.map(([category, shortcuts]) =>
+        h('div', { class: 'shortcuts-category', key: category }, [
+          h('div', { class: 'category-header' }, [
+            h('span', { class: 'category-title' }, category),
+            h('span', { class: 'shortcuts-count' }, String(shortcuts.length)),
+          ]),
+          h(
+            'ul',
+            { class: 'shortcuts-list' },
+            ...shortcuts.map((s) =>
+              h('li', { class: 'shortcut-item', key: `${s.keys}-${s.description}` }, [
+                h('span', { class: 'shortcut-description' }, s.description),
+                h('kbd', { class: 'shortcut-key' }, formatShortcut(s.keys)),
+              ])
+            )
+          ),
+        ])
+      )
+    );
+  }
+
+  private content(): ViewSpec {
+    const t = (k: string) => this.editor.t(k) || k;
+    return foreign((host, scope) => {
+      let filter = '';
+      const shell = mount(
+        host,
+        h('div', { class: 'shortcuts-menu-body' }, [
+          h('div', { class: 'shortcuts-search' }, [
+            h('input', {
+              class: 'shortcuts-search-input',
+              attrs: {
+                type: 'search',
+                placeholder: t('shortcuts.searchShortcuts'),
+              },
+              on: {
+                input: (e) => {
+                  filter = (e.target as HTMLInputElement).value;
+                  paintList();
+                },
+              },
+            }),
+          ]),
+          h('div', { class: 'shortcuts-list-host', ref: 'list' }),
+        ])
+      );
+      scope.own(shell);
+
+      let listMount: ReturnType<typeof mount> | null = null;
+      const paintList = () => {
+        const listHost = shell.refs.list;
+        // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+        if (!listHost) {
+          return;
+        }
+        listMount?.destroy();
+        listMount = mount(listHost, this.listSpec(filter));
+      };
+      scope.disposable(() => listMount?.destroy());
+      paintList();
+    });
+  }
+
+  show(): void {
+    this.popups.open({
+      title: this.editor.t('shortcuts.title'),
       className: 'shortcuts-menu',
+      size: 'lg',
       closeOnClickOutside: true,
       items: [
         {
-          type: 'custom',
-          id: 'shortcuts-search',
-          content: () => this.createSearchSection(),
-        },
-        {
-          type: 'custom',
+          type: 'view',
           id: 'shortcuts-content',
-          content: () => this.createContentSection(),
+          view: () => this.content(),
         },
       ],
     });
-  }
-  private createSearchSection(): HTMLElement {
-    const searchSection = createContainer('shortcuts-search');
-
-    const searchInput = document.createElement('input');
-    searchInput.type = 'text';
-    searchInput.placeholder = this.editor.t('Search shortcuts...');
-    searchInput.className = 'shortcuts-search-input';
-
-    const searchIcon = createSpan('search-icon', '🔍');
-    searchSection.appendChild(searchIcon);
-    searchSection.appendChild(searchInput);
-
-    // Обработчик поиска
-    searchInput.addEventListener('input', (event) => {
-      const searchTerm = (event.target as HTMLInputElement).value.toLowerCase();
-      this.filterShortcuts(searchTerm);
-    });
-
-    return searchSection;
-  }
-
-  private createContentSection(): HTMLElement {
-    const contentSection = createContainer('shortcuts-content');
-
-    // Создаем контейнер для отображения шорткатов
-    const shortcutsGrid = createContainer('shortcuts-grid');
-    contentSection.appendChild(shortcutsGrid);
-
-    // Первоначальная отрисовка
-    this.renderShortcuts(shortcutsGrid);
-
-    return contentSection;
-  }
-
-  private renderShortcuts(container: HTMLElement): void {
-    container.innerHTML = '';
-
-    const hotkeysList = this.editor?.getHotkeys();
-    if (!hotkeysList) return;
-
-    // Показываем все шорткаты
-    this.renderAllShortcuts(container, hotkeysList);
-  }
-
-  private renderAllShortcuts(container: HTMLElement, hotkeysList: any): void {
-    Object.entries(hotkeysList).forEach(([category, shortcuts]) => {
-      const categoryContainer = this.renderCategory(category, shortcuts as any[]);
-      container.appendChild(categoryContainer);
-    });
-  }
-
-  private renderCategory(category: string, shortcuts: any[]): HTMLElement {
-    const categoryContainer = createContainer('shortcuts-category');
-
-    const categoryHeader = createContainer('category-header');
-    const categoryTitle = createSpan('category-title', category);
-    const shortcutsCount = createSpan('shortcuts-count', `(${shortcuts.length})`);
-
-    categoryHeader.appendChild(categoryTitle);
-    categoryHeader.appendChild(shortcutsCount);
-    categoryContainer.appendChild(categoryHeader);
-
-    const shortcutsList = createUl('shortcuts-list');
-
-    shortcuts.forEach((shortcut) => {
-      const shortcutItem = this.renderShortcut(shortcut);
-      shortcutsList.appendChild(shortcutItem);
-    });
-
-    categoryContainer.appendChild(shortcutsList);
-    return categoryContainer;
-  }
-
-  private renderShortcut(shortcut: any): HTMLElement {
-    const shortcutItem = createLi('shortcut-item');
-
-    const shortcutInfo = createContainer('shortcut-info');
-    const icon = createSpan('shortcut-icon', shortcut.icon || '⌨️');
-    const description = createSpan('shortcut-description', shortcut.description);
-
-    shortcutInfo.appendChild(icon);
-    shortcutInfo.appendChild(description);
-
-    const shortcutKeys = createContainer('shortcut-keys');
-    const keys = createKbd('shortcut-key', this.formatShortcut(shortcut.keys));
-    shortcutKeys.appendChild(keys);
-
-    shortcutItem.appendChild(shortcutInfo);
-    shortcutItem.appendChild(shortcutKeys);
-
-    return shortcutItem;
-  }
-
-  private formatShortcut(keys: string): string {
-    return keys
-      .replace('Ctrl', '⌃')
-      .replace('Shift', '⇧')
-      .replace('Alt', '⌥')
-      .replace('Enter', '↵')
-      .replace('Backspace', '⌫')
-      .replace('Delete', '⌦')
-      .replace('ArrowUp', '↑')
-      .replace('ArrowDown', '↓')
-      .replace('ArrowLeft', '←')
-      .replace('ArrowRight', '→');
-  }
-
-  private filterShortcuts(searchTerm: string): void {
-    const shortcutsGrid = this.container?.querySelector('.shortcuts-grid');
-    if (!shortcutsGrid) return;
-
-    const shortcutItems = shortcutsGrid.querySelectorAll('.shortcut-item');
-
-    shortcutItems.forEach((item) => {
-      const description =
-        item.querySelector('.shortcut-description')?.textContent?.toLowerCase() || '';
-      const keys = item.querySelector('.shortcut-key')?.textContent?.toLowerCase() || '';
-
-      const matches = description.includes(searchTerm) || keys.includes(searchTerm);
-
-      if (matches) {
-        (item as HTMLElement).style.display = 'flex';
-      } else {
-        (item as HTMLElement).style.display = 'none';
-      }
-    });
-  }
-
-  public show(): void {
-    this.initialize(this.editor);
-
-    // Показываем попап в центре экрана
-    if (this.popup) {
-      this.popup.show();
-
-      // Принудительно центрируем попап и устанавливаем размеры
-      const popupElement = this.editor
-        .getDOMContext()
-        .querySelector('.shortcuts-menu') as HTMLElement;
-      if (popupElement) {
-        popupElement.style.position = 'fixed';
-        popupElement.style.top = '50%';
-        popupElement.style.left = '50%';
-        popupElement.style.transform = 'translate(-50%, -50%)';
-        popupElement.style.zIndex = '9999';
-        popupElement.style.maxHeight = '90vh';
-        popupElement.style.overflowY = 'auto';
-      }
-    }
-  }
-
-  public destroy(): void {
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
-    this.container?.remove();
   }
 }

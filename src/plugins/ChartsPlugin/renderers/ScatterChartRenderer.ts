@@ -1,20 +1,21 @@
 import type { ChartSeries, ChartOptions } from '../types';
 import { BaseChartRenderer } from './BaseChartRenderer';
+import { validateChartData } from '../utils/validation';
 
 export class ScatterChartRenderer extends BaseChartRenderer {
   public render(ctx: CanvasRenderingContext2D, data: ChartSeries[], options: ChartOptions): void {
-    if (!data || data.length === 0) {
+    if (!validateChartData(data)) {
       this.drawNoDataMessage(ctx, options);
       return;
     }
 
-    const orientation = options.orientation || 'vertical';
+    const orientation = options.orientation ?? 'vertical';
     const colors = this.getColors(options);
 
     // Find data ranges
     const allPoints = data.flatMap((series) => series.data);
-    const xMax = Math.max(...allPoints.map((p) => p.x || 0));
-    const yMax = Math.max(...allPoints.map((p) => p.y || 0));
+    const xMax = Math.max(...allPoints.map((p) => p.x ?? 0), 0);
+    const yMax = Math.max(...allPoints.map((p) => p.y ?? 0), 0);
 
     // Draw background
     this.drawBackground(ctx, options);
@@ -25,7 +26,7 @@ export class ScatterChartRenderer extends BaseChartRenderer {
       this.drawAxes(ctx, options, xMax, yMax);
       // Draw points
       data.forEach((series, i) => {
-        const color = series.color || colors[i % colors.length];
+        const color = series.color ?? colors[i % colors.length];
         this.drawPoints(ctx, series, xMax, yMax, color, options);
       });
     } else {
@@ -33,7 +34,7 @@ export class ScatterChartRenderer extends BaseChartRenderer {
       this.drawHorizontalAxes(ctx, options, xMax, yMax);
       // Draw horizontal points
       data.forEach((series, i) => {
-        const color = series.color || colors[i % colors.length];
+        const color = series.color ?? colors[i % colors.length];
         this.drawHorizontalPoints(ctx, series, xMax, yMax, color, options);
       });
     }
@@ -88,13 +89,20 @@ export class ScatterChartRenderer extends BaseChartRenderer {
     color: string,
     options: ChartOptions
   ): void {
-    const { padding } = this.getDimensions(options);
+    const { padding, width, height } = this.getDimensions(options);
+    if (xMax <= 0 || yMax <= 0) {
+      return;
+    }
+    const xScale = width / xMax;
+    const yScale = height / yMax;
 
     series.data.forEach((point) => {
-      if (!point.x || !point.y) return;
+      if (point.x === undefined || point.y === undefined) {
+        return;
+      }
 
-      const x = padding + point.x * xMax;
-      const y = options.height - padding - point.y * yMax;
+      const x = padding + point.x * xScale;
+      const y = options.height - padding - point.y * yScale;
 
       // Draw point
       ctx.beginPath();
@@ -183,11 +191,16 @@ export class ScatterChartRenderer extends BaseChartRenderer {
     options: ChartOptions
   ): void {
     const { padding, width, height } = this.getDimensions(options);
+    if (xMax <= 0 || yMax <= 0) {
+      return;
+    }
     const xScale = height / xMax; // swapped
     const yScale = width / yMax; // swapped
 
     series.data.forEach((point) => {
-      if (!point.x || !point.y) return;
+      if (point.x === undefined || point.y === undefined) {
+        return;
+      }
 
       const x = padding + point.y * xScale; // swapped
       const y = options.height - padding - point.x * yScale; // swapped

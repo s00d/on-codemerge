@@ -1,38 +1,59 @@
-import './style.scss';
-import './public.scss';
+import { definePlugin, withMarkTarget, core } from '@on-codemerge/sdk';
+import { boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '../../icons';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
-import { createContainer } from '../../utils/helpers.ts';
+/** Default mark buttons (B/I/U/S) on the SDK toolbar panel — not chrome owner. */
+export function ToolbarPlugin() {
+  return definePlugin({
+    name: 'toolbar',
+    setup(ctx) {
+      const editor = ctx.editor;
+      const marks: {
+        id: string;
+        icon: string;
+        title: string;
+        mark: string;
+        order: number;
+      }[] = [
+        { id: 'bold', icon: boldIcon, title: 'Bold', mark: 'bold', order: 1 },
+        { id: 'italic', icon: italicIcon, title: 'Italic', mark: 'italic', order: 2 },
+        { id: 'underline', icon: underlineIcon, title: 'Underline', mark: 'underline', order: 3 },
+        {
+          id: 'strike',
+          icon: strikethroughIcon,
+          title: 'Strike',
+          mark: 'strike',
+          order: 4,
+        },
+      ];
+      for (const m of marks) {
+        const hasMark = core.selectionHasMark(m.mark);
+        ctx.toolbar.add({
+          id: m.id,
+          icon: m.icon,
+          title: editor.t(m.title) || m.title,
+          group: 'marks',
+          order: m.order,
+          active: () => hasMark(editor.getState()),
+          onClick: () => {
+            withMarkTarget(editor, () => {
+              editor.run(core.toggleMark(m.mark));
+            });
+          },
+        });
+      }
+      ctx.on('selectionChanged', () => {
+        editor.toolbar.refresh();
+      });
+    },
+  });
+}
 
-export class ToolbarPlugin implements Plugin {
-  name = 'toolbar';
-
-  private toolbar: HTMLElement | null = null;
-  private editor: HTMLEditor | null = null;
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.createToolbar();
-  }
-
-  private createToolbar(): void {
-    this.toolbar = createContainer('editor-toolbar');
-
-    const editorElement = this.editor?.getDOMContext().querySelector('.html-editor');
-    if (editorElement?.parentNode && this.toolbar) {
-      editorElement.parentNode.insertBefore(this.toolbar, editorElement);
-    }
-  }
-
-  destroy(): void {
-    if (this.toolbar) {
-      this.toolbar.remove(); // Удаляем тулбар из DOM
-      this.toolbar = null; // Очищаем ссылку
-    }
-  }
-
-  public getToolbar(): HTMLElement | null {
-    return this.toolbar;
-  }
+/** @deprecated Prefer SDK separators via toolbar `group`. Kept for API compat. */
+export function ToolbarDividerPlugin() {
+  return definePlugin({
+    name: 'toolbar-divider',
+    setup() {
+      /* no-op — separators come from ToolbarPanel group boundaries */
+    },
+  });
 }

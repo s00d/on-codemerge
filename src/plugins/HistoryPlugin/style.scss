@@ -1,43 +1,201 @@
-.history-viewer-modal {
-  @apply max-w-4xl w-full;
-}
+@reference "../../tailwind.css";
 
-.history-item {
-  @apply border-b border-gray-100 last:border-0;
+/* Large history shell — same idea as form-builder-modal */
+.ocm-popup.history-viewer-modal {
+  top: 4%;
+  width: min(100% - 1.5rem, 72rem);
+  height: min(92vh, 52rem);
+  max-height: min(92vh, 52rem);
 
-  &.current {
-    @apply bg-blue-50;
+  .ocm-popup__content {
+    @apply flex min-h-0 flex-1 flex-col gap-0 overflow-hidden px-0 py-0;
   }
 
-  &.selected {
-    @apply bg-gray-100;
+  .ocm-popup__row {
+    @apply min-h-0 flex-1 overflow-hidden;
   }
 
-  .restore-button {
-    @apply opacity-0 transition-opacity;
+  .ocm-popup-view {
+    @apply flex h-full min-h-0 flex-col;
   }
 
-  &:hover .restore-button {
-    @apply opacity-100;
+  .ocm-popup__footer {
+    @apply shrink-0;
   }
 }
 
-.close-button {
-  @apply p-1 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-full transition-colors;
+.hv-shell {
+  @apply flex h-full min-h-0 overflow-hidden;
 }
 
-.diff-view {
-  @apply font-mono text-sm;
+.hv-sidebar {
+  @apply flex w-72 shrink-0 flex-col border-r border-ocm-border bg-ocm-surface-muted/40;
 }
 
-.diff-content {
-  @apply whitespace-pre-wrap break-all;
+.hv-sidebar__head {
+  @apply flex shrink-0 items-baseline justify-between gap-2 border-b border-ocm-border px-4 py-3;
 }
 
-.diff-add {
-  @apply bg-green-100 text-green-800 px-1 rounded;
+.hv-sidebar__title {
+  @apply text-sm font-semibold tracking-tight text-ocm-text;
 }
 
-.diff-remove {
-  @apply bg-red-100 text-red-800 px-1 rounded line-through;
+.hv-sidebar__count {
+  @apply text-[11px] tabular-nums text-ocm-text-muted;
+}
+
+.hv-timeline {
+  @apply min-h-0 flex-1 overflow-y-auto px-2 py-2;
+  scrollbar-gutter: stable;
+}
+
+.hv-item {
+  @apply relative mb-0.5 flex w-full cursor-pointer gap-2.5 rounded-xl border border-transparent px-2 py-2.5 text-left transition-colors;
+
+  &:hover {
+    @apply bg-ocm-surface;
+  }
+
+  &.is-selected {
+    @apply border-ocm-border bg-ocm-surface shadow-sm;
+  }
+
+  &.is-current .hv-item__dot {
+    @apply bg-ocm-accent ring-4 ring-ocm-accent/20;
+  }
+}
+
+.hv-item__rail {
+  @apply relative flex w-3 shrink-0 justify-center pt-1.5;
+}
+
+.hv-item__dot {
+  @apply size-2.5 rounded-full bg-ocm-border;
+}
+
+.hv-item__body {
+  @apply min-w-0 flex-1;
+}
+
+.hv-item__row {
+  @apply flex items-center gap-2;
+}
+
+.hv-item__title {
+  @apply truncate text-sm font-medium text-ocm-text;
+}
+
+.hv-item__meta {
+  @apply mt-0.5 flex flex-wrap items-center gap-x-1.5 text-[11px] text-ocm-text-muted;
+}
+
+.hv-item__sep {
+  @apply text-ocm-border;
+}
+
+.hv-badge {
+  @apply shrink-0 rounded-md bg-ocm-accent-soft px-1.5 py-0.5 text-[10px] font-semibold tracking-wide text-ocm-accent uppercase;
+}
+
+.hv-main {
+  @apply flex min-h-0 min-w-0 flex-1 flex-col bg-ocm-surface;
+}
+
+.hv-detail {
+  @apply flex h-full min-h-0 flex-col;
+}
+
+.hv-detail__head {
+  @apply flex shrink-0 flex-wrap items-start justify-between gap-3 border-b border-ocm-border px-5 py-4;
+}
+
+.hv-detail__title {
+  @apply text-base font-semibold tracking-tight text-ocm-text;
+}
+
+.hv-detail__sub {
+  @apply mt-1 flex flex-wrap items-center gap-2 text-xs text-ocm-text-muted;
+}
+
+.hv-stats {
+  @apply flex flex-wrap items-center gap-2;
+}
+
+.hv-stat {
+  @apply rounded-lg px-2 py-1 text-xs font-medium tabular-nums;
+
+  &--add {
+    @apply bg-emerald-50 text-emerald-700;
+  }
+
+  &--remove {
+    @apply bg-rose-50 text-rose-700;
+  }
+
+  &--muted {
+    @apply bg-ocm-surface-muted text-ocm-text-muted;
+  }
+}
+
+html.dark {
+  .hv-stat--add {
+    @apply bg-emerald-950/50 text-emerald-300;
+  }
+
+  .hv-stat--remove {
+    @apply bg-rose-950/50 text-rose-300;
+  }
+}
+
+.hv-diff {
+  @apply flex min-h-0 flex-1 flex-col gap-2 overflow-hidden px-5 py-4;
+}
+
+.hv-diff__label {
+  @apply shrink-0 text-[11px] font-semibold tracking-wide text-ocm-text-muted uppercase;
+}
+
+.hv-diff__content {
+  @apply min-h-0 flex-1 overflow-auto rounded-xl border border-ocm-border bg-ocm-surface-muted/30 p-4 font-mono text-[13px] leading-relaxed break-words whitespace-pre-wrap text-ocm-text;
+  scrollbar-gutter: stable;
+}
+
+.hv-diff__add {
+  @apply rounded-sm bg-emerald-100 text-emerald-900;
+}
+
+.hv-diff__remove {
+  @apply rounded-sm bg-rose-100 text-rose-900 line-through;
+}
+
+html.dark {
+  .hv-diff__add {
+    @apply bg-emerald-950 text-emerald-200;
+  }
+
+  .hv-diff__remove {
+    @apply bg-rose-950 text-rose-200;
+  }
+}
+
+.hv-empty {
+  @apply flex flex-1 items-center justify-center p-8 text-sm text-ocm-text-muted;
+}
+
+@media (max-width: 800px) {
+  .ocm-popup.history-viewer-modal {
+    top: 0;
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    border-radius: 0;
+  }
+
+  .hv-shell {
+    @apply flex-col;
+  }
+
+  .hv-sidebar {
+    @apply h-44 w-full border-r-0 border-b;
+  }
 }

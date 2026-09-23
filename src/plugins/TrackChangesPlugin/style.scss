@@ -1,4 +1,11 @@
-.tracked-insert {
-  background: #ecfccb;
-  transition: background 0.6s ease;
+@reference "../../tailwind.css";
+
+.tracked-insert,
+[data-mark='insertion'] {
+  @apply bg-lime-100 transition-colors duration-500 ease-in-out;
+}
+
+.tracked-delete,
+[data-mark='deletion'] {
+  @apply bg-red-200 line-through text-red-800;
 }

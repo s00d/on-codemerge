@@ -1,618 +1,315 @@
 import './style.scss';
-import './public.scss';
-
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { tableIcon, lazyTableIcon } from '../../icons';
+import { definePlugin, core } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
 import { TablePopup } from './components/TablePopup';
-import { TableContextMenu } from './components/TableContextMenu';
-import { TableEditor } from './components/TableEditor';
-import { CellFormatter } from './components/CellFormatter';
-import { TableExportService } from './services/TableExportService';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { tableIcon } from '../../icons';
-import { Resizer } from '../../utils/Resizer.ts';
-import { ExportTableCommand } from './commands/ExportTableCommand';
-import { ImportTableCommand } from './commands/ImportTableCommand';
-import { FormatCellCommand } from './commands/FormatCellCommand';
-import { ShowTablePropertiesCommand } from './commands/ShowTablePropertiesCommand';
-import { SortTableCommand } from './commands/SortTableCommand';
-import { ResizeColumnsCommand } from './commands/ResizeColumnsCommand';
-import { DeleteCellContentCommand } from './commands/DeleteCellContentCommand';
-import { CopyCellCommand } from './commands/CopyCellCommand';
-import { PasteCellCommand } from './commands/PasteCellCommand';
-import { CutCellCommand } from './commands/CutCellCommand';
-import { SelectAllCommand } from './commands/SelectAllCommand';
-import { LazyTableModal } from './components/LazyTableModal';
-import { EditLazyTableCommand } from './commands/EditLazyTableCommand';
+import { buildTableContextMenu } from './components/tableContextMenu';
+import {
+  addColumn,
+  addHeaderRow,
+  addRow,
+  clearCell,
+  clearTable,
+  deleteColumn,
+  deleteRow,
+  deleteTable,
+  findTablePath,
+  insertTableCommand,
+  mergeCellsHorizontal,
+  mergeCellsVertical,
+  removeHeaderRow,
+  setTableAttr,
+  splitCellHorizontal,
+} from './tableOps';
+import type { LazyTableConfig } from './lazyTable';
+import {
+  fetchLazyMatrix,
+  fillTableFromMatrix,
+  insertLazyTableShell,
+  readLazyConfigFromTable,
+} from './lazyTable';
 
-// Экспортируем новые команды для использования в других частях приложения
-export { EditLazyTableCommand } from './commands/EditLazyTableCommand';
-export { ImportTableFromHTMLCommand } from './commands/ImportTableFromHTMLCommand';
-export { LazyTableModal } from './components/LazyTableModal';
+const lazyKey = (id: string | undefined, url: string, index: number) => `${id ?? index}:${url}`;
 
-export class TablePlugin implements Plugin {
-  name = 'table';
-  hotkeys = [
-    { keys: 'Ctrl+Shift+T', description: 'Insert table', command: 'insert-table', icon: '📊' },
-    {
-      keys: 'Ctrl+Shift+J',
-      description: 'Insert lazy table',
-      command: 'insert-lazy-table',
-      icon: '📊⏳',
-    },
-    { keys: 'Ctrl+L', description: 'Edit lazy table', command: 'edit-lazy-table', icon: '🔄' },
-    {
-      keys: 'Ctrl+Shift+Z',
-      description: 'Import from HTML',
-      command: 'import-from-html',
-      icon: '🌐',
-    },
-    { keys: 'Ctrl+Shift+E', description: 'Export table', command: 'export-table', icon: '📤' },
-    { keys: 'Ctrl+Shift+I', description: 'Import table', command: 'import-table', icon: '📥' },
-    { keys: 'Alt+Shift+F', description: 'Format cells', command: 'format-cells', icon: '🎨' },
-    {
-      keys: 'Ctrl+Shift+P',
-      description: 'Table properties',
-      command: 'table-properties',
-      icon: '⚙️',
-    },
-    { keys: 'Alt+Shift+S', description: 'Sort table', command: 'sort-table', icon: '📈' },
-    { keys: 'Ctrl+Shift+R', description: 'Resize columns', command: 'resize-columns', icon: '📏' },
-    {
-      keys: 'Delete',
-      description: 'Delete selected cells',
-      command: 'delete-selected-cells',
-      icon: '🗑️',
-    },
-    {
-      keys: 'Backspace',
-      description: 'Delete selected cells',
-      command: 'delete-selected-cells',
-      icon: '🗑️',
-    },
-    {
-      keys: 'Alt+Shift+C',
-      description: 'Copy selected cells',
-      command: 'copy-selected-cells',
-      icon: '📋',
-    },
-    { keys: 'Ctrl+Shift+V', description: 'Paste cells', command: 'paste-cells', icon: '📋' },
-    {
-      keys: 'Ctrl+Shift+X',
-      description: 'Cut selected cells',
-      command: 'cut-selected-cells',
-      icon: '✂️',
-    },
-    {
-      keys: 'Ctrl+Shift+A',
-      description: 'Select all cells',
-      command: 'select-all-cells',
-      icon: '☑️',
-    },
-  ];
-  private editor: HTMLEditor | null = null;
-  private popup: TablePopup | null = null;
-  private contextMenu: TableContextMenu | null = null;
-  private tableEditor: TableEditor | null = null;
-  private cellFormatter: CellFormatter | null = null;
-  private exportService: TableExportService | null = null;
-  private currentResizer: Resizer | null = null;
-  private selectedCells: HTMLElement[] = [];
-  private toolbarButton: HTMLElement | null = null;
-
-  constructor() {}
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.popup = new TablePopup(editor);
-    this.contextMenu = new TableContextMenu(editor);
-    this.tableEditor = new TableEditor(editor);
-    this.cellFormatter = new CellFormatter(editor);
-    this.exportService = new TableExportService();
-
-    this.addToolbarButton();
-    this.setupTableEvents();
-    this.setupKeyboardShortcuts();
-
-    this.editor.on('table', () => {
-      // Сохраняем позицию курсора перед открытием popup
-      const savedPosition = this.editor?.saveCursorPosition();
-      this.popup?.show((options) => {
-        // Восстанавливаем позицию курсора
-        if (savedPosition) {
-          this.editor?.restoreCursorPosition(savedPosition);
-        }
-        this.insertTable(options);
-      });
-    });
+async function applyLazyLoad(editor: EditorAPI, config: LazyTableConfig): Promise<boolean> {
+  try {
+    const doc = editor.getJSON().doc;
+    const tp = findTablePath(doc, editor.getSelection().anchor.path);
+    const tableId = tp ? core.getNodeAt(doc, tp)?.id : undefined;
+    const { matrix, hasHeader } = await fetchLazyMatrix(config);
+    const ok = editor.run(fillTableFromMatrix(matrix, hasHeader, tableId));
+    if (!ok) {
+      editor.notify(editor.t('table.noTableSelected'));
+      return false;
+    }
+    editor.run(setTableAttr('lazyUrl', config.url));
+    editor.run(setTableAttr('lazyFormat', config.format === 'csv' ? 'csv' : 'json'));
+    editor.run(setTableAttr('lazyHeaders', config.headers !== false));
+    editor.run(setTableAttr('lazyDelimiter', config.delimiter ?? ','));
+    editor.notify(editor.t('table.lazyTableLoaded'));
+    return true;
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    editor.notify(msg);
+    return false;
   }
+}
 
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      const button = createToolbarButton({
-        icon: tableIcon,
-        title: this.editor?.t('Insert Table'),
-        onClick: () => {
-          // Сохраняем позицию курсора перед открытием popup
-          const savedPosition = this.editor?.saveCursorPosition();
-          this.popup?.show((options) => {
-            // Восстанавливаем позицию курсора
-            if (savedPosition) {
-              this.editor?.restoreCursorPosition(savedPosition);
+function openLazyPopup(
+  editor: EditorAPI,
+  mode: 'insert' | 'edit',
+  initial: Partial<LazyTableConfig> = {}
+): void {
+  editor.ui.popup.open({
+    title: mode === 'insert' ? editor.t('table.lazyTable') : editor.t('table.editLazy'),
+    items: [
+      { type: 'url', id: 'url', label: editor.t('common.dataUrl'), value: initial.url ?? '' },
+      {
+        type: 'list',
+        id: 'format',
+        label: editor.t('common.format'),
+        options: ['json', 'csv'],
+        value: initial.format ?? 'json',
+      },
+      {
+        type: 'checkbox',
+        id: 'header',
+        label: editor.t('table.includeHeaderRow'),
+        value: initial.headers !== false,
+      },
+      {
+        type: 'input',
+        id: 'delimiter',
+        label: editor.t('table.csvDelimiter2'),
+        value: initial.delimiter ?? ',',
+      },
+    ],
+    buttons: [
+      {
+        label: editor.t('common.load'),
+        variant: 'primary',
+        onClick: (v) => {
+          const config: LazyTableConfig = {
+            url: String(v.url ?? '').trim(),
+            format: v.format === 'csv' ? 'csv' : 'json',
+            headers: Boolean(v.header),
+            delimiter: String(v.delimiter ?? ',') || ',',
+          };
+          if (!config.url) {
+            editor.notify(editor.t('common.dataUrlIsRequired'));
+            return true;
+          }
+          void (async () => {
+            if (mode === 'insert') {
+              editor.run(insertLazyTableShell(config));
+              // Autoload on docChanged will fetch; avoid double applyLazyLoad.
+              return;
             }
-            this.insertTable(options);
+            await applyLazyLoad(editor, config);
+          })();
+          return true;
+        },
+      },
+    ],
+  });
+}
+
+export function TablePlugin() {
+  let openInsertLazy: (() => void) | null = null;
+  let openEditLazy: (() => void) | null = null;
+  let refreshLazy: (() => void) | null = null;
+
+  return definePlugin({
+    commands: {
+      insertTable: insertTableCommand(3, 3),
+      deleteTable,
+      addRowBelow: addRow('below'),
+      addRowAbove: addRow('above'),
+      addColumnLeft: addColumn('left'),
+      addColumnRight: addColumn('right'),
+      deleteRow,
+      deleteColumn,
+      clearCell,
+      clearTable,
+      addHeaderRow,
+      removeHeaderRow,
+      mergeCellsHorizontal: mergeCellsHorizontal(),
+      mergeCellsVertical: mergeCellsVertical(),
+      splitCell: splitCellHorizontal(),
+      insertLazyTable: () => {
+        openInsertLazy?.();
+        return null;
+      },
+      editLazyTable: () => {
+        openEditLazy?.();
+        return null;
+      },
+      fillTable: () => {
+        refreshLazy?.();
+        return null;
+      },
+    },
+    hotkeys: [
+      { keys: 'Mod-Shift-t', command: 'insertTable', description: 'Insert table' },
+      { keys: 'Mod-Shift-u', command: 'insertLazyTable', description: 'Insert lazy table' },
+      { keys: 'Mod-Alt-k', command: 'editLazyTable', description: 'Edit lazy table' },
+    ],
+    name: 'table',
+    nodes: [
+      {
+        name: 'table',
+        group: 'block',
+        attrs: {
+          cols: 2,
+          hasHeader: false,
+          tableStyle: 'default',
+          responsive: false,
+          autofit: false,
+          lazyUrl: '',
+          lazyFormat: 'json',
+          lazyHeaders: true,
+          lazyDelimiter: ',',
+        },
+      },
+      { name: 'tableRow', group: 'block' },
+      { name: 'tableCell', group: 'block' },
+    ],
+    setup(ctx) {
+      const editor = ctx.editor;
+      const popup = new TablePopup(editor, ctx.scope);
+      const loadedKeys = new Set<string>();
+      const inFlight = new Set<string>();
+
+      openInsertLazy = () => {
+        openLazyPopup(editor, 'insert');
+      };
+      openEditLazy = () => {
+        const tp = findTablePath(editor.getJSON().doc, editor.getSelection().anchor.path);
+        if (!tp) {
+          editor.notify(editor.t('table.noTableSelected'));
+          return;
+        }
+        const table = core.getNodeAt(editor.getJSON().doc, tp);
+        const cfg = readLazyConfigFromTable(table) ?? {
+          url: '',
+          format: 'json' as const,
+          headers: true,
+          delimiter: ',',
+        };
+        openLazyPopup(editor, 'edit', cfg);
+      };
+      refreshLazy = () => {
+        const tp = findTablePath(editor.getJSON().doc, editor.getSelection().anchor.path);
+        if (!tp) {
+          editor.notify(editor.t('table.noTableSelected'));
+          return;
+        }
+        const table = core.getNodeAt(editor.getJSON().doc, tp);
+        const cfg = readLazyConfigFromTable(table);
+        if (!cfg) {
+          openEditLazy?.();
+          return;
+        }
+        const key = lazyKey(table.id, cfg.url, tp[0] ?? 0);
+        loadedKeys.delete(key);
+        void applyLazyLoad(editor, cfg).then((ok) => {
+          if (ok) {
+            loadedKeys.add(key);
+          }
+          return ok;
+        });
+      };
+
+      ctx.toolbar.add({
+        id: 'table',
+        icon: tableIcon,
+        title: editor.t('table.insert'),
+        menu: 'insert',
+        order: 40,
+        onClick: () => {
+          popup.show((options) => {
+            editor.run(insertTableCommand(options.rows, options.cols, options.hasHeader));
           });
         },
       });
-
-      // Сохраняем ссылку на кнопку
-      this.toolbarButton = button;
-
-      toolbar.appendChild(button);
-    }
-  }
-
-  private setupTableEvents(): void {
-    if (!this.editor) return;
-
-    const container = this.editor.getContainer();
-    if (!container) return;
-
-    container.addEventListener('click', this.handleClick);
-    container.addEventListener('contextmenu', this.handleContextMenu);
-    container.addEventListener('keydown', this.handleKeydown);
-    container.addEventListener('mousedown', this.handleMouseDown);
-    container.addEventListener('mouseover', this.handleMouseOver);
-    container.addEventListener('mouseout', this.handleMouseOut);
-  }
-
-  private setupKeyboardShortcuts(): void {
-    if (!this.editor) return;
-
-    this.editor.on('insert-table', () => {
-      // Сохраняем позицию курсора перед открытием popup
-      const savedPosition = this.editor?.saveCursorPosition();
-      this.popup?.show((options) => {
-        // Восстанавливаем позицию курсора
-        if (savedPosition) {
-          this.editor?.restoreCursorPosition(savedPosition);
-        }
-        this.insertTable(options);
-      });
-    });
-
-    this.editor.on('insert-lazy-table', () => {
-      // Сохраняем позицию курсора перед открытием модального окна
-      const savedPosition = this.editor?.saveCursorPosition();
-      if (savedPosition) {
-        this.editor?.restoreCursorPosition(savedPosition);
-      }
-
-      // Получаем текущий диапазон после восстановления позиции
-      const selection = this.editor?.getTextFormatter()?.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        new LazyTableModal(this.editor!, range).show();
-      }
-    });
-
-    this.editor.on('edit-lazy-table', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor && table.classList.contains('lazy-table')) {
-        const command = new EditLazyTableCommand(this.editor, table);
-        command.execute();
-      }
-    });
-
-    this.editor.on('import-from-html', () => {
-      // Сохраняем позицию курсора перед открытием модального окна
-      const savedPosition = this.editor?.saveCursorPosition();
-      if (savedPosition) {
-        this.editor?.restoreCursorPosition(savedPosition);
-      }
-
-      // Получаем текущий диапазон после восстановления позиции
-      const selection = this.editor?.getTextFormatter()?.getSelection();
-      if (selection && selection.rangeCount > 0) {
-        const range = selection.getRangeAt(0);
-        const modal = new LazyTableModal(this.editor!, range);
-        modal.show();
-      }
-    });
-
-    this.editor.on('export-table', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const command = new ExportTableCommand(this.editor, table);
-        command.execute();
-      }
-    });
-
-    this.editor.on('import-table', () => {
-      if (this.editor) {
-        const command = new ImportTableCommand(this.editor);
-        command.execute();
-      }
-    });
-
-    this.editor.on('format-cells', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const selectedCells = table.querySelectorAll(
-          '.table-cell.selected, .table-header-cell.selected'
-        );
-        if (selectedCells.length > 0) {
-          const command = new FormatCellCommand(this.editor, selectedCells[0] as HTMLElement);
-          command.execute();
-        }
-      }
-    });
-
-    this.editor.on('table-properties', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const command = new ShowTablePropertiesCommand(this.editor, table);
-        command.execute();
-      }
-    });
-
-    this.editor.on('sort-table', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const command = new SortTableCommand(this.editor, table);
-        command.execute();
-      }
-    });
-
-    this.editor.on('resize-columns', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const command = new ResizeColumnsCommand(this.editor, table);
-        command.execute();
-      }
-    });
-
-    this.editor.on('delete-selected-cells', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const selectedCells = table.querySelectorAll(
-          '.table-cell.selected, .table-header-cell.selected'
-        );
-        if (selectedCells.length > 0) {
-          const command = new DeleteCellContentCommand(
-            this.editor,
-            selectedCells[0] as HTMLElement
-          );
-          command.execute();
-        }
-      }
-    });
-
-    this.editor.on('copy-selected-cells', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const selectedCells = table.querySelectorAll(
-          '.table-cell.selected, .table-header-cell.selected'
-        );
-        if (selectedCells.length > 0) {
-          const command = new CopyCellCommand(this.editor, selectedCells[0] as HTMLElement);
-          command.execute();
-        }
-      }
-    });
-
-    this.editor.on('paste-cells', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const selectedCells = table.querySelectorAll(
-          '.table-cell.selected, .table-header-cell.selected'
-        );
-        if (selectedCells.length > 0) {
-          const command = new PasteCellCommand(this.editor, selectedCells[0] as HTMLElement);
-          command.execute();
-        }
-      }
-    });
-
-    this.editor.on('cut-selected-cells', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const selectedCells = table.querySelectorAll(
-          '.table-cell.selected, .table-header-cell.selected'
-        );
-        if (selectedCells.length > 0) {
-          const command = new CutCellCommand(this.editor, selectedCells[0] as HTMLElement);
-          command.execute();
-        }
-      }
-    });
-
-    this.editor.on('select-all-cells', () => {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table && this.editor) {
-        const command = new SelectAllCommand(this.editor, table);
-        command.execute();
-      }
-    });
-  }
-
-  private handleContextMenu = (e: Event): void => {
-    const cell = (e.target as Element).closest('.table-cell, .table-header-cell');
-    if (cell instanceof HTMLElement) {
-      e.preventDefault();
-
-      // Получаем координаты мыши с учётом прокрутки страницы
-      const mouseX = (e as MouseEvent).clientX;
-      const mouseY = (e as MouseEvent).clientY;
-
-      // Показываем контекстное меню с учётом скорректированных координат
-      this.contextMenu?.show(cell, mouseX, mouseY);
-    }
-  };
-
-  private handleClick = (e: Event): void => {
-    const table = (e.target as Element).closest('.html-editor-table');
-    if (table instanceof HTMLElement) {
-      e.preventDefault();
-      this.editor?.getSelector()?.saveTable(table);
-    }
-
-    const cell = (e.target as Element).closest(
-      '.table-cell, .table-header-cell'
-    ) as HTMLElement | null;
-    if (!cell) return;
-
-    if (cell instanceof HTMLElement) {
-      e.preventDefault();
-      this.editor?.getSelector()?.selectCell(cell);
-
-      // Очищаем предыдущий resizer
-      if (this.currentResizer) {
-        this.currentResizer.destroy();
-        this.currentResizer = null;
-      }
-
-      // Создаем новый resizer для ячейки
-      this.currentResizer = new Resizer(cell, {
-        handleSize: 10,
-        handleColor: 'blue',
-        onResizeStart: () => this.editor?.disableObserver(),
-        onResize: (width, height) => {
-          cell.style.width = `${width}px`;
-          cell.style.height = `${height}px`;
+      ctx.toolbar.add({
+        id: 'lazy-table',
+        icon: lazyTableIcon,
+        title: editor.t('table.lazyTable'),
+        menu: 'insert',
+        order: 41,
+        onClick: () => {
+          openInsertLazy?.();
         },
-        onResizeEnd: () => this.editor?.enableObserver(),
       });
-    }
-  };
 
-  private handleMouseDown = (e: MouseEvent): void => {
-    const cell = (e.target as Element).closest(
-      '.table-cell, .table-header-cell'
-    ) as HTMLElement | null;
-    if (!cell) return;
-
-    if (e.shiftKey) {
-      // Множественный выбор с Shift
-      e.preventDefault();
-      this.addToSelection(cell);
-    } else {
-      // Одиночный выбор
-      this.clearSelection();
-      this.addToSelection(cell);
-    }
-  };
-
-  private handleMouseOver = (e: Event): void => {
-    const cell = (e.target as Element).closest(
-      '.table-cell, .table-header-cell'
-    ) as HTMLElement | null;
-    if (!cell) return;
-
-    // Добавляем визуальную обратную связь при наведении
-    cell.classList.add('hover');
-  };
-
-  private handleMouseOut = (e: Event): void => {
-    const cell = (e.target as Element).closest(
-      '.table-cell, .table-header-cell'
-    ) as HTMLElement | null;
-    if (!cell) return;
-
-    // Убираем визуальную обратную связь
-    cell.classList.remove('hover');
-  };
-
-  private handleKeydown = (e: KeyboardEvent): void => {
-    if (e.key === 'Delete') {
-      const table = this.editor?.getSelector()?.restoreTable();
-      if (table) {
-        table.remove();
-        this.editor?.getSelector()?.clearTable();
-      }
-    }
-
-    // Навигация по таблице с клавиатуры
-    if (
-      e.target instanceof HTMLElement &&
-      (e.target.classList.contains('table-cell') ||
-        e.target.classList.contains('table-header-cell'))
-    ) {
-      this.handleTableNavigation(e);
-    }
-  };
-
-  private handleTableNavigation(e: KeyboardEvent): void {
-    const cell = e.target as HTMLElement;
-    const table = cell.closest('.html-editor-table') as HTMLElement;
-    if (!table) return;
-
-    const currentRow = cell.parentElement as HTMLElement;
-    const currentCol = Array.from(
-      currentRow.querySelectorAll('.table-cell, .table-header-cell')
-    ).indexOf(cell);
-
-    let nextCell: HTMLElement | null = null;
-
-    switch (e.key) {
-      case 'ArrowUp':
-        if (currentRow.previousElementSibling) {
-          const prevRow = currentRow.previousElementSibling as HTMLElement;
-          const cells = prevRow.querySelectorAll('.table-cell, .table-header-cell');
-          nextCell = (cells[currentCol] as HTMLElement) || null;
+      ctx.onDom('host', 'contextmenu', (e) => {
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
         }
-        break;
-      case 'ArrowDown':
-        if (currentRow.nextElementSibling) {
-          const nextRow = currentRow.nextElementSibling as HTMLElement;
-          const cells = nextRow.querySelectorAll('.table-cell, .table-header-cell');
-          nextCell = (cells[currentCol] as HTMLElement) || null;
+        if (
+          !target.closest('[data-ocm-type="table"]') &&
+          !target.closest('table.html-editor-table') &&
+          !target.closest('.html-editor-table')
+        ) {
+          return;
         }
-        break;
-      case 'ArrowLeft':
-        const leftCells = currentRow.querySelectorAll('.table-cell, .table-header-cell');
-        nextCell = (leftCells[currentCol - 1] as HTMLElement) || null;
-        break;
-      case 'ArrowRight':
-        const rightCells = currentRow.querySelectorAll('.table-cell, .table-header-cell');
-        nextCell = (rightCells[currentCol + 1] as HTMLElement) || null;
-        break;
-      case 'Tab':
         e.preventDefault();
-        if (e.shiftKey) {
-          const leftCells = currentRow.querySelectorAll('.table-cell, .table-header-cell');
-          nextCell = (leftCells[currentCol - 1] as HTMLElement) || null;
-        } else {
-          const rightCells = currentRow.querySelectorAll('.table-cell, .table-header-cell');
-          nextCell = (rightCells[currentCol + 1] as HTMLElement) || null;
+        editor.ui.menu.open(
+          buildTableContextMenu(editor, {
+            onLazyInsert: () => openInsertLazy?.(),
+            onLazyEdit: () => openEditLazy?.(),
+            onLazyRefresh: () => refreshLazy?.(),
+          }),
+          e.clientX,
+          e.clientY
+        );
+      });
+
+      // Auto-fetch once per table id+url (HTML import / setJSON / insert shell).
+      const tryAutoload = () => {
+        const doc = editor.getJSON().doc;
+        for (const [i, block] of (doc.content ?? []).entries()) {
+          if (block.type !== 'table') {
+            continue;
+          }
+          const cfg = readLazyConfigFromTable(block);
+          if (!cfg) {
+            continue;
+          }
+          const key = lazyKey(block.id, cfg.url, i);
+          if (loadedKeys.has(key) || inFlight.has(key)) {
+            continue;
+          }
+          inFlight.add(key);
+          let tableId = block.id;
+          if (!tableId) {
+            tableId = `table_${Date.now()}_${i}`;
+            const stamped = { ...core.cloneNode(block), id: tableId };
+            editor.run(() => [
+              { type: 'remove_node', path: [], index: i },
+              { type: 'insert_node', path: [], index: i, node: stamped },
+            ]);
+          }
+          void (async () => {
+            try {
+              const { matrix, hasHeader } = await fetchLazyMatrix(cfg);
+              if (editor.run(fillTableFromMatrix(matrix, hasHeader, tableId))) {
+                loadedKeys.add(key);
+              }
+            } catch {
+              /* leave placeholder; user can Edit Lazy Table */
+            } finally {
+              inFlight.delete(key);
+            }
+          })();
         }
-        break;
-    }
-
-    if (nextCell) {
-      e.preventDefault();
-      nextCell.focus();
-      this.editor?.getSelector()?.selectCell(nextCell);
-    }
-  }
-
-  private addToSelection(cell: HTMLElement): void {
-    if (!this.selectedCells.includes(cell)) {
-      this.selectedCells.push(cell);
-      cell.classList.add('selected');
-    }
-  }
-
-  private clearSelection(): void {
-    this.selectedCells.forEach((cell) => cell.classList.remove('selected'));
-    this.selectedCells = [];
-  }
-
-  private insertTable(options: { rows: number; cols: number; hasHeader: boolean }): void {
-    if (!this.editor) return;
-
-    const table = document.createElement('div');
-    table.className = 'html-editor-table table-modern';
-
-    // Создаем заголовки если нужно
-    if (options.hasHeader) {
-      const headerRow = document.createElement('div');
-      headerRow.className = 'table-header-row';
-
-      for (let i = 0; i < options.cols; i++) {
-        const headerCell = document.createElement('div');
-        headerCell.className = 'table-header-cell';
-        headerCell.textContent = `Header ${i + 1}`;
-        headerCell.contentEditable = 'true';
-        headerRow.appendChild(headerCell);
-      }
-
-      table.appendChild(headerRow);
-    }
-
-    // Создаем строки данных
-    for (let i = 0; i < options.rows; i++) {
-      const row = document.createElement('div');
-      row.className = 'table-row';
-
-      for (let j = 0; j < options.cols; j++) {
-        const cell = document.createElement('div');
-        cell.className = 'table-cell';
-        cell.textContent = `Cell ${i + 1}-${j + 1}`;
-        cell.contentEditable = 'true';
-        row.appendChild(cell);
-      }
-
-      table.appendChild(row);
-    }
-
-    // Вставляем таблицу в редактор используя встроенный метод
-    this.editor.insertContent(table);
-
-    // Сохраняем таблицу в селекторе
-    this.editor.getSelector()?.saveTable(table);
-  }
-
-  destroy(): void {
-    if (!this.editor) return;
-
-    // Удаляем кнопку из тулбара
-    if (this.toolbarButton) {
-      this.toolbarButton.remove();
-      this.toolbarButton = null;
-    }
-
-    const container = this.editor.getContainer();
-    if (container) {
-      // Удаляем все обработчики событий
-      container.removeEventListener('click', this.handleClick);
-      container.removeEventListener('contextmenu', this.handleContextMenu);
-      container.removeEventListener('keydown', this.handleKeydown);
-      container.removeEventListener('mousedown', this.handleMouseDown);
-      container.removeEventListener('mouseover', this.handleMouseOver);
-      container.removeEventListener('mouseout', this.handleMouseOut);
-    }
-
-    // Уничтожаем все UI компоненты
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
-
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
-
-    if (this.tableEditor) {
-      this.tableEditor.destroy();
-      this.tableEditor = null;
-    }
-
-    if (this.cellFormatter) {
-      this.cellFormatter.destroy();
-      this.cellFormatter = null;
-    }
-
-    if (this.currentResizer) {
-      this.currentResizer.destroy();
-      this.currentResizer = null;
-    }
-
-    // Очищаем сервисы
-    if (this.exportService) {
-      this.exportService = null;
-    }
-
-    // Отписываемся от всех событий
-    this.editor.off('table');
-
-    // Очищаем селектор таблиц
-    this.editor.getSelector()?.clearTable();
-
-    // Очищаем все ссылки
-    this.editor = null;
-    this.selectedCells = [];
-  }
+      };
+      tryAutoload();
+      ctx.on('docChanged', () => {
+        tryAutoload();
+      });
+    },
+  });
 }

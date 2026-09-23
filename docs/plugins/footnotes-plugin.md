@@ -14,84 +14,41 @@ The Footnotes Plugin provides comprehensive footnote management for the on-CodeM
 - **Keyboard Shortcuts**: Quick footnote commands
 - **Footnote Management**: Create, edit, delete footnotes
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, FootnotesPlugin } from 'on-codemerge';
+import { Editor, FootnotesPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new FootnotesPlugin());
+const editor = new Editor(container, {
+  plugins: [FootnotesPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['FootnotesPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Footnote Methods
+Factory: `FootnotesPlugin()`.
 
-```javascript
-// Add footnote to selected text
-editor.executeCommand('footnote');
+| Command       |                                 |
+| ------------- | ------------------------------- |
+| `addFootnote` | `editor.command('addFootnote')` |
 
-// Get all footnotes
-const footnotes = footnoteManager.getAllFootnotes();
+### Keyboard shortcuts
 
-// Get specific footnote
-const footnote = footnoteManager.getFootnote(id);
+| Shortcut    | Command       |
+| ----------- | ------------- |
+| `Mod-Alt-j` | `addFootnote` |
 
-// Update footnote
-footnoteManager.updateFootnote(id, content);
-
-// Delete footnote
-footnoteManager.deleteFootnote(id);
-```
-
-### Footnote Interface
-
-```javascript
-interface Footnote {
-  id: string;           // Unique footnote identifier
-  number: number;       // Footnote number
-  content: string;      // Footnote content
-  reference: string;    // Reference text
-  createdAt: number;    // Creation timestamp
-  updatedAt: number;    // Last update timestamp
-}
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+X` | Add footnote | `footnote` |
-
-## Events
-
-```javascript
-// Listen to footnote events
-editor.on('footnote:added', (footnote) => {
-  console.log('Footnote added:', footnote);
-});
-
-editor.on('footnote:updated', (footnote) => {
-  console.log('Footnote updated:', footnote);
-});
-
-editor.on('footnote:deleted', (footnoteId) => {
-  console.log('Footnote deleted:', footnoteId);
-});
-```
+> **Note:** Command `addFootnote` (not `footnote`). No `footnoteManager`.
 
 ## Examples
 
@@ -104,26 +61,23 @@ editor.on('footnote:deleted', (footnoteId) => {
 </p>
 
 <!-- Footnote content -->
-<div class="footnote" id="fn1">
-  <sup>1</sup> This is the footnote content.
-</div>
+<div class="footnote" id="fn1"><sup>1</sup> This is the footnote content.</div>
 ```
 
 ### Multiple Footnotes
 
 ```html
 <p>
-  First footnote<sup class="footnote-marker" data-footnote-id="fn1">1</sup> 
-  and second footnote<sup class="footnote-marker" data-footnote-id="fn2">2</sup>.
+  First footnote<sup class="footnote-marker" data-footnote-id="fn1">1</sup> and second footnote<sup
+    class="footnote-marker"
+    data-footnote-id="fn2"
+    >2</sup
+  >.
 </p>
 
 <div class="footnotes">
-  <div class="footnote" id="fn1">
-    <sup>1</sup> First footnote content.
-  </div>
-  <div class="footnote" id="fn2">
-    <sup>2</sup> Second footnote content.
-  </div>
+  <div class="footnote" id="fn1"><sup>1</sup> First footnote content.</div>
+  <div class="footnote" id="fn2"><sup>2</sup> Second footnote content.</div>
 </div>
 ```
 
@@ -133,7 +87,7 @@ editor.on('footnote:deleted', (footnoteId) => {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, FootnotesPlugin } from 'on-codemerge';
+import { Editor, FootnotesPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -141,9 +95,9 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new FootnotesPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(FootnotesPlugin());
+
       // Track footnote events
       editorInstance.current.on('footnote:added', (footnote) => {
         console.log('New footnote:', footnote);
@@ -169,13 +123,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, FootnotesPlugin } from 'on-codemerge';
+import { Editor, FootnotesPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new FootnotesPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [FootnotesPlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -254,20 +208,6 @@ export default {
 
 ### Debug Mode
 
-```javascript
-// Add console logging
-console.log('Footnotes plugin initialized');
-
-// Check footnote events
-editor.on('footnote:added', (footnote) => {
-  console.log('Footnote added:', footnote);
-});
-
-// Check footnote manager
-const allFootnotes = footnoteManager.getAllFootnotes();
-console.log('All footnotes:', allFootnotes);
-```
-
 ## Browser Support
 
 - Chrome 60+
@@ -277,4 +217,4 @@ console.log('All footnotes:', allFootnotes);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

@@ -1,0 +1,8 @@
+/* @use must be first. meta.load-css replaces deprecated Sass @import.
+   @reference stays on this entry so Tailwind resolves './tailwind.css' from src/. */
+@use 'sass:meta';
+
+@reference './tailwind.css';
+
+@include meta.load-css('./styles/published/prose');
+@include meta.load-css('./styles/published/atoms');

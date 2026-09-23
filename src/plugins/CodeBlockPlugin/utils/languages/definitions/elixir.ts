@@ -1,4 +1,5 @@
-import { type LanguageDefinition, TokenType } from '../../../types';
+import { TokenType } from '../../../types';
+import type { LanguageDefinition } from '../../../types';
 
 export const elixirDefinition: LanguageDefinition = {
   name: 'elixir',
@@ -9,8 +10,7 @@ export const elixirDefinition: LanguageDefinition = {
     [TokenType.Function]: /^\b[a-z_]\w*(?=\s*\()/,
     [TokenType.Atom]: /^:\w+/,
     [TokenType.Variable]: /^@\w+|\b[A-Z]\w*/,
-    [TokenType.Operator]:
-      /^(?:\|\>|\+\+|\-\-|\|\||\&\&|\<\>|\=\~|\=\>|\<\-|\.\.|[+\-*/%|&^<>!=~]=?)/,
+    [TokenType.Operator]: /^(?:\|>|\+\+|-\-|\|\||&\&|<\>|=\~|=\>|<\-|\.\.|[+\-*/%|&^<>!=~]=?)/,
     [TokenType.Punctuation]: /^[{}[\]();,.]/,
   },
   keywords: [

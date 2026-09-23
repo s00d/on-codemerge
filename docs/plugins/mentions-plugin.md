@@ -2,7 +2,6 @@
 
 User mentions triggered by `@`.
 
-
 ### Installation
 
 ```bash
@@ -12,10 +11,10 @@ npm install on-codemerge
 ### Basic Usage
 
 ```javascript
-import { HTMLEditor, MentionsPlugin } from 'on-codemerge';
+import { Editor, MentionsPlugin } from 'on-codemerge';
 
 const editor = new HTMLEditор(container);
-editor.use(new MentionsPlugin());
+/* use plugins: [MentionsPlugin()] in Editor(...) */
 ```
 
 ### Demo
@@ -26,5 +25,18 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 <EditorComponent :activePlugins="['MentionsPlugin']" />
 
+## Public API (v2)
 
+Factory: `MentionsPlugin(mentions?)` — options: `Mention[] (default DEFAULT_MENTIONS)`.
 
+| Command         |                                   |
+| --------------- | --------------------------------- |
+| `insertMention` | `editor.command('insertMention')` |
+
+### Keyboard shortcuts
+
+| Shortcut      | Command         |
+| ------------- | --------------- |
+| `Mod-Shift-2` | `insertMention` |
+
+> **Note:** Editor is `Editor`, not `HTMLEditor`.

@@ -1,0 +1,62 @@
+/* Compact form atom — keep in sync with FormBuilderPlugin/style.scss */
+
+.generated-form {
+  @apply my-3 flex w-full max-w-md flex-col gap-2.5 rounded-xl border border-ocm-border bg-ocm-surface p-3 font-sans;
+  border-left: 3px solid var(--color-ocm-accent, #0284c7);
+
+  .form-field {
+    @apply flex flex-col gap-1;
+
+    label {
+      @apply text-[11px] font-medium text-ocm-text-muted;
+    }
+
+    input,
+    textarea,
+    select {
+      @apply w-full rounded-lg border border-ocm-border bg-ocm-input px-2.5 py-1.5 text-sm text-ocm-text transition-[border-color,box-shadow] duration-100;
+
+      &:focus {
+        @apply border-ocm-accent outline-none ring-2 ring-ocm-accent/20;
+      }
+
+      &::placeholder {
+        @apply text-ocm-text-muted/70;
+      }
+    }
+
+    textarea {
+      @apply min-h-[4.5rem] resize-y;
+    }
+  }
+
+  .form-field.required-field > label::after {
+    content: ' *';
+    @apply text-ocm-danger;
+  }
+
+  .submit-button {
+    @apply mt-0.5 cursor-pointer rounded-lg border-0 bg-ocm-accent px-3 py-1.5 text-sm font-semibold text-white transition-opacity duration-100;
+
+    &:hover {
+      @apply opacity-90;
+    }
+
+    &:active {
+      @apply opacity-80;
+    }
+  }
+
+  .checkbox-container {
+    @apply flex items-center gap-2;
+
+    input[type='checkbox'],
+    input[type='radio'] {
+      @apply size-3.5 shrink-0 rounded border-ocm-border text-ocm-accent;
+    }
+
+    label {
+      @apply m-0 text-sm text-ocm-text;
+    }
+  }
+}

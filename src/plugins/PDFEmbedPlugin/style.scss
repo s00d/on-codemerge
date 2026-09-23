@@ -1,11 +1,9 @@
+@reference "../../tailwind.css";
+
 .pdf-embed-container {
-  position: relative;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  overflow: hidden;
+  @apply relative bg-ocm-surface-muted border border-ocm-border rounded-ocm-sm overflow-hidden;
 }
 
 .pdf-embed-frame {
-  display: block;
+  @apply block;
 }

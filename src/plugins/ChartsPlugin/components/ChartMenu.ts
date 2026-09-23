@@ -1,11 +1,11 @@
-import { PopupManager, type PopupItem } from '../../../core/ui/PopupManager';
+import { PopupController, downloadUrl, foreign, h, mount, renderDetached } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import { ChartRenderer } from '../services/ChartRenderer';
 import type { ChartType, ChartSeries, ChartPoint } from '../types';
 import { MultiSeriesDataEditor } from './MultiSeriesDataEditor';
 import { ChartDataEditor } from './ChartDataEditor';
 import { CHART_TYPE_CONFIGS } from '../constants/chartTypes';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
-import { createButton, createContainer, createSpan } from '../../../utils/helpers.ts';
+import { isChartSeries, normalizeChartData } from '../utils/validation';
 
 const chartTemplates = [
   {
@@ -59,373 +59,122 @@ const chartTemplates = [
   },
 ];
 
+/** Chart insert/edit — ViewSpec chrome; data editor + canvas preview in foreign hosts. */
 export class ChartMenu {
-  private editor: HTMLEditor;
-  private popup: PopupManager;
-  private renderer: ChartRenderer;
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
+  private readonly renderer: ChartRenderer;
   private currentEditor: ChartDataEditor | MultiSeriesDataEditor;
   private selectedType: ChartType = 'bar';
   private onInsert: ((element: HTMLElement) => void) | null = null;
-  private previewTimeout: number | null = null;
+  private previewTimeout: ReturnType<typeof setTimeout> | null = null;
   private editingChart: HTMLElement | null = null;
-  private chartTitle: string = '';
-  private xAxisLabel: string = '';
-  private yAxisLabel: string = '';
-  private showLegend: boolean = true;
-  private chartWidth: number = 800;
-  private chartHeight: number = 400;
-  private showGrid: boolean = true;
+  private chartTitle = '';
+  private xAxisLabel = '';
+  private yAxisLabel = '';
+  private showLegend = true;
+  private chartWidth = 800;
+  private chartHeight = 400;
+  private showGrid = true;
   private chartMode: 'default' | 'stacked' | 'grouped' = 'default';
   private chartOrientation: 'vertical' | 'horizontal' = 'vertical';
 
-  constructor(editor: HTMLEditor) {
+  private editorHost: HTMLElement | null = null;
+  private previewHost: HTMLElement | null = null;
+  private readonly typeOptionEls = new Map<string, HTMLElement>();
+  private pendingEditData: ChartSeries[] | ChartPoint[] | null = null;
+
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
     this.renderer = new ChartRenderer(editor);
-    this.popup = new PopupManager(editor, {
-      title: editor.t('Insert'),
-      className: 'chart-menu',
-      closeOnClickOutside: true,
-      buttons: [
-        {
-          label: editor.t('Cancel'),
-          variant: 'secondary',
-          onClick: () => this.popup.hide(),
-        },
-        {
-          label: editor.t('Insert'),
-          variant: 'primary',
-          onClick: () => this.handleSubmit(),
-        },
-      ],
-      items: this.createPopupItems(), // Динамически создаем элементы
+    this.currentEditor = new ChartDataEditor(editor, (data) => {
+      this.schedulePreviewUpdate([{ name: 'Series 1', data }]);
     });
-
-    this.currentEditor = new ChartDataEditor(editor, (data) =>
-      this.schedulePreviewUpdate([{ name: 'Series 1', data }])
-    );
-  }
-
-  private createPopupItems(): PopupItem[] {
-    const items: PopupItem[] = [
-      // 1. Chart type selector
-      {
-        type: 'custom',
-        id: 'chart-type-selector',
-        content: () => this.createChartTypeSelector(),
-      },
-      // 2. Заголовки (title, x/y axis)
-      {
-        type: 'custom',
-        id: 'meta-fields',
-        content: () => this.createMetaFields(),
-      },
-      // 3. Размеры графика
-      {
-        type: 'custom',
-        id: 'chart-dimensions',
-        content: () => this.createDimensionsSelector(),
-      },
-      // 4. Настройки отображения
-      {
-        type: 'custom',
-        id: 'display-settings',
-        content: () => this.createDisplaySettings(),
-      },
-      // 5. Templates (над редактором данных)
-      {
-        type: 'custom',
-        id: 'template-selector',
-        content: () => this.createTemplateSelector(),
-      },
-      // 6. Data editor (теперь над предпросмотром)
-      {
-        type: 'custom',
-        id: 'data-editor-container',
-        content: () => this.createDataEditorContainer(),
-      },
-      // 7. Preview (график)
-      {
-        type: 'custom',
-        id: 'preview-container',
-        content: () => this.createPreviewContainer(),
-      },
-      // 8. Export (под графиком)
-      {
-        type: 'custom',
-        id: 'export-btn',
-        content: () => this.createExportButton(),
-      },
-    ];
-    return items;
-  }
-
-  private createMetaFields(): HTMLElement {
-    const container = createContainer('meta-fields flex flex-col gap-3 mb-4');
-
-    // Chart Title
-    const titleGroup = createContainer('flex flex-col gap-1');
-    const titleLabel = createSpan('text-sm font-medium text-gray-700');
-    titleLabel.textContent = this.editor.t('Chart Title');
-    const titleInput = document.createElement('input');
-    titleInput.type = 'text';
-    titleInput.placeholder = this.editor.t('Enter chart title...');
-    titleInput.value = this.chartTitle;
-    titleInput.className =
-      'meta-input px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all';
-    titleInput.oninput = (e) => {
-      this.chartTitle = (e.target as HTMLInputElement).value;
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    titleGroup.appendChild(titleLabel);
-    titleGroup.appendChild(titleInput);
-
-    // X Axis Label
-    const xGroup = createContainer('flex flex-col gap-1');
-    const xLabel = createSpan('text-sm font-medium text-gray-700');
-    xLabel.textContent = this.editor.t('X Axis Label');
-    const xInput = document.createElement('input');
-    xInput.type = 'text';
-    xInput.placeholder = this.editor.t('Enter X axis label...');
-    xInput.value = this.xAxisLabel;
-    xInput.className =
-      'meta-input px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all';
-    xInput.oninput = (e) => {
-      this.xAxisLabel = (e.target as HTMLInputElement).value;
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    xGroup.appendChild(xLabel);
-    xGroup.appendChild(xInput);
-
-    // Y Axis Label
-    const yGroup = createContainer('flex flex-col gap-1');
-    const yLabel = createSpan('text-sm font-medium text-gray-700');
-    yLabel.textContent = this.editor.t('Y Axis Label');
-    const yInput = document.createElement('input');
-    yInput.type = 'text';
-    yInput.placeholder = this.editor.t('Enter Y axis label...');
-    yInput.value = this.yAxisLabel;
-    yInput.className =
-      'meta-input px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all';
-    yInput.oninput = (e) => {
-      this.yAxisLabel = (e.target as HTMLInputElement).value;
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    yGroup.appendChild(yLabel);
-    yGroup.appendChild(yInput);
-
-    container.appendChild(titleGroup);
-    container.appendChild(xGroup);
-    container.appendChild(yGroup);
-    return container;
-  }
-
-  private createTemplateSelector(): HTMLElement {
-    const container = createContainer('template-selector flex flex-col gap-2 mb-4');
-
-    const title = createSpan('text-sm font-medium text-gray-700');
-    title.textContent = this.editor.t('Templates');
-    container.appendChild(title);
-
-    const select = document.createElement('select');
-    select.className =
-      'template-select px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white';
-
-    const defaultOption = document.createElement('option');
-    defaultOption.value = '';
-    defaultOption.textContent = this.editor.t('Select template...');
-    select.appendChild(defaultOption);
-
-    chartTemplates.forEach((tpl) => {
-      const option = document.createElement('option');
-      option.value = tpl.key;
-      option.textContent = tpl.name;
-      select.appendChild(option);
-    });
-
-    select.onchange = (e) => {
-      const selectedKey = (e.target as HTMLSelectElement).value;
-      if (selectedKey) {
-        const template = chartTemplates.find((t) => t.key === selectedKey);
-        if (template) {
-          this.selectedType = template.type as ChartType;
-          this.updateEditor(template.type as ChartType);
-
-          // Обновляем селектор типа графика
-          const typeOptions = this.popup.getElement()?.querySelectorAll('[data-type]');
-          typeOptions?.forEach((opt) => opt.classList.remove('selected'));
-          const selectedTypeOption = this.popup
-            .getElement()
-            ?.querySelector(`[data-type="${template.type}"]`);
-          if (selectedTypeOption) {
-            selectedTypeOption.classList.add('selected');
-          }
-
-          // Устанавливаем данные
-          setTimeout(() => {
-            if (this.currentEditor) {
-              if ('setData' in this.currentEditor) {
-                (this.currentEditor as any).setData(template.data);
-              }
-              this.updatePreview(template.data);
-            }
-          }, 100);
-        }
-      }
-    };
-
-    container.appendChild(select);
-    return container;
-  }
-
-  private createChartTypeSelector(): HTMLElement {
-    const container = createContainer('chart-type-selector');
-
-    const title = createSpan('text-sm font-medium text-gray-700 mb-4 block');
-    title.textContent = this.editor.t('Chart Type');
-    container.appendChild(title);
-
-    const grid = createContainer('grid');
-
-    Object.entries(CHART_TYPE_CONFIGS).forEach(([type, config]) => {
-      const option = createContainer(
-        `chart-type-option ${type === this.selectedType ? 'selected' : ''}`
-      );
-      option.setAttribute('data-type', type);
-
-      const icon = createContainer('w-10 h-10 mb-3 mx-auto flex items-center justify-center');
-      icon.innerHTML = config.icon;
-
-      const label = createSpan();
-      label.textContent = this.editor.t(config.name);
-
-      option.appendChild(icon);
-      option.appendChild(label);
-
-      option.onclick = () => {
-        // Убираем выделение с предыдущего
-        grid.querySelectorAll('.chart-type-option').forEach((opt) => {
-          opt.classList.remove('selected');
-        });
-
-        // Выделяем текущий
-        option.classList.add('selected');
-
-        this.selectedType = type as ChartType;
-        this.updateEditor(type as ChartType);
-      };
-
-      grid.appendChild(option);
-    });
-
-    container.appendChild(grid);
-    return container;
-  }
-
-  private createDataEditorContainer(): HTMLElement {
-    const container = createContainer('data-editor-container mb-6');
-    this.updateEditor('bar', container);
-    return container;
-  }
-
-  private createPreviewContainer(): HTMLElement {
-    const container = createContainer(
-      'preview-container h-64 bg-gray-50 rounded-lg flex items-center justify-center'
-    );
-    container.innerHTML = '<div class="text-gray-400">Chart preview will appear here</div>';
-    return container;
-  }
-
-  private createExportButton(): HTMLElement {
-    const container = createContainer('export-container flex justify-center mt-4');
-
-    const btn = createButton('', () => this.exportPreviewAsPNG());
-    btn.className =
-      'export-btn px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 font-medium';
-
-    const icon = createContainer('w-4 h-4');
-    icon.innerHTML =
-      '<svg fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm3.293-7.707a1 1 0 011.414 0L9 10.586V3a1 1 0 112 0v7.586l1.293-1.293a1 1 0 111.414 1.414l-3 3a1 1 0 01-1.414 0l-3-3a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>';
-
-    const text = createSpan();
-    text.textContent = this.editor.t('Export as PNG');
-
-    btn.appendChild(icon);
-    btn.appendChild(text);
-    container.appendChild(btn);
-
-    return container;
-  }
-  private exportPreviewAsPNG(): void {
-    const previewContainer = this.popup.getElement()?.querySelector('.preview-container');
-    if (!previewContainer) return;
-    const img = previewContainer.querySelector('img.svg-chart') as HTMLImageElement;
-    if (img && img.src) {
-      const link = document.createElement('a');
-      link.href = img.src;
-      link.download = 'chart.png';
-      (this.editor.getInnerContainer() || document.body).appendChild(link);
-      link.click();
-      link.parentNode?.removeChild(link);
-    } else {
-      // Если используется canvas (например, для предпросмотра)
-      const canvas = previewContainer.querySelector('canvas') as HTMLCanvasElement;
-      if (canvas) {
-        const link = document.createElement('a');
-        link.href = canvas.toDataURL('image/png');
-        link.download = 'chart.png';
-        (this.editor.getInnerContainer() || document.body).appendChild(link);
-        link.click();
-        link.parentNode?.removeChild(link);
-      }
-    }
-  }
-
-  private updateEditor(type: ChartType, container?: HTMLElement): void {
-    const config = CHART_TYPE_CONFIGS[type];
-    const editorContainer =
-      container ?? this.popup.getElement().querySelector('.data-editor-container');
-    if (!editorContainer) return;
-
-    editorContainer.innerHTML = '';
-
-    if (config.supportsMultipleSeries) {
-      this.currentEditor = new MultiSeriesDataEditor(this.editor, (data) =>
-        this.schedulePreviewUpdate(data)
-      );
-    } else {
-      this.currentEditor = new ChartDataEditor(
-        this.editor,
-        (data) =>
-          this.schedulePreviewUpdate([
-            {
-              name: this.editor.t('Series 1'),
-              data,
-            },
-          ]),
-        (config as unknown as any).requiresXY,
-        type === 'scatter'
-      );
-    }
-
-    editorContainer.appendChild(this.currentEditor.getElement());
   }
 
   private schedulePreviewUpdate(data: ChartPoint[] | ChartSeries[]): void {
     if (this.previewTimeout) {
-      window.clearTimeout(this.previewTimeout);
+      globalThis.clearTimeout(this.previewTimeout);
     }
-    this.previewTimeout = window.setTimeout(() => {
+    this.previewTimeout = globalThis.setTimeout(() => {
       this.updatePreview(data);
     }, 100);
   }
 
+  private bumpPreview(): void {
+    this.schedulePreviewUpdate(this.currentEditor.getData());
+  }
+
+  private applyDataToEditor(data: ChartPoint[] | ChartSeries[]): void {
+    if (this.currentEditor instanceof MultiSeriesDataEditor) {
+      this.currentEditor.setData(normalizeChartData(data));
+      return;
+    }
+    const first = data[0];
+    if (first !== undefined && isChartSeries(first)) {
+      this.currentEditor.setData(normalizeChartData(data)[0]?.data ?? []);
+    } else {
+      this.currentEditor.setData(data as ChartPoint[]);
+    }
+  }
+
+  private selectType(type: ChartType, data?: ChartPoint[] | ChartSeries[]): void {
+    this.selectedType = type;
+    for (const [key, el] of this.typeOptionEls) {
+      el.classList.toggle('selected', key === type);
+    }
+    this.mountEditor(type);
+    if (data) {
+      globalThis.setTimeout(() => {
+        this.applyDataToEditor(data);
+        this.updatePreview(data);
+      }, 0);
+    } else {
+      this.bumpPreview();
+    }
+  }
+
+  private mountEditor(type: ChartType): void {
+    const host = this.editorHost;
+    if (!host) {
+      return;
+    }
+
+    this.currentEditor.destroy();
+    host.replaceChildren();
+
+    const config = CHART_TYPE_CONFIGS[type];
+    if (config.supportsMultipleSeries) {
+      this.currentEditor = new MultiSeriesDataEditor(this.editor, (data) => {
+        this.schedulePreviewUpdate(data);
+      });
+    } else {
+      this.currentEditor = new ChartDataEditor(
+        this.editor,
+        (data) => {
+          this.schedulePreviewUpdate([{ name: this.editor.t('charts.series1'), data }]);
+        },
+        (config as { requiresXY?: boolean }).requiresXY,
+        type === 'scatter'
+      );
+    }
+    this.currentEditor.mountInto(host);
+  }
+
   private updatePreview(data: ChartPoint[] | ChartSeries[]): void {
-    const previewContainer = this.popup.getElement()?.querySelector('.preview-container');
-    if (!previewContainer) return;
+    const previewContainer = this.previewHost;
+    if (!previewContainer) {
+      return;
+    }
+
+    const pad = 32;
+    const width = Math.max(280, Math.floor((previewContainer.clientWidth || 560) - pad));
+    const height = Math.max(200, Math.floor((previewContainer.clientHeight || 320) - pad));
 
     const options = {
-      width: 350,
-      height: 250,
+      width,
+      height,
       title: this.chartTitle,
       xAxis: { title: this.xAxisLabel },
       yAxis: { title: this.yAxisLabel },
@@ -435,18 +184,384 @@ export class ChartMenu {
       orientation: this.chartOrientation,
     };
 
-    const canvas = this.renderer.createChart(this.selectedType, data, options);
-    canvas.style.position = 'absolute';
-    canvas.style.top = '50%';
-    canvas.style.left = '50%';
-    canvas.style.transform = 'translate(-50%, -50%)';
-    previewContainer.innerHTML = '';
-    previewContainer.appendChild(canvas);
+    const chartEl = this.renderer.createChart(this.selectedType, data, options);
+    chartEl.removeAttribute('width');
+    chartEl.removeAttribute('height');
+    chartEl.style.cssText =
+      'display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;margin:0;';
+    previewContainer.replaceChildren(chartEl);
+  }
+
+  private applyTemplate(key: string): void {
+    const template = chartTemplates.find((t) => t.key === key);
+    if (!template) {
+      return;
+    }
+    this.selectType(template.type as ChartType, template.data);
+  }
+
+  private typeSelectorView(): ViewSpec {
+    return h('div', { class: 'chart-type-selector' }, [
+      h(
+        'div',
+        { class: 'text-sm font-medium text-gray-700 mb-4 block' },
+        this.editor.t('charts.chartType')
+      ),
+      h(
+        'div',
+        { class: 'grid' },
+        ...Object.entries(CHART_TYPE_CONFIGS).map(([type, config]) =>
+          foreign(
+            (host, scope) => {
+              host.className = `chart-type-option ${type === this.selectedType ? 'selected' : ''}`;
+              host.dataset.type = type;
+              this.typeOptionEls.set(type, host);
+              const inner = mount(
+                host,
+                h('fragment', null, [
+                  h('div', {
+                    class: 'w-10 h-10 mb-3 mx-auto flex items-center justify-center',
+                    props: { innerHTML: config.icon },
+                  }),
+                  h('span', null, this.editor.t(config.name)),
+                ])
+              );
+              scope.own(inner);
+              scope.on(host, 'click', () => {
+                this.selectType(type as ChartType);
+              });
+              scope.disposable(() => {
+                if (this.typeOptionEls.get(type) === host) {
+                  this.typeOptionEls.delete(type);
+                }
+              });
+            },
+            { key: `chart-type-${type}` }
+          )
+        )
+      ),
+    ]);
+  }
+
+  private metaFieldsView(): ViewSpec {
+    const field = (
+      label: string,
+      value: string,
+      placeholder: string,
+      onInput: (v: string) => void
+    ) =>
+      h('div', { class: 'flex flex-col gap-1' }, [
+        h('span', { class: 'text-sm font-medium text-gray-700' }, label),
+        h('input', {
+          class:
+            'meta-input px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all',
+          attrs: { type: 'text', placeholder, value },
+          on: {
+            input: (e) => {
+              onInput((e.target as HTMLInputElement).value);
+              this.bumpPreview();
+            },
+          },
+        }),
+      ]);
+
+    return h('div', { class: 'meta-fields flex flex-col gap-3 mb-4' }, [
+      field(
+        this.editor.t('charts.chartTitle'),
+        this.chartTitle,
+        this.editor.t('charts.enterChartTitle'),
+        (v) => {
+          this.chartTitle = v;
+        }
+      ),
+      field(
+        this.editor.t('charts.xAxisLabel'),
+        this.xAxisLabel,
+        this.editor.t('charts.enterXAxisLabel'),
+        (v) => {
+          this.xAxisLabel = v;
+        }
+      ),
+      field(
+        this.editor.t('charts.yAxisLabel'),
+        this.yAxisLabel,
+        this.editor.t('charts.enterYAxisLabel'),
+        (v) => {
+          this.yAxisLabel = v;
+        }
+      ),
+    ]);
+  }
+
+  private dimensionsView(): ViewSpec {
+    const num = (
+      label: string,
+      value: number,
+      min: number,
+      max: number,
+      onChange: (n: number) => void
+    ) =>
+      h('div', { class: 'flex flex-col gap-1' }, [
+        h('span', { class: 'text-sm font-medium text-gray-700' }, label),
+        h('input', {
+          class: 'dimension-input px-2 py-1 rounded border border-gray-300 text-sm',
+          attrs: {
+            type: 'number',
+            min: String(min),
+            max: String(max),
+            step: '50',
+            value: String(value),
+          },
+          on: {
+            change: (e) => {
+              onChange(Math.trunc(Number((e.target as HTMLInputElement).value)) || value);
+              this.bumpPreview();
+            },
+          },
+        }),
+      ]);
+
+    return h('div', { class: 'dimensions-selector flex gap-4 mb-4' }, [
+      num(this.editor.t('common.width'), this.chartWidth, 200, 1200, (n) => {
+        this.chartWidth = n;
+      }),
+      num(this.editor.t('common.height'), this.chartHeight, 150, 800, (n) => {
+        this.chartHeight = n;
+      }),
+    ]);
+  }
+
+  private displaySettingsView(): ViewSpec {
+    return h(
+      'div',
+      { class: 'display-settings flex flex-col gap-3 mb-4 p-3 bg-gray-50 rounded-lg' },
+      [
+        h(
+          'span',
+          { class: 'text-sm font-medium text-gray-700 mb-2' },
+          this.editor.t('common.displaySettings')
+        ),
+        h('label', { class: 'flex items-center gap-2 text-sm' }, [
+          h('input', {
+            class: 'setting-checkbox',
+            attrs: { type: 'checkbox' },
+            props: { checked: this.showLegend },
+            on: {
+              change: (e) => {
+                this.showLegend = (e.target as HTMLInputElement).checked;
+                this.bumpPreview();
+              },
+            },
+          }),
+          this.editor.t('charts.showLegend'),
+        ]),
+        h('label', { class: 'flex items-center gap-2 text-sm' }, [
+          h('input', {
+            class: 'setting-checkbox',
+            attrs: { type: 'checkbox' },
+            props: { checked: this.showGrid },
+            on: {
+              change: (e) => {
+                this.showGrid = (e.target as HTMLInputElement).checked;
+                this.bumpPreview();
+              },
+            },
+          }),
+          this.editor.t('common.showGrid'),
+        ]),
+        h('div', { class: 'flex items-center gap-2' }, [
+          h('span', { class: 'text-sm' }, this.editor.t('common.barAreaMode')),
+          h(
+            'select',
+            {
+              class: 'mode-select px-2 py-1 rounded border border-gray-300 text-sm',
+              props: { value: this.chartMode },
+              on: {
+                change: (e) => {
+                  this.chartMode = (e.target as HTMLSelectElement).value as typeof this.chartMode;
+                  this.bumpPreview();
+                },
+              },
+            },
+            ...(['default', 'stacked', 'grouped'] as const).map((mode) =>
+              h(
+                'option',
+                { attrs: { value: mode } },
+                this.editor.t(mode.charAt(0).toUpperCase() + mode.slice(1))
+              )
+            )
+          ),
+        ]),
+        h('div', { class: 'flex items-center gap-2' }, [
+          h('span', { class: 'text-sm' }, this.editor.t('common.orientation')),
+          h(
+            'select',
+            {
+              class: 'orientation-select px-2 py-1 rounded border border-gray-300 text-sm',
+              props: { value: this.chartOrientation },
+              on: {
+                change: (e) => {
+                  this.chartOrientation = (e.target as HTMLSelectElement)
+                    .value as typeof this.chartOrientation;
+                  this.bumpPreview();
+                },
+              },
+            },
+            ...(['vertical', 'horizontal'] as const).map((orient) =>
+              h(
+                'option',
+                { attrs: { value: orient } },
+                this.editor.t(orient.charAt(0).toUpperCase() + orient.slice(1))
+              )
+            )
+          ),
+        ]),
+      ]
+    );
+  }
+
+  private templateSelectorView(): ViewSpec {
+    return h('div', { class: 'template-selector flex flex-col gap-2 mb-4' }, [
+      h('span', { class: 'text-sm font-medium text-gray-700' }, this.editor.t('common.templates')),
+      h(
+        'select',
+        {
+          class:
+            'template-select px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white',
+          on: {
+            change: (e) => {
+              const key = (e.target as HTMLSelectElement).value;
+              if (key) {
+                this.applyTemplate(key);
+              }
+            },
+          },
+        },
+        h('option', { attrs: { value: '' } }, this.editor.t('templates.selectTemplate')),
+        ...chartTemplates.map((tpl) => h('option', { attrs: { value: tpl.key } }, tpl.name))
+      ),
+    ]);
+  }
+
+  private exportView(): ViewSpec {
+    return h('div', { class: 'export-container flex justify-center mt-4' }, [
+      h(
+        'button',
+        {
+          class:
+            'export-btn px-4 py-2 rounded-lg bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 transition-all duration-200 shadow-md hover:shadow-lg flex items-center gap-2 font-medium',
+          attrs: { type: 'button' },
+          on: {
+            click: () => {
+              this.exportPreviewAsPNG();
+            },
+          },
+        },
+        this.editor.t('charts.exportAsPng')
+      ),
+    ]);
+  }
+
+  private bodyView(): ViewSpec {
+    return h('div', { class: 'chart-menu-body' }, [
+      this.typeSelectorView(),
+      this.metaFieldsView(),
+      this.dimensionsView(),
+      this.displaySettingsView(),
+      this.templateSelectorView(),
+      foreign(
+        (host, scope) => {
+          host.className = 'data-editor-container mb-6';
+          this.editorHost = host;
+          this.mountEditor(this.selectedType);
+          if (this.pendingEditData) {
+            const data = this.pendingEditData;
+            this.pendingEditData = null;
+            globalThis.setTimeout(() => {
+              this.applyDataToEditor(data);
+              this.updatePreview(data);
+            }, 0);
+          } else {
+            this.bumpPreview();
+          }
+          scope.disposable(() => {
+            if (this.editorHost === host) {
+              this.editorHost = null;
+            }
+          });
+        },
+        { key: 'chart-data-editor' }
+      ),
+      foreign(
+        (host, scope) => {
+          host.className = 'preview-container';
+          host.textContent = this.editor.t('math.chartPreviewWillAppearHere');
+          this.previewHost = host;
+          // Wait for popup layout so clientWidth/Height are real.
+          requestAnimationFrame(() => {
+            if (this.previewHost === host) {
+              this.bumpPreview();
+            }
+          });
+          scope.disposable(() => {
+            if (this.previewHost === host) {
+              this.previewHost = null;
+            }
+          });
+        },
+        { key: 'chart-preview' }
+      ),
+      this.exportView(),
+    ]);
+  }
+
+  private openModal(): void {
+    const editing = Boolean(this.editingChart);
+    this.popups.open({
+      title: editing ? this.editor.t('common.editChart') : this.editor.t('charts.insert'),
+      className: 'chart-menu',
+      size: 'lg',
+      closeOnClickOutside: true,
+      buttons: [
+        {
+          label: this.editor.t('common.cancel'),
+          variant: 'secondary',
+          onClick: () => {},
+        },
+        {
+          label: editing ? this.editor.t('common.save') : this.editor.t('common.insert'),
+          variant: 'primary',
+          onClick: () => {
+            this.handleSubmit();
+          },
+        },
+      ],
+      items: [{ type: 'view', id: 'chart-body', view: () => this.bodyView() }],
+    });
+  }
+
+  private exportPreviewAsPNG(): void {
+    const previewContainer = this.previewHost;
+    if (!previewContainer) {
+      return;
+    }
+    const img = previewContainer.querySelector('img.svg-chart') as HTMLImageElement | null;
+    if (img?.src) {
+      downloadUrl(img.src, 'chart.png');
+      return;
+    }
+    const canvas = previewContainer.querySelector('canvas');
+    if (canvas) {
+      downloadUrl(canvas.toDataURL('image/png'), 'chart.png');
+    }
   }
 
   private handleSubmit(): void {
     const data = this.currentEditor.getData();
-    if (!data || (Array.isArray(data) && data.length === 0)) return;
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+    if (!data || (Array.isArray(data) && data.length === 0)) {
+      return;
+    }
     const options = {
       width: this.chartWidth,
       height: this.chartHeight,
@@ -459,60 +574,116 @@ export class ChartMenu {
       orientation: this.chartOrientation,
     };
     if (this.editingChart) {
-      this.editingChart.setAttribute('data-chart-type', this.selectedType);
-      this.editingChart.setAttribute('data-chart-data', JSON.stringify(data));
+      this.editingChart.dataset.chartType = this.selectedType;
+      this.editingChart.dataset.chartData = JSON.stringify(data);
+      this.editingChart.dataset.chartTitle = this.chartTitle;
+      this.editingChart.dataset.showLegend = this.showLegend ? 'true' : 'false';
+      this.editingChart.dataset.showGrid = this.showGrid ? 'true' : 'false';
+      this.editingChart.dataset.mode = this.chartMode;
+      this.editingChart.dataset.orientation = this.chartOrientation;
+      this.editingChart.dataset.xAxisLabel = this.xAxisLabel;
+      this.editingChart.dataset.yAxisLabel = this.yAxisLabel;
+      this.editingChart.style.width = `${options.width}px`;
+      this.editingChart.style.height = `${options.height}px`;
       const canvas = this.renderer.createChart(this.selectedType, data, options);
-      this.editingChart.innerHTML = '';
-      this.editingChart.appendChild(canvas);
-    } else {
-      const chartContainer = createContainer('chart-container');
-      chartContainer.style.width = options.width + 'px';
-      chartContainer.style.height = options.height + 'px';
-      chartContainer.setAttribute('data-chart-type', this.selectedType);
-      chartContainer.setAttribute('data-chart-data', JSON.stringify(data));
-      const canvas = this.renderer.createChart(this.selectedType, data, options);
-      chartContainer.appendChild(canvas);
-      if (this.onInsert) {
-        this.onInsert(chartContainer);
+      this.editingChart.replaceChildren(canvas);
+      const pathRaw = this.editingChart.dataset.ocmPath ?? this.editingChart.dataset.ocmBlock;
+      if (pathRaw !== undefined) {
+        const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
+        this.editor.run(() => [
+          {
+            type: 'set_attrs',
+            path,
+            attrs: {
+              chartType: this.selectedType,
+              data: JSON.stringify(data),
+              title: this.chartTitle,
+              width: options.width,
+              height: options.height,
+              showLegend: this.showLegend,
+              showGrid: this.showGrid,
+              mode: this.chartMode,
+              orientation: this.chartOrientation,
+              xAxisLabel: this.xAxisLabel,
+              yAxisLabel: this.yAxisLabel,
+            },
+          },
+        ]);
       }
+    } else {
+      const { el: chartContainer } = renderDetached(
+        h('div', {
+          class: 'chart-container',
+          style: { width: `${options.width}px`, height: `${options.height}px` },
+          attrs: {
+            'data-chart-type': this.selectedType,
+            'data-chart-data': JSON.stringify(data),
+            'data-chart-title': this.chartTitle,
+            'data-show-legend': this.showLegend ? 'true' : 'false',
+            'data-show-grid': this.showGrid ? 'true' : 'false',
+            'data-mode': this.chartMode,
+            'data-orientation': this.chartOrientation,
+            'data-x-axis-label': this.xAxisLabel,
+            'data-y-axis-label': this.yAxisLabel,
+          },
+        })
+      );
+      chartContainer.append(this.renderer.createChart(this.selectedType, data, options));
+      this.onInsert?.(chartContainer);
     }
-    this.popup.hide();
+    this.popups.close();
   }
 
   public show(onInsert: (element: HTMLElement) => void): void {
     this.editingChart = null;
+    this.pendingEditData = null;
+    this.chartTitle = '';
+    this.xAxisLabel = '';
+    this.yAxisLabel = '';
+    this.showLegend = true;
+    this.showGrid = true;
+    this.chartWidth = 800;
+    this.chartHeight = 400;
+    this.chartMode = 'default';
+    this.chartOrientation = 'vertical';
+    this.selectedType = 'bar';
     this.onInsert = onInsert;
-    this.popup.show();
+    this.openModal();
   }
 
   public edit(chartElement: HTMLElement, hidden = false): void {
     this.editingChart = chartElement;
-    const type = chartElement.getAttribute('data-chart-type') as ChartType;
-    const dataStr = chartElement.getAttribute('data-chart-data');
+    const type = chartElement.dataset.chartType as ChartType | null;
+    const dataStr = chartElement.dataset.chartData;
+    if (!type || !dataStr) {
+      return;
+    }
 
-    if (type && dataStr) {
-      try {
-        const data = JSON.parse(dataStr) as ChartSeries[];
-
-        // Update type selector
-        const typeOption = this.popup.getElement()?.querySelector(`[data-type="${type}"]`);
-        if (typeOption) {
-          typeOption.classList.add('selected');
-        }
-
-        this.selectedType = type;
-        this.updateEditor(type);
-
-        // Set data in editor after a short delay to ensure editor is initialized
-        setTimeout(() => {
-          (this.currentEditor as ChartDataEditor).setData(data);
-          this.updatePreview(data);
-        }, 100);
-
-        if (!hidden) this.popup.show();
-      } catch (e) {
-        console.error('Failed to parse chart data:', e);
+    try {
+      const data = JSON.parse(dataStr) as ChartSeries[];
+      this.selectedType = type;
+      this.pendingEditData = data;
+      this.chartTitle = chartElement.dataset.chartTitle ?? '';
+      this.xAxisLabel = chartElement.dataset.xAxisLabel ?? '';
+      this.yAxisLabel = chartElement.dataset.yAxisLabel ?? '';
+      this.showLegend = chartElement.dataset.showLegend !== 'false';
+      this.showGrid = chartElement.dataset.showGrid !== 'false';
+      this.chartWidth = Math.trunc(Number(chartElement.style.width)) || 800;
+      this.chartHeight = Math.trunc(Number(chartElement.style.height)) || 400;
+      this.chartMode =
+        (chartElement.dataset.mode as 'default' | 'stacked' | 'grouped') || 'default';
+      this.chartOrientation =
+        (chartElement.dataset.orientation as 'vertical' | 'horizontal') || 'vertical';
+      if (hidden) {
+        this.mountEditor(type);
+        globalThis.setTimeout(() => {
+          this.applyDataToEditor(data);
+        }, 0);
+      } else {
+        this.openModal();
       }
+    } catch (error) {
+      console.error('Failed to parse chart data:', error);
     }
   }
 
@@ -522,159 +693,6 @@ export class ChartMenu {
     data: ChartSeries[],
     dimensions: { width: number; height: number }
   ): void {
-    const canvas = this.renderer.createChart(type, data, dimensions);
-    container.innerHTML = '';
-    container.appendChild(canvas);
-  }
-
-  private createDimensionsSelector(): HTMLElement {
-    const container = createContainer('dimensions-selector flex gap-4 mb-4');
-
-    // Width
-    const widthGroup = createContainer('flex flex-col gap-1');
-    const widthLabel = createSpan('text-sm font-medium text-gray-700');
-    widthLabel.textContent = this.editor.t('Width');
-    const widthInput = document.createElement('input');
-    widthInput.type = 'number';
-    widthInput.min = '200';
-    widthInput.max = '1200';
-    widthInput.step = '50';
-    widthInput.value = this.chartWidth.toString();
-    widthInput.className = 'dimension-input px-2 py-1 rounded border border-gray-300 text-sm';
-    widthInput.onchange = (e) => {
-      this.chartWidth = parseInt((e.target as HTMLInputElement).value);
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    widthGroup.appendChild(widthLabel);
-    widthGroup.appendChild(widthInput);
-
-    // Height
-    const heightGroup = createContainer('flex flex-col gap-1');
-    const heightLabel = createSpan('text-sm font-medium text-gray-700');
-    heightLabel.textContent = this.editor.t('Height');
-    const heightInput = document.createElement('input');
-    heightInput.type = 'number';
-    heightInput.min = '150';
-    heightInput.max = '800';
-    heightInput.step = '50';
-    heightInput.value = this.chartHeight.toString();
-    heightInput.className = 'dimension-input px-2 py-1 rounded border border-gray-300 text-sm';
-    heightInput.onchange = (e) => {
-      this.chartHeight = parseInt((e.target as HTMLInputElement).value);
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    heightGroup.appendChild(heightLabel);
-    heightGroup.appendChild(heightInput);
-
-    container.appendChild(widthGroup);
-    container.appendChild(heightGroup);
-    return container;
-  }
-
-  private createDisplaySettings(): HTMLElement {
-    const container = createContainer(
-      'display-settings flex flex-col gap-3 mb-4 p-3 bg-gray-50 rounded-lg'
-    );
-    const title = createSpan('text-sm font-medium text-gray-700 mb-2');
-    title.textContent = this.editor.t('Display Settings');
-    container.appendChild(title);
-
-    // Show Legend
-    const legendGroup = createContainer('flex items-center gap-2');
-    const legendCheckbox = document.createElement('input');
-    legendCheckbox.type = 'checkbox';
-    legendCheckbox.checked = this.showLegend;
-    legendCheckbox.className = 'setting-checkbox';
-    legendCheckbox.onchange = (e) => {
-      this.showLegend = (e.target as HTMLInputElement).checked;
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    const legendLabel = createSpan('text-sm');
-    legendLabel.textContent = this.editor.t('Show Legend');
-    legendGroup.appendChild(legendCheckbox);
-    legendGroup.appendChild(legendLabel);
-
-    // Show Grid
-    const gridGroup = createContainer('flex items-center gap-2');
-    const gridCheckbox = document.createElement('input');
-    gridCheckbox.type = 'checkbox';
-    gridCheckbox.checked = this.showGrid;
-    gridCheckbox.className = 'setting-checkbox';
-    gridCheckbox.onchange = (e) => {
-      this.showGrid = (e.target as HTMLInputElement).checked;
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    const gridLabel = createSpan('text-sm');
-    gridLabel.textContent = this.editor.t('Show Grid');
-    gridGroup.appendChild(gridCheckbox);
-    gridGroup.appendChild(gridLabel);
-
-    // Mode selector (stacked/grouped/default)
-    const modeGroup = createContainer('flex items-center gap-2');
-    const modeLabel = createSpan('text-sm');
-    modeLabel.textContent = this.editor.t('Bar/Area Mode');
-    const modeSelect = document.createElement('select');
-    modeSelect.className = 'mode-select px-2 py-1 rounded border border-gray-300 text-sm';
-    ['default', 'stacked', 'grouped'].forEach((mode) => {
-      const opt = document.createElement('option');
-      opt.value = mode;
-      opt.textContent = this.editor.t(mode.charAt(0).toUpperCase() + mode.slice(1));
-      modeSelect.appendChild(opt);
-    });
-    modeSelect.value = this.chartMode;
-    modeSelect.onchange = (e) => {
-      this.chartMode = (e.target as HTMLSelectElement).value as any;
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    modeGroup.appendChild(modeLabel);
-    modeGroup.appendChild(modeSelect);
-
-    // Orientation selector
-    const orientGroup = createContainer('flex items-center gap-2');
-    const orientLabel = createSpan('text-sm');
-    orientLabel.textContent = this.editor.t('Orientation');
-    const orientSelect = document.createElement('select');
-    orientSelect.className = 'orientation-select px-2 py-1 rounded border border-gray-300 text-sm';
-    ['vertical', 'horizontal'].forEach((orient) => {
-      const opt = document.createElement('option');
-      opt.value = orient;
-      opt.textContent = this.editor.t(orient.charAt(0).toUpperCase() + orient.slice(1));
-      orientSelect.appendChild(opt);
-    });
-    orientSelect.value = this.chartOrientation;
-    orientSelect.onchange = (e) => {
-      this.chartOrientation = (e.target as HTMLSelectElement).value as any;
-      this.schedulePreviewUpdate(this.currentEditor.getData());
-    };
-    orientGroup.appendChild(orientLabel);
-    orientGroup.appendChild(orientSelect);
-
-    container.appendChild(legendGroup);
-    container.appendChild(gridGroup);
-    container.appendChild(modeGroup);
-    container.appendChild(orientGroup);
-    return container;
-  }
-
-  public destroy(): void {
-    // Очистка таймеров
-    if (this.previewTimeout) {
-      window.clearTimeout(this.previewTimeout);
-      this.previewTimeout = null;
-    }
-
-    // Уничтожение зависимых объектов
-    this.popup.destroy();
-    if (this.currentEditor) {
-      this.currentEditor.destroy();
-    }
-
-    // Очистка ссылок
-    this.editor = null!;
-    this.popup = null!;
-    this.renderer = null!;
-    this.currentEditor = null!;
-    this.onInsert = null;
-    this.editingChart = null;
+    container.replaceChildren(this.renderer.createChart(type, data, dimensions));
   }
 }

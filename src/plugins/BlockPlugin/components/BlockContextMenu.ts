@@ -4,294 +4,267 @@ import {
   moveIcon,
   duplicateIcon,
   deleteIcon,
+  insertIcon,
+  textIcon,
+  blockIcon,
 } from '../../../icons';
-import { ContextMenu } from '../../../core/ui/ContextMenu';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
-import { SplitBlockCommand } from '../commands/SplitBlockCommand';
-import { MergeBlocksCommand } from '../commands/MergeBlocksCommand';
-import { BlockCommand } from '../commands/BlockCommand';
-import { DuplicateBlockCommand } from '../commands/DuplicateBlockCommand';
-import { DeleteBlockCommand } from '../commands/DeleteBlockCommand';
+import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
+import { insertAtomAfter, core } from '@on-codemerge/sdk';
+import { pathFromEl, removeAtomAt } from '../../../utils/atomPath';
+import { layoutFromTree, leaf, serializeTree, split, splitAt, treeFromAttrs } from '../paneTree';
 
 export class BlockContextMenu {
-  private editor: HTMLEditor;
-  private contextMenu: ContextMenu;
+  private readonly editor: EditorAPI;
   private activeBlock: HTMLElement | null = null;
+  /** Path into attrs.tree children; null = operate on whole block root. */
+  private activePanePath: number[] | null = null;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI) {
     this.editor = editor;
-    this.contextMenu = new ContextMenu(
-      editor,
-      [
-        {
-          title: editor.t('Insert'),
-          icon: '➕',
-          subMenu: [
-            {
-              title: editor.t('Text Block'),
-              action: 'insert-text',
-              onClick: () => this.handleAction('insert-text'),
-            },
-            {
-              title: editor.t('Container Block'),
-              action: 'insert-container',
-              onClick: () => this.handleAction('insert-container'),
-            },
-            {
-              title: editor.t('Split Container'),
-              action: 'insert-split',
-              onClick: () => this.handleAction('insert-split'),
-            },
-          ],
-        },
-        {
-          title: editor.t('Split'),
-          icon: splitHorizontalIcon,
-          subMenu: [
-            {
-              title: editor.t('Horizontally'),
-              icon: splitHorizontalIcon,
-              action: 'split-horizontal',
-              onClick: () => this.handleAction('split-horizontal'),
-            },
-            {
-              title: editor.t('Vertically'),
-              icon: splitVerticalIcon,
-              action: 'split-vertical',
-              onClick: () => this.handleAction('split-vertical'),
-            },
-          ],
-        },
-        {
-          title: editor.t('Merge'),
-          icon: '🔗',
-          action: 'merge',
-          onClick: () => this.handleAction('merge'),
-        },
-        {
-          type: 'divider',
-        },
-        {
-          title: editor.t('Move'),
-          icon: moveIcon,
-          subMenu: [
-            {
-              title: editor.t('Up'),
-              action: 'move-up',
-              onClick: () => this.handleAction('move-up'),
-            },
-            {
-              title: editor.t('Down'),
-              action: 'move-down',
-              onClick: () => this.handleAction('move-down'),
-            },
-          ],
-        },
-        {
-          title: editor.t('Duplicate'),
-          icon: duplicateIcon,
-          action: 'duplicate',
-          onClick: () => this.handleAction('duplicate'),
-        },
-        {
-          type: 'divider',
-        },
-        {
-          title: editor.t('Settings'),
-          icon: '🔧',
-          subMenu: [
-            {
-              title: editor.t('Make Editable'),
-              action: 'make-editable',
-              onClick: () => this.handleAction('make-editable'),
-            },
-            {
-              title: editor.t('Make Read-only'),
-              action: 'make-readonly',
-              onClick: () => this.handleAction('make-readonly'),
-            },
-          ],
-        },
-        {
-          title: editor.t('Remove'),
-          icon: deleteIcon,
-          action: 'remove',
-          className: 'text-red-600',
-          onClick: () => this.handleAction('remove'),
-        },
-      ],
-      { orientation: 'vertical' }
-    );
   }
 
   private handleAction(action: string): void {
-    if (!this.activeBlock) return;
+    if (!this.activeBlock) {
+      return;
+    }
+    const path = pathFromEl(this.activeBlock);
+    const index = path?.[0] ?? this.editor.getSelection().anchor.path[0];
 
     switch (action) {
-      case 'insert-text':
-        this.insertBlock('text');
+      case 'insert-text': {
+        this.editor.run(() => [
+          {
+            type: 'insert_node',
+            path: [],
+            index: index + 1,
+            node: core.createParagraph([core.createText('')]),
+          },
+        ]);
         break;
-      case 'insert-container':
-        this.insertBlock('container');
-        break;
-      case 'insert-split':
-        this.insertBlock('split');
-        break;
-      case 'split-horizontal':
-        this.splitBlock('horizontal');
-        break;
-      case 'split-vertical':
-        this.splitBlock('vertical');
-        break;
-      case 'merge':
-        this.mergeBlocks();
-        break;
-      case 'move-up':
-        this.moveBlock('up');
-        break;
-      case 'move-down':
-        this.moveBlock('down');
-        break;
-      case 'duplicate':
-        this.duplicateBlock();
-        break;
-      case 'make-editable':
-        this.setBlockEditable(true);
-        break;
-      case 'make-readonly':
-        this.setBlockEditable(false);
-        break;
-      case 'remove':
-        this.removeBlock();
-        break;
-    }
-
-    // Закрываем меню после выполнения действия
-    this.hide();
-  }
-
-  private insertBlock(type: 'text' | 'container' | 'split'): void {
-    const command = new BlockCommand(this.editor);
-    command.execute({ type });
-  }
-
-  private splitBlock(direction: 'horizontal' | 'vertical'): void {
-    if (!this.activeBlock || !this.canSplit(this.activeBlock)) return;
-
-    const command = new SplitBlockCommand(this.editor);
-    command.setData({ direction, block: this.activeBlock });
-    command.execute();
-  }
-
-  private mergeBlocks(): void {
-    if (!this.activeBlock) return;
-
-    // Находим соседние блоки для объединения
-    const blocks = this.getAdjacentBlocks(this.activeBlock);
-    if (blocks.length < 2) return;
-
-    const command = new MergeBlocksCommand(this.editor);
-    command.setData({ blocks });
-    command.execute();
-  }
-
-  private moveBlock(direction: 'up' | 'down'): void {
-    if (!this.activeBlock) return;
-
-    if (direction === 'up') {
-      const prev = this.activeBlock.previousElementSibling;
-      if (prev && prev.classList.contains('editor-block')) {
-        prev.parentNode?.insertBefore(this.activeBlock, prev);
       }
-    } else {
-      const next = this.activeBlock.nextElementSibling;
-      if (next && next.classList.contains('editor-block')) {
-        next.parentNode?.insertBefore(next, this.activeBlock);
+      case 'insert-container': {
+        this.editor.run(
+          insertAtomAfter('block_container', { layout: 'stack', tree: serializeTree(leaf()) })
+        );
+        break;
+      }
+      case 'insert-split-row': {
+        this.editor.run(
+          insertAtomAfter('block_container', {
+            layout: 'row',
+            tree: serializeTree(split('row', [leaf(), leaf()])),
+          })
+        );
+        break;
+      }
+      case 'insert-split-column': {
+        this.editor.run(
+          insertAtomAfter('block_container', {
+            layout: 'column',
+            tree: serializeTree(split('column', [leaf(), leaf()])),
+          })
+        );
+        break;
+      }
+      case 'split-horizontal': {
+        this.applySplit('row');
+        break;
+      }
+      case 'split-vertical': {
+        this.applySplit('column');
+        break;
+      }
+      case 'duplicate': {
+        this.editor.run(() => {
+          const doc = this.editor.getJSON().doc;
+          const block = doc.content?.[index];
+          if (!block) {
+            return null;
+          }
+          return [
+            {
+              type: 'insert_node',
+              path: [],
+              index: index + 1,
+              node: core.cloneNode(block),
+            },
+          ];
+        });
+        break;
+      }
+      case 'delete': {
+        removeAtomAt(this.activeBlock, (cmd) => this.editor.run(cmd as never));
+        break;
+      }
+      case 'move-up': {
+        if (index > 0) {
+          this.editor.run(() => {
+            const doc = this.editor.getJSON().doc;
+            const block = doc.content?.[index];
+            if (!block) {
+              return null;
+            }
+            return [
+              { type: 'remove_node', path: [], index },
+              { type: 'insert_node', path: [], index: index - 1, node: core.cloneNode(block) },
+            ];
+          });
+        }
+        break;
+      }
+      case 'move-down': {
+        this.editor.run(() => {
+          const doc = this.editor.getJSON().doc;
+          const block = doc.content?.[index];
+          if (!block || index >= (doc.content?.length ?? 0) - 1) {
+            return null;
+          }
+          return [
+            { type: 'remove_node', path: [], index },
+            { type: 'insert_node', path: [], index: index + 1, node: core.cloneNode(block) },
+          ];
+        });
+        break;
+      }
+      default: {
+        break;
       }
     }
   }
 
-  private duplicateBlock(): void {
-    if (!this.activeBlock) return;
-
-    const command = new DuplicateBlockCommand(this.editor);
-    command.setData({ block: this.activeBlock });
-    command.execute();
-  }
-
-  private setBlockEditable(editable: boolean): void {
-    if (!this.activeBlock) return;
-
-    const content = this.activeBlock.querySelector('.block-content') as HTMLElement;
-    if (content) {
-      content.contentEditable = editable.toString();
+  /** Nest / extend the pane tree at the active pane (or root). Never wipe existing panes. */
+  private applySplit(dir: 'row' | 'column'): void {
+    if (!this.activeBlock) {
+      return;
     }
-  }
-
-  private removeBlock(): void {
-    if (!this.activeBlock) return;
-
-    const command = new DeleteBlockCommand(this.editor);
-    command.setBlock(this.activeBlock);
-    command.execute();
-  }
-
-  private canSplit(block: HTMLElement): boolean {
-    return (
-      block.classList.contains('editor-block') &&
-      !block.classList.contains('split-container') &&
-      block.getAttribute('data-block-type') === 'text'
-    );
-  }
-
-  private getAdjacentBlocks(block: HTMLElement): HTMLElement[] {
-    const blocks: HTMLElement[] = [];
-
-    // Добавляем текущий блок
-    blocks.push(block);
-
-    // Ищем предыдущие блоки
-    let prev = block.previousElementSibling;
-    while (
-      prev &&
-      prev.classList.contains('editor-block') &&
-      prev.getAttribute('data-block-type') === 'text'
-    ) {
-      blocks.unshift(prev as HTMLElement);
-      prev = prev.previousElementSibling;
+    const blockPath = pathFromEl(this.activeBlock);
+    if (!blockPath) {
+      return;
     }
-
-    // Ищем следующие блоки
-    let next = block.nextElementSibling;
-    while (
-      next &&
-      next.classList.contains('editor-block') &&
-      next.getAttribute('data-block-type') === 'text'
-    ) {
-      blocks.push(next as HTMLElement);
-      next = next.nextElementSibling;
-    }
-
-    return blocks;
+    const panePath = this.activePanePath ?? [];
+    this.editor.run(() => {
+      const doc = this.editor.getJSON().doc;
+      const node = core.getNodeAt(doc, blockPath);
+      if (node === null || node === undefined || node.type !== 'block_container') {
+        return null;
+      }
+      const prev = treeFromAttrs(node.attrs ?? {});
+      const next = splitAt(prev, panePath, dir);
+      return [
+        {
+          type: 'set_attrs',
+          path: blockPath,
+          attrs: {
+            tree: serializeTree(next),
+            layout: layoutFromTree(next),
+          },
+        },
+      ];
+    });
   }
 
-  public show(block: HTMLElement, x: number, y: number): void {
+  public show(block: HTMLElement, x: number, y: number, panePath: number[] | null = null): void {
     this.activeBlock = block;
-    this.contextMenu.show(block, x, y);
-  }
-
-  public hide(): void {
-    this.contextMenu.hide();
-    this.activeBlock = null;
+    this.activePanePath = panePath;
+    const t = (k: string) => this.editor.t(k) || k;
+    const items: MenuItem[] = [
+      {
+        label: t('common.insert'),
+        icon: insertIcon,
+        subMenu: [
+          {
+            label: t('block.textBlock'),
+            icon: textIcon,
+            onClick: () => {
+              this.handleAction('insert-text');
+            },
+          },
+          {
+            label: t('block.containerBlock'),
+            icon: blockIcon,
+            onClick: () => {
+              this.handleAction('insert-container');
+            },
+          },
+          {
+            label: t('Horizontal Split'),
+            icon: splitHorizontalIcon,
+            onClick: () => {
+              this.handleAction('insert-split-row');
+            },
+          },
+          {
+            label: t('Vertical Split'),
+            icon: splitVerticalIcon,
+            onClick: () => {
+              this.handleAction('insert-split-column');
+            },
+          },
+        ],
+      },
+      {
+        label: t('block.split'),
+        icon: splitHorizontalIcon,
+        subMenu: [
+          {
+            label: t('block.horizontally'),
+            icon: splitHorizontalIcon,
+            onClick: () => {
+              this.handleAction('split-horizontal');
+            },
+          },
+          {
+            label: t('block.vertically'),
+            icon: splitVerticalIcon,
+            onClick: () => {
+              this.handleAction('split-vertical');
+            },
+          },
+        ],
+      },
+      {
+        label: t('common.move'),
+        icon: moveIcon,
+        subMenu: [
+          {
+            label: t('common.up'),
+            icon: moveIcon,
+            onClick: () => {
+              this.handleAction('move-up');
+            },
+          },
+          {
+            label: t('common.down'),
+            icon: moveIcon,
+            onClick: () => {
+              this.handleAction('move-down');
+            },
+          },
+        ],
+      },
+      {
+        label: t('common.duplicate'),
+        icon: duplicateIcon,
+        onClick: () => {
+          this.handleAction('duplicate');
+        },
+      },
+      { type: 'divider' },
+      {
+        label: t('common.delete'),
+        icon: deleteIcon,
+        variant: 'danger',
+        onClick: () => {
+          this.handleAction('delete');
+        },
+      },
+    ];
+    this.editor.ui.menu.open(items, x, y);
   }
 
   public destroy(): void {
-    if (this.contextMenu && typeof this.contextMenu.destroy === 'function') {
-      this.contextMenu.destroy();
-    }
-
-    this.editor = null!;
-    this.contextMenu = null!;
     this.activeBlock = null;
+    this.activePanePath = null;
+    this.editor.ui.menu.hide();
   }
 }

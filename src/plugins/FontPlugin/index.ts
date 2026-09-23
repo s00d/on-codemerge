@@ -1,185 +1,139 @@
-import type { HTMLEditor } from '../../core/HTMLEditor';
-import { fontSizeIcon, boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '../../icons';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { DEFAULT_FONT_FAMILIES, DEFAULT_FONT_SIZES, DEFAULT_LINE_HEIGHTS } from './constants';
-import type { Plugin } from '../../core/Plugin';
-import { PopupManager } from '../../core/ui/PopupManager';
+import './style.scss';
 
-export class FontPlugin implements Plugin {
-  name = 'font';
-  hotkeys = [
-    {
-      keys: 'Ctrl+Shift+F',
-      description: 'Change font style',
-      command: 'font-style',
-      icon: '🔤',
+import { definePlugin, withMarkTarget, setMarkAttrs, setBlockAttr, core } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
+import { fontSizeIcon } from '../../icons';
+import { defaultDraft } from './constants';
+import type { FontDraft } from './constants';
+import { fontSettingsPanel } from './components/FontSettingsPanel';
+
+function markAttrAtSelection(editor: EditorAPI, markType: string, attr: string): string | null {
+  const state = editor.getState();
+  const range = core.selectionTextRange(state.selection);
+  if (!range) {
+    return null;
+  }
+  let para;
+  try {
+    para = core.getNodeAt(state.doc, range.path);
+  } catch {
+    return null;
+  }
+  const offset = range.from < range.to ? range.from : Math.max(0, range.from - 1);
+  let pos = 0;
+  for (const child of para.content ?? []) {
+    if (child.type !== 'text' || typeof child.text !== 'string') {
+      continue;
+    }
+    const len = child.text.length;
+    if (offset >= pos && offset < pos + len) {
+      const mark = child.marks?.find((m) => m.type === markType);
+      const v = mark?.attrs?.[attr];
+      return typeof v === 'string' && v ? v : null;
+    }
+    pos += len;
+  }
+  return null;
+}
+
+function blockLineHeight(editor: EditorAPI): string | null {
+  const path = editor.getSelection().anchor.path;
+  if (path.length === 0) {
+    return null;
+  }
+  try {
+    const node = core.getNodeAt(editor.getJSON().doc, [path[0]]);
+    const lh = node.attrs?.lineHeight;
+    return typeof lh === 'string' && lh ? lh : null;
+  } catch {
+    return null;
+  }
+}
+
+function readDraft(editor: EditorAPI): FontDraft {
+  const draft = defaultDraft();
+  const family = markAttrAtSelection(editor, 'fontFamily', 'family');
+  const size = markAttrAtSelection(editor, 'fontSize', 'size');
+  const lh = blockLineHeight(editor);
+  if (family) {
+    draft.family = family;
+  }
+  if (size) {
+    draft.size = size;
+  }
+  if (lh) {
+    draft.lineHeight = lh;
+  }
+  return draft;
+}
+
+/**
+ * Font family / size / line-height UI. Mark toggles (B/I/U/S) live in ToolbarPlugin —
+ * do not re-register the same toolbar ids.
+ */
+export function FontPlugin() {
+  return definePlugin({
+    name: 'font',
+    marks: [
+      { name: 'fontFamily', attrs: { family: 'Arial, Helvetica, sans-serif' } },
+      { name: 'fontSize', attrs: { size: '16px' } },
+    ],
+    commands: {
+      toggleBold: core.toggleMark('bold'),
+      toggleItalic: core.toggleMark('italic'),
+      toggleUnderline: core.toggleMark('underline'),
+      toggleStrike: core.toggleMark('strike'),
     },
-  ];
-  private editor: HTMLEditor | null = null;
-  private toolbarButtons: Map<string, HTMLElement> = new Map();
-  private fontButtons: Map<string, HTMLElement> = new Map();
-  private fontPopup: PopupManager | null = null;
-  private fontFamilies: string[] = [];
-  private font = 'Arial';
-  private size = '16px';
-  private lineHeight = 'normal';
+    hotkeys: [
+      { keys: 'Mod-b', command: 'toggleBold', description: 'Bold' },
+      { keys: 'Mod-i', command: 'toggleItalic', description: 'Italic' },
+      { keys: 'Mod-u', command: 'toggleUnderline', description: 'Underline' },
+      { keys: 'Mod-Shift-x', command: 'toggleStrike', description: 'Strikethrough' },
+    ],
+    setup(ctx) {
+      const editor = ctx.editor;
 
-  constructor() {}
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    // const container = editor.getContainer();
-    this.fontFamilies = this.getAvailableFonts();
-    this.fontPopup = new PopupManager(editor, {
-      title: editor.t('Font Settings'),
-      className: 'font-popup',
-      closeOnClickOutside: true,
-      items: [
-        {
-          type: 'list',
-          id: 'font-family',
-          label: editor.t('Font Family'),
-          options: this.fontFamilies,
-          value: this.font,
-          onChange: (value) => (this.font = value.toString()),
-        },
-        {
-          type: 'list',
-          id: 'font-size',
-          label: editor.t('Font Size'),
-          options: DEFAULT_FONT_SIZES,
-          value: this.size,
-          onChange: (value) => (this.size = value.toString()),
-        },
-        {
-          type: 'list',
-          id: 'line-height',
-          label: editor.t('Line Height'),
-          options: DEFAULT_LINE_HEIGHTS,
-          value: this.lineHeight,
-          onChange: (value) => (this.lineHeight = value.toString()),
-        },
-      ],
-      buttons: [
-        {
-          label: editor.t('Confirm'),
-          variant: 'primary',
-          onClick: () => this.applyFontSettings(),
-        },
-        {
-          label: editor.t('Clear'),
-          variant: 'danger',
-          onClick: () => this.clearFontSettings(),
-        },
-        {
-          label: editor.t('Cancel'),
-          variant: 'secondary',
-          onClick: () => this.fontPopup?.hide(),
-        },
-      ],
-    });
-    this.addToolbarButtons();
-    this.editor.on('selectionchange', () => this.handleSelectionChange());
-
-    this.editor.on('font', () => {
-      this.fontPopup?.show();
-    });
-  }
-
-  private addToolbarButtons(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      const buttons = [
-        { icon: boldIcon, title: 'Bold', style: 'bold' },
-        { icon: italicIcon, title: 'Italic', style: 'italic' },
-        { icon: underlineIcon, title: 'Underline', style: 'underline' },
-        { icon: strikethroughIcon, title: 'Strikethrough', style: 'strikethrough' },
-      ];
-
-      buttons.forEach(({ icon, title, style }) => {
-        const button = createToolbarButton({
-          icon,
-          title,
-          onClick: () => {
-            this.editor?.getTextFormatter()?.toggleStyle(style);
-            this.handleSelectionChange();
-          },
-        });
-        toolbar.appendChild(button);
-        this.toolbarButtons.set(style, button);
-      });
-
-      const fontSettingsButton = createToolbarButton({
+      ctx.toolbar.add({
+        id: 'font-settings',
         icon: fontSizeIcon,
-        title: this.editor?.t('Font Settings'),
+        title: editor.t('font.settings'),
+        group: 'format',
+        order: 14,
         onClick: () => {
-          let fontFamily = this.editor?.getTextFormatter()?.getStyle('fontFamily');
-          if (fontFamily === '') fontFamily = null;
-          this.fontPopup?.setValue('font-family', fontFamily ?? 'Arial');
-          let fontSize = this.editor?.getTextFormatter()?.getStyle('fontSize');
-          if (fontSize === '') fontSize = null;
-          this.fontPopup?.setValue('font-size', fontSize ?? '16px');
-          let lineHeight = this.editor?.getTextFormatter()?.getStyle('lineHeight');
-          if (lineHeight === '') lineHeight = null;
-          this.fontPopup?.setValue('line-height', lineHeight ?? 'normal');
-          this.fontPopup?.show();
+          const draft = readDraft(editor);
+          ctx.popup.open({
+            title: editor.t('font.settings'),
+            className: 'font-settings-modal',
+            size: 'md',
+            closeOnClickOutside: true,
+            items: [
+              {
+                type: 'view',
+                id: 'font-panel',
+                view: () => fontSettingsPanel(editor, draft),
+              },
+            ],
+            buttons: [
+              {
+                label: editor.t('common.cancel'),
+                variant: 'secondary',
+                onClick: () => {},
+              },
+              {
+                label: editor.t('common.apply'),
+                variant: 'primary',
+                onClick: () => {
+                  withMarkTarget(editor, () => {
+                    editor.run(setMarkAttrs('fontFamily', { family: draft.family }));
+                    editor.run(setMarkAttrs('fontSize', { size: draft.size }));
+                  });
+                  editor.run(setBlockAttr('lineHeight', draft.lineHeight));
+                },
+              },
+            ],
+          });
         },
       });
-      toolbar.appendChild(fontSettingsButton);
-      this.fontButtons.set('fontSize', fontSettingsButton);
-    }
-  }
-
-  private handleSelectionChange(): void {
-    // Проверяем, какие стили применены к выделенному тексту
-    this.toolbarButtons.forEach((button, style) => {
-      const isActive = this.editor?.getTextFormatter()?.hasClass(style);
-      if (isActive) {
-        button.classList.add('active'); // Добавляем класс для активной кнопки
-      } else {
-        button.classList.remove('active'); // Убираем класс, если стиль не применен
-      }
-    });
-  }
-
-  private getAvailableFonts(): string[] {
-    const loadedFonts = this.getLoadedFonts();
-    return [...new Set([...DEFAULT_FONT_FAMILIES, ...loadedFonts])];
-  }
-
-  private getLoadedFonts(): string[] {
-    const fonts = new Set<string>();
-    document.fonts.forEach((fontFace) => {
-      fonts.add(fontFace.family);
-    });
-    return Array.from(fonts);
-  }
-
-  private applyFontSettings(): void {
-    this.editor?.getTextFormatter()?.setFont(this.font, this.size, this.lineHeight);
-    if (this.fontPopup) {
-      this.fontPopup.hide();
-    }
-  }
-
-  private clearFontSettings(): void {
-    this.editor?.getTextFormatter()?.clearFont();
-    if (this.fontPopup) {
-      this.fontPopup.hide();
-    }
-  }
-
-  destroy(): void {
-    this.toolbarButtons.forEach((button) => button.remove());
-    this.toolbarButtons.clear();
-    this.fontButtons.forEach((button) => button.remove());
-    this.fontButtons.clear();
-
-    this.editor?.off('selectionchange');
-
-    this.fontPopup?.destroy();
-    this.fontPopup = null;
-
-    this.editor = null;
-  }
+    },
+  });
 }

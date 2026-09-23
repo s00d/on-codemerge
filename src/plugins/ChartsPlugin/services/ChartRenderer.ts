@@ -8,14 +8,14 @@ import { RadarChartRenderer } from '../renderers/RadarChartRenderer';
 import { ScatterChartRenderer } from '../renderers/ScatterChartRenderer';
 import { BubbleChartRenderer } from '../renderers/BubbleChartRenderer';
 import { normalizeChartData } from '../utils/validation';
-import type { BaseChartRenderer } from '../renderers/BaseChartRenderer.ts';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
-import { createCanvas } from '../../../utils/helpers.ts';
+import type { BaseChartRenderer } from '../renderers/BaseChartRenderer';
+import { canvas, renderDetached } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
 
 export class ChartRenderer {
-  private renderers: Map<ChartType, BaseChartRenderer>;
+  private readonly renderers: Map<ChartType, BaseChartRenderer>;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI) {
     this.renderers = new Map<ChartType, BaseChartRenderer>([
       ['bar', new BarChartRenderer(editor)],
       ['line', new LineChartRenderer(editor)],
@@ -33,15 +33,16 @@ export class ChartRenderer {
     data: ChartPoint[] | ChartSeries[],
     options: ChartOptions
   ): HTMLImageElement {
-    const canvas = createCanvas();
+    const { el } = renderDetached(canvas());
+    const canvasEl = el as HTMLCanvasElement;
     const dpr = window.devicePixelRatio || 1;
 
-    canvas.width = options.width * dpr;
-    canvas.height = options.height * dpr;
-    canvas.style.width = `${options.width}px`;
-    canvas.style.height = `${options.height}px`;
+    canvasEl.width = options.width * dpr;
+    canvasEl.height = options.height * dpr;
+    canvasEl.style.width = `${options.width}px`;
+    canvasEl.style.height = `${options.height}px`;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvasEl.getContext('2d');
     if (!ctx) {
       throw new Error('Failed to get 2D context');
     }
@@ -61,6 +62,7 @@ export class ChartRenderer {
 
       // For pie/doughnut charts, use only first series
       const chartData =
+        // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
         type === 'pie' || type === 'doughnut' ? normalizedData[0]?.data || [] : normalizedData;
 
       renderer.render(ctx, chartData, options);
@@ -69,7 +71,7 @@ export class ChartRenderer {
     // Convert canvas to Data URL and create an image
     const img = new Image();
     img.className = 'svg-chart';
-    img.src = canvas.toDataURL('image/png');
+    img.src = canvasEl.toDataURL('image/png');
     img.width = options.width;
     img.height = options.height;
 

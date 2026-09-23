@@ -20,11 +20,13 @@ This demo application shows the main capabilities of the on-codemerge editor:
 ## Installation
 
 1. Make sure you have pnpm installed:
+
 ```bash
 npm install -g pnpm
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
@@ -32,6 +34,7 @@ pnpm install
 ## Running
 
 ### Development mode
+
 ```bash
 pnpm dev
 ```
@@ -39,11 +42,13 @@ pnpm dev
 The application will open in your browser at http://localhost:3001
 
 ### Production build
+
 ```bash
 pnpm build
 ```
 
 ### Preview build
+
 ```bash
 pnpm preview
 ```

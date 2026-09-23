@@ -1,6 +1,4 @@
-.templates-menu {
-  @apply max-w-xl w-full;
-}
+@reference "../../tailwind.css";
 
 .template-item {
   @apply transition-colors;
@@ -18,7 +16,7 @@
 
 .template-name,
 .template-content {
-  @apply block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500;
+  @apply block w-full rounded-ocm-sm border-ocm-border shadow-sm focus:border-ocm-accent focus:ring-ocm-accent;
 }
 
 .template-content {

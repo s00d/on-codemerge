@@ -39,7 +39,7 @@ export class LineChartRenderer extends BaseChartRenderer {
 
     // Draw lines and points
     validData.forEach((series, index) => {
-      const color = series.color || colors[index % colors.length];
+      const color = series.color ?? colors[index % colors.length];
       this.drawLine(ctx, series, options, scale, color);
       this.drawPoints(ctx, series, options, scale, color);
     });

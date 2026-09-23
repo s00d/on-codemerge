@@ -17,93 +17,43 @@ The Form Builder Plugin provides comprehensive form creation and management capa
 - **Accessibility**: ARIA labels and keyboard navigation support
 - **Improved UX**: Better notifications, reactive interface updates, and compact option editors
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, FormBuilderPlugin } from 'on-codemerge';
+import { Editor, FormBuilderPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-const editor = new HTMLEditor(container);
-editor.use(new FormBuilderPlugin());
+const editor = new Editor(container, {
+  plugins: [FormBuilderPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['FormBuilderPlugin']" />
 
-## Architecture
+## Internals (not a public SDK)
 
-The plugin follows a modular architecture with clear separation of concerns:
+UI lives in plugin modules (`FormBuilderModal`, `TemplateManager`, widget mount). There is **no** public `plugin.initialize()` / `FormManager` API on the sealed factory return value.
 
-### Core Components
+Public surface:
 
-- **FormBuilderModal**: Main modal for form creation and editing
-- **FormPopup**: Quick form insertion popup
-- **TemplatesModal**: Template selection modal
-- **FieldEditor**: Enhanced field configuration interface with type-specific options
-- **FormPreview**: Live form preview component with improved rendering
+| Piece                          | Role                                                |
+| ------------------------------ | --------------------------------------------------- |
+| `FormBuilderPlugin()`          | Factory for `plugins: [...]`                        |
+| `editor.command('insertForm')` | Open builder / insert `form` atom                   |
+| Atom `form`                    | Attrs `schema` (JSON string of fields) and `action` |
+| Toolbar                        | Insert menu → form                                  |
+| Hotkey                         | `Mod-Alt-F` → `insertForm`                          |
 
-### Services
-
-- **FormManager**: Central form state management and HTML generation with improved option handling
-- **TemplateManager**: Template creation and management
-- **FieldBuilder**: Field creation and configuration
-
-### Commands
-
-- **DeleteFormCommand**: Handles form deletion
-- **DuplicateFormCommand**: Handles form duplication
-
-## API Reference
-
-### Plugin Methods
-
-```javascript
-// Initialize plugin
-plugin.initialize(editor);
-
-// Destroy plugin
-plugin.destroy();
-```
-
-### FormManager Methods
-
-```javascript
-// Add field to form
-formManager.addField(typeOrField, options);
-
-// Update field with improved option merging
-formManager.updateField(fieldId, updates);
-
-// Remove field
-formManager.removeField(fieldId);
-
-// Move field
-formManager.moveField(fieldId, newPosition);
-
-// Get fields
-formManager.getFields();
-
-// Create form configuration
-formManager.createFormConfig(action, method);
-
-// Create HTML form
-formManager.createForm(formConfig);
-
-// Load form from element
-formManager.loadForm(element);
-
-// Parse form element
-formManager.parseForm(element);
-```
+Context-menu edit / duplicate / delete operate on the selected form widget in the document.
 
 ### Field Types
 
@@ -111,11 +61,29 @@ The plugin supports all standard HTML input types:
 
 ```typescript
 type FieldType =
-  | 'text' | 'textarea' | 'select' | 'checkbox' | 'radio'
-  | 'button' | 'file' | 'date' | 'time' | 'range' | 'email'
-  | 'password' | 'number' | 'tel' | 'url' | 'color'
-  | 'datetime-local' | 'month' | 'week' | 'hidden' | 'image'
-  | 'submit' | 'reset';
+  | 'text'
+  | 'textarea'
+  | 'select'
+  | 'checkbox'
+  | 'radio'
+  | 'button'
+  | 'file'
+  | 'date'
+  | 'time'
+  | 'range'
+  | 'email'
+  | 'password'
+  | 'number'
+  | 'tel'
+  | 'url'
+  | 'color'
+  | 'datetime-local'
+  | 'month'
+  | 'week'
+  | 'hidden'
+  | 'image'
+  | 'submit'
+  | 'reset';
 ```
 
 ### Field Configuration
@@ -152,7 +120,8 @@ interface FieldOptions {
   readonly src?: string;
   readonly alt?: string;
   readonly options?: readonly string[];
-  readonly autocomplete?: 'on' | 'off' | 'name' | 'email' | 'tel' | 'url' | 'current-password' | 'new-password';
+  readonly autocomplete?:
+    'on' | 'off' | 'name' | 'email' | 'tel' | 'url' | 'current-password' | 'new-password';
 }
 
 interface ValidationRules {
@@ -206,11 +175,11 @@ const checkboxField = {
   options: {
     name: 'terms',
     value: 'I agree to the terms and conditions', // Checkbox text
-    checked: false // Default state
+    checked: false, // Default state
   },
   validation: {
-    required: true
-  }
+    required: true,
+  },
 };
 ```
 
@@ -225,7 +194,7 @@ The plugin includes new CSS classes for improved styling:
   gap: 0.5rem;
 }
 
-.checkbox-container input[type="checkbox"] {
+.checkbox-container input[type='checkbox'] {
   margin: 0;
   flex-shrink: 0;
 }
@@ -238,21 +207,23 @@ The plugin includes new CSS classes for improved styling:
 
 ## Keyboard Shortcuts
 
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+F` | Insert form | `form` |
+| Shortcut     | Description | Command |
+| ------------ | ----------- | ------- |
+| `Ctrl+Alt+F` | Insert form | `form`  |
 
 ## Form Templates
 
 The plugin includes pre-built templates for common use cases. All templates include proper validation with required fields marked appropriately.
 
 ### Contact Form Template
+
 - Name field (text) - **Required**
 - Email field (email) - **Required**
 - Phone field (tel)
 - Message field (textarea) - **Required**
 
 ### Registration Form Template
+
 - Username field (text) - **Required** (min 3 characters)
 - Email field (email) - **Required**
 - Password field (password) - **Required** (min 6 characters)
@@ -260,6 +231,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Terms agreement (checkbox) - **Required**
 
 ### Survey Form Template
+
 - Name field (text) - **Required**
 - Age group (select with options) - **Required**
 - Gender (radio buttons) - **Required**
@@ -267,6 +239,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Service rating (range) - **Required**
 
 ### Payment Form Template
+
 - Card number (text) - **Required** (13-19 digits)
 - Cardholder name (text) - **Required**
 - Expiry date (text) - **Required** (MM/YY format)
@@ -274,6 +247,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Amount (number) - **Required** (min 0.01)
 
 ### Order Form Template
+
 - Product name (text) - **Required**
 - Quantity (number) - **Required** (min 1)
 - Customer name (text) - **Required**
@@ -284,6 +258,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Special instructions (textarea)
 
 ### Feedback Form Template
+
 - Your name (text) - **Required**
 - Email (email) - **Required**
 - Feedback type (select: Bug Report, Feature Request, General Feedback, Complaint, Praise) - **Required**
@@ -293,6 +268,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Allow contact (checkbox)
 
 ### Resume Form Template
+
 - Full name (text) - **Required**
 - Email (email) - **Required**
 - Phone (tel) - **Required**
@@ -305,6 +281,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Terms agreement (checkbox) - **Required**
 
 ### Booking Form Template
+
 - Full name (text) - **Required**
 - Email (email) - **Required**
 - Phone (tel) - **Required**
@@ -316,6 +293,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Booking confirmation (checkbox) - **Required**
 
 ### Newsletter Subscription Template
+
 - First name (text) - **Required**
 - Last name (text) - **Required**
 - Email address (email) - **Required**
@@ -326,6 +304,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Email consent (checkbox) - **Required**
 
 ### Customer Satisfaction Survey Template
+
 - Customer name (text) - **Required**
 - Email (email) - **Required**
 - Product/service used (select) - **Required**
@@ -337,6 +316,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Feedback permission (checkbox)
 
 ### Job Application Form Template
+
 - First name (text) - **Required**
 - Last name (text) - **Required**
 - Email (email) - **Required**
@@ -351,6 +331,7 @@ The plugin includes pre-built templates for common use cases. All templates incl
 - Terms agreement (checkbox) - **Required**
 
 ### Support Ticket Form Template
+
 - Full name (text) - **Required**
 - Email (email) - **Required**
 - Phone (tel) - **Required**
@@ -366,44 +347,6 @@ The plugin includes pre-built templates for common use cases. All templates incl
 
 ### Basic Form Creation
 
-```javascript
-// Create a simple contact form
-const formConfig = {
-  id: 'contact-form',
-  method: 'POST',
-  action: '/contact',
-  className: 'contact-form',
-  fields: [
-    {
-      id: 'name',
-      type: 'text',
-      label: 'Name',
-      options: {
-        name: 'name',
-        placeholder: 'Enter your name'
-      },
-      validation: {
-        required: true
-      }
-    },
-    {
-      id: 'email',
-      type: 'email',
-      label: 'Email',
-      options: {
-        name: 'email',
-        placeholder: 'Enter your email'
-      },
-      validation: {
-        required: true
-      }
-    }
-  ]
-};
-
-const formHtml = formManager.createForm(formConfig);
-```
-
 ### Enhanced Checkbox Form
 
 ```javascript
@@ -418,13 +361,13 @@ const registrationForm = {
       label: 'Username',
       options: {
         name: 'username',
-        placeholder: 'Enter username'
+        placeholder: 'Enter username',
       },
       validation: {
         required: true,
         minLength: 3,
-        pattern: '^[a-zA-Z0-9_]+$'
-      }
+        pattern: '^[a-zA-Z0-9_]+$',
+      },
     },
     {
       id: 'terms',
@@ -433,11 +376,11 @@ const registrationForm = {
       options: {
         name: 'terms',
         value: 'I agree to the terms and conditions',
-        checked: false
+        checked: false,
       },
       validation: {
-        required: true
-      }
+        required: true,
+      },
     },
     {
       id: 'newsletter',
@@ -446,13 +389,13 @@ const registrationForm = {
       options: {
         name: 'newsletter',
         value: 'Subscribe to newsletter',
-        checked: true
+        checked: true,
       },
       validation: {
-        required: false
-      }
-    }
-  ]
+        required: false,
+      },
+    },
+  ],
 };
 ```
 
@@ -470,13 +413,13 @@ const registrationForm = {
       label: 'Username',
       options: {
         name: 'username',
-        placeholder: 'Enter username'
+        placeholder: 'Enter username',
       },
       validation: {
         required: true,
         minLength: 3,
-        pattern: '^[a-zA-Z0-9_]+$'
-      }
+        pattern: '^[a-zA-Z0-9_]+$',
+      },
     },
     {
       id: 'age',
@@ -485,15 +428,15 @@ const registrationForm = {
       options: {
         name: 'age',
         min: 18,
-        max: 120
+        max: 120,
       },
       validation: {
         required: true,
         min: 18,
-        max: 120
-      }
-    }
-  ]
+        max: 120,
+      },
+    },
+  ],
 };
 ```
 
@@ -506,11 +449,11 @@ const selectField = {
   label: 'Country',
   options: {
     name: 'country',
-    options: ['United States', 'Canada', 'United Kingdom', 'Germany', 'France']
+    options: ['United States', 'Canada', 'United Kingdom', 'Germany', 'France'],
   },
   validation: {
-    required: true
-  }
+    required: true,
+  },
 };
 ```
 
@@ -592,6 +535,7 @@ You can customize the appearance by overriding CSS variables:
 ## Browser Support
 
 The plugin supports all modern browsers that support:
+
 - ES6+ features
 - CSS Grid and Flexbox
 - HTML5 form elements
@@ -600,6 +544,7 @@ The plugin supports all modern browsers that support:
 ## Performance
 
 The plugin is optimized for performance with:
+
 - Lazy loading of components
 - Efficient DOM manipulation
 - Minimal re-renders
@@ -608,4 +553,4 @@ The plugin is optimized for performance with:
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

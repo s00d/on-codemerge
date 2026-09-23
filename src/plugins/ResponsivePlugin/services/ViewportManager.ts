@@ -18,13 +18,9 @@ export class ViewportManager {
   constructor() {
     // responsive по умолчанию, desktop игнорируем как дефолт
     let initial: Viewport = 'responsive';
-    const savedViewport = localStorage.getItem('responsive-viewport') as Viewport;
-    if (
-      savedViewport &&
-      savedViewport !== 'desktop' &&
-      VIEWPORT_SIZES[savedViewport as keyof typeof VIEWPORT_SIZES]
-    ) {
-      initial = savedViewport;
+    const savedRaw = localStorage.getItem('responsive-viewport');
+    if (savedRaw !== null && savedRaw !== 'desktop' && savedRaw in VIEWPORT_SIZES) {
+      initial = savedRaw as Viewport;
     }
     this.currentViewport = initial;
   }
@@ -36,7 +32,7 @@ export class ViewportManager {
     // Сохраняем в localStorage
     localStorage.setItem('responsive-viewport', viewport);
 
-    const size = VIEWPORT_SIZES[viewport as keyof typeof VIEWPORT_SIZES];
+    const size = VIEWPORT_SIZES[viewport];
 
     // Добавляем анимацию перехода
     container.style.transition = 'width 0.3s ease-in-out, margin 0.3s ease-in-out';
@@ -64,7 +60,9 @@ export class ViewportManager {
   }
 
   public getCurrentWidth(): number {
-    if (!this.container) return window.innerWidth;
+    if (!this.container) {
+      return window.innerWidth;
+    }
     return this.container.offsetWidth;
   }
 
@@ -73,7 +71,9 @@ export class ViewportManager {
   }
 
   private notifyChange(viewport: Viewport, width: number): void {
-    this.changeHandlers.forEach((handler) => handler(viewport, width));
+    this.changeHandlers.forEach((handler) => {
+      handler(viewport, width);
+    });
   }
 
   private setupResizeObserver(): void {

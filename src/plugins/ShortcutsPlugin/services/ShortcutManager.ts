@@ -17,8 +17,8 @@ interface ShortcutStats {
 }
 
 export class ShortcutManager {
-  private shortcuts: Map<string, Shortcut> = new Map();
-  private isMac: boolean;
+  private readonly shortcuts = new Map<string, Shortcut>();
+  private readonly isMac: boolean;
   private stats: ShortcutStats = {
     totalShortcuts: 0,
     mostUsed: [],
@@ -27,7 +27,7 @@ export class ShortcutManager {
   };
 
   constructor() {
-    this.isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+    this.isMac = navigator.platform.toUpperCase().includes('MAC');
   }
 
   public register(
@@ -65,9 +65,15 @@ export class ShortcutManager {
     const pressedKeys: string[] = [];
 
     // Определяем модификаторы
-    if (this.isMac ? event.metaKey : event.ctrlKey) pressedKeys.push('ctrl');
-    if (event.shiftKey) pressedKeys.push('shift');
-    if (event.altKey) pressedKeys.push('alt');
+    if (this.isMac ? event.metaKey : event.ctrlKey) {
+      pressedKeys.push('ctrl');
+    }
+    if (event.shiftKey) {
+      pressedKeys.push('shift');
+    }
+    if (event.altKey) {
+      pressedKeys.push('alt');
+    }
 
     // Добавляем основную клавишу
     const key = this.normalizeKey(event.key);
@@ -135,11 +141,13 @@ export class ShortcutManager {
   }
 
   private matchesShortcut(pressed: string[], defined: string[]): boolean {
-    if (pressed.length !== defined.length) return false;
+    if (pressed.length !== defined.length) {
+      return false;
+    }
 
     // Сортируем массивы для корректного сравнения
-    const sortedPressed = [...pressed].sort();
-    const sortedDefined = [...defined].sort();
+    const sortedPressed = [...pressed].toSorted();
+    const sortedDefined = [...defined].toSorted();
 
     return sortedDefined.every((key, index) => sortedPressed[index] === key);
   }
@@ -149,7 +157,9 @@ export class ShortcutManager {
     const newKeys = this.isMac && newShortcut.keysMac ? newShortcut.keysMac : newShortcut.keys;
 
     for (const [id, shortcut] of this.shortcuts) {
-      if (id === newShortcut.id) continue;
+      if (id === newShortcut.id) {
+        continue;
+      }
 
       const shortcutKeys = this.isMac && shortcut.keysMac ? shortcut.keysMac : shortcut.keys;
       if (this.matchesShortcut(newKeys, shortcutKeys)) {
@@ -161,26 +171,27 @@ export class ShortcutManager {
   }
 
   private updateStats(): void {
-    const shortcuts = Array.from(this.shortcuts.values());
+    const shortcuts = [...this.shortcuts.values()];
 
     // Самые используемые
-    this.stats.mostUsed = shortcuts.sort((a, b) => b.usageCount - a.usageCount).slice(0, 5);
+    this.stats.mostUsed = shortcuts.toSorted((a, b) => b.usageCount - a.usageCount).slice(0, 5);
 
     // Недавно использованные
     this.stats.recentlyUsed = shortcuts
       .filter((s) => s.lastUsed > 0)
-      .sort((a, b) => b.lastUsed - a.lastUsed)
+      .toSorted((a, b) => b.lastUsed - a.lastUsed)
       .slice(0, 5);
   }
 
   public getShortcuts(): Shortcut[] {
-    return Array.from(this.shortcuts.values());
+    return [...this.shortcuts.values()];
   }
 
   public getShortcutsByCategory(): Record<string, Shortcut[]> {
     const categories: Record<string, Shortcut[]> = {};
 
     for (const shortcut of this.shortcuts.values()) {
+      // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
       if (!categories[shortcut.category]) {
         categories[shortcut.category] = [];
       }

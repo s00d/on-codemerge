@@ -9,8 +9,15 @@ lerna-debug.log*
 
 node_modules
 dist
+dist-e2e
 dist-ssr
 *.local
+
+# Legacy package-root CSS/fonts (pre dist-only layout)
+/public.css
+/index.css
+/tailwind.css
+/fonts
 
 # Editor directories and files
 .vscode/*
@@ -25,3 +32,15 @@ dist-ssr
 
 docs/.vitepress/dist
 docs/.vitepress/cache
+
+coverage
+test/.untestutils
+.untestutils
+.output
+.cursor
+test-results
+playwright-report
+blob-report
+
+# pnpm is the package manager; do not commit divergent npm locks
+package-lock.json

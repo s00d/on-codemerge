@@ -1,23 +1,17 @@
-/* File upload menu */
-.file-upload-menu {
-  @apply max-w-lg w-full;
-}
+@reference "../../tailwind.css";
 
-/* Upload area */
 .upload-area {
   @apply transition-colors duration-200;
 
   &.drag-over {
-    @apply border-blue-500 bg-blue-50;
+    @apply border-ocm-accent bg-ocm-accent-soft;
   }
 
-  /* Responsive */
   @media (max-width: 640px) {
     @apply p-4;
   }
 }
 
-/* Progress bar */
 .progress-bar {
   @apply mt-4;
 
@@ -26,16 +20,14 @@
   }
 }
 
-/* File link */
 .file-link {
-  @apply inline-flex items-center gap-2 px-3 py-1.5 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm text-gray-700;
+  @apply inline-flex items-center gap-2 px-3 py-1.5 bg-ocm-surface-muted hover:bg-ocm-border-subtle rounded-ocm text-sm text-ocm-text;
 
   svg {
-    @apply text-gray-500;
+    @apply text-ocm-text-muted;
   }
 }
 
-/* Hover effects */
 .browse-button {
   &:hover {
     @apply underline;

@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+@import '../packages/sdk/src/ui/ocm-theme.css';
+@plugin '@tailwindcss/typography';
+
+@source './**/*.{ts,vue,scss}';
+@source '../packages/sdk/src/**/*.{ts,scss}';

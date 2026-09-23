@@ -1,12 +1,12 @@
 import type { ChartOptions } from '../types';
 import { CHART_COLORS, colorWithOpacity } from '../utils/colors';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
+import type { EditorAPI } from '@on-codemerge/sdk';
 
 export abstract class BaseChartRenderer {
-  protected editor: HTMLEditor;
+  protected editor: EditorAPI;
   protected colors = CHART_COLORS;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI) {
     this.editor = editor;
   }
 
@@ -17,7 +17,7 @@ export abstract class BaseChartRenderer {
   }
 
   protected getDimensions(options: ChartOptions) {
-    const padding = Math.max(40, options.padding || 40);
+    const padding = Math.max(40, options.padding ?? 40);
     const width = Math.max(0, options.width - padding * 2);
     const height = Math.max(0, options.height - padding * 2);
     return { padding, width, height };
@@ -37,7 +37,7 @@ export abstract class BaseChartRenderer {
     ctx.textBaseline = 'middle';
     ctx.font = '14px Inter, system-ui, sans-serif';
     ctx.fillText(
-      this.editor.t('No valid data points to display'),
+      this.editor.t('common.noValidDataPointsToDisplay'),
       options.width / 2,
       options.height / 2
     );
@@ -48,7 +48,7 @@ export abstract class BaseChartRenderer {
     ctx: CanvasRenderingContext2D,
     options: ChartOptions,
     maxValue: number,
-    showXAxis: boolean = true,
+    showXAxis = true,
     xLabels?: string[],
     chartType?: string
   ): void {
@@ -59,12 +59,12 @@ export abstract class BaseChartRenderer {
     const { padding, width, height } = this.getDimensions(options);
 
     ctx.save();
-    ctx.strokeStyle = options.grid?.color || this.getGridColor(options);
-    ctx.lineWidth = options.grid?.width || 1;
+    ctx.strokeStyle = options.grid?.color ?? this.getGridColor(options);
+    ctx.lineWidth = options.grid?.width ?? 1;
     ctx.setLineDash(
       options.grid?.style === 'dashed' ? [5, 5] : options.grid?.style === 'dotted' ? [2, 2] : []
     );
-    ctx.globalAlpha = options.grid?.opacity || 0.3;
+    ctx.globalAlpha = options.grid?.opacity ?? 0.3;
     ctx.fillStyle = '#6b7280';
     ctx.font = '12px Inter, system-ui, sans-serif';
 
@@ -124,7 +124,11 @@ export abstract class BaseChartRenderer {
     ctx.restore();
   }
 
-  protected drawLegend(ctx: CanvasRenderingContext2D, data: any[], options: ChartOptions): void {
+  protected drawLegend(
+    ctx: CanvasRenderingContext2D,
+    data: { name?: string; color?: string }[],
+    options: ChartOptions
+  ): void {
     if (options.legend && options.legend.show === false) {
       return;
     }
@@ -134,8 +138,8 @@ export abstract class BaseChartRenderer {
     let legendX = padding;
 
     data.forEach((series, i) => {
-      const name = series.name || this.editor.t('Series') + ` ${i + 1}`;
-      const color = series.color || this.getColors(options)[i % this.getColors(options).length];
+      const name = series.name ?? `${this.editor.t('charts.series')} ${i + 1}`;
+      const color = series.color ?? this.getColors(options)[i % this.getColors(options).length];
 
       // Draw color indicator
       ctx.beginPath();
@@ -159,6 +163,7 @@ export abstract class BaseChartRenderer {
     if (options.colors && options.colors.length > 0) {
       return options.colors;
     }
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
     if (options.theme && options.theme.colors && options.theme.colors.primary) {
       return options.theme.colors.primary;
     }
@@ -166,6 +171,7 @@ export abstract class BaseChartRenderer {
   }
 
   protected getTextColor(options: ChartOptions): string {
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
     if (options.theme && options.theme.colors && options.theme.colors.text) {
       return options.theme.colors.text;
     }
@@ -173,6 +179,7 @@ export abstract class BaseChartRenderer {
   }
 
   protected getBackgroundColor(options: ChartOptions): string {
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
     if (options.theme && options.theme.colors && options.theme.colors.background) {
       return options.theme.colors.background;
     }
@@ -180,6 +187,7 @@ export abstract class BaseChartRenderer {
   }
 
   protected getGridColor(options: ChartOptions): string {
+    // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
     if (options.theme && options.theme.colors && options.theme.colors.grid) {
       return options.theme.colors.grid;
     }
@@ -187,7 +195,9 @@ export abstract class BaseChartRenderer {
   }
 
   protected drawTitle(ctx: CanvasRenderingContext2D, options: ChartOptions): void {
-    if (!options.title) return;
+    if (!options.title) {
+      return;
+    }
 
     ctx.save();
     ctx.fillStyle = this.getTextColor(options);

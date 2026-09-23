@@ -5,7 +5,7 @@ export function isChartSeries(item: ChartPoint | ChartSeries): item is ChartSeri
 }
 
 export function validateChartData(data: ChartPoint[] | ChartSeries[]): boolean {
-  if (!data || !Array.isArray(data) || data.length === 0) {
+  if (!Array.isArray(data) || data.length === 0) {
     console.warn('Invalid chart data: Data must be a non-empty array');
     return false;
   }
@@ -14,19 +14,18 @@ export function validateChartData(data: ChartPoint[] | ChartSeries[]): boolean {
     // Multi-series data
     return data.every((series) => {
       const seriesData = series as ChartSeries;
-      if (!seriesData.data || !Array.isArray(seriesData.data) || seriesData.data.length === 0) {
+      if (!Array.isArray(seriesData.data) || seriesData.data.length === 0) {
         console.warn('Invalid series data: Each series must have a non-empty data array');
         return false;
       }
       return seriesData.data.every((point) => isValidPoint(point));
     });
-  } else {
-    return data.every((point) => isValidPoint(point as ChartPoint));
   }
+  return data.every((point) => isValidPoint(point as ChartPoint));
 }
 
 function isValidPoint(point: ChartPoint): boolean {
-  if (!point || typeof point !== 'object') {
+  if (typeof point !== 'object' || point === null) {
     console.warn('Invalid point: Must be an object');
     return false;
   }
@@ -66,7 +65,9 @@ function isValidPoint(point: ChartPoint): boolean {
 }
 
 export function normalizeChartData(data: ChartPoint[] | ChartSeries[]): ChartSeries[] {
-  if (!data.length) return [];
+  if (!Array.isArray(data) || data.length === 0) {
+    return [];
+  }
 
   // If it's already multi-series
   if ('data' in data[0]) {

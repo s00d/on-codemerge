@@ -1,128 +1,179 @@
+import { h } from '@on-codemerge/sdk';
+import type { EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import type { ChartPoint } from '../types';
 import { getRandomColor } from '../utils/colors';
+import { colorSwatchButton } from '../../../utils/ColorWell';
 import { deleteIcon } from '../../../icons';
-import { createContainer } from '../../../utils/helpers.ts';
 
+/** One chart data row as ViewSpec (draft held in memory). */
 export class DataRow {
-  public element: HTMLElement;
-  private requiresXY: boolean;
-  private isScatter: boolean;
-  private onChange: () => void;
-  private onDelete: () => void;
+  private readonly editor: EditorAPI;
+  private readonly draft: Partial<ChartPoint>;
+  private readonly requiresXY: boolean;
+  private readonly isScatter: boolean;
+  private readonly onChange: () => void;
+  private readonly onDelete: () => void;
 
   constructor(
+    editor: EditorAPI,
     data: Partial<ChartPoint>,
     requiresXY: boolean,
     isScatter: boolean,
     onChange: () => void,
     onDelete: () => void
   ) {
-    this.element = createContainer();
+    this.editor = editor;
     this.requiresXY = requiresXY;
     this.isScatter = isScatter;
     this.onChange = onChange;
     this.onDelete = onDelete;
-    this.initialize(data);
-  }
-
-  private initialize(data: Partial<ChartPoint>): void {
-    this.element.className = `grid ${this.getGridCols()} gap-2 items-center`;
-
-    // Always generate a random color if none is provided
-    const color = data.color || getRandomColor();
-
-    this.element.innerHTML = this.requiresXY
-      ? this.createXYRowContent(data, color)
-      : this.createBasicRowContent(data, color);
-
-    this.setupEventListeners();
+    this.draft = {
+      label: data.label ?? '',
+      value: data.value,
+      x: data.x,
+      y: data.y,
+      r: data.r ?? 5,
+      color: data.color ?? getRandomColor(),
+    };
   }
 
   private getGridCols(): string {
     if (this.requiresXY) {
       return this.isScatter
-        ? 'grid-cols-[1fr,80px,80px,40px]' // Scatter: label, x, y, delete
-        : 'grid-cols-[1fr,80px,80px,80px,40px,40px]'; // Bubble: label, x, y, size, color, delete
+        ? 'grid-cols-[1fr,80px,80px,40px]'
+        : 'grid-cols-[1fr,80px,80px,80px,40px,40px]';
     }
-    return 'grid-cols-[1fr,120px,40px,40px]'; // Basic: label, value, color, delete
+    return 'grid-cols-[1fr,120px,40px,40px]';
   }
 
-  private createBasicRowContent(data: Partial<ChartPoint>, color: string): string {
-    return `
-      <input type="text" class="label-input px-2 py-1 border rounded text-sm" 
-             value="${data.label || ''}" placeholder="Label">
-      <input type="number" class="value-input px-2 py-1 border rounded text-sm" 
-             value="${data.value || ''}" placeholder="Value">
-      <input type="color" class="color-input w-8 h-8 rounded cursor-pointer" 
-             value="${color}" title="Point Color">
-      <button class="delete-row-btn p-1 text-red-500 hover:text-red-700" title="Delete Point">${deleteIcon}</button>
-    `;
+  private input(
+    className: string,
+    type: string,
+    value: string,
+    placeholder: string,
+    onInput: (v: string) => void
+  ): ViewSpec {
+    return h('input', {
+      class: className,
+      attrs: { type, placeholder },
+      props: { value },
+      on: {
+        input: (e) => {
+          onInput((e.target as HTMLInputElement).value);
+          this.onChange();
+        },
+      },
+    });
   }
 
-  private createXYRowContent(data: Partial<ChartPoint>, color: string): string {
-    if (this.isScatter) {
-      return `
-        <input type="text" class="label-input px-2 py-1 border rounded text-sm" 
-               value="${data.label || ''}" placeholder="Label">
-        <input type="number" class="x-input px-2 py-1 border rounded text-sm" 
-               value="${data.x || ''}" placeholder="X">
-        <input type="number" class="y-input px-2 py-1 border rounded text-sm" 
-               value="${data.y || ''}" placeholder="Y">
-        <button class="delete-row-btn p-1 text-red-500 hover:text-red-700" title="Delete Point">${deleteIcon}</button>
-      `;
-    }
-
-    return `
-      <input type="text" class="label-input px-2 py-1 border rounded text-sm" 
-             value="${data.label || ''}" placeholder="Label">
-      <input type="number" class="x-input px-2 py-1 border rounded text-sm" 
-             value="${data.x || ''}" placeholder="X">
-      <input type="number" class="y-input px-2 py-1 border rounded text-sm" 
-             value="${data.y || ''}" placeholder="Y">
-      <input type="number" class="r-input px-2 py-1 border rounded text-sm" 
-             value="${data.r || '5'}" placeholder="Size" min="1" max="100">
-      <input type="color" class="color-input w-8 h-8 rounded cursor-pointer" 
-             value="${color}" title="Point Color">
-      <button class="delete-row-btn p-1 text-red-500 hover:text-red-700" title="Delete Point">${deleteIcon}</button>
-    `;
+  private colorControl(): ViewSpec {
+    return colorSwatchButton(
+      this.editor,
+      () => this.draft.color ?? getRandomColor(),
+      (hex) => {
+        this.draft.color = hex;
+        this.onChange();
+      }
+    );
   }
 
-  private setupEventListeners(): void {
-    this.element.addEventListener('input', this.onChange);
-    this.element.querySelector('.delete-row-btn')?.addEventListener('click', this.onDelete);
-  }
-
-  public getData(): Partial<ChartPoint> {
-    const data: Partial<ChartPoint> = {
-      label: (this.element.querySelector('.label-input') as HTMLInputElement)?.value || '',
-    };
+  view(): ViewSpec {
+    const d = this.draft;
+    const children: ViewSpec[] = [
+      this.input(
+        'label-input px-2 py-1 border rounded text-sm',
+        'text',
+        d.label ?? '',
+        'Label',
+        (v) => {
+          d.label = v;
+        }
+      ),
+    ];
 
     if (this.requiresXY) {
-      data.x = parseFloat(
-        (this.element.querySelector('.x-input') as HTMLInputElement)?.value || '0'
+      children.push(
+        this.input(
+          'x-input px-2 py-1 border rounded text-sm',
+          'number',
+          String(d.x ?? ''),
+          'X',
+          (v) => {
+            d.x = Number(v) || 0;
+          }
+        ),
+        this.input(
+          'y-input px-2 py-1 border rounded text-sm',
+          'number',
+          String(d.y ?? ''),
+          'Y',
+          (v) => {
+            d.y = Number(v) || 0;
+          }
+        )
       );
-      data.y = parseFloat(
-        (this.element.querySelector('.y-input') as HTMLInputElement)?.value || '0'
-      );
-
       if (!this.isScatter) {
-        data.r = parseFloat(
-          (this.element.querySelector('.r-input') as HTMLInputElement)?.value || '5'
+        children.push(
+          this.input(
+            'r-input px-2 py-1 border rounded text-sm',
+            'number',
+            String(d.r ?? 5),
+            'Size',
+            (v) => {
+              d.r = Number(v) || 5;
+            }
+          ),
+          this.colorControl()
         );
-        data.color = (this.element.querySelector('.color-input') as HTMLInputElement)?.value;
-      } else {
-        data.color = getRandomColor(); // Always use random color for scatter plots
-        data.r = 5; // Fixed size for scatter plots
       }
-
-      data.value = data.y; // Use Y value as the main value
     } else {
-      data.value = parseFloat(
-        (this.element.querySelector('.value-input') as HTMLInputElement)?.value || '0'
+      children.push(
+        this.input(
+          'value-input px-2 py-1 border rounded text-sm',
+          'number',
+          String(d.value ?? ''),
+          'Value',
+          (v) => {
+            d.value = Number(v) || 0;
+          }
+        ),
+        this.colorControl()
       );
-      data.color = (this.element.querySelector('.color-input') as HTMLInputElement)?.value;
     }
 
+    children.push(
+      h('button', {
+        class: 'delete-row-btn p-1 text-red-500 hover:text-red-700',
+        attrs: { type: 'button', title: 'Delete Point' },
+        props: { innerHTML: deleteIcon },
+        on: {
+          click: () => {
+            this.onDelete();
+          },
+        },
+      })
+    );
+
+    return h('div', { class: `grid ${this.getGridCols()} gap-2 items-center` }, children);
+  }
+
+  getData(): Partial<ChartPoint> {
+    const data: Partial<ChartPoint> = { label: this.draft.label ?? '' };
+    if (this.requiresXY) {
+      data.x = this.draft.x ?? 0;
+      data.y = this.draft.y ?? 0;
+      if (this.isScatter) {
+        data.color = getRandomColor();
+        data.r = 5;
+      } else {
+        data.r = this.draft.r ?? 5;
+        data.color = this.draft.color;
+      }
+      data.value = data.y;
+    } else {
+      data.value = this.draft.value ?? 0;
+      data.color = this.draft.color;
+    }
     return data;
   }
 }

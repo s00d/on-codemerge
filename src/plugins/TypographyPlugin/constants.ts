@@ -9,53 +9,81 @@ import {
   hrIcon,
 } from '../../icons';
 
-export const TYPOGRAPHY_STYLES = [
+export type TypographyStyle = {
+  value: string;
+  /** i18n key under typography.* */
+  labelKey: string;
+  /** Sample text shown in the row (also i18n key) */
+  sampleKey: string;
+  /** Preview hint class on sample only (not the whole button) */
+  sampleClass: string;
+  icon: string;
+  section: 'heading' | 'body' | 'insert';
+};
+
+export const TYPOGRAPHY_STYLES: TypographyStyle[] = [
   {
     value: 'h1',
-    label: 'Heading 1',
-    preview: 'text-3xl font-bold h-12',
+    labelKey: 'typography.heading1',
+    sampleKey: 'typography.sampleHeading1',
+    sampleClass: 'typo-sample--h1',
     icon: h1Icon,
+    section: 'heading',
   },
   {
     value: 'h2',
-    label: 'Heading 2',
-    preview: 'text-2xl font-bold',
+    labelKey: 'typography.heading2',
+    sampleKey: 'typography.sampleHeading2',
+    sampleClass: 'typo-sample--h2',
     icon: h2Icon,
+    section: 'heading',
   },
   {
     value: 'h3',
-    label: 'Heading 3',
-    preview: 'text-xl font-bold',
+    labelKey: 'typography.heading3',
+    sampleKey: 'typography.sampleHeading3',
+    sampleClass: 'typo-sample--h3',
     icon: h3Icon,
+    section: 'heading',
   },
   {
     value: 'h4',
-    label: 'Heading 4',
-    preview: 'text-lg font-bold',
+    labelKey: 'typography.heading4',
+    sampleKey: 'typography.sampleHeading4',
+    sampleClass: 'typo-sample--h4',
     icon: h4Icon,
+    section: 'heading',
   },
   {
     value: 'paragraph',
-    label: 'Paragraph',
-    preview: 'text-base',
+    labelKey: 'typography.paragraph',
+    sampleKey: 'typography.sampleParagraph',
+    sampleClass: 'typo-sample--p',
     icon: paragraphIcon,
+    section: 'body',
   },
   {
     value: 'blockquote',
-    label: 'Blockquote',
-    preview: 'text-lg italic',
+    labelKey: 'typography.blockquote',
+    sampleKey: 'typography.sampleBlockquote',
+    sampleClass: 'typo-sample--quote',
     icon: blockquoteIcon,
+    section: 'body',
   },
   {
     value: 'pre',
-    label: 'Preformatted',
-    preview: 'font-mono text-sm',
+    labelKey: 'typography.preformatted',
+    sampleKey: 'typography.samplePre',
+    sampleClass: 'typo-sample--pre',
     icon: preIcon,
+    section: 'body',
   },
   {
     value: 'hr',
-    label: 'Horizontal Line',
-    preview: 'text-gray-500',
+    labelKey: 'typography.horizontalLine',
+    sampleKey: 'typography.sampleHr',
+    sampleClass: 'typo-sample--hr',
     icon: hrIcon,
+    section: 'insert',
   },
 ];

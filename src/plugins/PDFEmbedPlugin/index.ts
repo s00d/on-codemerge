@@ -1,142 +1,232 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
-import { PopupManager, type PopupItem } from '../../core/ui/PopupManager';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { pdfIcon } from '../../icons';
+import { definePlugin, insertAtomAfter, attrString, h, iframe } from '@on-codemerge/sdk';
+import type { WidgetContext, ViewSpec, EditorAPI } from '@on-codemerge/sdk';
+import { editIcon, deleteIcon, linkIcon, pdfIcon } from '../../icons';
 import { Resizer } from '../../utils/Resizer';
+import { atomAlignStyle } from '../../utils/atomAlign';
+import { removeAtomAt } from '../../utils/atomPath';
 
-export class PDFEmbedPlugin implements Plugin {
-  name = 'pdf-embed';
-  hotkeys = [{ keys: 'Ctrl+Alt+P', description: 'Insert PDF', command: 'pdf-embed', icon: '📄' }];
-
-  private editor: HTMLEditor | null = null;
-  private popup: PopupManager | null = null;
-  private toolbarButton: HTMLElement | null = null;
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.addToolbarButton();
-
-    this.popup = new PopupManager(editor, {
-      title: editor.t('Insert PDF'),
-      className: 'pdf-embed-popup',
-      closeOnClickOutside: true,
-      items: this.buildPopupItems(),
-      buttons: [
-        {
-          label: editor.t('Cancel'),
-          variant: 'secondary',
-          onClick: () => this.popup?.hide(),
-        },
-        { label: editor.t('Insert'), variant: 'primary', onClick: () => this.handleInsert() },
-      ],
-    });
-
-    this.editor.on('pdf-embed', () => this.openModal());
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      this.toolbarButton = createToolbarButton({
-        icon: pdfIcon,
-        title: this.editor?.t('Insert PDF'),
-        onClick: () => this.openModal(),
-      });
-      toolbar.appendChild(this.toolbarButton);
-    }
-  }
-
-  private buildPopupItems(): PopupItem[] {
-    return [
+function openPdfProps(
+  editor: EditorAPI,
+  attrs: Record<string, unknown>,
+  updateAttrs: (partial: Record<string, unknown>) => void
+): void {
+  const t = (k: string) => editor.t(k) || k;
+  editor.ui.popup.open({
+    title: t('common.edit'),
+    className: 'pdf-embed-popup',
+    closeOnClickOutside: true,
+    items: [
       {
         type: 'input',
         id: 'pdf-url',
-        label: this.editor?.t('PDF URL') || 'PDF URL',
+        label: t('pdf.pdfUrl'),
         placeholder: 'https://example.com/file.pdf',
-        value: '',
+        value: attrString(attrs.url, ''),
       },
       {
         type: 'number',
         id: 'pdf-width',
-        label: this.editor?.t('Width') || 'Width',
-        value: 800,
+        label: t('common.width'),
+        value: Number(attrs.width) || 800,
       },
       {
         type: 'number',
         id: 'pdf-height',
-        label: this.editor?.t('Height') || 'Height',
-        value: 600,
+        label: t('common.height'),
+        value: Number(attrs.height) || 600,
       },
-    ];
-  }
+    ],
+    buttons: [
+      { label: t('common.cancel'), variant: 'secondary', onClick: () => {} },
+      {
+        label: t('common.save'),
+        variant: 'primary',
+        onClick: (values) => {
+          const url = String(values['pdf-url'] ?? '').trim();
+          if (!url) {
+            editor.notify(t('pdf.pdfUrlIsRequired'));
+            return false;
+          }
+          updateAttrs({
+            url,
+            width: Number(values['pdf-width']) || 800,
+            height: Number(values['pdf-height']) || 600,
+          });
+        },
+      },
+    ],
+  });
+}
 
-  private openModal(): void {
-    this.popup?.show();
-    // Focus URL input
-    this.popup?.setFocus('pdf-url');
-  }
+function renderPdf(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpec {
+  const resizer = wctx.scope.slot<Resizer>();
+  const align = attrString(attrs.align, '');
+  const url = attrString(attrs.url, '');
 
-  private handleInsert(): void {
-    if (!this.editor || !this.popup) return;
+  return h(
+    'div',
+    {
+      class: 'pdf-embed-container my-4 ocm-pdf-atom',
+      style: {
+        width: `${Number(attrs.width) || 800}px`,
+        height: `${Number(attrs.height) || 600}px`,
+        ...atomAlignStyle(align),
+      },
+      on: {
+        click: (e) => {
+          const host = e.currentTarget as HTMLElement;
+          resizer.replace(
+            new Resizer(host, {
+              aspect: 'lock',
+              onBlur: () => {
+                resizer.clear();
+              },
+              onResizeEnd: () => {
+                wctx.updateAttrs({ width: host.offsetWidth, height: host.offsetHeight });
+              },
+            })
+          );
+        },
+        contextmenu: (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const t = (k: string) => wctx.editor.t(k) || k;
+          wctx.openMenu(
+            [
+              {
+                label: t('common.edit'),
+                icon: editIcon,
+                onClick: () => {
+                  openPdfProps(wctx.editor, attrs, (partial) => {
+                    wctx.updateAttrs(partial);
+                  });
+                },
+              },
+              {
+                label: t('common.view'),
+                icon: linkIcon,
+                onClick: () => {
+                  if (!url) {
+                    return;
+                  }
+                  globalThis.open(url, '_blank', 'noopener');
+                },
+              },
+              { type: 'divider' },
+              {
+                label: t('common.delete'),
+                icon: deleteIcon,
+                variant: 'danger',
+                onClick: () => {
+                  removeAtomAt(wctx.path, (cmd) => wctx.editor.run(cmd as never));
+                },
+              },
+            ],
+            e.clientX,
+            e.clientY
+          );
+        },
+      },
+    },
+    iframe({
+      class: 'pdf-embed-frame',
+      src: url,
+      width: '100%',
+      height: '100%',
+      attrs: { loading: 'lazy' },
+    })
+  );
+}
 
-    const url = String(this.popup.getValue('pdf-url') || '').trim();
-    const width = Number(this.popup.getValue('pdf-width') || 800);
-    const height = Number(this.popup.getValue('pdf-height') || 600);
+export function PDFEmbedPlugin() {
+  let openPicker: (() => void) | null = null;
 
-    if (!url) {
-      this.editor.showWarningNotification(this.editor.t('Please provide PDF URL'));
-      return;
-    }
-
-    const wrapper = document.createElement('div');
-    wrapper.className = 'pdf-embed-container my-4';
-    wrapper.style.width = `${width}px`;
-    wrapper.style.height = `${height}px`;
-
-    const iframe = document.createElement('iframe');
-    iframe.className = 'pdf-embed-frame';
-    iframe.src = url;
-    iframe.width = '100%';
-    iframe.height = '100%';
-    iframe.setAttribute('frameborder', '0');
-    iframe.setAttribute('allowfullscreen', 'true');
-    iframe.setAttribute('loading', 'lazy');
-
-    wrapper.appendChild(iframe);
-
-    // Add resizer for convenience
-    new Resizer(wrapper, {
-      handleSize: 10,
-      handleColor: '#2563eb',
-    });
-
-    this.editor.insertContent(wrapper);
-    this.popup.hide();
-  }
-
-  destroy(): void {
-    // Уничтожаем все UI компоненты
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
-
-    // Удаляем кнопку из тулбара
-    if (this.toolbarButton) {
-      this.toolbarButton.remove();
-      this.toolbarButton = null;
-    }
-
-    // Отписываемся от всех событий
-    this.editor?.off('pdf-embed');
-    this.editor?.off('pdf-insert');
-    this.editor?.off('pdf-error');
-
-    // Очищаем все ссылки
-    this.editor = null;
-  }
+  return definePlugin({
+    name: 'pdf-embed',
+    commands: {
+      insertPdf: () => {
+        openPicker?.();
+        return null;
+      },
+    },
+    hotkeys: [{ keys: 'Mod-Alt-p', command: 'insertPdf', description: 'Insert PDF' }],
+    nodes: [
+      {
+        name: 'pdf',
+        group: 'atom',
+        atom: true,
+        attrs: { url: '', width: 800, height: 600, align: '' },
+      },
+    ],
+    setup(ctx) {
+      const editor = ctx.editor;
+      openPicker = () => {
+        ctx.popup.open({
+          title: editor.t('pdf.insertPdf'),
+          className: 'pdf-embed-popup',
+          closeOnClickOutside: true,
+          items: [
+            {
+              type: 'input',
+              id: 'pdf-url',
+              label: editor.t('pdf.pdfUrl'),
+              placeholder: 'https://example.com/file.pdf',
+              value: '',
+            },
+            {
+              type: 'number',
+              id: 'pdf-width',
+              label: editor.t('common.width'),
+              value: 800,
+            },
+            {
+              type: 'number',
+              id: 'pdf-height',
+              label: editor.t('common.height'),
+              value: 600,
+            },
+          ],
+          buttons: [
+            {
+              label: editor.t('common.cancel'),
+              variant: 'secondary',
+              onClick: () => {},
+            },
+            {
+              label: editor.t('common.insert'),
+              variant: 'primary',
+              onClick: (values) => {
+                const url = String(values['pdf-url'] ?? '').trim();
+                if (!url) {
+                  editor.notify(editor.t('pdf.pdfUrlIsRequired'));
+                  return;
+                }
+                editor.run(
+                  insertAtomAfter('pdf', {
+                    url,
+                    width: Number(values['pdf-width']) || 800,
+                    height: Number(values['pdf-height']) || 600,
+                    align: '',
+                  })
+                );
+              },
+            },
+          ],
+        });
+      };
+      ctx.toolbar.add({
+        id: 'pdf-embed',
+        icon: pdfIcon,
+        title: editor.t('pdf.insertPdf'),
+        menu: 'insert',
+        order: 44,
+        onClick: () => openPicker?.(),
+      });
+    },
+    widgets: {
+      pdf: { render: renderPdf },
+    },
+  });
 }

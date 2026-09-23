@@ -1,13 +1,10 @@
 import './style.scss';
-import './public.scss';
+import { asAttr } from '../../utils/asAttr';
 
-import type { PopupItem } from '../../core/ui/PopupManager';
-import { PopupManager } from '../../core/ui/PopupManager';
-import type { Plugin } from '../../core/Plugin';
-import { createToolbarButton } from '../ToolbarPlugin/utils.ts';
-import { aiAssistantIcon } from '../../icons/';
+import { definePlugin } from '@on-codemerge/sdk';
+import type { EditorAPI, PopupItem, PopupOptions } from '@on-codemerge/sdk';
+import { aiAssistantIcon } from '../../icons';
 import {
-  type AIDriver,
   OpenAIDriver,
   DeepSeekDriver,
   HuggingFaceDriver,
@@ -16,279 +13,229 @@ import {
   MistralDriver,
   OllamaDriver,
 } from './drivers';
-import type { HTMLEditor } from '../../core/HTMLEditor.ts';
-import type { OptionsDescription } from './drivers/AIDriver.ts';
+import type { AIDriver } from './drivers';
+import type { OptionsDescription } from './drivers/AIDriver';
 
 const LOCAL_STORAGE_KEY = 'aiAssistantSettings';
 
 const defaultPrompt =
-  'Write an article about the benefits of using artificial intelligence in web development. Include examples of JavaScript code and explain how AI can simplify the development process.';
-const defaultStructurePrompt = `The response should be formatted as HTML code that can be inserted into a text editor. Follow these rules:
-1. Headings should be wrapped in <h1>, <h2>, <h3>, etc.
-2. Paragraphs should be wrapped in <p>.
-3. Lists should use <ul>, <ol>, and <li>.
-4. Code should be wrapped in <pre><code>.
-5. Use <strong> and <em> for emphasis.
-6. For images, use the <img> tag with the src attribute.
-7. Links should use the <a> tag.
-8. Tables should use <table>, <tr>, <th>, and <td>.
-9. Do not include unnecessary tags like <html>, <head>, or <body>.
-10. Ensure code examples are properly formatted.`;
+  'Write an article about the benefits of using artificial intelligence in web development.';
+const defaultStructurePrompt = `The response should be formatted as HTML. Use h1-h3, p, ul/ol/li, pre/code, strong/em, a, table. Do not include html/head/body.`;
 
-export class AIAssistantPlugin implements Plugin {
-  name = 'ai-assistant';
-  private editor: HTMLEditor | null = null;
-  private popup: PopupManager | null = null;
-  private apiKey: string = '';
-  private driver: AIDriver<any> | null = null;
-  private driverName: string = 'openai';
-  private structurePrompt: string = defaultStructurePrompt;
-  private prompt: string = defaultPrompt;
-  private driverOptions: any = {};
-  private toolbarButton: HTMLElement | null = null;
-  private drivers: { [key: string]: AIDriver<any> } = {};
-
-  constructor() {
-    this.loadSettings();
-    this.initializeDrivers();
-  }
-
-  private initializeDrivers(): void {
-    this.drivers = {
-      openai: new OpenAIDriver(this.apiKey),
-      deepseek: new DeepSeekDriver(this.apiKey),
-      huggingface: new HuggingFaceDriver(this.apiKey),
-      github: new GitHubAzureDriver(this.apiKey),
-      llama: new LlamaDriver(this.apiKey),
-      mistral: new MistralDriver(this.apiKey),
-      ollama: new OllamaDriver(this.apiKey),
-    };
-  }
-
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.setupPopup();
-    this.addToolbarButton();
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      this.toolbarButton = createToolbarButton({
-        icon: aiAssistantIcon,
-        title: 'AI Assistant',
-        onClick: () => {
-          this.popup?.show();
-        },
-      });
-
-      toolbar.appendChild(this.toolbarButton);
+function defaultsFromDesc(desc: OptionsDescription): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [key, field] of Object.entries(desc)) {
+    if (field.default !== undefined) {
+      out[key] = field.default;
     }
   }
+  return out;
+}
 
-  private createPopupItems(): PopupItem[] {
-    // Массив стандартных полей для попапа
-    const items: PopupItem[] = [
-      {
-        type: 'list',
-        id: 'driver-select',
-        label: 'AI Driver:',
-        options: ['openai', 'deepseek', 'huggingface', 'github', 'llama', 'mistral', 'ollama'],
-        value: this.driverName,
-        onChange: (value) => {
-          this.driverName = value as string;
-          this.saveSettings();
-          this.updatePopupContent(); // Обновляем содержимое попапа
-        },
-      },
-      {
-        type: 'input',
-        id: 'api-key-input',
-        label: 'API Key:',
-        placeholder: 'Enter your API key',
-        value: this.apiKey,
-        onChange: (value) => {
-          this.apiKey = value as string;
-          this.saveSettings();
-        },
-      },
-      {
-        type: 'textarea',
-        id: 'structure-prompt-textarea',
-        label: 'Structure Prompt:',
-        placeholder: 'Enter your structure prompt',
-        value: this.structurePrompt,
-        onChange: (value) => {
-          this.structurePrompt = value as string;
-          this.saveSettings();
-        },
-      },
-      {
-        type: 'textarea',
-        id: 'prompt-textarea',
-        label: 'Prompt:',
-        placeholder: 'Enter your prompt',
-        value: this.prompt,
-        onChange: (value) => {
-          this.prompt = value as string;
-          this.saveSettings();
-        },
-      },
-    ];
+export function AIAssistantPlugin() {
+  let openAI: (() => void) | null = null;
 
-    // Добавляем динамические поля для опций драйвера
-    const driverOptionsDescription = this.getDriverOptionsDescription();
-    for (const [key, desc] of Object.entries(driverOptionsDescription)) {
-      const item: PopupItem = {
-        type: desc.type,
-        id: `driver-option-${key}`,
-        label: desc.label,
-        options: desc.type === 'list' ? desc.options : undefined,
-        value: this.driverOptions[key] || desc.default,
-        onChange: (value) => {
-          this.driverOptions[key] = value;
-          this.saveSettings();
-        },
+  return definePlugin({
+    name: 'ai-assistant',
+    hotkeys: [{ keys: 'Mod-Shift-a', command: 'openAI', description: 'AI Assistant' }],
+    commands: {
+      openAI: () => {
+        openAI?.();
+        return null;
+      },
+    },
+    setup(ctx) {
+      const editor = ctx.editor;
+      let apiKey = '';
+      let driverName = 'openai';
+      let prompt = defaultPrompt;
+      let structurePrompt = defaultStructurePrompt;
+      let driverOptions: Record<string, unknown> = {};
+
+      try {
+        const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
+        if (raw) {
+          const s = JSON.parse(raw) as Record<string, unknown>;
+          // Never restore secrets from localStorage (purge legacy blobs).
+          driverName = asAttr(s.driverName, 'openai');
+          prompt = asAttr(s.prompt, defaultPrompt);
+          structurePrompt = asAttr(s.structurePrompt, defaultStructurePrompt);
+          // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+          driverOptions =
+            s.driverOptions !== null &&
+            s.driverOptions !== undefined &&
+            typeof s.driverOptions === 'object' &&
+            !Array.isArray(s.driverOptions)
+              ? (s.driverOptions as Record<string, unknown>)
+              : {};
+          if ('apiKey' in s) {
+            localStorage.setItem(
+              LOCAL_STORAGE_KEY,
+              JSON.stringify({ driverName, prompt, structurePrompt, driverOptions })
+            );
+          }
+        }
+      } catch {
+        /* ignore */
+      }
+
+      const drivers: Record<string, AIDriver<any>> = {
+        openai: new OpenAIDriver(apiKey),
+        deepseek: new DeepSeekDriver(apiKey),
+        huggingface: new HuggingFaceDriver(apiKey),
+        github: new GitHubAzureDriver(apiKey),
+        llama: new LlamaDriver(apiKey),
+        mistral: new MistralDriver(apiKey),
+        ollama: new OllamaDriver(),
       };
 
-      if (desc.min) {
-        item.min = desc.min;
-      }
+      const saveSettings = () => {
+        localStorage.setItem(
+          LOCAL_STORAGE_KEY,
+          JSON.stringify({ driverName, prompt, structurePrompt, driverOptions })
+        );
+      };
 
-      if (desc.max) {
-        item.max = desc.max;
-      }
+      const popups = ctx.popup.session();
 
-      items.push(item);
-    }
+      const popupChrome = (): Pick<
+        PopupOptions,
+        'title' | 'className' | 'closeOnClickOutside'
+      > => ({
+        title: editor.t('common.aiAssistant'),
+        className: 'ai-assistant',
+        closeOnClickOutside: true,
+      });
 
-    return items;
-  }
-
-  private setupPopup(): void {
-    if (!this.editor) return;
-
-    // Создаем массив items
-    const items = this.createPopupItems();
-
-    // Инициализируем попап
-    this.popup = new PopupManager(this.editor, {
-      title: 'AI Assistant',
-      className: 'ai-assistant',
-      closeOnClickOutside: true,
-      buttons: [
+      const popupButtons = (): PopupOptions['buttons'] => [
         {
-          label: 'Generate',
-          variant: 'primary',
-          onClick: () => this.handleGenerate(),
-        },
-        {
-          label: 'Cancel',
+          label: editor.t('common.cancel'),
           variant: 'secondary',
-          onClick: () => this.popup?.hide(),
+          onClick: () => {},
         },
-      ],
-      items: items, // Передаем массив стандартных и динамических полей
-    });
-  }
+        {
+          label: editor.t('common.generate'),
+          variant: 'primary',
+          onClick: () => {
+            ctx.defer(() => handleGenerate(editor));
+            return true;
+          },
+        },
+      ];
 
-  private updatePopupContent(): void {
-    if (!this.popup) return;
+      const resolveDriverOptions = (): Record<string, unknown> => {
+        const driver = drivers[driverName];
+        const desc = driver?.getOptionsDescription() ?? {};
+        return { ...defaultsFromDesc(desc), ...driverOptions };
+      };
 
-    // Создаем массив items
-    const items = this.createPopupItems();
+      const buildItems = (): PopupItem[] => {
+        const items: PopupItem[] = [
+          {
+            type: 'list',
+            id: 'driver',
+            label: editor.t('common.provider'),
+            options: Object.keys(drivers),
+            value: driverName,
+            onChange: (v) => {
+              driverName = String(v);
+              const next = drivers[driverName];
+              driverOptions = defaultsFromDesc(next?.getOptionsDescription() ?? {});
+              popups.update({
+                ...popupChrome(),
+                items: buildItems(),
+                buttons: popupButtons(),
+              });
+            },
+          },
+          {
+            type: 'input',
+            id: 'api-key',
+            label: editor.t('common.apiKey'),
+            value: apiKey,
+            onChange: (v) => {
+              apiKey = String(v);
+            },
+          },
+          {
+            type: 'textarea',
+            id: 'prompt',
+            label: editor.t('common.prompt'),
+            value: prompt,
+            onChange: (v) => {
+              prompt = String(v);
+            },
+          },
+          {
+            type: 'textarea',
+            id: 'structure',
+            label: editor.t('common.structure'),
+            value: structurePrompt,
+            onChange: (v) => {
+              structurePrompt = String(v);
+            },
+          },
+        ];
 
-    // Перерисовываем содержимое попапа
-    this.popup.rerender(items);
-  }
+        const driver = drivers[driverName];
+        const desc = driver?.getOptionsDescription() ?? {};
+        const merged = resolveDriverOptions();
+        for (const [key, field] of Object.entries(desc)) {
+          items.push({
+            type: field.type,
+            id: `driver-option-${key}`,
+            label: field.label,
+            options: field.type === 'list' ? field.options : undefined,
+            value: merged[key] as string | number | boolean | undefined,
+            onChange: (value) => {
+              driverOptions[key] = value;
+              saveSettings();
+            },
+          });
+        }
 
-  private getDriverOptionsDescription(): OptionsDescription {
-    const driver = this.drivers[this.driverName];
-    if (driver) {
-      return driver.getOptionsDescription();
-    }
-    return {};
-  }
+        return items;
+      };
 
-  private async handleGenerate(): Promise<void> {
-    if (!this.editor || !this.popup) return;
+      const handleGenerate = async (api: EditorAPI) => {
+        saveSettings();
+        const driver = drivers[driverName];
+        // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+        if (!driver) {
+          api.notify(api.t('common.unsupportedDriver'));
+          return;
+        }
+        try {
+          (driver as { apiKey?: string }).apiKey = apiKey;
+          const fullPrompt = `${structurePrompt}\n\n${prompt}`;
+          const generatedText = await driver.generateText(fullPrompt, resolveDriverOptions());
+          const current = api.getHTML();
+          api.setHTML(`${current}${generatedText}`);
+          popups.close();
+        } catch (error) {
+          console.error('Error generating text:', error);
+          api.notify(api.t('common.failedToGenerateText'));
+        }
+      };
 
-    // Показываем лоадер
-    this.popup.rerender([
-      {
-        type: 'loader',
-        id: 'loader',
-      },
-      // Другие элементы попапа
-    ]);
+      openAI = () => {
+        popups.open({
+          ...popupChrome(),
+          items: buildItems(),
+          buttons: popupButtons(),
+        });
+      };
 
-    // Получаем драйвер из массива
-    this.driver = this.drivers[this.driverName];
-    if (!this.driver) {
-      throw new Error('Unsupported driver');
-    }
-
-    try {
-      const fullPrompt = `${this.structurePrompt}\n\n${this.prompt}`;
-      const generatedText = await this.driver.generateText(fullPrompt, this.driverOptions);
-
-      this.editor.insertContent(generatedText);
-      this.popup.hide();
-    } catch (error) {
-      console.error('Error generating text:', error);
-      alert('Failed to generate text. Please check your API key and try again.');
-    } finally {
-      const items = this.createPopupItems();
-
-      this.popup.rerender(items);
-    }
-  }
-
-  private saveSettings(): void {
-    const settings = {
-      apiKey: this.apiKey,
-      driverName: this.driverName,
-      prompt: this.prompt,
-      structurePrompt: this.structurePrompt,
-      driverOptions: this.driverOptions,
-    };
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(settings));
-  }
-
-  private loadSettings(): void {
-    const settingsJson = localStorage.getItem(LOCAL_STORAGE_KEY);
-    if (settingsJson) {
-      const settings = JSON.parse(settingsJson);
-      this.apiKey = settings.apiKey || '';
-      this.driverName = settings.driverName || 'openai';
-      this.prompt = settings.prompt || defaultPrompt;
-      this.structurePrompt = settings.structurePrompt || defaultStructurePrompt;
-      this.driverOptions = settings.driverOptions || {};
-    }
-  }
-
-  destroy(): void {
-    // Уничтожаем все UI компоненты
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
-
-    // Удаляем кнопку из тулбара
-    if (this.toolbarButton) {
-      this.toolbarButton.remove();
-      this.toolbarButton = null;
-    }
-
-    // Отписываемся от всех событий
-    this.editor?.off('ai-assistant');
-    this.editor?.off('ai-request');
-    this.editor?.off('ai-response');
-    this.editor?.off('ai-error');
-
-    // Очищаем все ссылки
-    this.editor = null;
-    this.driver = null;
-    this.driverOptions = {};
-  }
+      ctx.toolbar.add({
+        id: 'ai-assistant',
+        icon: aiAssistantIcon,
+        title: editor.t('common.aiAssistant'),
+        menu: 'tools',
+        order: 90,
+        onClick: () => {
+          openAI?.();
+        },
+      });
+    },
+  });
 }

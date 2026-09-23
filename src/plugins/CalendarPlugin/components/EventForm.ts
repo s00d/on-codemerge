@@ -1,271 +1,246 @@
-import type { HTMLEditor } from '../../../core/HTMLEditor';
+import { h, mount } from '@on-codemerge/sdk';
+import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { CalendarEvent, CreateEventData } from '../types';
-import {
-  createForm,
-  createLabel,
-  createInputField,
-  createTextarea,
-  createCheckbox,
-  createContainer,
-  createSelectField,
-  createFormSubmitHandler,
-} from '../../../utils/helpers';
+import { colorSwatchButton } from '../../../utils/ColorWell';
 
+type CategoryManagerLike = {
+  getCategories: () => { id: string; name: string }[];
+};
+
+function splitCsv(s: string): string[] {
+  return s
+    .split(',')
+    .map((x) => x.trim())
+    .filter((x) => x !== '');
+}
+
+/** Event form — ViewSpec only. */
 export class EventForm {
-  private editor: HTMLEditor;
-  private onSubmit: (data: CreateEventData) => void;
-  private event?: CalendarEvent;
-  private formElement?: HTMLFormElement;
-  private categoryManager: any;
+  private readonly editor: EditorAPI;
+  private readonly onSubmit: (data: CreateEventData) => void;
+  private readonly categoryManager?: CategoryManagerLike;
+  private readonly draft: {
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    duration: string;
+    color: string;
+    priority: string;
+    category: string;
+    location: string;
+    attendees: string;
+    tags: string;
+    reminder: string;
+    isAllDay: boolean;
+  };
+  private mountHandle: MountHandle | null = null;
 
   constructor(
-    editor: HTMLEditor,
+    editor: EditorAPI,
     onSubmit: (data: CreateEventData) => void,
     event?: CalendarEvent,
-    categoryManager?: any
+    categoryManager?: CategoryManagerLike
   ) {
     this.editor = editor;
     this.onSubmit = onSubmit;
-    this.event = event;
     this.categoryManager = categoryManager;
+    this.draft = {
+      title: event?.title ?? '',
+      description: event?.description ?? '',
+      date: event?.date ?? '',
+      time: event?.time ?? '',
+      duration: String(event?.duration ?? 60),
+      color: event?.color ?? '#3b82f6',
+      priority: event?.priority ?? 'medium',
+      category: event?.category ?? '',
+      location: event?.location ?? '',
+      attendees: event?.attendees?.join(', ') ?? '',
+      tags: event?.tags?.join(', ') ?? '',
+      reminder: (() => {
+        const r = event?.reminder;
+        return r === null || r === undefined ? '' : String(r);
+      })(),
+      isAllDay: event?.isAllDay ?? false,
+    };
   }
 
-  public getElement(): HTMLElement {
-    const container = document.createElement('div');
-    container.className = 'event-form-container';
+  private input(
+    id: string,
+    label: string,
+    type: string,
+    value: string,
+    onInput: (v: string) => void,
+    extra: Record<string, string | number | boolean | null | undefined> = {}
+  ): ViewSpec {
+    return h('div', { class: 'form-group mb-3' }, [
+      h('label', { attrs: { for: id } }, label),
+      h('input', {
+        class: 'w-full p-2 border rounded',
+        attrs: { id, type, ...extra },
+        props: { value },
+        on: {
+          input: (e) => {
+            onInput((e.target as HTMLInputElement).value);
+          },
+        },
+      }),
+    ]);
+  }
 
-    // Создаем форму
-    this.formElement = createForm('event-form', null, 'POST');
+  view(): ViewSpec {
+    const t = (k: string) => this.editor.t(k) || k;
+    const categories = this.categoryManager?.getCategories() ?? [];
+    return h('div', { class: 'event-form-container space-y-2' }, [
+      this.input('event-title', t('common.title'), 'text', this.draft.title, (v) => {
+        this.draft.title = v;
+      }),
+      h('div', { class: 'form-group mb-3' }, [
+        h('label', { attrs: { for: 'event-description' } }, t('common.description')),
+        h('textarea', {
+          class: 'w-full p-2 border rounded',
+          attrs: { id: 'event-description', rows: 3 },
+          props: { value: this.draft.description },
+          on: {
+            input: (e) => {
+              this.draft.description = (e.target as HTMLTextAreaElement).value;
+            },
+          },
+        }),
+      ]),
+      h('div', { class: 'grid grid-cols-2 gap-4' }, [
+        this.input('event-date', t('common.date'), 'date', this.draft.date, (v) => {
+          this.draft.date = v;
+        }),
+        this.input('event-time', t('common.time'), 'time', this.draft.time, (v) => {
+          this.draft.time = v;
+        }),
+      ]),
+      h('div', { class: 'grid grid-cols-2 gap-4' }, [
+        this.input(
+          'event-duration',
+          t('common.durationMinutes'),
+          'number',
+          this.draft.duration,
+          (v) => {
+            this.draft.duration = v;
+          },
+          { min: 15, step: 15 }
+        ),
+        h('div', { class: 'form-group mb-3' }, [
+          h('label', {}, t('common.color')),
+          colorSwatchButton(
+            this.editor,
+            () => this.draft.color,
+            (hex) => {
+              this.draft.color = hex;
+            }
+          ),
+        ]),
+      ]),
+      h('div', { class: 'grid grid-cols-2 gap-4' }, [
+        h('div', { class: 'form-group mb-3' }, [
+          h('label', { attrs: { for: 'event-priority' } }, t('common.priority')),
+          h(
+            'select',
+            {
+              class: 'w-full p-2 border rounded',
+              attrs: { id: 'event-priority' },
+              props: { value: this.draft.priority },
+              on: {
+                change: (e) => {
+                  this.draft.priority = (e.target as HTMLSelectElement).value;
+                },
+              },
+            },
+            h('option', { attrs: { value: 'low' } }, t('common.low')),
+            h('option', { attrs: { value: 'medium' } }, t('common.medium')),
+            h('option', { attrs: { value: 'high' } }, t('common.high'))
+          ),
+        ]),
+        h('div', { class: 'form-group mb-3' }, [
+          h('label', { attrs: { for: 'event-category' } }, t('common.category')),
+          h(
+            'select',
+            {
+              class: 'w-full p-2 border rounded',
+              attrs: { id: 'event-category' },
+              props: { value: this.draft.category },
+              on: {
+                change: (e) => {
+                  this.draft.category = (e.target as HTMLSelectElement).value;
+                },
+              },
+            },
+            h('option', { attrs: { value: '' } }, t('common.selectCategory')),
+            ...categories.map((cat) => h('option', { attrs: { value: cat.id } }, cat.name))
+          ),
+        ]),
+      ]),
+      this.input('event-location', t('common.location'), 'text', this.draft.location, (v) => {
+        this.draft.location = v;
+      }),
+      this.input('event-attendees', t('calendar.attendees'), 'text', this.draft.attendees, (v) => {
+        this.draft.attendees = v;
+      }),
+      this.input('event-tags', t('common.tags'), 'text', this.draft.tags, (v) => {
+        this.draft.tags = v;
+      }),
+      this.input(
+        'event-reminder',
+        t('calendar.reminderMinutesBefore'),
+        'number',
+        this.draft.reminder,
+        (v) => {
+          this.draft.reminder = v;
+        },
+        { min: 0, placeholder: t('calendar.noReminder') }
+      ),
+      h('label', { class: 'flex items-center gap-2 mb-3' }, [
+        h('input', {
+          attrs: { type: 'checkbox', id: 'event-all-day' },
+          props: { checked: this.draft.isAllDay },
+          on: {
+            change: (e) => {
+              this.draft.isAllDay = (e.target as HTMLInputElement).checked;
+            },
+          },
+        }),
+        t('calendar.allDayEvent'),
+      ]),
+    ]);
+  }
 
-    // Заголовок события
-    const titleContainer = createContainer('form-group mb-4');
-    const titleLabel = createLabel(this.editor.t('Title'), 'event-title');
-    const titleInput = createInputField(
-      'text',
-      this.editor.t('Enter event title'),
-      this.event?.title || ''
-    );
-    titleInput.id = 'event-title';
-    titleInput.name = 'title';
-    titleInput.required = true;
-    titleContainer.appendChild(titleLabel);
-    titleContainer.appendChild(titleInput);
-    this.formElement.appendChild(titleContainer);
+  mountInto(host: HTMLElement): void {
+    this.mountHandle?.destroy();
+    this.mountHandle = mount(host, this.view());
+  }
 
-    // Описание события
-    const descriptionContainer = createContainer('form-group mb-4');
-    const descriptionLabel = createLabel(this.editor.t('Description'), 'event-description');
-    const descriptionTextarea = createTextarea(
-      this.editor.t('Enter event description'),
-      this.event?.description || ''
-    );
-    descriptionTextarea.id = 'event-description';
-    descriptionTextarea.name = 'description';
-    descriptionTextarea.rows = 3;
-    descriptionContainer.appendChild(descriptionLabel);
-    descriptionContainer.appendChild(descriptionTextarea);
-    this.formElement.appendChild(descriptionContainer);
-
-    // Дата и время
-    const dateTimeContainer = createContainer('form-row grid grid-cols-2 gap-4 mb-4');
-
-    const dateContainer = createContainer('form-group');
-    const dateLabel = createLabel(this.editor.t('Date'), 'event-date');
-    const dateInput = createInputField('date', '', this.event?.date || '');
-    dateInput.id = 'event-date';
-    dateInput.name = 'date';
-    dateInput.required = true;
-    dateContainer.appendChild(dateLabel);
-    dateContainer.appendChild(dateInput);
-    dateTimeContainer.appendChild(dateContainer);
-
-    const timeContainer = createContainer('form-group');
-    const timeLabel = createLabel(this.editor.t('Time'), 'event-time');
-    const timeInput = createInputField('time', '', this.event?.time || '');
-    timeInput.id = 'event-time';
-    timeInput.name = 'time';
-    timeInput.required = true;
-    timeContainer.appendChild(timeLabel);
-    timeContainer.appendChild(timeInput);
-    dateTimeContainer.appendChild(timeContainer);
-
-    this.formElement.appendChild(dateTimeContainer);
-
-    // Длительность и цвет
-    const durationColorContainer = createContainer('form-row grid grid-cols-2 gap-4 mb-4');
-
-    const durationContainer = createContainer('form-group');
-    const durationLabel = createLabel(this.editor.t('Duration (minutes)'), 'event-duration');
-    const durationInput = createInputField('number', '', this.event?.duration?.toString() || '60');
-    durationInput.id = 'event-duration';
-    durationInput.name = 'duration';
-    durationInput.min = '15';
-    durationInput.step = '15';
-    durationContainer.appendChild(durationLabel);
-    durationContainer.appendChild(durationInput);
-    durationColorContainer.appendChild(durationContainer);
-
-    const colorContainer = createContainer('form-group');
-    const colorLabel = createLabel(this.editor.t('Color'), 'event-color');
-    const colorInput = createInputField('color', '', this.event?.color || '#3b82f6');
-    colorInput.id = 'event-color';
-    colorInput.name = 'color';
-    colorContainer.appendChild(colorLabel);
-    colorContainer.appendChild(colorInput);
-    durationColorContainer.appendChild(colorContainer);
-
-    this.formElement.appendChild(durationColorContainer);
-
-    // Приоритет и категория
-    const priorityCategoryContainer = createContainer('form-row grid grid-cols-2 gap-4 mb-4');
-
-    const priorityContainer = createContainer('form-group');
-    const priorityLabel = createLabel(this.editor.t('Priority'), 'event-priority');
-    const priorityOptions = [
-      { value: 'low', label: this.editor.t('Low') },
-      { value: 'medium', label: this.editor.t('Medium') },
-      { value: 'high', label: this.editor.t('High') },
-    ];
-    const prioritySelect = createSelectField(priorityOptions, this.event?.priority || 'medium');
-    prioritySelect.id = 'event-priority';
-    prioritySelect.name = 'priority';
-    priorityContainer.appendChild(priorityLabel);
-    priorityContainer.appendChild(prioritySelect);
-    priorityCategoryContainer.appendChild(priorityContainer);
-
-    const categoryContainer = createContainer('form-group');
-    const categoryLabel = createLabel(this.editor.t('Category'), 'event-category');
-    let categoryOptions = [{ value: '', label: this.editor.t('Select category') }];
-
-    if (this.categoryManager) {
-      const categories = this.categoryManager.getCategories();
-      categoryOptions = categoryOptions.concat(
-        categories.map((cat: any) => ({ value: cat.id, label: cat.name }))
-      );
+  submit(): boolean {
+    if (!this.draft.title.trim() || !this.draft.date || !this.draft.time) {
+      this.editor.notify(this.editor.t('formBuilder.requiredFieldsMissing'));
+      return false;
     }
-
-    const categorySelect = createSelectField(categoryOptions, this.event?.category || '');
-    categorySelect.id = 'event-category';
-    categorySelect.name = 'category';
-    categoryContainer.appendChild(categoryLabel);
-    categoryContainer.appendChild(categorySelect);
-    priorityCategoryContainer.appendChild(categoryContainer);
-
-    this.formElement.appendChild(priorityCategoryContainer);
-
-    // Местоположение
-    const locationContainer = createContainer('form-group mb-4');
-    const locationLabel = createLabel(this.editor.t('Location'), 'event-location');
-    const locationInput = createInputField(
-      'text',
-      this.editor.t('Enter event location'),
-      this.event?.location || ''
-    );
-    locationInput.id = 'event-location';
-    locationInput.name = 'location';
-    locationContainer.appendChild(locationLabel);
-    locationContainer.appendChild(locationInput);
-    this.formElement.appendChild(locationContainer);
-
-    // Участники
-    const attendeesContainer = createContainer('form-group mb-4');
-    const attendeesLabel = createLabel(this.editor.t('Attendees'), 'event-attendees');
-    const attendeesInput = createInputField(
-      'text',
-      this.editor.t('Enter attendees (comma separated)'),
-      this.event?.attendees?.join(', ') || ''
-    );
-    attendeesInput.id = 'event-attendees';
-    attendeesInput.name = 'attendees';
-    attendeesContainer.appendChild(attendeesLabel);
-    attendeesContainer.appendChild(attendeesInput);
-    this.formElement.appendChild(attendeesContainer);
-
-    // Теги
-    const tagsContainer = createContainer('form-group mb-4');
-    const tagsLabel = createLabel(this.editor.t('Tags'), 'event-tags');
-    const tagsInput = createInputField(
-      'text',
-      this.editor.t('Enter tags (comma separated)'),
-      this.event?.tags?.join(', ') || ''
-    );
-    tagsInput.id = 'event-tags';
-    tagsInput.name = 'tags';
-    tagsContainer.appendChild(tagsLabel);
-    tagsContainer.appendChild(tagsInput);
-    this.formElement.appendChild(tagsContainer);
-
-    // Напоминание
-    const reminderContainer = createContainer('form-group mb-4');
-    const reminderLabel = createLabel(this.editor.t('Reminder (minutes before)'), 'event-reminder');
-    const reminderInput = createInputField('number', '', this.event?.reminder?.toString() || '');
-    reminderInput.id = 'event-reminder';
-    reminderInput.name = 'reminder';
-    reminderInput.min = '0';
-    reminderInput.placeholder = this.editor.t('No reminder');
-    reminderContainer.appendChild(reminderLabel);
-    reminderContainer.appendChild(reminderInput);
-    this.formElement.appendChild(reminderContainer);
-
-    // Весь день
-    const allDayContainer = createContainer('form-group mb-4');
-    const allDayCheckbox = createCheckbox(
-      this.editor.t('All day event'),
-      this.event?.isAllDay || false
-    );
-    const allDayInput = allDayCheckbox.querySelector('input') as HTMLInputElement;
-    allDayInput.id = 'event-all-day';
-    allDayInput.name = 'isAllDay';
-    allDayContainer.appendChild(allDayCheckbox);
-    this.formElement.appendChild(allDayContainer);
-
-    // Обработчик отправки
-    this.formElement.addEventListener(
-      'submit',
-      createFormSubmitHandler(this.formElement, (data) => {
-        const eventData: CreateEventData = {
-          title: data.title as string,
-          description: data.description as string,
-          date: data.date as string,
-          time: data.time as string,
-          duration: data.duration as number,
-          location: data.location as string,
-          color: data.color as string,
-          isAllDay: data.isAllDay as boolean,
-          priority: data.priority as 'low' | 'medium' | 'high',
-          category: data.category as string,
-          tags: data.tags
-            ? (data.tags as string)
-                .split(',')
-                .map((tag) => tag.trim())
-                .filter((tag) => tag)
-            : [],
-          attendees: data.attendees
-            ? (data.attendees as string)
-                .split(',')
-                .map((attendee) => attendee.trim())
-                .filter((attendee) => attendee)
-            : [],
-          reminder: data.reminder ? parseInt(data.reminder as string) : undefined,
-        };
-        this.onSubmit(eventData);
-      })
-    );
-
-    container.appendChild(this.formElement);
-    return container;
+    this.onSubmit({
+      title: this.draft.title.trim(),
+      description: this.draft.description,
+      date: this.draft.date,
+      time: this.draft.time,
+      duration: Number(this.draft.duration) || 60,
+      location: this.draft.location,
+      color: this.draft.color,
+      isAllDay: this.draft.isAllDay,
+      priority: this.draft.priority as 'low' | 'medium' | 'high',
+      category: this.draft.category,
+      attendees: splitCsv(this.draft.attendees),
+      tags: splitCsv(this.draft.tags),
+      reminder: this.draft.reminder === '' ? undefined : Math.trunc(Number(this.draft.reminder)),
+    });
+    return true;
   }
 
-  public submit(): boolean {
-    if (!this.formElement) return false;
-
-    // Создаем событие submit для валидации и отправки
-    const submitEvent = new Event('submit', {
-      bubbles: true,
-      cancelable: true,
-    });
-
-    this.formElement.dispatchEvent(submitEvent);
-    return true;
+  destroy(): void {
+    this.mountHandle?.destroy();
+    this.mountHandle = null;
   }
 }

@@ -1,268 +1,297 @@
 import './style.scss';
-import './public.scss';
-
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { calendarIcon } from '../../icons';
+import { definePlugin, insertAtomAfter, attrString, h } from '@on-codemerge/sdk';
+import { foreign } from '@on-codemerge/sdk';
+import type { WidgetContext, ViewSpec } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
 import { CalendarMenu } from './components/CalendarMenu';
 import { CalendarManager } from './services/CalendarManager';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
-import { calendarIcon } from '../../icons';
-import type { Calendar, CalendarEvent } from './types';
 import { CalendarContextMenu } from './components/CalendarContextMenu';
-import { createLineBreak } from '../../utils/helpers';
+import type { Calendar, CalendarEvent } from './types';
+import { downloadJson, pickJsonFile, mountCalendarView } from './widgets/domOps';
+import { asAttr } from '../../utils/asAttr';
 
-export class CalendarPlugin implements Plugin {
-  name = 'calendar';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+L', description: 'Insert calendar', command: 'calendar', icon: '📅' },
-  ];
-  private editor: HTMLEditor | null = null;
-  private menu: CalendarMenu | null = null;
-  private manager: CalendarManager;
-  private toolbarButton: HTMLElement | null = null;
-  private contextMenu: CalendarContextMenu | null = null;
+function serializeCalendar(cal: Calendar, events: CalendarEvent[]): string {
+  return JSON.stringify({ calendar: cal, events });
+}
 
-  constructor() {
-    this.manager = new CalendarManager();
+function parsePayload(raw: unknown): { calendar: Calendar; events: CalendarEvent[] } | null {
+  if (typeof raw !== 'string' || !raw.trim()) {
+    return null;
   }
-
-  initialize(editor: HTMLEditor): void {
-    this.menu = new CalendarMenu(this.manager, editor, () => this.showImportDialog());
-    this.editor = editor;
-    this.contextMenu = new CalendarContextMenu(editor, this.handleContextMenuAction.bind(this));
-    this.addToolbarButton();
-    this.setupEventListeners();
-    this.editor.on('calendar', () => {
-      this.showCalendarMenu();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      this.toolbarButton = createToolbarButton({
-        icon: calendarIcon,
-        title: this.editor?.t('Calendar'),
-        onClick: () => this.showCalendarMenu(),
-      });
-      toolbar.appendChild(this.toolbarButton);
+  try {
+    const parsed = JSON.parse(raw) as { calendar?: Calendar; events?: CalendarEvent[] };
+    if (parsed.calendar) {
+      return { calendar: parsed.calendar, events: parsed.events ?? [] };
     }
+  } catch {
+    /* ignore */
   }
+  return null;
+}
 
-  private setupEventListeners(): void {
-    if (!this.editor) return;
-    const container = this.editor.getContainer();
-    container.addEventListener('click', this.handleCalendarClick.bind(this));
-    container.addEventListener('contextmenu', this.handleContextMenu.bind(this));
-  }
+export function CalendarPlugin() {
+  const manager = new CalendarManager();
+  let editor!: EditorAPI;
+  let menu!: CalendarMenu;
+  let contextMenu!: CalendarContextMenu;
+  let openCalendarMenu: (() => void) | null = null;
 
-  private handleCalendarClick(e: MouseEvent): void {
-    const eventElement = (e.target as Element).closest('.calendar-event');
-    if (!eventElement) return;
+  const refreshWidgets = () => {
+    // Remount via model attrs — do not invent DOM with replaceWithHtml.
+    persistOpenCalendars();
+  };
 
-    e.preventDefault();
-    const eventId = eventElement.getAttribute('data-event-id');
-    if (!eventId) return;
-
-    const event = this.manager.getEvent(eventId);
-    if (event) {
-      this.menu?.showEditEvent(event, () => this.refreshCalendar());
-    }
-  }
-
-  private handleContextMenu(e: MouseEvent): void {
-    const calendarElement = (e.target as Element).closest('.calendar-widget');
-    const eventElement = (e.target as Element).closest('.calendar-event');
-
-    if (calendarElement instanceof HTMLElement) {
-      e.preventDefault();
-      const calendarId = calendarElement.getAttribute('data-calendar-id');
-      const calendar = calendarId ? this.manager.getCalendar(calendarId) : null;
-      if (calendar) {
-        this.contextMenu?.show(calendar, e.clientX, e.clientY);
-      }
-    } else if (eventElement instanceof HTMLElement) {
-      e.preventDefault();
-      const eventId = eventElement.getAttribute('data-event-id');
-      const event = eventId ? this.manager.getEvent(eventId) : null;
-      if (event) {
-        this.contextMenu?.show(event, e.clientX, e.clientY);
-      }
-    }
-  }
-
-  private handleContextMenuAction(action: string, target: Calendar | CalendarEvent) {
-    const refreshCallback = () => this.refreshCalendar();
-
+  const handleContextAction = (action: string, target: Calendar | CalendarEvent) => {
     if ('events' in target) {
-      // Calendar actions
       switch (action) {
-        case 'add-event':
-          this.menu?.showCreateEvent(target.id, refreshCallback);
+        case 'add-event': {
+          menu.showCreateEvent(target.id, refreshWidgets);
           break;
-        case 'edit-calendar':
-          this.menu?.showEditCalendarForm(target);
+        }
+        case 'edit-calendar': {
+          menu.showEditCalendarForm(target);
           break;
-        case 'copy-calendar':
+        }
+        case 'copy-calendar': {
           try {
-            this.manager.copyCalendar(target.id);
-            this.editor?.showSuccessNotification(
-              this.editor?.t('Calendar copied successfully') || 'Calendar copied successfully'
-            );
-            this.refreshCalendar();
-          } catch (error) {
-            this.editor?.showErrorNotification(
-              this.editor?.t('Failed to copy calendar') || 'Failed to copy calendar'
-            );
+            manager.copyCalendar(target.id);
+            editor.notify(editor.t('calendar.calendarCopiedSuccessfully') || 'Calendar copied');
+            refreshWidgets();
+          } catch {
+            editor.notify(editor.t('calendar.failedToCopyCalendar') || 'Copy failed');
           }
           break;
-        case 'export-calendar':
-          this.showExportDialog(target);
+        }
+        case 'export-calendar': {
+          showExport(target);
           break;
-        case 'import-calendar':
-          this.showImportDialog();
+        }
+        case 'import-calendar': {
+          showImport();
           break;
-        case 'delete-calendar':
-          this.manager.deleteCalendar(target.id);
-          this.refreshCalendar();
+        }
+        case 'delete-calendar': {
+          manager.deleteCalendar(target.id);
+          refreshWidgets();
           break;
+        }
       }
     } else {
-      // Event actions
       switch (action) {
-        case 'edit-event':
-          this.menu?.showEditEvent(target, refreshCallback);
+        case 'edit-event': {
+          menu.showEditEvent(target, refreshWidgets);
           break;
-        case 'copy-event':
-          try {
-            this.manager.copyEvent(target.id);
-            this.editor?.showSuccessNotification(
-              this.editor?.t('Event copied successfully') || 'Event copied successfully'
-            );
-            this.refreshCalendar();
-          } catch (error) {
-            this.editor?.showErrorNotification(
-              this.editor?.t('Failed to copy event') || 'Failed to copy event'
-            );
-          }
-          break;
-        case 'delete-event':
-          this.manager.deleteEvent(target.id);
-          this.refreshCalendar();
-          break;
-      }
-    }
-  }
-
-  private showCalendarMenu(): void {
-    if (!this.editor) return;
-
-    // Сохраняем позицию курсора перед открытием меню
-    const savedPosition = this.editor.saveCursorPosition();
-
-    // Сначала показываем список календарей
-    this.menu?.show((calendarData: Calendar) => {
-      if (this.editor) {
-        // Восстанавливаем позицию курсора перед вставкой
-        if (savedPosition) {
-          this.editor.restoreCursorPosition(savedPosition);
         }
-        this.insertCalendar(calendarData);
-      }
-    });
-  }
-
-  private insertCalendar(calendarData: Calendar): void {
-    if (!this.editor) return;
-
-    const calendarHtml = this.manager.generateCalendarHTML(calendarData);
-
-    // Используем встроенный метод insertContent для вставки календаря
-    this.editor.insertContent(calendarHtml);
-    this.editor.insertContent(createLineBreak());
-  }
-
-  private refreshCalendar(): void {
-    const calendarElements = this.editor?.getContainer().querySelectorAll('.calendar-widget');
-
-    calendarElements?.forEach((element) => {
-      const calendarId = element.getAttribute('data-calendar-id');
-      if (!calendarId) return;
-
-      const calendarData = this.manager.getCalendar(calendarId);
-      if (!calendarData) return;
-
-      // Обновляем весь календарь используя метод из менеджера
-      const updatedHtml = this.manager.generateCalendarHTML(calendarData);
-      const tempDiv = document.createElement('div');
-      tempDiv.innerHTML = updatedHtml;
-      const newCalendarElement = tempDiv.firstElementChild;
-
-      if (newCalendarElement && element.parentNode) {
-        element.parentNode.replaceChild(newCalendarElement, element);
-      }
-    });
-  }
-
-  private showExportDialog(calendar: Calendar): void {
-    try {
-      const data = JSON.stringify(calendar, null, 2);
-      const blob = new Blob([data], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `calendar-${calendar.id}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      this.editor?.showErrorNotification(this.editor.t('Export failed') || 'Export failed');
-    }
-  }
-
-  private showImportDialog(): void {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json';
-    input.onchange = (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
+        case 'copy-event': {
           try {
-            const calendar = JSON.parse(e.target?.result as string);
-            this.manager.importCalendar(calendar);
-            this.editor?.showSuccessNotification(
-              this.editor?.t('Calendar imported successfully') || 'Calendar imported successfully'
-            );
-            this.refreshCalendar();
-          } catch (error) {
-            this.editor?.showErrorNotification(this.editor?.t('Import failed') || 'Import failed');
+            manager.copyEvent(target.id);
+            editor.notify(editor.t('calendar.eventCopiedSuccessfully') || 'Event copied');
+            refreshWidgets();
+          } catch {
+            editor.notify(editor.t('calendar.failedToCopyEvent') || 'Copy failed');
           }
-        };
-        reader.readAsText(file);
+          break;
+        }
+        case 'delete-event': {
+          manager.deleteEvent(target.id);
+          refreshWidgets();
+          break;
+        }
       }
-    };
-    input.click();
-  }
-
-  public destroy(): void {
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
     }
+  };
 
-    if (this.menu) {
-      this.menu.destroy();
-      this.menu = null;
+  const persistOpenCalendars = () => {
+    editor.host
+      .querySelectorAll<HTMLElement>('[data-ocm-type="calendar"], .ocm-calendar')
+      .forEach((el) => {
+        const pathRaw = el.dataset.ocmPath ?? el.dataset.ocmBlock;
+        const calId =
+          el.querySelector<HTMLElement>('.calendar-widget')?.dataset.calendarId ??
+          el.dataset.calendarId;
+        if (pathRaw === undefined || !calId) {
+          return;
+        }
+        const cal = manager.getCalendar(calId);
+        if (!cal) {
+          return;
+        }
+        const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
+        editor.run(() => [
+          {
+            type: 'set_attrs',
+            path,
+            attrs: {
+              payload: serializeCalendar(cal, manager.getEvents(cal.id)),
+              title: cal.title,
+            },
+          },
+        ]);
+      });
+  };
+
+  const showExport = (calendar: Calendar) => {
+    try {
+      const data = JSON.stringify({ calendar, events: manager.getEvents(calendar.id) }, null, 2);
+      downloadJson(`calendar-${calendar.id}.json`, data);
+    } catch {
+      editor.notify(editor.t('export.exportFailed'));
     }
+  };
 
-    if (this.contextMenu) {
-      this.contextMenu.destroy();
-      this.contextMenu = null;
-    }
+  const showImport = () => {
+    pickJsonFile((text) => {
+      try {
+        const calendar = JSON.parse(text) as Calendar;
+        manager.importCalendar(JSON.stringify({ calendar, events: calendar.events ?? [] }));
+        editor.notify(editor.t('calendar.calendarImportedSuccessfully') || 'Imported');
+        menu.show((cal) => {
+          insertCalendar(cal);
+        });
+      } catch {
+        editor.notify(editor.t('common.importFailed'));
+      }
+    });
+  };
 
-    this.editor?.off('calendar');
-    this.editor = null;
-    this.manager = null!;
-    this.toolbarButton = null;
-  }
+  const insertCalendar = (calendarData: Calendar) => {
+    const events = manager.getEvents(calendarData.id);
+    editor.run(
+      insertAtomAfter('calendar', {
+        title: calendarData.title,
+        calendarId: calendarData.id,
+        payload: serializeCalendar(calendarData, events),
+        align: '',
+      })
+    );
+  };
+
+  return definePlugin({
+    commands: {
+      insertCalendar: () => {
+        openCalendarMenu?.();
+        return null;
+      },
+    },
+    hotkeys: [{ keys: 'Mod-Alt-l', command: 'insertCalendar', description: 'Insert calendar' }],
+    name: 'calendar',
+    nodes: [
+      {
+        name: 'calendar',
+        group: 'atom',
+        atom: true,
+        attrs: { title: 'Calendar', calendarId: '', payload: '', align: '' },
+      },
+    ],
+    setup(ctx) {
+      editor = ctx.editor;
+      menu = new CalendarMenu(manager, editor, showImport, ctx.scope);
+      contextMenu = ctx.own(new CalendarContextMenu(editor, handleContextAction));
+      openCalendarMenu = () => {
+        menu.show((cal) => {
+          insertCalendar(cal);
+        });
+      };
+
+      ctx.toolbar.add({
+        id: 'calendar',
+        icon: calendarIcon,
+        title: editor.t('calendar.title'),
+        menu: 'insert',
+        order: 51,
+        onClick: () => openCalendarMenu?.(),
+      });
+
+      ctx.onDom('host', 'click', (e) => {
+        const eventElement = (e.target as Element).closest<HTMLElement>('.calendar-event');
+        if (!eventElement) {
+          return;
+        }
+        e.preventDefault();
+        const eventId = eventElement.dataset.eventId;
+        if (!eventId) {
+          return;
+        }
+        const ev = manager.getEvent(eventId);
+        if (ev) {
+          menu.showEditEvent(ev, () => {
+            refreshWidgets();
+            persistOpenCalendars();
+          });
+        }
+      });
+
+      ctx.onDom('host', 'contextmenu', (e) => {
+        const calendarElement = (e.target as Element).closest('.calendar-widget');
+        const eventElement = (e.target as Element).closest('.calendar-event');
+        if (calendarElement instanceof HTMLElement) {
+          e.preventDefault();
+          const calendarId = calendarElement.dataset.calendarId;
+          const calendar = calendarId ? manager.getCalendar(calendarId) : null;
+          if (calendar) {
+            contextMenu.show(calendar, e.clientX, e.clientY);
+          }
+        } else if (eventElement instanceof HTMLElement) {
+          e.preventDefault();
+          const eventId = eventElement.dataset.eventId;
+          const ev = eventId ? manager.getEvent(eventId) : null;
+          if (ev) {
+            contextMenu.show(ev, e.clientX, e.clientY);
+          }
+        }
+      });
+    },
+    widgets: {
+      calendar: {
+        render(attrs, _wctx: WidgetContext): ViewSpec {
+          return foreign((host, scope) => {
+            const payload = parsePayload(attrs.payload);
+            let cal = payload?.calendar ?? null;
+            if (!cal && asAttr(attrs.calendarId)) {
+              cal = manager.getCalendar(asAttr(attrs.calendarId));
+            }
+            cal ??= manager.createCalendar({
+              title: attrString(attrs.title, 'Calendar'),
+              description: '',
+            });
+            if (!manager.getCalendar(cal.id)) {
+              manager.importCalendar(
+                JSON.stringify({ calendar: cal, events: payload?.events ?? cal.events ?? [] })
+              );
+            }
+            const align = attrString(attrs.align, '');
+            const spec = manager.calendarView(cal, {
+              emptyLabel: editor.t('calendar.noEvents'),
+            });
+            mountCalendarView(host, spec, scope, align);
+          });
+        },
+      },
+    },
+    publish: {
+      node: 'calendar',
+      runtime: 'calendar-reminders',
+      render: (attrs) => {
+        const payload = parsePayload(attrs.payload);
+        let cal = payload?.calendar ?? null;
+        if (!cal && asAttr(attrs.calendarId)) {
+          cal = manager.getCalendar(asAttr(attrs.calendarId));
+        }
+        if (!cal) {
+          return h('div', { attrs: { 'data-node': 'calendar' } });
+        }
+        if (!manager.getCalendar(cal.id)) {
+          manager.importCalendar(
+            JSON.stringify({ calendar: cal, events: payload?.events ?? cal.events ?? [] })
+          );
+        }
+        return manager.calendarView(cal, {
+          publish: true,
+          emptyLabel: editor.t('calendar.noEvents'),
+          align: attrString(attrs.align, ''),
+        });
+      },
+    },
+  });
 }

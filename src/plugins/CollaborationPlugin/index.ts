@@ -1,297 +1,228 @@
-import './style.scss';
-import './public.scss';
-
-import type { HTMLEditor } from '../../app';
-import { PopupManager } from '../../core/ui/PopupManager';
-import type { Plugin } from '../../core/Plugin';
-import { createToolbarButton } from '../ToolbarPlugin/utils.ts';
+import { definePlugin, h, core } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
+import type { Operation, DocNode, Transaction } from '@on-codemerge/kernel';
 import { collaborationIcon } from '../../icons';
-import { createContainer, createLink } from '../../utils/helpers.ts';
 
 interface CollaborationPluginOptions {
-  serverUrl?: string; // URL WebSocket сервера
-  autoStart?: boolean; // Автоматически начинать совместную работу
+  serverUrl?: string;
+  autoStart?: boolean;
+  /** Shared secret matching server `COLLAB_TOKEN` (required for join/ops). */
+  token?: string;
+  onBroadcast?: (ops: Operation[]) => void;
 }
 
-function generateToken(length: number = 8): string {
+export interface OpsCollabBinding {
+  applyRemote(ops: Operation[]): DocNode;
+  getDoc(): DocNode;
+  onLocal(ops: Operation[]): void;
+}
+
+export function createOpsCollabBinding(
+  initial: DocNode,
+  broadcast: (ops: Operation[]) => void = () => {}
+): OpsCollabBinding {
+  let doc = initial;
+  const selection = {
+    anchor: { offset: 0, path: [0] },
+    focus: { offset: 0, path: [0] },
+  };
+  return {
+    applyRemote(ops) {
+      doc = core.normalize(core.applyOps(doc, ops, selection).doc);
+      return doc;
+    },
+    getDoc: () => doc,
+    onLocal(ops) {
+      doc = core.normalize(core.applyOps(doc, ops, selection).doc);
+      broadcast(ops);
+    },
+  };
+}
+
+function generateToken(length = 8): string {
+  const bytes = new Uint8Array(length);
+  if (typeof crypto !== 'undefined' && typeof crypto.getRandomValues === 'function') {
+    crypto.getRandomValues(bytes);
+  } else {
+    for (let i = 0; i < length; i++) {
+      bytes[i] = Math.floor(Math.random() * 256);
+    }
+  }
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
   let token = '';
   for (let i = 0; i < length; i++) {
-    token += characters.charAt(Math.floor(Math.random() * characters.length));
+    token += characters.charAt((bytes[i] ?? 0) % characters.length);
   }
   return token;
 }
 
-export class CollaborationPlugin implements Plugin {
-  name = 'collaboration';
-  hotkeys = [
-    {
-      keys: 'Ctrl+Shift+C',
-      description: 'Enable collaboration mode',
-      command: 'collaboration',
-      icon: '👥',
+/**
+ * Opt-in realtime collaboration (ops protocol).
+ * Not included in `createDefaultPlugins` — pass `token` matching server `COLLAB_TOKEN`.
+ */
+export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
+  const opts = {
+    serverUrl: 'ws://localhost:8080',
+    autoStart: false,
+    token: '',
+    ...options,
+  };
+
+  let openCollab: (() => void) | null = null;
+
+  return definePlugin({
+    name: 'collaboration',
+    hotkeys: [{ keys: 'Mod-Alt-o', command: 'openCollaboration', description: 'Collaboration' }],
+    commands: {
+      openCollaboration: () => {
+        openCollab?.();
+        return null;
+      },
     },
-  ];
-  private editor: HTMLEditor | null = null;
-  private ws: WebSocket | null = null;
-  private docId: string | null = null;
-  private popup: PopupManager | null = null;
-  private options: CollaborationPluginOptions;
-  private toolbarButton: HTMLElement | null = null;
-  private isExternalUpdate: boolean = false; // Флаг для отслеживания внешних изменений
-  private contentVersion: number = 0; // Текущая версия контента
-  private lastContent: string = ''; // Последний известный контент
-  private unsubscribeFromContentChange: (() => void) | null = null; // Функция для отписки от изменений
-  private status: string = '';
-  private userId: string = '';
+    setup(ctx) {
+      const editor = ctx.editor;
+      const urlParams = new URLSearchParams(globalThis.location.search);
+      const userId = urlParams.get('userId') ?? generateToken();
+      let ws: WebSocket | null = null;
+      let docId: string | null = urlParams.get('docId');
+      let status = 'Disconnected';
+      let applyingRemote = false;
+      let binding = createOpsCollabBinding(core.docFromJSON(editor.getJSON()), opts.onBroadcast);
 
-  constructor(options: CollaborationPluginOptions = {}) {
-    this.options = {
-      serverUrl: 'ws://localhost:8080',
-      autoStart: true,
-      ...options,
-    };
-  }
+      const send = (payload: Record<string, unknown>) => {
+        if (!ws || ws.readyState !== WebSocket.OPEN) {
+          return;
+        }
+        ws.send(JSON.stringify({ ...payload, token: opts.token, userId, docId }));
+      };
 
-  initialize(editor: HTMLEditor): void {
-    const urlParams = new URLSearchParams(window.location.search);
-    this.userId = urlParams.get('userId') ?? generateToken();
+      const prevDispatch = editor.dispatch.bind(editor);
+      editor.dispatch = (tr: Transaction) => {
+        prevDispatch(tr);
+        if (applyingRemote || !ws || ws.readyState !== WebSocket.OPEN || !docId) {
+          return;
+        }
+        const ops = tr.ops.filter((o) => o.type !== 'set_selection');
+        if (ops.length === 0) {
+          return;
+        }
+        binding.onLocal(ops);
+        send({ type: 'ops', ops, snapshot: binding.getDoc() });
+      };
 
-    this.editor = editor;
-    this.popup = new PopupManager(this.editor, {
-      title: 'Collaboration',
-      closeOnClickOutside: false,
-      buttons: [
-        {
-          label: 'Start Collaboration',
-          variant: 'primary',
-          onClick: () => this.startCollaboration(),
-        },
-      ],
-      items: [
-        {
-          type: 'custom',
-          id: 'collaboration-content',
-          content: () => this.createCollaborationContent(),
-        },
-      ],
-    });
+      const startCollaboration = (api: EditorAPI) => {
+        if (!opts.token) {
+          api.notify(api.t('common.collaborationRequiresATokenMatchingCollabToken'));
+          return;
+        }
+        if (!docId) {
+          docId = generateToken(12);
+          const url = new URL(globalThis.location.href);
+          url.searchParams.set('docId', docId);
+          url.searchParams.set('userId', userId);
+          globalThis.history.replaceState({}, '', url.toString());
+        }
+        try {
+          ws?.close();
+          binding = createOpsCollabBinding(core.docFromJSON(api.getJSON()), opts.onBroadcast);
+          ws = new WebSocket(`${opts.serverUrl}?docId=${docId}&userId=${userId}`);
+          ws.addEventListener('open', () => {
+            status = 'Connected';
+            send({ type: 'join', snapshot: binding.getDoc() });
+            api.notify(api.t('common.collaborationConnected'));
+          });
+          ws.addEventListener('message', (ev) => {
+            try {
+              const msg = JSON.parse(String(ev.data)) as {
+                type: string;
+                ops?: Operation[];
+                snapshot?: DocNode;
+              };
+              if (msg.type === 'init' && msg.snapshot) {
+                applyingRemote = true;
+                try {
+                  binding = createOpsCollabBinding(msg.snapshot, opts.onBroadcast);
+                  api.setJSON(msg.snapshot);
+                } finally {
+                  applyingRemote = false;
+                }
+                return;
+              }
+              if (msg.type === 'ops' && Array.isArray(msg.ops)) {
+                applyingRemote = true;
+                try {
+                  binding.applyRemote(msg.ops);
+                  api.setJSON({ type: 'doc', content: binding.getDoc().content });
+                } finally {
+                  applyingRemote = false;
+                }
+              }
+            } catch {
+              /* ignore */
+            }
+          });
+          ws.addEventListener('close', () => {
+            status = 'Disconnected';
+          });
+        } catch {
+          api.notify(api.t('common.failedToConnect'));
+        }
+      };
 
-    if (this.options.autoStart) {
-      this.setupCollaboration();
-    }
+      openCollab = () => {
+        ctx.popup.open({
+          title: editor.t('collaboration.title'),
+          closeOnClickOutside: false,
+          items: [
+            {
+              type: 'view',
+              id: 'collaboration-content',
+              view: () =>
+                h('div', { class: 'collaboration-content p-4' }, [
+                  h('p', { class: 'collab-status' }, `${editor.t('common.status')}: ${status}`),
+                  h('p', null, `${editor.t('common.user')}: ${userId}`),
+                  h(
+                    'a',
+                    { attrs: { href: globalThis.location.href, target: '_blank' } },
+                    editor.t('common.shareThisLink')
+                  ),
+                  h(
+                    'p',
+                    { class: 'text-sm text-gray-500' },
+                    editor.t('collaboration.localDemoOnlyPassToken')
+                  ),
+                ]),
+            },
+          ],
+          buttons: [
+            {
+              label: editor.t('common.startCollaboration'),
+              variant: 'primary',
+              onClick: () => {
+                startCollaboration(editor);
+              },
+            },
+          ],
+        });
+      };
 
-    this.addToolbarButton();
-
-    this.editor.on('collaboration', () => {
-      this.popup?.show();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      this.toolbarButton = createToolbarButton({
+      ctx.toolbar.add({
+        id: 'collaboration',
         icon: collaborationIcon,
-        title: this.editor?.t('Collaboration'),
-        onClick: () => this.popup?.show(),
+        title: editor.t('collaboration.title'),
+        menu: 'review',
+        order: 70,
+        onClick: () => openCollab?.(),
       });
-      toolbar.appendChild(this.toolbarButton);
-    }
-  }
 
-  private updateConnectionStatus(status: string): void {
-    this.status = status;
-    if (!this.editor) return;
-    const statusElement = this.editor.getInnerContainer().querySelector('.collaboration-status');
-    if (statusElement) {
-      statusElement.textContent = this.editor.t('Collaboration') + ': ' + status;
-    }
-  }
+      ctx.disposable(() => {
+        ws?.close();
+        editor.dispatch = prevDispatch;
+      });
 
-  private setupCollaboration(): void {
-    if (!this.editor) {
-      return;
-    }
-
-    if (!this.options.serverUrl) {
-      return;
-    }
-    const urlParams = new URLSearchParams(window.location.search);
-    this.docId = urlParams.get('docId') ?? null;
-
-    if (!this.docId) {
-      return;
-    }
-
-    this.ws = new WebSocket(this.options.serverUrl);
-
-    this.ws.onopen = () => {
-      console.log('WebSocket connected');
-      this.updateConnectionStatus('Connected');
-      this.ws?.send(
-        JSON.stringify({
-          type: 'join',
-          docId: this.docId,
-          userId: this.userId,
-          content: this.editor?.getHtml(),
-        })
-      );
-    };
-
-    this.ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      if (data.type === 'init' || data.type === 'update') {
-        console.log('onmessage', data);
-
-        if (data.userId === this.userId) {
-          console.log('Ignoring self update');
-          return;
-        }
-
-        if (!data.content || data.content === '') {
-          console.log('Ignoring empty version:', data.content);
-          return;
-        }
-
-        // Проверяем версию контента
-        if (data.version && data.version < this.contentVersion) {
-          console.log('Ignoring older version:', data.version);
-          return;
-        }
-
-        // Нормализуем полученный контент
-        const normalizedContent = this.normalizeHtml(data.content);
-
-        // Проверяем, изменился ли контент
-        if (normalizedContent === this.normalizeHtml(this.lastContent)) {
-          console.log('Content is the same, ignoring update');
-          return;
-        }
-
-        this.isExternalUpdate = true;
-
-        this.editor?.setHtml(data.content);
-        this.lastContent = data.content; // Сохраняем новый контент
-        this.contentVersion = data.version; // Обновляем текущую версию
-
-        this.isExternalUpdate = false;
+      if (opts.autoStart && docId && opts.token) {
+        startCollaboration(editor);
       }
-    };
-
-    this.ws.onerror = (error) => {
-      console.error('WebSocket error:', error);
-      this.updateConnectionStatus('Connection error');
-    };
-
-    this.ws.onclose = () => {
-      console.log('WebSocket disconnected. Reconnecting...');
-      this.updateConnectionStatus('Reconnecting...');
-      setTimeout(() => this.setupCollaboration(), 3000); // Переподключение через 3 секунды
-    };
-
-    // Подписываемся на изменения контента
-    this.unsubscribeFromContentChange = this.editor.subscribeToContentChange(
-      (newContent?: string) => {
-        this.handleContentChange(newContent);
-      }
-    );
-  }
-
-  private debounce(func: (...args: any[]) => void, wait: number) {
-    let timeout: ReturnType<typeof setTimeout> | null;
-
-    return (...args: any[]) => {
-      if (timeout) {
-        clearTimeout(timeout);
-      }
-      timeout = setTimeout(() => {
-        func(...args);
-      }, wait);
-    };
-  }
-
-  private debouncedSendUpdate = this.debounce((newContent: string) => {
-    if (this.ws && this.docId && this.status === 'Connected') {
-      this.ws.send(
-        JSON.stringify({
-          type: 'update',
-          docId: this.docId,
-          userId: this.userId,
-          content: newContent,
-          version: this.contentVersion,
-        })
-      );
-      console.log('Content sent:', newContent);
-    }
-  }, 300);
-
-  private handleContentChange(newContent?: string): void {
-    if (!newContent || this.isExternalUpdate) {
-      return;
-    }
-
-    // Нормализуем текущий контент
-    const normalizedCurrentContent = this.normalizeHtml(newContent);
-    const normalizedLastContent = this.normalizeHtml(this.lastContent);
-
-    // Проверяем, изменился ли контент
-    if (normalizedCurrentContent !== normalizedLastContent) {
-      console.log('Content changed, scheduling update');
-      this.lastContent = newContent;
-      this.contentVersion += 1;
-
-      // Планируем отправку обновления с задержкой
-      this.debouncedSendUpdate(newContent);
-    }
-  }
-
-  /**
-   * Нормализует HTML, удаляя лишние пробелы и переносы строк
-   * @param html Исходный HTML
-   * @returns Нормализованный HTML
-   */
-  private normalizeHtml(html: string): string {
-    return html
-      .replace(/\s+/g, ' ') // Заменяем множественные пробелы на один
-      .replace(/>\s+</g, '><') // Удаляем пробелы между тегами
-      .replace(/\s+</g, '<') // Удаляем пробелы перед открывающими тегами
-      .replace(/>\s+/g, '>') // Удаляем пробелы после закрывающих тегов
-      .trim(); // Удаляем пробелы в начале и конце
-  }
-
-  private createCollaborationContent(): HTMLElement {
-    const container = createContainer('p-4');
-
-    const docId = generateToken();
-    const collaborationLink = `${window.location.origin}${window.location.pathname}?docId=${docId}`;
-
-    const linkElement = createLink(collaborationLink, collaborationLink, '_blank');
-
-    container.appendChild(document.createTextNode('Share this link to collaborate: '));
-    container.appendChild(linkElement);
-
-    return container;
-  }
-
-  private startCollaboration(): void {
-    const docId = generateToken();
-    window.location.href = `${window.location.origin}${window.location.pathname}?docId=${docId}}`;
-  }
-
-  destroy(): void {
-    if (this.ws) {
-      this.ws.close();
-      this.ws = null;
-    }
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
-    if (this.unsubscribeFromContentChange) {
-      this.unsubscribeFromContentChange();
-      this.unsubscribeFromContentChange = null;
-    }
-    this.editor = null;
-  }
+    },
+  });
 }

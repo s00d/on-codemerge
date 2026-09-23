@@ -1,4 +1,5 @@
-import { type LanguageDefinition, TokenType } from '../../../types';
+import { TokenType } from '../../../types';
+import type { LanguageDefinition } from '../../../types';
 
 export const csharpDefinition: LanguageDefinition = {
   name: 'csharp',
@@ -9,8 +10,8 @@ export const csharpDefinition: LanguageDefinition = {
     [TokenType.Function]: /^\b[a-zA-Z_]\w*(?=\s*\()/,
     [TokenType.Type]:
       /^\b(?:bool|byte|sbyte|char|decimal|double|float|int|uint|long|ulong|short|ushort|object|string|void|dynamic|var)\b/,
-    [TokenType.Decorator]: /^(?:\[(?:[^\[\]\\]|\\.)*\])/,
-    [TokenType.Operator]: /^(?:=>|\?\?=|\+\+|--|&&|\|\||[+\-*\/%&|^<>!=]=?)/,
+    [TokenType.Decorator]: /^(?:\[(?:[^[\]\\]|\\.)*\])/,
+    [TokenType.Operator]: /^(?:=>|\?\?=|\+\+|--|&&|\|\||[+\-*/%&|^<>!=]=?)/,
     [TokenType.Punctuation]: /^[{}[\]();,.]/,
   },
   keywords: [

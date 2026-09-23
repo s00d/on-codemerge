@@ -1,4 +1,4 @@
-import type { ChartPoint, ChartSeries } from './ChartTypes.ts';
+import type { ChartPoint, ChartSeries } from './ChartTypes';
 import type { ChartTheme } from './ChartTheme';
 
 export interface ChartAxisOptions {

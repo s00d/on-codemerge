@@ -1,44 +1,83 @@
 const WebSocket = require('ws');
-const { v4: uuidv4 } = require('uuid');
 
-const wss = new WebSocket.Server({ port: 8080 });
-const documents = new Map(); // Хранение документов по их ID
+const TOKEN = process.env.COLLAB_TOKEN;
+if (!TOKEN) {
+  console.error('COLLAB_TOKEN is required (fail-closed). Example: COLLAB_TOKEN=dev pnpm start');
+  process.exit(1);
+}
 
+const PORT = Number(process.env.PORT) || 8080;
+const wss = new WebSocket.Server({ port: PORT });
+/** @type {Map<string, { clients: Set<import('ws')>, snapshot: unknown }>} */
+const rooms = new Map();
+
+function unauthorized(ws) {
+  try {
+    ws.close(1008, 'unauthorized');
+  } catch {
+    /* ignore */
+  }
+}
 
 wss.on('connection', (ws) => {
-  ws.on('message', (message) => {
-    const data = JSON.parse(message);
-    const { type, docId, content, userId } = data;
+  ws.on('message', (raw) => {
+    let data;
+    try {
+      data = JSON.parse(String(raw));
+    } catch {
+      return;
+    }
+    const { type, docId, ops, token, userId, snapshot } = data ?? {};
+    if (token !== TOKEN) {
+      unauthorized(ws);
+      return;
+    }
+    if (typeof docId !== 'string' || !docId) {
+      return;
+    }
 
     if (type === 'join') {
-      // Подключение к документу
-      if (!documents.has(docId)) {
-        documents.set(docId, { content: content ?? '', clients: new Set() });
+      if (!rooms.has(docId)) {
+        rooms.set(docId, { clients: new Set(), snapshot: snapshot ?? null });
       }
-      documents.get(docId).clients.add(ws);
+      const room = rooms.get(docId);
+      room.clients.add(ws);
       ws.docId = docId;
-      ws.send(JSON.stringify({ type: 'init', content: documents.get(docId).content, userId: userId }));
-    } else if (type === 'update') {
-      // Обновление документа
-      if (documents.has(docId)) {
-        documents.get(docId).content = content;
-        documents.get(docId).clients.forEach((client) => {
-          if (client !== ws && client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify({ type: 'update', content, userId: userId }));
-          }
-        });
+      ws.send(
+        JSON.stringify({
+          type: 'init',
+          docId,
+          userId,
+          snapshot: room.snapshot,
+        })
+      );
+      return;
+    }
+
+    if (type === 'ops' && rooms.has(docId) && Array.isArray(ops)) {
+      const room = rooms.get(docId);
+      if (snapshot !== undefined) {
+        room.snapshot = snapshot;
+      }
+      for (const client of room.clients) {
+        if (client !== ws && client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify({ type: 'ops', docId, ops, userId }));
+        }
       }
     }
   });
 
   ws.on('close', () => {
-    if (ws.docId && documents.has(ws.docId)) {
-      documents.get(ws.docId).clients.delete(ws);
-      if (documents.get(ws.docId).clients.size === 0) {
-        documents.delete(ws.docId);
-      }
+    const docId = ws.docId;
+    if (typeof docId !== 'string' || !rooms.has(docId)) {
+      return;
+    }
+    const room = rooms.get(docId);
+    room.clients.delete(ws);
+    if (room.clients.size === 0) {
+      rooms.delete(docId);
     }
   });
 });
 
-console.log('WebSocket server is running on ws://localhost:8080');
+console.log(`Collaboration ops server on ws://localhost:${PORT} (COLLAB_TOKEN required)`);

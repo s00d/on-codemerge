@@ -1,49 +1,56 @@
-import { mathjax } from 'mathjax-full/js/mathjax';
-import { TeX } from 'mathjax-full/js/input/tex';
-import { SVG } from 'mathjax-full/js/output/svg';
-import { liteAdaptor } from 'mathjax-full/js/adaptors/liteAdaptor';
-import { RegisterHTMLHandler } from 'mathjax-full/js/handlers/html';
-import type { MathExpression } from '../types';
+import { h, renderDetached } from '@on-codemerge/sdk';
+import { parseMath } from '../utils/parse';
+import { astToMathML, escapeText } from '../utils/mathml';
 
-const adaptor = liteAdaptor();
-RegisterHTMLHandler(adaptor);
+export type MathRenderOptions = {
+  width?: number;
+  height?: number;
+  display?: 'block' | 'inline';
+};
 
-const tex = new TeX({ packages: ['base', 'ams'] });
-const svg = new SVG({ fontCache: 'local' });
-const html = mathjax.document('', { InputJax: tex, OutputJax: svg });
+const BASE_FONT_PX = 20;
 
+/**
+ * TeX-subset → MathML (browser layout). No KaTeX.
+ */
 export class MathRenderer {
-  public async renderMath(
-    expression: MathExpression,
-    options: { width: number; height: number }
-  ): Promise<HTMLImageElement> {
-    const img = new Image();
+  renderMath(expression: string, options: MathRenderOptions = {}): HTMLElement {
+    const display = options.display ?? 'block';
+    const parsed = parseMath(expression);
 
-    try {
-      // Генерация SVG с помощью MathJax
-      const node = html.convert(expression, { display: true });
-      const fullString = adaptor.outerHTML(node);
-
-      // Извлечение чистого SVG
-      const svgMatch = fullString.match(/<svg[^>]*>[\s\S]*<\/svg>/);
-      if (!svgMatch) {
-        throw new Error('Invalid SVG structure');
-      }
-
-      const svgString = svgMatch[0];
-
-      // Преобразование SVG в Data URL
-      const encodedSvg = encodeURIComponent(svgString);
-      // Установка Data URL в источник изображения
-      img.className = 'svg-img';
-      img.src = `data:image/svg+xml;charset=utf-8,${encodedSvg}`;
-      img.width = options.width;
-      img.height = options.height;
-    } catch (e) {
-      console.error('MathJax rendering error:', e);
-      img.alt = 'Invalid math expression';
+    if (!parsed.ok) {
+      const { el } = renderDetached(
+        h(
+          'div',
+          {
+            class:
+              'ocm-math-content ocm-math-error font-mono text-sm text-red-600 whitespace-pre-wrap p-2',
+            attrs: { role: 'alert', title: parsed.error },
+          },
+          escapeText(expression || parsed.error)
+        )
+      );
+      return el;
     }
 
-    return img;
+    const math = astToMathML(parsed.ast, display);
+    const { el: wrap } = renderDetached(
+      h('div', {
+        class: 'ocm-math-content flex items-center justify-center',
+      })
+    );
+
+    const w = options.width ?? 0;
+    const hPx = options.height ?? 0;
+    if (w > 0 && hPx > 0) {
+      // Explicit box (user-resized): scale font from container size.
+      const fs = Math.max(14, Math.min(48, Math.round(Math.min(w, hPx) / 4)));
+      wrap.style.fontSize = `${fs}px`;
+    } else {
+      wrap.style.fontSize = `${BASE_FONT_PX}px`;
+    }
+
+    wrap.append(math);
+    return wrap;
   }
 }

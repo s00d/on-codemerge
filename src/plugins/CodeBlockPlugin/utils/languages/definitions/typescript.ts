@@ -1,4 +1,5 @@
-import { type LanguageDefinition, TokenType } from '../../../types';
+import { TokenType } from '../../../types';
+import type { LanguageDefinition } from '../../../types';
 import { javascriptDefinition } from './javascript';
 
 export const typescriptDefinition: LanguageDefinition = {

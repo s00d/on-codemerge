@@ -1,13 +1,15 @@
 import type { CalendarEvent, Reminder } from '../types';
 import type { CalendarManager } from './CalendarManager';
+import { h, renderDetached } from '@on-codemerge/sdk';
+import { parseJson } from '../../../utils/asAttr';
 
 export class ReminderService {
-  private remindersKey = 'html-editor-calendar-reminders';
-  private checkInterval: number | null = null;
+  private readonly remindersKey = 'html-editor-calendar-reminders';
+  private checkInterval: ReturnType<typeof setInterval> | null = null;
   private calendarManager: CalendarManager | null = null;
 
   constructor(calendarManager?: CalendarManager) {
-    this.calendarManager = calendarManager || null;
+    this.calendarManager = calendarManager ?? null;
     this.startReminderCheck();
   }
 
@@ -18,7 +20,7 @@ export class ReminderService {
 
   // Создание напоминания
   public createReminder(event: CalendarEvent, calendarId: string): Reminder {
-    if (!event.reminder) {
+    if (event.reminder === null || event.reminder === undefined) {
       throw new Error('Event has no reminder set');
     }
 
@@ -45,7 +47,11 @@ export class ReminderService {
   // Получение всех напоминаний
   public getReminders(): Reminder[] {
     const stored = localStorage.getItem(this.remindersKey);
-    return stored ? JSON.parse(stored) : [];
+    if (stored === null || stored === undefined || stored === '') {
+      return [];
+    }
+    const parsed = parseJson(stored);
+    return Array.isArray(parsed) ? (parsed as Reminder[]) : [];
   }
 
   // Получение напоминаний для события
@@ -67,13 +73,13 @@ export class ReminderService {
 
   // Проверка напоминаний
   private startReminderCheck(): void {
-    if (this.checkInterval) {
+    if (this.checkInterval !== null && this.checkInterval !== undefined) {
       clearInterval(this.checkInterval);
     }
 
-    this.checkInterval = window.setInterval(() => {
+    this.checkInterval = globalThis.setInterval(() => {
       this.checkReminders();
-    }, 60000); // Проверка каждую минуту
+    }, 60_000); // Проверка каждую минуту
   }
 
   private checkReminders(): void {
@@ -90,7 +96,6 @@ export class ReminderService {
 
   // Показать напоминание
   private showReminder(reminder: Reminder): void {
-    // Помечаем как показанное
     const reminders = this.getReminders();
     const index = reminders.findIndex((r) => r.id === reminder.id);
     if (index !== -1) {
@@ -98,151 +103,119 @@ export class ReminderService {
       localStorage.setItem(this.remindersKey, JSON.stringify(reminders));
     }
 
-    // Создаем HTML для напоминания
-    const reminderHtml = this.generateReminderHTML(reminder);
-
-    // Добавляем в DOM
-    this.insertReminderHTML(reminderHtml, reminder.id);
-  }
-
-  // Генерация HTML кода для напоминания
-  public generateReminderHTML(reminder: Reminder): string {
     const event = this.getEventById(reminder.eventId);
-    if (!event) return '';
+    if (!event) {
+      return;
+    }
 
-    const priorityClass = event.priority || 'medium';
-    const categoryColor = event.color || '#3b82f6';
-    const tagsHtml =
-      event.tags && event.tags.length > 0
-        ? `<div class="event-tags">${event.tags.map((tag) => `<span class="event-tag">${tag}</span>`).join('')}</div>`
-        : '';
+    const priorityClass = event.priority ?? 'medium';
+    const categoryColor = event.color ?? '#3b82f6';
+    let toastEl: HTMLElement | null = null;
 
-    return `
-      <div class="calendar-reminder" data-reminder-id="${reminder.id}" data-event-id="${reminder.eventId}">
-        <div class="reminder-header">
-          <div class="reminder-icon">⏰</div>
-          <div class="reminder-title">Event Reminder</div>
-          <button class="reminder-close" onclick="this.closest('.calendar-reminder').remove()">×</button>
-        </div>
-        <div class="reminder-content">
-          <div class="reminder-event-title">${event.title}</div>
-          <div class="reminder-event-time">${event.date} at ${event.time}</div>
-          ${event.location ? `<div class="reminder-event-location">📍 ${event.location}</div>` : ''}
-          ${event.description ? `<div class="reminder-event-description">${event.description}</div>` : ''}
-          ${tagsHtml}
-        </div>
-        <div class="reminder-footer">
-          <div class="reminder-priority priority-${priorityClass}">${priorityClass.toUpperCase()}</div>
-          <div class="reminder-category" style="background-color: ${categoryColor}">${event.category || 'General'}</div>
-        </div>
-      </div>
-    `;
-  }
+    const { el, destroy } = renderDetached(
+      h(
+        'div',
+        {
+          class: 'calendar-reminder',
+          attrs: {
+            'data-reminder-id': reminder.id,
+            'data-event-id': reminder.eventId,
+          },
+        },
+        [
+          h('div', { class: 'reminder-header' }, [
+            h('div', { class: 'reminder-icon' }, '⏰'),
+            h('div', { class: 'reminder-title' }, 'Event Reminder'),
+            h(
+              'button',
+              {
+                class: 'reminder-close',
+                attrs: { type: 'button' },
+                on: {
+                  click: () => {
+                    toastEl?.remove();
+                    destroy();
+                  },
+                },
+              },
+              '×'
+            ),
+          ]),
+          h('div', { class: 'reminder-content' }, [
+            h('div', { class: 'reminder-event-title' }, event.title),
+            h('div', { class: 'reminder-event-time' }, `${event.date} at ${event.time}`),
+            event.location
+              ? h('div', { class: 'reminder-event-location' }, `📍 ${event.location}`)
+              : null,
+            event.description
+              ? h('div', { class: 'reminder-event-description' }, event.description)
+              : null,
+            event.tags && event.tags.length > 0
+              ? h(
+                  'div',
+                  { class: 'event-tags' },
+                  event.tags.map((tag) => h('span', { class: 'event-tag' }, tag))
+                )
+              : null,
+          ]),
+          h('div', { class: 'reminder-footer' }, [
+            h(
+              'div',
+              { class: `reminder-priority priority-${priorityClass}` },
+              priorityClass.toUpperCase()
+            ),
+            h(
+              'div',
+              {
+                class: 'reminder-category',
+                style: { backgroundColor: categoryColor },
+              },
+              event.category ?? 'General'
+            ),
+          ]),
+        ]
+      )
+    );
+    toastEl = el;
 
-  // Вставка HTML напоминания в DOM
-  private insertReminderHTML(html: string, _reminderId: string): void {
-    // Создаем контейнер для напоминаний, если его нет
-    let container = document.querySelector('.calendar-reminders-container') as HTMLDivElement;
+    let container = document.querySelector('.calendar-reminders-container');
     if (!container) {
-      container = document.createElement('div') as HTMLDivElement;
-      container.className = 'calendar-reminders-container';
-      container.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        z-index: 10000;
-        max-width: 400px;
-        pointer-events: none;
-      `;
-      document.body.appendChild(container);
+      const built = renderDetached(
+        h('div', {
+          class: 'calendar-reminders-container',
+          style: {
+            position: 'fixed',
+            top: '20px',
+            right: '20px',
+            zIndex: '10000',
+            maxWidth: '400px',
+            pointerEvents: 'none',
+          },
+        })
+      );
+      container = built.el;
+      document.body.append(container);
     }
-
-    // Создаем элемент напоминания
-    const reminderElement = document.createElement('div');
-    reminderElement.innerHTML = html;
-    const reminderNode = reminderElement.firstElementChild;
-
-    if (reminderNode) {
-      container.appendChild(reminderNode);
-
-      // Автоматическое удаление через 30 секунд
-      setTimeout(() => {
-        if (reminderNode.parentNode) {
-          reminderNode.parentNode.removeChild(reminderNode);
-        }
-      }, 30000);
-    }
+    container.append(el);
+    globalThis.setTimeout(() => {
+      el.remove();
+      destroy();
+    }, 30_000);
   }
 
-  // Генерация JavaScript кода для клиента
-  public generateReminderScript(calendarId: string): string {
-    const reminders = this.getReminders().filter((r) => r.calendarId === calendarId);
-
-    if (reminders.length === 0) return '';
-
-    const reminderData = reminders.map((reminder) => ({
-      id: reminder.id,
-      eventId: reminder.eventId,
-      triggerTime: reminder.triggerTime,
-      message: reminder.message,
-    }));
-
-    return `
-      <script>
-        (function() {
-          const reminderData = ${JSON.stringify(reminderData)};
-          const now = Date.now();
-          
-          function showReminder(reminder) {
-            const reminderHtml = \`
-              <div class="calendar-reminder" data-reminder-id="\${reminder.id}">
-                <div class="reminder-header">
-                  <div class="reminder-icon">⏰</div>
-                  <div class="reminder-title">Event Reminder</div>
-                  <button class="reminder-close" onclick="this.closest('.calendar-reminder').remove()">×</button>
-                </div>
-                <div class="reminder-content">
-                  <div class="reminder-message">\${reminder.message}</div>
-                </div>
-              </div>
-            \`;
-            
-            let container = document.querySelector('.calendar-reminders-container');
-            if (!container) {
-              container = document.createElement('div');
-              container.className = 'calendar-reminders-container';
-              container.style.cssText = 'position: fixed; top: 20px; right: 20px; z-index: 10000; max-width: 400px;';
-              document.body.appendChild(container);
-            }
-            
-            const reminderElement = document.createElement('div');
-            reminderElement.innerHTML = reminderHtml;
-            container.appendChild(reminderElement.firstElementChild);
-            
-            setTimeout(() => {
-              const reminder = document.querySelector(\`[data-reminder-id="\${reminder.id}"]\`);
-              if (reminder && reminder.parentNode) {
-                reminder.parentNode.removeChild(reminder);
-              }
-            }, 30000);
-          }
-          
-          function checkReminders() {
-            reminderData.forEach(reminder => {
-              if (reminder.triggerTime <= now) {
-                showReminder(reminder);
-              }
-            });
-          }
-          
-          // Проверяем сразу
-          checkReminders();
-          
-          // Проверяем каждую минуту
-          setInterval(checkReminders, 60000);
-        })();
-      </script>
-    `;
+  /** Reminder payloads for published `calendar-reminders` runtime. */
+  public getPublishReminders(calendarId: string): {
+    id: string;
+    triggerTime: number;
+    message: string;
+  }[] {
+    return this.getReminders()
+      .filter((r) => r.calendarId === calendarId && !r.isShown)
+      .map((r) => ({
+        id: r.id,
+        triggerTime: r.triggerTime,
+        message: r.message,
+      }));
   }
 
   // Получение события по ID из CalendarManager
@@ -256,7 +229,7 @@ export class ReminderService {
 
   // Очистка ресурсов
   public destroy(): void {
-    if (this.checkInterval) {
+    if (this.checkInterval !== null && this.checkInterval !== undefined) {
       clearInterval(this.checkInterval);
       this.checkInterval = null;
     }

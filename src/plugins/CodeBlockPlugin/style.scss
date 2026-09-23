@@ -1,28 +1,111 @@
-/* Code block modal */
+@reference "../../tailwind.css";
+
 .code-block-modal {
-  width: 70%;
+  @apply w-[min(100%-2rem,52rem)];
+
+  .ocm-popup__content {
+    @apply overflow-hidden;
+  }
+}
+
+.code-block-modal__body {
+  @apply grid min-h-0 grid-cols-1 gap-3 sm:grid-cols-[1fr_14rem];
+}
+
+.code-block-modal__main {
+  @apply flex min-w-0 flex-col gap-1.5;
+}
+
+.code-block-modal__side {
+  @apply flex min-h-0 flex-col gap-1.5;
+}
+
+.code-block-modal__label {
+  @apply text-xs font-medium text-ocm-text-muted;
+}
+
+.code-block-modal__code {
+  @apply min-h-56 w-full flex-1 resize-y rounded-ocm-sm border border-ocm-border bg-ocm-input px-2.5 py-1.5 font-mono text-sm text-ocm-text outline-none;
+  @apply focus:border-sky-400 focus:ring-2 focus:ring-ocm-accent-soft;
 }
 
 .language-selector {
-  @apply w-64 max-h-96 overflow-hidden bg-white rounded-lg shadow-lg border border-gray-200;
+  @apply flex max-h-72 min-h-56 w-full flex-col overflow-hidden rounded-ocm-sm border border-ocm-border bg-ocm-surface;
 
   .language-search {
-    @apply p-2 border-b border-gray-200;
+    @apply shrink-0 border-b border-ocm-border p-2;
 
     .search-input {
-      @apply w-full px-3 py-1.5 text-sm border border-gray-300 rounded-md;
+      @apply w-full rounded-ocm-sm border border-ocm-border bg-ocm-input px-2.5 py-1.5 text-sm text-ocm-text outline-none;
+      @apply focus:border-sky-400 focus:ring-2 focus:ring-ocm-accent-soft;
     }
   }
 
   .language-list {
-    @apply max-h-80 overflow-y-auto p-1;
+    @apply min-h-0 flex-1 overflow-y-auto p-1;
   }
 
   .language-option {
-    @apply w-full text-left px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100 rounded-md;
+    @apply w-full cursor-pointer rounded-ocm-sm border-0 bg-transparent px-3 py-1.5 text-left text-sm text-ocm-text;
+    @apply hover:bg-ocm-surface-muted;
+
+    &.is-active {
+      @apply bg-ocm-accent-soft font-medium text-ocm-accent;
+    }
 
     &[data-hidden='true'] {
-      display: none;
+      @apply hidden;
     }
+  }
+}
+
+/* syntax tokens — editor chrome */
+.token {
+  &.keyword {
+    @apply text-purple-600 font-medium;
+  }
+
+  &.string {
+    @apply text-green-600;
+  }
+
+  &.number {
+    @apply text-blue-600;
+  }
+
+  &.boolean {
+    @apply text-blue-600 font-medium;
+  }
+
+  &.comment {
+    @apply text-gray-500 italic;
+  }
+
+  &.operator {
+    @apply text-yellow-600;
+  }
+
+  &.function {
+    @apply text-pink-600;
+  }
+
+  &.variable {
+    @apply text-orange-600;
+  }
+
+  &.type {
+    @apply text-teal-600 font-medium;
+  }
+
+  &.punctuation {
+    @apply text-gray-600;
+  }
+
+  &.tag {
+    @apply text-blue-600;
+  }
+
+  &.attribute {
+    @apply text-purple-600;
   }
 }

@@ -6,7 +6,7 @@ export interface Comment {
 }
 
 export class CommentManager {
-  private comments: Map<string, Comment> = new Map();
+  private readonly comments = new Map<string, Comment>();
 
   public createComment(content: string): Comment {
     const id = crypto.randomUUID();
@@ -40,6 +40,6 @@ export class CommentManager {
   }
 
   public getAllComments(): Comment[] {
-    return Array.from(this.comments.values());
+    return [...this.comments.values()];
   }
 }

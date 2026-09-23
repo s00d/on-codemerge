@@ -1,5 +1,6 @@
-import { type UploadConfig, defaultConfig } from '../config/UploadConfig';
-import { createLink } from '../../../utils/helpers.ts';
+import { defaultConfig } from '../config/UploadConfig';
+import type { UploadConfig } from '../config/UploadConfig';
+import { downloadBlob, downloadUrl } from '@on-codemerge/sdk';
 
 interface UploadedFile {
   id: string;
@@ -10,8 +11,8 @@ interface UploadedFile {
 }
 
 export class FileUploader {
-  private files: Map<string, UploadedFile> = new Map();
-  private config: UploadConfig;
+  private readonly files = new Map<string, UploadedFile>();
+  private readonly config: UploadConfig;
 
   constructor(config: Partial<UploadConfig> = {}) {
     this.config = { ...defaultConfig, ...config };
@@ -19,7 +20,7 @@ export class FileUploader {
 
   public async uploadFile(file: File): Promise<UploadedFile> {
     // Validate file
-    if (file.size > (this.config.maxFileSize || defaultConfig.maxFileSize!)) {
+    if (file.size > (this.config.maxFileSize ?? defaultConfig.maxFileSize!)) {
       throw new Error(`File size exceeds ${this.formatFileSize(this.config.maxFileSize!)}`);
     }
 
@@ -44,7 +45,7 @@ export class FileUploader {
     }
 
     // Fallback to emulation
-    await this.emulateDownload(id);
+    this.emulateDownload(id);
   }
 
   private async uploadToServer(file: File): Promise<UploadedFile> {
@@ -60,9 +61,16 @@ export class FileUploader {
       throw new Error('Upload failed');
     }
 
-    const data = await response.json();
+    const data: unknown = await response.json();
+    const payload = data as {
+      id?: string;
+      url?: string;
+      name?: string;
+      size?: number;
+      type?: string;
+    };
     return {
-      id: data.id,
+      id: payload.id ?? '',
       name: file.name,
       size: file.size,
       type: file.type,
@@ -79,9 +87,10 @@ export class FileUploader {
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     const filename =
-      response.headers.get('content-disposition')?.split('filename=')[1] || 'download';
+      response.headers.get('content-disposition')?.split('filename=')[1] ?? 'download';
 
-    this.triggerDownload(url, filename);
+    downloadUrl(url, filename.replaceAll('"', ''));
+    URL.revokeObjectURL(url);
   }
 
   private async emulateUpload(file: File): Promise<UploadedFile> {
@@ -100,28 +109,18 @@ export class FileUploader {
     return uploadedFile;
   }
 
-  private async emulateDownload(id: string): Promise<void> {
+  private emulateDownload(id: string): void {
     const file = this.files.get(id);
     if (!file) {
       throw new Error('File not found');
     }
 
     const blob = new Blob([file.data], { type: file.type });
-    const url = URL.createObjectURL(blob);
-    this.triggerDownload(url, file.name);
-  }
-
-  private triggerDownload(url: string, filename: string): void {
-    const link = createLink('', url);
-    link.download = filename;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, file.name, file.type);
   }
 
   private isFileTypeAllowed(file: File): boolean {
-    const allowedTypes = this.config.allowedTypes || defaultConfig.allowedTypes!;
+    const allowedTypes = this.config.allowedTypes ?? defaultConfig.allowedTypes!;
     return allowedTypes.includes('*/*') || allowedTypes.includes(file.type);
   }
 

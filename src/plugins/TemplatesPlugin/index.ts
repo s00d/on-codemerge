@@ -1,70 +1,92 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin, attrString, foreign } from '@on-codemerge/sdk';
+import type { ViewSpec } from '@on-codemerge/sdk';
+import { htmlToDoc } from '../../io/html';
 import { TemplatesMenu } from './components/TemplatesMenu';
 import { TemplateManager } from './services/TemplateManager';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { templatesIcon } from '../../icons';
+import type { Template } from './types';
 
-export class TemplatesPlugin implements Plugin {
-  name = 'templates';
-  hotkeys = [
-    { keys: 'Ctrl+Alt+M', description: 'Insert template', command: 'templates', icon: '📄' },
-  ];
-  private editor: HTMLEditor | null = null;
-  private menu: TemplatesMenu | null = null;
-  private manager: TemplateManager;
-  private toolbarButton: HTMLElement | null = null;
+function looksLikeHtml(s: string): boolean {
+  return /<\/?[a-z][\s\S]*>/i.test(s);
+}
 
-  constructor() {
-    this.manager = new TemplateManager();
-  }
+export function TemplatesPlugin() {
+  const manager = new TemplateManager();
+  let openTemplates: (() => void) | null = null;
 
-  initialize(editor: HTMLEditor): void {
-    this.menu = new TemplatesMenu(this.manager, editor);
-    this.editor = editor;
-    this.addToolbarButton();
-    this.editor.on('templates', () => {
-      this.showTemplatesMenu();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
-
-    this.toolbarButton = createToolbarButton({
-      icon: templatesIcon,
-      title: this.editor?.t('Templates'),
-      onClick: () => this.showTemplatesMenu(),
-    });
-    toolbar.appendChild(this.toolbarButton);
-  }
-
-  private showTemplatesMenu(): void {
-    if (!this.editor) return;
-    this.menu?.show((template) => {
-      if (this.editor) {
-        this.editor.getContainer().innerHTML = template.content;
-      }
-    });
-  }
-
-  public destroy(): void {
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
-    }
-
-    if (this.menu) {
-      this.menu.destroy();
-      this.menu = null;
-    }
-
-    this.editor?.off('templates');
-    this.editor = null;
-    this.manager = null!;
-    this.toolbarButton = null;
-  }
+  return definePlugin({
+    name: 'templates',
+    nodes: [
+      {
+        name: 'template',
+        group: 'atom',
+        atom: true,
+        attrs: { payload: '', name: '' },
+      },
+    ],
+    commands: {
+      insertTemplate: () => {
+        openTemplates?.();
+        return null;
+      },
+    },
+    hotkeys: [{ keys: 'Mod-Alt-m', command: 'insertTemplate', description: 'Insert template' }],
+    setup(ctx) {
+      const editor = ctx.editor;
+      const menu = new TemplatesMenu(manager, editor, ctx.scope);
+      openTemplates = () => {
+        menu.show((template: Template) => {
+          const content = template.content ?? '';
+          if (content && looksLikeHtml(content)) {
+            const doc = htmlToDoc(content);
+            const blocks = doc.content ?? [];
+            const index = editor.getSelection().anchor.path[0] + 1;
+            editor.run(() =>
+              blocks.map((node, i) => ({
+                type: 'insert_node' as const,
+                path: [] as number[],
+                index: index + i,
+                node,
+              }))
+            );
+            return;
+          }
+          // Plain text / markdown-ish → paragraph
+          const text = content || template.name || 'Template';
+          editor.run(() => [
+            {
+              type: 'insert_node',
+              path: [],
+              index: editor.getSelection().anchor.path[0] + 1,
+              node: {
+                type: 'paragraph',
+                content: [{ type: 'text', text }],
+              },
+            },
+          ]);
+        });
+      };
+      ctx.toolbar.add({
+        id: 'templates',
+        icon: templatesIcon,
+        title: editor.t('common.templates'),
+        menu: 'insert',
+        order: 55,
+        onClick: () => openTemplates?.(),
+      });
+    },
+    widgets: {
+      // Legacy atoms (if any) — show name, not raw payload dump
+      template: {
+        render(attrs): ViewSpec {
+          return foreign((host) => {
+            host.className = 'ocm-template-atom';
+            host.textContent = attrString(attrs.name, 'Template');
+          });
+        },
+      },
+    },
+  });
 }

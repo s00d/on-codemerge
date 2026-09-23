@@ -14,48 +14,41 @@ The Templates Plugin provides template management capabilities for the on-CodeMe
 - **Template Search**: Search through template library
 - **Toolbar Integration**: Template menu in toolbar
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, TemplatesPlugin } from 'on-codemerge';
+import { Editor, TemplatesPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new TemplatesPlugin());
+const editor = new Editor(container, {
+  plugins: [TemplatesPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['TemplatesPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Template Methods
+Factory: `TemplatesPlugin()`.
 
-```javascript
-// Create template
-editor.createTemplate('My Template', content, 'custom');
+| Command          |                                    |
+| ---------------- | ---------------------------------- |
+| `insertTemplate` | `editor.command('insertTemplate')` |
 
-// Apply template
-editor.applyTemplate(templateId);
+### Keyboard shortcuts
 
-// Get all templates
-const templates = editor.getTemplates();
+| Shortcut    | Command          |
+| ----------- | ---------------- |
+| `Mod-Alt-m` | `insertTemplate` |
 
-// Delete template
-editor.deleteTemplate(templateId);
-
-// Export template
-const templateData = editor.exportTemplate(templateId);
-```
+> **Note:** Command `insertTemplate` — no `editor.createTemplate`.
 
 ## Template Categories
 
@@ -64,41 +57,9 @@ const templateData = editor.exportTemplate(templateId);
 - **Component**: Reusable components
 - **Custom**: User-defined templates
 
-## Events
-
-```javascript
-// Listen to template events
-editor.on('template:created', (template) => {
-  console.log('Template created:', template);
-});
-
-editor.on('template:applied', (template) => {
-  console.log('Template applied:', template);
-});
-
-editor.on('template:deleted', (templateId) => {
-  console.log('Template deleted:', templateId);
-});
-```
-
 ## Examples
 
 ### Basic Template Usage
-
-```javascript
-// Create a template
-editor.createTemplate('Blog Post', `
-  <h1>Blog Post Title</h1>
-  <p>Introduction paragraph...</p>
-  <h2>Main Content</h2>
-  <p>Content goes here...</p>
-  <h3>Conclusion</h3>
-  <p>Conclusion paragraph...</p>
-`, 'document');
-
-// Apply template
-editor.applyTemplate('blog-post-template');
-```
 
 ### Template Management
 
@@ -121,7 +82,7 @@ console.log('Template data:', templateData);
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, TemplatesPlugin } from 'on-codemerge';
+import { Editor, TemplatesPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -130,11 +91,11 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new TemplatesPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(TemplatesPlugin());
+
       editorInstance.current.on('template:created', (template) => {
-        setTemplates(prev => [...prev, template]);
+        setTemplates((prev) => [...prev, template]);
       });
     }
     return () => {
@@ -161,12 +122,12 @@ function MyEditor() {
   </div>
 </template>
 <script>
-import { HTMLEditor, TemplatesPlugin } from 'on-codemerge';
+import { Editor, TemplatesPlugin } from 'on-codemerge';
 export default {
   data() { return { editor: null, templates: [] }; },
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new TemplatesPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [TemplatesPlugin()] in Editor(...) */;
     this.editor.on('template:created', template => {
       this.templates.push(template);
     });
@@ -253,4 +214,4 @@ export default {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

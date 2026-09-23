@@ -1,15 +1,16 @@
 import type { FieldConfig, FormConfig, FieldType, FieldOptions } from '../types';
-import type { HTMLEditor } from '../../../app';
+import type { EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { h } from '@on-codemerge/sdk';
 
 export class FormManager {
   private fieldsConfig: FieldConfig[] = [];
   private currentFormId: string | null = null;
-  private currentFormAction: string = '';
+  private currentFormAction = '';
   private currentFormMethod: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS' =
     'POST';
-  private editor: HTMLEditor;
+  private readonly editor: EditorAPI;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI) {
     this.editor = editor;
   }
 
@@ -34,7 +35,7 @@ export class FormManager {
         baseOptions = {
           name: fieldId,
           placeholder: '',
-          value: this.editor.t('New Checkbox'),
+          value: this.editor.t('formBuilder.newCheckbox'),
           checked: false,
         };
       }
@@ -42,7 +43,7 @@ export class FormManager {
       field = {
         id: fieldId,
         type: typeOrField,
-        label: this.editor.t('New Field'),
+        label: this.editor.t('formBuilder.newField'),
         options: baseOptions,
         validation: {
           required: false,
@@ -55,7 +56,7 @@ export class FormManager {
       field = {
         ...typeOrField,
         ...options,
-        id: options?.id || typeOrField.id || this.generateFieldId(),
+        id: (options?.id ?? typeOrField.id) || this.generateFieldId(),
         position: this.fieldsConfig.length,
       };
     }
@@ -110,8 +111,8 @@ export class FormManager {
     this.fieldsConfig.splice(newPosition, 0, field);
 
     // Обновляем позиции
-    this.fieldsConfig.forEach((field, i) => {
-      field.position = i;
+    this.fieldsConfig.forEach((fieldItem, i) => {
+      fieldItem.position = i;
     });
 
     return true;
@@ -153,37 +154,65 @@ export class FormManager {
   }
 
   /**
-   * Создает и возвращает HTML форму
+   * Form ViewSpec (editor widget + preview).
    */
-  createForm(formConfig: FormConfig): string {
+  createForm(formConfig: FormConfig): ViewSpec {
     const { id, method, action, className, fields } = formConfig;
-
-    let formHtml = `<form id="${id}" method="${method}" action="${action}" class="${className}">`;
-
-    fields.forEach((field) => {
-      formHtml += this.createFieldHTML(field);
-    });
-
-    formHtml += `<button type="submit" class="submit-button">${this.editor.t('Submit')}</button>`;
-    formHtml += '</form>';
-
-    return formHtml;
+    return h(
+      'form',
+      {
+        class: `${className ?? 'generated-form'} not-prose`,
+        attrs: { id, method, action },
+      },
+      [
+        ...fields.map((field) => this.fieldView(field)),
+        h(
+          'button',
+          { class: 'submit-button', attrs: { type: 'submit' } },
+          this.editor.t('formBuilder.submit')
+        ),
+      ]
+    );
   }
 
-  /**
-   * Create field HTML
-   */
-  private createFieldHTML(field: FieldConfig): string {
+  private fieldCommonAttrs(
+    field: FieldConfig
+  ): Record<string, string | number | boolean | null | undefined> {
+    const { options, validation } = field;
+    return {
+      placeholder: options?.placeholder,
+      value: options?.value,
+      class: options?.className,
+      readonly: options?.readonly ? true : undefined,
+      disabled: options?.disabled ? true : undefined,
+      size: options?.size,
+      maxlength: options?.maxlength,
+      minlength: options?.minlength,
+      min: options?.min,
+      max: options?.max,
+      step: options?.step,
+      autocomplete: options?.autocomplete,
+      required: validation?.required ? true : undefined,
+      pattern: validation?.pattern,
+      'data-validation': validation ? JSON.stringify(validation) : undefined,
+    };
+  }
+
+  private fieldView(field: FieldConfig): ViewSpec {
     const { id, type, label, options, validation } = field;
-
-    let fieldHtml = `<div class="form-field${validation?.required ? ' required-field' : ''}">`;
-
-    if (label) {
-      fieldHtml += `<label for="${id}">${label}</label>`;
-    }
-
-    // Build common attributes
-    const commonAttrs = this.buildCommonAttributes(field);
+    const name = options?.name ?? id;
+    const wrapClass = `form-field${validation?.required ? ' required-field' : ''}`;
+    const labelNode = label ? h('label', { attrs: { for: id } }, label) : null;
+    const simpleInput = (
+      inputType: string,
+      extra: Record<string, string | number | boolean | null | undefined> = {}
+    ) =>
+      h('div', { class: wrapClass }, [
+        labelNode,
+        h('input', {
+          attrs: { type: inputType, id, name, ...this.fieldCommonAttrs(field), ...extra },
+        }),
+      ]);
 
     switch (type) {
       case 'text':
@@ -198,164 +227,115 @@ export class FormManager {
       case 'month':
       case 'week':
       case 'color':
-      case 'range':
-        fieldHtml += `<input type="${type}" id="${id}" name="${options?.name || id}"${commonAttrs}>`;
-        break;
-
-      case 'textarea':
-        const rows = options?.rows ? ` rows="${options.rows}"` : '';
-        const cols = options?.cols ? ` cols="${options.cols}"` : '';
-        fieldHtml += `<textarea id="${id}" name="${options?.name || id}"${commonAttrs}${rows}${cols}></textarea>`;
-        break;
-
-      case 'select':
-        const multiple = options?.multiple ? ' multiple' : '';
-        fieldHtml += `<select id="${id}" name="${options?.name || id}"${commonAttrs}${multiple}>`;
-        if (options?.options) {
-          options.options.forEach((option) => {
-            fieldHtml += `<option value="${option}">${option}</option>`;
-          });
-        }
-        fieldHtml += '</select>';
-        break;
-
-      case 'checkbox':
-        const checked = options?.checked ? ' checked' : '';
-        const checkboxText = options?.value || label || '';
-        if (checkboxText) {
-          fieldHtml += `<div class="checkbox-container">`;
-          fieldHtml += `<input type="checkbox" id="${id}" name="${options?.name || id}"${commonAttrs}${checked}>`;
-          fieldHtml += `<label for="${id}">${checkboxText}</label>`;
-          fieldHtml += `</div>`;
-        } else {
-          fieldHtml += `<input type="checkbox" id="${id}" name="${options?.name || id}"${commonAttrs}${checked}>`;
-        }
-        break;
-
-      case 'radio':
-        if (options?.options) {
-          options.options.forEach((option, index) => {
+      case 'range': {
+        return simpleInput(type);
+      }
+      case 'textarea': {
+        return h('div', { class: wrapClass }, [
+          labelNode,
+          h('textarea', {
+            attrs: {
+              id,
+              name,
+              rows: options?.rows,
+              cols: options?.cols,
+              ...this.fieldCommonAttrs(field),
+            },
+          }),
+        ]);
+      }
+      case 'select': {
+        return h('div', { class: wrapClass }, [
+          labelNode,
+          h(
+            'select',
+            {
+              attrs: {
+                id,
+                name,
+                multiple: options?.multiple ? true : undefined,
+                ...this.fieldCommonAttrs(field),
+              },
+            },
+            ...(options?.options ?? []).map((opt) => h('option', { attrs: { value: opt } }, opt))
+          ),
+        ]);
+      }
+      case 'checkbox': {
+        const text = (options?.value ?? label) || '';
+        return h('div', { class: wrapClass }, [
+          h('div', { class: 'checkbox-container' }, [
+            h('input', {
+              attrs: {
+                type: 'checkbox',
+                id,
+                name,
+                checked: options?.checked ? true : undefined,
+                ...this.fieldCommonAttrs(field),
+              },
+            }),
+            text ? h('label', { attrs: { for: id } }, text) : null,
+          ]),
+        ]);
+      }
+      case 'radio': {
+        return h(
+          'div',
+          { class: wrapClass },
+          ...(options?.options ?? []).flatMap((option, index) => {
             const radioId = `${id}_${index}`;
-            const checked = options?.value === option ? ' checked' : '';
-            fieldHtml += `<input type="radio" id="${radioId}" name="${options?.name || id}" value="${option}"${commonAttrs}${checked}>`;
-            fieldHtml += `<label for="${radioId}">${option}</label>`;
-          });
-        }
-        break;
-
-      case 'file':
-        const accept = options?.accept ? ` accept="${options.accept}"` : '';
-        const fileMultiple = options?.multiple ? ' multiple' : '';
-        fieldHtml += `<input type="file" id="${id}" name="${options?.name || id}"${commonAttrs}${accept}${fileMultiple}>`;
-        break;
-
-      case 'hidden':
-        fieldHtml += `<input type="hidden" id="${id}" name="${options?.name || id}"${commonAttrs}>`;
-        break;
-
-      case 'image':
-        const src = options?.src ? ` src="${options.src}"` : '';
-        const alt = options?.alt ? ` alt="${options.alt}"` : '';
-        fieldHtml += `<input type="image" id="${id}" name="${options?.name || id}"${commonAttrs}${src}${alt}>`;
-        break;
-
+            return [
+              h('input', {
+                attrs: {
+                  type: 'radio',
+                  id: radioId,
+                  name,
+                  value: option,
+                  checked: options?.value === option ? true : undefined,
+                  ...this.fieldCommonAttrs(field),
+                },
+              }),
+              h('label', { attrs: { for: radioId } }, option),
+            ];
+          })
+        );
+      }
+      case 'file': {
+        return simpleInput('file', {
+          accept: options?.accept,
+          multiple: options?.multiple ? true : undefined,
+        });
+      }
+      case 'hidden': {
+        return h('input', {
+          attrs: { type: 'hidden', id, name, ...this.fieldCommonAttrs(field) },
+        });
+      }
+      case 'image': {
+        return h('input', {
+          attrs: {
+            type: 'image',
+            id,
+            name,
+            src: options?.src,
+            alt: options?.alt,
+            ...this.fieldCommonAttrs(field),
+          },
+        });
+      }
       case 'button':
       case 'submit':
-      case 'reset':
-        fieldHtml += `<button type="${type}" id="${id}" name="${options?.name || id}"${commonAttrs}>${label || type}</button>`;
-        break;
-
-      default:
-        fieldHtml += `<input type="text" id="${id}" name="${options?.name || id}"${commonAttrs}>`;
+      case 'reset': {
+        return h(
+          'button',
+          { attrs: { type, id, name, ...this.fieldCommonAttrs(field) } },
+          label || type
+        );
+      }
+      default: {
+        return simpleInput('text');
+      }
     }
-
-    fieldHtml += '</div>';
-    return fieldHtml;
-  }
-
-  /**
-   * Build common attributes for form fields
-   */
-  private buildCommonAttributes(field: FieldConfig): string {
-    const { options, validation } = field;
-    let attrs = '';
-
-    // Placeholder
-    if (options?.placeholder) {
-      attrs += ` placeholder="${options.placeholder}"`;
-    }
-
-    // Value
-    if (options?.value) {
-      attrs += ` value="${options.value}"`;
-    }
-
-    // CSS class
-    if (options?.className) {
-      attrs += ` class="${options.className}"`;
-    }
-
-    // Readonly
-    if (options?.readonly) {
-      attrs += ' readonly';
-    }
-
-    // Disabled
-    if (options?.disabled) {
-      attrs += ' disabled';
-    }
-
-    // Size
-    if (options?.size) {
-      attrs += ` size="${options.size}"`;
-    }
-
-    // Max length
-    if (options?.maxlength) {
-      attrs += ` maxlength="${options.maxlength}"`;
-    }
-
-    // Min length
-    if (options?.minlength) {
-      attrs += ` minlength="${options.minlength}"`;
-    }
-
-    // Min value (for number, range, date inputs)
-    if (options?.min !== undefined) {
-      attrs += ` min="${options.min}"`;
-    }
-
-    // Max value (for number, range, date inputs)
-    if (options?.max !== undefined) {
-      attrs += ` max="${options.max}"`;
-    }
-
-    // Step value (for number, range inputs)
-    if (options?.step !== undefined) {
-      attrs += ` step="${options.step}"`;
-    }
-
-    // Autocomplete
-    if (options?.autocomplete) {
-      attrs += ` autocomplete="${options.autocomplete}"`;
-    }
-
-    // Required
-    if (validation?.required) {
-      attrs += ' required';
-    }
-
-    // Pattern
-    if (validation?.pattern) {
-      attrs += ` pattern="${validation.pattern}"`;
-    }
-
-    // Validation data attribute
-    if (validation) {
-      attrs += ` data-validation="${JSON.stringify(validation)}"`;
-    }
-
-    return attrs;
   }
 
   /**
@@ -387,7 +367,9 @@ export class FormManager {
    * Parse form element
    */
   parseForm(element: HTMLElement): FormConfig | null {
-    if (element.tagName !== 'FORM') return null;
+    if (element.tagName !== 'FORM') {
+      return null;
+    }
 
     const form = element as HTMLFormElement;
     const fields: FieldConfig[] = [];
@@ -437,7 +419,7 @@ export class FormManager {
 
     const field: FieldConfig = {
       id: input.id || `field_${Date.now()}_${index}`,
-      type: type as any,
+      type: type as FieldConfig['type'],
       label: this.getFieldLabel(input),
       options: {
         name: input.name,
@@ -455,7 +437,7 @@ export class FormManager {
           ? parseInt((input as HTMLInputElement).max)
           : undefined,
         step: (input as HTMLInputElement).step
-          ? parseFloat((input as HTMLInputElement).step)
+          ? Number((input as HTMLInputElement).step)
           : undefined,
         rows: (input as HTMLTextAreaElement).rows,
         cols: (input as HTMLTextAreaElement).cols,
@@ -478,7 +460,7 @@ export class FormManager {
           ? parseInt((input as HTMLInputElement).max)
           : undefined,
         step: (input as HTMLInputElement).step
-          ? parseFloat((input as HTMLInputElement).step)
+          ? Number((input as HTMLInputElement).step)
           : undefined,
       },
       position: index,
@@ -503,7 +485,7 @@ export class FormManager {
   private getFieldLabel(input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement): string {
     // Try to find label by for attribute
     if (input.id) {
-      const label = this.editor.getDOMContext().querySelector(`label[for="${input.id}"]`);
+      const label = document.querySelector(`label[for="${input.id}"]`);
       if (label) {
         return label.textContent || '';
       }
@@ -522,7 +504,7 @@ export class FormManager {
     return (
       (input as HTMLInputElement | HTMLTextAreaElement).placeholder ||
       input.name ||
-      this.editor.t('Untitled Field')
+      this.editor.t('formBuilder.untitledField')
     );
   }
   /**
@@ -558,7 +540,7 @@ export class FormManager {
    */
   getFormConfig(): FormConfig {
     return {
-      id: this.currentFormId || this.generateFormId(),
+      id: this.currentFormId ?? this.generateFormId(),
       method: this.currentFormMethod,
       action: this.currentFormAction,
       className: 'generated-form',

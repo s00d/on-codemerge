@@ -1,85 +1,115 @@
-import { PopupManager, type PopupItem } from '../../../core/ui/PopupManager';
+import { PopupController, h } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import { TYPOGRAPHY_STYLES } from '../constants';
+import type { TypographyStyle } from '../constants';
 import { clearIcon } from '../../../icons';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
 
 export class TypographyMenu {
-  private editor: HTMLEditor;
-  private popup: PopupManager;
+  private readonly editor: EditorAPI;
   private onSelect: ((style: string) => void) | null = null;
+  private readonly popups: PopupController;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
-    this.popup = new PopupManager(editor, {
-      title: editor.t('Typography Styles'),
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
+  }
+
+  private t(key: string): string {
+    return this.editor.t(key);
+  }
+
+  private pick(value: string): void {
+    this.onSelect?.(value);
+    this.popups.close();
+  }
+
+  private styleRow(style: TypographyStyle): ViewSpec {
+    return h(
+      'button',
+      {
+        class: 'typo-row',
+        attrs: { type: 'button' },
+        on: {
+          click: () => {
+            this.pick(style.value);
+          },
+        },
+      },
+      [
+        h('span', {
+          class: 'typo-row__icon',
+          attrs: { 'aria-hidden': 'true' },
+          props: { innerHTML: style.icon },
+        }),
+        h('span', { class: 'typo-row__body' }, [
+          h('span', { class: 'typo-row__label' }, this.t(style.labelKey)),
+          h('span', { class: `typo-row__sample ${style.sampleClass}` }, this.t(style.sampleKey)),
+        ]),
+      ]
+    );
+  }
+
+  private section(titleKey: string, styles: TypographyStyle[]): ViewSpec {
+    return h('section', { class: 'typo-section' }, [
+      h('h3', { class: 'typo-section__title' }, this.t(titleKey)),
+      h(
+        'div',
+        { class: 'typo-section__list' },
+        styles.map((s) => this.styleRow(s))
+      ),
+    ]);
+  }
+
+  private stylesView(): ViewSpec {
+    const headings = TYPOGRAPHY_STYLES.filter((s) => s.section === 'heading');
+    const body = TYPOGRAPHY_STYLES.filter((s) => s.section === 'body');
+    const insert = TYPOGRAPHY_STYLES.filter((s) => s.section === 'insert');
+
+    return h('div', { class: 'typo-panel' }, [
+      h(
+        'button',
+        {
+          class: 'typo-clear',
+          attrs: { type: 'button' },
+          on: {
+            click: () => {
+              this.pick('clear');
+            },
+          },
+        },
+        [
+          h('span', {
+            class: 'typo-clear__icon',
+            attrs: { 'aria-hidden': 'true' },
+            props: { innerHTML: clearIcon },
+          }),
+          h('span', { class: 'typo-clear__text' }, [
+            h('span', { class: 'typo-clear__label' }, this.t('typography.clearFormatting')),
+            h('span', { class: 'typo-clear__hint' }, this.t('typography.clearHint')),
+          ]),
+        ]
+      ),
+      this.section('typography.sectionHeadings', headings),
+      this.section('typography.sectionBody', body),
+      this.section('typography.sectionInsert', insert),
+    ]);
+  }
+
+  show(onSelect: (style: string) => void): void {
+    this.onSelect = onSelect;
+    this.popups.open({
+      title: this.t('typography.styles'),
       className: 'typography-menu',
+      size: 'md',
       closeOnClickOutside: true,
+      items: [{ type: 'view', id: 'typography-styles', view: () => this.stylesView() }],
       buttons: [
         {
-          label: editor.t('Cancel'),
+          label: this.t('common.cancel'),
           variant: 'secondary',
-          onClick: () => this.popup.hide(),
+          onClick: () => {},
         },
       ],
-      items: this.createPopupItems(), // Динамически создаем элементы
     });
-  }
-
-  private createPopupItems(): PopupItem[] {
-    const items: PopupItem[] = [];
-
-    // Кнопка для очистки форматирования
-    items.push({
-      type: 'button',
-      id: 'typography-clear',
-      text: this.editor.t('Clear Formatting'),
-      buttonVariant: 'primary',
-      icon: clearIcon,
-      value: 'clear',
-      onChange: (value) => {
-        this.onSelect?.(value.toString());
-        this.popup.hide();
-      },
-    });
-
-    // Разделитель
-    items.push({
-      type: 'divider',
-      id: 'typography-divider',
-    });
-
-    // Кнопки для стилей
-    TYPOGRAPHY_STYLES.forEach((style) => {
-      items.push({
-        type: 'button',
-        id: `typography-${style.value}`,
-        text: this.editor.t(style.label),
-        buttonVariant: 'secondary',
-        icon: style.icon,
-        value: style.value,
-        className: style.preview,
-        onChange: (value) => {
-          this.onSelect?.(value.toString());
-          this.popup.hide();
-        },
-      });
-    });
-
-    return items;
-  }
-
-  public show(onSelect: (style: string) => void): void {
-    this.onSelect = onSelect;
-    this.popup.show();
-  }
-
-  public destroy(): void {
-    // Уничтожаем PopupManager
-    this.popup.destroy();
-
-    // Очищаем ссылки
-    this.editor = null!;
-    this.popup = null!;
-    this.onSelect = null;
   }
 }

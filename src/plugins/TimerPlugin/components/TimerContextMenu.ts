@@ -1,105 +1,60 @@
-import { ContextMenu } from '../../../core/ui/ContextMenu';
 import type { TimerManager } from '../services/TimerManager';
 import type { Timer } from '../types';
-import type { HTMLEditor } from '../../../core/HTMLEditor';
+import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
+import { copyIcon, deleteIcon, editIcon, exportIcon, uploadIcon } from '../../../icons';
 
 export class TimerContextMenu {
-  private editor: HTMLEditor;
-  private currentContextMenu: ContextMenu | null = null;
+  private readonly editor: EditorAPI;
 
-  constructor(_manager: TimerManager, editor: HTMLEditor) {
+  constructor(_manager: TimerManager, editor: EditorAPI) {
     this.editor = editor;
   }
 
   public show(event: MouseEvent, _timer: Timer, onAction: (action: string) => void): void {
-    // Закрываем предыдущее контекстное меню, если оно открыто
-    if (this.currentContextMenu) {
-      this.currentContextMenu.destroy();
-      this.currentContextMenu = null;
-    }
-
-    const menuItems = [
+    const t = (k: string) => this.editor.t(k) || k;
+    const items: MenuItem[] = [
       {
-        label: this.editor.t('Edit Timer'),
-        icon: '✏️',
-        action: 'edit-timer',
+        label: t('timer.editTimer'),
+        icon: editIcon,
         onClick: () => {
           onAction('edit-timer');
-          this.closeContextMenu();
         },
-        type: 'button' as const,
       },
       {
-        label: this.editor.t('Copy Timer'),
-        icon: '📋',
-        action: 'copy-timer',
+        label: t('timer.copyTimer'),
+        icon: copyIcon,
         onClick: () => {
           onAction('copy-timer');
-          this.closeContextMenu();
         },
-        type: 'button' as const,
       },
       {
-        label: this.editor.t('Export Timer'),
-        icon: '📤',
-        action: 'export-timer',
+        label: t('timer.exportTimer'),
+        icon: exportIcon,
         onClick: () => {
           onAction('export-timer');
-          this.closeContextMenu();
         },
-        type: 'button' as const,
       },
       {
-        label: this.editor.t('Import Timer'),
-        icon: '📥',
-        action: 'import-timer',
+        label: t('timer.importTimer'),
+        icon: uploadIcon,
         onClick: () => {
           onAction('import-timer');
-          this.closeContextMenu();
         },
-        type: 'button' as const,
       },
+      { type: 'divider' },
       {
-        type: 'divider' as const,
-      },
-      {
-        label: this.editor.t('Delete Timer'),
-        icon: '🗑️',
-        action: 'delete-timer',
-        className: 'danger',
+        label: t('timer.deleteTimer'),
+        icon: deleteIcon,
+        variant: 'danger',
         onClick: () => {
           onAction('delete-timer');
-          this.closeContextMenu();
         },
-        type: 'button' as const,
       },
     ];
-
-    // Создаем новый экземпляр контекстного меню с кнопками
-    this.currentContextMenu = new ContextMenu(this.editor, menuItems);
-
-    // Создаем временный элемент для позиционирования
-    const tempElement = document.createElement('div');
-    tempElement.style.position = 'fixed';
-    tempElement.style.left = `${event.clientX}px`;
-    tempElement.style.top = `${event.clientY}px`;
-    document.body.appendChild(tempElement);
-
-    this.currentContextMenu.show(tempElement, event.clientX, event.clientY);
-
-    // Удаляем временный элемент
-    document.body.removeChild(tempElement);
-  }
-
-  private closeContextMenu(): void {
-    if (this.currentContextMenu) {
-      this.currentContextMenu.destroy();
-      this.currentContextMenu = null;
-    }
+    this.editor.ui.menu.open(items, event.clientX, event.clientY);
   }
 
   public destroy(): void {
-    this.closeContextMenu();
-    this.editor = null!;
+    this.editor.ui.menu.hide();
   }
 }

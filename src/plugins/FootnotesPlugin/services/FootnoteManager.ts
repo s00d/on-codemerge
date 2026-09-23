@@ -4,7 +4,7 @@ export interface Footnote {
 }
 
 export class FootnoteManager {
-  private footnotes: Map<string, Footnote> = new Map();
+  private readonly footnotes = new Map<string, Footnote>();
 
   public createFootnote(content: string): Footnote {
     const id = crypto.randomUUID();
@@ -25,11 +25,11 @@ export class FootnoteManager {
   }
 
   public getAllFootnotes(): Footnote[] {
-    return Array.from(this.footnotes.values());
+    return [...this.footnotes.values()];
   }
 
   public getFootnoteNumber(id: string): number {
-    const footnotes = Array.from(this.footnotes.keys());
+    const footnotes = [...this.footnotes.keys()];
     return footnotes.indexOf(id) + 1;
   }
 

@@ -14,119 +14,52 @@ The History Plugin provides comprehensive document history management for the on
 - **Performance Optimized**: Efficient history storage and retrieval
 - **Diff Visualization**: Visual diff highlighting
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, HistoryPlugin } from 'on-codemerge';
+import { Editor, HistoryPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new HistoryPlugin());
+const editor = new Editor(container, {
+  plugins: [HistoryPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['HistoryPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### History Methods
+Factory: `HistoryPlugin()`.
 
-```javascript
-// Get document history
-const history = historyPlugin.getHistory();
+| Command       |                                 |
+| ------------- | ------------------------------- |
+| `undo`        | `editor.command('undo')`        |
+| `redo`        | `editor.command('redo')`        |
+| `viewHistory` | `editor.command('viewHistory')` |
 
-// Get specific version
-const version = historyPlugin.getVersion(versionId);
+### Keyboard shortcuts
 
-// Restore to version
-historyPlugin.restoreVersion(versionId);
+| Shortcut      | Command       |
+| ------------- | ------------- |
+| `Mod-z`       | `undo`        |
+| `Mod-y`       | `redo`        |
+| `Mod-Shift-z` | `redo`        |
+| `Mod-Alt-h`   | `viewHistory` |
 
-// Compare versions
-const diff = historyPlugin.compareVersions(version1Id, version2Id);
-
-// Export history
-const historyData = historyPlugin.exportHistory();
-
-// Clear history
-historyPlugin.clearHistory();
-```
-
-### History Entry Interface
-
-```javascript
-interface HistoryEntry {
-  id: string;           // Unique version identifier
-  timestamp: number;    // Version timestamp
-  content: string;      // Document content at this version
-  description: string;  // Version description
-  author?: string;      // Author of changes
-  changes: Change[];    // List of changes made
-}
-```
-
-## Events
-
-```javascript
-// Listen to history events
-editor.on('history:version-created', (version) => {
-  console.log('New version created:', version);
-});
-
-editor.on('history:version-restored', (version) => {
-  console.log('Version restored:', version);
-});
-
-editor.on('history:cleared', () => {
-  console.log('History cleared');
-});
-
-editor.on('history:exported', (data) => {
-  console.log('History exported:', data);
-});
-```
+> **Note:** Use `editor.undo()` / `editor.redo()` and `viewHistory` modal. Snapshots are internal markdown — no `getHistory`/`compareVersions`/`exportHistory` on the factory return.
 
 ## Examples
 
 ### Basic History Usage
 
-```javascript
-// Initialize with history tracking
-const editor = new HTMLEditor(container);
-editor.use(new HistoryPlugin());
-
-// Get current history
-const history = historyPlugin.getHistory();
-console.log('Document has', history.length, 'versions');
-
-// Restore to previous version
-if (history.length > 1) {
-  const previousVersion = history[history.length - 2];
-  historyPlugin.restoreVersion(previousVersion.id);
-}
-```
-
 ### Version Comparison
-
-```javascript
-// Compare two versions
-const history = historyPlugin.getHistory();
-if (history.length >= 2) {
-  const latest = history[history.length - 1];
-  const previous = history[history.length - 2];
-  
-  const diff = historyPlugin.compareVersions(previous.id, latest.id);
-  console.log('Changes between versions:', diff);
-}
-```
 
 ## Integration Examples
 
@@ -134,7 +67,7 @@ if (history.length >= 2) {
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, HistoryPlugin } from 'on-codemerge';
+import { Editor, HistoryPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -143,12 +76,12 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new HistoryPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(HistoryPlugin());
+
       // Track history changes
       editorInstance.current.on('history:version-created', (version) => {
-        setHistory(prev => [...prev, version]);
+        setHistory((prev) => [...prev, version]);
       });
     }
 
@@ -161,9 +94,7 @@ function MyEditor() {
 
   return (
     <div>
-      <div className="history-info">
-        Versions: {history.length}
-      </div>
+      <div className="history-info">Versions: {history.length}</div>
       <div ref={editorRef} className="editor-container" />
     </div>
   );
@@ -171,55 +102,6 @@ function MyEditor() {
 ```
 
 ### Vue Integration
-
-```vue
-<template>
-  <div>
-    <div class="history-panel" v-if="history.length">
-      <h3>Document History</h3>
-      <ul>
-        <li v-for="version in history" :key="version.id">
-          {{ new Date(version.timestamp).toLocaleString() }}
-          <button @click="restoreVersion(version.id)">Restore</button>
-        </li>
-      </ul>
-    </div>
-    <div ref="editorContainer" class="editor-container"></div>
-  </div>
-</template>
-
-<script>
-import { HTMLEditor, HistoryPlugin } from 'on-codemerge';
-
-export default {
-  name: 'MyEditor',
-  data() {
-    return {
-      editor: null,
-      history: []
-    };
-  },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new HistoryPlugin());
-    
-    this.editor.on('history:version-created', (version) => {
-      this.history.push(version);
-    });
-  },
-  methods: {
-    restoreVersion(versionId) {
-      this.historyPlugin.restoreVersion(versionId);
-    }
-  },
-  beforeDestroy() {
-    if (this.editor) {
-      this.editor.destroy();
-    }
-  }
-};
-</script>
-```
 
 ## Styling
 
@@ -319,20 +201,6 @@ export default {
 
 ### Debug Mode
 
-```javascript
-// Add console logging
-console.log('History plugin initialized');
-
-// Check history events
-editor.on('history:version-created', (version) => {
-  console.log('Version created:', version);
-});
-
-// Check history state
-const history = historyPlugin.getHistory();
-console.log('Current history:', history);
-```
-
 ## Browser Support
 
 - Chrome 60+
@@ -342,4 +210,4 @@ console.log('Current history:', history);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

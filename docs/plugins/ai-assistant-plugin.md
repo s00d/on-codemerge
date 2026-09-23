@@ -12,85 +12,81 @@ The AI Assistant Plugin provides AI-powered content generation capabilities for 
 - **Settings Persistence**: Automatic saving of user preferences
 - **Popup Interface**: User-friendly configuration interface
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, AIAssistantPlugin } from 'on-codemerge';
+import { Editor, AIAssistantPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new AIAssistantPlugin());
+const editor = new Editor(container, {
+  plugins: [AIAssistantPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 <EditorComponent :activePlugins="['AIAssistantPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Plugin Initialization
+Factory: `AIAssistantPlugin()`.
 
-```javascript
-const aiPlugin = new AIAssistantPlugin();
-editor.use(aiPlugin);
-```
+| Command  |                            |
+| -------- | -------------------------- |
+| `openAI` | `editor.command('openAI')` |
 
-### Generate Content
+### Keyboard shortcuts
 
-```javascript
-// Generate content programmatically
-const result = await aiPlugin.generateContent({
-  prompt: 'Write about web development',
-  driver: 'openai',
-  apiKey: 'your-api-key',
-  options: {
-    model: 'gpt-3.5-turbo',
-    temperature: 0.7,
-    maxTokens: 1000
-  }
-});
-```
+| Shortcut      | Command  |
+| ------------- | -------- |
+| `Mod-Shift-a` | `openAI` |
+
+> **Note:** Toolbar/popup via `openAI`. No instance `generateContent` API.
 
 ## Supported AI Providers
 
 ### OpenAI
+
 - **Models**: GPT-3.5-turbo, GPT-4, GPT-4-turbo
 - **Features**: High-quality text generation, code assistance
 - **Configuration**: API key, model selection, temperature, max tokens
 
 ### DeepSeek
+
 - **Models**: DeepSeek-Coder, DeepSeek-Chat
 - **Features**: Code-focused generation, technical content
 - **Configuration**: API key, model selection, temperature, max tokens
 
 ### HuggingFace
+
 - **Models**: Various open-source models
 - **Features**: Free tier available, diverse model options
 - **Configuration**: API key, model selection, temperature, max tokens
 
 ### GitHub Azure
+
 - **Models**: GitHub Copilot models
 - **Features**: Code generation, GitHub integration
 - **Configuration**: API key, model selection, temperature, max tokens
 
 ### Llama
+
 - **Models**: Llama 2, Llama 3
 - **Features**: Open-source models, local deployment possible
 - **Configuration**: API key, model selection, temperature, max tokens
 
 ### Mistral
+
 - **Models**: Mistral 7B, Mixtral 8x7B
 - **Features**: High-performance open models
 - **Configuration**: API key, model selection, temperature, max tokens
 
 ### Ollama
+
 - **Models**: Local models via Ollama
 - **Features**: Local deployment, privacy-focused
 - **Configuration**: API key, model selection, temperature, max tokens
@@ -100,12 +96,14 @@ const result = await aiPlugin.generateContent({
 The plugin provides a popup interface with the following fields:
 
 ### Basic Settings
+
 - **AI Driver**: Select the AI provider (openai, deepseek, huggingface, github, llama, mistral, ollama)
 - **API Key**: Enter your API key for the selected provider
 - **Structure Prompt**: Define how the AI should format the response
 - **Prompt**: The main prompt for content generation
 
 ### Driver-Specific Options
+
 Each driver supports custom options:
 
 ```javascript
@@ -135,11 +133,13 @@ Each driver supports custom options:
 ## Default Prompts
 
 ### Default Content Prompt
+
 ```
 Write an article about the benefits of using artificial intelligence in web development. Include examples of JavaScript code and explain how AI can simplify the development process.
 ```
 
 ### Default Structure Prompt
+
 ```
 The response should be formatted as HTML code that can be inserted into a text editor. Follow these rules:
 1. Headings should be wrapped in <h1>, <h2>, <h3>, etc.
@@ -154,69 +154,13 @@ The response should be formatted as HTML code that can be inserted into a text e
 10. Ensure code examples are properly formatted.
 ```
 
-## Events
-
-```javascript
-// Listen to AI assistant events
-editor.on('ai:generated', (content) => {
-  console.log('Content generated:', content);
-});
-
-editor.on('ai:error', (error) => {
-  console.error('AI generation error:', error);
-});
-
-editor.on('ai:settings-changed', (settings) => {
-  console.log('Settings updated:', settings);
-});
-```
-
 ## Examples
 
 ### Basic Content Generation
 
-```javascript
-// Generate a simple article
-const prompt = 'Write a short article about JavaScript frameworks';
-const result = await aiPlugin.generateContent({
-  prompt,
-  driver: 'openai',
-  apiKey: 'your-api-key'
-});
-```
-
 ### Code Generation
 
-```javascript
-// Generate code examples
-const prompt = 'Create a React component for a todo list';
-const result = await aiPlugin.generateContent({
-  prompt,
-  driver: 'deepseek',
-  apiKey: 'your-api-key',
-  options: {
-    model: 'deepseek-coder',
-    temperature: 0.3
-  }
-});
-```
-
 ### Technical Documentation
-
-```javascript
-// Generate technical documentation
-const prompt = 'Write documentation for a REST API';
-const result = await aiPlugin.generateContent({
-  prompt,
-  driver: 'openai',
-  apiKey: 'your-api-key',
-  options: {
-    model: 'gpt-4',
-    temperature: 0.5,
-    maxTokens: 2000
-  }
-});
-```
 
 ## Settings Persistence
 
@@ -232,8 +176,8 @@ const settings = {
   driverOptions: {
     model: 'gpt-3.5-turbo',
     temperature: 0.7,
-    maxTokens: 1000
-  }
+    maxTokens: 1000,
+  },
 };
 ```
 
@@ -243,7 +187,7 @@ const settings = {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, AIAssistantPlugin } from 'on-codemerge';
+import { Editor, AIAssistantPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -251,8 +195,8 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new AIAssistantPlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(AIAssistantPlugin());
     }
 
     return () => {
@@ -274,13 +218,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, AIAssistantPlugin } from 'on-codemerge';
+import { Editor, AIAssistantPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new AIAssistantPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [AIAssistantPlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -306,15 +250,15 @@ export class CustomAIDriver implements AIDriver<DriverOptions> {
     const response = await fetch('your-ai-endpoint', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${this.apiKey}`,
-        'Content-Type': 'application/json'
+        Authorization: `Bearer ${this.apiKey}`,
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         prompt,
         model: options?.model,
         temperature: options?.temperature,
-        maxTokens: options?.maxTokens
-      })
+        maxTokens: options?.maxTokens,
+      }),
     });
 
     const data = await response.json();
@@ -327,22 +271,22 @@ export class CustomAIDriver implements AIDriver<DriverOptions> {
         type: 'list',
         label: 'Model',
         options: ['custom-model-1', 'custom-model-2'],
-        default: 'custom-model-1'
+        default: 'custom-model-1',
       },
       temperature: {
         type: 'number',
         label: 'Temperature',
         default: 0.7,
         min: 0,
-        max: 2
+        max: 2,
       },
       maxTokens: {
         type: 'number',
         label: 'Max Tokens',
         default: 1000,
         min: 1,
-        max: 4000
-      }
+        max: 4000,
+      },
     };
   }
 }
@@ -408,4 +352,4 @@ editor.on('ai:error', (error) => {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

@@ -14,26 +14,22 @@ npm install on-codemerge
 ### Basic Usage
 
 ```javascript
-import { HTMLEditor, PDFEmbedPlugin } from 'on-codemerge';
+import { Editor, PDFEmbedPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new PDFEmbedPlugin());
+const editor = new Editor(container, {
+  plugins: [PDFEmbedPlugin()],
+});
 ```
 
 ### How It Works
 
-1) Click the toolbar button or press the hotkey to open the popup
-2) Enter the PDF URL and dimensions → Insert
-3) A `.pdf-embed-container` with an `<iframe>` and a resize handle is inserted
+1. Click the toolbar button or press the hotkey to open the popup
+2. Enter the PDF URL and dimensions → Insert
+3. A `.pdf-embed-container` with an `<iframe>` and a resize handle is inserted
 
 Tip: try `https://example.com/sample.pdf` and resize the container.
 
 ### Programmatic Example
-
-```javascript
-// Open the insert popup programmatically
-editor.triggerEvent('pdf-embed');
-```
 
 ### Demo
 
@@ -43,5 +39,18 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 <EditorComponent :activePlugins="['PDFEmbedPlugin']" />
 
+## Public API (v2)
 
+Factory: `PDFEmbedPlugin()`.
 
+| Command     |                               |
+| ----------- | ----------------------------- |
+| `insertPdf` | `editor.command('insertPdf')` |
+
+### Keyboard shortcuts
+
+| Shortcut    | Command     |
+| ----------- | ----------- |
+| `Mod-Alt-p` | `insertPdf` |
+
+> **Note:** Command `insertPdf` — no `triggerEvent('pdf-embed')`.

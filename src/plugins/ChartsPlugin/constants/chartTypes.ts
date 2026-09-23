@@ -12,7 +12,7 @@ import {
 export const CHART_TYPE_CONFIGS = {
   bar: {
     name: 'Bar Chart',
-    supportsMultipleSeries: false,
+    supportsMultipleSeries: true,
     icon: barIcon,
   },
   line: {

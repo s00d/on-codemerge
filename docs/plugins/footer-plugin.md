@@ -13,75 +13,33 @@ The Footer Plugin automatically adds a statistics footer to the on-CodeMerge edi
 - **Statistics Calculator**: Advanced metrics calculation
 - **Footer Renderer**: Flexible footer rendering system
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, FooterPlugin } from 'on-codemerge';
+import { Editor, FooterPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new FooterPlugin());
+const editor = new Editor(container, {
+  plugins: [FooterPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['FooterPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Statistics Methods
+Factory: `FooterPlugin()`.
 
-```javascript
-// Get current statistics
-const stats = footerPlugin.getStatistics();
+No named commands — toolbar / menu UI only.
 
-// Calculate statistics for content
-const stats = statisticsCalculator.calculate(htmlContent);
-
-// Update footer display
-footerRenderer.update(stats);
-
-// Get specific metrics
-const wordCount = stats.words;
-const charCount = stats.characters;
-const paragraphCount = stats.paragraphs;
-const sentenceCount = stats.sentences;
-```
-
-### Statistics Object
-
-```javascript
-interface DocumentStatistics {
-  words: number;           // Word count
-  characters: number;      // Character count (with spaces)
-  charactersNoSpaces: number; // Character count (without spaces)
-  paragraphs: number;      // Paragraph count
-  sentences: number;       // Sentence count
-  lines: number;          // Line count
-  readingTime: number;    // Estimated reading time (minutes)
-}
-```
-
-## Events
-
-```javascript
-// Listen to statistics updates
-editor.on('statistics:updated', (stats) => {
-  console.log('Statistics updated:', stats);
-});
-
-editor.on('content:changed', () => {
-  console.log('Content changed, updating statistics');
-});
-```
+> **Note:** Footer chrome only. No `getStatistics` public API.
 
 ## Examples
 
@@ -89,8 +47,9 @@ editor.on('content:changed', () => {
 
 ```javascript
 // Initialize with footer plugin
-const editor = new HTMLEditor(container);
-editor.use(new FooterPlugin());
+const editor = new Editor(container, {
+  plugins: [FooterPlugin()],
+});
 
 // Footer will automatically appear with statistics
 ```
@@ -102,7 +61,7 @@ editor.use(new FooterPlugin());
 const customStats = statisticsCalculator.calculate(content, {
   includeHTML: false,
   countSpaces: true,
-  estimateReadingTime: true
+  estimateReadingTime: true,
 });
 
 // Custom footer rendering
@@ -115,7 +74,7 @@ footerRenderer.update(customStats);
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, FooterPlugin } from 'on-codemerge';
+import { Editor, FooterPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -124,9 +83,9 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new FooterPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(FooterPlugin());
+
       // Track statistics
       editorInstance.current.on('statistics:updated', (stats) => {
         setStatistics(stats);
@@ -166,7 +125,7 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, FooterPlugin } from 'on-codemerge';
+import { Editor, FooterPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
@@ -177,9 +136,9 @@ export default {
     };
   },
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new FooterPlugin());
-    
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [FooterPlugin()] in Editor(...) */;
+
     this.editor.on('statistics:updated', (stats) => {
       this.stats = stats;
     });
@@ -289,4 +248,4 @@ editor.on('statistics:updated', (stats) => {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

@@ -1,66 +1,31 @@
-import type { Command } from '../../../core/commands/Command';
-import type { HTMLEditor } from '../../../core/HTMLEditor';
+import type { EditorAPI } from '@on-codemerge/sdk';
 import type { Viewport } from '../types';
-import type { ResponsivePlugin } from '../index';
+import type { ViewportManager } from '../services/ViewportManager';
 
-export class SetViewportCommand implements Command {
-  name = 'setViewport';
-  private editor: HTMLEditor;
-  private viewport: Viewport | null = null;
-  private previousViewport: Viewport | null = null;
+export class SetViewportCommand {
+  private viewport: Viewport = 'responsive';
 
-  constructor(editor: HTMLEditor) {
-    this.editor = editor;
-  }
+  constructor(private readonly editor: EditorAPI) {}
 
   setViewport(viewport: Viewport): void {
     this.viewport = viewport;
   }
 
   execute(): void {
-    if (!this.viewport) return;
-
-    const container = this.editor.getContainer();
-    if (!container) return;
-
-    // Сохраняем предыдущий viewport для отмены
-    const plugins = this.editor.getPlugins();
-    const responsivePlugin = plugins.get('responsive') as ResponsivePlugin;
-    if (responsivePlugin) {
-      this.previousViewport = responsivePlugin.getCurrentViewport() as Viewport;
+    const mgr = (this.editor.host as HTMLElement & { __ocmViewportManager?: ViewportManager })
+      .__ocmViewportManager;
+    if (mgr) {
+      mgr.setViewport(this.editor.host, this.viewport);
+      return;
     }
-
-    // Устанавливаем новый viewport
-    if (responsivePlugin && responsivePlugin.viewportManager) {
-      responsivePlugin.viewportManager.setViewport(container, this.viewport);
-    }
-  }
-
-  undo(): void {
-    if (!this.previousViewport) return;
-
-    const container = this.editor.getContainer();
-    if (!container) return;
-
-    const plugins = this.editor.getPlugins();
-    const responsivePlugin = plugins.get('responsive') as ResponsivePlugin;
-
-    if (responsivePlugin && responsivePlugin.viewportManager) {
-      responsivePlugin.viewportManager.setViewport(container, this.previousViewport);
-    }
-  }
-
-  redo(): void {
-    if (!this.viewport) return;
-
-    const container = this.editor.getContainer();
-    if (!container) return;
-
-    const plugins = this.editor.getPlugins();
-    const responsivePlugin = plugins.get('responsive') as ResponsivePlugin;
-
-    if (responsivePlugin && responsivePlugin.viewportManager) {
-      responsivePlugin.viewportManager.setViewport(container, this.viewport);
-    }
+    this.editor.host.style.maxWidth =
+      this.viewport === 'responsive'
+        ? '100%'
+        : this.viewport === 'mobile'
+          ? '320px'
+          : this.viewport === 'tablet'
+            ? '768px'
+            : '1024px';
+    this.editor.host.style.margin = '0 auto';
   }
 }

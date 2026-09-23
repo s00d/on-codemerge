@@ -54,8 +54,6 @@ export interface Token {
 
 export interface LanguageDefinition {
   name: string;
-  patterns: {
-    [key in TokenType]?: RegExp;
-  };
+  patterns: Partial<Record<TokenType, RegExp>>;
   keywords: string[];
 }

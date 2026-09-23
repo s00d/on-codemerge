@@ -14,70 +14,48 @@ The Lists Plugin provides comprehensive list management capabilities for the on-
 - **Nested Lists**: Support for nested list structures
 - **List Styling**: Customizable list appearance
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, ListsPlugin } from 'on-codemerge';
+import { Editor, ListsPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new ListsPlugin());
+const editor = new Editor(container, {
+  plugins: [ListsPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['ListsPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### List Creation
+Factory: `ListsPlugin()`.
 
-```javascript
-// Create unordered list
-editor.executeCommand('lists-unordered');
+| Command           |                                     |
+| ----------------- | ----------------------------------- |
+| `wrapBulletList`  | `editor.command('wrapBulletList')`  |
+| `wrapOrderedList` | `editor.command('wrapOrderedList')` |
 
-// Create ordered list
-editor.executeCommand('lists-ordered');
+### Keyboard shortcuts
 
-// Toggle list type
-editor.executeCommand('toggleList', { type: 'ordered' });
-```
+| Shortcut      | Command           |
+| ------------- | ----------------- |
+| `Mod-Shift-8` | `wrapBulletList`  |
+| `Mod-Shift-7` | `wrapOrderedList` |
 
-### List Operations
-
-```javascript
-// Convert list type
-editor.executeCommand('convertList', {
-  from: 'unordered',
-  to: 'ordered'
-});
-
-// Exit list
-editor.executeCommand('exitList');
-
-// Add list item
-editor.executeCommand('addListItem');
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Shift+U` | Create unordered list | `lists-unordered` |
-| `Ctrl+Shift+O` | Create ordered list | `lists-ordered` |
-| `Ctrl+Enter` / `Cmd+Enter` | Exit list and insert break | Auto-exit |
+> **Note:** Commands `wrapBulletList` / `wrapOrderedList` (not `bulletList`/`orderedList`/`toggleList`).
 
 ## List Types
 
 ### Unordered Lists (Bullet Lists)
+
 ```html
 <ul>
   <li>First item</li>
@@ -87,6 +65,7 @@ editor.executeCommand('addListItem');
 ```
 
 ### Ordered Lists (Numbered Lists)
+
 ```html
 <ol>
   <li>First item</li>
@@ -96,15 +75,18 @@ editor.executeCommand('addListItem');
 ```
 
 ### Nested Lists
+
 ```html
 <ul>
-  <li>Main item 1
+  <li>
+    Main item 1
     <ul>
       <li>Sub item 1.1</li>
       <li>Sub item 1.2</li>
     </ul>
   </li>
-  <li>Main item 2
+  <li>
+    Main item 2
     <ol>
       <li>Numbered sub item 2.1</li>
       <li>Numbered sub item 2.2</li>
@@ -118,12 +100,14 @@ editor.executeCommand('addListItem');
 Right-click on a list to access:
 
 ### List Operations
+
 - **Convert to Ordered List**: Change to numbered list
 - **Convert to Unordered List**: Change to bullet list
 - **Remove List**: Convert list to regular text
 - **Add Item**: Insert new list item
 
 ### List Styling
+
 - **List Style**: Choose bullet or number style
 - **List Indent**: Adjust list indentation
 - **List Spacing**: Modify list item spacing
@@ -131,11 +115,13 @@ Right-click on a list to access:
 ## List Behavior
 
 ### Toggle Functionality
+
 - Clicking the same list type button removes the list
 - Clicking a different list type converts the list
 - Selecting text and clicking creates a new list
 
 ### Keyboard Navigation
+
 - **Enter**: Create new list item
 - **Shift+Enter**: Create new line within item
 - **Tab**: Indent list item (create nested list)
@@ -143,35 +129,12 @@ Right-click on a list to access:
 - **Ctrl+Enter**: Exit list and create paragraph
 
 ### Active State
+
 The plugin shows active state for list buttons:
+
 - Button highlights when cursor is in a list
 - Different highlighting for ordered vs unordered lists
 - Visual feedback for current list type
-
-## Events
-
-```javascript
-// Listen to list events
-editor.on('list:created', (list) => {
-  console.log('List created:', list);
-});
-
-editor.on('list:converted', (list, fromType, toType) => {
-  console.log('List converted:', list, fromType, toType);
-});
-
-editor.on('list:removed', (list) => {
-  console.log('List removed:', list);
-});
-
-editor.on('list-item:added', (item) => {
-  console.log('List item added:', item);
-});
-
-editor.on('list:exited', (list) => {
-  console.log('List exited:', list);
-});
-```
 
 ## Examples
 
@@ -201,13 +164,15 @@ editor.on('list:exited', (list) => {
 
 ```html
 <ol>
-  <li>Main task
+  <li>
+    Main task
     <ul>
       <li>Subtask 1</li>
       <li>Subtask 2</li>
     </ul>
   </li>
-  <li>Another main task
+  <li>
+    Another main task
     <ol>
       <li>Numbered subtask 1</li>
       <li>Numbered subtask 2</li>
@@ -232,7 +197,7 @@ editor.on('list:exited', (list) => {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, ListsPlugin } from 'on-codemerge';
+import { Editor, ListsPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -240,8 +205,8 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new ListsPlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(ListsPlugin());
     }
 
     return () => {
@@ -263,13 +228,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, ListsPlugin } from 'on-codemerge';
+import { Editor, ListsPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new ListsPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [ListsPlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -339,7 +304,7 @@ export default {
 }
 
 .custom-list li::before {
-  content: "→";
+  content: '→';
   position: absolute;
   left: 0;
   color: #3b82f6;
@@ -456,4 +421,4 @@ editor.on('selectionchange', () => {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

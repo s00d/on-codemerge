@@ -1,142 +1,325 @@
-// Resizer.ts
-type ResizerOptions = {
-  handleSize?: number; // Размер точки для ресайза
-  handleColor?: string; // Цвет точки для ресайза
-  onResizeStart?: () => void; // Событие начала ресайза
-  onResize?: (width: number, height: number, e?: MouseEvent) => void; // Событие изменения размера
-  onResizeEnd?: () => void; // Событие завершения ресайза
-  minWidth?: number; // Минимальная ширина элемента
-  minHeight?: number; // Минимальная высота элемента
-  maxWidth?: number; // Максимальная ширина элемента
-  maxHeight?: number; // Максимальная высота элемента
+import { h, renderDetached } from '@on-codemerge/sdk';
+
+import { computeResize, effectiveAspectLock } from './resizeMath';
+import type { ResizeHandle } from './resizeMath';
+
+export type ResizerAspect = 'lock' | 'free';
+
+export type ResizerOptions = {
+  aspect?: ResizerAspect;
+  handles?: ResizeHandle[];
+  minWidth?: number;
+  minHeight?: number;
+  maxWidth?: number;
+  maxHeight?: number;
+  showBadge?: boolean;
+  onResizeStart?: () => void;
+  onResize?: (width: number, height: number, e?: PointerEvent) => void;
+  onResizeEnd?: (width: number, height: number) => void;
+  onCancel?: () => void;
+  /** Fired when selection should clear (outside click or Escape). */
+  onBlur?: () => void;
 };
 
+const ALL_HANDLES: ResizeHandle[] = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+
+const CURSOR: Record<ResizeHandle, string> = {
+  nw: 'nwse-resize',
+  ne: 'nesw-resize',
+  se: 'nwse-resize',
+  sw: 'nesw-resize',
+  n: 'ns-resize',
+  s: 'ns-resize',
+  e: 'ew-resize',
+  w: 'ew-resize',
+};
+
+type Detached = { el: HTMLElement; destroy: () => void };
+
+/**
+ * Selection-frame resizer: 8 handles (corners + edges), optional size badge,
+ * aspect lock, pointer capture, Escape cancel, outside blur.
+ */
 export class Resizer {
-  private element: HTMLElement; // Элемент, который нужно ресайзить
-  private handle: HTMLDivElement | null = null; // Точка для ресайза
-  private isResizing = false; // Флаг, указывающий, что ресайз активен
-  private startX = 0; // Начальная позиция курсора по X
-  private startY = 0; // Начальная позиция курсора по Y
-  private startWidth = 0; // Начальная ширина элемента
-  private startHeight = 0; // Начальная высота элемента
-  private options: ResizerOptions; // Настройки ресайзера
-  private boundMouseMove?: (e: MouseEvent) => void;
-  private boundMouseUp?: (e: MouseEvent) => void;
+  private readonly element: HTMLElement;
+  private readonly options: Required<
+    Pick<ResizerOptions, 'aspect' | 'handles' | 'minWidth' | 'minHeight' | 'showBadge'>
+  > &
+    ResizerOptions;
+
+  private frame: Detached | null = null;
+  private badge: Detached | null = null;
+  private readonly handleNodes: Detached[] = [];
+  private savedOverflow: string | null = null;
+
+  private dragging = false;
+  private activeHandle: ResizeHandle | null = null;
+  private startX = 0;
+  private startY = 0;
+  private startWidth = 0;
+  private startHeight = 0;
+  private lastWidth = 0;
+  private lastHeight = 0;
+  private activePointerId: number | null = null;
+
+  private readonly onPointerMove: (e: PointerEvent) => void;
+  private readonly onPointerUp: (e: PointerEvent) => void;
+  private readonly onKeyDown: (e: KeyboardEvent) => void;
+  private readonly onDocPointerDown: (e: PointerEvent) => void;
 
   constructor(element: HTMLElement, options: ResizerOptions = {}) {
     this.element = element;
     this.options = {
-      handleSize: 10,
-      handleColor: 'blue',
-      minWidth: 50, // Минимальная ширина по умолчанию
-      minHeight: 50, // Минимальная высота по умолчанию
+      aspect: 'free',
+      handles: ALL_HANDLES,
+      minWidth: 50,
+      minHeight: 50,
+      showBadge: true,
       ...options,
     };
-    this.createResizeHandle();
+
+    this.onPointerMove = (e) => {
+      this.handlePointerMove(e);
+    };
+    this.onPointerUp = (e) => {
+      this.handlePointerUp(e);
+    };
+    this.onKeyDown = (e) => {
+      this.handleKeyDown(e);
+    };
+    this.onDocPointerDown = (e) => {
+      this.handleDocPointerDown(e);
+    };
+
+    this.mountChrome();
+    document.addEventListener('pointerdown', this.onDocPointerDown, true);
+    document.addEventListener('keydown', this.onKeyDown, true);
   }
 
-  private createResizeHandle(): void {
-    // Удаляем предыдущий handle, если он есть
-    const existingHandle = this.element.querySelector('.resize-handle');
-    if (existingHandle) {
-      existingHandle.remove();
+  private mountChrome(): void {
+    this.teardownChrome();
+
+    const computed = getComputedStyle(this.element);
+    if (computed.position === 'static') {
+      this.element.style.position = 'relative';
+    }
+    // Edge/corner handles sit slightly outside the box — avoid clip.
+    if (computed.overflow !== 'visible') {
+      this.savedOverflow = this.element.style.overflow;
+      this.element.style.overflow = 'visible';
+    }
+    this.element.classList.add('ocm-resize--selected');
+
+    this.frame = renderDetached(
+      h('div', { class: 'ocm-resize-frame', attrs: { 'aria-hidden': 'true' } })
+    );
+    this.element.append(this.frame.el);
+
+    for (const handle of this.options.handles) {
+      const built = renderDetached(
+        h('div', {
+          class: `ocm-resize-handle ocm-resize-handle--${handle}`,
+          attrs: {
+            'data-resize-corner': handle,
+            'data-resize-handle': handle,
+            role: 'slider',
+            'aria-label': `Resize ${handle}`,
+            tabindex: '-1',
+          },
+          style: { cursor: CURSOR[handle] },
+          on: {
+            pointerdown: (e) => {
+              this.startDrag(handle, e);
+            },
+          },
+        })
+      );
+      this.handleNodes.push(built);
+      this.element.append(built.el);
     }
 
-    // Создаем новый handle
-    this.handle = document.createElement('div');
-    this.handle.className = 'resize-handle';
-    this.handle.style.position = 'absolute';
-    this.handle.style.right = '0';
-    this.handle.style.bottom = '0';
-    this.handle.style.width = `${this.options.handleSize}px`;
-    this.handle.style.height = `${this.options.handleSize}px`;
-    this.handle.style.backgroundColor = this.options.handleColor ?? 'blue';
-    this.handle.style.cursor = 'se-resize';
-
-    // Добавляем handle в элемент
-    this.element.style.position = 'relative';
-    this.element.appendChild(this.handle);
-
-    // Обработчик для начала изменения размера
-    this.handle.addEventListener('mousedown', (e) => this.startResize(e));
+    if (this.options.showBadge) {
+      this.badge = renderDetached(
+        h('div', {
+          class: 'ocm-resize-badge',
+          attrs: { 'aria-hidden': 'true' },
+        })
+      );
+      this.badge.el.hidden = true;
+      this.element.append(this.badge.el);
+    }
   }
 
-  private startResize(e: MouseEvent): void {
-    this.isResizing = true;
+  private teardownChrome(): void {
+    this.element.classList.remove('ocm-resize--selected', 'ocm-resize--active');
+    if (this.savedOverflow !== null) {
+      this.element.style.overflow = this.savedOverflow;
+      this.savedOverflow = null;
+    }
+    this.frame?.destroy();
+    this.frame?.el.remove();
+    this.frame = null;
+    this.badge?.destroy();
+    this.badge?.el.remove();
+    this.badge = null;
+    for (const node of this.handleNodes) {
+      node.destroy();
+      node.el.remove();
+    }
+    this.handleNodes.length = 0;
+    this.element
+      .querySelectorAll('.ocm-resize-frame, .ocm-resize-handle, .ocm-resize-badge, .resize-handle')
+      .forEach((n) => {
+        n.remove();
+      });
+  }
+
+  private startDrag(handle: ResizeHandle, e: PointerEvent): void {
+    if (e.button !== 0) {
+      return;
+    }
+    e.preventDefault();
+    e.stopPropagation();
+
+    this.dragging = true;
+    this.activeHandle = handle;
+    this.activePointerId = e.pointerId;
     this.startX = e.clientX;
     this.startY = e.clientY;
     this.startWidth = this.element.offsetWidth;
     this.startHeight = this.element.offsetHeight;
+    this.lastWidth = this.startWidth;
+    this.lastHeight = this.startHeight;
 
-    // Вызываем событие начала ресайза
+    this.element.classList.add('ocm-resize--active');
+    document.documentElement.classList.add('ocm-resizing');
+    document.documentElement.style.setProperty('cursor', CURSOR[handle]);
+
+    if (this.badge) {
+      this.badge.el.hidden = false;
+      this.updateBadge(this.startWidth, this.startHeight);
+    }
+
+    const target = e.currentTarget as HTMLElement;
+    if (typeof target.setPointerCapture === 'function') {
+      try {
+        target.setPointerCapture(e.pointerId);
+      } catch {
+        /* jsdom / detached */
+      }
+    }
+
+    document.addEventListener('pointermove', this.onPointerMove);
+    document.addEventListener('pointerup', this.onPointerUp);
+    document.addEventListener('pointercancel', this.onPointerUp);
+
     this.options.onResizeStart?.();
+  }
 
+  private handlePointerMove(e: PointerEvent): void {
+    if (!this.dragging || !this.activeHandle) {
+      return;
+    }
+    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) {
+      return;
+    }
+
+    const lock = effectiveAspectLock(this.options.aspect, e.shiftKey);
+    const { width, height } = computeResize({
+      corner: this.activeHandle,
+      start: { width: this.startWidth, height: this.startHeight },
+      delta: { dx: e.clientX - this.startX, dy: e.clientY - this.startY },
+      bounds: {
+        minWidth: this.options.minWidth,
+        minHeight: this.options.minHeight,
+        maxWidth: this.options.maxWidth,
+        maxHeight: this.options.maxHeight,
+      },
+      aspectLock: lock,
+    });
+
+    this.applySize(width, height);
+    this.options.onResize?.(width, height, e);
+  }
+
+  private handlePointerUp(e: PointerEvent): void {
+    if (!this.dragging) {
+      return;
+    }
+    if (this.activePointerId !== null && e.pointerId !== this.activePointerId) {
+      return;
+    }
+    this.finishDrag(false);
+  }
+
+  private handleKeyDown(e: KeyboardEvent): void {
+    if (e.key !== 'Escape') {
+      return;
+    }
     e.preventDefault();
-
-    // Навешиваем глобальные обработчики только на время ресайза
-    this.boundMouseMove = (evt: MouseEvent) => this.resize(evt);
-    this.boundMouseUp = () => this.stopResize();
-    document.addEventListener('mousemove', this.boundMouseMove);
-    document.addEventListener('mouseup', this.boundMouseUp);
+    e.stopPropagation();
+    if (this.dragging) {
+      this.applySize(this.startWidth, this.startHeight);
+      this.finishDrag(true);
+      this.options.onCancel?.();
+    }
+    this.options.onBlur?.();
   }
 
-  private resize(e: MouseEvent): void {
-    if (this.isResizing && this.handle) {
-      // Вычисляем новые размеры
-      let newWidth = this.startWidth + (e.clientX - this.startX);
-      let newHeight = this.startHeight + (e.clientY - this.startY);
+  private handleDocPointerDown(e: PointerEvent): void {
+    if (this.dragging) {
+      return;
+    }
+    const target = e.target as Node | null;
+    if (target && this.element.contains(target)) {
+      return;
+    }
+    this.options.onBlur?.();
+  }
 
-      // Ограничиваем размеры минимальными и максимальными значениями
-      if (this.options.minWidth !== undefined && newWidth < this.options.minWidth) {
-        newWidth = this.options.minWidth;
-      }
-      if (this.options.maxWidth !== undefined && newWidth > this.options.maxWidth) {
-        newWidth = this.options.maxWidth;
-      }
-      if (this.options.minHeight !== undefined && newHeight < this.options.minHeight) {
-        newHeight = this.options.minHeight;
-      }
-      if (this.options.maxHeight !== undefined && newHeight > this.options.maxHeight) {
-        newHeight = this.options.maxHeight;
-      }
+  private finishDrag(cancelled: boolean): void {
+    this.dragging = false;
+    this.activeHandle = null;
+    this.activePointerId = null;
 
-      // Применяем новые размеры
-      this.element.style.width = `${newWidth}px`;
-      this.element.style.height = `${newHeight}px`;
+    document.removeEventListener('pointermove', this.onPointerMove);
+    document.removeEventListener('pointerup', this.onPointerUp);
+    document.removeEventListener('pointercancel', this.onPointerUp);
 
-      // Вызываем событие изменения размера
-      this.options.onResize?.(newWidth, newHeight, e);
+    this.element.classList.remove('ocm-resize--active');
+    document.documentElement.classList.remove('ocm-resizing');
+    document.documentElement.style.removeProperty('cursor');
+
+    if (this.badge) {
+      this.badge.el.hidden = true;
+    }
+
+    if (!cancelled) {
+      this.options.onResizeEnd?.(this.lastWidth, this.lastHeight);
     }
   }
 
-  private stopResize(): void {
-    this.isResizing = false;
+  private applySize(width: number, height: number): void {
+    this.lastWidth = width;
+    this.lastHeight = height;
+    this.element.style.width = `${width}px`;
+    this.element.style.height = `${height}px`;
+    this.updateBadge(width, height);
+  }
 
-    // Вызываем событие завершения ресайза
-    this.options.onResizeEnd?.();
-
-    // Снимаем глобальные обработчики
-    if (this.boundMouseMove) {
-      document.removeEventListener('mousemove', this.boundMouseMove);
-      this.boundMouseMove = undefined;
+  private updateBadge(width: number, height: number): void {
+    if (this.badge === null || this.badge.el.hidden === true) {
+      return;
     }
-    if (this.boundMouseUp) {
-      document.removeEventListener('mouseup', this.boundMouseUp);
-      this.boundMouseUp = undefined;
-    }
+    this.badge.el.textContent = `${width} × ${height}`;
   }
 
   public destroy(): void {
-    if (this.handle) {
-      this.handle.remove();
+    if (this.dragging) {
+      this.finishDrag(true);
     }
-    if (this.boundMouseMove) {
-      document.removeEventListener('mousemove', this.boundMouseMove);
-      this.boundMouseMove = undefined;
-    }
-    if (this.boundMouseUp) {
-      document.removeEventListener('mouseup', this.boundMouseUp);
-      this.boundMouseUp = undefined;
-    }
+    document.removeEventListener('pointerdown', this.onDocPointerDown, true);
+    document.removeEventListener('keydown', this.onKeyDown, true);
+    this.teardownChrome();
   }
 }

@@ -12,124 +12,72 @@ The Alignment Plugin provides text alignment functionality for the on-CodeMerge 
 - **Toggle Functionality**: Toggle alignment on/off
 - **Real-time Updates**: Immediate visual feedback
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, AlignmentPlugin } from 'on-codemerge';
+import { Editor, AlignmentPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new AlignmentPlugin());
+const editor = new Editor(container, {
+  plugins: [AlignmentPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['AlignmentPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Alignment Commands
+Factory: `AlignmentPlugin()`.
 
-```javascript
-// Align text left
-editor.executeCommand('align_left');
+| Command        |                                  |
+| -------------- | -------------------------------- |
+| `alignLeft`    | `editor.command('alignLeft')`    |
+| `alignCenter`  | `editor.command('alignCenter')`  |
+| `alignRight`   | `editor.command('alignRight')`   |
+| `alignJustify` | `editor.command('alignJustify')` |
 
-// Align text center
-editor.executeCommand('align_center');
+### Keyboard shortcuts
 
-// Align text right
-editor.executeCommand('align_right');
+| Shortcut      | Command        |
+| ------------- | -------------- |
+| `Mod-Shift-l` | `alignLeft`    |
+| `Mod-Shift-e` | `alignCenter`  |
+| `Mod-Shift-r` | `alignRight`   |
+| `Mod-Shift-j` | `alignJustify` |
 
-// Justify text
-editor.executeCommand('align_justify');
-
-// Toggle alignment style
-editor.getTextFormatter()?.toggleStyle('alignLeft');
-editor.getTextFormatter()?.toggleStyle('alignCenter');
-editor.getTextFormatter()?.toggleStyle('alignRight');
-editor.getTextFormatter()?.toggleStyle('alignJustify');
-```
-
-### Alignment Detection
-
-```javascript
-// Check if alignment is applied
-const isLeftAligned = editor.getTextFormatter()?.hasClass('alignLeft');
-const isCenterAligned = editor.getTextFormatter()?.hasClass('alignCenter');
-const isRightAligned = editor.getTextFormatter()?.hasClass('alignRight');
-const isJustified = editor.getTextFormatter()?.hasClass('alignJustify');
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+B` | Bold text | `bold` |
-| `Ctrl+I` | Italic text | `italic` |
-| `Ctrl+U` | Underline text | `underline` |
-| `Ctrl+Shift+S` | Strikethrough text | `strikethrough` |
+> **Note:** Block `align` attr. No `getTextFormatter` / instance methods.
 
 ## Alignment Types
 
 ### Left Alignment
+
 ```html
-<div style="text-align: left;">
-  This text is left-aligned
-</div>
+<div style="text-align: left;">This text is left-aligned</div>
 ```
 
 ### Center Alignment
+
 ```html
-<div style="text-align: center;">
-  This text is center-aligned
-</div>
+<div style="text-align: center;">This text is center-aligned</div>
 ```
 
 ### Right Alignment
+
 ```html
-<div style="text-align: right;">
-  This text is right-aligned
-</div>
+<div style="text-align: right;">This text is right-aligned</div>
 ```
 
 ### Justify Alignment
+
 ```html
-<div style="text-align: justify;">
-  This text is justified and will spread across the full width
-</div>
-```
-
-## Events
-
-```javascript
-// Listen to alignment events
-editor.on('align_left', () => {
-  console.log('Text aligned left');
-});
-
-editor.on('align_center', () => {
-  console.log('Text aligned center');
-});
-
-editor.on('align_right', () => {
-  console.log('Text aligned right');
-});
-
-editor.on('align_justify', () => {
-  console.log('Text justified');
-});
-
-editor.on('selectionchange', () => {
-  console.log('Selection changed, updating alignment state');
-});
+<div style="text-align: justify;">This text is justified and will spread across the full width</div>
 ```
 
 ## Examples
@@ -147,7 +95,9 @@ editor.on('selectionchange', () => {
 <p style="text-align: right;">This paragraph is right-aligned.</p>
 
 <!-- Justified text -->
-<p style="text-align: justify;">This paragraph is justified and will spread across the full width of the container.</p>
+<p style="text-align: justify;">
+  This paragraph is justified and will spread across the full width of the container.
+</p>
 ```
 
 ### Mixed Alignment
@@ -177,7 +127,7 @@ editor.on('selectionchange', () => {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, AlignmentPlugin } from 'on-codemerge';
+import { Editor, AlignmentPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -185,8 +135,8 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new AlignmentPlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(AlignmentPlugin());
     }
 
     return () => {
@@ -208,13 +158,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, AlignmentPlugin } from 'on-codemerge';
+import { Editor, AlignmentPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new AlignmentPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [AlignmentPlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -310,7 +260,7 @@ export default {
   .mobile-center {
     text-align: center !important;
   }
-  
+
   .mobile-left {
     text-align: left !important;
   }
@@ -375,25 +325,6 @@ The plugin uses CSS classes for alignment:
 
 Enable debug logging:
 
-```javascript
-// Add console logging
-console.log('Alignment plugin initialized');
-
-// Check alignment events
-editor.on('align_left', () => {
-  console.log('Left alignment applied');
-});
-
-// Check selection changes
-editor.on('selectionchange', () => {
-  console.log('Selection changed, checking alignment state');
-});
-
-// Check alignment classes
-const hasLeftAlign = editor.getTextFormatter()?.hasClass('alignLeft');
-console.log('Has left alignment:', hasLeftAlign);
-```
-
 ## Browser Support
 
 - Chrome 60+
@@ -417,4 +348,4 @@ console.log('Has left alignment:', hasLeftAlign);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

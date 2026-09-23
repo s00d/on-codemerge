@@ -1,173 +1,108 @@
 import './style.scss';
-import './public.scss';
 
-import type { Plugin } from '../../core/Plugin';
-import type { HTMLEditor } from '../../core/HTMLEditor';
+import { definePlugin, convertBlockType, insertAtomAfter, core } from '@on-codemerge/sdk';
+import { plainText } from '@on-codemerge/kernel';
 import { TypographyMenu } from './components/TypographyMenu';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
 import { typographyIcon } from '../../icons';
-import { createHr } from '../../utils/helpers.ts';
 
-export class TypographyPlugin implements Plugin {
-  name = 'typography';
-  hotkeys = [
-    {
-      keys: 'Ctrl+Shift+W',
-      description: 'Adjust typography settings',
-      command: 'typography-settings',
-      icon: '✒️',
+export function TypographyPlugin() {
+  let openTypography: (() => void) | null = null;
+
+  return definePlugin({
+    name: 'typography',
+    nodes: [
+      { name: 'heading', group: 'block', attrs: { level: 1 } },
+      { name: 'blockquote', group: 'block' },
+      { name: 'code_block_typo', group: 'block' },
+      { name: 'horizontalRule', group: 'atom', atom: true },
+    ],
+    hotkeys: [{ keys: 'Mod-Shift-w', command: 'typographyMenu', description: 'Typography styles' }],
+    commands: {
+      typographyMenu: () => {
+        openTypography?.();
+        return null;
+      },
+      setParagraph: convertBlockType('paragraph'),
+      setHeading1: convertBlockType('heading', { level: 1 }),
+      setHeading2: convertBlockType('heading', { level: 2 }),
+      setHeading3: convertBlockType('heading', { level: 3 }),
+      setHeading4: convertBlockType('heading', { level: 4 }),
+      setBlockquote: convertBlockType('blockquote'),
+      insertHr: insertAtomAfter('horizontalRule'),
     },
-  ];
-  private editor: HTMLEditor | null = null;
-  private menu: TypographyMenu | null = null;
-  private toolbarButton: HTMLElement | null = null;
-  private boundKeyDown?: (e: Event) => void;
+    setup(ctx) {
+      const editor = ctx.editor;
+      const menu = new TypographyMenu(editor, ctx.scope);
 
-  constructor() {}
+      openTypography = () => {
+        menu.show((style) => {
+          switch (style) {
+            case 'clear': {
+              editor.run(convertBlockType('paragraph'));
+              break;
+            }
+            case 'h1': {
+              editor.command('setHeading1');
+              break;
+            }
+            case 'h2': {
+              editor.command('setHeading2');
+              break;
+            }
+            case 'h3': {
+              editor.command('setHeading3');
+              break;
+            }
+            case 'h4': {
+              editor.command('setHeading4');
+              break;
+            }
+            case 'paragraph': {
+              editor.command('setParagraph');
+              break;
+            }
+            case 'blockquote': {
+              editor.command('setBlockquote');
+              break;
+            }
+            case 'hr': {
+              editor.command('insertHr');
+              break;
+            }
+            case 'pre': {
+              editor.run((state) => {
+                const idx = state.selection.anchor.path[0] ?? 0;
+                let block;
+                try {
+                  block = core.getNodeAt(state.doc, [idx]);
+                } catch {
+                  return null;
+                }
+                const code = plainText(block);
+                return convertBlockType('code_block', {
+                  language: 'plaintext',
+                  code,
+                })(state);
+              });
+              break;
+            }
+            default: {
+              break;
+            }
+          }
+        });
+      };
 
-  initialize(editor: HTMLEditor): void {
-    this.editor = editor;
-    this.menu = new TypographyMenu(editor);
-    this.addToolbarButton();
-    this.setupEventListeners();
-    this.setupKeyboardEvents();
-
-    this.boundKeyDown = (e: Event) => this.handleKeyDown(e);
-    document.addEventListener('keydown', this.boundKeyDown);
-    this.editor.on('typography', () => {
-      this.editor?.ensureEditorFocus();
-      this.showMenu();
-    });
-  }
-
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (toolbar) {
-      this.toolbarButton = createToolbarButton({
+      ctx.toolbar.add({
+        id: 'typography',
         icon: typographyIcon,
-        title: this.editor?.t('Typography') || 'Typography',
-        onClick: () => this.showMenu(),
+        title: editor.t('typography.title'),
+        group: 'format',
+        order: 18,
+        onClick: () => {
+          openTypography?.();
+        },
       });
-      toolbar.appendChild(this.toolbarButton);
-    }
-  }
-
-  private setupEventListeners(): void {
-    if (this.editor) {
-      this.editor.getContainer().addEventListener('click', this.handleClick);
-    }
-  }
-
-  private setupKeyboardEvents(): void {
-    if (!this.editor) return;
-
-    this.boundKeyDown = (e: Event) => {
-      if ((e as KeyboardEvent).key === 'Tab') {
-        e.preventDefault();
-        this.insertTab();
-      }
-    };
-
-    this.editor.getDOMContext().addEventListener('keydown', this.boundKeyDown);
-  }
-
-  private insertTab(): void {
-    if (!this.editor) return;
-
-    const selection = this.editor.getTextFormatter()?.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    const tabNode = document.createTextNode('\t');
-    range.deleteContents();
-    range.insertNode(tabNode);
-    range.setStartAfter(tabNode);
-    range.setEndAfter(tabNode);
-    selection.removeAllRanges();
-    selection.addRange(range);
-  }
-
-  private handleKeyDown(e: Event): void {
-    if ((e as KeyboardEvent).ctrlKey && (e as KeyboardEvent).key === 't') {
-      e.preventDefault();
-      this.showMenu();
-    }
-  }
-
-  private handleClick(): void {
-    this.editor?.getContainer().focus();
-  }
-
-  private showMenu(): void {
-    if (!this.editor) return;
-    this.editor.getContainer().focus();
-    this.menu?.show((style) => this.applyStyle(style));
-  }
-
-  private applyStyle(style: string): void {
-    if (!this.editor) return;
-
-    const selection = this.editor.getTextFormatter()?.getSelection();
-    if (!selection || selection.rangeCount === 0) return;
-
-    const range = selection.getRangeAt(0);
-    const container = range.commonAncestorContainer.parentElement;
-    if (!container) return;
-
-    switch (style) {
-      case 'h1':
-      case 'h2':
-      case 'h3':
-      case 'h4':
-      case 'h5':
-      case 'h6':
-        this.editor?.getTextFormatter()?.applyBlock(style);
-        break;
-      case 'paragraph':
-        this.editor?.getTextFormatter()?.applyBlock('p');
-        break;
-      case 'blockquote':
-        this.editor?.getTextFormatter()?.applyBlock('blockquote');
-        break;
-      case 'pre':
-        this.editor?.getTextFormatter()?.applyBlock('pre');
-        break;
-      case 'hr':
-        const hrElement = createHr('my-4 border-t border-gray-300');
-        range.deleteContents();
-        range.insertNode(hrElement);
-        range.setStartAfter(hrElement);
-        range.setEndAfter(hrElement);
-        selection.removeAllRanges();
-        selection.addRange(range);
-        break;
-      case 'clear':
-        this.editor?.getTextFormatter()?.clearBlock();
-        break;
-    }
-  }
-
-  public destroy(): void {
-    if (this.editor) {
-      this.editor.getContainer().removeEventListener('click', this.handleClick);
-    }
-
-    if (this.boundKeyDown) {
-      this.editor?.getDOMContext().removeEventListener('keydown', this.boundKeyDown);
-      this.boundKeyDown = undefined;
-    }
-
-    if (this.toolbarButton && this.toolbarButton.parentElement) {
-      this.toolbarButton.parentElement.removeChild(this.toolbarButton);
-    }
-
-    this.menu?.destroy();
-
-    this.editor?.off('typography');
-
-    // Очищаем ссылки
-    this.editor = null;
-    this.menu = null;
-    this.toolbarButton = null;
-  }
+    },
+  });
 }

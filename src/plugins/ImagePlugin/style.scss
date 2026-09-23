@@ -1,6 +1,7 @@
-/* Image styles */
+@reference "../../tailwind.css";
+
 .html-editor {
   img {
-    @apply max-w-full h-auto rounded-lg;
+    @apply max-w-full h-auto rounded-ocm;
   }
 }

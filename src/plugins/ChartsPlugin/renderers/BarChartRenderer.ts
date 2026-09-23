@@ -19,8 +19,8 @@ export class BarChartRenderer extends BaseChartRenderer {
       ? (data as ChartSeries[])
       : [{ name: '', data: data as ChartPoint[] }];
     const categories = seriesArr[0].data.map((p) => p.label || '');
-    const mode = options.mode || 'default';
-    const orientation = options.orientation || 'vertical';
+    const mode = options.mode ?? 'default';
+    const orientation = options.orientation ?? 'vertical';
 
     // Вычисление максимального значения для разных режимов
     let maxValue = 1;
@@ -80,7 +80,7 @@ export class BarChartRenderer extends BaseChartRenderer {
       const x = padding + barSpacing * i + (barSpacing - barWidth) / 2;
       const barHeight = value * scale;
       const y = options.height - padding - barHeight;
-      const color = point.color || colors[i % colors.length];
+      const color = point.color ?? colors[i % colors.length];
       // Тень
       ctx.fillStyle = 'rgba(0,0,0,0.1)';
       ctx.fillRect(x + 2, y + 2, barWidth, barHeight);
@@ -118,7 +118,7 @@ export class BarChartRenderer extends BaseChartRenderer {
         const barHeight = (value * height) / maxValue;
         y -= barHeight;
         const x = padding + barSpacing * i + (barSpacing - barWidth) / 2;
-        const color = seriesArr[s].color || colors[s % colors.length];
+        const color = seriesArr[s].color ?? colors[s % colors.length];
         ctx.fillStyle = color;
         this.roundRect(ctx, x, y, barWidth, barHeight, 4);
         ctx.fill();
@@ -147,7 +147,7 @@ export class BarChartRenderer extends BaseChartRenderer {
         const barHeight = value * scale;
         const x = padding + barSpacing * i + (barSpacing - groupWidth) / 2 + s * singleBarWidth;
         const y = options.height - padding - barHeight;
-        const color = seriesArr[s].color || colors[s % colors.length];
+        const color = seriesArr[s].color ?? colors[s % colors.length];
         ctx.fillStyle = color;
         this.roundRect(ctx, x, y, singleBarWidth, barHeight, 4);
         ctx.fill();
@@ -175,7 +175,7 @@ export class BarChartRenderer extends BaseChartRenderer {
       const y = padding + barSpacing * i + (barSpacing - barHeight) / 2;
       const barWidth = value * scale;
       const x = padding;
-      const color = point.color || colors[i % colors.length];
+      const color = point.color ?? colors[i % colors.length];
       ctx.fillStyle = 'rgba(0,0,0,0.1)';
       ctx.fillRect(x + 2, y + 2, barWidth, barHeight);
       const gradient = ctx.createLinearGradient(x, y, x + barWidth, y);
@@ -209,7 +209,7 @@ export class BarChartRenderer extends BaseChartRenderer {
         const value = seriesArr[s].data[i]?.value || 0;
         const barWidth = (value * width) / maxValue;
         const y = padding + barSpacing * i + (barSpacing - barHeight) / 2;
-        const color = seriesArr[s].color || colors[s % colors.length];
+        const color = seriesArr[s].color ?? colors[s % colors.length];
         ctx.fillStyle = color;
         this.roundRect(ctx, x, y, barWidth, barHeight, 4);
         ctx.fill();
@@ -239,7 +239,7 @@ export class BarChartRenderer extends BaseChartRenderer {
         const barWidth = value * scale;
         const y = padding + barSpacing * i + (barSpacing - groupHeight) / 2 + s * singleBarHeight;
         const x = padding;
-        const color = seriesArr[s].color || colors[s % colors.length];
+        const color = seriesArr[s].color ?? colors[s % colors.length];
         ctx.fillStyle = color;
         this.roundRect(ctx, x, y, barWidth, singleBarHeight, 4);
         ctx.fill();

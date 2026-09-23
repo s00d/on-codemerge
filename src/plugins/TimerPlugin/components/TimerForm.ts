@@ -1,186 +1,145 @@
-import type { HTMLEditor } from '../../../core/HTMLEditor';
+import type { EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { h, mount } from '@on-codemerge/sdk';
+import type { MountHandle } from '@on-codemerge/sdk';
 import type { Timer, CreateTimerData } from '../types';
-import {
-  createForm,
-  createInputField,
-  createTextarea,
-  createContainer,
-  createLabel,
-} from '../../../utils/helpers';
 
+/** Timer form — ViewSpec only (no helpers / getElement). */
 export class TimerForm {
-  private editor: HTMLEditor;
-  private onSubmit: (data: CreateTimerData) => void;
-  private timer?: Timer;
-  private titleField?: HTMLInputElement;
-  private descriptionField?: HTMLTextAreaElement;
-  private dateField?: HTMLInputElement;
-  private timeField?: HTMLInputElement;
-  private colorField?: HTMLInputElement;
-  private categoryField?: HTMLInputElement;
-  private tagsField?: HTMLInputElement;
+  private readonly editor: EditorAPI;
+  private readonly onSubmit: (data: CreateTimerData) => void;
+  private readonly draft: {
+    title: string;
+    description: string;
+    date: string;
+    time: string;
+    color: string;
+    category: string;
+    tags: string;
+  };
+  private mountHandle: MountHandle | null = null;
 
-  constructor(editor: HTMLEditor, onSubmit: (data: CreateTimerData) => void, timer?: Timer) {
+  constructor(editor: EditorAPI, onSubmit: (data: CreateTimerData) => void, timer?: Timer) {
     this.editor = editor;
     this.onSubmit = onSubmit;
-    this.timer = timer;
+    this.draft = {
+      title: timer?.title ?? '',
+      description: timer?.description ?? '',
+      date: timer?.targetDate ? timer.targetDate.toISOString().slice(0, 10) : '',
+      time: timer?.targetTime ?? '',
+      color: timer?.color ?? '#3b82f6',
+      category: timer?.category ?? '',
+      tags: timer?.tags?.join(', ') ?? '',
+    };
   }
 
-  public getElement(): HTMLElement {
-    const container = createContainer('timer-form-container');
-
-    const form = createForm('timer-form');
-
-    // Название таймера
-    const titleLabel = createLabel(this.editor.t('Title'), 'title');
-    this.titleField = createInputField(
-      'text',
-      this.editor.t('Enter timer title'),
-      this.timer?.title || ''
-    );
-    this.titleField.id = 'title';
-    this.titleField.required = true;
-
-    // Описание
-    const descriptionLabel = createLabel(this.editor.t('Description'), 'description');
-    this.descriptionField = createTextarea(
-      this.editor.t('Enter timer description'),
-      this.timer?.description || ''
-    );
-    this.descriptionField.id = 'description';
-
-    // Дата
-    const dateLabel = createLabel(this.editor.t('Target Date'), 'targetDate');
-    this.dateField = createInputField(
-      'date',
-      '',
-      this.timer?.targetDate ? this.formatDateForInput(this.timer.targetDate) : ''
-    );
-    this.dateField.id = 'targetDate';
-    this.dateField.required = true;
-
-    // Время
-    const timeLabel = createLabel(this.editor.t('Target Time'), 'targetTime');
-    this.timeField = createInputField('time', '', this.timer?.targetTime || '');
-    this.timeField.id = 'targetTime';
-    this.timeField.required = true;
-
-    // Цвет
-    const colorLabel = createLabel(this.editor.t('Color'), 'color');
-    this.colorField = createInputField('color', '', this.timer?.color || '#3b82f6');
-    this.colorField.id = 'color';
-
-    // Категория
-    const categoryLabel = createLabel(this.editor.t('Category'), 'category');
-    this.categoryField = createInputField(
-      'text',
-      this.editor.t('Enter category'),
-      this.timer?.category || ''
-    );
-    this.categoryField.id = 'category';
-
-    // Теги
-    const tagsLabel = createLabel(this.editor.t('Tags (comma separated)'), 'tags');
-    this.tagsField = createInputField(
-      'text',
-      this.editor.t('Enter tags separated by commas'),
-      this.timer?.tags?.join(', ') || ''
-    );
-    this.tagsField.id = 'tags';
-
-    // Добавляем поля в форму
-    form.appendChild(titleLabel);
-    form.appendChild(this.titleField);
-    form.appendChild(descriptionLabel);
-    form.appendChild(this.descriptionField);
-    form.appendChild(dateLabel);
-    form.appendChild(this.dateField);
-    form.appendChild(timeLabel);
-    form.appendChild(this.timeField);
-    form.appendChild(colorLabel);
-    form.appendChild(this.colorField);
-    form.appendChild(categoryLabel);
-    form.appendChild(this.categoryField);
-    form.appendChild(tagsLabel);
-    form.appendChild(this.tagsField);
-
-    container.appendChild(form);
-
-    return container;
+  private field(
+    id: string,
+    label: string,
+    type: string,
+    value: string,
+    onInput: (v: string) => void,
+    extra: Record<string, string | number | boolean | null | undefined> = {}
+  ): ViewSpec {
+    return h('div', { class: 'form-group mb-3' }, [
+      h('label', { attrs: { for: id } }, label),
+      type === 'textarea'
+        ? h('textarea', {
+            class: 'w-full p-2 border rounded',
+            attrs: { id, rows: 3, placeholder: label },
+            props: { value },
+            on: {
+              input: (e) => {
+                onInput((e.target as HTMLTextAreaElement).value);
+              },
+            },
+          })
+        : h('input', {
+            class: 'w-full p-2 border rounded',
+            attrs: { id, type, placeholder: label, ...extra },
+            props: { value },
+            on: {
+              input: (e) => {
+                onInput((e.target as HTMLInputElement).value);
+              },
+            },
+          }),
+    ]);
   }
 
-  private formatDateForInput(date: Date): string {
-    return date.toISOString().split('T')[0];
+  view(): ViewSpec {
+    const t = (k: string) => this.editor.t(k) || k;
+    return h('div', { class: 'timer-form-container space-y-2' }, [
+      this.field('title', t('common.title'), 'text', this.draft.title, (v) => {
+        this.draft.title = v;
+      }),
+      this.field(
+        'description',
+        t('common.description'),
+        'textarea',
+        this.draft.description,
+        (v) => {
+          this.draft.description = v;
+        }
+      ),
+      this.field('targetDate', t('common.targetDate'), 'date', this.draft.date, (v) => {
+        this.draft.date = v;
+      }),
+      this.field('targetTime', t('common.targetTime'), 'time', this.draft.time, (v) => {
+        this.draft.time = v;
+      }),
+      this.field('color', t('common.color'), 'color', this.draft.color, (v) => {
+        this.draft.color = v;
+      }),
+      this.field('category', t('common.category'), 'text', this.draft.category, (v) => {
+        this.draft.category = v;
+      }),
+      this.field('tags', t('common.tagsCommaSeparated'), 'text', this.draft.tags, (v) => {
+        this.draft.tags = v;
+      }),
+    ]);
   }
 
-  public submit(): void {
-    if (!this.titleField || !this.dateField || !this.timeField) return;
+  mountInto(host: HTMLElement): void {
+    this.mountHandle?.destroy();
+    this.mountHandle = mount(host, this.view());
+  }
 
-    const dateValue = this.dateField.value;
-    const timeValue = this.timeField.value;
-
-    // Создаем дату, объединяя дату и время
-    let targetDate: Date;
-    if (dateValue && timeValue) {
-      const dateTimeString = `${dateValue}T${timeValue}`;
-      targetDate = new Date(dateTimeString);
-    } else {
-      targetDate = new Date();
+  submit(): void {
+    const { title, description, date, time, color, category, tags } = this.draft;
+    if (!title.trim()) {
+      this.editor.notify(this.editor.t('common.titleIsRequired'));
+      return;
     }
-
+    if (!date) {
+      this.editor.notify(this.editor.t('common.targetDateIsRequired'));
+      return;
+    }
+    if (!time) {
+      this.editor.notify(this.editor.t('common.targetTimeIsRequired'));
+      return;
+    }
+    const targetDate = new Date(`${date}T${time}`);
+    if (isNaN(targetDate.getTime())) {
+      this.editor.notify(this.editor.t('formBuilder.invalidDateTimeFormat'));
+      return;
+    }
     const data: CreateTimerData = {
-      title: this.titleField.value || '',
-      description: this.descriptionField?.value || '',
-      targetDate: targetDate,
-      targetTime: this.timeField.value || '',
-      color: this.colorField?.value || '#3b82f6',
-      category: this.categoryField?.value || '',
-      tags: (this.tagsField?.value || '')
+      title,
+      description,
+      targetDate,
+      targetTime: time,
+      color: color || '#3b82f6',
+      category,
+      tags: tags
         .split(',')
         .map((tag) => tag.trim())
         .filter(Boolean),
     };
-
-    // Валидация
-    if (!data.title.trim()) {
-      this.editor.showErrorNotification(this.editor.t('Title is required') || 'Title is required');
-      return;
-    }
-
-    if (!dateValue) {
-      this.editor.showErrorNotification(
-        this.editor.t('Target date is required') || 'Target date is required'
-      );
-      return;
-    }
-
-    if (!timeValue) {
-      this.editor.showErrorNotification(
-        this.editor.t('Target time is required') || 'Target time is required'
-      );
-      return;
-    }
-
-    if (isNaN(targetDate.getTime())) {
-      this.editor.showErrorNotification(
-        this.editor.t('Invalid date/time format') || 'Invalid date/time format'
-      );
-      return;
-    }
-
     this.onSubmit(data);
   }
 
-  public destroy(): void {
-    this.titleField = null!;
-    this.descriptionField = null!;
-    this.dateField = null!;
-    this.timeField = null!;
-    this.colorField = null!;
-    this.categoryField = null!;
-    this.tagsField = null!;
-    this.editor = null!;
-    this.onSubmit = null!;
-    this.timer = null!;
+  destroy(): void {
+    this.mountHandle?.destroy();
+    this.mountHandle = null;
   }
 }

@@ -14,60 +14,52 @@ The Font Plugin provides comprehensive typography control for the on-CodeMerge e
 - **Keyboard Shortcuts**: Quick font style commands
 - **Font Settings Popup**: Comprehensive font configuration
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, FontPlugin } from 'on-codemerge';
+import { Editor, FontPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new FontPlugin());
+const editor = new Editor(container, {
+  plugins: [FontPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['FontPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Font Methods
+Factory: `FontPlugin()`.
 
-```javascript
-// Apply font settings
-editor.getTextFormatter()?.setFont(family, size, lineHeight);
+| Command           |                                     |
+| ----------------- | ----------------------------------- |
+| `toggleBold`      | `editor.command('toggleBold')`      |
+| `toggleItalic`    | `editor.command('toggleItalic')`    |
+| `toggleUnderline` | `editor.command('toggleUnderline')` |
+| `toggleStrike`    | `editor.command('toggleStrike')`    |
 
-// Get current font style
-const fontFamily = editor.getTextFormatter()?.getStyle('fontFamily');
-const fontSize = editor.getTextFormatter()?.getStyle('fontSize');
-const lineHeight = editor.getTextFormatter()?.getStyle('lineHeight');
+### Keyboard shortcuts
 
-// Clear font settings
-editor.getTextFormatter()?.clearFont();
+| Shortcut      | Command           |
+| ------------- | ----------------- |
+| `Mod-b`       | `toggleBold`      |
+| `Mod-i`       | `toggleItalic`    |
+| `Mod-u`       | `toggleUnderline` |
+| `Mod-Shift-x` | `toggleStrike`    |
 
-// Toggle text styles
-editor.getTextFormatter()?.toggleStyle('bold');
-editor.getTextFormatter()?.toggleStyle('italic');
-editor.getTextFormatter()?.toggleStyle('underline');
-editor.getTextFormatter()?.toggleStyle('strikethrough');
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Shift+F` | Font settings | `font-style` |
+> **Note:** Popup for family/size/line-height. Mark toggles overlap ToolbarPlugin — avoid duplicate toolbar ids. No `getAvailableFonts`.
 
 ## Available Fonts
 
 ### Default Font Families
+
 - Arial, Arial Black, Verdana, Tahoma
 - Trebuchet MS, Times New Roman, Georgia
 - Garamond, Courier New, Brush Script MT
@@ -81,28 +73,13 @@ editor.getTextFormatter()?.toggleStyle('strikethrough');
 - Herculanum
 
 ### Font Sizes
+
 8px to 72px in 1px increments
 
 ### Line Heights
+
 - normal, 0.75, 1, 1.15, 1.25, 1.35
 - 1.5, 1.75, 2, 2.5, 3, 16px
-
-## Events
-
-```javascript
-// Listen to font events
-editor.on('font:changed', (fontFamily, fontSize, lineHeight) => {
-  console.log('Font changed:', fontFamily, fontSize, lineHeight);
-});
-
-editor.on('style:applied', (style) => {
-  console.log('Style applied:', style);
-});
-
-editor.on('style:removed', (style) => {
-  console.log('Style removed:', style);
-});
-```
 
 ## Examples
 
@@ -146,7 +123,7 @@ editor.on('style:removed', (style) => {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, FontPlugin } from 'on-codemerge';
+import { Editor, FontPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -154,9 +131,9 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new FontPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(FontPlugin());
+
       // Listen to font changes
       editorInstance.current.on('font:changed', (family, size, lineHeight) => {
         console.log('Font updated:', family, size, lineHeight);
@@ -182,13 +159,13 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, FontPlugin } from 'on-codemerge';
+import { Editor, FontPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new FontPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [FontPlugin()] in Editor(...) */;
   },
   beforeDestroy() {
     if (this.editor) {
@@ -269,19 +246,6 @@ export default {
 
 ### Debug Mode
 
-```javascript
-// Add console logging
-console.log('Font plugin initialized');
-
-// Check font detection
-const availableFonts = fontPlugin.getAvailableFonts();
-console.log('Available fonts:', availableFonts);
-
-// Check current styles
-const currentFont = editor.getTextFormatter()?.getStyle('fontFamily');
-console.log('Current font:', currentFont);
-```
-
 ## Browser Support
 
 - Chrome 60+
@@ -291,4 +255,4 @@ console.log('Current font:', currentFont);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

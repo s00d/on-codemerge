@@ -5,29 +5,28 @@ The Charts Plugin provides comprehensive chart creation and management capabilit
 ## Features
 
 - **Multiple Chart Types**: Bar, Line, Pie, Doughnut, Area, Radar, Scatter, and Bubble charts
-- **Interactive Charts**: Click to resize, context menu for editing
-- **Data Management**: Easy data input and editing
-- **Chart Customization**: Colors, themes, and styling options
-- **Responsive Charts**: Automatic resizing and responsive behavior
-- **Export Support**: Export charts as images or data
-- **Real-time Updates**: Dynamic chart updates with data changes
+- **Interactive Charts**: Click to resize, context menu for edit / PNG export / delete
+- **Data Management**: Modal data editor (single- and multi-series)
+- **Chart Customization**: Title, axes, legend, grid, mode, orientation
+- **Export Support**: Export chart as PNG from the context menu
+- **HTML Boundary**: Persist via `data-node="chart"` attrs in `getHTML` / `setHTML`
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, ChartsPlugin } from 'on-codemerge';
+import { Editor, ChartsPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-const editor = new HTMLEditor(container);
-editor.use(new ChartsPlugin());
+const editor = new Editor(container, {
+  plugins: [ChartsPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
@@ -36,65 +35,49 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 ## API Reference
 
-### Chart Creation
+### Commands
 
 ```javascript
-// Insert chart programmatically
-editor.executeCommand('charts');
-
-// Create chart with specific data
-const chartData = [
-  {
-    name: 'Sales',
-    data: [
-      { label: 'Jan', value: 100 },
-      { label: 'Feb', value: 150 },
-      { label: 'Mar', value: 200 }
-    ],
-    color: '#3b82f6'
-  }
-];
-
-editor.executeCommand('insertChart', {
-  type: 'bar',
-  data: chartData,
-  options: {
-    width: 600,
-    height: 400
-  }
-});
+// Opens the chart modal (toolbar Insert → Chart). Hotkey: Mod-Alt-g
+editor.command('insertChart');
 ```
 
-### Chart Operations
+Edit, resize, and PNG export are available from the chart context menu (right-click the chart widget). There are no separate `updateChart` / `resizeChart` / `exportChart` commands.
+
+Document changes are observed via:
 
 ```javascript
-// Update chart data
-editor.executeCommand('updateChart', {
-  chart: chartElement,
-  data: newData
-});
+editor.on('docChanged', () => {});
+editor.on('selectionChanged', () => {});
+```
 
-// Resize chart
-editor.executeCommand('resizeChart', {
-  chart: chartElement,
-  width: 800,
-  height: 500
-});
+### HTML boundary (`getHTML` / `setHTML`)
 
-// Export chart
-editor.executeCommand('exportChart', {
-  chart: chartElement,
-  format: 'png'
-});
+Persisted chart atoms use `data-node="chart"` (not the live widget class `.chart-container`):
+
+```html
+<div
+  data-node="chart"
+  data-chart-type="bar"
+  data-data='[{"name":"Series 1","data":[{"label":"A","value":3}]}]'
+  data-title="Chart"
+  data-width="800"
+  data-height="400"
+  data-show-legend="true"
+  data-show-grid="true"
+  data-mode="default"
+  data-orientation="vertical"
+></div>
 ```
 
 ## Supported Chart Types
 
 ### Bar Chart
+
 - **Type**: `bar`
-- **Supports Multiple Series**: No
+- **Supports Multiple Series**: Yes (default / stacked / grouped)
 - **Best For**: Comparing categories, discrete data
-- **Data Format**: Single series with labels and values
+- **Data Format**: One or more series with labels and values
 
 ```javascript
 const barData = [
@@ -104,13 +87,14 @@ const barData = [
       { label: 'Q1', value: 100 },
       { label: 'Q2', value: 150 },
       { label: 'Q3', value: 200 },
-      { label: 'Q4', value: 180 }
-    ]
-  }
+      { label: 'Q4', value: 180 },
+    ],
+  },
 ];
 ```
 
 ### Line Chart
+
 - **Type**: `line`
 - **Supports Multiple Series**: Yes
 - **Best For**: Trends over time, continuous data
@@ -123,23 +107,24 @@ const lineData = [
     data: [
       { label: 'Jan', value: 100 },
       { label: 'Feb', value: 150 },
-      { label: 'Mar', value: 200 }
+      { label: 'Mar', value: 200 },
     ],
-    color: '#3b82f6'
+    color: '#3b82f6',
   },
   {
     name: 'Expenses',
     data: [
       { label: 'Jan', value: 80 },
       { label: 'Feb', value: 120 },
-      { label: 'Mar', value: 160 }
+      { label: 'Mar', value: 160 },
     ],
-    color: '#ef4444'
-  }
+    color: '#ef4444',
+  },
 ];
 ```
 
 ### Pie Chart
+
 - **Type**: `pie`
 - **Supports Multiple Series**: No
 - **Best For**: Proportions, percentages
@@ -153,31 +138,35 @@ const pieData = [
       { label: 'Product A', value: 40 },
       { label: 'Product B', value: 30 },
       { label: 'Product C', value: 20 },
-      { label: 'Product D', value: 10 }
-    ]
-  }
+      { label: 'Product D', value: 10 },
+    ],
+  },
 ];
 ```
 
 ### Doughnut Chart
+
 - **Type**: `doughnut`
 - **Supports Multiple Series**: No
 - **Best For**: Proportions with center space
 - **Data Format**: Single series with labels and values
 
 ### Area Chart
+
 - **Type**: `area`
 - **Supports Multiple Series**: Yes
 - **Best For**: Cumulative data, filled trends
 - **Data Format**: Multiple series with labels and values
 
 ### Radar Chart
+
 - **Type**: `radar`
 - **Supports Multiple Series**: Yes
 - **Best For**: Multi-dimensional data, comparisons
 - **Data Format**: Multiple series with labels and values
 
 ### Scatter Plot
+
 - **Type**: `scatter`
 - **Supports Multiple Series**: Yes
 - **Requires XY Data**: Yes
@@ -191,13 +180,14 @@ const scatterData = [
     data: [
       { label: 'Point 1', x: 10, y: 20 },
       { label: 'Point 2', x: 15, y: 25 },
-      { label: 'Point 3', x: 20, y: 30 }
-    ]
-  }
+      { label: 'Point 3', x: 20, y: 30 },
+    ],
+  },
 ];
 ```
 
 ### Bubble Chart
+
 - **Type**: `bubble`
 - **Supports Multiple Series**: Yes
 - **Requires XY Data**: Yes
@@ -206,33 +196,24 @@ const scatterData = [
 
 ## Keyboard Shortcuts
 
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+G` | Insert chart | `charts` |
+| Shortcut     | Description  | Command       |
+| ------------ | ------------ | ------------- |
+| `Ctrl+Alt+G` | Insert chart | `insertChart` |
 
 ## Context Menu
 
-Right-click on a chart to access:
+Right-click a chart:
 
-### Chart Operations
-- **Edit Chart**: Open chart editor
-- **Duplicate Chart**: Create a copy
-- **Delete Chart**: Remove chart
-- **Export Chart**: Save as image
+- **Edit Chart** — open the chart modal
+- **Export Chart** — download PNG
+- **Delete Chart** — remove the atom
 
-### Data Operations
-- **Edit Data**: Modify chart data
-- **Import Data**: Load data from file
-- **Export Data**: Save data to file
-
-### Styling
-- **Chart Theme**: Apply different themes
-- **Colors**: Customize chart colors
-- **Size**: Adjust chart dimensions
+Resize handles appear after clicking the chart. There is no duplicate / import-data / theme picker in the menu today.
 
 ## Chart Data Structure
 
 ### ChartDataPoint
+
 ```typescript
 interface ChartDataPoint {
   label: string;
@@ -241,6 +222,7 @@ interface ChartDataPoint {
 ```
 
 ### ChartSeries
+
 ```typescript
 interface ChartSeries {
   name: string;
@@ -250,83 +232,85 @@ interface ChartSeries {
 ```
 
 ### ChartData
+
 ```typescript
 type ChartData = ChartSeries | ChartDataPoint;
 ```
 
 ## Events
 
-```javascript
-// Listen to chart events
-editor.on('chart:created', (chart) => {
-  console.log('Chart created:', chart);
-});
-
-editor.on('chart:updated', (chart) => {
-  console.log('Chart updated:', chart);
-});
-
-editor.on('chart:deleted', (chart) => {
-  console.log('Chart deleted:', chart);
-});
-
-editor.on('chart:resized', (chart, dimensions) => {
-  console.log('Chart resized:', chart, dimensions);
-});
-
-editor.on('chart:exported', (chart, format) => {
-  console.log('Chart exported:', chart, format);
-});
-```
+Use `editor.on('docChanged' | 'selectionChanged', …)` only.
 
 ## Examples
 
 ### Basic Bar Chart
 
 ```html
-<div class="chart-container" data-chart-type="bar" data-chart-data='[{"name":"Sales","data":[{"label":"Jan","value":100},{"label":"Feb","value":150},{"label":"Mar","value":200}]}]' style="width: 600px; height: 400px;">
-  <!-- Chart will be rendered here -->
-</div>
+<div
+  data-node="chart"
+  data-chart-type="bar"
+  data-data='[{"name":"S","data":[{"label":"A","value":1}]}]'
+  data-title="Chart"
+  data-width="800"
+  data-height="400"
+></div>
 ```
 
 ### Multi-Series Line Chart
 
 ```html
-<div class="chart-container" data-chart-type="line" data-chart-data='[{"name":"Revenue","data":[{"label":"Jan","value":100},{"label":"Feb","value":150},{"label":"Mar","value":200}],"color":"#3b82f6"},{"name":"Expenses","data":[{"label":"Jan","value":80},{"label":"Feb","value":120},{"label":"Mar","value":160}],"color":"#ef4444"}]' style="width: 600px; height: 400px;">
-  <!-- Chart will be rendered here -->
-</div>
+<div
+  data-node="chart"
+  data-chart-type="bar"
+  data-data='[{"name":"S","data":[{"label":"A","value":1}]}]'
+  data-title="Chart"
+  data-width="800"
+  data-height="400"
+></div>
 ```
 
 ### Pie Chart
 
 ```html
-<div class="chart-container" data-chart-type="pie" data-chart-data='[{"name":"Market Share","data":[{"label":"Product A","value":40},{"label":"Product B","value":30},{"label":"Product C","value":20},{"label":"Product D","value":10}]}]' style="width: 400px; height: 400px;">
-  <!-- Chart will be rendered here -->
-</div>
+<div
+  data-node="chart"
+  data-chart-type="bar"
+  data-data='[{"name":"S","data":[{"label":"A","value":1}]}]'
+  data-title="Chart"
+  data-width="800"
+  data-height="400"
+></div>
 ```
 
 ### Scatter Plot
 
 ```html
-<div class="chart-container" data-chart-type="scatter" data-chart-data='[{"name":"Dataset 1","data":[{"label":"Point 1","x":10,"y":20},{"label":"Point 2","x":15,"y":25},{"label":"Point 3","x":20,"y":30}]}]' style="width: 600px; height: 400px;">
-  <!-- Chart will be rendered here -->
-</div>
+<div
+  data-node="chart"
+  data-chart-type="bar"
+  data-data='[{"name":"S","data":[{"label":"A","value":1}]}]'
+  data-title="Chart"
+  data-width="800"
+  data-height="400"
+></div>
 ```
 
 ## Chart Customization
 
 ### Themes
+
 ```javascript
 // Apply different themes
 const chartOptions = {
   theme: 'dark', // or 'light', 'blue', 'green', etc.
   colors: ['#3b82f6', '#ef4444', '#10b981', '#f59e0b'],
   fontFamily: 'Arial, sans-serif',
-  fontSize: 12
+  fontSize: 12,
 };
 ```
 
 ### Styling
+
 ```css
 /* Custom chart styles */
 .chart-container {
@@ -348,7 +332,9 @@ const chartOptions = {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, ChartsPlugin } from 'on-codemerge';
+import { Editor, ChartsPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -356,8 +342,8 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new ChartsPlugin());
+      editorInstance.current = new Editor(editorRef.current);
+      // v2: pass ChartsPlugin() in Editor constructor plugins: [...]
     }
 
     return () => {
@@ -379,13 +365,15 @@ function MyEditor() {
 </template>
 
 <script>
-import { HTMLEditor, ChartsPlugin } from 'on-codemerge';
+import { Editor, ChartsPlugin } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new ChartsPlugin());
+    this.editor = new Editor(this.$refs.editorContainer);
+    this.// use plugins: [ChartsPlugin()];
   },
   beforeDestroy() {
     if (this.editor) {
@@ -399,6 +387,7 @@ export default {
 ## Data Import/Export
 
 ### Import Data
+
 ```javascript
 // Import from JSON
 const jsonData = `[
@@ -411,29 +400,15 @@ const jsonData = `[
     ]
   }
 ]`;
-
-editor.executeCommand('importChartData', {
-  chart: chartElement,
-  data: JSON.parse(jsonData)
-});
 ```
 
 ### Export Data
-```javascript
-// Export chart data
-const data = editor.executeCommand('exportChartData', {
-  chart: chartElement,
-  format: 'json'
-});
 
+````javascript
+// Export chart data
+const data =
 // Export chart as image
-const imageData = editor.executeCommand('exportChartImage', {
-  chart: chartElement,
-  format: 'png',
-  width: 800,
-  height: 600
-});
-```
+const imageData = ```
 
 ## Troubleshooting
 
@@ -455,7 +430,7 @@ const imageData = editor.executeCommand('exportChartImage', {
    - Ensure no conflicting CSS styles
 
 4. **Context menu not working**
-   - Check if chart has correct class `chart-container`
+   - Check `data-node="chart"` in `getHTML()` / document JSON attrs
    - Verify event handlers are attached
    - Ensure no other event handlers are interfering
 
@@ -468,10 +443,7 @@ Enable debug logging:
 console.log('Charts plugin initialized');
 
 // Check chart events
-editor.on('chart:created', (chart) => {
-  console.log('Chart created:', chart);
-});
-```
+````
 
 ## Browser Support
 
@@ -496,4 +468,4 @@ editor.on('chart:created', (chart) => {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

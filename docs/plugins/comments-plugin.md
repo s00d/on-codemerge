@@ -14,65 +14,41 @@ The Comments Plugin provides comprehensive commenting functionality for the on-C
 - **Interactive UI**: Click to edit, hover to preview
 - **Timestamp Tracking**: Creation and update timestamps
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, CommentsPlugin } from 'on-codemerge';
+import { Editor, CommentsPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new CommentsPlugin());
+const editor = new Editor(container, {
+  plugins: [CommentsPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['CommentsPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Comment Management
+Factory: `CommentsPlugin()`.
 
-```javascript
-// Add comment to selected text
-editor.executeCommand('comment');
+| Command      |                                |
+| ------------ | ------------------------------ |
+| `addComment` | `editor.command('addComment')` |
 
-// Get all comments
-const comments = commentManager.getAllComments();
+### Keyboard shortcuts
 
-// Get specific comment
-const comment = commentManager.getComment(commentId);
+| Shortcut      | Command      |
+| ------------- | ------------ |
+| `Mod-Shift-c` | `addComment` |
 
-// Update comment
-commentManager.updateComment(commentId, newContent);
-
-// Delete comment
-commentManager.deleteComment(commentId);
-```
-
-### Comment Interface
-
-```typescript
-interface Comment {
-  id: string;           // Unique comment identifier
-  content: string;      // Comment text content
-  createdAt: number;    // Creation timestamp
-  updatedAt: number;    // Last update timestamp
-}
-```
-
-## Keyboard Shortcuts
-
-| Shortcut | Description | Command |
-|----------|-------------|---------|
-| `Ctrl+Alt+M` | Insert comment | `comment` |
+> **Note:** Command is `addComment` (not `comment`). No `commentManager` instance API.
 
 ## Comment Workflow
 
@@ -95,49 +71,24 @@ interface Comment {
 2. **Delete**: Click the delete button
 3. **Confirm**: Comment and marker are removed
 
-## Events
-
-```javascript
-// Listen to comment events
-editor.on('comment:added', (comment) => {
-  console.log('Comment added:', comment);
-});
-
-editor.on('comment:updated', (comment) => {
-  console.log('Comment updated:', comment);
-});
-
-editor.on('comment:deleted', (commentId) => {
-  console.log('Comment deleted:', commentId);
-});
-
-editor.on('comment:clicked', (commentId) => {
-  console.log('Comment clicked:', commentId);
-});
-```
-
 ## Examples
 
 ### Basic Comment Usage
 
 ```html
 <!-- Text with comment -->
-<span class="commented-text">
-  This text has a comment
-</span>
-<span class="comment-marker" data-comment-id="comment-123">
-  💬
-</span>
+<span class="commented-text"> This text has a comment </span>
+<span class="comment-marker" data-comment-id="comment-123"> 💬 </span>
 ```
 
 ### Multiple Comments
 
 ```html
 <p>
-  This is a paragraph with 
+  This is a paragraph with
   <span class="commented-text">multiple comments</span>
   <span class="comment-marker" data-comment-id="comment-1">💬</span>
-  and 
+  and
   <span class="commented-text">another comment</span>
   <span class="comment-marker" data-comment-id="comment-2">💬</span>
   on different parts.
@@ -148,12 +99,8 @@ editor.on('comment:clicked', (commentId) => {
 
 ```html
 <div class="comment-container">
-  <span class="commented-text highlighted">
-    This text is highlighted and commented
-  </span>
-  <span class="comment-marker" data-comment-id="comment-456">
-    💬
-  </span>
+  <span class="commented-text highlighted"> This text is highlighted and commented </span>
+  <span class="comment-marker" data-comment-id="comment-456"> 💬 </span>
 </div>
 ```
 
@@ -163,7 +110,7 @@ editor.on('comment:clicked', (commentId) => {
 
 ```jsx
 import React, { useEffect, useRef } from 'react';
-import { HTMLEditor, CommentsPlugin } from 'on-codemerge';
+import { Editor, CommentsPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -171,9 +118,9 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new CommentsPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(CommentsPlugin());
+
       // Listen to comment events
       editorInstance.current.on('comment:added', (comment) => {
         console.log('New comment:', comment);
@@ -196,15 +143,13 @@ function MyEditor() {
 ```vue
 <template>
   <div>
-    <div class="comment-stats">
-      Comments: {{ commentCount }}
-    </div>
+    <div class="comment-stats">Comments: {{ commentCount }}</div>
     <div ref="editorContainer" class="editor-container"></div>
   </div>
 </template>
 
 <script>
-import { HTMLEditor, CommentsPlugin } from 'on-codemerge';
+import { Editor, CommentsPlugin } from 'on-codemerge';
 
 export default {
   name: 'MyEditor',
@@ -215,14 +160,14 @@ export default {
     };
   },
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new CommentsPlugin());
-    
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [CommentsPlugin()] in Editor(...) */;
+
     // Track comment count
     this.editor.on('comment:added', () => {
       this.commentCount++;
     });
-    
+
     this.editor.on('comment:deleted', () => {
       this.commentCount--;
     });
@@ -346,12 +291,12 @@ export default {
     font-size: 12px;
     padding: 6px 8px;
   }
-  
+
   .comment-menu {
     max-width: 90vw;
     margin: 0 16px;
   }
-  
+
   .comment-marker {
     font-size: 16px;
   }
@@ -381,17 +326,13 @@ export default {
 ### Comment Marker HTML
 
 ```html
-<span class="comment-marker" data-comment-id="comment-uuid-123">
-  💬
-</span>
+<span class="comment-marker" data-comment-id="comment-uuid-123"> 💬 </span>
 ```
 
 ### Commented Text HTML
 
 ```html
-<span class="commented-text">
-  This text has a comment attached to it
-</span>
+<span class="commented-text"> This text has a comment attached to it </span>
 ```
 
 ## Troubleshooting
@@ -426,28 +367,6 @@ export default {
 
 Enable debug logging:
 
-```javascript
-// Add console logging
-console.log('Comments plugin initialized');
-
-// Check comment events
-editor.on('comment:added', (comment) => {
-  console.log('Comment added:', comment);
-});
-
-editor.on('comment:updated', (comment) => {
-  console.log('Comment updated:', comment);
-});
-
-// Check comment manager
-const allComments = commentManager.getAllComments();
-console.log('All comments:', allComments);
-
-// Check comment markers
-const markers = document.querySelectorAll('.comment-marker');
-console.log('Comment markers found:', markers.length);
-```
-
 ## Browser Support
 
 - Chrome 60+
@@ -471,4 +390,4 @@ console.log('Comment markers found:', markers.length);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

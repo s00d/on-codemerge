@@ -15,54 +15,48 @@ The Typography Plugin provides advanced typography controls for the on-CodeMerge
 - **Typography Presets**: Pre-defined typography styles
 - **Custom Fonts**: Add custom font families
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, TypographyPlugin } from 'on-codemerge';
+import { Editor, TypographyPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new TypographyPlugin());
+const editor = new Editor(container, {
+  plugins: [TypographyPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['TypographyPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Typography Methods
+Factory: `TypographyPlugin()`.
 
-```javascript
-// Set font family
-editor.setFontFamily('Arial');
+| Command          |                                    |
+| ---------------- | ---------------------------------- |
+| `typographyMenu` | `editor.command('typographyMenu')` |
+| `setParagraph`   | `editor.command('setParagraph')`   |
+| `setHeading1`    | `editor.command('setHeading1')`    |
+| `setHeading2`    | `editor.command('setHeading2')`    |
+| `setHeading3`    | `editor.command('setHeading3')`    |
+| `setHeading4`    | `editor.command('setHeading4')`    |
+| `setBlockquote`  | `editor.command('setBlockquote')`  |
+| `insertHr`       | `editor.command('insertHr')`       |
 
-// Set font size
-editor.setFontSize('16px');
+### Keyboard shortcuts
 
-// Set font weight
-editor.setFontWeight('bold');
+| Shortcut      | Command          |
+| ------------- | ---------------- |
+| `Mod-Shift-w` | `typographyMenu` |
 
-// Set line height
-editor.setLineHeight('1.5');
-
-// Set letter spacing
-editor.setLetterSpacing('0.5px');
-
-// Apply typography preset
-editor.applyTypographyPreset('heading-1');
-
-// Get current typography
-const typography = editor.getTypography();
-```
+> **Note:** Command `typographyMenu` — no `createTypographyPreset`.
 
 ## Typography Presets
 
@@ -74,31 +68,15 @@ const typography = editor.getTypography();
 - **Quote**: Blockquote style
 - **Code**: Monospace code style
 
-## Events
-
-```javascript
-// Listen to typography events
-editor.on('typography:changed', (typography) => {
-  console.log('Typography changed:', typography);
-});
-
-editor.on('font-family:changed', (fontFamily) => {
-  console.log('Font family changed:', fontFamily);
-});
-
-editor.on('font-size:changed', (fontSize) => {
-  console.log('Font size changed:', fontSize);
-});
-```
-
 ## Examples
 
 ### Basic Typography Usage
 
 ```javascript
 // Initialize typography plugin
-const editor = new HTMLEditor(container);
-editor.use(new TypographyPlugin());
+const editor = new Editor(container, {
+  plugins: [TypographyPlugin()],
+});
 
 // Set typography properties
 editor.setFontFamily('Georgia');
@@ -109,29 +87,13 @@ editor.setLineHeight('1.6');
 
 ### Typography Presets
 
-```javascript
-// Apply typography presets
-editor.applyTypographyPreset('heading-1');
-editor.applyTypographyPreset('body-text');
-editor.applyTypographyPreset('quote');
-
-// Create custom preset
-editor.createTypographyPreset('custom-style', {
-  fontFamily: 'Helvetica',
-  fontSize: '14px',
-  fontWeight: 'normal',
-  lineHeight: '1.4',
-  letterSpacing: '0.2px'
-});
-```
-
 ## Integration Examples
 
 ### React Integration
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, TypographyPlugin } from 'on-codemerge';
+import { Editor, TypographyPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -140,9 +102,9 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new TypographyPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(TypographyPlugin());
+
       editorInstance.current.on('typography:changed', (typography) => {
         setTypography(typography);
       });
@@ -173,13 +135,13 @@ function MyEditor() {
   </div>
 </template>
 <script>
-import { HTMLEditor, TypographyPlugin } from 'on-codemerge';
+import { Editor, TypographyPlugin } from 'on-codemerge';
 export default {
   data() { return { editor: null, typography: {} }; },
   mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new TypographyPlugin());
-    
+    this.editor = new Editor(this.$refs.editorContainer);
+    this./* use plugins: [TypographyPlugin()] in Editor(...) */;
+
     this.editor.on('typography:changed', typography => {
       this.typography = typography;
     });
@@ -289,4 +251,4 @@ export default {
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

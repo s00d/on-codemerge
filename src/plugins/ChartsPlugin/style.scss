@@ -1,135 +1,70 @@
-/* Chart type selector */
+@reference "../../tailwind.css";
+
 .chart-type-selector {
-  margin-bottom: 1.5rem;
+  @apply mb-6;
 
   .grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0.75rem;
-  }
+    @apply grid grid-cols-2 gap-3;
 
-  @media (min-width: 768px) {
-    .grid {
-      grid-template-columns: repeat(4, 1fr);
+    @media (min-width: 768px) {
+      @apply grid-cols-4;
     }
   }
 
   .chart-type-option {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 0.5rem;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    background-color: white;
+    @apply flex flex-col items-center justify-center p-4 border-2 border-ocm-border rounded-ocm-sm cursor-pointer transition-all duration-200 bg-ocm-surface;
 
     &:hover {
-      border-color: #93c5fd;
-      background-color: #eff6ff;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      @apply border-ocm-accent bg-ocm-accent-soft shadow-md;
     }
 
     &.selected {
-      border-color: #3b82f6;
-      background-color: #dbeafe;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      @apply border-ocm-accent bg-ocm-accent-soft shadow-md;
 
       svg {
-        color: #2563eb;
+        @apply text-ocm-accent;
       }
     }
 
     svg {
-      width: 2.5rem;
-      height: 2.5rem;
-      color: #4b5563;
-      transition: color 0.2s ease;
-      margin-bottom: 0.75rem;
+      @apply mb-3 size-10 text-ocm-text-muted transition-colors duration-200;
     }
 
     span {
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-      text-align: center;
-      margin-top: 0.5rem;
+      @apply mt-2 text-center text-sm font-medium text-ocm-text;
     }
   }
 }
 
-/* Data editor */
 .chart-data-editor {
-  max-height: 400px;
-  overflow-y: auto;
-  border-radius: 0.75rem;
-  background-color: white;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
-  padding: 1rem;
+  @apply max-h-[400px] overflow-y-auto rounded-xl bg-ocm-surface shadow-sm p-4;
 }
 
-/* Preview container */
 .preview-container {
-  background-color: #f9fafb;
-  border-radius: 1rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 1.5rem;
-  box-shadow: 0 6px 32px 0 rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-  min-height: 320px;
-  min-width: 320px;
-  position: relative;
-  overflow: hidden;
+  @apply relative flex min-h-80 w-full items-center justify-center overflow-hidden rounded-2xl bg-ocm-surface-muted p-4;
 }
 
 .preview-container img.svg-chart,
 .preview-container canvas {
-  border-radius: 1.25rem;
-  box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.1);
-  opacity: 0;
-  animation: fadeIn 0.5s forwards;
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  max-width: 90%;
-  max-height: 90%;
-}
-
-.preview-container > canvas {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  @apply m-0 block h-auto max-h-full w-auto max-w-full object-contain;
 }
 
 .chart-canvas {
-  display: block;
-  margin: auto;
-  border-radius: 1.25rem;
-  box-shadow: 0 2px 16px 0 rgba(0, 0, 0, 0.1);
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
-  display: block;
-  align-self: center;
+  @apply mx-auto block max-h-full max-w-full object-contain self-center rounded-[1.25rem];
 }
 
-@keyframes fadeIn {
-  to {
-    opacity: 1;
+.chart-menu {
+  @apply w-full max-w-2xl;
+
+  .ocm-popup__content {
+    @apply overflow-y-auto;
   }
-}
 
-/* Специальные стили для центрирования canvas в preview */
-.preview-container canvas {
-  position: absolute !important;
-  top: 50% !important;
-  left: 50% !important;
-  transform: translate(-50%, -50%) !important;
-  margin: 0 !important;
+  .chart-menu-body {
+    @apply flex flex-col gap-4;
+  }
+
+  .chart-data-editor {
+    @apply w-full max-w-full;
+  }
 }

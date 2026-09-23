@@ -1,312 +1,291 @@
-import type { HTMLEditor } from '../../core/HTMLEditor';
-import type { Plugin } from '../../core/Plugin';
-import { createToolbarButton } from '../ToolbarPlugin/utils';
+import './style.scss';
+
+import { definePlugin } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@on-codemerge/sdk';
+import type { DocNode, Operation } from '@on-codemerge/kernel';
+import { plainText, textLength } from '@on-codemerge/kernel';
+import Typo from 'typo-js';
 import { spellCheckIcon } from '../../icons';
-import type { SpellcheckerWasm } from 'spellchecker-wasm/lib/browser';
-import wasmUrl from 'spellchecker-wasm/lib/spellchecker-wasm.wasm?url';
 
-const dictionaries = import.meta.glob('./dictionaries/**/*', {
-  query: '?url',
-  import: 'default',
-});
+const WORD_RE = /[A-Za-zА-Яа-яЁё']{2,}/g;
 
-export class SpellCheckerPlugin implements Plugin {
-  name = 'spellchecker';
-  hotkeys = [
-    {
-      keys: 'Ctrl+Shift+S',
-      description: 'Run spell checker',
-      command: 'spellchecker',
-      icon: '🔍✅',
-    },
-  ];
-  private editor: HTMLEditor | null = null;
-  private toolbarButton: HTMLElement | null = null;
-  private isSpellCheckEnabled: boolean = false;
-  private spellChecker: SpellcheckerWasm | null = null;
-  private misspelledWords: Map<Text, Range> = new Map();
-  private lastResults: any[] = [];
+/** Hunspell dictionary file URLs for one locale (`.aff` + `.dic`). */
+export type SpellDictionaryFiles = {
+  aff: string;
+  dic: string;
+};
 
-  constructor() {}
+export type SpellCheckerOptions = {
+  /**
+   * Locale → Hunspell file URLs. Required — dictionaries are not bundled.
+   * Example (Vite): `new URL('../node_modules/dictionary-en/index.aff', import.meta.url).href`
+   * (package `exports` only exposes Node `index.js` — deep `?url` imports of `.aff`/`.dic` fail).
+   */
+  dictionaries: Record<string, SpellDictionaryFiles>;
+  /** Used when `editor.getLocale()` has no matching entry (default: `'en'`). */
+  defaultLocale?: string;
+};
 
-  async initialize(editor: HTMLEditor): Promise<void> {
-    this.editor = editor;
-    this.addToolbarButton();
-    this.enableSpellCheck(this.isSpellCheckEnabled);
+function localeBase(locale: string): string {
+  const part = (locale || 'en').split(/[_-]/)[0];
+  return (part || 'en').toLowerCase();
+}
 
-    this.editor.on('spellchecker', async () => {
-      this.isSpellCheckEnabled = !this.isSpellCheckEnabled;
-      if (this.isSpellCheckEnabled) await this.loadDictionary(this.editor?.getLocale() ?? 'en');
-      this.enableSpellCheck(this.isSpellCheckEnabled);
-      this.toolbarButton?.classList.toggle('active', this.isSpellCheckEnabled);
-    });
+function eachTextBlock(
+  node: DocNode,
+  path: number[],
+  visit: (path: number[], block: DocNode) => void
+): void {
+  if (node.type === 'codeBlock' || node.type === 'code_block') {
+    return;
   }
+  // Leaf text carriers only — avoid double-visiting blockquote + inner paragraphs.
+  if (node.type === 'paragraph' || node.type === 'heading' || node.type === 'listItem') {
+    visit(path, node);
+    return;
+  }
+  (node.content ?? []).forEach((child, i) => {
+    eachTextBlock(child, [...path, i], visit);
+  });
+}
 
-  private async loadDictionary(locale: string): Promise<void> {
-    try {
-      // Загружаем WASM-модуль и словари
-      const wasm = await fetch(wasmUrl);
+function docPlainFingerprint(doc: DocNode): string {
+  const parts: string[] = [];
+  eachTextBlock(doc, [], (_path, block) => {
+    parts.push(plainText(block));
+  });
+  return parts.join('\n');
+}
 
-      // Получаем функции, которые возвращают URL-адреса
-      const dicUrlFn = dictionaries[`./dictionaries/${locale}.txt`];
-
-      if (!dicUrlFn) {
-        throw new Error(`Dictionary files for locale ${locale} not found`);
-      }
-
-      // Вызываем функции и получаем URL-адреса
-      const dicUrl = (await dicUrlFn()) as string;
-
-      // Загружаем файлы
-      const dicResponse = await fetch(dicUrl);
-
-      if (!wasm.ok || !dicResponse.ok) {
-        throw new Error('Failed to load dictionary files');
-      }
-
-      const { SpellcheckerWasm } = await import('spellchecker-wasm/lib/browser');
-
-      // Инициализация SpellcheckerWasm
-      this.spellChecker = new SpellcheckerWasm((results) => {
-        this.lastResults = results;
-      });
-
-      // Подготовка spellchecker с загруженными словарями
-      await this.spellChecker.prepareSpellchecker(wasm, dicResponse);
-    } catch (error) {
-      console.error('Failed to load dictionary:', error);
-      this.spellChecker = null;
+function clearMisspelledOps(doc: DocNode): Operation[] {
+  const ops: Operation[] = [];
+  eachTextBlock(doc, [], (path, block) => {
+    const len = textLength(block);
+    if (len > 0) {
+      ops.push({ type: 'remove_mark', path, from: 0, to: len, markType: 'misspelled' });
     }
+  });
+  return ops;
+}
+
+function resolveSpellLocale(
+  locale: string,
+  dictionaries: Record<string, SpellDictionaryFiles>,
+  defaultLocale: string
+): string {
+  const base = localeBase(locale);
+  if (Object.hasOwn(dictionaries, base)) {
+    return base;
   }
+  if (Object.hasOwn(dictionaries, defaultLocale)) {
+    return defaultLocale;
+  }
+  return Object.keys(dictionaries)[0] ?? base;
+}
 
-  private addToolbarButton(): void {
-    const toolbar = this.editor?.getToolbar();
-    if (!toolbar) return;
+async function fetchText(url: string): Promise<string> {
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`Failed to fetch dictionary: ${url} (${res.status})`);
+  }
+  return res.text();
+}
 
-    this.toolbarButton = createToolbarButton({
-      icon: spellCheckIcon,
-      title: this.editor?.t('Spell Check'),
-      onClick: async () => {
-        this.isSpellCheckEnabled = !this.isSpellCheckEnabled;
-        if (this.isSpellCheckEnabled) await this.loadDictionary(this.editor?.getLocale() ?? 'en');
-        this.enableSpellCheck(this.isSpellCheckEnabled);
-        this.toolbarButton?.classList.toggle('active', this.isSpellCheckEnabled);
+export function SpellCheckerPlugin(options: SpellCheckerOptions) {
+  const dictionaries = options.dictionaries ?? {};
+  const defaultLocale = localeBase(options.defaultLocale ?? 'en');
+  let toggle: (() => void) | null = null;
+
+  return definePlugin({
+    name: 'spell-checker',
+    marks: [{ name: 'misspelled', attrs: {} }],
+    hotkeys: [
+      { keys: 'Mod-Shift-s', command: 'toggleSpellCheck', description: 'Toggle spell check' },
+    ],
+    commands: {
+      toggleSpellCheck: () => {
+        toggle?.();
+        return null;
       },
-    });
+    },
+    setup(ctx) {
+      const editor = ctx.editor;
+      let enabled = false;
+      let spellChecker: Typo | null = null;
+      let loadedLocale = '';
+      let lastPlain = '';
+      let applying = false;
+      let debounceTimer: ReturnType<typeof setTimeout> | null = null;
 
-    toolbar.appendChild(this.toolbarButton);
-  }
-
-  private enableSpellCheck(enabled: boolean): void {
-    const editorContainer = this.editor?.getContainer();
-    if (editorContainer) {
-      if (enabled) {
-        this.addSpellCheckListeners();
-        this.checkAllText();
-      } else {
-        this.removeSpellCheckListeners();
-        this.clearHighlights();
-      }
-    }
-  }
-
-  private addSpellCheckListeners(): void {
-    const editorContainer = this.editor?.getContainer();
-    if (editorContainer) {
-      editorContainer.addEventListener('input', this.handleInput.bind(this));
-      editorContainer.addEventListener('mouseup', this.handleMouseUp.bind(this));
-      editorContainer.addEventListener('contextmenu', this.handleContextMenu.bind(this));
-    }
-  }
-
-  private removeSpellCheckListeners(): void {
-    const editorContainer = this.editor?.getContainer();
-    if (editorContainer) {
-      editorContainer.removeEventListener('input', this.handleInput.bind(this));
-      editorContainer.removeEventListener('mouseup', this.handleMouseUp.bind(this));
-      editorContainer.removeEventListener('contextmenu', this.handleContextMenu.bind(this));
-    }
-  }
-
-  private handleInput(_event: Event): void {
-    this.checkAllText();
-  }
-
-  private handleMouseUp(_event: MouseEvent): void {
-    const selection = this.editor?.getTextFormatter()?.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const selectedText = range.toString();
-
-      if (selectedText) {
-        this.checkSpelling(range);
-      }
-    }
-  }
-
-  private handleContextMenu(event: MouseEvent): void {
-    const selection = this.editor?.getTextFormatter()?.getSelection();
-    if (selection && selection.rangeCount > 0) {
-      const range = selection.getRangeAt(0);
-      const selectedText = range.toString();
-
-      if (selectedText && this.isMisspelled(selectedText)) {
-        event.preventDefault();
-        const suggestions = this.getSpellingSuggestions(selectedText);
-        if (suggestions.length > 0) {
-          this.showContextMenu(event, suggestions, range);
-        }
-      }
-    }
-  }
-
-  private checkAllText(): void {
-    const editorContainer = this.editor?.getContainer();
-    if (!editorContainer) return;
-
-    this.clearHighlights();
-
-    const walker = document.createTreeWalker(editorContainer, NodeFilter.SHOW_TEXT);
-    let node: Node | null;
-    while ((node = walker.nextNode())) {
-      const textNode = node as Text;
-      const text = textNode.textContent;
-      if (text) {
-        const words = text.split(/\s+/);
-        let offset = 0;
-        words.forEach((word) => {
-          if (this.isMisspelled(word)) {
-            const range = document.createRange();
-            range.setStart(textNode, offset);
-            range.setEnd(textNode, offset + word.length);
-            this.highlightMisspelledWord(textNode, range);
+      const loadDictionary = async (locale: string) => {
+        const base = resolveSpellLocale(locale, dictionaries, defaultLocale);
+        const files = dictionaries[base];
+        try {
+          // oxlint-disable-next-line typescript/strict-boolean-expressions -- missing entry guard
+          if (!files?.aff || !files?.dic) {
+            throw new Error(`Dictionary not configured for locale: ${base}`);
           }
-          offset += word.length + 1; // +1 для учета пробела
+          const [affData, wordsData] = await Promise.all([
+            fetchText(files.aff),
+            fetchText(files.dic),
+          ]);
+          spellChecker = new Typo(base, affData, wordsData);
+          loadedLocale = base;
+        } catch (error) {
+          console.error('Failed to load dictionary:', error);
+          spellChecker = null;
+          loadedLocale = '';
+          editor.notify(
+            editor.t('common.spellCheckerDictionaryUnavailable') || 'Dictionary unavailable'
+          );
+        }
+      };
+
+      const isMisspelled = (word: string): boolean => {
+        if (!spellChecker) {
+          return false;
+        }
+        const clean = word.replaceAll(/^'+|'+$/g, '');
+        if (clean.length < 2) {
+          return false;
+        }
+        if (/^\d+$/.test(clean)) {
+          return false;
+        }
+        return !spellChecker.check(clean);
+      };
+
+      const paintMisspelledOps = (doc: DocNode): Operation[] => {
+        const ops: Operation[] = [...clearMisspelledOps(doc)];
+        eachTextBlock(doc, [], (path, block) => {
+          const text = plainText(block);
+          WORD_RE.lastIndex = 0;
+          let match: RegExpExecArray | null;
+          while ((match = WORD_RE.exec(text))) {
+            const word = match[0];
+            const from = match.index;
+            const to = from + word.length;
+            if (isMisspelled(word)) {
+              ops.push({
+                type: 'set_mark',
+                path,
+                from,
+                to,
+                mark: { type: 'misspelled' },
+              });
+            }
+          }
         });
-      }
-    }
-  }
+        return ops;
+      };
 
-  private checkSpelling(range: Range): void {
-    const text = range.toString();
-    if (this.isMisspelled(text)) {
-      const textNode = range.startContainer as Text;
-      this.highlightMisspelledWord(textNode, range);
-    }
-  }
+      const rescan = () => {
+        if (!enabled || !spellChecker || applying) {
+          return;
+        }
+        const doc = editor.getJSON().doc;
+        const plain = docPlainFingerprint(doc);
+        const ops = paintMisspelledOps(doc);
+        // Always clear+repaint when enabled so toggles refresh; skip no-op empty clears on empty doc.
+        if (ops.length === 0) {
+          lastPlain = plain;
+          return;
+        }
+        applying = true;
+        lastPlain = plain;
+        editor.run(() => ops);
+        applying = false;
+      };
 
-  private isMisspelled(word: string): boolean {
-    if (!this.spellChecker) return false;
+      const scheduleRescan = () => {
+        if (!enabled) {
+          return;
+        }
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
+        debounceTimer = setTimeout(() => {
+          debounceTimer = null;
+          rescan();
+        }, 280);
+      };
 
-    // Сбрасываем результаты перед проверкой
-    this.lastResults = [];
+      const clearAllMarks = (api: EditorAPI) => {
+        const doc = api.getJSON().doc;
+        const ops = clearMisspelledOps(doc);
+        if (ops.length === 0) {
+          return;
+        }
+        applying = true;
+        api.run(() => ops);
+        applying = false;
+      };
 
-    // Проверяем слово
-    this.spellChecker.checkSpelling(word, {
-      includeUnknown: true, // Включаем слова, которых нет в словаре
-      maxEditDistance: 2, // Максимальное расстояние редактирования
-      verbosity: 1, // Уровень детализации предложений
-      includeSelf: false, // Не включать само слово в результаты
-    });
+      const setEnabled = (on: boolean) => {
+        enabled = on;
+        editor.toolbar.refresh();
+        if (!on) {
+          if (debounceTimer) {
+            clearTimeout(debounceTimer);
+            debounceTimer = null;
+          }
+          clearAllMarks(editor);
+          lastPlain = '';
+          return;
+        }
+        ctx.defer(async () => {
+          const locale = resolveSpellLocale(
+            editor.getLocale() || defaultLocale,
+            dictionaries,
+            defaultLocale
+          );
+          if (!spellChecker || loadedLocale !== locale) {
+            await loadDictionary(locale);
+          }
+          if (!spellChecker) {
+            enabled = false;
+            editor.toolbar.refresh();
+            return;
+          }
+          lastPlain = '';
+          rescan();
+        });
+      };
 
-    // Если есть результаты, значит слово с ошибкой
-    return this.lastResults.length > 0;
-  }
+      toggle = () => {
+        setEnabled(!enabled);
+      };
 
-  private getSpellingSuggestions(word: string): string[] {
-    if (!this.spellChecker) return [];
-
-    // Сбрасываем результаты перед проверкой
-    this.lastResults = [];
-
-    // Проверяем слово
-    this.spellChecker.checkSpelling(word, {
-      includeUnknown: true,
-      maxEditDistance: 2,
-      verbosity: 2, // Возвращаем все предложения
-      includeSelf: false,
-    });
-
-    // Возвращаем предложения
-    return this.lastResults.map((result) => result.term);
-  }
-
-  private highlightMisspelledWord(textNode: Text, range: Range): void {
-    // Добавляем класс к родительскому элементу текстового узла
-    textNode.parentElement?.classList.add('misspelled-word');
-    this.misspelledWords.set(textNode, range);
-  }
-
-  private clearHighlights(): void {
-    this.misspelledWords.forEach((_range, textNode) => {
-      textNode.parentElement?.classList.remove('misspelled-word');
-    });
-    this.misspelledWords.clear();
-  }
-
-  private showContextMenu(event: MouseEvent, suggestions: string[], range: Range): void {
-    const menu = document.createElement('div');
-    menu.style.position = 'fixed'; // Используем fixed для точного позиционирования
-    menu.style.backgroundColor = '#fff';
-    menu.style.border = '1px solid #ccc';
-    menu.style.boxShadow = '0 2px 5px rgba(0, 0, 0, 0.2)';
-    menu.style.zIndex = '1000';
-    menu.style.maxHeight = '200px'; // Ограничение по высоте
-    menu.style.overflowY = 'auto'; // Включаем вертикальный скролл
-    menu.style.padding = '4px 0'; // Отступы внутри меню
-
-    // Рассчитываем позицию меню
-    const menuWidth = 200; // Ширина меню
-    const menuHeight = Math.min(suggestions.length * 32, 200); // Высота меню (32px на элемент)
-    const viewportWidth = window.innerWidth;
-    const viewportHeight = window.innerHeight;
-
-    let top = event.clientY;
-    let left = event.clientX;
-
-    // Проверяем, чтобы меню не выходило за пределы экрана
-    if (top + menuHeight > viewportHeight) {
-      top = viewportHeight - menuHeight; // Сдвигаем меню вверх, если оно выходит за нижнюю границу
-    }
-    if (left + menuWidth > viewportWidth) {
-      left = viewportWidth - menuWidth; // Сдвигаем меню влево, если оно выходит за правую границу
-    }
-
-    // Устанавливаем позицию меню
-    menu.style.top = `${top}px`;
-    menu.style.left = `${left}px`;
-
-    // Добавляем предложения в меню
-    suggestions.forEach((suggestion) => {
-      const item = document.createElement('div');
-      item.style.padding = '8px 16px';
-      item.style.cursor = 'pointer';
-      item.textContent = suggestion;
-      item.addEventListener('click', () => {
-        this.replaceMisspelledWord(range, suggestion);
-        menu.remove();
+      ctx.on('docChanged', () => {
+        if (!enabled || applying) {
+          return;
+        }
+        const plain = docPlainFingerprint(editor.getJSON().doc);
+        if (plain === lastPlain) {
+          return;
+        }
+        scheduleRescan();
       });
-      menu.appendChild(item);
-    });
 
-    // Добавляем меню в DOM
-    this.editor?.getInnerContainer().appendChild(menu);
+      ctx.toolbar.add({
+        id: 'spell',
+        icon: spellCheckIcon,
+        title: editor.t('common.spellChecker'),
+        menu: 'tools',
+        order: 73,
+        active: () => enabled,
+        onClick: () => toggle?.(),
+      });
 
-    // Удаляем меню при клике вне его
-    this.editor?.getDOMContext().addEventListener('click', () => menu.remove(), { once: true });
-  }
-
-  private replaceMisspelledWord(range: Range, replacement: string): void {
-    range.deleteContents();
-    range.insertNode(document.createTextNode(replacement));
-    this.checkAllText(); // Перепроверяем текст после замены
-  }
-
-  destroy(): void {
-    this.enableSpellCheck(false);
-    this.toolbarButton?.remove();
-    this.toolbarButton = null;
-    this.editor = null;
-    this.spellChecker = null;
-  }
+      ctx.scope.disposable(() => {
+        if (debounceTimer) {
+          clearTimeout(debounceTimer);
+        }
+        if (enabled) {
+          enabled = false;
+          clearAllMarks(editor);
+        }
+      });
+    },
+  });
 }

@@ -1,167 +1,218 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
+import { PopupController, h } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import type { HistoryState } from '../types';
-import { formatTimestamp } from '../utils/formatters';
-import { computeDiff, type DiffChange } from '../utils/diff';
-import { closeIcon } from '../../../icons';
-import type { HTMLEditor } from '../../../core/HTMLEditor.ts';
-import { createButton, createContainer, createH } from '../../../utils/helpers.ts';
+import { formatClock, formatTimestamp } from '../utils/formatters';
+import { computeDiff } from '../utils/diff';
+import type { DiffChange } from '../utils/diff';
 
+function diffStats(changes: DiffChange[]): { added: number; removed: number } {
+  let added = 0;
+  let removed = 0;
+  for (const c of changes) {
+    if (!c.value?.trim()) {
+      continue;
+    }
+    if (c.type === 'add') {
+      added += c.value.length;
+    } else if (c.type === 'remove') {
+      removed += c.value.length;
+    }
+  }
+  return { added, removed };
+}
+
+/** Large history viewer — timeline + diff, restore in footer. */
 export class HistoryViewerModal {
-  private editor: HTMLEditor;
-  private popup: PopupManager;
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
   private states: HistoryState[] = [];
-  private currentIndex: number = -1;
-  private selectedIndex: number = -1;
+  private currentIndex = -1;
+  private selectedIndex = -1;
   private onRestore: ((content: string) => void) | null = null;
 
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
-    this.popup = new PopupManager(editor, {
-      className: 'history-viewer-modal',
-      closeOnClickOutside: true,
-      items: [
-        {
-          type: 'custom',
-          id: 'html-viewer-content',
-          content: () => this.createContent(),
-        },
-      ],
-    });
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
   }
 
-  private createContent(): HTMLElement {
-    // Основной контейнер
-    const container = createContainer('p-4');
-    const header = createContainer('flex items-center justify-between mb-4');
-    const title = createH('h3', 'text-lg font-semibold', this.editor.t('Edit History'));
-    const closeButton = createButton('', () => {
-      this.popup.hide();
-    });
-    closeButton.className = 'close-button';
-    closeButton.innerHTML = closeIcon;
-
-    header.appendChild(title);
-    header.appendChild(closeButton);
-
-    // Сетка для списка истории и просмотра изменений
-    const grid = createContainer('grid grid-cols-2 gap-4');
-    const historyList = createContainer('history-list max-h-[60vh] overflow-y-auto');
-    const diffView = createContainer(
-      'diff-view max-h-[60vh] overflow-y-auto p-3 bg-gray-50 rounded-lg'
-    );
-
-    // Сборка структуры
-    grid.appendChild(historyList);
-    grid.appendChild(diffView);
-    container.appendChild(header);
-    container.appendChild(grid);
-
-    // Настройка обработчиков событий
-    container.addEventListener('click', (e) => {
-      const button = (e.target as Element).closest('[data-index]');
-      if (!button) return;
-
-      const index = parseInt(button.getAttribute('data-index') || '0', 10);
-
-      this.selectedIndex = index;
-      this.showDiff(index);
-    });
-
-    return container;
+  private t(key: string, params?: Record<string, string | number | boolean>): string {
+    return this.editor.t(key, params);
   }
 
-  private renderHistoryList(): void {
-    const listContainer = this.popup.getElement().querySelector('.history-list');
-    if (!listContainer) return;
-
-    // Очистка контейнера
-    listContainer.innerHTML = '';
-
-    // Создание элементов списка
-    this.states.forEach((state, index) => {
-      const item = this.createHistoryItem(state, index);
-      listContainer.appendChild(item);
-    });
+  private selectedState(): HistoryState | null {
+    return this.states[this.selectedIndex] ?? null;
   }
 
-  private createHistoryItem(state: HistoryState, index: number): HTMLElement {
-    const item = createContainer(
-      `history-item ${index === this.currentIndex ? 'current' : ''} ${index === this.selectedIndex ? 'selected' : ''}`
-    );
-    item.dataset.index = index.toString();
-
-    const itemContent = createContainer(
-      'flex items-center justify-between p-3 hover:bg-gray-50 rounded-lg cursor-pointer'
-    );
-    const itemText = createContainer();
-    const version = createContainer('text-sm font-medium');
-    version.textContent = `Version ${index + 1}`;
-
-    const timestamp = createContainer('ext-xs text-gray-500', formatTimestamp(state.timestamp));
-
-    itemText.appendChild(version);
-    itemText.appendChild(timestamp);
-
-    const restoreButton = createButton(this.editor.t('Restore'), (e) => {
-      e.preventDefault();
-      const state = this.states[index];
-      if (state && this.onRestore) {
-        this.onRestore(state.content);
-        this.popup.hide();
+  private diffChildren(changes: DiffChange[]): ViewSpec[] {
+    return changes.map((change) => {
+      if (change.type === 'add') {
+        return h('span', { class: 'hv-diff__add' }, change.value);
       }
+      if (change.type === 'remove') {
+        return h('span', { class: 'hv-diff__remove' }, change.value);
+      }
+      return change.value;
     });
-
-    restoreButton.className =
-      'restore-button px-2 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded';
-    restoreButton.textContent = this.editor.t('Restore');
-
-    itemContent.appendChild(itemText);
-    itemContent.appendChild(restoreButton);
-    item.appendChild(itemContent);
-
-    return item;
   }
 
-  private showDiff(index: number): void {
-    const diffContainer = this.popup.getElement().querySelector('.diff-view');
-    if (!diffContainer) return;
+  private timelineSpec(): ViewSpec {
+    // Newest first
+    const order = this.states.map((_, i) => i).toReversed();
 
-    const currentState = this.states[index];
-    const previousState = index > 0 ? this.states[index - 1] : { content: '' };
+    if (order.length === 0) {
+      return h('div', { class: 'hv-empty' }, this.t('history.empty'));
+    }
 
-    const changes = computeDiff(previousState.content, currentState.content);
-    const diffHtml = this.renderDiff(changes);
+    return h(
+      'div',
+      { class: 'hv-timeline', attrs: { role: 'list' } },
+      order.map((index) => {
+        const state = this.states[index];
+        const isCurrent = index === this.currentIndex;
+        const isSelected = index === this.selectedIndex;
+        const classes = ['hv-item', isCurrent ? 'is-current' : '', isSelected ? 'is-selected' : '']
+          .filter(Boolean)
+          .join(' ');
 
-    // Очистка контейнера
-    diffContainer.innerHTML = '';
-
-    // Создание элементов для отображения изменений
-    const diffTitle = createContainer('text-sm mb-2 text-gray-500');
-    diffTitle.textContent =
-      index > 0
-        ? this.editor.t('Changes from previous version:')
-        : this.editor.t('Initial version');
-
-    const diffContent = createContainer('diff-content');
-    diffContent.innerHTML = diffHtml;
-
-    diffContainer.appendChild(diffTitle);
-    diffContainer.appendChild(diffContent);
-  }
-
-  private renderDiff(changes: DiffChange[]): string {
-    return changes
-      .map((change) => {
-        switch (change.type) {
-          case 'add':
-            return `<span class="diff-add">${change.value}</span>`;
-          case 'remove':
-            return `<span class="diff-remove">${change.value}</span>`;
-          default:
-            return change.value;
-        }
+        return h(
+          'button',
+          {
+            class: classes,
+            attrs: {
+              type: 'button',
+              role: 'listitem',
+              'data-index': String(index),
+            },
+            on: {
+              click: () => {
+                this.selectedIndex = index;
+                this.refresh();
+              },
+            },
+          },
+          [
+            h('span', { class: 'hv-item__rail', attrs: { 'aria-hidden': 'true' } }, [
+              h('span', { class: 'hv-item__dot' }),
+            ]),
+            h('span', { class: 'hv-item__body' }, [
+              h('span', { class: 'hv-item__row' }, [
+                h(
+                  'span',
+                  { class: 'hv-item__title' },
+                  this.t('history.versionN', { n: index + 1 })
+                ),
+                isCurrent ? h('span', { class: 'hv-badge' }, this.t('history.current')) : null,
+              ]),
+              h('span', { class: 'hv-item__meta' }, [
+                formatTimestamp(state.timestamp, (k, p) => this.t(k, p)),
+                h('span', { class: 'hv-item__sep' }, '·'),
+                formatClock(state.timestamp),
+              ]),
+            ]),
+          ]
+        );
       })
-      .join('');
+    );
+  }
+
+  private detailSpec(): ViewSpec {
+    const index = this.selectedIndex >= 0 ? this.selectedIndex : this.currentIndex;
+    const state = this.states[index];
+    if (state === undefined) {
+      return h('div', { class: 'hv-empty' }, this.t('history.empty'));
+    }
+
+    const previous = index > 0 ? (this.states[index - 1]?.content ?? '') : '';
+    const changes = computeDiff(previous, state.content);
+    const stats = diffStats(changes);
+    const isInitial = index === 0;
+    const isCurrent = index === this.currentIndex;
+
+    return h('div', { class: 'hv-detail' }, [
+      h('div', { class: 'hv-detail__head' }, [
+        h('div', { class: 'hv-detail__titles' }, [
+          h('div', { class: 'hv-detail__title' }, this.t('history.versionN', { n: index + 1 })),
+          h('div', { class: 'hv-detail__sub' }, [
+            formatTimestamp(state.timestamp, (k, p) => this.t(k, p)),
+            isCurrent ? h('span', { class: 'hv-badge' }, this.t('history.current')) : null,
+          ]),
+        ]),
+        h('div', { class: 'hv-stats' }, [
+          isInitial
+            ? h('span', { class: 'hv-stat hv-stat--muted' }, this.t('history.initialVersion'))
+            : [
+                h(
+                  'span',
+                  { class: 'hv-stat hv-stat--add' },
+                  this.t('history.charsAdded', { n: stats.added })
+                ),
+                h(
+                  'span',
+                  { class: 'hv-stat hv-stat--remove' },
+                  this.t('history.charsRemoved', { n: stats.removed })
+                ),
+              ],
+        ]),
+      ]),
+      h('div', { class: 'hv-diff' }, [
+        h(
+          'div',
+          { class: 'hv-diff__label' },
+          isInitial ? this.t('history.initialVersion') : this.t('history.changesFromPrevious')
+        ),
+        h('div', { class: 'hv-diff__content' }, ...this.diffChildren(changes)),
+      ]),
+    ]);
+  }
+
+  private rootView(): ViewSpec {
+    const total = this.states.length;
+    return h('div', { class: 'hv-shell' }, [
+      h('aside', { class: 'hv-sidebar' }, [
+        h('div', { class: 'hv-sidebar__head' }, [
+          h('div', { class: 'hv-sidebar__title' }, this.t('history.versions')),
+          h('div', { class: 'hv-sidebar__count' }, this.t('history.versionCount', { n: total })),
+        ]),
+        this.timelineSpec(),
+      ]),
+      h('main', { class: 'hv-main' }, [this.detailSpec()]),
+    ]);
+  }
+
+  private popupOptions() {
+    const selected = this.selectedState();
+    const canRestore =
+      selected !== null && this.selectedIndex !== this.currentIndex && this.selectedIndex >= 0;
+
+    return {
+      title: this.t('history.editHistory'),
+      className: 'history-viewer-modal',
+      size: 'lg' as const,
+      closeOnClickOutside: true,
+      items: [{ type: 'view' as const, id: 'history-viewer', view: () => this.rootView() }],
+      buttons: [
+        {
+          label: this.t('history.close'),
+          variant: 'secondary' as const,
+          onClick: () => {},
+        },
+        ...(canRestore
+          ? [
+              {
+                label: this.t('history.restore'),
+                variant: 'primary' as const,
+                onClick: () => {
+                  this.onRestore?.(selected.content);
+                },
+              },
+            ]
+          : []),
+      ],
+    };
+  }
+
+  private refresh(): void {
+    this.popups.update(this.popupOptions());
   }
 
   public show(
@@ -173,52 +224,6 @@ export class HistoryViewerModal {
     this.currentIndex = currentIndex;
     this.selectedIndex = currentIndex;
     this.onRestore = onRestore;
-    this.renderHistoryList();
-    this.showDiff(currentIndex);
-    this.popup.show();
-  }
-
-  public destroy(): void {
-    // Уничтожение PopupManager
-    if (this.popup.destroy) {
-      this.popup.destroy();
-    }
-
-    // Очистка обработчиков событий
-    const popupElement = this.popup.getElement();
-    if (popupElement) {
-      const closeButton = popupElement.querySelector('.close-button');
-      closeButton?.removeEventListener('click', () => {
-        this.popup.hide();
-      });
-
-      popupElement.removeEventListener('click', (e) => {
-        const button = (e.target as Element).closest('[data-index]');
-        if (!button) return;
-
-        const index = parseInt(button.getAttribute('data-index') || '0', 10);
-
-        if ((e.target as Element).closest('.restore-button')) {
-          const state = this.states[index];
-          if (state && this.onRestore) {
-            this.onRestore(state.content);
-            this.popup.hide();
-          }
-        } else {
-          this.selectedIndex = index;
-          this.showDiff(index);
-        }
-      });
-    }
-
-    // Очистка состояния
-    this.states = [];
-    this.currentIndex = -1;
-    this.selectedIndex = -1;
-    this.onRestore = null;
-
-    // Очистка ссылок
-    this.editor = null!;
-    this.popup = null!;
+    this.popups.open(this.popupOptions());
   }
 }

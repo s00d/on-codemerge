@@ -1,14 +1,11 @@
-/* Link modal styles */
-.link-menu {
-  @apply max-w-lg w-full;
+@reference "../../tailwind.css";
 
+.link-menu {
   input {
-    @apply font-mono text-sm;
-    white-space: pre-wrap;
+    @apply font-mono text-sm whitespace-pre-wrap;
   }
 }
 
-/* Toolbar button styles */
 .link-button {
-  @apply text-blue-600 cursor-pointer hover:text-blue-800;
+  @apply text-ocm-accent cursor-pointer hover:text-sky-800;
 }

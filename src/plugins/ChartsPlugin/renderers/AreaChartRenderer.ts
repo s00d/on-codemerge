@@ -9,14 +9,11 @@ export class AreaChartRenderer extends BaseChartRenderer {
       return;
     }
 
-    const isMulti = Array.isArray(data) && 'data' in data[0];
-    const seriesArr: ChartSeries[] = isMulti
-      ? (data as ChartSeries[])
-      : [{ name: '', data: data as any }];
+    const seriesArr: ChartSeries[] = data;
     const categories = seriesArr[0].data.map((p) => p.label || '');
     const colors = this.getColors(options);
-    const mode = options.mode || 'default';
-    const orientation = options.orientation || 'vertical';
+    const mode = options.mode ?? 'default';
+    const orientation = options.orientation ?? 'vertical';
 
     // Вычисление максимального значения для разных режимов
     let maxValue = 1;
@@ -61,14 +58,16 @@ export class AreaChartRenderer extends BaseChartRenderer {
   ) {
     const { padding, width, height } = this.getDimensions(options);
     const scale = height / (maxValue * 1.1);
-    [...seriesArr].reverse().forEach((series, index) => {
-      const color = series.color || colors[index % colors.length];
+    [...seriesArr].toReversed().forEach((series, index) => {
+      const color = series.color ?? colors[index % colors.length];
       ctx.beginPath();
       ctx.moveTo(padding, options.height - padding);
       series.data.forEach((point, i) => {
         const x = padding + (width / (series.data.length - 1)) * i;
         const y = options.height - padding - (point.value || 0) * scale;
-        if (i === 0) ctx.moveTo(x, options.height - padding);
+        if (i === 0) {
+          ctx.moveTo(x, options.height - padding);
+        }
         ctx.lineTo(x, y);
       });
       ctx.lineTo(options.width - padding, options.height - padding);
@@ -95,15 +94,17 @@ export class AreaChartRenderer extends BaseChartRenderer {
     const pointCount = seriesArr[0].data.length;
     const scale = height / (maxValue * 1.1);
     // Массив накопленных значений
-    const stack: number[] = new Array(pointCount).fill(0);
-    [...seriesArr].reverse().forEach((series, index) => {
-      const color = series.color || colors[index % colors.length];
+    const stack: number[] = Array.from({ length: pointCount }, () => 0);
+    [...seriesArr].toReversed().forEach((series, index) => {
+      const color = series.color ?? colors[index % colors.length];
       ctx.beginPath();
       for (let i = 0; i < pointCount; i++) {
         const x = padding + (width / (pointCount - 1)) * i;
         stack[i] += series.data[i]?.value || 0;
         const y = options.height - padding - stack[i] * scale;
-        if (i === 0) ctx.moveTo(x, options.height - padding);
+        if (i === 0) {
+          ctx.moveTo(x, options.height - padding);
+        }
         ctx.lineTo(x, y);
       }
       ctx.lineTo(options.width - padding, options.height - padding);
@@ -118,8 +119,11 @@ export class AreaChartRenderer extends BaseChartRenderer {
       for (let i = 0; i < pointCount; i++) {
         const x = padding + (width / (pointCount - 1)) * i;
         const y = options.height - padding - stack[i] * scale;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
       }
       ctx.strokeStyle = color;
       ctx.lineWidth = 2;
@@ -137,14 +141,16 @@ export class AreaChartRenderer extends BaseChartRenderer {
   ) {
     const { padding, width, height } = this.getDimensions(options);
     const scale = width / (maxValue * 1.1);
-    [...seriesArr].reverse().forEach((series, index) => {
-      const color = series.color || colors[index % colors.length];
+    [...seriesArr].toReversed().forEach((series, index) => {
+      const color = series.color ?? colors[index % colors.length];
       ctx.beginPath();
       ctx.moveTo(padding, height - padding);
       series.data.forEach((point, i) => {
         const y = padding + (height / (series.data.length - 1)) * i;
         const x = padding + (point.value || 0) * scale;
-        if (i === 0) ctx.moveTo(padding, y);
+        if (i === 0) {
+          ctx.moveTo(padding, y);
+        }
         ctx.lineTo(x, y);
       });
       ctx.lineTo(padding, height - padding);
@@ -159,8 +165,11 @@ export class AreaChartRenderer extends BaseChartRenderer {
       series.data.forEach((point, i) => {
         const y = padding + (height / (series.data.length - 1)) * i;
         const x = padding + (point.value || 0) * scale;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
       });
       ctx.strokeStyle = color;
       ctx.lineWidth = 2;
@@ -179,15 +188,17 @@ export class AreaChartRenderer extends BaseChartRenderer {
     const { padding, width, height } = this.getDimensions(options);
     const pointCount = seriesArr[0].data.length;
     const scale = width / (maxValue * 1.1);
-    const stack: number[] = new Array(pointCount).fill(0);
-    [...seriesArr].reverse().forEach((series, index) => {
-      const color = series.color || colors[index % colors.length];
+    const stack: number[] = Array.from({ length: pointCount }, () => 0);
+    [...seriesArr].toReversed().forEach((series, index) => {
+      const color = series.color ?? colors[index % colors.length];
       ctx.beginPath();
       for (let i = 0; i < pointCount; i++) {
         const y = padding + (height / (pointCount - 1)) * i;
         stack[i] += series.data[i]?.value || 0;
         const x = padding + stack[i] * scale;
-        if (i === 0) ctx.moveTo(padding, y);
+        if (i === 0) {
+          ctx.moveTo(padding, y);
+        }
         ctx.lineTo(x, y);
       }
       ctx.lineTo(padding, height - padding);
@@ -202,8 +213,11 @@ export class AreaChartRenderer extends BaseChartRenderer {
       for (let i = 0; i < pointCount; i++) {
         const y = padding + (height / (pointCount - 1)) * i;
         const x = padding + stack[i] * scale;
-        if (i === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+        if (i === 0) {
+          ctx.moveTo(x, y);
+        } else {
+          ctx.lineTo(x, y);
+        }
       }
       ctx.strokeStyle = color;
       ctx.lineWidth = 2;

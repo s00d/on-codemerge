@@ -14,112 +14,39 @@ The HTML Viewer Plugin provides HTML code viewing and syntax highlighting capabi
 - **Responsive Design**: Mobile-friendly viewer
 - **Export Options**: Export formatted HTML code
 
-## Installation
-
-```bash
-npm install on-codemerge
-```
+> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
 ## Basic Usage
 
 ```javascript
-import { HTMLEditor, HTMLViewerPlugin } from 'on-codemerge';
+import { Editor, HTMLViewerPlugin } from 'on-codemerge';
 
-const editor = new HTMLEditor(container);
-editor.use(new HTMLViewerPlugin());
+const editor = new Editor(container, {
+  plugins: [HTMLViewerPlugin()],
+});
 ```
 
 ## Demo
+
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
 <EditorComponent :activePlugins="['HTMLViewerPlugin']" />
 
-## API Reference
+## Public API (v2)
 
-### Viewer Methods
+Factory: `HTMLViewerPlugin()`.
 
-```javascript
-// Open HTML viewer
-htmlViewerPlugin.openViewer();
+No named commands — toolbar / menu UI only.
 
-// View specific HTML content
-htmlViewerPlugin.viewHTML(htmlContent);
-
-// Format HTML code
-const formattedHTML = htmlViewerPlugin.formatHTML(htmlContent);
-
-// Highlight syntax
-const highlightedHTML = htmlViewerPlugin.highlightSyntax(htmlContent);
-
-// Export formatted code
-htmlViewerPlugin.exportCode(format);
-```
-
-### Viewer Configuration
-
-```javascript
-interface HTMLViewerConfig {
-  theme?: 'light' | 'dark' | 'monokai' | 'github';
-  showLineNumbers?: boolean;
-  showLineHighlight?: boolean;
-  wordWrap?: boolean;
-  fontSize?: number;
-  tabSize?: number;
-}
-```
-
-## Events
-
-```javascript
-// Listen to viewer events
-editor.on('html-viewer:opened', () => {
-  console.log('HTML viewer opened');
-});
-
-editor.on('html-viewer:closed', () => {
-  console.log('HTML viewer closed');
-});
-
-editor.on('html-viewer:content-changed', (content) => {
-  console.log('HTML content changed:', content);
-});
-
-editor.on('html-viewer:exported', (format) => {
-  console.log('HTML exported as:', format);
-});
-```
+> **Note:** No constructor options; Tools-menu UI only.
 
 ## Examples
 
 ### Basic HTML Viewing
 
-```javascript
-// Initialize with HTML viewer
-const editor = new HTMLEditor(container);
-editor.use(new HTMLViewerPlugin());
-
-// Open viewer with current content
-const currentHTML = editor.getHtml();
-htmlViewerPlugin.viewHTML(currentHTML);
-```
-
 ### Custom Viewer Configuration
-
-```javascript
-// Configure HTML viewer
-const htmlViewerPlugin = new HTMLViewerPlugin({
-  theme: 'dark',
-  showLineNumbers: true,
-  showLineHighlight: true,
-  wordWrap: true,
-  fontSize: 14,
-  tabSize: 2
-});
-
-editor.use(htmlViewerPlugin);
-```
 
 ## Integration Examples
 
@@ -127,7 +54,7 @@ editor.use(htmlViewerPlugin);
 
 ```jsx
 import React, { useEffect, useRef, useState } from 'react';
-import { HTMLEditor, HTMLViewerPlugin } from 'on-codemerge';
+import { Editor, HTMLViewerPlugin } from 'on-codemerge';
 
 function MyEditor() {
   const editorRef = useRef(null);
@@ -136,14 +63,14 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new HTMLEditor(editorRef.current);
-      editorInstance.current.use(new HTMLViewerPlugin());
-      
+      editorInstance.current = new Editor(editorRef.current);
+      editorInstance.current.use(HTMLViewerPlugin());
+
       // Track viewer state
       editorInstance.current.on('html-viewer:opened', () => {
         setViewerOpen(true);
       });
-      
+
       editorInstance.current.on('html-viewer:closed', () => {
         setViewerOpen(false);
       });
@@ -158,9 +85,7 @@ function MyEditor() {
 
   return (
     <div>
-      <div className="viewer-status">
-        HTML Viewer: {viewerOpen ? 'Open' : 'Closed'}
-      </div>
+      <div className="viewer-status">HTML Viewer: {viewerOpen ? 'Open' : 'Closed'}</div>
       <div ref={editorRef} className="editor-container" />
     </div>
   );
@@ -168,54 +93,6 @@ function MyEditor() {
 ```
 
 ### Vue Integration
-
-```vue
-<template>
-  <div>
-    <button @click="openViewer" :disabled="viewerOpen">
-      View HTML
-    </button>
-    <div ref="editorContainer" class="editor-container"></div>
-  </div>
-</template>
-
-<script>
-import { HTMLEditor, HTMLViewerPlugin } from 'on-codemerge';
-
-export default {
-  name: 'MyEditor',
-  data() {
-    return {
-      editor: null,
-      viewerOpen: false
-    };
-  },
-  mounted() {
-    this.editor = new HTMLEditor(this.$refs.editorContainer);
-    this.editor.use(new HTMLViewerPlugin());
-    
-    this.editor.on('html-viewer:opened', () => {
-      this.viewerOpen = true;
-    });
-    
-    this.editor.on('html-viewer:closed', () => {
-      this.viewerOpen = false;
-    });
-  },
-  methods: {
-    openViewer() {
-      const html = this.editor.getHtml();
-      this.htmlViewerPlugin.viewHTML(html);
-    }
-  },
-  beforeDestroy() {
-    if (this.editor) {
-      this.editor.destroy();
-    }
-  }
-};
-</script>
-```
 
 ## Styling
 
@@ -317,20 +194,6 @@ export default {
 
 ### Debug Mode
 
-```javascript
-// Add console logging
-console.log('HTML Viewer plugin initialized');
-
-// Check viewer events
-editor.on('html-viewer:opened', () => {
-  console.log('HTML viewer opened');
-});
-
-// Check HTML formatting
-const formatted = htmlViewerPlugin.formatHTML(htmlContent);
-console.log('Formatted HTML:', formatted);
-```
-
 ## Browser Support
 
 - Chrome 60+
@@ -340,4 +203,4 @@ console.log('Formatted HTML:', formatted);
 
 ## License
 
-MIT License - see LICENSE file for details. 
+MIT License - see LICENSE file for details.

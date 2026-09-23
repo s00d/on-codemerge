@@ -1,0 +1,17 @@
+/* Layout shell — typography via @apply so standalone public.css embeds prose rules. */
+.ocm-content {
+  @apply prose prose-zinc max-w-none;
+
+  /* Match editor chrome spacing when used as export wrapper (sdk.scss also styles this). */
+  [data-ocm-block] {
+    @apply mb-2;
+
+    &:last-child {
+      @apply mb-0;
+    }
+  }
+}
+
+html.dark .ocm-content {
+  @apply prose-invert;
+}

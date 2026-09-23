@@ -1,14 +1,7 @@
-import { PopupManager } from '../../../core/ui/PopupManager';
-import type { HTMLEditor } from '../../../app';
+import { PopupController } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI } from '@on-codemerge/sdk';
 import type { FormTemplate } from '../types';
 import { TemplateManager } from '../services/TemplateManager';
-import {
-  createContainer,
-  createInputField,
-  createLabel,
-  createSelectField,
-  createCheckbox,
-} from '../../../utils/helpers';
 
 export interface FormPopupOptions {
   method: 'GET' | 'POST';
@@ -17,169 +10,117 @@ export interface FormPopupOptions {
   template?: FormTemplate;
 }
 
+/** Create-form chrome — declarative popup items only. */
 export class FormPopup {
-  private readonly editor: HTMLEditor;
-  private popup: PopupManager | null = null;
-  private templateManager: TemplateManager;
+  private readonly editor: EditorAPI;
+  private readonly popups: PopupController;
+  private readonly templateManager: TemplateManager;
   private callback: ((options: FormPopupOptions) => void) | null = null;
+  private selectedTemplateId = '';
 
-  // Ссылки на элементы
-  private methodSelect: HTMLSelectElement | null = null;
-  private actionInput: HTMLInputElement | null = null;
-  private submitButtonCheckbox: HTMLInputElement | null = null;
-  private templateSelect: HTMLSelectElement | null = null;
-
-  constructor(editor: HTMLEditor) {
+  constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
+    this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
     this.templateManager = new TemplateManager(editor);
   }
 
-  private createContent(): HTMLElement {
-    const container = createContainer('p-4 space-y-4');
+  private templateLabels(): string[] {
+    return [
+      this.editor.t('templates.noTemplate'),
+      ...this.templateManager.getTemplates().map((t) => t.name),
+    ];
+  }
 
-    // Template selection
-    const templateSection = createContainer('template-section');
-    const templateLabel = createLabel(this.editor.t('Template (optional):'));
-    this.templateSelect = createSelectField(this.getTemplateOptions(), '', (value) =>
-      this.handleTemplateChange(value)
-    );
-    templateSection.appendChild(templateLabel);
-    templateSection.appendChild(this.templateSelect);
-    container.appendChild(templateSection);
+  private templateIdForLabel(label: string): string {
+    if (label === this.editor.t('templates.noTemplate')) {
+      return '';
+    }
+    return this.templateManager.getTemplates().find((t) => t.name === label)?.id ?? '';
+  }
 
-    // Form method
-    const methodSection = createContainer('method-section');
-    const methodLabel = createLabel(this.editor.t('Method:'));
-    this.methodSelect = createSelectField(
-      [
-        { value: 'GET', label: 'GET' },
-        { value: 'POST', label: 'POST' },
+  private open(defaults?: { method: string; action: string }): void {
+    this.popups.open({
+      title: this.editor.t('formBuilder.createForm'),
+      className: 'form-popup',
+      closeOnClickOutside: true,
+      items: [
+        {
+          type: 'list',
+          id: 'template',
+          label: this.editor.t('templates.templateOptional'),
+          options: this.templateLabels(),
+          value: this.editor.t('templates.noTemplate'),
+          onChange: (value) => {
+            this.selectedTemplateId = this.templateIdForLabel(String(value));
+            const template = this.selectedTemplateId
+              ? this.templateManager.getTemplate(this.selectedTemplateId)
+              : null;
+            if (!template) {
+              return;
+            }
+            this.open({
+              method: template.config.method,
+              action: template.config.action,
+            });
+          },
+        },
+        {
+          type: 'list',
+          id: 'method',
+          label: this.editor.t('formBuilder.method2'),
+          options: ['GET', 'POST'],
+          value: defaults?.method ?? 'POST',
+        },
+        {
+          type: 'url',
+          id: 'action',
+          label: this.editor.t('formBuilder.actionUrl2'),
+          placeholder: this.editor.t('formBuilder.enterFormActionUrl') || '',
+          value: defaults?.action ?? '',
+        },
+        {
+          type: 'checkbox',
+          id: 'hasSubmitButton',
+          label: this.editor.t('formBuilder.includeSubmitButton'),
+          value: true,
+        },
       ],
-      'POST',
-      () => {}
-    );
-    methodSection.appendChild(methodLabel);
-    methodSection.appendChild(this.methodSelect);
-    container.appendChild(methodSection);
-
-    // Form action
-    const actionSection = createContainer('action-section');
-    const actionLabel = createLabel(this.editor.t('Action URL:'));
-    this.actionInput = createInputField(
-      'text',
-      this.editor.t('Enter form action URL'),
-      '',
-      () => {}
-    ) as HTMLInputElement;
-    actionSection.appendChild(actionLabel);
-    actionSection.appendChild(this.actionInput);
-    container.appendChild(actionSection);
-
-    // Submit button option
-    const submitSection = createContainer('submit-section');
-    const submitLabel = createLabel('label');
-    submitLabel.className = 'flex items-center gap-2';
-
-    this.submitButtonCheckbox = createCheckbox(
-      this.editor.t('Include submit button'),
-      true,
-      () => {}
-    ) as HTMLInputElement;
-    this.submitButtonCheckbox.id = 'submitButton';
-
-    submitLabel.appendChild(this.submitButtonCheckbox);
-    submitSection.appendChild(submitLabel);
-    container.appendChild(submitSection);
-
-    return container;
-  }
-
-  private getTemplateOptions(): Array<{ value: string; label: string }> {
-    const templates = this.templateManager.getTemplates();
-    const options = [{ value: '', label: this.editor.t('No template') }];
-
-    templates.forEach((template) => {
-      options.push({
-        value: template.id,
-        label: template.name,
-      });
+      buttons: [
+        {
+          label: this.editor.t('common.cancel'),
+          variant: 'secondary',
+          onClick: () => {},
+        },
+        {
+          label: this.editor.t('common.create'),
+          variant: 'primary',
+          onClick: (values) => {
+            if (!this.callback) {
+              return;
+            }
+            const options: FormPopupOptions = {
+              method: (String(values.method) as 'GET' | 'POST') || 'POST',
+              action: String(values.action ?? ''),
+              hasSubmitButton: Boolean(values.hasSubmitButton),
+            };
+            const templateLabel = String(values.template ?? '');
+            const templateId = this.templateIdForLabel(templateLabel);
+            if (templateId) {
+              const template = this.templateManager.getTemplate(templateId);
+              if (template) {
+                options.template = template;
+              }
+            }
+            this.callback(options);
+          },
+        },
+      ],
     });
-
-    return options;
-  }
-
-  private handleTemplateChange(templateId: string): void {
-    if (!templateId) return;
-
-    const template = this.templateManager.getTemplate(templateId);
-    if (template) {
-      // Автозаполняем поля из шаблона
-      if (this.methodSelect) {
-        this.methodSelect.value = template.config.method;
-      }
-      if (this.actionInput) {
-        this.actionInput.value = template.config.action;
-      }
-    }
-  }
-
-  private handleCreate(): void {
-    if (!this.callback) return;
-
-    const options: FormPopupOptions = {
-      method: (this.methodSelect?.value as 'GET' | 'POST') || 'POST',
-      action: this.actionInput?.value || '',
-      hasSubmitButton: this.submitButtonCheckbox?.checked || false,
-    };
-
-    // Если выбран шаблон, добавляем его
-    if (this.templateSelect?.value) {
-      const template = this.templateManager.getTemplate(this.templateSelect.value);
-      if (template) {
-        options.template = template;
-      }
-    }
-
-    this.callback(options);
-    this.popup?.hide();
   }
 
   public show(callback: (options: FormPopupOptions) => void): void {
     this.callback = callback;
-    if (!this.popup) {
-      this.popup = new PopupManager(this.editor, {
-        title: this.editor.t('Create Form'),
-        className: 'form-popup',
-        closeOnClickOutside: true,
-        buttons: [
-          {
-            label: this.editor.t('Create'),
-            variant: 'primary',
-            onClick: () => this.handleCreate(),
-          },
-          {
-            label: this.editor.t('Cancel'),
-            variant: 'secondary',
-            onClick: () => this.popup!.hide(),
-          },
-        ],
-        items: [
-          {
-            type: 'custom',
-            id: 'form-content',
-            content: () => this.createContent(),
-          },
-        ],
-      });
-    }
-    this.popup.show();
-  }
-
-  public destroy(): void {
-    if (this.popup) {
-      this.popup.destroy();
-      this.popup = null;
-    }
-    this.callback = null;
+    this.selectedTemplateId = '';
+    this.open();
   }
 }

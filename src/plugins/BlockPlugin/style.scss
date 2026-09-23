@@ -1,275 +1,142 @@
-/* Block Plugin Styles */
+@reference "../../tailwind.css";
 
+.ocm-block-container.editor-block,
 .editor-block {
-  position: relative;
-  margin: 8px 0;
-  border: 2px solid transparent;
-  border-radius: 8px;
-  transition: all 0.2s ease-in-out;
-  background: #fff;
-  min-height: 40px;
+  @apply relative my-2 box-border min-h-14 rounded-lg border border-ocm-border bg-ocm-surface-muted p-3 transition-all duration-200 ease-in-out;
 
   &:hover {
-    border-color: #e5e7eb;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    @apply border-ocm-text-muted shadow-[0_2px_8px_rgb(0_0_0/0.08)];
   }
 
   &.active {
-    border-color: #2563eb;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+    @apply border-ocm-accent shadow-[0_4px_12px_rgb(2_132_199/0.15)];
+  }
 
-    .block-content {
-      background: #f8fafc;
-      border-radius: 4px;
+  &.layout-row,
+  &.split-container.horizontal {
+    @apply flex flex-row items-stretch gap-3;
+  }
+
+  &.layout-column,
+  &.split-container.vertical {
+    @apply flex flex-col items-stretch gap-2;
+  }
+
+  .block-content,
+  .block-container-inner {
+    @apply box-border w-full p-2 text-center text-[13px] text-ocm-text-muted italic select-none;
+  }
+
+  .block-split-panes {
+    @apply contents;
+
+    /* Nested splits must be real flex boxes (not display:contents). */
+    &.split-nested {
+      @apply m-0 flex min-h-12 min-w-0 flex-[1_1_0] gap-2 border-0 p-0;
     }
 
-    &::before {
-      content: '';
-      position: absolute;
-      top: -2px;
-      left: -2px;
-      right: -2px;
-      bottom: -2px;
-      border: 2px solid #2563eb;
-      border-radius: 8px;
-      pointer-events: none;
-      animation: pulse 2s infinite;
+    &.split-nested.split-horizontal {
+      @apply flex-row items-stretch;
+    }
+
+    &.split-nested.split-vertical {
+      @apply flex-col items-stretch;
     }
   }
 
-  /* Типы блоков */
-  &.text-block {
-    .block-content {
-      padding: 12px 16px;
-      min-height: 24px;
-      line-height: 1.5;
-      font-size: 14px;
-      color: #374151;
-      outline: none;
-      border: none;
-      background: transparent;
-      width: 100%;
-      box-sizing: border-box;
-
-      &:focus {
-        outline: none;
-        background: #f9fafb;
-      }
-
-      &[contenteditable='true'] {
-        cursor: text;
-      }
-
-      // Предотвращаем сброс позиции курсора
-      &::selection {
-        background: #dbeafe;
-      }
-
-      &::-moz-selection {
-        background: #dbeafe;
-      }
-    }
-  }
-
-  &.container-block {
-    background: #f8fafc;
-    border: 2px dashed #d1d5db;
-
-    .block-content {
-      padding: 16px;
-      text-align: center;
-      color: #6b7280;
-      font-style: italic;
-    }
-  }
-
-  &.split-container {
-    display: flex;
-    gap: 16px;
-    padding: 16px;
-    background: #f8fafc;
-    border: 2px dashed #d1d5db;
-
-    &.horizontal {
-      flex-direction: row;
-
-      > .editor-block {
-        flex: 1;
-        margin: 0;
-      }
-    }
-
-    &.vertical {
-      flex-direction: column;
-
-      > .editor-block {
-        margin: 0 0 8px 0;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
-      }
-    }
+  .block-pane {
+    @apply m-0 box-border flex min-h-12 min-w-0 flex-[1_1_0] items-center justify-center rounded-md border border-ocm-border bg-ocm-surface p-2 text-xs text-ocm-text-muted italic;
   }
 }
 
-/* Анимации */
+/* @apply disallowed inside @keyframes — keep raw keyframe stops */
 @keyframes pulse {
   0%,
   100% {
     opacity: 1;
   }
+
   50% {
     opacity: 0.5;
   }
 }
 
-/* Resizer handles */
-.editor-block .resizer-handle {
-  position: absolute;
-  background: #2563eb;
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity 0.2s;
-
-  &:hover {
-    opacity: 1;
-  }
+.editor-block.ocm-resize--selected {
+  @apply border-ocm-accent;
 }
 
-.editor-block.active .resizer-handle {
-  opacity: 0.3;
-}
-
-/* Контекстное меню для блоков */
 .block-context-menu {
   .menu-item {
-    padding: 8px 12px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
+    @apply rounded px-3 py-2 transition-colors duration-200;
 
     &:hover {
-      background-color: #f3f4f6;
+      @apply bg-ocm-surface-hover;
     }
 
     &.danger {
-      color: #dc2626;
+      @apply text-ocm-danger;
 
       &:hover {
-        background-color: #fef2f2;
+        @apply bg-ocm-danger-soft;
       }
     }
   }
 
   .submenu {
-    margin-left: 8px;
-    border-left: 2px solid #e5e7eb;
-    padding-left: 8px;
+    @apply ml-2 border-l-2 border-ocm-border pl-2;
   }
 }
 
-/* Состояния для разных типов блоков */
 .editor-block[data-block-type='text'] {
   .block-content {
-    cursor: text;
+    @apply cursor-text;
   }
 }
 
 .editor-block[data-block-type='container'] {
   .block-content {
-    cursor: pointer;
+    @apply cursor-pointer;
   }
 }
 
 .editor-block[data-block-type='split'] {
   .block-content {
-    cursor: default;
+    @apply cursor-default;
   }
 }
 
-/* Адаптивность */
 @media (max-width: 768px) {
   .editor-block {
-    margin: 4px 0;
+    @apply my-1;
 
     &.split-container {
-      flex-direction: column !important;
-      gap: 8px;
-      padding: 8px;
+      /* stack split panes on narrow viewports — !important beats inline flex-direction */
+      @apply flex-col! gap-2 p-2;
 
       > .editor-block {
-        margin: 0 0 4px 0;
-
-        &:last-child {
-          margin-bottom: 0;
-        }
+        @apply m-0 mb-1 last:mb-0;
       }
     }
 
     .block-content {
-      padding: 8px 12px;
-      font-size: 13px;
+      @apply px-3 py-2 text-[13px];
     }
   }
 }
 
-/* Темная тема */
-@media (prefers-color-scheme: dark) {
-  .editor-block {
-    background: #1f2937;
-    color: #f9fafb;
-
-    &:hover {
-      border-color: #4b5563;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-    }
-
-    &.active {
-      border-color: #3b82f6;
-      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
-    }
-
-    &.container-block {
-      background: #374151;
-      border-color: #6b7280;
-    }
-
-    &.split-container {
-      background: #374151;
-      border-color: #6b7280;
-    }
-
-    .block-content {
-      color: #f9fafb;
-
-      &:focus {
-        background: #374151;
-      }
-    }
-  }
-}
-
-/* Улучшенные эффекты при перетаскивании */
 .editor-block.dragging {
-  opacity: 0.5;
-  transform: rotate(2deg);
-  z-index: 1000;
+  @apply z-[1000] rotate-2 opacity-50;
 }
 
 .editor-block.drag-over {
-  border-color: #10b981;
-  background: #ecfdf5;
+  @apply border-emerald-500 bg-emerald-50;
+
+  html.dark & {
+    @apply border-emerald-400 bg-emerald-950/40;
+  }
 }
 
-/* Индикаторы для пустых блоков */
 .editor-block:empty::after {
   content: 'Empty block';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  color: #9ca3af;
-  font-size: 12px;
-  font-style: italic;
-  pointer-events: none;
+  @apply pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-ocm-text-muted italic;
 }

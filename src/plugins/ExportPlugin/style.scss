@@ -1,11 +1,13 @@
+@reference "../../tailwind.css";
+
 .export-menu {
-  @apply bg-white rounded-lg shadow-lg border border-gray-200 min-w-[200px];
+  @apply bg-ocm-surface rounded-ocm shadow-lg border border-ocm-border min-w-[200px];
 }
 
 .export-button {
-  @apply flex items-center gap-2 w-full px-3 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors rounded-md;
+  @apply flex items-center gap-2 w-full px-3 py-2 text-sm text-ocm-text hover:bg-ocm-surface-muted transition-colors rounded-ocm-sm;
 
   svg {
-    @apply text-gray-500;
+    @apply text-ocm-text-muted;
   }
 }
