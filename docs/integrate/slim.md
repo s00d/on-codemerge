@@ -1,189 +1,88 @@
 # Slim
 
-Welcome to the Slim framework-specific documentation for **On-Codemerge**, a versatile web editor designed for easy integration into Slim applications.
+Serve a Vite-built editor and persist document **JSON** with Slim 4.
 
-## Getting Started with Slim
+Verified with Slim 4 + PHP built-in server + Vite + `on-codemerge@2.0.3` (browser smoke).
 
-To integrate On-Codemerge into your Slim application, install the package:
+## Install
 
 ```bash
+composer require slim/slim slim/psr7
 npm install on-codemerge
+npm install -D vite
 ```
 
-## Slim Integration Example
+## Minimal example
 
-Here's how to integrate On-Codemerge into a Slim application:
+Client (wrap async — no top-level `await` in the default Vite target):
 
-1. **Frontend Setup**:
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-```javascript title="public/js/app.js"
-import {
-  Editor,
-  createCorePlugins,
-  AlignmentPlugin,
-} from '/node_modules/on-codemerge/dist/app.mjs';
-import '/node_modules/on-codemerge/dist/public.css';
-import '/node_modules/on-codemerge/dist/index.css';
-
-class SlimEditor {
-  constructor() {
-    this.editor = null;
-    this.init();
-  }
-
-  async init() {
-    const editorElement = document.getElementById('editor');
-    if (!editorElement) return;
-
-    // Initialize editor
-    this.editor = new Editor(editorElement, {
-      plugins: [...createCorePlugins(), AlignmentPlugin()],
+async function main() {
+  const editor = new Editor(document.getElementById('editor'), {
+    plugins: createCorePlugins(),
+  });
+  const loaded = await fetch('/api/doc').then((r) => r.json());
+  editor.setJSON(loaded.doc);
+  editor.on('docChanged', () => {
+    fetch('/api/doc', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ doc: editor.getJSON() }),
     });
-
-    // Subscribe to content changes
-    this.editor.on('docChanged', (newContent) => {
-      this.updateHiddenField(newContent);
-      console.log('Content changed:', newContent);
-    });
-
-    // Set initial content
-    const initialContent =
-      document.getElementById('initial-content')?.textContent ||
-      'Welcome to On-Codemerge with Slim!';
-    this.editor.setHTML(initialContent);
-  }
-
-  updateHiddenField(content) {
-    const hiddenField = document.getElementById('editor-content');
-    if (hiddenField) {
-      hiddenField.value = content;
-    }
-  }
-
-  getContent() {
-    return this.editor ? this.editor.getHTML() : '';
-  }
+  });
 }
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new SlimEditor();
-});
+main();
 ```
 
-2. **Include the Script in Your Slim View**:
+`public/index.php` (working smoke router):
 
-```php title="templates/home.php"
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slim On-Codemerge Editor</title>
-</head>
-<body>
-    <div class="container">
-        <h1>Slim On-Codemerge Editor</h1>
-
-        <form method="post" action="/save-content">
-            <div id="editor" style="min-height: 300px;"></div>
-            <input type="hidden" id="editor-content" name="content" value="">
-
-            <div class="controls">
-                <button type="submit">Save Content</button>
-                <button type="button" onclick="previewContent()">Preview</button>
-            </div>
-        </form>
-
-        <div id="preview" style="display: none;">
-            <h3>Preview:</h3>
-            <div id="preview-content"></div>
-        </div>
-    </div>
-
-    <!-- Initial content (if any) -->
-    <script id="initial-content" type="text/plain"><?= htmlspecialchars($initialContent ?? '<p>Welcome to On-Codemerge with Slim!</p>') ?></script>
-
-    <script type="module" src="/js/app.js"></script>
-    <script>
-        function previewContent() {
-            const content = document.getElementById('editor-content').value;
-            const previewDiv = document.getElementById('preview');
-            const previewContent = document.getElementById('preview-content');
-
-            previewContent.innerHTML = content;
-            previewDiv.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
-```
-
-3. **Routing and Controller Setup**:
-
-```php title="routes.php"
+```php
 <?php
-
 use Psr\Http\Message\ResponseInterface as Response;
 use Psr\Http\Message\ServerRequestInterface as Request;
 use Slim\Factory\AppFactory;
 
-require __DIR__ . '/vendor/autoload.php';
+require __DIR__ . '/../vendor/autoload.php';
 
 $app = AppFactory::create();
-
-// Add middleware
 $app->addBodyParsingMiddleware();
+$dataFile = __DIR__ . '/../data/doc.json';
 
-// Home route
-$app->get('/', function (Request $request, Response $response) {
-    $initialContent = '<p>Welcome to On-Codemerge with Slim!</p>';
-
-    ob_start();
-    include __DIR__ . '/templates/home.php';
-    $html = ob_get_clean();
-
-    $response->getBody()->write($html);
-    return $response;
-});
-
-// Save content route
-$app->post('/save-content', function (Request $request, Response $response) {
-    $data = $request->getParsedBody();
-    $content = $data['content'] ?? '';
-
-    // Save content to database or file
-    error_log("Saving content: " . $content);
-
-    $response->getBody()->write(json_encode(['success' => true]));
+$app->get('/api/doc', function (Request $request, Response $response) use ($dataFile) {
+    $response->getBody()->write(file_get_contents($dataFile));
     return $response->withHeader('Content-Type', 'application/json');
 });
 
+$app->put('/api/doc', function (Request $request, Response $response) use ($dataFile) {
+    $body = $request->getParsedBody();
+    file_put_contents($dataFile, json_encode(['doc' => $body['doc']], JSON_PRETTY_PRINT));
+    $response->getBody()->write(json_encode(['ok' => true]));
+    return $response->withHeader('Content-Type', 'application/json');
+});
+
+// also serve public/index.html + /dist/* statically
 $app->run();
 ```
 
-4. **Composer Configuration**:
+Run: `php -S 127.0.0.1:8000 -t public public/index.php`
 
-```json title="composer.json"
-{
-  "require": {
-    "slim/slim": "^4.0",
-    "slim/psr7": "^1.0"
-  },
-  "autoload": {
-    "psr-4": {
-      "App\\": "src/"
-    }
-  }
-}
-```
+## Persist
 
-## Key Features
+`{ "doc": editor.getJSON() }` via `PUT /api/doc`.
 
-- **Slim Integration**: Full compatibility with Slim 4 framework
-- **PSR-7 Support**: Proper HTTP message handling
-- **Template Integration**: Easy integration with PHP templates
-- **Form Handling**: Built-in form parsing middleware
-- **Content Management**: Real-time content updates and saving
-- **Plugin System**: Full plugin support
-- **Localization**: Multi-language support
+## Gotchas
+
+- Bundle with Vite; import both CSS files.
+- Avoid top-level `await` unless you raise the Vite/build target.
+- Persist JSON, not HTML.
+
+## Related
+
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
