@@ -4,11 +4,21 @@ import { applyPlaceRoot } from './place';
 import { createPortal, h, mount as mountView, renderDetached } from './view';
 import type { MountHandle, PortalHandle, ViewSpec } from './view';
 
+/** Static text or locale-reactive resolver (re-read on every `refresh`). */
+export type ToolbarText = string | (() => string);
+
+function resolveToolbarText(value: ToolbarText | undefined): string | undefined {
+  if (value === undefined) {
+    return undefined;
+  }
+  return typeof value === 'function' ? value() : value;
+}
+
 export interface ToolbarButton {
   id: string;
-  label?: string;
+  label?: ToolbarText;
   icon?: string;
-  title?: string;
+  title?: ToolbarText;
   command?: string;
   onClick?: () => void;
   /** Bar segment for separators (ignored when `menu` is set). */
@@ -22,9 +32,9 @@ export interface ToolbarButton {
 
 export interface ToolbarMenuDef {
   id: string;
-  label?: string;
+  label?: ToolbarText;
   icon?: string;
-  title?: string;
+  title?: ToolbarText;
   order?: number;
   /** Bar segment for the menu trigger. */
   group?: string;
@@ -267,6 +277,8 @@ export class ToolbarPanel {
     const children: ViewSpec[] = items.map((btn) => {
       const disabled = Boolean(btn.disabled?.());
       const active = Boolean(btn.active?.());
+      const title = resolveToolbarText(btn.title);
+      const label = resolveToolbarText(btn.label) ?? title ?? btn.id;
       return h(
         'button',
         {
@@ -276,7 +288,7 @@ export class ToolbarPanel {
             role: 'menuitem',
             'data-id': btn.id,
             disabled: disabled ? true : undefined,
-            title: btn.title,
+            title,
           },
           on: {
             click: () => {
@@ -292,7 +304,7 @@ export class ToolbarPanel {
         btn.icon
           ? h('span', { class: 'ocm-toolbar-menu__icon', props: { innerHTML: btn.icon } })
           : null,
-        h('span', { class: 'ocm-toolbar-menu__label' }, btn.label ?? btn.title ?? btn.id)
+        h('span', { class: 'ocm-toolbar-menu__label' }, label)
       );
     });
 
@@ -357,13 +369,15 @@ export class ToolbarPanel {
   private buttonSpec(btn: ToolbarButton): ViewSpec {
     const active = Boolean(btn.active?.());
     const disabled = Boolean(btn.disabled?.());
+    const title = resolveToolbarText(btn.title);
+    const label = resolveToolbarText(btn.label);
     return h(
       'button',
       {
         class: toolbarTv({ active }).btn(),
         attrs: {
           type: 'button',
-          title: btn.title,
+          title,
           'data-id': btn.id,
           disabled: disabled ? true : undefined,
         },
@@ -379,20 +393,20 @@ export class ToolbarPanel {
           },
         },
       },
-      btn.icon ? null : (btn.label ?? btn.id)
+      btn.icon ? null : (label ?? btn.id)
     );
   }
 
   private menuTriggerSpec(def: ToolbarMenuDef): ViewSpec {
     const open = this.openMenu?.id === def.id;
-    const label = def.label ?? def.title ?? def.id;
+    const label = resolveToolbarText(def.label) ?? resolveToolbarText(def.title) ?? def.id;
     return h(
       'button',
       {
         class: toolbarTv({ active: open }).btn({ class: 'ocm-toolbar__btn--menu' }),
         attrs: {
           type: 'button',
-          title: def.title ?? label,
+          title: resolveToolbarText(def.title) ?? label,
           'data-id': `menu-${def.id}`,
           'data-menu': def.id,
           'aria-haspopup': 'menu',

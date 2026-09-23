@@ -62,7 +62,7 @@ export function AnchorLinkPlugin() {
       ctx.toolbar.add({
         id: 'anchor',
         icon: anchorAddIcon,
-        title: editor.t('common.insertAnchor'),
+        title: () => editor.t('common.insertAnchor'),
         menu: 'insert',
         order: 64,
         onClick: open,

@@ -38,7 +38,7 @@ export function CommentsPlugin() {
       ctx.toolbar.add({
         id: 'comment',
         icon: commentIcon,
-        title: editor.t('comments.comment'),
+        title: () => editor.t('comments.comment'),
         menu: 'review',
         order: 60,
         onClick: () => openComment?.(),

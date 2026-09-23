@@ -223,7 +223,7 @@ export function TablePlugin() {
       ctx.toolbar.add({
         id: 'table',
         icon: tableIcon,
-        title: editor.t('table.insert'),
+        title: () => editor.t('table.insert'),
         menu: 'insert',
         order: 40,
         onClick: () => {
@@ -235,7 +235,7 @@ export function TablePlugin() {
       ctx.toolbar.add({
         id: 'lazy-table',
         icon: lazyTableIcon,
-        title: editor.t('table.lazyTable'),
+        title: () => editor.t('table.lazyTable'),
         menu: 'insert',
         order: 41,
         onClick: () => {

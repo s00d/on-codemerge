@@ -10,7 +10,7 @@ export {
   type WidgetContext,
 } from './plugin';
 export type { EditorAPI, LocaleMessages, TranslateParams } from './types';
-export type { ToolbarButton, ToolbarMenuDef, ToolbarAction } from './ui/toolbar';
+export type { ToolbarButton, ToolbarMenuDef, ToolbarAction, ToolbarText } from './ui/toolbar';
 export type { PopupHandle, PopupOptions, PopupItem, PopupButton } from './ui/popup';
 export { PopupService, PopupController } from './ui/popup';
 export type { MenuItem, MenuPosition } from './ui/context-menu';

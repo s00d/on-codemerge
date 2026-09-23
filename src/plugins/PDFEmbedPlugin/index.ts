@@ -223,7 +223,7 @@ export function PDFEmbedPlugin() {
       ctx.toolbar.add({
         id: 'pdf-embed',
         icon: pdfIcon,
-        title: editor.t('pdf.insertPdf'),
+        title: () => editor.t('pdf.insertPdf'),
         menu: 'insert',
         order: 44,
         onClick: () => openPicker?.(),

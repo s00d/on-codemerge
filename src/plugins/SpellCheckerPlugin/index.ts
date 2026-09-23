@@ -270,7 +270,7 @@ export function SpellCheckerPlugin(options: SpellCheckerOptions) {
       ctx.toolbar.add({
         id: 'spell',
         icon: spellCheckIcon,
-        title: editor.t('common.spellChecker'),
+        title: () => editor.t('common.spellChecker'),
         menu: 'tools',
         order: 73,
         active: () => enabled,

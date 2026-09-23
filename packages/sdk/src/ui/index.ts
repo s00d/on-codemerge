@@ -3,6 +3,7 @@ export {
   type ToolbarButton,
   type ToolbarMenuDef,
   type ToolbarAction,
+  type ToolbarText,
 } from './toolbar';
 export {
   PopupService,

@@ -203,7 +203,7 @@ export function VideoPlugin() {
       ctx.toolbar.add({
         id: 'video',
         icon: videoIcon,
-        title: editor.t('video.insert'),
+        title: () => editor.t('video.insert'),
         menu: 'insert',
         order: 41,
         onClick: () => openPicker?.(),

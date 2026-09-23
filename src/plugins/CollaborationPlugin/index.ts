@@ -235,7 +235,7 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
       ctx.toolbar.add({
         id: 'collaboration',
         icon: collaborationIcon,
-        title: editor.t('collaboration.title'),
+        title: () => editor.t('collaboration.title'),
         menu: 'review',
         order: 70,
         onClick: () => openCollab?.(),

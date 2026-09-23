@@ -47,7 +47,7 @@ export function MathPlugin() {
       ctx.toolbar.add({
         id: 'math',
         icon: mathIcon,
-        title: editor.t('math.insert'),
+        title: () => editor.t('math.insert'),
         menu: 'insert',
         order: 45,
         onClick: () => openMath?.(),

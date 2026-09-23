@@ -70,7 +70,7 @@ export function LinkPlugin() {
       ctx.toolbar.add({
         id: 'link',
         icon: linkIcon,
-        title: editor.t('link.insert'),
+        title: () => editor.t('link.insert'),
         group: 'format',
         order: 17,
         onClick: () => {

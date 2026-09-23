@@ -64,7 +64,7 @@ export function FootnotesPlugin() {
       ctx.toolbar.add({
         id: 'footnotes',
         icon: footnoteIcon,
-        title: editor.t('common.footnote'),
+        title: () => editor.t('common.footnote'),
         menu: 'review',
         order: 62,
         onClick: () => openFootnote?.(),

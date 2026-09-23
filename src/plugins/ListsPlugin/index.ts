@@ -24,7 +24,7 @@ export function ListsPlugin() {
       ctx.toolbar.add({
         id: 'list-bullet',
         icon: listBulletIcon,
-        title: editor.t('lists.bullet'),
+        title: () => editor.t('lists.bullet'),
         group: 'format',
         order: 20,
         onClick: () => editor.command('wrapBulletList'),
@@ -32,7 +32,7 @@ export function ListsPlugin() {
       ctx.toolbar.add({
         id: 'list-ordered',
         icon: listNumberedIcon,
-        title: editor.t('lists.numbered'),
+        title: () => editor.t('lists.numbered'),
         group: 'format',
         order: 21,
         onClick: () => editor.command('wrapOrderedList'),

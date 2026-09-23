@@ -199,7 +199,7 @@ export function CalendarPlugin() {
       ctx.toolbar.add({
         id: 'calendar',
         icon: calendarIcon,
-        title: editor.t('calendar.title'),
+        title: () => editor.t('calendar.title'),
         menu: 'insert',
         order: 51,
         onClick: () => openCalendarMenu?.(),

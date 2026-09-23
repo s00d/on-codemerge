@@ -261,7 +261,7 @@ export function AIAssistantPlugin() {
       ctx.toolbar.add({
         id: 'ai-assistant',
         icon: aiAssistantIcon,
-        title: editor.t('common.aiAssistant'),
+        title: () => editor.t('common.aiAssistant'),
         menu: 'tools',
         order: 90,
         onClick: () => {

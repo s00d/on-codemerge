@@ -38,7 +38,7 @@ export function MentionsPlugin(mentions: Mention[] = DEFAULT_MENTIONS) {
       ctx.toolbar.add({
         id: 'mentions',
         icon: mentionsIcon,
-        title: editor.t('common.mentions'),
+        title: () => editor.t('common.mentions'),
         menu: 'review',
         order: 61,
         onClick: () => openMentions?.(),

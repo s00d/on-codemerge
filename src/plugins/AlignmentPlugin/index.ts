@@ -51,7 +51,7 @@ export function AlignmentPlugin() {
         {
           id: 'align-left',
           icon: alignLeftIcon,
-          title: 'Align Left',
+          titleKey: 'alignment.alignLeft',
           cmd: 'alignLeft',
           value: 'left',
           order: 30,
@@ -59,7 +59,7 @@ export function AlignmentPlugin() {
         {
           id: 'align-center',
           icon: alignCenterIcon,
-          title: 'Align Center',
+          titleKey: 'alignment.alignCenter',
           cmd: 'alignCenter',
           value: 'center',
           order: 31,
@@ -67,7 +67,7 @@ export function AlignmentPlugin() {
         {
           id: 'align-right',
           icon: alignRightIcon,
-          title: 'Align Right',
+          titleKey: 'alignment.alignRight',
           cmd: 'alignRight',
           value: 'right',
           order: 32,
@@ -75,7 +75,7 @@ export function AlignmentPlugin() {
         {
           id: 'align-justify',
           icon: alignJustifyIcon,
-          title: 'Justify',
+          titleKey: 'blockStyle.align.justify',
           cmd: 'alignJustify',
           value: 'justify',
           order: 33,
@@ -85,7 +85,7 @@ export function AlignmentPlugin() {
         ctx.toolbar.add({
           id: b.id,
           icon: b.icon,
-          title: editor.t(b.title) || b.title,
+          title: () => editor.t(b.titleKey),
           group: 'format',
           order: b.order,
           active: () => selectedAlign(editor) === b.value,

@@ -13,7 +13,7 @@ export function ShortcutsPlugin() {
       ctx.toolbar.add({
         id: 'shortcuts',
         icon: shortcutsIcon,
-        title: editor.t('shortcuts.title'),
+        title: () => editor.t('shortcuts.title'),
         menu: 'tools',
         order: 99,
         onClick: () => {

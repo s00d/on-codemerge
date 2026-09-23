@@ -38,7 +38,7 @@ export function TrackChangesPlugin() {
       ctx.toolbar.add({
         id: 'track-changes',
         icon: trackChangesIcon,
-        title: editor.t('common.trackChanges'),
+        title: () => editor.t('common.trackChanges'),
         menu: 'review',
         order: 63,
         active: () => enabled,

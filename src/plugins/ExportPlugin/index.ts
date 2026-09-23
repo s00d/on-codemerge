@@ -25,7 +25,7 @@ export function ExportPlugin() {
       ctx.toolbar.add({
         id: 'export',
         icon: exportIcon,
-        title: editor.t('export.title'),
+        title: () => editor.t('export.title'),
         menu: 'tools',
         order: 80,
         onClick: () => {

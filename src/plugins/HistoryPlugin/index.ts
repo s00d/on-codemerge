@@ -43,7 +43,7 @@ export function HistoryPlugin() {
       ctx.toolbar.add({
         id: 'undo',
         icon: undoIcon,
-        title: editor.t('history.undo'),
+        title: () => editor.t('history.undo'),
         group: 'history',
         order: 1,
         onClick: () => {
@@ -53,7 +53,7 @@ export function HistoryPlugin() {
       ctx.toolbar.add({
         id: 'redo',
         icon: redoIcon,
-        title: editor.t('history.redo'),
+        title: () => editor.t('history.redo'),
         group: 'history',
         order: 2,
         onClick: () => {
@@ -63,7 +63,7 @@ export function HistoryPlugin() {
       ctx.toolbar.add({
         id: 'history',
         icon: historyIcon,
-        title: editor.t('history.history'),
+        title: () => editor.t('history.history'),
         group: 'history',
         order: 3,
         onClick: () => {

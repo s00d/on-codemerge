@@ -122,7 +122,7 @@ export function ColorPlugin() {
       ctx.toolbar.add({
         id: 'fore-color',
         icon: textColorIcon,
-        title: editor.t('color.text'),
+        title: () => editor.t('color.text'),
         group: 'format',
         order: 15,
         onClick: () => openText?.(),
@@ -130,7 +130,7 @@ export function ColorPlugin() {
       ctx.toolbar.add({
         id: 'hilite-color',
         icon: backgroundColorIcon,
-        title: editor.t('color.background'),
+        title: () => editor.t('color.background'),
         group: 'format',
         order: 16,
         onClick: () => openHighlight?.(),

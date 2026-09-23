@@ -73,7 +73,7 @@ export function FileUploadPlugin(config: Partial<UploadConfig> = {}) {
       ctx.toolbar.add({
         id: 'file-upload',
         icon: uploadIcon,
-        title: editor.t('fileUpload.title'),
+        title: () => editor.t('fileUpload.title'),
         menu: 'insert',
         order: 43,
         onClick: () => {

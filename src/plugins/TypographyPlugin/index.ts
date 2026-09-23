@@ -96,7 +96,7 @@ export function TypographyPlugin() {
       ctx.toolbar.add({
         id: 'typography',
         icon: typographyIcon,
-        title: editor.t('typography.title'),
+        title: () => editor.t('typography.title'),
         group: 'format',
         order: 18,
         onClick: () => {

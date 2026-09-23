@@ -163,7 +163,7 @@ export function YouTubeVideoPlugin() {
       ctx.toolbar.add({
         id: 'youtube-video',
         icon: youtubeIcon,
-        title: editor.t('youtube.insert'),
+        title: () => editor.t('youtube.insert'),
         menu: 'insert',
         order: 42,
         onClick: () => openPicker?.(),

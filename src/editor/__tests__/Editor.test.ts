@@ -117,8 +117,16 @@ describe('editor facade', () => {
     expect(editor.t('toolbar.bold')).toBe('Bld');
     const shortcuts = editor.listShortcuts();
     expect(shortcuts.some((s) => s.keys === 'Mod-B')).toBe(true);
-    const rem = editor.toolbar.add({ id: 'test-btn', label: 'T', onClick: () => {} });
-    expect(host.querySelector('[data-id="test-btn"]')).toBeTruthy();
+    const rem = editor.toolbar.add({
+      id: 'test-btn',
+      label: () => editor.t('toolbar.bold'),
+      title: () => editor.t('toolbar.bold'),
+      onClick: () => {},
+    });
+    expect(host.querySelector('[data-id="test-btn"]')?.getAttribute('title')).toBe('Bld');
+    editor.registerLocale('yy', { toolbar: { bold: 'BoldYY' } });
+    await editor.setLocale('yy');
+    expect(host.querySelector('[data-id="test-btn"]')?.getAttribute('title')).toBe('BoldYY');
     editor.toolbar.refresh();
     rem();
     editor.toolbar.remove('test-btn');

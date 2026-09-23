@@ -72,7 +72,7 @@ export function BlockStylePlugin() {
       ctx.toolbar.add({
         id: 'block-style',
         icon: styleIcon,
-        title: editor.t('blockStyle.title'),
+        title: () => editor.t('blockStyle.title'),
         group: 'format',
         order: 19,
         onClick: open,

@@ -72,7 +72,7 @@ export function ChartsPlugin() {
       ctx.toolbar.add({
         id: 'chart',
         icon: barIcon,
-        title: editor.t('charts.insert'),
+        title: () => editor.t('charts.insert'),
         menu: 'insert',
         order: 50,
         onClick: () => {

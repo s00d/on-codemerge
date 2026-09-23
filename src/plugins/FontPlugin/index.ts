@@ -96,7 +96,7 @@ export function FontPlugin() {
       ctx.toolbar.add({
         id: 'font-settings',
         icon: fontSizeIcon,
-        title: editor.t('font.settings'),
+        title: () => editor.t('font.settings'),
         group: 'format',
         order: 14,
         onClick: () => {

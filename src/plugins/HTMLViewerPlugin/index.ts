@@ -13,7 +13,7 @@ export function HTMLViewerPlugin() {
       ctx.toolbar.add({
         id: 'html-viewer',
         icon: htmlIcon,
-        title: editor.t('common.html'),
+        title: () => editor.t('common.html'),
         menu: 'tools',
         order: 71,
         onClick: () => {

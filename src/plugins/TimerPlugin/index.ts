@@ -196,7 +196,7 @@ export function TimerPlugin() {
       ctx.toolbar.add({
         id: 'timer',
         icon: timerIcon,
-        title: editor.t('timer.title'),
+        title: () => editor.t('timer.title'),
         menu: 'insert',
         order: 46,
         onClick: () => openTimerMenu?.(),

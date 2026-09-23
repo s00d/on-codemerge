@@ -388,24 +388,24 @@ export class Editor implements EditorAPI {
   private registerDefaultMenus(): void {
     this.toolbarPanel.defineMenu({
       id: 'insert',
-      label: this.t('common.insert'),
-      title: this.t('common.insert'),
+      label: () => this.t('common.insert'),
+      title: () => this.t('common.insert'),
       icon: insertIcon,
       group: 'insert',
       order: 40,
     });
     this.toolbarPanel.defineMenu({
       id: 'review',
-      label: this.t('common.review'),
-      title: this.t('common.review'),
+      label: () => this.t('common.review'),
+      title: () => this.t('common.review'),
       icon: commentIcon,
       group: 'review',
       order: 50,
     });
     this.toolbarPanel.defineMenu({
       id: 'tools',
-      label: this.t('common.tools'),
-      title: this.t('common.tools'),
+      label: () => this.t('common.tools'),
+      title: () => this.t('common.tools'),
       icon: shortcutsIcon,
       group: 'tools',
       order: 60,

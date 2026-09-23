@@ -81,7 +81,7 @@ export function CodeBlockPlugin() {
       ctx.toolbar.add({
         id: 'code-block',
         icon: insertIcon,
-        title: editor.t('codeBlock.insert'),
+        title: () => editor.t('codeBlock.insert'),
         menu: 'insert',
         order: 45,
         onClick: () => openModal?.(),

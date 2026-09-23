@@ -10,17 +10,23 @@ export function ToolbarPlugin() {
       const marks: {
         id: string;
         icon: string;
-        title: string;
+        titleKey: string;
         mark: string;
         order: number;
       }[] = [
-        { id: 'bold', icon: boldIcon, title: 'Bold', mark: 'bold', order: 1 },
-        { id: 'italic', icon: italicIcon, title: 'Italic', mark: 'italic', order: 2 },
-        { id: 'underline', icon: underlineIcon, title: 'Underline', mark: 'underline', order: 3 },
+        { id: 'bold', icon: boldIcon, titleKey: 'toolbar.bold', mark: 'bold', order: 1 },
+        { id: 'italic', icon: italicIcon, titleKey: 'toolbar.italic', mark: 'italic', order: 2 },
+        {
+          id: 'underline',
+          icon: underlineIcon,
+          titleKey: 'toolbar.underline',
+          mark: 'underline',
+          order: 3,
+        },
         {
           id: 'strike',
           icon: strikethroughIcon,
-          title: 'Strike',
+          titleKey: 'toolbar.strikethrough',
           mark: 'strike',
           order: 4,
         },
@@ -30,7 +36,7 @@ export function ToolbarPlugin() {
         ctx.toolbar.add({
           id: m.id,
           icon: m.icon,
-          title: editor.t(m.title) || m.title,
+          title: () => editor.t(m.titleKey),
           group: 'marks',
           order: m.order,
           active: () => hasMark(editor.getState()),

@@ -30,7 +30,7 @@ export function ResponsivePlugin() {
       ctx.toolbar.add({
         id: 'responsive',
         icon: responsiveIcon,
-        title: editor.t('responsive.title'),
+        title: () => editor.t('responsive.title'),
         menu: 'tools',
         order: 86,
         onClick: () => {

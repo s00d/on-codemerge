@@ -77,7 +77,7 @@ export function FormBuilderPlugin() {
       ctx.toolbar.add({
         id: 'form',
         icon: formIcon,
-        title: editor.t('formBuilder.insertForm'),
+        title: () => editor.t('formBuilder.insertForm'),
         menu: 'insert',
         order: 53,
         onClick: () => openFormBuilder?.(),

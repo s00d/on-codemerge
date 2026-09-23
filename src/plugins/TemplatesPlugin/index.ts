@@ -71,7 +71,7 @@ export function TemplatesPlugin() {
       ctx.toolbar.add({
         id: 'templates',
         icon: templatesIcon,
-        title: editor.t('common.templates'),
+        title: () => editor.t('common.templates'),
         menu: 'insert',
         order: 55,
         onClick: () => openTemplates?.(),

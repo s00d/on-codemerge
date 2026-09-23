@@ -244,7 +244,7 @@ export function ImagePlugin() {
       ctx.toolbar.add({
         id: 'image',
         icon: imageIcon,
-        title: editor.t('image.insert'),
+        title: () => editor.t('image.insert'),
         menu: 'insert',
         order: 40,
         onClick: () => openPicker?.(),

@@ -179,7 +179,7 @@ export function BlockPlugin() {
       ctx.toolbar.add({
         id: 'block',
         icon: blockIcon,
-        title: editor.t('block.insert'),
+        title: () => editor.t('block.insert'),
         menu: 'insert',
         order: 25,
         onClick: () => editor.command('insertBlock'),

@@ -18,7 +18,7 @@ export function LanguagePlugin() {
       ctx.toolbar.add({
         id: 'language',
         icon: globeIcon,
-        title: editor.t('common.language'),
+        title: () => editor.t('common.language'),
         menu: 'tools',
         order: 85,
         onClick: () => {
