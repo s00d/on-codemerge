@@ -2,6 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { defineConfig } from 'vite';
+import { scssPreprocessorOptions } from '../scripts/scss-vite-options.ts';
 
 const demoDir = dirname(fileURLToPath(import.meta.url));
 let ocmVersion = 'unknown';
@@ -21,6 +22,11 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     target: 'es2015',
+  },
+  css: {
+    preprocessorOptions: {
+      scss: scssPreprocessorOptions,
+    },
   },
   server: {
     open: true,

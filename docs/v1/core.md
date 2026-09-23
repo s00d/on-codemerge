@@ -16,7 +16,9 @@ editor.use(new ToolbarPlugin());
 await editor.setLocale('en');
 editor.t('toolbar.bold'); // translate
 
-editor.on('content-change', (html) => { /* ... */ });
+editor.on('content-change', (html) => {
+  /* ... */
+});
 editor.off('content-change', handler);
 ```
 

@@ -18,7 +18,9 @@ export default {
     this.editor = new HTMLEditor(this.$refs.host);
     this.editor.use(new ToolbarPlugin());
   },
-  beforeDestroy() { this.editor?.destroy(); },
+  beforeDestroy() {
+    this.editor?.destroy();
+  },
 };
 </script>
 ```

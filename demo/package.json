@@ -1,7 +1,7 @@
 {
   "name": "on-codemerge-demo-stand",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
   "description": "Local demo stand against published on-codemerge from npm",
   "type": "module",
   "scripts": {

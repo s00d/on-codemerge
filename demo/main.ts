@@ -12,7 +12,8 @@ const cssOkEl = document.querySelector('#css-ok');
 const exportsOkEl = document.querySelector('#exports-ok');
 
 function reportError(err: unknown): void {
-  const msg = err instanceof Error ? `${err.name}: ${err.message}\n${err.stack ?? ''}` : String(err);
+  const msg =
+    err instanceof Error ? `${err.name}: ${err.message}\n${err.stack ?? ''}` : String(err);
   console.error(err);
   if (errorsEl) {
     errorsEl.textContent = (errorsEl.textContent ? `${errorsEl.textContent}\n\n` : '') + msg;
@@ -23,7 +24,9 @@ window.addEventListener('error', (e) => reportError(e.error ?? e.message));
 window.addEventListener('unhandledrejection', (e) => reportError(e.reason));
 
 function setText(el: Element | null, text: string): void {
-  if (el) el.textContent = text;
+  if (el) {
+    el.textContent = text;
+  }
 }
 
 function probeCss(): void {
@@ -39,7 +42,9 @@ function probeCss(): void {
     } catch {
       /* ignore */
     }
-    if (hasToolbarCss) break;
+    if (hasToolbarCss) {
+      break;
+    }
   }
   setText(cssOkEl, hasToolbarCss ? 'css: ocm-toolbar OK' : 'css: MISSING ocm-toolbar');
 }

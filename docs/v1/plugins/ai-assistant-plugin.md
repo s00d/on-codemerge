@@ -2,7 +2,6 @@
 
 > Archive: on-codemerge **v1** (`HTMLEditor`, `editor.use(new …Plugin())`). Current: [Plugins](/plugins/) · [Migrate](/guide/migration-v1-to-v2).
 
-
 AI assist actions via configured driver (Ollama / HF / …).
 
 ## Usage
