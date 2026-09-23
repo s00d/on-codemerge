@@ -1,156 +1,88 @@
-# Express
+# Express.js
 
-Welcome to the Express.js-specific documentation for **On-Codemerge**, a sophisticated web editor designed for easy integration with Express.js applications.
+Serve a Vite-built editor page and persist document **JSON** with a small API.
 
-## Getting Started with Express.js
+Verified with Express 5 + Vite + `on-codemerge@2.0.3` (build, `GET/PUT /api/doc`, browser smoke).
 
-To integrate On-Codemerge into your Express.js application, install the package:
+## Install
 
 ```bash
-npm install on-codemerge
+npm install express on-codemerge
+npm install -D vite
 ```
 
-## Express.js Integration Example
+## Minimal example
 
-Here's how to integrate On-Codemerge into an Express.js application:
+Client (`src/editor.js` — working smoke file):
 
-1. **Set Up Your Express.js Server**:
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-```javascript title="app.js"
-const express = require('express');
-const path = require('path');
+const INITIAL = {
+  version: 1,
+  doc: {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello from Express' }] }],
+  },
+};
+
+const host = document.getElementById('editor');
+const editor = new Editor(host, { plugins: createCorePlugins() });
+
+const loaded = await fetch('/api/doc').then((r) => r.json());
+editor.setJSON(loaded.doc ?? INITIAL);
+
+editor.on('docChanged', () => {
+  const doc = editor.getJSON();
+  fetch('/api/doc', {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ doc }),
+  });
+});
+```
+
+Build the client into `public/dist` (set Vite `publicDir: false` if you also serve from `public/`), then:
+
+```js
+import express from 'express';
+import fs from 'node:fs';
+import path from 'node:path';
+
+const dataFile = path.resolve('data/doc.json');
 const app = express();
-const port = 3000;
-
-// Serve static files
+app.use(express.json({ limit: '2mb' }));
 app.use(express.static('public'));
-app.use(express.json());
 
-// Serve the main page
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+app.get('/api/doc', (_req, res) => {
+  res.json(JSON.parse(fs.readFileSync(dataFile, 'utf8')));
 });
 
-// API endpoint to save content
-app.post('/api/save', (req, res) => {
-  const { content } = req.body;
-  console.log('Saving content:', content);
-  // Add your save logic here
-  res.json({ success: true });
+app.put('/api/doc', (req, res) => {
+  fs.writeFileSync(dataFile, JSON.stringify({ doc: req.body.doc }, null, 2));
+  res.json({ ok: true });
 });
 
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
-});
+app.listen(3000);
 ```
 
-2. **Create Your HTML File**:
+`public/index.html` loads `/dist/editor.js` + `/dist/editor.css`.
 
-```html title="public/index.html"
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>On-Codemerge Express App</title>
-    <link rel="stylesheet" href="/node_modules/on-codemerge/dist/public.css" />
-    <link rel="stylesheet" href="/node_modules/on-codemerge/dist/index.css" />
-  </head>
-  <body>
-    <div class="container">
-      <h1>On-Codemerge with Express</h1>
-      <div id="editor"></div>
-      <button id="saveBtn">Save Content</button>
-      <div id="output">
-        <h3>Current HTML:</h3>
-        <pre id="htmlOutput"></pre>
-      </div>
-    </div>
-    <script type="module" src="/js/editor.js"></script>
-  </body>
-</html>
-```
+## Persist
 
-3. **Initialize On-Codemerge**:
+SoT is the JSON body `{ doc: editor.getJSON() }` on `PUT /api/doc`. HTML is only a boundary for export/paste.
 
-```javascript title="public/js/editor.js"
-import {
-  Editor,
-  createCorePlugins,
-  AlignmentPlugin,
-} from '/node_modules/on-codemerge/dist/app.mjs';
+## Gotchas
 
-class EditorManager {
-  constructor() {
-    this.editor = null;
-    this.init();
-  }
+- Bundle the editor with Vite (or another bundler); do not expect a UMD global from the npm package alone.
+- If Vite `outDir` is under `public/`, disable Vite’s `publicDir` copy to avoid nested-public warnings.
+- Persist JSON, not `getHTML()`.
 
-  async init() {
-    const editorElement = document.getElementById('editor');
-    if (!editorElement) return;
+## Related
 
-    // Initialize editor
-    this.editor = new Editor(editorElement, {
-      plugins: [...createCorePlugins(), AlignmentPlugin()],
-    });
-
-    // Subscribe to content changes
-    this.editor.on('docChanged', (newContent) => {
-      this.updateOutput(newContent);
-    });
-
-    // Set initial content
-    this.editor.setHTML('<p>Welcome to On-Codemerge with Express!</p>');
-
-    // Setup save button
-    this.setupSaveButton();
-  }
-
-  updateOutput(content) {
-    const output = document.getElementById('htmlOutput');
-    if (output) {
-      output.textContent = content;
-    }
-  }
-
-  setupSaveButton() {
-    const saveBtn = document.getElementById('saveBtn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', async () => {
-        const content = this.editor.getHTML();
-        try {
-          const response = await fetch('/api/save', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ content }),
-          });
-          const result = await response.json();
-          if (result.success) {
-            alert('Content saved successfully!');
-          }
-        } catch (error) {
-          console.error('Error saving content:', error);
-          alert('Error saving content');
-        }
-      });
-    }
-  }
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new EditorManager();
-});
-```
-
-## Key Features
-
-- **Server Integration**: Easy integration with Express.js backend
-- **API Endpoints**: Built-in support for saving content via API
-- **Static File Serving**: Proper static file configuration
-- **Content Management**: Real-time content updates and saving
-- **Plugin System**: Full plugin support
-- **Localization**: Multi-language support
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
