@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       on-codemerge:
-        specifier: 2.0.1
-        version: 2.0.1
+        specifier: 2.0.3
+        version: 2.0.3
     devDependencies:
       '@playwright/test':
         specifier: ^1.63.0
@@ -428,8 +428,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  on-codemerge@2.0.1:
-    resolution: {integrity: sha512-73KwiCChKKmwaeZnkXsoVdhQAAtuE0lvmMWRjnvyPmKl1R9hYT3v5FfvY3s3RCqYQw5tG1niosPljA1vu2AmPA==}
+  on-codemerge@2.0.3:
+    resolution: {integrity: sha512-OZggwAe7I2ekdCVudNtgh4lAN9vWxV6GmT6URRLV/1MNdZZI5x37+upfQDc7u4n09iZx1lBHwUPfYOwGpVJy+Q==}
     engines: {node: '>=20'}
 
   path-type@6.0.0:
@@ -849,7 +849,7 @@ snapshots:
 
   nanoid@3.3.19: {}
 
-  on-codemerge@2.0.1:
+  on-codemerge@2.0.3:
     dependencies:
       '@i18n-micro/runtime': 1.0.0
       dompurify: 3.4.15
