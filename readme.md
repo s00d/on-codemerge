@@ -8,7 +8,7 @@
 [![Donate](https://img.shields.io/badge/Donate-Donationalerts-ff4081?style=for-the-badge)](https://www.donationalerts.com/r/s00d88)
 
 <p align="center">
-  <img src="https://github.com/s00d/on-codemerge/blob/main/branding/png/logo-color.png?raw=true" alt="on-CodeMerge" width="220">
+  <img src="https://github.com/s00d/on-codemerge/blob/main/branding/banner-readme.png?raw=true" alt="on-CodeMerge" width="720">
 </p>
 
 # on-codemerge
@@ -18,13 +18,11 @@
 [Documentation](https://s00d.github.io/on-codemerge/) · [Plugins](https://s00d.github.io/on-codemerge/plugins/) · [Integrate](https://s00d.github.io/on-codemerge/integrate/) · [npm](https://www.npmjs.com/package/on-codemerge)
 
 <p align="center">
-  <img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot-v2-editor.png?raw=true" alt="Editor demo" width="900">
+  <img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot-v2-editor.png?raw=true" alt="Editor demo — toolbar, lists, table" width="900">
 </p>
 
 <p align="center">
-  <img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot1.png?raw=true" alt="Toolbar and table" width="440">
-  &nbsp;
-  <img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot2.png?raw=true" alt="Charts insert" width="440">
+  <img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot-v2-insert.png?raw=true" alt="Insert menu — blocks, media, charts, forms" width="900">
 </p>
 
 ---
