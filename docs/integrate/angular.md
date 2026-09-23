@@ -1,127 +1,98 @@
 # Angular
 
-Welcome to the Angular-specific documentation for **On-Codemerge**, an adaptable web editor designed for easy integration with Angular applications.
+Embed On-Codemerge in Angular (standalone component). Persist **JSON** (`getJSON` / `setJSON`), not HTML.
 
-## Getting Started with Angular
+Verified with Angular CLI 19 + `on-codemerge@2.0.3` (`ng build`, browser smoke).
 
-Integrating On-Codemerge into your Angular project is straightforward. Begin by installing the package.
-
-### Installation
-
-Run the following command in your Angular project directory to install `on-codemerge`:
+## Install
 
 ```bash
 npm install on-codemerge
 ```
 
-## Angular Integration Example
+Import editor CSS once in global styles:
 
-Here's an example that demonstrates how to integrate On-Codemerge into an Angular project:
+```css
+/* styles.css */
+@import 'on-codemerge/index.css';
+@import 'on-codemerge/public.css';
+```
 
-```typescript title="editor.component.ts"
+## Minimal example
+
+Working standalone host from the temp app:
+
+```ts
 import {
+  AfterViewInit,
   Component,
   ElementRef,
-  ViewChild,
-  AfterViewInit,
-  Input,
-  Output,
-  EventEmitter,
   OnDestroy,
+  ViewChild,
 } from '@angular/core';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-import { Editor, createCorePlugins, AlignmentPlugin } from 'on-codemerge';
+import { Editor, createCorePlugins } from 'on-codemerge';
+
+const INITIAL = {
+  version: 1 as const,
+  doc: {
+    type: 'doc' as const,
+    content: [
+      {
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'Hello from Angular' }],
+      },
+    ],
+  },
+};
 
 @Component({
   selector: 'app-editor',
-  template: `<div #editorContainer style="min-height: 300px;"></div>`,
-  styleUrls: ['./editor.component.css'],
+  standalone: true,
+  template: `<div #host style="min-height: 300px"></div>`,
 })
 export class EditorComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('editorContainer', { static: true }) editorContainer!: ElementRef;
-  @Input() value: string = '';
-  @Output() valueChange = new EventEmitter<string>();
-
+  @ViewChild('host', { static: true }) host!: ElementRef<HTMLDivElement>;
   private editor: Editor | null = null;
 
-  async ngAfterViewInit() {
-    if (this.editorContainer?.nativeElement) {
-      this.editor = new Editor(this.editorContainer.nativeElement, {
-        plugins: [...createCorePlugins(), AlignmentPlugin()],
-      });
-
-      // Subscribe to content changes
-      this.editor.on('docChanged', (newContent: string) => {
-        this.valueChange.emit(newContent);
-      });
-
-      // Set initial content
-      if (this.value) {
-        this.editor.setHTML(this.value);
-      }
-    }
+  ngAfterViewInit(): void {
+    this.editor = new Editor(this.host.nativeElement, {
+      plugins: createCorePlugins(),
+    });
+    this.editor.setJSON(INITIAL);
+    this.editor.on('docChanged', () => {
+      const json = this.editor!.getJSON();
+      // emit / save json
+    });
   }
 
-  ngOnDestroy() {
-    if (this.editor) {
-      this.editor.destroy();
-    }
-  }
-
-  // Method to update content from parent component
-  updateContent(content: string) {
-    if (this.editor && content !== this.editor.getHTML()) {
-      this.editor.setHTML(content);
-    }
+  ngOnDestroy(): void {
+    this.editor?.destroy();
+    this.editor = null;
   }
 }
 ```
 
-## Usage Example
+## Persist
 
-```typescript title="app.component.ts"
-import { Component } from '@angular/core';
-
-@Component({
-  selector: 'app-root',
-  template: `
-    <h1>My Angular App with On-Codemerge</h1>
-    <app-editor [(value)]="content"></app-editor>
-    <div>
-      <h3>Current HTML:</h3>
-      <pre>{{ content }}</pre>
-    </div>
-  `,
-})
-export class AppComponent {
-  content: string = '<p>Initial content</p>';
-}
+```ts
+this.editor.on('docChanged', () => {
+  const json = this.editor!.getJSON();
+  // POST / save
+});
 ```
 
-## Module Configuration
+HTML / Markdown are boundaries only.
 
-```typescript title="app.module.ts"
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
-import { AppComponent } from './app.component';
-import { EditorComponent } from './editor.component';
+## Gotchas
 
-@NgModule({
-  declarations: [AppComponent, EditorComponent],
-  imports: [BrowserModule],
-  providers: [],
-  bootstrap: [AppComponent],
-})
-export class AppModule {}
-```
+- Mount in `ngAfterViewInit` (host element must exist).
+- Destroy in `ngOnDestroy`.
+- Prefer global `@import` for CSS so Angular’s bundler resolves package paths.
+- Initial production budget may warn — editor + CSS is large; raise budgets if needed.
 
-## Key Features
+## Related
 
-- **Angular Integration**: Full compatibility with Angular's component system
-- **Two-way Binding**: Support for `[(value)]` two-way data binding
-- **TypeScript**: Complete TypeScript support with proper type definitions
-- **Lifecycle Management**: Proper cleanup in `ngOnDestroy`
-- **Plugin System**: Easy plugin registration and management
-- **Localization**: Built-in multi-language support
-- **Content Management**: Simple HTML content setting and retrieval
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
