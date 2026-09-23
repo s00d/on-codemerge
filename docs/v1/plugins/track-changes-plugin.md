@@ -29,5 +29,3 @@ editor.use(new TrackChangesPlugin());
 
 Note: this is a scaffold for future features (comments on changes, approve/revert).
 
-### Demo
-

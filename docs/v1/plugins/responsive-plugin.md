@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ResponsivePlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Responsive Methods

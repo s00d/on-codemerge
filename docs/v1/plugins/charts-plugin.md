@@ -30,7 +30,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ChartsPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Chart Creation

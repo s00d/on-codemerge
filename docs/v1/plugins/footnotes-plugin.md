@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new FootnotesPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Footnote Methods

@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ShortcutsPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Shortcut Methods

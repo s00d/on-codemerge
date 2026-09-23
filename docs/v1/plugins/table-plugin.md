@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new TablePlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Table Creation

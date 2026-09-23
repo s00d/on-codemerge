@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new HistoryPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### History Methods

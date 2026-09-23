@@ -30,7 +30,6 @@ const editor = new HTMLEditor(container);
 editor.use(new AlignmentPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Alignment Commands

@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new MathPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Math Formula Creation

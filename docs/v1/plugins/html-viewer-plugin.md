@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new HTMLViewerPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Viewer Methods

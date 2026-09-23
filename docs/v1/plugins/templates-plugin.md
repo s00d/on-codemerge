@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new TemplatesPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Template Methods

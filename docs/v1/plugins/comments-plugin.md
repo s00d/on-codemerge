@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new CommentsPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Comment Management

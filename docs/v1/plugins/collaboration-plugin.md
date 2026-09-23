@@ -36,8 +36,6 @@ editor.use(new CollaborationPlugin({
 }));
 ```
 
-## Demo
-
 ## API Reference
 
 ### Plugin Configuration

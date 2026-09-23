@@ -33,7 +33,6 @@ const editor = new HTMLEditor(container);
 editor.use(new VideoPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Video Methods

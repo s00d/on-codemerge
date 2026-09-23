@@ -30,7 +30,6 @@ const editor = new HTMLEditor(container);
 editor.use(new LanguagePlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Language Methods

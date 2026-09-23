@@ -38,7 +38,6 @@ const editor = new HTMLEditor(container);
 editor.use(new TimerPlugin());
 ```
 
-## Demo
 ## User Interface
 
 ### Toolbar Button

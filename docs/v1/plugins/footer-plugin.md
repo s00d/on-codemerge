@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new FooterPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Statistics Methods

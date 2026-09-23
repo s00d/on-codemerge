@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new FontPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Font Methods

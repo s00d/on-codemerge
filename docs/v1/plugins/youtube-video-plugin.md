@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new YouTubeVideoPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### YouTube Video Creation

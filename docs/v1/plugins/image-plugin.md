@@ -30,7 +30,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ImagePlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Image Upload

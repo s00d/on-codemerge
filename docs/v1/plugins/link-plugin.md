@@ -33,7 +33,6 @@ const editor = new HTMLEditor(container);
 editor.use(new LinkPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Link Methods

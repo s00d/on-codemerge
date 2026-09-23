@@ -35,7 +35,6 @@ const editor = new HTMLEditor(container);
 editor.use(new FormBuilderPlugin());
 ```
 
-## Demo
 ## Architecture
 
 The plugin follows a modular architecture with clear separation of concerns:

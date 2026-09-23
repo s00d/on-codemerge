@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new BlockStylePlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Block Detection

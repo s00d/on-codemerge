@@ -33,7 +33,6 @@ const editor = new HTMLEditor(container);
 editor.use(new FileUploadPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Plugin Configuration

@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ListsPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### List Creation

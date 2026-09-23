@@ -33,7 +33,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ExportPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Export Methods

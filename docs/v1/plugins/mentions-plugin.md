@@ -20,5 +20,3 @@ const editor = new HTMLEditор(container);
 editor.use(new MentionsPlugin());
 ```
 
-### Demo
-

@@ -30,7 +30,6 @@ const editor = new HTMLEditor(container);
 editor.use(new AIAssistantPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Plugin Initialization

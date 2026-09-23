@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new CodeBlockPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Code Block Creation

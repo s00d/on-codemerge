@@ -38,7 +38,6 @@ const editor = new HTMLEditor(container);
 editor.use(new CalendarPlugin());
 ```
 
-## Demo
 ## User Interface
 
 ### Toolbar Button

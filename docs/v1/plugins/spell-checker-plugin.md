@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new SpellCheckerPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Spell Checker Methods

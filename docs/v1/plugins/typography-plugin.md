@@ -33,7 +33,6 @@ const editor = new HTMLEditor(container);
 editor.use(new TypographyPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Typography Methods

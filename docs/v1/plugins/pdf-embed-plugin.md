@@ -37,5 +37,3 @@ Tip: try `https://example.com/sample.pdf` and resize the container.
 editor.triggerEvent('pdf-embed');
 ```
 
-### Demo
-

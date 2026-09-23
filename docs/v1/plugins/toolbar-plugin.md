@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ToolbarPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Toolbar Methods

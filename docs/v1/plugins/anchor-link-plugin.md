@@ -27,5 +27,3 @@ editor.use(new AnchorLinkPlugin());
 1) Select a phrase in the document
 2) Click `#` in the toolbar → fill Anchor ID and Text → Insert
 
-### Demo
-

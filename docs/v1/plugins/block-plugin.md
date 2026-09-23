@@ -31,7 +31,6 @@ const editor = new HTMLEditor(container);
 editor.use(new BlockPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Block Creation

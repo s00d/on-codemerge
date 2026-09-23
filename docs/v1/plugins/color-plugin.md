@@ -32,7 +32,6 @@ const editor = new HTMLEditor(container);
 editor.use(new ColorPlugin());
 ```
 
-## Demo
 ## API Reference
 
 ### Color Operations
