@@ -2,19 +2,17 @@
   "name": "on-codemerge-demo-stand",
   "version": "1.0.0",
   "private": true,
-  "description": "Local demo stand against published on-codemerge from npm",
+  "description": "Demo stand using on-codemerge from npm",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4177",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui",
-    "install:npm": "pnpm add on-codemerge@^2.0.1 --ignore-workspace",
-    "install:local-pack": "node ./scripts/install-local-pack.mjs"
+    "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "on-codemerge": "^2.0.1"
+    "on-codemerge": "2.0.1"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

@@ -2,9 +2,6 @@
 node_modules/
 .pnpm-store/
 
-# Local pack of on-codemerge (from install:local-pack)
-*.tgz
-
 # Build / test output
 dist/
 build/
