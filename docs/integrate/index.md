@@ -24,10 +24,10 @@ Upgrading from 1.x: [Migration v1 → v2](/guide/migration-v1-to-v2).
 
 ## Meta-frameworks
 
-| Guide                  | Stack   |
-| ---------------------- | ------- |
-| [Next.js](./next.md)   | Next.js |
-| [Nuxt.js 3](./nuxt.md) | Nuxt 3  |
+| Guide                   | Stack             |
+| ----------------------- | ----------------- |
+| [Next.js](./next.md)    | Next.js           |
+| [Nuxt 3 / 4](./nuxt.md) | Nuxt (ClientOnly) |
 
 ## Backend
 
@@ -49,10 +49,10 @@ Each guide shows how to serve the editor and save/load document JSON (or HTML bo
 
 ## Hosts
 
-| Guide                     | Stack           |
-| ------------------------- | --------------- |
-| [Flutter](./flutter.md)   | Flutter WebView |
-| [Electron](./electron.md) | Electron        |
+| Guide                     | Stack                                |
+| ------------------------- | ------------------------------------ |
+| [Flutter](./flutter.md)   | `flutter_inappwebview` + JSON bridge |
+| [Electron](./electron.md) | Electron + Vite renderer             |
 
 ## Shared expectations
 
