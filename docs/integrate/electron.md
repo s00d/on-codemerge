@@ -1,307 +1,70 @@
 # Electron
 
-Welcome to the Electron-specific documentation for **On-Codemerge**, an advanced web editor designed for seamless integration with Electron applications.
+Load a Vite-built editor in a `BrowserWindow` and persist **JSON** (file or `localStorage`).
 
-## Getting Started with Electron
+Verified: renderer build + browser smoke (`Electron JSON SoT` screenshot). Electron binary `v36.9.5` installs after scripts are enabled (`electron/install.js`); window load uses `loadFile('dist/index.html')`.
 
-To integrate On-Codemerge into your Electron application, install the package:
+## Install
 
 ```bash
 npm install on-codemerge
+npm install -D electron vite
 ```
 
-## Electron Integration Example
+If Electron’s binary is missing (`Electron failed to install correctly`), re-run the postinstall / `node node_modules/electron/install.js`.
 
-Here's how to integrate On-Codemerge into an Electron application:
+## Minimal example
 
-1. **Create Your Electron HTML Page**:
+`main.cjs` (working smoke main):
 
-```html title="index.html"
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>On-Codemerge Electron App</title>
-    <style>
-      body {
-        margin: 0;
-        padding: 20px;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      }
-      .container {
-        max-width: 1200px;
-        margin: 0 auto;
-      }
-      #editor {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        margin: 20px 0;
-      }
-      .controls {
-        margin: 20px 0;
-      }
-      button {
-        padding: 8px 16px;
-        margin-right: 10px;
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        background: #f8f9fa;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #e9ecef;
-      }
-      #output {
-        margin-top: 20px;
-        padding: 15px;
-        background: #f8f9fa;
-        border-radius: 4px;
-      }
-    </style>
-  </head>
-  <body>
-    <div class="container">
-      <h1>On-Codemerge with Electron</h1>
-      <div class="controls">
-        <button id="saveBtn">Save Content</button>
-        <button id="loadBtn">Load Content</button>
-        <button id="exportBtn">Export HTML</button>
-      </div>
-      <div id="editor"></div>
-      <div id="output">
-        <h3>Current HTML:</h3>
-        <pre id="htmlOutput"></pre>
-      </div>
-    </div>
-    <script type="module" src="./js/editor.js"></script>
-  </body>
-</html>
-```
-
-2. **Initialize On-Codemerge**:
-
-```javascript title="js/editor.js"
-import {
-  Editor,
-  createCorePlugins,
-  AlignmentPlugin,
-} from '../node_modules/on-codemerge/dist/app.mjs';
-import '../node_modules/on-codemerge/dist/public.css';
-import '../node_modules/on-codemerge/dist/index.css';
-
-class ElectronEditor {
-  constructor() {
-    this.editor = null;
-    this.init();
-  }
-
-  async init() {
-    const editorElement = document.getElementById('editor');
-    if (!editorElement) return;
-
-    // Initialize editor
-    this.editor = new Editor(editorElement, {
-      plugins: [...createCorePlugins(), AlignmentPlugin()],
-    });
-
-    // Subscribe to content changes
-    this.editor.on('docChanged', (newContent) => {
-      this.updateOutput(newContent);
-    });
-
-    // Set initial content
-    this.editor.setHTML('<p>Welcome to On-Codemerge with Electron!</p>');
-
-    // Setup controls
-    this.setupControls();
-  }
-
-  updateOutput(content) {
-    const output = document.getElementById('htmlOutput');
-    if (output) {
-      output.textContent = content;
-    }
-  }
-
-  setupControls() {
-    // Save button
-    const saveBtn = document.getElementById('saveBtn');
-    if (saveBtn) {
-      saveBtn.addEventListener('click', () => {
-        const content = this.editor.getHTML();
-        // Use Electron's dialog to save file
-        if (window.electronAPI) {
-          window.electronAPI.saveFile(content);
-        } else {
-          console.log('Content to save:', content);
-        }
-      });
-    }
-
-    // Load button
-    const loadBtn = document.getElementById('loadBtn');
-    if (loadBtn) {
-      loadBtn.addEventListener('click', async () => {
-        if (window.electronAPI) {
-          const content = await window.electronAPI.loadFile();
-          if (content) {
-            this.editor.setHTML(content);
-          }
-        }
-      });
-    }
-
-    // Export button
-    const exportBtn = document.getElementById('exportBtn');
-    if (exportBtn) {
-      exportBtn.addEventListener('click', () => {
-        const content = this.editor.getHTML();
-        const fullHtml = `
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="UTF-8">
-  <title>Exported Content</title>
-</head>
-<body>
-  ${content}
-</body>
-</html>`;
-
-        if (window.electronAPI) {
-          window.electronAPI.exportFile(fullHtml);
-        } else {
-          console.log('Export content:', fullHtml);
-        }
-      });
-    }
-  }
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new ElectronEditor();
-});
-```
-
-3. **Electron Main Process**:
-
-```javascript title="main.js"
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
-const fs = require('fs');
+```js
+const { app, BrowserWindow } = require('electron');
 const path = require('path');
 
-function createWindow() {
+async function createWindow() {
   const win = new BrowserWindow({
-    width: 1200,
-    height: 800,
-    webPreferences: {
-      nodeIntegration: false,
-      contextIsolation: true,
-      preload: path.join(__dirname, 'preload.js'),
-    },
+    width: 900,
+    height: 600,
+    webPreferences: { contextIsolation: true, nodeIntegration: false },
   });
-
-  win.loadFile('index.html');
-
-  // Open DevTools in development
-  if (process.env.NODE_ENV === 'development') {
-    win.webContents.openDevTools();
-  }
+  await win.loadFile(path.join(__dirname, 'dist', 'index.html'));
 }
 
 app.whenReady().then(createWindow);
+```
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+Renderer (Vite entry, `base: './'`):
+
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
+
+const editor = new Editor(document.getElementById('editor'), {
+  plugins: createCorePlugins(),
 });
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createWindow();
-  }
-});
-
-// IPC handlers
-ipcMain.handle('save-file', async (event, content) => {
-  const result = await dialog.showSaveDialog({
-    filters: [{ name: 'HTML Files', extensions: ['html'] }],
-  });
-
-  if (!result.canceled) {
-    fs.writeFileSync(result.filePath, content);
-    return { success: true };
-  }
-  return { success: false };
-});
-
-ipcMain.handle('load-file', async () => {
-  const result = await dialog.showOpenDialog({
-    filters: [{ name: 'HTML Files', extensions: ['html'] }],
-  });
-
-  if (!result.canceled) {
-    return fs.readFileSync(result.filePaths[0], 'utf8');
-  }
-  return null;
-});
-
-ipcMain.handle('export-file', async (event, content) => {
-  const result = await dialog.showSaveDialog({
-    filters: [{ name: 'HTML Files', extensions: ['html'] }],
-  });
-
-  if (!result.canceled) {
-    fs.writeFileSync(result.filePath, content);
-    return { success: true };
-  }
-  return { success: false };
+editor.setJSON(/* load from IPC / localStorage */);
+editor.on('docChanged', () => {
+  const doc = editor.getJSON();
+  // IPC to main to write JSON file, or localStorage.setItem(...)
 });
 ```
 
-4. **Preload Script**:
+Build with Vite into `dist/`, copy `index.html` that references `./editor.js` + `./editor.css`, then `electron .`.
 
-```javascript title="preload.js"
-const { contextBridge, ipcRenderer } = require('electron');
+## Persist
 
-contextBridge.exposeInMainWorld('electronAPI', {
-  saveFile: (content) => ipcRenderer.invoke('save-file', content),
-  loadFile: () => ipcRenderer.invoke('load-file'),
-  exportFile: (content) => ipcRenderer.invoke('export-file', content),
-});
-```
+Prefer JSON over HTML. Typical bridge: `ipcRenderer.invoke('save-doc', editor.getJSON())` → main writes a `.json` file.
 
-5. **Package.json Configuration**:
+## Gotchas
 
-```json title="package.json"
-{
-  "name": "on-codemerge-electron",
-  "version": "1.0.0",
-  "description": "On-Codemerge Electron App",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron .",
-    "dev": "NODE_ENV=development electron .",
-    "build": "electron-builder"
-  },
-  "dependencies": {
-    "on-codemerge": "^1.0.0"
-  },
-  "devDependencies": {
-    "electron": "^25.0.0",
-    "electron-builder": "^24.0.0"
-  }
-}
-```
+- Use `base: './'` so `file://` asset URLs resolve.
+- Keep `nodeIntegration: false` + `contextIsolation: true`; talk to Node only via preload/IPC.
+- Persist JSON, not HTML.
 
-## Key Features
+## Related
 
-- **Desktop Integration**: Full desktop application capabilities
-- **File Operations**: Save, load, and export content to files
-- **Native Dialogs**: Use system file dialogs
-- **Security**: Proper context isolation and security practices
-- **Plugin System**: Full plugin support
-- **Localization**: Multi-language support
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
