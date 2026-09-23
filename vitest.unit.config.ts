@@ -31,6 +31,8 @@ export default defineConfig({
     name: 'unit',
     environment: 'jsdom',
     globals: false,
+    // threads: avoids jsdom structuredClone / webidl.markAsUncloneable forks failures on CI
+    pool: 'threads',
     setupFiles: [resolve(root, 'src/__mocks__/vitest.setup.ts')],
     include: ['packages/**/src/**/*.{test,spec}.ts', 'src/**/*.{test,spec}.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/test/e2e/**', '**/__tests__/helpers/**'],

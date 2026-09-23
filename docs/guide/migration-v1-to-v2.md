@@ -2,6 +2,8 @@
 
 on-codemerge **2.x** rewrites the editor around a virtual JSON document (`on-codemerge/kernel`), an SDK surface (`on-codemerge/sdk`), and plugins that **never own DOM**.
 
+Full v1 docs (trimmed archive): [docs/v1](/v1/).
+
 ## Quick map
 
 | v1                                          | v2                                                       |

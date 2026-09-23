@@ -2,7 +2,7 @@ import os from 'node:os';
 import { defineConfig } from 'vitest/config';
 import { fileURLToPath } from 'node:url';
 import { untestutils } from 'untestutils/vitest/plugin';
-import { recipes } from './test/recipes.ts';
+import { recipes } from './test/recipes';
 
 const parallelism =
   typeof os.availableParallelism === 'function' ? os.availableParallelism() : os.cpus().length;

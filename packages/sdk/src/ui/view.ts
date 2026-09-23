@@ -236,9 +236,13 @@ function bindDomEvent<K extends keyof ViewEventMap>(
   scope.on(el, type, handler);
 }
 
-const elementEventProbe = document.createElement('div');
+let elementEventProbe: HTMLElement | undefined;
 
 function isElementEventType(type: string): type is keyof ViewEventMap {
+  if (typeof document === 'undefined') {
+    return true;
+  }
+  elementEventProbe ??= document.createElement('div');
   const prop = `on${type}`;
   return prop in elementEventProbe;
 }

@@ -5,7 +5,7 @@ Product documentation profile for **on-codemerge** (VitePress site).
 ## Doc root
 
 - `docs/` — VitePress sources (`docs/.vitepress/config.ts`)
-- Site sections: `guide/`, `plugins/`, `integrate/`
+- Site sections: `guide/`, `plugins/`, `integrate/`, `v1/` (HTMLEditor archive)
 
 ## Code roots (truth for drift checks)
 
@@ -24,6 +24,7 @@ Product documentation profile for **on-codemerge** (VitePress site).
 | Plugin catalog   | `docs/plugins/`                    |
 | Framework / host | `docs/integrate/`                  |
 | v1 upgrade       | `docs/guide/migration-v1-to-v2.md` |
+| v1 archive       | `docs/v1/`                         |
 
 ## Verify
 
