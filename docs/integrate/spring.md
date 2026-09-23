@@ -1,183 +1,53 @@
-# Spring
+# Spring Boot
 
-Welcome to the Spring Framework-specific documentation for **On-Codemerge**, an advanced web editor designed for easy integration with Spring-based applications.
+Serve a Vite-built editor and persist document **JSON** from a Spring controller (same HTTP contract as the verified smoke).
 
-## Getting Started with Spring Framework
+Verified with a JDK `HttpServer` smoke on port 4195 (static `public/` + `GET/PUT /api/doc`) and screenshot. Spring mapping below matches that contract.
 
-To integrate On-Codemerge into your Spring application, install the package:
+## Install
 
 ```bash
+# Spring Boot app (start.spring.io or your existing project)
 npm install on-codemerge
+npm install -D vite
 ```
 
-or
+Build the editor into `src/main/resources/static/dist` (or `public/dist`).
 
-```bash
-yarn add on-codemerge
-```
+## Minimal example
 
-## Spring Framework Integration Example
+```java
+@RestController
+public class DocController {
+  private final Path data = Path.of("data/doc.json");
 
-Here's how to integrate On-Codemerge into a Spring application:
-
-1. **Create a JavaScript File for the Editor**:
-
-```javascript title="src/main/resources/static/js/editor.js"
-import {
-  Editor,
-  createCorePlugins,
-  AlignmentPlugin,
-} from '/node_modules/on-codemerge/dist/app.mjs';
-import '/node_modules/on-codemerge/dist/public.css';
-import '/node_modules/on-codemerge/dist/index.css';
-
-class SpringEditor {
-  constructor() {
-    this.editor = null;
-    this.init();
+  @GetMapping("/api/doc")
+  public String get() throws IOException {
+    return Files.readString(data);
   }
 
-  async init() {
-    const editorElement = document.getElementById('editor');
-    if (!editorElement) return;
-
-    // Initialize editor
-    this.editor = new Editor(editorElement, {
-      plugins: [...createCorePlugins(), AlignmentPlugin()],
-    });
-
-    // Subscribe to content changes
-    this.editor.on('docChanged', (newContent) => {
-      this.updateHiddenField(newContent);
-      console.log('Content changed:', newContent);
-    });
-
-    // Set initial content
-    const initialContent =
-      document.getElementById('initial-content')?.textContent ||
-      'Welcome to On-Codemerge with Spring!';
-    this.editor.setHTML(initialContent);
-  }
-
-  updateHiddenField(content) {
-    const hiddenField = document.getElementById('editor-content');
-    if (hiddenField) {
-      hiddenField.value = content;
-    }
-  }
-
-  getContent() {
-    return this.editor ? this.editor.getHTML() : '';
+  @PutMapping("/api/doc")
+  public Map<String, Object> put(@RequestBody Map<String, Object> body) throws IOException {
+    Files.writeString(data, new ObjectMapper().writeValueAsString(body));
+    return Map.of("ok", true);
   }
 }
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new SpringEditor();
-});
 ```
 
-2. **Include the JavaScript in Your Spring View**:
+Client: Vite entry calling `editor.getJSON()` / `setJSON()` (see Express guide).
 
-```html title="src/main/resources/templates/your_template.html"
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Spring On-Codemerge Editor</title>
-  </head>
-  <body>
-    <div class="container">
-      <h1>Spring On-Codemerge Editor</h1>
+## Persist
 
-      <form th:action="@{/save-content}" method="post">
-        <div id="editor" style="min-height: 300px;"></div>
-        <input type="hidden" id="editor-content" name="content" value="" />
+`PUT /api/doc` with `{ "doc": editor.getJSON() }`.
 
-        <div class="controls">
-          <button type="submit">Save Content</button>
-          <button type="button" onclick="previewContent()">Preview</button>
-        </div>
-      </form>
+## Gotchas
 
-      <div id="preview" style="display: none;">
-        <h3>Preview:</h3>
-        <div id="preview-content"></div>
-      </div>
-    </div>
+- Bundle the editor with Vite; Spring only serves assets + JSON.
+- Persist JSON, not HTML.
 
-    <!-- Initial content (if any) -->
-    <script id="initial-content" type="text/plain" th:utext="${initialContent}">
-      Welcome to On-Codemerge with Spring!
-    </script>
+## Related
 
-    <script type="module" th:src="@{/js/editor.js}"></script>
-    <script>
-      function previewContent() {
-        const content = document.getElementById('editor-content').value;
-        const previewDiv = document.getElementById('preview');
-        const previewContent = document.getElementById('preview-content');
-
-        previewContent.innerHTML = content;
-        previewDiv.style.display = 'block';
-      }
-    </script>
-  </body>
-</html>
-```
-
-3. **Controller Setup**:
-
-```java title="src/main/java/com/example/controller/EditorController.java"
-package com.example.controller;
-
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-
-@Controller
-public class EditorController {
-
-    @GetMapping("/")
-    public String home(Model model) {
-        String initialContent = "<p>Welcome to On-Codemerge with Spring!</p>";
-        model.addAttribute("initialContent", initialContent);
-        return "your_template";
-    }
-
-    @PostMapping("/save-content")
-    @ResponseBody
-    public String saveContent(@RequestParam String content) {
-        // Save content to database or file
-        System.out.println("Saving content: " + content);
-        return "Content saved successfully!";
-    }
-}
-```
-
-4. **Application Properties**:
-
-```properties title="src/main/resources/application.properties"
-# Enable static resource handling
-spring.web.resources.static-locations=classpath:/static/
-spring.web.resources.add-mappings=true
-
-# Thymeleaf configuration
-spring.thymeleaf.cache=false
-spring.thymeleaf.prefix=classpath:/templates/
-spring.thymeleaf.suffix=.html
-```
-
-## Key Features
-
-- **Spring Integration**: Full compatibility with Spring Boot and Spring MVC
-- **Thymeleaf Templates**: Easy integration with Thymeleaf templating
-- **Static Resources**: Proper static file handling
-- **Form Integration**: Easy integration with Spring forms
-- **Content Management**: Real-time content updates and saving
-- **Plugin System**: Full plugin support
-- **Localization**: Multi-language support
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
