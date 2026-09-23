@@ -1,6 +1,7 @@
 import { createDefaultPlugins, Editor, insertText, toggleMark } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
+import publicCssUrl from 'on-codemerge/public.css?url';
 
 type StandEditor = Editor;
 
@@ -49,6 +50,20 @@ function probeCss(): void {
   setText(cssOkEl, hasToolbarCss ? 'css: ocm-toolbar OK' : 'css: MISSING ocm-toolbar');
 }
 
+/** Local package CSS in srcdoc — CDN can lag / fail; demo must show real content. */
+function publishedSrcdoc(bodyHtml: string): string {
+  return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <link rel="stylesheet" href="${publicCssUrl}">
+</head>
+<body>
+  <div class="ocm-content">${bodyHtml}</div>
+</body>
+</html>`;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const apiOk =
     typeof Editor === 'function' &&
@@ -78,7 +93,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   requestAnimationFrame(() => probeCss());
 
-  // Prefer resolved package version when Vite can read it from node_modules at build time.
   try {
     const meta = import.meta as ImportMeta & { env?: { VITE_OCM_VERSION?: string } };
     if (meta.env?.VITE_OCM_VERSION) {
@@ -94,7 +108,20 @@ document.addEventListener('DOMContentLoaded', () => {
     setText(outputEl, `=== ${label} ===\n${value}`);
   };
 
-  const refreshJson = () => show('JSON', JSON.stringify(editor.getJSON(), null, 2));
+  const refreshPublish = () => {
+    const bodyHtml = editor.getPublishedHTML();
+    const full = editor.getPublishedDocument();
+    if (publishEl instanceof HTMLIFrameElement) {
+      publishEl.srcdoc = publishedSrcdoc(bodyHtml);
+    }
+    return { bodyHtml, full };
+  };
+
+  const refreshJson = () => {
+    show('JSON', JSON.stringify(editor.getJSON(), null, 2));
+    refreshPublish();
+  };
+
   editor.on('docChanged', refreshJson);
   refreshJson();
 
@@ -109,11 +136,8 @@ document.addEventListener('DOMContentLoaded', () => {
     show('Markdown', editor.getMarkdown());
   });
   document.querySelector('#btn-publish')?.addEventListener('click', () => {
-    const doc = editor.getPublishedDocument();
-    show('Published document (HTML)', doc);
-    if (publishEl instanceof HTMLIFrameElement) {
-      publishEl.srcdoc = doc;
-    }
+    const { full } = refreshPublish();
+    show('Published document (HTML)', full);
   });
   document.querySelector('#btn-set-html')?.addEventListener('click', () => {
     editor.setHTML(`
