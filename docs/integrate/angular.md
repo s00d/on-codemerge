@@ -23,13 +23,7 @@ Import editor CSS once in global styles:
 Working standalone host from the temp app:
 
 ```ts
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  OnDestroy,
-  ViewChild,
-} from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
 import { Editor, createCorePlugins } from 'on-codemerge';
 
 const INITIAL = {
