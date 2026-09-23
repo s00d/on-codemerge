@@ -21,8 +21,6 @@ describe('locale toolbar live', () => {
     const bold = host.querySelector('[data-id="bold"]')?.getAttribute('title');
     const undo = host.querySelector('[data-id="undo"]')?.getAttribute('title');
     const tools = host.querySelector('[data-id="menu-tools"]')?.getAttribute('title');
-    const language = host.querySelector('[data-id="language"]');
-    // open tools menu items via panel API — query after pointer isn't available; check bar titles
     expect(tools).toBe('Werkzeuge');
     expect(bold).toBe('Fett');
     expect(undo).toBe('Rückgängig');
