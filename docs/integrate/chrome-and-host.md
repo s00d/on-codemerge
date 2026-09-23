@@ -2,6 +2,18 @@
 
 How the editor presents chrome and how to host it. Document **source of truth stays JSON** (`getJSON` / `setJSON`) regardless of packaging.
 
+## Install & CSS
+
+```bash
+npm install on-codemerge
+```
+
+```ts
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
+import { Editor, createCorePlugins } from 'on-codemerge';
+```
+
 ## Chrome (`bar` / `page`)
 
 | Value           | Behavior                                                                                   |
@@ -10,13 +22,26 @@ How the editor presents chrome and how to host it. Document **source of truth st
 | `page`          | Content fills the host; toolbar/footer hidden; click opens the **same** toolbar in a popup |
 
 ```ts
-import { Editor, createDefaultPlugins } from 'on-codemerge';
-
 const editor = new Editor(container, {
   chrome: 'page',
-  plugins: createDefaultPlugins(),
+  plugins: createCorePlugins(), // or createDefaultPlugins()
+});
+
+editor.setJSON({
+  version: 1,
+  doc: {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] }],
+  },
+});
+
+editor.on('docChanged', () => {
+  const json = editor.getJSON();
+  // persist json
 });
 ```
+
+With `chrome: 'page'`, the root gets `ocm-editor-root--page`. Click the content area to open the toolbar popup.
 
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
@@ -51,7 +76,7 @@ shadow.appendChild(mountEl);
 
 // Import CSS into the shadow (or inject link/style nodes) as your bundler allows.
 const editor = new Editor(mountEl, {
-  plugins: createDefaultPlugins(),
+  plugins: createCorePlugins(),
 });
 ```
 
@@ -82,6 +107,17 @@ editor.on('docChanged', () => {
 });
 ```
 
+## Persist
+
+- SoT: `editor.getJSON()` / `editor.setJSON(doc)`
+- HTML / Markdown: paste, export, SSR boundaries only — not the stored document
+
+## Gotchas
+
+- Always import both `on-codemerge/index.css` and `on-codemerge/public.css` (or a-la-carte plugin CSS + `on-codemerge/sdk.css`).
+- Shadow/iframe hosts need `setPortalRoot` or overlays render on the wrong document.
+- There is no v1 `HTMLEditor` / `editor.init()` — construct with `new Editor(el, options)`.
+
 ## Comparison (host choice)
 
 | Feature          | Direct                  | Shadow host                | Iframe host       |
@@ -91,16 +127,9 @@ editor.on('docChanged', () => {
 | Integration cost | Low                     | Medium                     | Higher            |
 | Portals          | Default `document.body` | Often need `setPortalRoot` | Separate document |
 
-## Best practices
-
-1. Prefer **direct** mount unless you have real style conflicts.
-2. Use **Shadow DOM** for widgets / design-system embeds; fix portals.
-3. Use **iframe** only when you need a hard security/style boundary.
-4. Always persist **JSON** (`getJSON` / `setJSON`), not HTML, as SoT.
-5. Test overlays (toolbar menus, popups) in your chosen host.
-
 ## Related
 
 - [Editor API](/guide/editor) — `chrome`, `colorScheme`, document API
 - [Authoring plugins — Portals](/guide/authoring-plugins#portals-teleport)
 - [Integrate overview](/integrate/)
+- [Plugins overview](/plugins/)
