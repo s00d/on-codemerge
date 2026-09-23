@@ -1,17 +1,23 @@
 {
-  "name": "on-codemerge-demo",
+  "name": "on-codemerge-demo-stand",
+  "private": true,
   "version": "1.0.0",
-  "description": "Демо-пример использования on-codemerge WYSIWYG редактора",
+  "description": "Local demo stand against published on-codemerge from npm",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview --host 127.0.0.1 --port 4177",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "install:npm": "pnpm add on-codemerge@^2.0.1 --ignore-workspace",
+    "install:local-pack": "node ./scripts/install-local-pack.mjs"
   },
   "dependencies": {
-    "on-codemerge": "file:../"
+    "on-codemerge": "^2.0.1"
   },
   "devDependencies": {
+    "@playwright/test": "^1.63.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5"
   }

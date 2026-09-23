@@ -2,9 +2,15 @@
 node_modules/
 .pnpm-store/
 
-# Build output
+# Local pack of on-codemerge (from install:local-pack)
+*.tgz
+
+# Build / test output
 dist/
 build/
+test-results/
+playwright-report/
+blob-report/
 
 # Environment files
 .env
@@ -13,13 +19,11 @@ build/
 .env.test.local
 .env.production.local
 
-# IDE files
+# IDE / OS
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS files
 .DS_Store
 Thumbs.db
 

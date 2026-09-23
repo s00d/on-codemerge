@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
   "keywords": [
     "JavaScript",
@@ -81,6 +81,7 @@
     "./public.js": "./dist/public.js",
     "./tailwind.css": "./dist/tailwind.css",
     "./sdk.css": "./dist/packages/sdk/src/ui/sdk.css",
+    "./package.json": "./package.json",
     "./plugins/*/style.css": "./dist/src/plugins/*/style.css"
   },
   "scripts": {

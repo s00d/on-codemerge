@@ -37,8 +37,8 @@
 
 <script>
 import { ensurePublishRuntimesRegistered, publishRuntimes } from '../../src/publish/runtimes';
+import { Editor } from '../../src/editor/Editor';
 import {
-  Editor,
   createDefaultPlugins,
   ToolbarPlugin,
   ToolbarDividerPlugin,
@@ -78,7 +78,7 @@ import {
   AIAssistantPlugin,
   TrackChangesPlugin,
   AnchorLinkPlugin,
-} from '../../src/app';
+} from '../../src/plugins';
 
 // dictionary-en package `exports` only exposes index.js (Node fs) — load Hunspell files as Vite URLs.
 const enAffUrl = new URL('../../node_modules/dictionary-en/index.aff', import.meta.url).href;

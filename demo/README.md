@@ -1,85 +1,72 @@
-# on-codemerge Demo
+# on-codemerge — npm demo stand
 
-Demo example of using the on-codemerge WYSIWYG editor.
+Локальный стенд против **пакета с npm** (не против исходников монорепы). Нужен, чтобы руками и через Playwright поймать проблемы install / CSS / API после публикации.
 
-## Description
+## Быстрый старт (после публикации 2.0.1+)
 
-This demo application shows the main capabilities of the on-codemerge editor:
-
-- 🎨 Rich text formatting
-- 📋 Creating and editing tables
-- 🖼️ Inserting images
-- 🔗 Creating links
-- 📝 Working with lists
-- 🎨 Color styling
-- 🔧 Content alignment
-- 📦 Block elements
-- 💻 Code blocks
-- 📤 Content export
-
-## Installation
-
-1. Make sure you have pnpm installed:
+`demo/` — отдельный consumer (см. `.npmrc`: `ignore-workspace=true`), не workspace-пакет монорепы.
 
 ```bash
-npm install -g pnpm
+cd demo
+pnpm install                  # тянет on-codemerge@^2.0.1 с registry
+pnpm exec playwright install chromium
+pnpm dev                      # http://localhost:3001
 ```
 
-2. Install dependencies:
+Ручная проверка: тулбар со стилями, Bold / JSON / HTML / Markdown / Published preview, блок `#errors` пустой.
+
+## Если версии ещё нет на npm (локальный pack)
+
+Из корня репозитория или из `demo/`:
 
 ```bash
-pnpm install
-```
-
-## Running
-
-### Development mode
-
-```bash
+cd demo
+pnpm install          # devDeps (vite, playwright)
+pnpm run install:local-pack   # build + pack monorepo → pnpm add ./on-codemerge-*.tgz
 pnpm dev
 ```
 
-The application will open in your browser at http://localhost:3001
-
-### Production build
+После публикации можно перейти на registry:
 
 ```bash
+pnpm run install:npm
+```
+
+## E2E (Playwright)
+
+Сначала соберите стенд (нужен установленный `on-codemerge`):
+
+```bash
+cd demo
 pnpm build
+pnpm test:e2e
 ```
 
-### Preview build
+`playwright.config.ts` поднимает `pnpm preview` на порту **4177** и гоняет `e2e/stand.spec.ts`:
 
-```bash
-pnpm preview
-```
+- CSS содержит `ocm-toolbar`
+- Editor / plugins экспортируются
+- setHTML → getHTML / getJSON / getMarkdown / getPublishedDocument
+- нет `pageerror` и текста в `#errors`
 
-## Usage
+UI-режим: `pnpm test:e2e:ui`.
 
-1. **Editing**: Click in the editor area and start typing
-2. **Formatting**: Use the toolbar for formatting
-3. **Get HTML**: Click "Get HTML" button to view generated code
-4. **Set Content**: Click "Set Content" to load an example
-5. **Clear**: Click "Clear" to remove all content
-
-## Project Structure
+## Структура
 
 ```
 demo/
-├── index.html          # Main HTML page
-├── main.ts             # TypeScript application code
-├── package.json        # Project dependencies
-├── vite.config.ts      # Vite configuration
-├── tsconfig.json       # TypeScript configuration
-└── README.md           # This file
+├── index.html
+├── main.ts              # boot Editor from on-codemerge + CSS imports
+├── e2e/stand.spec.ts
+├── playwright.config.ts
+├── scripts/install-local-pack.mjs
+├── package.json         # dependency: on-codemerge@^2.0.1
+└── README.md
 ```
 
-## Technologies
+## Что смотреть руками
 
-- **on-codemerge** - main WYSIWYG editor
-- **TypeScript** - programming language
-- **Vite** - build tool and dev server
-- **HTML/CSS** - markup and styles
-
-## Support
-
-If you have questions or issues, refer to the main on-codemerge documentation or create an issue in the project repository.
+1. Тулбар — кнопки с отступами/ховером (не «голые» иконки в ряд).
+2. Таблица из sample HTML — видны границы ячеек.
+3. Published preview — iframe с контентом и public-стилями.
+4. В мета-плашках: `css: ocm-toolbar OK`, `exports: Editor/plugins OK`.

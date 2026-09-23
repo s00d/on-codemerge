@@ -3,43 +3,156 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>on-codemerge Demo</title>
+    <title>on-codemerge — npm demo stand</title>
     <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f4f5;
+        --card: #fff;
+        --border: #e4e4e7;
+        --text: #18181b;
+        --muted: #71717a;
+      }
+      * {
+        box-sizing: border-box;
+      }
       body {
-        font-family: system-ui, sans-serif;
         margin: 0;
-        padding: 24px;
-        background: #f5f5f5;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
       }
       .wrap {
-        max-width: 960px;
+        max-width: 1100px;
         margin: 0 auto;
-        background: #fff;
-        border-radius: 8px;
-        padding: 24px;
+        padding: 24px 16px 48px;
+      }
+      header h1 {
+        margin: 0 0 4px;
+        font-size: 1.5rem;
+      }
+      header p {
+        margin: 0 0 16px;
+        color: var(--muted);
+        font-size: 0.95rem;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 12px;
+      }
+      .meta span {
+        background: #eef2ff;
+        color: #3730a3;
+        border-radius: 999px;
+        padding: 4px 10px;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 12px;
+        margin-bottom: 16px;
       }
       #editor {
-        min-height: 280px;
+        min-height: 320px;
       }
-      #output {
-        margin-top: 16px;
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin: 12px 0;
+      }
+      .actions button {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font: inherit;
+      }
+      .actions button:hover {
+        background: #fafafa;
+      }
+      .actions button.primary {
+        background: #0284c7;
+        border-color: #0284c7;
+        color: #fff;
+      }
+      pre.out {
+        margin: 0;
         padding: 12px;
-        background: #f8f9fa;
-        border-radius: 6px;
-        white-space: pre-wrap;
+        background: #fafafa;
+        border: 1px solid var(--border);
+        border-radius: 8px;
         font-size: 12px;
-        max-height: 320px;
+        max-height: 280px;
         overflow: auto;
+        white-space: pre-wrap;
+      }
+      iframe#publish {
+        width: 100%;
+        min-height: 240px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        background: #fff;
+      }
+      #errors {
+        color: #b91c1c;
+        font-size: 13px;
+        white-space: pre-wrap;
+      }
+      #errors:empty {
+        display: none;
       }
     </style>
   </head>
   <body>
     <div class="wrap">
-      <h1>on-codemerge</h1>
-      <p>Virtual document core — JSON is source of truth.</p>
-      <div id="editor"></div>
-      <h3>JSON</h3>
-      <pre id="output"></pre>
+      <header>
+        <h1>on-codemerge demo stand</h1>
+        <p>
+          Connects the <strong>npm</strong> package (not the monorepo source). Use this to smoke-test
+          installs, CSS, and APIs before / after publish.
+        </p>
+        <div class="meta">
+          <span id="pkg-version">version: …</span>
+          <span id="css-ok">css: …</span>
+          <span id="exports-ok">exports: …</span>
+        </div>
+      </header>
+
+      <div id="errors" class="card"></div>
+
+      <div class="card">
+        <div id="editor" data-testid="editor-host"></div>
+        <div class="actions">
+          <button type="button" class="primary" id="btn-bold" data-testid="btn-bold">Bold</button>
+          <button type="button" id="btn-json" data-testid="btn-json">Show JSON</button>
+          <button type="button" id="btn-html" data-testid="btn-html">Show HTML</button>
+          <button type="button" id="btn-md" data-testid="btn-md">Show Markdown</button>
+          <button type="button" id="btn-publish" data-testid="btn-publish">Published preview</button>
+          <button type="button" id="btn-set-html" data-testid="btn-set-html">Load sample HTML</button>
+          <button type="button" id="btn-clear" data-testid="btn-clear">Clear</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Output</h3>
+        <pre class="out" id="output" data-testid="output"></pre>
+      </div>
+
+      <div class="card">
+        <h3>Published document</h3>
+        <iframe id="publish" data-testid="publish" title="Published preview"></iframe>
+      </div>
     </div>
     <script type="module" src="./main.ts"></script>
   </body>

@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.1] - 2026-09-23
+
+### Fixed
+
+- **Docs site CSS**: VitePress now loads prebuilt `dist/index.css` + `dist/public.css` so demos get full toolbar / atom chrome (Tailwind content-scan via docs pipeline was incomplete)
+- Docs `EditorComponent` imports editor modules without pulling half-processed `src/app` CSS side-effects
+
+### Added
+
+- **`demo/`** npm stand + Playwright smoke (`demo/README.md`) against the published package
+- Package export `on-codemerge/package.json` for version probing
+
 ## [2.0.0] - 2026-09-23
 
 Breaking rewrite of the editor around a virtual JSON document, SDK plugin surface, and published-page CSS/JS split. See [Migration guide: v1 → v2](docs/guide/migration-v1-to-v2.md).
