@@ -1,165 +1,97 @@
 # Next.js
 
-Welcome to the Next.js-specific documentation for **On-Codemerge**, a sophisticated web editor optimized for integration with Next.js.
+Embed On-Codemerge in the App Router as a **client-only** component. Persist **JSON** (`getJSON` / `setJSON`), not HTML.
 
-## Getting Started with Next.js
+Verified with `create-next-app@15` (App Router) + `on-codemerge@2.0.3` (`next build` + browser smoke).
 
-To include On-Codemerge in your Next.js project, install the package:
+## Install
 
 ```bash
 npm install on-codemerge
 ```
 
-## Next.js Integration Example
+## Minimal example
 
-Here's how to integrate On-Codemerge into a Next.js project:
+`EditorClient.tsx` (client component — real working file from the temp app):
 
-1. **Create a React Component**:
+```tsx
+'use client';
 
-```tsx title="components/OnCodemergeEditor.tsx"
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
-import { Editor, createCorePlugins, AlignmentPlugin, LanguagePlugin } from 'on-codemerge';
 
-interface OnCodemergeEditorProps {
-  value?: string;
-  onChange?: (value: string) => void;
-  showOutput?: boolean;
-}
-
-const OnCodemergeEditor: React.FC<OnCodemergeEditorProps> = ({
-  value,
-  onChange,
-  showOutput = false,
-}) => {
-  const editorRef = useRef<HTMLDivElement>(null);
-  const [editor, setEditor] = useState<Editor | null>(null);
-  const [currentContent, setCurrentContent] = useState<string>('');
-
-  useEffect(() => {
-    if (editorRef.current && !editor) {
-      const newEditor = new Editor(editorRef.current, {
-        plugins: [...createCorePlugins(), AlignmentPlugin(), LanguagePlugin()],
-      });
-
-      void newEditor.setLocale('ru');
-
-      // Subscribe to content changes
-      newEditor.on('docChanged', (newContent) => {
-        setCurrentContent(newContent);
-        if (onChange) {
-          onChange(newContent);
-        }
-      });
-
-      // Set initial content
-      if (value) {
-        newEditor.setHTML(value);
-      } else {
-        newEditor.setHTML('<p>Welcome to On-Codemerge with Next.js!</p>');
-      }
-
-      setEditor(newEditor);
-      setCurrentContent(newEditor.getHTML());
-    }
-  }, [editor, value, onChange]);
-
-  // Update editor content when value prop changes
-  useEffect(() => {
-    if (editor && value !== undefined && value !== editor.getHTML()) {
-      editor.setHTML(value);
-    }
-  }, [editor, value]);
-
-  return (
-    <div>
-      <div ref={editorRef} style={{ minHeight: '300px' }}></div>
-      {showOutput && (
-        <div className="output">
-          <h3>Current HTML:</h3>
-          <pre>{currentContent}</pre>
-        </div>
-      )}
-    </div>
-  );
-};
-
-export default OnCodemergeEditor;
-```
-
-2. **Dynamic Import with Next.js**:
-
-```tsx title="pages/index.tsx"
-import dynamic from 'next/dynamic';
-import { useState } from 'react';
-
-const OnCodemergeEditor = dynamic(() => import('../components/OnCodemergeEditor'), {
-  ssr: false,
-});
-
-const HomePage: React.FC = () => {
-  const [content, setContent] = useState('<p>Initial content</p>');
-
-  return (
-    <div className="container">
-      <h1>My Next.js Page with On-Codemerge</h1>
-      <OnCodemergeEditor value={content} onChange={setContent} showOutput={true} />
-      <div className="controls">
-        <button onClick={() => console.log('Saving:', content)}>Save Content</button>
-        <button onClick={() => setContent('<p>New content</p>')}>Load New Content</button>
-      </div>
-    </div>
-  );
-};
-
-export default HomePage;
-```
-
-3. **API Route for Saving Content**:
-
-```typescript title="pages/api/save-content.ts"
-import type { NextApiRequest, NextApiResponse } from 'next';
-
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-  if (req.method === 'POST') {
-    const { content } = req.body;
-
-    // Save content to database or file
-    console.log('Saving content:', content);
-
-    res.status(200).json({ success: true });
-  } else {
-    res.setHeader('Allow', ['POST']);
-    res.status(405).end(`Method ${req.method} Not Allowed`);
-  }
-}
-```
-
-4. **Next.js Configuration**:
-
-```javascript title="next.config.js"
-/** @type {import('next').NextConfig} */
-const nextConfig = {
-  reactStrictMode: true,
-  webpack: (config) => {
-    config.module.rules.push({
-      test: /\.css$/,
-      use: ['style-loader', 'css-loader'],
-    });
-    return config;
+const INITIAL = {
+  version: 1 as const,
+  doc: {
+    type: 'doc' as const,
+    content: [
+      {
+        type: 'paragraph',
+        content: [{ type: 'text', text: 'Hello from Next.js' }],
+      },
+    ],
   },
 };
 
-module.exports = nextConfig;
+export default function EditorClient() {
+  const hostRef = useRef<HTMLDivElement>(null);
+  const editorRef = useRef<Editor | null>(null);
+
+  useEffect(() => {
+    const el = hostRef.current;
+    if (!el || editorRef.current) return;
+
+    const editor = new Editor(el, { plugins: createCorePlugins() });
+    editor.setJSON(INITIAL);
+    editor.on('docChanged', () => {
+      const json = editor.getJSON();
+      // persist json
+    });
+    editorRef.current = editor;
+
+    return () => {
+      editor.destroy();
+      editorRef.current = null;
+    };
+  }, []);
+
+  return <div ref={hostRef} style={{ minHeight: 300 }} />;
+}
 ```
 
-## Key Features
+`page.tsx` must also be a client page (or a client wrapper) if it renders the editor directly:
 
-- **Next.js Integration**: Full compatibility with Next.js SSR and SSG
-- **Dynamic Imports**: Proper client-side only rendering for editor
-- **TypeScript Support**: Complete TypeScript support with proper type definitions
-- **API Routes**: Built-in API routes for content saving
-- **Plugin System**: Easy plugin registration and management
-- **Localization**: Multi-language support
-- **Content Management**: Simple HTML content setting and retrieval
+```tsx
+'use client';
+
+import EditorClient from './EditorClient';
+
+export default function Home() {
+  return <EditorClient />;
+}
+```
+
+## Persist
+
+```ts
+editor.on('docChanged', () => {
+  const json = editor.getJSON();
+  // POST / save
+});
+```
+
+## Gotchas
+
+- Editor needs DOM APIs — keep it in a `'use client'` module.
+- `next/dynamic(..., { ssr: false })` **cannot** be used inside a Server Component (Next 15 build error). Put `ssr: false` only inside a Client Component, or just mark the page/wrapper `'use client'` as above.
+- Call `editor.destroy()` in the effect cleanup (Strict Mode remounts in dev).
+- Import both CSS entry points in the client module.
+
+## Related
+
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
