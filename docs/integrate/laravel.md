@@ -1,254 +1,101 @@
 # Laravel
 
-Welcome to the Laravel-specific documentation for **On-Codemerge**, a powerful web editor designed for seamless integration into Laravel applications.
+Serve On-Codemerge through **Vite** (not Laravel Mix) and persist document **JSON**.
 
-## Getting Started with Laravel
+Verified with Laravel 10 + `laravel-vite-plugin` + `on-codemerge@2.0.3` (`vite build`, `artisan serve`, browser smoke). On this machine PHP 8.1 could not install Laravel 11/12 (they need PHP ≥ 8.2).
 
-To use On-Codemerge in a Laravel application, install the package:
+## Install
 
 ```bash
+composer create-project laravel/laravel my-app
+cd my-app
 npm install on-codemerge
 ```
 
-## Laravel Integration Example
+## Minimal example
 
-Here's how to integrate On-Codemerge into a Laravel project:
+`vite.config.js` input includes the editor entry:
 
-1. **Set Up Laravel Mix**:
+```js
+import { defineConfig } from 'vite';
+import laravel from 'laravel-vite-plugin';
 
-```javascript title="webpack.mix.js"
-const mix = require('laravel-mix');
-
-mix
-  .js('resources/js/app.js', 'public/js')
-  .postCss('resources/css/app.css', 'public/css', [])
-  .copy('node_modules/on-codemerge/dist/public.css', 'public/css/on-codemerge-public.css')
-  .copy('node_modules/on-codemerge/dist/index.css', 'public/css/on-codemerge-index.css');
-```
-
-2. **Create the Editor Initialization Script**:
-
-```javascript title="resources/js/app.js"
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-import { Editor, createCorePlugins, AlignmentPlugin } from 'on-codemerge';
-
-class LaravelEditor {
-  constructor() {
-    this.editor = null;
-    this.init();
-  }
-
-  async init() {
-    const editorElement = document.getElementById('myEditor');
-    if (!editorElement) return;
-
-    // Initialize editor
-    this.editor = new Editor(editorElement, {
-      plugins: [...createCorePlugins(), AlignmentPlugin()],
-    });
-
-    // Subscribe to content changes
-    this.editor.on('docChanged', (newContent) => {
-      this.updateHiddenField(newContent);
-      console.log('Content changed:', newContent);
-    });
-
-    // Set initial content
-    const initialContent =
-      document.getElementById('initial-content')?.textContent ||
-      'Welcome to On-Codemerge with Laravel!';
-    this.editor.setHTML(initialContent);
-  }
-
-  updateHiddenField(content) {
-    const hiddenField = document.getElementById('editor-content');
-    if (hiddenField) {
-      hiddenField.value = content;
-    }
-  }
-
-  getContent() {
-    return this.editor ? this.editor.getHTML() : '';
-  }
-}
-
-// Initialize when DOM is loaded
-document.addEventListener('DOMContentLoaded', () => {
-  new LaravelEditor();
+export default defineConfig({
+  plugins: [
+    laravel({
+      input: ['resources/js/editor.js'],
+      refresh: true,
+    }),
+  ],
 });
 ```
 
-3. **Compile Your Assets**:
+`resources/js/editor.js` (working smoke file):
 
-```bash
-npm run dev
-```
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-4. **Integrate in Blade Template**:
-
-```blade title="welcome.blade.php"
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Laravel On-Codemerge Editor</title>
-    <link rel="stylesheet" href="{{ mix('css/on-codemerge-public.css') }}">
-    <link rel="stylesheet" href="{{ mix('css/on-codemerge-index.css') }}">
-    <link rel="stylesheet" href="{{ mix('css/toolbar-plugin.css') }}">
-    <link rel="stylesheet" href="{{ mix('css/alignment-plugin-public.css') }}">
-    <link rel="stylesheet" href="{{ mix('css/alignment-plugin.css') }}">
-</head>
-<body>
-    <div class="container">
-        <h1>Laravel On-Codemerge Editor</h1>
-
-        <form method="post" action="{{ route('save-content') }}">
-            @csrf
-            <div id="myEditor" style="min-height: 300px;"></div>
-            <input type="hidden" id="editor-content" name="content" value="">
-
-            <div class="controls">
-                <button type="submit">Save Content</button>
-                <button type="button" onclick="previewContent()">Preview</button>
-            </div>
-        </form>
-
-        <div id="preview" style="display: none;">
-            <h3>Preview:</h3>
-            <div id="preview-content"></div>
-        </div>
-    </div>
-
-    <!-- Initial content (if any) -->
-    @if(isset($initialContent))
-    <script id="initial-content" type="text/plain">{!! $initialContent !!}</script>
-    @endif
-
-    <script src="{{ mix('js/app.js') }}"></script>
-    <script>
-        function previewContent() {
-            const content = document.getElementById('editor-content').value;
-            const previewDiv = document.getElementById('preview');
-            const previewContent = document.getElementById('preview-content');
-
-            previewContent.innerHTML = content;
-            previewDiv.style.display = 'block';
-        }
-    </script>
-</body>
-</html>
-```
-
-5. **Laravel Controller**:
-
-```php title="app/Http/Controllers/EditorController.php"
-<?php
-
-namespace App\Http\Controllers;
-
-use Illuminate\Http\Request;
-use App\Models\Content;
-
-class EditorController extends Controller
-{
-    public function index()
-    {
-        $initialContent = '<p>Welcome to On-Codemerge with Laravel!</p>';
-        return view('welcome', compact('initialContent'));
-    }
-
-    public function saveContent(Request $request)
-    {
-        $request->validate([
-            'content' => 'required|string'
-        ]);
-
-        $content = $request->input('content');
-
-        // Save content to database
-        Content::create([
-            'body' => $content,
-            'title' => 'Editor Content'
-        ]);
-
-        \Log::info('Saving content: ' . $content);
-
-        return response()->json(['success' => true]);
-    }
+async function main() {
+  const editor = new Editor(document.getElementById('editor'), {
+    plugins: createCorePlugins(),
+  });
+  const loaded = await fetch('/api/doc').then((r) => r.json());
+  editor.setJSON(loaded.doc);
+  editor.on('docChanged', () => {
+    fetch('/api/doc', {
+      method: 'PUT',
+      headers: {
+        'content-type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+      },
+      body: JSON.stringify({ doc: editor.getJSON() }),
+    });
+  });
 }
+main();
 ```
 
-6. **Routes**:
+Blade:
 
-```php title="routes/web.php"
-use App\Http\Controllers\EditorController;
-
-Route::get('/', [EditorController::class, 'index']);
-Route::post('/save-content', [EditorController::class, 'saveContent'])->name('save-content');
+```blade
+<meta name="csrf-token" content="{{ csrf_token() }}">
+@vite(['resources/js/editor.js'])
+<div id="editor" style="min-height:300px"></div>
 ```
 
-7. **Model for Content Storage** (Optional):
+Routes (JSON SoT on disk via Storage):
 
-```php title="app/Models/Content.php"
-<?php
+```php
+Route::get('/api/doc', fn () => response()->json(
+    json_decode(Storage::disk('local')->get('doc.json'), true)
+));
 
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-
-class Content extends Model
-{
-    use HasFactory;
-
-    protected $fillable = [
-        'body',
-        'title'
-    ];
-
-    protected $casts = [
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-    ];
-}
+Route::put('/api/doc', function (Request $request) {
+    Storage::disk('local')->put(
+        'doc.json',
+        json_encode(['doc' => $request->input('doc')], JSON_PRETTY_PRINT)
+    );
+    return ['ok' => true];
+});
 ```
 
-8. **Migration** (Optional):
+Build: `npm run build` then `php artisan serve`.
 
-```php title="database/migrations/YYYY_MM_DD_create_contents_table.php"
-<?php
+## Persist
 
-use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+`PUT /api/doc` with `{ doc: editor.getJSON() }`. Include CSRF header on cookie sessions.
 
-return new class extends Migration
-{
-    public function up()
-    {
-        Schema::create('contents', function (Blueprint $table) {
-            $table->id();
-            $table->text('body');
-            $table->string('title')->nullable();
-            $table->timestamps();
-        });
-    }
+## Gotchas
 
-    public function down()
-    {
-        Schema::dropIfExists('contents');
-    }
-};
-```
+- Use Vite + `laravel-vite-plugin` — do not resurrect Mix.
+- Send `X-CSRF-TOKEN` on mutating requests.
+- Persist JSON, not HTML.
 
-## Key Features
+## Related
 
-- **Laravel Integration**: Full compatibility with Laravel's asset compilation
-- **Mix Support**: Proper integration with Laravel Mix
-- **Blade Templates**: Easy integration with Blade templating
-- **CSRF Protection**: Built-in CSRF token support
-- **Content Management**: Real-time content updates and saving
-- **Plugin System**: Full plugin support
-- **Localization**: Multi-language support
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
