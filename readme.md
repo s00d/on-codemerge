@@ -82,24 +82,24 @@ const html = editor.getPublishedHTML();
 
 ## Docs & demos
 
-| | |
-| --- | --- |
-| **Docs site** | https://s00d.github.io/on-codemerge/ |
-| **Editor API** | [guide/editor](https://s00d.github.io/on-codemerge/guide/editor.html) |
-| **SDK** | [guide/sdk](https://s00d.github.io/on-codemerge/guide/sdk.html) |
+|                     |                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------ |
+| **Docs site**       | https://s00d.github.io/on-codemerge/                                                 |
+| **Editor API**      | [guide/editor](https://s00d.github.io/on-codemerge/guide/editor.html)                |
+| **SDK**             | [guide/sdk](https://s00d.github.io/on-codemerge/guide/sdk.html)                      |
 | **Migrate v1 → v2** | [guide/migration](https://s00d.github.io/on-codemerge/guide/migration-v1-to-v2.html) |
-| **npm demo stand** | [`demo/`](./demo) — `cd demo && pnpm install && pnpm dev` |
+| **npm demo stand**  | [`demo/`](./demo) — `cd demo && pnpm install && pnpm dev`                            |
 
 Plugins use `core.*` and `editor.toolbar` / `ctx.popup` — do not deep-import the kernel from app code.
 
 ## Package surface
 
-| Import | Role |
-| --- | --- |
-| `on-codemerge` | `Editor`, plugin factories, IO helpers |
-| `on-codemerge/sdk` | `definePlugin`, `h` / `mount`, toolbar/popup types |
-| `on-codemerge/index.css` | Editor chrome |
-| `on-codemerge/public.css` | Published page styles |
+| Import                    | Role                                               |
+| ------------------------- | -------------------------------------------------- |
+| `on-codemerge`            | `Editor`, plugin factories, IO helpers             |
+| `on-codemerge/sdk`        | `definePlugin`, `h` / `mount`, toolbar/popup types |
+| `on-codemerge/index.css`  | Editor chrome                                      |
+| `on-codemerge/public.css` | Published page styles                              |
 
 ## License
 
