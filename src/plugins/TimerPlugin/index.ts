@@ -19,14 +19,42 @@ function serializeTimer(timer: Timer): string {
   });
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
 function parseTimer(raw: unknown): Timer | null {
   if (typeof raw !== 'string' || !raw.trim()) {
     return null;
   }
   try {
-    const t = JSON.parse(raw) as Timer;
-    t.targetDate = new Date(t.targetDate);
-    return t;
+    const parsed: unknown = JSON.parse(raw);
+    if (!isRecord(parsed)) {
+      return null;
+    }
+    if (typeof parsed.id !== 'string' || typeof parsed.title !== 'string') {
+      return null;
+    }
+    const targetRaw = parsed.targetDate;
+    if (typeof targetRaw !== 'string' && !(targetRaw instanceof Date)) {
+      return null;
+    }
+    const now = Date.now();
+    return {
+      id: parsed.id,
+      title: parsed.title,
+      description: typeof parsed.description === 'string' ? parsed.description : '',
+      targetDate: targetRaw instanceof Date ? targetRaw : new Date(targetRaw),
+      targetTime: typeof parsed.targetTime === 'string' ? parsed.targetTime : '00:00',
+      color: typeof parsed.color === 'string' ? parsed.color : '#3b82f6',
+      category: typeof parsed.category === 'string' ? parsed.category : '',
+      tags: Array.isArray(parsed.tags)
+        ? parsed.tags.filter((t): t is string => typeof t === 'string')
+        : [],
+      isActive: typeof parsed.isActive === 'boolean' ? parsed.isActive : true,
+      createdAt: typeof parsed.createdAt === 'number' ? parsed.createdAt : now,
+      updatedAt: typeof parsed.updatedAt === 'number' ? parsed.updatedAt : now,
+    };
   } catch {
     return null;
   }
@@ -175,8 +203,9 @@ export function TimerPlugin() {
       });
 
       ctx.onDom('host', 'click', (e) => {
-        const timerElement = (e.target as Element).closest<HTMLElement>('.timer-widget');
-        if (!timerElement) {
+        const from = e.target instanceof Element ? e.target : null;
+        const timerElement = from?.closest('.timer-widget') ?? null;
+        if (!(timerElement instanceof HTMLElement)) {
           return;
         }
         const timerId = timerElement.dataset.timerId;
@@ -190,8 +219,9 @@ export function TimerPlugin() {
       });
 
       ctx.onDom('host', 'contextmenu', (e) => {
-        const timerElement = (e.target as Element).closest<HTMLElement>('.timer-widget');
-        if (!timerElement) {
+        const from = e.target instanceof Element ? e.target : null;
+        const timerElement = from?.closest('.timer-widget') ?? null;
+        if (!(timerElement instanceof HTMLElement)) {
           return;
         }
         e.preventDefault();

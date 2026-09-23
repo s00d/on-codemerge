@@ -16,18 +16,40 @@ function setText(root: HTMLElement, sel: string, value: string): void {
   }
 }
 
+function byClass(root: HTMLElement, name: string, value: string): void {
+  setText(root, `.timer-${name}`, value);
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function timerPublishConfigFromUnknown(raw: unknown): TimerPublishConfig | null {
+  if (!isRecord(raw)) {
+    return null;
+  }
+  if (typeof raw.target !== 'string') {
+    return null;
+  }
+  const cfg: TimerPublishConfig = { target: raw.target };
+  if (typeof raw.expiredText === 'string') {
+    cfg.expiredText = raw.expiredText;
+  }
+  return cfg;
+}
+
 /** Published countdown — picked up by src/public.ts via import.meta.glob. */
 export const runtime = definePublishRuntime({
   id: 'timer',
   mount(el, config) {
     const cfg =
-      (config as TimerPublishConfig | null) ?? (readOcmConfig(el) as TimerPublishConfig | null);
+      timerPublishConfigFromUnknown(config) ?? timerPublishConfigFromUnknown(readOcmConfig(el));
     if (!cfg?.target) {
-      return;
+      return undefined;
     }
     const targetMs = new Date(cfg.target).getTime();
     if (Number.isNaN(targetMs)) {
-      return;
+      return undefined;
     }
     const expiredText = cfg.expiredText ?? 'Expired';
     const timerId = el.dataset.timerId ?? '';
@@ -50,13 +72,10 @@ export const runtime = definePublishRuntime({
       const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
       const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-      const byClass = (name: string, value: string) => {
-        setText(el, `.timer-${name}`, value);
-      };
-      byClass('days', String(days));
-      byClass('hours', pad2(hours));
-      byClass('minutes', pad2(minutes));
-      byClass('seconds', pad2(seconds));
+      byClass(el, 'days', String(days));
+      byClass(el, 'hours', pad2(hours));
+      byClass(el, 'minutes', pad2(minutes));
+      byClass(el, 'seconds', pad2(seconds));
 
       if (timerId) {
         setText(el, `#timer-days-${timerId}`, String(days));
@@ -68,7 +87,7 @@ export const runtime = definePublishRuntime({
     };
 
     if (!tick()) {
-      return;
+      return undefined;
     }
     const id = globalThis.setInterval(() => {
       if (!tick()) {

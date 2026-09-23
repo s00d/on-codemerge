@@ -156,7 +156,11 @@ export class MathMenu {
           props: { value: this.expression },
           on: {
             input: (e) => {
-              this.schedulePreview((e.target as HTMLTextAreaElement).value);
+              const t = e.target;
+              if (!(t instanceof HTMLTextAreaElement)) {
+                return;
+              }
+              this.schedulePreview(t.value);
             },
           },
         })

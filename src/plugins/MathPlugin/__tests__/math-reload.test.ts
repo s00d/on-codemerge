@@ -34,10 +34,10 @@ const CASES: { name: string; expr: string; expectTag?: string }[] = [
 describe('math formulas smoke + reload', () => {
   const renderer = new MathRenderer();
 
-  it.each(CASES)('$name parses, renders, embeds, reloads', ({ name, expr, expectTag }) => {
+  it.each(CASES)('$name parses, renders, embeds, reloads', ({ expr, expectTag }) => {
     expect.hasAssertions();
     const parsed = parseMath(expr);
-    expect(parsed.ok, `${name} parse`).toBe(true);
+    expect(parsed.ok).toBe(true);
     if (!parsed.ok) {
       return;
     }
@@ -45,7 +45,7 @@ describe('math formulas smoke + reload', () => {
     const mml = astToMathML(parsed.ast);
     expect(mml.tagName.toLowerCase()).toBe('math');
     if (expectTag) {
-      expect(mml.querySelector(expectTag), `${name} ${expectTag}`).toBeTruthy();
+      expect(mml.querySelector(expectTag)).toBeTruthy();
     }
 
     const el = renderer.renderMath(expr, { width: 480, height: 160 });

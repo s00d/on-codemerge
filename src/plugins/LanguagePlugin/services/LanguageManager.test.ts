@@ -7,7 +7,7 @@ function mockEditor(overrides: Partial<EditorAPI> = {}): EditorAPI {
   return {
     getLocale: () => locale,
     listLocales: () => ['en', 'ru', 'de'],
-    setLocale: vi.fn(async (code: string) => {
+    setLocale: vi.fn((code: string) => {
       locale = code;
     }),
     registerLocale: vi.fn(),
@@ -33,7 +33,7 @@ describe('languageManager', () => {
     const editor = mockEditor();
     const manager = new LanguageManager();
     manager.initialize(editor);
-    expect(manager.getLocales()).toEqual(['en', 'ru', 'de']);
+    expect(manager.getLocales()).toStrictEqual(['en', 'ru', 'de']);
     localStorage.setItem('editor-language', 'ru');
     await manager.restoreSavedLocale();
     expect(editor.setLocale).toHaveBeenCalledWith('ru');

@@ -115,9 +115,14 @@ function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
               wctx.editor.notify(t('common.copied'));
               return;
             }
-            void navigator.clipboard.writeText(src).then(() => {
-              wctx.editor.notify(t('common.copied'));
-            });
+            void (async () => {
+              try {
+                await navigator.clipboard.writeText(src);
+                wctx.editor.notify(t('common.copied'));
+              } catch {
+                /* clipboard unavailable */
+              }
+            })();
           },
         },
         {
@@ -145,7 +150,7 @@ function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
           icon: deleteIcon,
           variant: 'danger',
           onClick: () => {
-            removeAtomAt(wctx.path, (cmd) => wctx.editor.run(cmd as never));
+            removeAtomAt(wctx.path, (cmd) => wctx.editor.run(cmd));
           },
         },
       ],
@@ -160,7 +165,10 @@ function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
       class: 'ocm-image-atom',
       on: {
         click: (e) => {
-          const host = e.currentTarget as HTMLElement;
+          const host = e.currentTarget;
+          if (!(host instanceof HTMLElement)) {
+            return;
+          }
           resizer.replace(
             new Resizer(host, {
               aspect: 'lock',

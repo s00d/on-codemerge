@@ -15,6 +15,29 @@ function pad2(n: number): string {
   return n.toString().padStart(2, '0');
 }
 
+function timerSep(): ViewSpec {
+  return h('span', { class: 'timer-sep', attrs: { 'aria-hidden': 'true' } }, ':');
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isStoredTimer(value: unknown): value is Timer & { targetDate: string | Date } {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.id === 'string' &&
+    typeof value.title === 'string' &&
+    typeof value.targetTime === 'string' &&
+    typeof value.isActive === 'boolean' &&
+    typeof value.createdAt === 'number' &&
+    typeof value.updatedAt === 'number' &&
+    (typeof value.targetDate === 'string' || value.targetDate instanceof Date)
+  );
+}
+
 export class TimerManager {
   private readonly timersKey = 'html-editor-timers';
   private readonly editor: EditorAPI;
@@ -34,14 +57,10 @@ export class TimerManager {
       return [];
     }
 
-    // Конвертируем строки targetDate обратно в объекты Date
-    return parsed.map((timer) => {
-      const t = timer as Timer & { targetDate: string | Date };
-      return {
-        ...t,
-        targetDate: new Date(t.targetDate),
-      };
-    });
+    return parsed.filter(isStoredTimer).map((t) => ({
+      ...t,
+      targetDate: new Date(t.targetDate),
+    }));
   }
 
   public getTimer(id: string): Timer | null {
@@ -186,8 +205,6 @@ export class TimerManager {
         h('span', { class: 'timer-label' }, label),
       ]);
 
-    const sep = () => h('span', { class: 'timer-sep', attrs: { 'aria-hidden': 'true' } }, ':');
-
     const countdown = timeLeft.isExpired
       ? h('div', { class: 'timer-expired' }, this.editor.t('timer.timeExpired'))
       : h(
@@ -198,11 +215,11 @@ export class TimerManager {
           },
           [
             unit('days', String(timeLeft.days), this.editor.t('timer.days')),
-            sep(),
+            timerSep(),
             unit('hours', pad2(timeLeft.hours), this.editor.t('timer.hours')),
-            sep(),
+            timerSep(),
             unit('minutes', pad2(timeLeft.minutes), this.editor.t('common.min')),
-            sep(),
+            timerSep(),
             unit('seconds', pad2(timeLeft.seconds), this.editor.t('timer.sec')),
           ]
         );

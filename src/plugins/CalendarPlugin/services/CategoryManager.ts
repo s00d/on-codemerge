@@ -1,5 +1,6 @@
 import type { Category, Tag, CalendarEvent } from '../types';
 import { parseJson } from '../../../utils/asAttr';
+import { parseCategoryArray, parseTagArray } from '../utils/storageGuards';
 
 export class CategoryManager {
   private readonly categoriesKey = 'html-editor-calendar-categories';
@@ -11,8 +12,8 @@ export class CategoryManager {
     if (stored === null || stored === undefined || stored === '') {
       return this.getDefaultCategories();
     }
-    const parsed = parseJson(stored);
-    return Array.isArray(parsed) ? (parsed as Category[]) : this.getDefaultCategories();
+    const parsed = parseCategoryArray(parseJson(stored));
+    return parsed.length > 0 ? parsed : this.getDefaultCategories();
   }
 
   public getCategory(id: string): Category | null {
@@ -63,8 +64,8 @@ export class CategoryManager {
     if (stored === null || stored === undefined || stored === '') {
       return this.getDefaultTags();
     }
-    const parsed = parseJson(stored);
-    return Array.isArray(parsed) ? (parsed as Tag[]) : this.getDefaultTags();
+    const parsed = parseTagArray(parseJson(stored));
+    return parsed.length > 0 ? parsed : this.getDefaultTags();
   }
 
   public getTag(id: string): Tag | null {

@@ -17,7 +17,7 @@ export class VideoUploader {
         }
       });
       reader.addEventListener('error', () => {
-        reject(reader.error);
+        reject(reader.error ?? new Error('Failed to read file'));
       });
       reader.readAsDataURL(file);
     });

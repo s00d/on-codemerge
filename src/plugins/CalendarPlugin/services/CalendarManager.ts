@@ -1,10 +1,8 @@
 import type {
   Calendar,
   CalendarEvent,
-  Category,
   CreateCalendarData,
   CreateEventData,
-  Tag,
   UpdateCalendarData,
   UpdateEventData,
 } from '../types';
@@ -14,26 +12,15 @@ import { CategoryManager } from './CategoryManager';
 import { ReminderService } from './ReminderService';
 import { parseJson } from '../../../utils/asAttr';
 import { atomAlignStyle } from '../../../utils/atomAlign';
-
-function asCalendarArray(value: unknown): Calendar[] {
-  return Array.isArray(value) ? (value as Calendar[]) : [];
-}
-
-function asEventArray(value: unknown): (CalendarEvent & { calendarId: string })[] {
-  return Array.isArray(value) ? (value as (CalendarEvent & { calendarId: string })[]) : [];
-}
-
-function asCategoryArray(value: unknown): Category[] {
-  return Array.isArray(value) ? (value as Category[]) : [];
-}
-
-function asTagArray(value: unknown): Tag[] {
-  return Array.isArray(value) ? (value as Tag[]) : [];
-}
-
-function asCreateEventArray(value: unknown): CreateEventData[] {
-  return Array.isArray(value) ? (value as CreateEventData[]) : [];
-}
+import {
+  parseCalendarArray,
+  parseCategoryArray,
+  parseCreateEventArray,
+  parseEventStorageArray,
+  parseImportCalendarMeta,
+  parseTagArray,
+  isRecord,
+} from '../utils/storageGuards';
 
 export class CalendarManager {
   private readonly calendarsKey = 'html-editor-calendars';
@@ -49,7 +36,7 @@ export class CalendarManager {
   public getCalendars(): Calendar[] {
     const stored = localStorage.getItem(this.calendarsKey);
     return stored !== null && stored !== undefined && stored !== ''
-      ? asCalendarArray(parseJson(stored))
+      ? parseCalendarArray(parseJson(stored))
       : [];
   }
 
@@ -381,7 +368,7 @@ export class CalendarManager {
   private getAllEvents(): (CalendarEvent & { calendarId: string })[] {
     const stored = localStorage.getItem(this.eventsKey);
     return stored !== null && stored !== undefined && stored !== ''
-      ? asEventArray(parseJson(stored))
+      ? parseEventStorageArray(parseJson(stored))
       : [];
   }
 
@@ -406,24 +393,14 @@ export class CalendarManager {
   public importCalendar(data: string): Calendar {
     try {
       const importData = parseJson(data);
-      if (
-        importData === null ||
-        importData === undefined ||
-        typeof importData !== 'object' ||
-        Array.isArray(importData)
-      ) {
+      if (!isRecord(importData)) {
         throw new Error('Invalid calendar data format');
       }
-      const payload = importData as {
-        calendar?: { title?: string; description?: string };
-        events?: unknown;
-        categories?: unknown;
-        tags?: unknown;
-      };
-      const calendar = payload.calendar;
-      const events = asCreateEventArray(payload.events ?? []);
-      const categories = asCategoryArray(payload.categories ?? []);
-      const tags = asTagArray(payload.tags ?? []);
+      const record = importData;
+      const calendarMeta = parseImportCalendarMeta(record.calendar);
+      const events = parseCreateEventArray(record.events);
+      const categories = parseCategoryArray(record.categories);
+      const tags = parseTagArray(record.tags);
 
       // Импортируем категории и теги
       categories.forEach((cat) => {
@@ -435,8 +412,8 @@ export class CalendarManager {
       });
 
       const newCalendar = this.createCalendar({
-        title: calendar?.title ?? 'Imported',
-        description: calendar?.description,
+        title: calendarMeta.title ?? 'Imported',
+        description: calendarMeta.description,
       });
 
       events.forEach((eventData) => {

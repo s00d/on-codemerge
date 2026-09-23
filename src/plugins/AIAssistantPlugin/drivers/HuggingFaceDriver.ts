@@ -101,10 +101,14 @@ export class HuggingFaceDriver implements AIDriver<HuggingFaceOptions> {
     if (!Array.isArray(data) || data.length === 0) {
       throw new Error('Invalid AI response');
     }
-    const first = data[0] as { generated_text?: string };
-    if (typeof first.generated_text !== 'string') {
+    const first: unknown = data[0];
+    if (first === null || typeof first !== 'object' || !('generated_text' in first)) {
       throw new TypeError('Invalid AI response');
     }
-    return first.generated_text;
+    const generated: unknown = Reflect.get(first, 'generated_text');
+    if (typeof generated !== 'string') {
+      throw new TypeError('Invalid AI response');
+    }
+    return generated;
   }
 }

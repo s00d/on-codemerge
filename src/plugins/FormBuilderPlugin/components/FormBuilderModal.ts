@@ -1,6 +1,7 @@
 import { PopupController, foreign, h, mount } from '@on-codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { FieldConfig, FieldType, FormConfig } from '../types';
+import { parseFormHttpMethod } from '../types';
 import { FormManager } from '../services/FormManager';
 import { FieldEditor } from './FieldEditor';
 import { FormPreview } from './FormPreview';
@@ -51,8 +52,12 @@ export class FormBuilderModal {
             props: { value: this.formManager.getFormMethod() },
             on: {
               change: (e) => {
-                this.methodSelect = e.target as HTMLSelectElement;
-                this.formManager.updateFormMethod(this.methodSelect.value as FormConfig['method']);
+                const t = e.target;
+                if (!(t instanceof HTMLSelectElement)) {
+                  return;
+                }
+                this.methodSelect = t;
+                this.formManager.updateFormMethod(parseFormHttpMethod(t.value));
               },
             },
           },
@@ -81,8 +86,12 @@ export class FormBuilderModal {
           props: { value: this.formManager.getFormAction() || '' },
           on: {
             input: (e) => {
-              this.urlInput = e.target as HTMLInputElement;
-              this.formManager.updateFormAction(this.urlInput.value);
+              const t = e.target;
+              if (!(t instanceof HTMLInputElement)) {
+                return;
+              }
+              this.urlInput = t;
+              this.formManager.updateFormAction(t.value);
             },
           },
         }),
@@ -184,9 +193,9 @@ export class FormBuilderModal {
           this.settingsMount = mount(host, this.settingsView());
           const refs = this.settingsMount.refs;
           // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
-          this.methodSelect = (refs.methodSelect as HTMLSelectElement) || null;
-          // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
-          this.urlInput = (refs.urlInput as HTMLInputElement) || null;
+          this.methodSelect =
+            refs.methodSelect instanceof HTMLSelectElement ? refs.methodSelect : null;
+          this.urlInput = refs.urlInput instanceof HTMLInputElement ? refs.urlInput : null;
           scope.disposable(() => {
             this.settingsMount?.destroy();
             this.settingsMount = null;
@@ -474,10 +483,8 @@ export class FormBuilderModal {
       return;
     }
 
-    if (this.isEditMode) {
-      if (!confirm(this.t('formBuilder.areYouSureYouWantToUpdateThisForm'))) {
-        return;
-      }
+    if (this.isEditMode && !confirm(this.t('formBuilder.areYouSureYouWantToUpdateThisForm'))) {
+      return;
     }
 
     this.callback?.(formConfig);
@@ -583,7 +590,7 @@ export class FormBuilderModal {
         baseOptions.options = currentField.options?.options ?? [];
         baseOptions.multiple =
           newType === 'select' ? (currentField.options?.multiple ?? false) : false;
-        if ((baseOptions.options as unknown[]).length === 0) {
+        if (Array.isArray(baseOptions.options) && baseOptions.options.length === 0) {
           baseOptions.options = [
             newType === 'radio' ? this.t('formBuilder.newRadio') : this.t('common.option1'),
           ];

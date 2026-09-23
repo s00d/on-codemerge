@@ -13,7 +13,7 @@ describe('computeResize', () => {
       bounds,
       aspectLock: false,
     });
-    expect(r).toEqual({ width: 240, height: 120 });
+    expect(r).toStrictEqual({ width: 240, height: 120 });
   });
 
   it('nw shrinks with positive delta when free', () => {
@@ -25,7 +25,7 @@ describe('computeResize', () => {
       bounds,
       aspectLock: false,
     });
-    expect(r).toEqual({ width: 180, height: 90 });
+    expect(r).toStrictEqual({ width: 180, height: 90 });
   });
 
   it('sw and ne flip one axis', () => {
@@ -37,7 +37,7 @@ describe('computeResize', () => {
       bounds,
       aspectLock: false,
     });
-    expect(sw).toEqual({ width: 180, height: 120 });
+    expect(sw).toStrictEqual({ width: 180, height: 120 });
 
     const ne = computeResize({
       corner: 'ne',
@@ -46,7 +46,7 @@ describe('computeResize', () => {
       bounds,
       aspectLock: false,
     });
-    expect(ne).toEqual({ width: 220, height: 80 });
+    expect(ne).toStrictEqual({ width: 220, height: 80 });
   });
 
   it('locks aspect ratio from start size', () => {
@@ -99,7 +99,7 @@ describe('computeResize', () => {
         bounds,
         aspectLock: false,
       })
-    ).toEqual({ width: 240, height: 100 });
+    ).toStrictEqual({ width: 240, height: 100 });
     expect(
       computeResize({
         corner: 's',
@@ -108,7 +108,7 @@ describe('computeResize', () => {
         bounds,
         aspectLock: false,
       })
-    ).toEqual({ width: 200, height: 130 });
+    ).toStrictEqual({ width: 200, height: 130 });
   });
 
   it('edge drag with aspect lock scales the other axis', () => {
@@ -120,7 +120,7 @@ describe('computeResize', () => {
       bounds,
       aspectLock: true,
     });
-    expect(r).toEqual({ width: 250, height: 125 });
+    expect(r).toStrictEqual({ width: 250, height: 125 });
   });
 });
 

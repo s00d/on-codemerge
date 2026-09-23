@@ -160,7 +160,7 @@ describe('atom toolbar alignment', () => {
     atom.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, button: 0 }));
     atom.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, button: 0 }));
 
-    expect(editor.getSelection().anchor.path).toEqual([1]);
+    expect(editor.getSelection().anchor.path).toStrictEqual([1]);
     expect(editor.command('alignLeft')).toBe(true);
     expect(editor.getJSON().doc.content?.[1]?.attrs?.align).toBe('left');
     // Paragraph untouched

@@ -38,9 +38,14 @@ export class SyntaxHighlighter {
       }
 
       // Check patterns
-      let longestMatch = { length: 0, type: null as TokenType | null, value: '' };
+      let longestMatch: { length: number; type: TokenType | null; value: string } = {
+        length: 0,
+        type: null,
+        value: '',
+      };
 
-      for (const [tokenType, pattern] of Object.entries(definition.patterns)) {
+      for (const tokenType of Object.values(TokenType)) {
+        const pattern = definition.patterns[tokenType];
         // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
         if (!pattern) {
           continue;
@@ -54,13 +59,13 @@ export class SyntaxHighlighter {
         if (result && result[0].length > longestMatch.length) {
           longestMatch = {
             length: result[0].length,
-            type: tokenType as TokenType,
+            type: tokenType,
             value: result[0],
           };
         }
       }
 
-      if (longestMatch.type !== undefined && longestMatch.type !== null) {
+      if (longestMatch.type !== null) {
         tokens.push({ type: longestMatch.type, value: longestMatch.value });
         remaining = remaining.slice(longestMatch.length);
       } else {

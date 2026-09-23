@@ -2,6 +2,7 @@ import type { CalendarEvent, Reminder } from '../types';
 import type { CalendarManager } from './CalendarManager';
 import { h, renderDetached } from '@on-codemerge/sdk';
 import { parseJson } from '../../../utils/asAttr';
+import { parseReminderArray } from '../utils/storageGuards';
 
 export class ReminderService {
   private readonly remindersKey = 'html-editor-calendar-reminders';
@@ -50,8 +51,7 @@ export class ReminderService {
     if (stored === null || stored === undefined || stored === '') {
       return [];
     }
-    const parsed = parseJson(stored);
-    return Array.isArray(parsed) ? (parsed as Reminder[]) : [];
+    return parseReminderArray(parseJson(stored));
   }
 
   // Получение напоминаний для события

@@ -65,14 +65,23 @@ export function rgbToHsv(r: number, g: number, b: number): Hsv {
   return { h, s, v: max };
 }
 
+function hexByte(n: number): string {
+  return clamp(Math.round(n), 0, 255).toString(16).padStart(2, '0');
+}
+
 export function rgbToHex({ r, g, b }: Rgb): string {
-  const part = (n: number) => clamp(Math.round(n), 0, 255).toString(16).padStart(2, '0');
-  return `#${part(r)}${part(g)}${part(b)}`;
+  return `#${hexByte(r)}${hexByte(g)}${hexByte(b)}`;
 }
 
 export function hexToRgb(hex: string): Rgb | null {
   const raw = hex.trim().replace(/^#/, '');
-  const full = raw.length === 3 ? [...raw].map((c) => c + c).join('') : raw;
+  const full =
+    raw.length === 3
+      ? raw
+          .split('')
+          .map((c) => `${c}${c}`)
+          .join('')
+      : raw;
   if (!/^[0-9a-fA-F]{6}$/.test(full)) {
     return null;
   }

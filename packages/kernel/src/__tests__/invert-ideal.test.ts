@@ -66,16 +66,16 @@ describe('invert ideal', () => {
         attrs: { align: 'center', color: 'red' },
       })
     );
-    expect({ ...next.doc.content![0].attrs }).toEqual({ align: 'center', color: 'red' });
+    expect({ ...next.doc.content![0].attrs }).toStrictEqual({ align: 'center', color: 'red' });
     expect(inverses[0]).toMatchObject({
       type: 'set_attrs',
       replace: true,
     });
-    expect({ ...(inverses[0] as { attrs: Record<string, unknown> }).attrs }).toEqual({
+    expect({ ...(inverses[0] as { attrs: Record<string, unknown> }).attrs }).toStrictEqual({
       align: 'left',
     });
     const undone = applyTransaction(next, transaction(...inverses)).state;
-    expect({ ...undone.doc.content![0].attrs }).toEqual({ align: 'left' });
+    expect({ ...undone.doc.content![0].attrs }).toStrictEqual({ align: 'left' });
     expect(undone.doc.content![0].attrs).not.toHaveProperty('color');
   });
 
@@ -454,7 +454,7 @@ describe('invert ideal', () => {
         node: createParagraph([createText('zzz')]),
       })
     ).state;
-    expect(state.selection.anchor.path).toEqual([2]);
+    expect(state.selection.anchor.path).toStrictEqual([2]);
     const content = state.doc.content ?? [];
     expect(plainText(content[2])).toBe('bbb');
   });
@@ -466,7 +466,7 @@ describe('invert ideal', () => {
       { anchor: { path: [0, 0], offset: 0 }, focus: { path: [0, 0], offset: 0 } }
     );
     expect(state.doc.content![0].type).toBe('paragraph');
-    expect(state.selection.anchor.path).toEqual([0]);
+    expect(state.selection.anchor.path).toStrictEqual([0]);
     const tr = runCommand(state, insertText('X'));
     expect(tr).not.toBeNull();
     const next = applyTransaction(state, tr!).state;

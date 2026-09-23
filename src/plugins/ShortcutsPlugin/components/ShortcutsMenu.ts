@@ -135,7 +135,11 @@ export class ShortcutsMenu {
               },
               on: {
                 input: (e) => {
-                  filter = (e.target as HTMLInputElement).value;
+                  const inputEl = e.target;
+                  if (!(inputEl instanceof HTMLInputElement)) {
+                    return;
+                  }
+                  filter = inputEl.value;
                   paintList();
                 },
               },

@@ -34,9 +34,14 @@ export class CodeBlockContextMenu {
           onClick: () => {
             const code = this.activeBlock?.querySelector('code');
             if (code) {
-              void navigator.clipboard.writeText(code.textContent || '').then(() => {
-                this.editor.notify(t('common.copied'));
-              });
+              void (async () => {
+                try {
+                  await navigator.clipboard.writeText(code.textContent || '');
+                  this.editor.notify(t('common.copied'));
+                } catch {
+                  /* clipboard unavailable */
+                }
+              })();
             }
           },
         },
@@ -46,7 +51,7 @@ export class CodeBlockContextMenu {
           icon: deleteIcon,
           variant: 'danger',
           onClick: () => {
-            removeAtomAt(pathFromEl(shell) ?? shell, (cmd) => this.editor.run(cmd as never));
+            removeAtomAt(pathFromEl(shell) ?? shell, (cmd) => this.editor.run(cmd));
           },
         },
       ],

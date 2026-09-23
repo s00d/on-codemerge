@@ -9,6 +9,10 @@ const VIEWPORT_SIZES = {
   responsive: '100%',
 };
 
+function isViewport(value: string): value is Viewport {
+  return value in VIEWPORT_SIZES;
+}
+
 export class ViewportManager {
   private currentViewport: Viewport;
   private container: HTMLElement | null = null;
@@ -19,8 +23,8 @@ export class ViewportManager {
     // responsive по умолчанию, desktop игнорируем как дефолт
     let initial: Viewport = 'responsive';
     const savedRaw = localStorage.getItem('responsive-viewport');
-    if (savedRaw !== null && savedRaw !== 'desktop' && savedRaw in VIEWPORT_SIZES) {
-      initial = savedRaw as Viewport;
+    if (savedRaw !== null && savedRaw !== 'desktop' && isViewport(savedRaw)) {
+      initial = savedRaw;
     }
     this.currentViewport = initial;
   }

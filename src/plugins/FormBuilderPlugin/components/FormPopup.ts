@@ -99,7 +99,7 @@ export class FormPopup {
               return;
             }
             const options: FormPopupOptions = {
-              method: (String(values.method) as 'GET' | 'POST') || 'POST',
+              method: String(values.method).toUpperCase() === 'GET' ? 'GET' : 'POST',
               action: String(values.action ?? ''),
               hasSubmitButton: Boolean(values.hasSubmitButton),
             };

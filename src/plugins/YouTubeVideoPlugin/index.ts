@@ -29,7 +29,10 @@ function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): Vie
       class: 'ocm-youtube-atom',
       on: {
         click: (e) => {
-          const host = e.currentTarget as HTMLElement;
+          const host = e.currentTarget;
+          if (!(host instanceof HTMLElement)) {
+            return;
+          }
           resizer.replace(
             new Resizer(host, {
               aspect: 'lock',
@@ -77,6 +80,7 @@ function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): Vie
                             return false;
                           }
                           wctx.updateAttrs({ videoId: id });
+                          return true;
                         },
                       },
                     ],
@@ -103,7 +107,7 @@ function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): Vie
                 icon: deleteIcon,
                 variant: 'danger',
                 onClick: () => {
-                  removeAtomAt(wctx.path, (cmd) => wctx.editor.run(cmd as never));
+                  removeAtomAt(wctx.path, (cmd) => wctx.editor.run(cmd));
                 },
               },
             ],

@@ -91,14 +91,23 @@ export class FileUploadMenu {
               on: {
                 dragover: (e) => {
                   e.preventDefault();
-                  (e.currentTarget as HTMLElement).classList.add('drag-over');
+                  const areaEl = e.currentTarget;
+                  if (areaEl instanceof HTMLElement) {
+                    areaEl.classList.add('drag-over');
+                  }
                 },
                 dragleave: (e) => {
-                  (e.currentTarget as HTMLElement).classList.remove('drag-over');
+                  const areaEl = e.currentTarget;
+                  if (areaEl instanceof HTMLElement) {
+                    areaEl.classList.remove('drag-over');
+                  }
                 },
                 drop: (e) => {
                   e.preventDefault();
-                  (e.currentTarget as HTMLElement).classList.remove('drag-over');
+                  const areaEl = e.currentTarget;
+                  if (areaEl instanceof HTMLElement) {
+                    areaEl.classList.remove('drag-over');
+                  }
                   const file = e.dataTransfer?.files?.[0];
                   if (file) {
                     void start(file);
@@ -145,7 +154,10 @@ export class FileUploadMenu {
             ref: 'fileInput',
             on: {
               change: (e) => {
-                const input = e.target as HTMLInputElement;
+                const input = e.target;
+                if (!(input instanceof HTMLInputElement)) {
+                  return;
+                }
                 const file = input.files?.[0];
                 if (file) {
                   void start(file);
@@ -161,7 +173,7 @@ export class FileUploadMenu {
       progress = shell.refs.progress ?? null;
       fill = shell.refs.fill ?? null;
       filename = shell.refs.filename ?? null;
-      fileInput = (shell.refs.fileInput as HTMLInputElement) ?? null;
+      fileInput = shell.refs.fileInput instanceof HTMLInputElement ? shell.refs.fileInput : null;
       scope.own(shell);
     });
   }

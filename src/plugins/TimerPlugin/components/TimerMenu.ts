@@ -203,25 +203,21 @@ export class TimerMenu {
   }
 
   public showImportDialog(): void {
-    void pickFile({ accept: '.json' }).then((files) => {
+    void (async () => {
+      const files = await pickFile({ accept: '.json' });
       const file = files?.[0];
       if (!file) {
         return;
       }
-      const reader = new FileReader();
-      reader.addEventListener('load', () => {
-        try {
-          const text = typeof reader.result === 'string' ? reader.result : '';
-          this.manager.importTimer(text);
-          this.editor.notify(this.editor.t('timer.timerImportedSuccessfully'));
-          this.popups.close();
-          this.openMainPopup();
-        } catch {
-          this.editor.notify(this.editor.t('common.importFailed'));
-        }
-      });
-      reader.readAsText(file);
-      return;
-    });
+      try {
+        const text = await file.text();
+        this.manager.importTimer(text);
+        this.editor.notify(this.editor.t('timer.timerImportedSuccessfully'));
+        this.popups.close();
+        this.openMainPopup();
+      } catch {
+        this.editor.notify(this.editor.t('common.importFailed'));
+      }
+    })();
   }
 }

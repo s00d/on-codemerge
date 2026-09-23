@@ -33,7 +33,10 @@ export class CalendarForm {
           props: { value: this.draft.title },
           on: {
             input: (e) => {
-              this.draft.title = (e.target as HTMLInputElement).value;
+              const inputEl = e.target;
+              if (inputEl instanceof HTMLInputElement) {
+                this.draft.title = inputEl.value;
+              }
             },
           },
         }),
@@ -46,7 +49,10 @@ export class CalendarForm {
           props: { value: this.draft.description },
           on: {
             input: (e) => {
-              this.draft.description = (e.target as HTMLTextAreaElement).value;
+              const inputEl = e.target;
+              if (inputEl instanceof HTMLTextAreaElement) {
+                this.draft.description = inputEl.value;
+              }
             },
           },
         }),

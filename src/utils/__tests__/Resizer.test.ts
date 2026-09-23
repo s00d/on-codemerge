@@ -63,11 +63,11 @@ describe('resizer', () => {
 
     Object.defineProperty(host, 'offsetWidth', {
       configurable: true,
-      get: () => Number.parseInt(host.style.width, 10) || 200,
+      get: () => Math.trunc(Number(host.style.width)) || 200,
     });
     Object.defineProperty(host, 'offsetHeight', {
       configurable: true,
-      get: () => Number.parseInt(host.style.height, 10) || 100,
+      get: () => Math.trunc(Number(host.style.height)) || 100,
     });
 
     const handle = host.querySelector('.ocm-resize-handle--e') as HTMLElement;
@@ -108,11 +108,11 @@ describe('resizer', () => {
     // Simulate growing box as style is applied
     Object.defineProperty(host, 'offsetWidth', {
       configurable: true,
-      get: () => Number.parseInt(host.style.width, 10) || 200,
+      get: () => Math.trunc(Number(host.style.width)) || 200,
     });
     Object.defineProperty(host, 'offsetHeight', {
       configurable: true,
-      get: () => Number.parseInt(host.style.height, 10) || 100,
+      get: () => Math.trunc(Number(host.style.height)) || 100,
     });
 
     pointer('pointermove', document, { clientX: 260, clientY: 140 });

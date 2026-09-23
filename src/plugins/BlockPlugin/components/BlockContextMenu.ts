@@ -93,7 +93,7 @@ export class BlockContextMenu {
         break;
       }
       case 'delete': {
-        removeAtomAt(this.activeBlock, (cmd) => this.editor.run(cmd as never));
+        removeAtomAt(this.activeBlock, (cmd) => this.editor.run(cmd));
         break;
       }
       case 'move-up': {

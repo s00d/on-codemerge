@@ -1,5 +1,22 @@
 import type { Template, CreateTemplateData } from '../types';
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function isTemplate(value: unknown): value is Template {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.id === 'string' &&
+    typeof value.name === 'string' &&
+    typeof value.content === 'string' &&
+    typeof value.createdAt === 'number' &&
+    typeof value.updatedAt === 'number'
+  );
+}
+
 export class TemplateManager {
   private readonly storageKey = 'html-editor-templates';
 
@@ -9,7 +26,10 @@ export class TemplateManager {
       return [];
     }
     const parsed: unknown = JSON.parse(stored);
-    return Array.isArray(parsed) ? (parsed as Template[]) : [];
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter(isTemplate);
   }
 
   public saveTemplate(data: CreateTemplateData): Template {

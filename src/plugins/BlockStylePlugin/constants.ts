@@ -61,7 +61,7 @@ export function parseStyleAttr(raw: unknown): StyleDraft {
       return draft;
     }
     for (const key of STYLE_KEYS) {
-      const v = (parsed as Record<string, unknown>)[key];
+      const v: unknown = Reflect.get(parsed, key);
       if (typeof v === 'string' && v.trim()) {
         draft[key] = v.trim();
       }

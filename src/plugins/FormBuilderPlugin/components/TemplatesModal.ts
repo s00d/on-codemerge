@@ -93,7 +93,11 @@ export class TemplatesModal {
               props: { value: this.search },
               on: {
                 input: (e) => {
-                  this.search = (e.target as HTMLInputElement).value;
+                  const t = e.target;
+                  if (!(t instanceof HTMLInputElement)) {
+                    return;
+                  }
+                  this.search = t.value;
                   refreshGrid();
                 },
               },
@@ -108,7 +112,11 @@ export class TemplatesModal {
                 props: { value: this.selectedCategory },
                 on: {
                   change: (e) => {
-                    this.selectedCategory = (e.target as HTMLSelectElement).value;
+                    const t = e.target;
+                    if (!(t instanceof HTMLSelectElement)) {
+                      return;
+                    }
+                    this.selectedCategory = t.value;
                     refreshGrid();
                   },
                 },

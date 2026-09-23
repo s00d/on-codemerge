@@ -24,7 +24,6 @@ export default defineConfig({
         if (id.endsWith('.scss') || id.endsWith('.css')) {
           return 'export default {}';
         }
-        return;
       },
     },
   ],

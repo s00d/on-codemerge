@@ -34,7 +34,10 @@ export class ChartRenderer {
     options: ChartOptions
   ): HTMLImageElement {
     const { el } = renderDetached(canvas());
-    const canvasEl = el as HTMLCanvasElement;
+    if (!(el instanceof HTMLCanvasElement)) {
+      throw new Error('Chart canvas element expected');
+    }
+    const canvasEl = el;
     const dpr = window.devicePixelRatio || 1;
 
     canvasEl.width = options.width * dpr;

@@ -37,10 +37,9 @@ export function expandOffsetToWord(text: string, offset: number): { from: number
 }
 
 function blockPlainText(editor: EditorAPI, path: number[]): string {
-  let node: { content?: { text?: string; content?: unknown[] }[] } | undefined =
-    editor.getJSON().doc;
+  let node: DocNode | undefined = editor.getJSON().doc;
   for (const idx of path) {
-    node = node?.content?.[idx] as typeof node;
+    node = node?.content?.[idx];
   }
   if (!node?.content) {
     return '';

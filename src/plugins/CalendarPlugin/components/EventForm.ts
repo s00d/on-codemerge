@@ -1,6 +1,7 @@
 import { h, mount } from '@on-codemerge/sdk';
 import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { CalendarEvent, CreateEventData } from '../types';
+import { parseEventPriority } from '../utils/storageGuards';
 import { colorSwatchButton } from '../../../utils/ColorWell';
 
 type CategoryManagerLike = {
@@ -81,7 +82,8 @@ export class EventForm {
         props: { value },
         on: {
           input: (e) => {
-            onInput((e.target as HTMLInputElement).value);
+            const el = e.target;
+            onInput(el instanceof HTMLInputElement ? el.value : '');
           },
         },
       }),
@@ -103,7 +105,8 @@ export class EventForm {
           props: { value: this.draft.description },
           on: {
             input: (e) => {
-              this.draft.description = (e.target as HTMLTextAreaElement).value;
+              const el = e.target;
+              this.draft.description = el instanceof HTMLTextAreaElement ? el.value : '';
             },
           },
         }),
@@ -149,7 +152,8 @@ export class EventForm {
               props: { value: this.draft.priority },
               on: {
                 change: (e) => {
-                  this.draft.priority = (e.target as HTMLSelectElement).value;
+                  const el = e.target;
+                  this.draft.priority = el instanceof HTMLSelectElement ? el.value : '';
                 },
               },
             },
@@ -168,7 +172,8 @@ export class EventForm {
               props: { value: this.draft.category },
               on: {
                 change: (e) => {
-                  this.draft.category = (e.target as HTMLSelectElement).value;
+                  const el = e.target;
+                  this.draft.category = el instanceof HTMLSelectElement ? el.value : '';
                 },
               },
             },
@@ -202,7 +207,8 @@ export class EventForm {
           props: { checked: this.draft.isAllDay },
           on: {
             change: (e) => {
-              this.draft.isAllDay = (e.target as HTMLInputElement).checked;
+              const el = e.target;
+              this.draft.isAllDay = el instanceof HTMLInputElement ? el.checked : false;
             },
           },
         }),
@@ -230,7 +236,7 @@ export class EventForm {
       location: this.draft.location,
       color: this.draft.color,
       isAllDay: this.draft.isAllDay,
-      priority: this.draft.priority as 'low' | 'medium' | 'high',
+      priority: parseEventPriority(this.draft.priority),
       category: this.draft.category,
       attendees: splitCsv(this.draft.attendees),
       tags: splitCsv(this.draft.tags),

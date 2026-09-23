@@ -63,7 +63,8 @@ export class EditorView {
       )
     );
     this.root = built.el;
-    this.content = (built.el.firstElementChild as HTMLElement) ?? built.el;
+    const contentEl = built.el.firstElementChild;
+    this.content = contentEl instanceof HTMLElement ? contentEl : built.el;
     this.content.contentEditable = 'true';
     this.content.spellcheck = false;
     host.append(this.root);
@@ -300,20 +301,21 @@ export class EditorView {
       const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw || 0)];
 
       const editor = this.getEditor?.() ?? null;
+      if (!editor) {
+        el.textContent = `[${type}]`;
+        continue;
+      }
       const scope = new DisposableScope();
       const ctx: WidgetContext = {
         attrs,
         path,
-        editor: editor as EditorAPI,
+        editor,
         scope,
         updateAttrs: (partial) => {
-          if (!editor) {
-            return;
-          }
           editor.run(() => [{ type: 'set_attrs', path, attrs: partial }]);
         },
         openMenu: (items, x, y) => {
-          editor?.ui.menu.open(items, x, y);
+          editor.ui.menu.open(items, x, y);
         },
       };
       const handle = mountView(el, def.render(attrs, ctx));
@@ -363,7 +365,7 @@ function blockDomAttrs(node: DocNode): string {
         typeof parsed === 'object' &&
         !Array.isArray(parsed)
       ) {
-        for (const [k, v] of Object.entries(parsed as Record<string, unknown>)) {
+        for (const [k, v] of Object.entries(parsed)) {
           const vs = asAttr(v);
           if (vs !== '') {
             styleParts.push(`${k}:${vs}`);
@@ -417,10 +419,8 @@ function pathFromElement(el: HTMLElement): number[] {
 
 /** Resolve doc path from an atom host (or descendant). */
 export function pathFromAtomEl(el: HTMLElement): number[] {
-  const host =
-    el.closest('[data-ocm-atom="1"]') instanceof HTMLElement
-      ? (el.closest('[data-ocm-atom="1"]') as HTMLElement)
-      : el;
+  const atomHost = el.closest('[data-ocm-atom="1"]');
+  const host = atomHost instanceof HTMLElement ? atomHost : el;
   return pathFromElement(host);
 }
 
@@ -452,7 +452,7 @@ export function domPointToOffset(root: HTMLElement, node: Node, offset: number):
   if (node === root) {
     return 0;
   }
-  if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === 'BR') {
+  if (node instanceof Element && node.tagName === 'BR') {
     return 0;
   }
   const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
@@ -462,10 +462,8 @@ export function domPointToOffset(root: HTMLElement, node: Node, offset: number):
     if (cur === node) {
       return total + offset;
     }
-    if (node.nodeType === Node.ELEMENT_NODE && cur.parentNode === node) {
-      if (offset === 0) {
-        return total;
-      }
+    if (node.nodeType === Node.ELEMENT_NODE && cur.parentNode === node && offset === 0) {
+      return total;
     }
     total += cur.data.length;
     cur = walker.nextNode();

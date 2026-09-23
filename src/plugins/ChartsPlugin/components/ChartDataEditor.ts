@@ -1,6 +1,7 @@
 import { h, mount } from '@on-codemerge/sdk';
 import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { ChartPoint } from '../types';
+import { toChartPoint } from '../utils/validation';
 import { getRandomColor } from '../utils/colors';
 import { DataRow } from './DataRow';
 
@@ -75,7 +76,9 @@ export class ChartDataEditor {
   }
 
   private emit(): void {
-    this.data = this.rows.map((r) => r.getData() as ChartPoint).filter((point) => point.label);
+    this.data = this.rows
+      .map((r) => toChartPoint(r.getData()))
+      .filter((point): point is ChartPoint => point !== null);
     this.onChange(this.data);
   }
 

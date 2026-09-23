@@ -141,19 +141,15 @@ export function parseJsonToMatrix(
       hasHeader: false,
     };
   }
-  if (isRecord(data)) {
-    if (Array.isArray(data.rows)) {
-      const headers = Array.isArray(data.headers)
-        ? data.headers.map((h) => stringifyCell(h))
-        : null;
-      const body = data.rows.map((row) =>
-        (Array.isArray(row) ? row : [row]).map((c) => stringifyCell(c))
-      );
-      if (headers !== null) {
-        return { matrix: [headers, ...body], hasHeader: true };
-      }
-      return { matrix: body.length > 0 ? body : [['']], hasHeader: preferHeaders };
+  if (isRecord(data) && Array.isArray(data.rows)) {
+    const headers = Array.isArray(data.headers) ? data.headers.map((h) => stringifyCell(h)) : null;
+    const body = data.rows.map((row) =>
+      (Array.isArray(row) ? row : [row]).map((c) => stringifyCell(c))
+    );
+    if (headers !== null) {
+      return { matrix: [headers, ...body], hasHeader: true };
     }
+    return { matrix: body.length > 0 ? body : [['']], hasHeader: preferHeaders };
   }
   return { matrix: [[stringifyCell(data)]], hasHeader: false };
 }

@@ -12,14 +12,15 @@
     "docs/.vitepress/cache/**",
     "docs/.vitepress/dist/**",
     "demo/dist/**",
-    "src/plugins/CodeBlockPlugin/utils/languages/definitions/**"
+    "src/plugins/CodeBlockPlugin/utils/languages/definitions/**",
+    "src/__mocks__/**"
   ],
   "categories": {
     "correctness": "error",
     "suspicious": "error",
-    "perf": "warn",
-    "pedantic": "warn",
-    "style": "warn",
+    "perf": "off",
+    "pedantic": "off",
+    "style": "off",
     "restriction": "off",
     "nursery": "off"
   },
@@ -39,38 +40,8 @@
       }
     ],
     "curly": ["error", "all"],
-    "prefer-template": "warn",
-    "no-nested-ternary": "warn",
-    "no-underscore-dangle": [
-      "warn",
-      {
-        "allow": ["_exhaustive", "_onOut"],
-        "allowAfterThis": true,
-        "enforceInMethodNames": false
-      }
-    ],
 
-    "sort-keys": "off",
-    "sort-imports": "off",
-    "sort-vars": "off",
-    "id-length": "off",
-    "func-style": "off",
-    "one-var": "off",
-    "no-magic-numbers": "off",
-    "no-ternary": "off",
-    "new-cap": "off",
-    "max-statements": "off",
-    "max-lines-per-function": "off",
-    "max-lines": "off",
-    "max-params": "off",
-    "prefer-destructuring": "off",
-    "no-continue": "off",
-    "require-unicode-regexp": "off",
-    "capitalized-comments": "off",
-    "no-inline-comments": "off",
-    "init-declarations": "off",
-
-    "typescript/no-explicit-any": "warn",
+    "typescript/no-explicit-any": "error",
     "typescript/consistent-type-imports": "error",
     "typescript/no-floating-promises": "error",
     "typescript/no-misused-promises": "error",
@@ -83,7 +54,7 @@
     "typescript/no-unsafe-member-access": "error",
     "typescript/no-unsafe-argument": "error",
     "typescript/no-unsafe-return": "error",
-    "typescript/no-unsafe-type-assertion": "warn",
+    "typescript/no-unsafe-type-assertion": "error",
     "typescript/strict-boolean-expressions": [
       "error",
       {
@@ -96,8 +67,21 @@
         "allowString": true
       }
     ],
-    "typescript/no-confusing-void-expression": "warn",
-    "typescript/no-deprecated": "warn",
+    "typescript/consistent-return": "error",
+    "typescript/no-misused-spread": "error",
+    "typescript/prefer-nullish-coalescing": "off",
+    "typescript/no-deprecated": "off",
+    "typescript/no-confusing-void-expression": "off",
+    "typescript/prefer-readonly-parameter-types": "off",
+    "typescript/strict-void-return": "off",
+    "typescript/consistent-type-definitions": "off",
+    "typescript/method-signature-style": "off",
+    "typescript/parameter-properties": "off",
+    "typescript/ban-types": "error",
+    "typescript/switch-exhaustiveness-check": "error",
+    "typescript/prefer-promise-reject-errors": "error",
+    "typescript/require-await": "error",
+    "typescript/prefer-for-of": "error",
     "typescript/no-unused-vars": [
       "error",
       {
@@ -106,11 +90,6 @@
         "caughtErrorsIgnorePattern": "^_"
       }
     ],
-    "typescript/prefer-readonly-parameter-types": "off",
-    "typescript/strict-void-return": "off",
-    "typescript/consistent-type-definitions": "off",
-    "typescript/method-signature-style": "off",
-    "typescript/parameter-properties": "off",
 
     "import/no-cycle": "error",
     "import/first": "error",
@@ -132,38 +111,75 @@
     "unicorn/filename-case": "off",
     "unicorn/prefer-export-from": "off",
     "unicorn/no-array-for-each": "off",
-    "unicorn/explicit-length-check": "warn",
-    "unicorn/prefer-spread": "warn",
-    "unicorn/prefer-at": "warn",
-    "unicorn/prefer-dom-node-dataset": "warn",
-    "unicorn/no-lonely-if": "warn",
-    "unicorn/no-nested-ternary": "warn",
     "unicorn/no-array-callback-reference": "off",
     "unicorn/max-nested-calls": "off",
+    "unicorn/consistent-function-scoping": "error",
+    "unicorn/no-useless-undefined": "off",
+    "unicorn/prefer-global-this": "off",
+    "unicorn/prefer-ternary": "off",
+    "unicorn/no-useless-switch-case": "off",
+    "unicorn/prefer-string-slice": "error",
+    "unicorn/prefer-number-coercion": "error",
+    "unicorn/prefer-native-coercion-functions": "off",
+    "unicorn/prefer-blob-reading-methods": "error",
+    "unicorn/no-lonely-if": "error",
+    "unicorn/explicit-length-check": "error",
+    "unicorn/prefer-modern-dom-apis": "error",
+    "unicorn/prefer-single-call": "error",
+    "unicorn/no-immediate-mutation": "off",
 
     "oxc/no-map-spread": "off",
 
     "promise/no-return-wrap": "error",
     "promise/param-names": "error",
     "promise/no-multiple-resolved": "error",
-    "promise/always-return": "warn",
+    "promise/always-return": "error",
+    "promise/prefer-await-to-then": "error",
+    "promise/avoid-new": "off",
     "promise/prefer-await-to-callbacks": "off",
 
-    "unicorn/consistent-function-scoping": "warn",
-
-    "typescript/consistent-return": "warn",
-    "typescript/no-misused-spread": "warn",
-    "typescript/no-base-to-string": "warn",
+    "eslint/radix": "error",
+    "eslint/no-await-in-loop": "off",
+    "eslint/require-await": "error",
+    "eslint/no-underscore-dangle": [
+      "error",
+      {
+        "allow": ["_exhaustive", "_onOut", "__ocmViewportManager"],
+        "allowAfterThis": true,
+        "enforceInMethodNames": false
+      }
+    ],
+    "eslint/no-useless-return": "error",
+    "eslint/max-depth": "off",
+    "eslint/no-script-url": "error",
+    "eslint/no-promise-executor-return": "error",
+    "eslint/no-lonely-if": "error",
+    "eslint/max-classes-per-file": "off",
+    "eslint/default-param-last": "error",
+    "eslint/no-loop-func": "error",
+    "eslint/prefer-named-capture-group": "off",
+    "eslint/no-nested-ternary": "off",
 
     "jest/prefer-ending-with-an-expect": "off",
     "jest/require-hook": "off",
     "jest/no-hooks": "off",
     "jest/require-top-level-describe": "off",
-    "jest/no-conditional-in-test": "warn",
-    "jest/no-conditional-expect": "warn",
-    "jest/valid-expect": "warn"
+    "jest/no-conditional-in-test": "off",
+    "jest/no-conditional-expect": "error",
+    "jest/valid-expect": "error",
+    "jest/max-expects": "off",
+    "jest/prefer-strict-equal": "error",
+    "jest/prefer-expect-assertions": "off",
+    "jest/prefer-called-with": "error"
   },
   "overrides": [
+    {
+      "files": ["**/__mocks__/**/*.{ts,js,mjs}", "src/__mocks__/**/*.{ts,js,mjs}"],
+      "rules": {
+        "typescript/no-unsafe-type-assertion": "off",
+        "typescript/consistent-type-assertions": "off"
+      }
+    },
     {
       "files": ["**/*.{test,spec}.{ts,js,mjs}", "**/__tests__/**/*.{ts,js,mjs}"],
       "env": {
@@ -181,8 +197,11 @@
         "typescript/no-misused-promises": "off",
         "typescript/unbound-method": "off",
         "typescript/strict-boolean-expressions": "off",
+        "typescript/ban-types": "off",
+        "typescript/no-unnecessary-type-assertion": "off",
         "jest/no-conditional-expect": "off",
-        "jest/valid-expect": "off"
+        "promise/prefer-await-to-then": "off",
+        "promise/always-return": "off"
       }
     },
     {
@@ -201,10 +220,12 @@
         "typescript/no-unsafe-call": "off",
         "typescript/no-unsafe-argument": "off",
         "typescript/no-unsafe-return": "off",
+        "typescript/no-unsafe-type-assertion": "off",
         "typescript/strict-boolean-expressions": "off",
         "typescript/consistent-return": "off",
-        "eslint/no-unused-vars": "off",
-        "no-unused-vars": "warn"
+        "typescript/require-await": "off",
+        "no-unused-vars": "off",
+        "promise/prefer-await-to-then": "off"
       }
     },
     {
@@ -239,7 +260,8 @@
         "typescript/no-unsafe-member-access": "off",
         "typescript/no-unsafe-call": "off",
         "typescript/no-unsafe-return": "off",
-        "typescript/no-unsafe-argument": "off"
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-type-assertion": "off"
       }
     }
   ]

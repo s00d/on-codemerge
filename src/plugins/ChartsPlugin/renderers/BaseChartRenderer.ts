@@ -1,4 +1,4 @@
-import type { ChartOptions } from '../types';
+import type { ChartOptions, ChartPoint, ChartSeries } from '../types';
 import { CHART_COLORS, colorWithOpacity } from '../utils/colors';
 import type { EditorAPI } from '@on-codemerge/sdk';
 
@@ -10,7 +10,11 @@ export abstract class BaseChartRenderer {
     this.editor = editor;
   }
 
-  abstract render(ctx: CanvasRenderingContext2D, data: any[], options: ChartOptions): void;
+  abstract render(
+    ctx: CanvasRenderingContext2D,
+    data: ChartPoint[] | ChartSeries[],
+    options: ChartOptions
+  ): void;
 
   protected colorWithOpacity(color: string | undefined, opacity: number): string {
     return colorWithOpacity(color, opacity);

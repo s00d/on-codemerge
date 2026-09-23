@@ -82,16 +82,18 @@ function normalizeTree(value: unknown): BlockTree | null {
   if (value === null || value === undefined || typeof value !== 'object') {
     return null;
   }
-  const v = value as Record<string, unknown>;
-  if (v.kind === 'leaf') {
+  const kind: unknown = Reflect.get(value, 'kind');
+  if (kind === 'leaf') {
     return leaf();
   }
-  if (v.kind === 'split' && (v.dir === 'row' || v.dir === 'column') && Array.isArray(v.children)) {
-    const children = v.children.map(normalizeTree).filter((c): c is BlockTree => c !== null);
+  const dir: unknown = Reflect.get(value, 'dir');
+  const rawChildren: unknown = Reflect.get(value, 'children');
+  if (kind === 'split' && (dir === 'row' || dir === 'column') && Array.isArray(rawChildren)) {
+    const children = rawChildren.map(normalizeTree).filter((c): c is BlockTree => c !== null);
     if (children.length < 2) {
       return children[0] ?? leaf();
     }
-    return split(v.dir, children);
+    return split(dir, children);
   }
   return null;
 }

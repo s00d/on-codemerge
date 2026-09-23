@@ -103,7 +103,8 @@ export class ToolbarPanel {
       )
     );
     this.el = shell.el;
-    this.bar = (shell.el.firstElementChild as HTMLElement) ?? shell.el;
+    const firstChild = shell.el.firstElementChild;
+    this.bar = firstChild instanceof HTMLElement ? firstChild : shell.el;
     this.shellDestroy = shell.destroy;
     host.prepend(this.el);
     // Leaving the whole toolbar (not into the open panel) drops hover menus.
@@ -403,15 +404,24 @@ export class ToolbarPanel {
           },
           click: (e) => {
             e.preventDefault();
-            this.toggleMenu(def.id, e.currentTarget as HTMLElement);
+            const trigger = e.currentTarget;
+            if (!(trigger instanceof HTMLElement)) {
+              return;
+            }
+            this.toggleMenu(def.id, trigger);
           },
           pointerenter: (e) => {
             this.overTrigger = true;
-            this.showMenu(def.id, e.currentTarget as HTMLElement);
+            const trigger = e.currentTarget;
+            if (!(trigger instanceof HTMLElement)) {
+              return;
+            }
+            this.showMenu(def.id, trigger);
           },
           pointerleave: (e) => {
             // Bar remount replaces the node — ignore leave on the detached trigger.
-            if (!(e.currentTarget as Node).isConnected) {
+            const trigger = e.currentTarget;
+            if (!(trigger instanceof Node) || !trigger.isConnected) {
               return;
             }
             const to = e.relatedTarget;

@@ -1,6 +1,6 @@
 import type { ChartMenu } from './ChartMenu';
 import { editIcon, deleteIcon, exportIcon } from '../../../icons';
-import type { ChartType } from '../types';
+import { isChartType } from '../utils/validation';
 import { downloadUrl } from '@on-codemerge/sdk';
 import type { EditorAPI } from '@on-codemerge/sdk';
 import { pathFromEl, removeAtomAt } from '../../../utils/atomPath';
@@ -29,8 +29,8 @@ export class ChartContextMenu {
             if (!this.activeChart) {
               return;
             }
-            const type = this.activeChart.dataset.chartType as ChartType;
-            if (type && this.activeChart.dataset.chartData) {
+            const typeRaw = this.activeChart.dataset.chartType ?? '';
+            if (isChartType(typeRaw) && this.activeChart.dataset.chartData) {
               this.chartMenu.edit(this.activeChart);
             }
           },
@@ -42,8 +42,8 @@ export class ChartContextMenu {
             if (!this.activeChart) {
               return;
             }
-            const img = this.activeChart.querySelector('img.svg-chart') as HTMLImageElement | null;
-            if (img?.src) {
+            const img = this.activeChart.querySelector('img.svg-chart');
+            if (img instanceof HTMLImageElement && img.src) {
               downloadUrl(img.src, 'chart.png');
               return;
             }
@@ -59,7 +59,7 @@ export class ChartContextMenu {
           icon: deleteIcon,
           variant: 'danger',
           onClick: () => {
-            removeAtomAt(pathFromEl(shell) ?? shell, (cmd) => this.editor.run(cmd as never));
+            removeAtomAt(pathFromEl(shell) ?? shell, (cmd) => this.editor.run(cmd));
           },
         },
       ],

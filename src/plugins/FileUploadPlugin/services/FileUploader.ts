@@ -30,11 +30,11 @@ export class FileUploader {
 
     // Use real endpoints if configured and emulation is disabled
     if (this.config.endpoints?.upload && !this.config.useEmulation) {
-      return this.uploadToServer(file);
+      return await this.uploadToServer(file);
     }
 
     // Fallback to emulation
-    return this.emulateUpload(file);
+    return await this.emulateUpload(file);
   }
 
   public async downloadFile(id: string): Promise<void> {
@@ -62,15 +62,12 @@ export class FileUploader {
     }
 
     const data: unknown = await response.json();
-    const payload = data as {
-      id?: string;
-      url?: string;
-      name?: string;
-      size?: number;
-      type?: string;
-    };
+    let id = '';
+    if (typeof data === 'object' && data !== null && 'id' in data && typeof data.id === 'string') {
+      id = data.id;
+    }
     return {
-      id: payload.id ?? '',
+      id,
       name: file.name,
       size: file.size,
       type: file.type,
@@ -95,7 +92,9 @@ export class FileUploader {
 
   private async emulateUpload(file: File): Promise<UploadedFile> {
     // Simulate network delay
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 1000);
+    });
 
     const uploadedFile = {
       id: crypto.randomUUID(),

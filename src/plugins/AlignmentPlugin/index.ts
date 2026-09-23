@@ -4,6 +4,10 @@ import { definePlugin, setBlockAttr, core, findAncestorPath } from '@on-codemerg
 import type { EditorAPI } from '@on-codemerge/sdk';
 import { alignLeftIcon, alignCenterIcon, alignRightIcon, alignJustifyIcon } from '../../icons';
 
+function attrStr(v: unknown, fallback = ''): string {
+  return typeof v === 'string' ? v : fallback;
+}
+
 function selectedAlign(editor: EditorAPI): string {
   const state = editor.getState();
   const path = state.selection.anchor.path;
@@ -13,14 +17,14 @@ function selectedAlign(editor: EditorAPI): string {
   try {
     const cell = findAncestorPath(state.doc, path, 'tableCell');
     if (cell) {
-      return String(core.getNodeAt(state.doc, cell).attrs?.align ?? '');
+      return attrStr(core.getNodeAt(state.doc, cell).attrs?.align);
     }
     const listItem = findAncestorPath(state.doc, path, 'listItem');
     if (listItem) {
-      return String(core.getNodeAt(state.doc, listItem).attrs?.align ?? '');
+      return attrStr(core.getNodeAt(state.doc, listItem).attrs?.align);
     }
     const root = core.getNodeAt(state.doc, [path[0] ?? 0]);
-    return String(root.attrs?.align ?? '');
+    return attrStr(root.attrs?.align);
   } catch {
     return '';
   }

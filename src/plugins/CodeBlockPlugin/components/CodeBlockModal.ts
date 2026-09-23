@@ -48,7 +48,8 @@ export class CodeBlockModal {
               },
               on: {
                 input: (e) => {
-                  filter = (e.target as HTMLInputElement).value;
+                  const el = e.target;
+                  filter = el instanceof HTMLInputElement ? el.value : '';
                   paint();
                 },
               },
@@ -117,7 +118,8 @@ export class CodeBlockModal {
                   props: { value: this.code },
                   on: {
                     input: (e) => {
-                      this.code = (e.target as HTMLTextAreaElement).value;
+                      const el = e.target;
+                      this.code = el instanceof HTMLTextAreaElement ? el.value : '';
                     },
                   },
                 }),

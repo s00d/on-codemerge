@@ -212,12 +212,12 @@ export function TablePlugin() {
         }
         const key = lazyKey(table.id, cfg.url, tp[0] ?? 0);
         loadedKeys.delete(key);
-        void applyLazyLoad(editor, cfg).then((ok) => {
+        void (async () => {
+          const ok = await applyLazyLoad(editor, cfg);
           if (ok) {
             loadedKeys.add(key);
           }
-          return ok;
-        });
+        })();
       };
 
       ctx.toolbar.add({

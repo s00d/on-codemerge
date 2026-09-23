@@ -1,6 +1,7 @@
 import { h, mount } from '@on-codemerge/sdk';
 import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
 import type { FieldConfig, FieldType } from '../types';
+import { isFieldType } from '../types';
 import type { FormManager } from '../services/FormManager';
 
 /** Field settings editor — ViewSpec + mountInto; presets via ui.popup. */
@@ -56,7 +57,11 @@ export class FieldEditor {
         props: { value },
         on: {
           input: (e) => {
-            onInput((e.target as HTMLInputElement).value);
+            const t = e.target;
+            if (!(t instanceof HTMLInputElement)) {
+              return;
+            }
+            onInput(t.value);
           },
         },
       }),
@@ -71,7 +76,11 @@ export class FieldEditor {
         props: { checked },
         on: {
           change: (e) => {
-            onChange((e.target as HTMLInputElement).checked);
+            const t = e.target;
+            if (!(t instanceof HTMLInputElement)) {
+              return;
+            }
+            onChange(t.checked);
           },
         },
       }),
@@ -176,7 +185,7 @@ export class FieldEditor {
             this.t('common.rows'),
             String(o.rows ?? 4),
             (v) => {
-              upd({ rows: parseInt(v) || 4 });
+              upd({ rows: Math.trunc(Number(v)) || 4 });
             },
             'number'
           ),
@@ -184,7 +193,7 @@ export class FieldEditor {
             this.t('common.columns'),
             String(o.cols ?? 50),
             (v) => {
-              upd({ cols: parseInt(v) || 50 });
+              upd({ cols: Math.trunc(Number(v)) || 50 });
             },
             'number'
           )
@@ -243,7 +252,7 @@ export class FieldEditor {
             this.t('common.maxLength'),
             o.maxlength === undefined ? '' : String(o.maxlength),
             (v) => {
-              upd({ maxlength: v ? parseInt(v) : undefined });
+              upd({ maxlength: v ? Math.trunc(Number(v)) : undefined });
             },
             'number'
           ),
@@ -356,7 +365,11 @@ export class FieldEditor {
                   on: {
                     input: (e) => {
                       const newOptions = [...options];
-                      newOptions[index] = (e.target as HTMLInputElement).value;
+                      const t = e.target;
+                      if (!(t instanceof HTMLInputElement)) {
+                        return;
+                      }
+                      newOptions[index] = t.value;
                       this.onUpdate(field.id, {
                         options: { ...field.options, options: newOptions },
                       });
@@ -584,7 +597,14 @@ export class FieldEditor {
                 props: { value: field.type },
                 on: {
                   change: (e) => {
-                    const newType = (e.target as HTMLSelectElement).value as FieldType;
+                    const t = e.target;
+                    if (!(t instanceof HTMLSelectElement)) {
+                      return;
+                    }
+                    const newType = t.value;
+                    if (!isFieldType(newType)) {
+                      return;
+                    }
                     this.onUpdate(field.id, { type: newType });
                     this.onTypeChange?.(field.id, newType);
                   },
@@ -660,7 +680,10 @@ export class FieldEditor {
             field.validation?.minLength?.toString() ?? '',
             (v) => {
               this.onUpdate(field.id, {
-                validation: { ...field.validation, minLength: parseInt(v) || undefined },
+                validation: {
+                  ...field.validation,
+                  minLength: v ? Math.trunc(Number(v)) : undefined,
+                },
               });
             },
             'number'
@@ -670,7 +693,10 @@ export class FieldEditor {
             field.validation?.maxLength?.toString() ?? '',
             (v) => {
               this.onUpdate(field.id, {
-                validation: { ...field.validation, maxLength: parseInt(v) || undefined },
+                validation: {
+                  ...field.validation,
+                  maxLength: v ? Math.trunc(Number(v)) : undefined,
+                },
               });
             },
             'number'

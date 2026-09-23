@@ -7,18 +7,19 @@ export function downloadJson(filename: string, data: string): void {
 }
 
 export function pickJsonFile(onText: (text: string) => void): void {
-  void pickFile({ accept: '.json' }).then((files) => {
-    const file = files?.[0];
-    if (!file) {
-      return;
+  void (async () => {
+    try {
+      const files = await pickFile({ accept: '.json' });
+      const file = files?.[0];
+      if (!file) {
+        return;
+      }
+      const text = await file.text();
+      onText(text);
+    } catch {
+      /* user cancelled or read failed */
     }
-    const reader = new FileReader();
-    reader.addEventListener('load', () => {
-      onText(typeof reader.result === 'string' ? reader.result : '');
-    });
-    reader.readAsText(file);
-    return;
-  });
+  })();
 }
 
 export function mountCalendarView(

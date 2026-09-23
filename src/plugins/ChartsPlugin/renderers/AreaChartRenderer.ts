@@ -36,12 +36,10 @@ export class AreaChartRenderer extends BaseChartRenderer {
       } else {
         this.drawNormalArea(ctx, seriesArr, options, maxValue, colors);
       }
+    } else if (mode === 'stacked') {
+      this.drawHorizontalStackedArea(ctx, seriesArr, options, maxValue, colors);
     } else {
-      if (mode === 'stacked') {
-        this.drawHorizontalStackedArea(ctx, seriesArr, options, maxValue, colors);
-      } else {
-        this.drawHorizontalArea(ctx, seriesArr, options, maxValue, colors);
-      }
+      this.drawHorizontalArea(ctx, seriesArr, options, maxValue, colors);
     }
 
     this.drawAxisLabels(ctx, options);

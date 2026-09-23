@@ -7,7 +7,7 @@ describe('math tokenize', () => {
   it('splits commands and scripts', () => {
     expect.hasAssertions();
     const toks = tokenize(String.raw`\frac{a}{b}`);
-    expect(toks.map((t) => t.kind)).toEqual([
+    expect(toks.map((t) => t.kind)).toStrictEqual([
       'command',
       'lbrace',
       'char',
@@ -16,7 +16,7 @@ describe('math tokenize', () => {
       'char',
       'rbrace',
     ]);
-    expect(tokenize('x^2').map((t) => t.kind)).toEqual(['char', 'sup', 'char']);
+    expect(tokenize('x^2').map((t) => t.kind)).toStrictEqual(['char', 'sup', 'char']);
   });
 });
 

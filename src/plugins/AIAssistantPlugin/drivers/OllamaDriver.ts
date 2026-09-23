@@ -1,19 +1,15 @@
 import type { AIDriver, DriverOptions, OptionsDescription } from './AIDriver';
 
 // Типизация для ответа API Ollama (Generate Completion)
-interface GenerateCompletionResponse {
-  model: string;
-  created_at: string;
-  response: string;
-  done: boolean;
-  context?: number[];
-  total_duration?: number;
-  load_duration?: number;
-  prompt_eval_count?: number;
-  prompt_eval_duration?: number;
-  eval_count?: number;
-  eval_duration?: number;
-  done_reason?: string;
+function readOllamaResponse(value: unknown): string {
+  if (value === null || typeof value !== 'object' || !('response' in value)) {
+    throw new TypeError('Invalid Ollama response');
+  }
+  const response = Reflect.get(value, 'response');
+  if (typeof response !== 'string') {
+    throw new TypeError('Invalid Ollama response');
+  }
+  return response;
 }
 
 // Типизация для параметров Ollama
@@ -119,15 +115,13 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
           }
 
           const chunk = new TextDecoder().decode(value);
-          const parsedChunk = JSON.parse(chunk) as GenerateCompletionResponse;
-          result += parsedChunk.response;
+          result += readOllamaResponse(JSON.parse(chunk));
         }
       }
 
       return result;
     }
     // Обработка не потокового ответа
-    const data = (await response.json()) as GenerateCompletionResponse;
-    return data.response;
+    return readOllamaResponse(await response.json());
   }
 }

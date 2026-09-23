@@ -6,7 +6,13 @@ import { ChartContextMenu } from '../components/ChartContextMenu';
 import { ChartRenderer } from '../services/ChartRenderer';
 import { Resizer } from '../../../utils/Resizer';
 import { atomAlignStyle } from '../../../utils/atomAlign';
-import type { ChartSeries, ChartType } from '../types';
+import type { ChartSeries } from '../types';
+import {
+  parseChartDataJson,
+  parseChartMode,
+  parseChartOrientation,
+  parseChartType,
+} from '../utils/validation';
 
 /** Mount chart into atom host; all teardown via `scope`. */
 export function mountChartWidget(
@@ -28,14 +34,10 @@ export function mountChartWidget(
   }
 
   const renderer = new ChartRenderer(api);
-  const type = attrString(attrs.chartType, 'bar') as ChartType;
-  let data: ChartSeries[] = [];
-  try {
-    const raw = attrs.data;
-    data = JSON.parse(typeof raw === 'string' ? raw : '[]') as ChartSeries[];
-  } catch {
-    data = [];
-  }
+  const type = parseChartType(attrString(attrs.chartType, 'bar'));
+  const data: ChartSeries[] = parseChartDataJson(
+    typeof attrs.data === 'string' ? attrs.data : '[]'
+  );
   const width = Number(attrs.width) || 800;
   const height = Number(attrs.height) || 400;
   el.style.width = `${width}px`;
@@ -63,8 +65,8 @@ export function mountChartWidget(
     yAxis: { title: attrString(attrs.yAxisLabel) },
     legend: { show: attrs.showLegend !== false },
     grid: { show: attrs.showGrid !== false },
-    mode: (attrs.mode as 'default' | 'stacked' | 'grouped') || 'default',
-    orientation: (attrs.orientation as 'vertical' | 'horizontal') || 'vertical',
+    mode: parseChartMode(attrString(attrs.mode, 'default')),
+    orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
   });
   el.append(img);
 

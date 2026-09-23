@@ -1,3 +1,6 @@
+import type { ChartOptions } from './ChartOptions';
+import type { ChartPoint, ChartSeries } from './ChartTypes';
+
 export interface ChartResizeEvent {
   type: 'resize';
   width: number;
@@ -6,8 +9,8 @@ export interface ChartResizeEvent {
 
 export interface ChartUpdateEvent {
   type: 'update';
-  data: any;
-  options: any;
+  data: ChartPoint[] | ChartSeries[];
+  options: ChartOptions;
 }
 
 export interface ChartDestroyEvent {

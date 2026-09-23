@@ -7,18 +7,14 @@ export function downloadJson(filename: string, data: string): void {
 }
 
 export function pickJsonFile(onText: (text: string) => void): void {
-  void pickFile({ accept: '.json' }).then((files) => {
+  void (async () => {
+    const files = await pickFile({ accept: '.json' });
     const file = files?.[0];
     if (!file) {
       return;
     }
-    const reader = new FileReader();
-    reader.addEventListener('load', () => {
-      onText(typeof reader.result === 'string' ? reader.result : '');
-    });
-    reader.readAsText(file);
-    return;
-  });
+    onText(await file.text());
+  })();
 }
 
 export function mountTimerView(

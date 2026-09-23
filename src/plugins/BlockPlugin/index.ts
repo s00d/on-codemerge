@@ -109,8 +109,12 @@ function renderBlock(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
     };
 
     scope.on(host, 'contextmenu', (e) => {
-      const target = e.target as Element | null;
-      const pane = target?.closest<HTMLElement>('[data-pane-path]');
+      const target = e.target;
+      if (!(target instanceof Element)) {
+        openMenu(e, null);
+        return;
+      }
+      const pane = target.closest<HTMLElement>('[data-pane-path]');
       if (pane && host.contains(pane) && pane.dataset.panePath !== undefined) {
         const raw = pane.dataset.panePath;
         const panePath =
@@ -182,11 +186,15 @@ export function BlockPlugin() {
       });
 
       ctx.onDom('host', 'contextmenu', (e) => {
-        const block = (e.target as Element).closest('.ocm-block-container, .html-editor-block');
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const block = target.closest('.ocm-block-container, .html-editor-block');
         if (!(block instanceof HTMLElement)) {
           return;
         }
-        const pane = (e.target as Element).closest<HTMLElement>('.block-pane[data-pane-path]');
+        const pane = target.closest<HTMLElement>('.block-pane[data-pane-path]');
         const panePath =
           pane && block.contains(pane) && pane.dataset.panePath
             ? pane.dataset.panePath

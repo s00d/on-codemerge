@@ -200,7 +200,10 @@ export class Resizer {
       this.updateBadge(this.startWidth, this.startHeight);
     }
 
-    const target = e.currentTarget as HTMLElement;
+    const target = e.currentTarget;
+    if (!(target instanceof HTMLElement)) {
+      return;
+    }
     if (typeof target.setPointerCapture === 'function') {
       try {
         target.setPointerCapture(e.pointerId);
@@ -270,8 +273,8 @@ export class Resizer {
     if (this.dragging) {
       return;
     }
-    const target = e.target as Node | null;
-    if (target && this.element.contains(target)) {
+    const target = e.target;
+    if (target instanceof Node && this.element.contains(target)) {
       return;
     }
     this.options.onBlur?.();

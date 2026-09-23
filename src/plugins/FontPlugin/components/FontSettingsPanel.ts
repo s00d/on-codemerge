@@ -49,10 +49,11 @@ export function fontSettingsPanel(editor: EditorAPI, draft: FontDraft): ViewSpec
         opts.find((f) => f.id === draft.family)?.label ??
         draft.family.split(',')[0]?.replaceAll(/['"]/g, '').trim() ??
         '';
+      const fontSizePx = draft.size !== '' ? draft.size : '16px';
 
       const previewStyle: Record<string, string> = {
         fontFamily: draft.family || 'inherit',
-        fontSize: draft.size || '16px',
+        fontSize: fontSizePx,
         lineHeight: draft.lineHeight === 'normal' || !draft.lineHeight ? '1.5' : draft.lineHeight,
       };
 
@@ -63,7 +64,7 @@ export function fontSettingsPanel(editor: EditorAPI, draft: FontDraft): ViewSpec
           h('div', { class: 'fp-preview__meta' }, [
             familyLabel,
             ' · ',
-            draft.size || '16px',
+            fontSizePx,
             ' · ',
             draft.lineHeight || '1.5',
           ]),
@@ -86,7 +87,11 @@ export function fontSettingsPanel(editor: EditorAPI, draft: FontDraft): ViewSpec
               attrs: { 'aria-label': t('font.family') },
               on: {
                 change: (e: Event) => {
-                  draft.family = (e.target as HTMLSelectElement).value;
+                  const selectEl = e.target;
+                  if (!(selectEl instanceof HTMLSelectElement)) {
+                    return;
+                  }
+                  draft.family = selectEl.value;
                   paint();
                 },
               },
@@ -110,9 +115,9 @@ export function fontSettingsPanel(editor: EditorAPI, draft: FontDraft): ViewSpec
         h('section', { class: 'fp-section' }, [
           h('h3', { class: 'fp-section__title' }, t('font.size')),
           h('div', { class: 'fp-chips' }, [
-            ...(draft.size && !(FONT_SIZES as readonly string[]).includes(draft.size)
+            ...(fontSizePx !== '' && !(FONT_SIZES as readonly string[]).includes(fontSizePx)
               ? [
-                  chip(draft.size.replace('px', ''), true, () => {
+                  chip(fontSizePx.replace('px', ''), true, () => {
                     paint();
                   }),
                 ]
@@ -151,15 +156,16 @@ export function fontSettingsPanel(editor: EditorAPI, draft: FontDraft): ViewSpec
 
     paint();
 
-    void listAvailableFonts()
-      .then((list) => {
+    void (async () => {
+      try {
+        const list = await listAvailableFonts();
         if (list.length > 0) {
           families = list;
           paint();
         }
-      })
-      .catch(() => {
+      } catch {
         /* keep static FONT_FAMILIES */
-      });
+      }
+    })();
   });
 }

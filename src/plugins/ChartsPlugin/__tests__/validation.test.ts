@@ -10,7 +10,7 @@ describe('validateChartData', () => {
     expect.hasAssertions();
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(validateChartData([])).toBe(false);
-    expect(validateChartData(null as never)).toBe(false);
+    expect(validateChartData(null)).toBe(false);
   });
 
   it('accepts value points and series', () => {
@@ -31,7 +31,7 @@ describe('validateChartData', () => {
     expect.hasAssertions();
     vi.spyOn(console, 'warn').mockImplementation(() => {});
     expect(validateChartData([{ label: 'A', x: 1, y: 2 }])).toBe(true);
-    expect(validateChartData([{ label: 'A', x: 1 } as never])).toBe(false);
+    expect(validateChartData([{ label: 'A', x: 1 }])).toBe(false);
   });
 });
 
@@ -46,12 +46,12 @@ describe('normalizeChartData', () => {
   it('passes series through', () => {
     expect.hasAssertions();
     const series = [{ name: 'S', data: [{ label: 'A', value: 1 }] }];
-    expect(normalizeChartData(series)).toBe(series);
+    expect(normalizeChartData(series)).toStrictEqual(series);
   });
 
   it('normalizeChartData tolerates non-arrays', () => {
     expect.hasAssertions();
-    expect(normalizeChartData(null as never)).toStrictEqual([]);
-    expect(normalizeChartData({} as never)).toStrictEqual([]);
+    expect(normalizeChartData(null)).toStrictEqual([]);
+    expect(normalizeChartData({})).toStrictEqual([]);
   });
 });

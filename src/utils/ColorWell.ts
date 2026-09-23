@@ -129,8 +129,13 @@ function wellPanel(
 
     const preview = root.refs.preview;
     const hexLabel = root.refs.hex;
-    const sv = root.refs.sv as HTMLCanvasElement;
-    const hue = root.refs.hue as HTMLCanvasElement;
+    const svRef = root.refs.sv;
+    const hueRef = root.refs.hue;
+    if (!(svRef instanceof HTMLCanvasElement) || !(hueRef instanceof HTMLCanvasElement)) {
+      return;
+    }
+    const sv = svRef;
+    const hue = hueRef;
     const svThumb = root.refs.svThumb;
     const hueThumb = root.refs.hueThumb;
     const quickHost = root.refs.quick;

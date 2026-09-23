@@ -188,7 +188,12 @@ describe('editor and io gaps', () => {
       { name: 'more', hotkeys: [{ keys: 'Mod-1', command: 'x' }], setup },
       editor
     );
-    expect(setup).toHaveBeenCalled();
+    expect(setup).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'more',
+        editor: expect.any(Object),
+      })
+    );
     runExtensionSetup(platform, [{ name: 'base' }], editor);
     const bareHost = document.createElement('div');
     registerPlugin(
@@ -244,7 +249,7 @@ describe('editor and io gaps', () => {
     expect.hasAssertions();
     const host = mount();
     const editor = new Editor(host, { plugins: [TrackChangesPlugin()] });
-    expect(editor.getStoredMarks()).toEqual([]);
+    expect(editor.getStoredMarks()).toStrictEqual([]);
     expect(editor.getSoftDeleteMark()).toBeNull();
     editor.setStoredMarks([{ type: 'insertion', attrs: { author: 't' } }]);
     editor.setSoftDeleteMark({ type: 'deletion', attrs: { author: 't' } });
@@ -258,7 +263,7 @@ describe('editor and io gaps', () => {
     ).toBe(true);
     editor.setStoredMarks([]);
     editor.setSoftDeleteMark(null);
-    expect(editor.getStoredMarks()).toEqual([]);
+    expect(editor.getStoredMarks()).toStrictEqual([]);
     expect(editor.getSoftDeleteMark()).toBeNull();
     editor.destroy();
     host.remove();

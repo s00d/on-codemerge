@@ -33,7 +33,8 @@ export class TablePopup {
           attrs: { type: 'checkbox', id: 'tableHeader' },
           on: {
             change: (e) => {
-              this.hasHeader = (e.target as HTMLInputElement).checked;
+              const input = e.target;
+              this.hasHeader = input instanceof HTMLInputElement ? input.checked : false;
             },
           },
         }),
@@ -69,7 +70,8 @@ export class TablePopup {
                 attrs: { role: 'grid', 'aria-label': t('Table size') },
                 on: {
                   mousemove: (e) => {
-                    const cell = (e.target as HTMLElement).closest('.table-picker__cell');
+                    const from = e.target instanceof Element ? e.target : null;
+                    const cell = from?.closest('.table-picker__cell') ?? null;
                     if (!(cell instanceof HTMLElement)) {
                       return;
                     }

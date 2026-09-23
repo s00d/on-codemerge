@@ -25,7 +25,10 @@ export function renderCodeBlockDom(
             on: {
               click: (e) => {
                 e.stopPropagation();
-                const btn = e.currentTarget as HTMLButtonElement;
+                const btn = e.currentTarget;
+                if (!(btn instanceof HTMLButtonElement)) {
+                  return;
+                }
                 const codeElement = document.querySelector(`#${uniqueId}`)?.querySelector('code');
                 if (!codeElement) {
                   return;

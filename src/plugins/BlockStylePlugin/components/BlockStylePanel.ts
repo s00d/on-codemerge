@@ -23,7 +23,10 @@ function selectField(
         attrs: { id },
         on: {
           change: (e: Event) => {
-            onChange((e.target as HTMLSelectElement).value);
+            const t = e.target;
+            if (t instanceof HTMLSelectElement) {
+              onChange(t.value);
+            }
           },
         },
       },
@@ -94,7 +97,9 @@ export function blockStylePanel(editor: EditorAPI, draft: StyleDraft): ViewSpec 
 
     const syncTabs = (root: HTMLElement) => {
       for (const btn of root.querySelectorAll<HTMLElement>('.bs-color-tab')) {
-        const id = btn.dataset.target as ColorTarget | undefined;
+        const raw = btn.dataset.target;
+        const id: ColorTarget | undefined =
+          raw === 'color' || raw === 'background-color' || raw === 'border-color' ? raw : undefined;
         btn.classList.toggle('is-active', id === colorTarget);
       }
     };

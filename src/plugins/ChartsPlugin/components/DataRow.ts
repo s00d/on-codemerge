@@ -59,7 +59,8 @@ export class DataRow {
       props: { value },
       on: {
         input: (e) => {
-          onInput((e.target as HTMLInputElement).value);
+          const el = e.target;
+          onInput(el instanceof HTMLInputElement ? el.value : '');
           this.onChange();
         },
       },

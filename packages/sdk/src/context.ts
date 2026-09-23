@@ -143,10 +143,13 @@ export function createPluginContext(opts: CreatePluginContextOptions): PluginCon
       return scope.own(resource);
     },
     defer(task) {
-      const promise = typeof task === 'function' ? task() : task;
-      promise.catch((error) => {
-        console.error(`[plugin:${name}] deferred task failed`, error);
-      });
+      void (async () => {
+        try {
+          await (typeof task === 'function' ? task() : task);
+        } catch (error) {
+          console.error(`[plugin:${name}] deferred task failed`, error);
+        }
+      })();
     },
     mount(parent, spec) {
       const handle = mountView(parent, spec);
@@ -160,9 +163,9 @@ export function createPluginContext(opts: CreatePluginContextOptions): PluginCon
       const holder = document.createElement('div');
       if (parent) {
         if (position === 'before') {
-          parent.insertBefore(holder, editor.host);
+          editor.host.before(holder);
         } else {
-          parent.insertBefore(holder, editor.host.nextSibling);
+          editor.host.after(holder);
         }
       } else {
         editor.host.insertAdjacentElement(

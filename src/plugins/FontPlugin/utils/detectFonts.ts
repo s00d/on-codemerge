@@ -11,8 +11,10 @@ let inflight: Promise<FontOption[]> | null = null;
 
 function measureWidth(fontCss: string): number {
   const { el } = renderDetached(canvas());
-  const canvasEl = el as HTMLCanvasElement;
-  const ctx = canvasEl.getContext('2d');
+  if (!(el instanceof HTMLCanvasElement)) {
+    return 0;
+  }
+  const ctx = el.getContext('2d');
   if (!ctx) {
     return 0;
   }
@@ -41,20 +43,24 @@ export function isLocalFontAvailable(fontName: string): boolean {
 
 type LocalFontData = { family: string };
 
+function windowHasLocalFonts(
+  w: Window
+): w is Window & { queryLocalFonts: () => Promise<LocalFontData[]> } {
+  return 'queryLocalFonts' in w && typeof w.queryLocalFonts === 'function';
+}
+
 async function tryQueryLocalFonts(): Promise<FontOption[] | null> {
-  const w = window as Window & {
-    queryLocalFonts?: () => Promise<LocalFontData[]>;
-  };
-  if (typeof w.queryLocalFonts !== 'function') {
+  if (!windowHasLocalFonts(window)) {
     return null;
   }
 
   // Only use if already granted — never pop a permission dialog from settings open.
   try {
-    const perms = navigator.permissions as Permissions & {
-      query: (desc: { name: string }) => Promise<PermissionStatus>;
-    };
-    const status = await perms.query({ name: 'local-fonts' });
+    if (typeof navigator.permissions?.query !== 'function') {
+      return null;
+    }
+    // @ts-expect-error — `local-fonts` not yet in lib.dom PermissionName
+    const status = await navigator.permissions.query({ name: 'local-fonts' });
     if (status.state !== 'granted') {
       return null;
     }
@@ -64,7 +70,7 @@ async function tryQueryLocalFonts(): Promise<FontOption[] | null> {
   }
 
   try {
-    const fonts = await w.queryLocalFonts();
+    const fonts = await window.queryLocalFonts();
     const seen = new Set<string>();
     const out: FontOption[] = [];
     for (const f of fonts) {
@@ -118,9 +124,9 @@ function probeCandidates(): FontOption[] {
  * 2) else canvas metric probe of curated candidates
  * Always prepends System UI stack. Cached for the session.
  */
-export async function listAvailableFonts(): Promise<FontOption[]> {
+export function listAvailableFonts(): Promise<FontOption[]> {
   if (cache) {
-    return cache;
+    return Promise.resolve(cache);
   }
   if (inflight) {
     return inflight;

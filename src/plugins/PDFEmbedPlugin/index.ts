@@ -54,6 +54,7 @@ function openPdfProps(
             width: Number(values['pdf-width']) || 800,
             height: Number(values['pdf-height']) || 600,
           });
+          return true;
         },
       },
     ],
@@ -76,7 +77,10 @@ function renderPdf(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpe
       },
       on: {
         click: (e) => {
-          const host = e.currentTarget as HTMLElement;
+          const host = e.currentTarget;
+          if (!(host instanceof HTMLElement)) {
+            return;
+          }
           resizer.replace(
             new Resizer(host, {
               aspect: 'lock',
@@ -120,7 +124,7 @@ function renderPdf(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpe
                 icon: deleteIcon,
                 variant: 'danger',
                 onClick: () => {
-                  removeAtomAt(wctx.path, (cmd) => wctx.editor.run(cmd as never));
+                  removeAtomAt(wctx.path, (cmd) => wctx.editor.run(cmd));
                 },
               },
             ],

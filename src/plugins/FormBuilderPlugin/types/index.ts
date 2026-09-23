@@ -97,3 +97,71 @@ export interface FormTemplate {
   config: FormConfig;
   category: 'contact' | 'survey' | 'registration' | 'payment' | 'custom';
 }
+
+const FIELD_TYPE_SET: ReadonlySet<string> = new Set<FieldType>([
+  'text',
+  'textarea',
+  'select',
+  'checkbox',
+  'radio',
+  'button',
+  'file',
+  'date',
+  'time',
+  'range',
+  'email',
+  'password',
+  'number',
+  'tel',
+  'url',
+  'color',
+  'datetime-local',
+  'month',
+  'week',
+  'hidden',
+  'image',
+  'submit',
+  'reset',
+]);
+
+export function isFieldType(value: string): value is FieldType {
+  return FIELD_TYPE_SET.has(value);
+}
+
+const FORM_HTTP_METHODS: ReadonlySet<string> = new Set<FormConfig['method']>([
+  'GET',
+  'POST',
+  'PUT',
+  'DELETE',
+  'PATCH',
+  'HEAD',
+  'OPTIONS',
+]);
+
+export function isFormHttpMethod(value: string): value is FormConfig['method'] {
+  return FORM_HTTP_METHODS.has(value.toUpperCase());
+}
+
+export function parseFormHttpMethod(value: string): FormConfig['method'] {
+  const u = value.toUpperCase();
+  switch (u) {
+    case 'GET':
+    case 'POST':
+    case 'PUT':
+    case 'DELETE':
+    case 'PATCH':
+    case 'HEAD':
+    case 'OPTIONS': {
+      return u;
+    }
+    default: {
+      return 'POST';
+    }
+  }
+}
+
+export function isFormConfig(value: unknown): value is FormConfig {
+  return (
+    typeof value === 'object' && value !== null && 'fields' in value && Array.isArray(value.fields)
+  );
+}

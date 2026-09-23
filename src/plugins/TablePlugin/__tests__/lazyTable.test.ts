@@ -132,10 +132,12 @@ describe('lazyTable commands', () => {
     expect(() => assertSafeLazyUrl('https://example.com/ok.json')).not.toThrow();
     vi.stubGlobal(
       'fetch',
-      vi.fn(async () => ({
-        ok: true,
-        text: async () => '[["a"]]',
-      }))
+      vi.fn(() =>
+        Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve('[["a"]]'),
+        })
+      )
     );
     await expect(
       fetchLazyMatrix({ url: 'https://example.com/ok.json', format: 'json' })

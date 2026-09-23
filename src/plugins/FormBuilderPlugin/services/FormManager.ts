@@ -1,4 +1,5 @@
 import type { FieldConfig, FormConfig, FieldType, FieldOptions } from '../types';
+import { isFieldType, parseFormHttpMethod } from '../types';
 import type { EditorAPI, ViewSpec } from '@on-codemerge/sdk';
 import { h } from '@on-codemerge/sdk';
 
@@ -22,7 +23,7 @@ export class FormManager {
 
     if (typeof typeOrField === 'string') {
       // Создаем поле по типу
-      const fieldId = `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const fieldId = `field_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 
       // Базовые опции для всех полей
       let baseOptions: FieldOptions = {
@@ -352,14 +353,14 @@ export class FormManager {
    * Генерирует уникальный ID для поля
    */
   private generateFieldId(): string {
-    return `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `field_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
    * Генерирует уникальный ID для формы
    */
   private generateFormId(): string {
-    return `form_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `form_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   // Методы для работы с опциями (для обратной совместимости)
@@ -367,20 +368,26 @@ export class FormManager {
    * Parse form element
    */
   parseForm(element: HTMLElement): FormConfig | null {
-    if (element.tagName !== 'FORM') {
+    if (!(element instanceof HTMLFormElement)) {
       return null;
     }
 
-    const form = element as HTMLFormElement;
+    const form = element;
     const fields: FieldConfig[] = [];
 
     // Parse form fields
     const inputs = form.querySelectorAll('input, select, textarea');
     inputs.forEach((input, index) => {
-      const field = this.parseField(
-        input as HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
-        index
-      );
+      if (
+        !(
+          input instanceof HTMLInputElement ||
+          input instanceof HTMLSelectElement ||
+          input instanceof HTMLTextAreaElement
+        )
+      ) {
+        return;
+      }
+      const field = this.parseField(input, index);
       if (field) {
         fields.push(field);
       }
@@ -388,7 +395,7 @@ export class FormManager {
 
     return {
       id: form.id || `form_${Date.now()}`,
-      method: form.method as 'GET' | 'POST',
+      method: parseFormHttpMethod(form.method || 'POST'),
       action: form.action,
       className: form.className,
       fields,
@@ -402,78 +409,106 @@ export class FormManager {
     input: HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement,
     index: number
   ): FieldConfig | null {
-    let type: string;
-
-    if (input.tagName === 'TEXTAREA') {
-      type = 'textarea';
-    } else if (input.tagName === 'SELECT') {
-      type = 'select';
+    let typeRaw: string;
+    if (input instanceof HTMLTextAreaElement) {
+      typeRaw = 'textarea';
+    } else if (input instanceof HTMLSelectElement) {
+      typeRaw = 'select';
     } else {
-      type = input.type || 'text';
+      typeRaw = input.type || 'text';
     }
 
-    // Skip submit/reset buttons
-    if (type === 'submit' || type === 'reset') {
+    if (typeRaw === 'submit' || typeRaw === 'reset' || !isFieldType(typeRaw)) {
       return null;
     }
+    const type = typeRaw;
+
+    const textLikeOptions =
+      input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement
+        ? {
+            placeholder: input.placeholder,
+            readonly: input.readOnly,
+            maxlength: input.maxLength,
+            minlength: input.minLength,
+          }
+        : {};
+
+    const inputOptions =
+      input instanceof HTMLInputElement
+        ? {
+            min: input.min ? Math.trunc(Number(input.min)) : undefined,
+            max: input.max ? Math.trunc(Number(input.max)) : undefined,
+            step: input.step ? Number(input.step) : undefined,
+            accept: input.accept,
+            size: input.size,
+            src: input.src,
+            alt: input.alt,
+          }
+        : {};
+
+    const textareaOptions =
+      input instanceof HTMLTextAreaElement
+        ? {
+            rows: input.rows,
+            cols: input.cols,
+          }
+        : {};
+
+    const selectAttrs =
+      input instanceof HTMLSelectElement
+        ? {
+            multiple: input.multiple,
+          }
+        : {};
+
+    const options: FieldOptions = {
+      name: input.name,
+      id: input.id,
+      value: input.value,
+      className: input.className,
+      disabled: input.disabled,
+      ...textLikeOptions,
+      ...inputOptions,
+      ...textareaOptions,
+      ...selectAttrs,
+    };
+
+    const validation: FieldConfig['validation'] =
+      input instanceof HTMLInputElement
+        ? {
+            required: input.required,
+            minLength: input.minLength,
+            maxLength: input.maxLength,
+            pattern: input.pattern,
+            min: input.min ? Math.trunc(Number(input.min)) : undefined,
+            max: input.max ? Math.trunc(Number(input.max)) : undefined,
+            step: input.step ? Number(input.step) : undefined,
+          }
+        : input instanceof HTMLTextAreaElement
+          ? {
+              required: input.required,
+              minLength: input.minLength,
+              maxLength: input.maxLength,
+            }
+          : {
+              required: input.required,
+            };
 
     const field: FieldConfig = {
       id: input.id || `field_${Date.now()}_${index}`,
-      type: type as FieldConfig['type'],
+      type,
       label: this.getFieldLabel(input),
-      options: {
-        name: input.name,
-        id: input.id,
-        placeholder: (input as HTMLInputElement | HTMLTextAreaElement).placeholder,
-        value: input.value,
-        className: input.className,
-        readonly: (input as HTMLInputElement | HTMLTextAreaElement).readOnly,
-        disabled: input.disabled,
-        multiple: (input as HTMLSelectElement).multiple,
-        min: (input as HTMLInputElement).min
-          ? parseInt((input as HTMLInputElement).min)
-          : undefined,
-        max: (input as HTMLInputElement).max
-          ? parseInt((input as HTMLInputElement).max)
-          : undefined,
-        step: (input as HTMLInputElement).step
-          ? Number((input as HTMLInputElement).step)
-          : undefined,
-        rows: (input as HTMLTextAreaElement).rows,
-        cols: (input as HTMLTextAreaElement).cols,
-        accept: (input as HTMLInputElement).accept,
-        size: (input as HTMLInputElement).size,
-        maxlength: (input as HTMLInputElement | HTMLTextAreaElement).maxLength,
-        minlength: (input as HTMLInputElement | HTMLTextAreaElement).minLength,
-        src: (input as HTMLInputElement).src,
-        alt: (input as HTMLInputElement).alt,
-      },
-      validation: {
-        required: input.required,
-        pattern: (input as HTMLInputElement).pattern,
-        minLength: (input as HTMLInputElement | HTMLTextAreaElement).minLength,
-        maxLength: (input as HTMLInputElement | HTMLTextAreaElement).maxLength,
-        min: (input as HTMLInputElement).min
-          ? parseInt((input as HTMLInputElement).min)
-          : undefined,
-        max: (input as HTMLInputElement).max
-          ? parseInt((input as HTMLInputElement).max)
-          : undefined,
-        step: (input as HTMLInputElement).step
-          ? Number((input as HTMLInputElement).step)
-          : undefined,
-      },
+      options,
+      validation,
       position: index,
     };
 
-    // Parse select options
-    if (type === 'select') {
-      const select = input as HTMLSelectElement;
-      const options: string[] = [];
-      select.querySelectorAll('option').forEach((option) => {
-        options.push(option.value);
+    if (input instanceof HTMLSelectElement) {
+      const selectOptions: string[] = [];
+      input.querySelectorAll('option').forEach((option) => {
+        selectOptions.push(option.value);
       });
-      field.options = { ...field.options!, options };
+      field.options = { ...field.options, options: selectOptions };
     }
 
     return field;
@@ -501,11 +536,11 @@ export class FormManager {
     }
 
     // Use placeholder or name as fallback
-    return (
-      (input as HTMLInputElement | HTMLTextAreaElement).placeholder ||
-      input.name ||
-      this.editor.t('formBuilder.untitledField')
-    );
+    const placeholder =
+      input instanceof HTMLInputElement || input instanceof HTMLTextAreaElement
+        ? input.placeholder
+        : '';
+    return placeholder || input.name || this.editor.t('formBuilder.untitledField');
   }
   /**
    * Обновляет action URL формы

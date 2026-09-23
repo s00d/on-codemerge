@@ -92,7 +92,11 @@ export class HTMLViewerModal {
             props: { value: this.html },
             on: {
               input: (e) => {
-                this.html = (e.target as HTMLTextAreaElement).value;
+                const textarea = e.target;
+                if (!(textarea instanceof HTMLTextAreaElement)) {
+                  return;
+                }
+                this.html = textarea.value;
               },
             },
           }),

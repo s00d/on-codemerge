@@ -35,7 +35,7 @@ export class FieldBuilder {
    * Генерирует уникальный ID для поля
    */
   private generateFieldId(): string {
-    return `field_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+    return `field_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
   }
 
   /**
@@ -75,57 +75,49 @@ export class FieldBuilder {
    * Получает опции по умолчанию для типа поля
    */
   private getDefaultOptions(type: FieldType): Partial<FieldOptions> {
-    switch (type) {
-      case 'email': {
-        return { autocomplete: 'email' };
-      }
-      case 'password': {
-        return { autocomplete: 'current-password' };
-      }
-      case 'tel': {
-        return { autocomplete: 'tel' };
-      }
-      case 'url': {
-        return { autocomplete: 'url' };
-      }
-      case 'file': {
-        return { accept: '*/*' };
-      }
-      case 'range': {
-        return { min: 0, max: 100, step: 1 };
-      }
-      case 'number': {
-        return { min: 0, step: 1 };
-      }
-      default: {
-        return {};
-      }
+    if (type === 'email') {
+      return { autocomplete: 'email' };
     }
+    if (type === 'password') {
+      return { autocomplete: 'current-password' };
+    }
+    if (type === 'tel') {
+      return { autocomplete: 'tel' };
+    }
+    if (type === 'url') {
+      return { autocomplete: 'url' };
+    }
+    if (type === 'file') {
+      return { accept: '*/*' };
+    }
+    if (type === 'range') {
+      return { min: 0, max: 100, step: 1 };
+    }
+    if (type === 'number') {
+      return { min: 0, step: 1 };
+    }
+    return {};
   }
 
   /**
    * Получает валидацию по умолчанию для типа поля
    */
   private getDefaultValidation(type: FieldType): ValidationRules {
-    switch (type) {
-      case 'email': {
-        return { required: true, email: true };
-      }
-      case 'password': {
-        return { required: true, minLength: 6 };
-      }
-      case 'tel': {
-        return { pattern: '^[+]?[0-9\\s\\-\\(\\)]{10,}$' };
-      }
-      case 'url': {
-        return { url: true };
-      }
-      case 'number': {
-        return { numeric: true };
-      }
-      default: {
-        return {};
-      }
+    if (type === 'email') {
+      return { required: true, email: true };
     }
+    if (type === 'password') {
+      return { required: true, minLength: 6 };
+    }
+    if (type === 'tel') {
+      return { pattern: '^[+]?[0-9\\s\\-\\(\\)]{10,}$' };
+    }
+    if (type === 'url') {
+      return { url: true };
+    }
+    if (type === 'number') {
+      return { numeric: true };
+    }
+    return {};
   }
 }

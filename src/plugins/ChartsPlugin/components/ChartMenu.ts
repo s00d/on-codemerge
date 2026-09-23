@@ -5,7 +5,15 @@ import type { ChartType, ChartSeries, ChartPoint } from '../types';
 import { MultiSeriesDataEditor } from './MultiSeriesDataEditor';
 import { ChartDataEditor } from './ChartDataEditor';
 import { CHART_TYPE_CONFIGS } from '../constants/chartTypes';
-import { isChartSeries, normalizeChartData } from '../utils/validation';
+import {
+  isChartPoint,
+  isChartSeries,
+  isChartType,
+  normalizeChartData,
+  parseChartDataJson,
+  parseChartMode,
+  parseChartOrientation,
+} from '../utils/validation';
 
 const chartTemplates = [
   {
@@ -114,8 +122,8 @@ export class ChartMenu {
     const first = data[0];
     if (first !== undefined && isChartSeries(first)) {
       this.currentEditor.setData(normalizeChartData(data)[0]?.data ?? []);
-    } else {
-      this.currentEditor.setData(data as ChartPoint[]);
+    } else if (data.every(isChartPoint)) {
+      this.currentEditor.setData(data);
     }
   }
 
@@ -155,7 +163,7 @@ export class ChartMenu {
         (data) => {
           this.schedulePreviewUpdate([{ name: this.editor.t('charts.series1'), data }]);
         },
-        (config as { requiresXY?: boolean }).requiresXY,
+        'requiresXY' in config && config.requiresXY === true,
         type === 'scatter'
       );
     }
@@ -197,7 +205,10 @@ export class ChartMenu {
     if (!template) {
       return;
     }
-    this.selectType(template.type as ChartType, template.data);
+    if (!isChartType(template.type)) {
+      return;
+    }
+    this.selectType(template.type, template.data);
   }
 
   private typeSelectorView(): ViewSpec {
@@ -210,35 +221,38 @@ export class ChartMenu {
       h(
         'div',
         { class: 'grid' },
-        ...Object.entries(CHART_TYPE_CONFIGS).map(([type, config]) =>
-          foreign(
-            (host, scope) => {
-              host.className = `chart-type-option ${type === this.selectedType ? 'selected' : ''}`;
-              host.dataset.type = type;
-              this.typeOptionEls.set(type, host);
-              const inner = mount(
-                host,
-                h('fragment', null, [
-                  h('div', {
-                    class: 'w-10 h-10 mb-3 mx-auto flex items-center justify-center',
-                    props: { innerHTML: config.icon },
-                  }),
-                  h('span', null, this.editor.t(config.name)),
-                ])
-              );
-              scope.own(inner);
-              scope.on(host, 'click', () => {
-                this.selectType(type as ChartType);
-              });
-              scope.disposable(() => {
-                if (this.typeOptionEls.get(type) === host) {
-                  this.typeOptionEls.delete(type);
-                }
-              });
-            },
-            { key: `chart-type-${type}` }
-          )
-        )
+        ...Object.keys(CHART_TYPE_CONFIGS)
+          .filter(isChartType)
+          .map((type) => {
+            const config = CHART_TYPE_CONFIGS[type];
+            return foreign(
+              (host, scope) => {
+                host.className = `chart-type-option ${type === this.selectedType ? 'selected' : ''}`;
+                host.dataset.type = type;
+                this.typeOptionEls.set(type, host);
+                const inner = mount(
+                  host,
+                  h('fragment', null, [
+                    h('div', {
+                      class: 'w-10 h-10 mb-3 mx-auto flex items-center justify-center',
+                      props: { innerHTML: config.icon },
+                    }),
+                    h('span', null, this.editor.t(config.name)),
+                  ])
+                );
+                scope.own(inner);
+                scope.on(host, 'click', () => {
+                  this.selectType(type);
+                });
+                scope.disposable(() => {
+                  if (this.typeOptionEls.get(type) === host) {
+                    this.typeOptionEls.delete(type);
+                  }
+                });
+              },
+              { key: `chart-type-${type}` }
+            );
+          })
       ),
     ]);
   }
@@ -258,7 +272,8 @@ export class ChartMenu {
           attrs: { type: 'text', placeholder, value },
           on: {
             input: (e) => {
-              onInput((e.target as HTMLInputElement).value);
+              const el = e.target;
+              onInput(el instanceof HTMLInputElement ? el.value : '');
               this.bumpPreview();
             },
           },
@@ -314,7 +329,8 @@ export class ChartMenu {
           },
           on: {
             change: (e) => {
-              onChange(Math.trunc(Number((e.target as HTMLInputElement).value)) || value);
+              const el = e.target;
+              onChange(Math.trunc(Number(el instanceof HTMLInputElement ? el.value : '')) || value);
               this.bumpPreview();
             },
           },
@@ -348,7 +364,8 @@ export class ChartMenu {
             props: { checked: this.showLegend },
             on: {
               change: (e) => {
-                this.showLegend = (e.target as HTMLInputElement).checked;
+                const el = e.target;
+                this.showLegend = el instanceof HTMLInputElement ? el.checked : false;
                 this.bumpPreview();
               },
             },
@@ -362,7 +379,8 @@ export class ChartMenu {
             props: { checked: this.showGrid },
             on: {
               change: (e) => {
-                this.showGrid = (e.target as HTMLInputElement).checked;
+                const el = e.target;
+                this.showGrid = el instanceof HTMLInputElement ? el.checked : false;
                 this.bumpPreview();
               },
             },
@@ -378,7 +396,10 @@ export class ChartMenu {
               props: { value: this.chartMode },
               on: {
                 change: (e) => {
-                  this.chartMode = (e.target as HTMLSelectElement).value as typeof this.chartMode;
+                  const el = e.target;
+                  if (el instanceof HTMLSelectElement) {
+                    this.chartMode = parseChartMode(el.value);
+                  }
                   this.bumpPreview();
                 },
               },
@@ -401,8 +422,10 @@ export class ChartMenu {
               props: { value: this.chartOrientation },
               on: {
                 change: (e) => {
-                  this.chartOrientation = (e.target as HTMLSelectElement)
-                    .value as typeof this.chartOrientation;
+                  const el = e.target;
+                  if (el instanceof HTMLSelectElement) {
+                    this.chartOrientation = parseChartOrientation(el.value);
+                  }
                   this.bumpPreview();
                 },
               },
@@ -430,7 +453,8 @@ export class ChartMenu {
             'template-select px-3 py-2 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all bg-white',
           on: {
             change: (e) => {
-              const key = (e.target as HTMLSelectElement).value;
+              const el = e.target;
+              const key = el instanceof HTMLSelectElement ? el.value : '';
               if (key) {
                 this.applyTemplate(key);
               }
@@ -545,8 +569,8 @@ export class ChartMenu {
     if (!previewContainer) {
       return;
     }
-    const img = previewContainer.querySelector('img.svg-chart') as HTMLImageElement | null;
-    if (img?.src) {
+    const img = previewContainer.querySelector('img.svg-chart');
+    if (img instanceof HTMLImageElement && img.src) {
       downloadUrl(img.src, 'chart.png');
       return;
     }
@@ -653,15 +677,15 @@ export class ChartMenu {
 
   public edit(chartElement: HTMLElement, hidden = false): void {
     this.editingChart = chartElement;
-    const type = chartElement.dataset.chartType as ChartType | null;
+    const typeRaw = chartElement.dataset.chartType ?? '';
     const dataStr = chartElement.dataset.chartData;
-    if (!type || !dataStr) {
+    if (!isChartType(typeRaw) || !dataStr) {
       return;
     }
 
     try {
-      const data = JSON.parse(dataStr) as ChartSeries[];
-      this.selectedType = type;
+      const data = parseChartDataJson(dataStr);
+      this.selectedType = typeRaw;
       this.pendingEditData = data;
       this.chartTitle = chartElement.dataset.chartTitle ?? '';
       this.xAxisLabel = chartElement.dataset.xAxisLabel ?? '';
@@ -670,12 +694,10 @@ export class ChartMenu {
       this.showGrid = chartElement.dataset.showGrid !== 'false';
       this.chartWidth = Math.trunc(Number(chartElement.style.width)) || 800;
       this.chartHeight = Math.trunc(Number(chartElement.style.height)) || 400;
-      this.chartMode =
-        (chartElement.dataset.mode as 'default' | 'stacked' | 'grouped') || 'default';
-      this.chartOrientation =
-        (chartElement.dataset.orientation as 'vertical' | 'horizontal') || 'vertical';
+      this.chartMode = parseChartMode(chartElement.dataset.mode ?? 'default');
+      this.chartOrientation = parseChartOrientation(chartElement.dataset.orientation ?? 'vertical');
       if (hidden) {
-        this.mountEditor(type);
+        this.mountEditor(typeRaw);
         globalThis.setTimeout(() => {
           this.applyDataToEditor(data);
         }, 0);

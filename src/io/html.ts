@@ -62,9 +62,9 @@ function docToHTMLInner(
     if (lazyUrl) {
       lazyAttrs.push(
         ` data-lazy-url="${escapeAttr(lazyUrl)}"`,
-        ` data-lazy-format="${escapeAttr(asAttr(doc.attrs?.lazyFormat, 'json'))}"`
+        ` data-lazy-format="${escapeAttr(asAttr(doc.attrs?.lazyFormat, 'json'))}"`,
+        ` data-lazy-headers="${doc.attrs?.lazyHeaders === false ? 'false' : 'true'}"`
       );
-      lazyAttrs.push(` data-lazy-headers="${doc.attrs?.lazyHeaders === false ? 'false' : 'true'}"`);
       const delim = asAttr(doc.attrs?.lazyDelimiter, ',');
       if (delim && delim !== ',') {
         lazyAttrs.push(` data-lazy-delimiter="${escapeAttr(delim)}"`);
@@ -129,7 +129,8 @@ function docToHTMLInner(
     const attrs = Object.entries(doc.attrs ?? {})
       .map(([k, v]) => ` data-${escapeAttr(camelToKebab(k))}="${escapeAttr(asAttr(v))}"`)
       .join('');
-    const expression = String(doc.attrs?.expression ?? '');
+    const expressionRaw = doc.attrs?.expression;
+    const expression = typeof expressionRaw === 'string' ? expressionRaw : '';
     let inner = '';
     if (typeof document !== 'undefined' && expression) {
       const parsed = parseMath(expression);
@@ -360,8 +361,8 @@ function parseBlock(node: ChildNode): DocNode | null {
   }
   if (tag === 'ul' || tag === 'ol') {
     const items = [...el.children]
-      .filter((c) => c.tagName.toLowerCase() === 'li')
-      .map((li) => ({ content: parseInline(li as HTMLElement), type: 'listItem' }));
+      .filter((c): c is HTMLElement => c instanceof HTMLElement && c.tagName.toLowerCase() === 'li')
+      .map((li) => ({ content: parseInline(li), type: 'listItem' }));
     return {
       content:
         items.length > 0 ? items : [{ content: [{ type: 'text', text: '' }], type: 'listItem' }],
@@ -374,14 +375,17 @@ function parseBlock(node: ChildNode): DocNode | null {
     const hasTh = Boolean(el.querySelector(':scope th'));
     const hasHeader = hasHeaderAttr || hasTh;
     const rows = rawRows.map((tr, ri) => {
-      const isHeaderRow = hasHeader && (ri === 0 || (tr as HTMLElement).dataset.header === 'true');
+      const isHeaderRow =
+        hasHeader && (ri === 0 || (tr instanceof HTMLElement && tr.dataset.header === 'true'));
       const cells = [...tr.children]
-        .filter((c) => {
+        .filter((c): c is HTMLElement => {
+          if (!(c instanceof HTMLElement)) {
+            return false;
+          }
           const t = c.tagName.toLowerCase();
           return t === 'td' || t === 'th';
         })
-        .map((td) => {
-          const cellEl = td as HTMLElement;
+        .map((cellEl) => {
           const cellAttrs: Record<string, unknown> = {};
           const cs = Number(cellEl.getAttribute('colspan') || cellEl.dataset.colspan || 1);
           const rs = Number(cellEl.getAttribute('rowspan') || cellEl.dataset.rowspan || 1);

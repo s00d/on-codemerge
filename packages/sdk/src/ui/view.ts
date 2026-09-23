@@ -194,7 +194,7 @@ function applyStyle(el: HTMLElement, style: ViewElementSpec['style']): void {
     if (k.startsWith('--')) {
       el.style.setProperty(k, value);
     } else {
-      (el.style as unknown as Record<string, string>)[k] = value;
+      Reflect.set(el.style, k, value);
     }
   }
 }
@@ -204,7 +204,7 @@ function applyProps(el: HTMLElement, props: ViewElementSpec['props']): void {
     return;
   }
   for (const [k, v] of Object.entries(props)) {
-    (el as unknown as Record<string, unknown>)[k] = v;
+    Reflect.set(el, k, v);
   }
 }
 
@@ -212,12 +212,35 @@ function bindEvents(el: HTMLElement, on: ViewEventMap | undefined, scope: Dispos
   if (on === undefined) {
     return;
   }
-  for (const [type, handler] of Object.entries(on)) {
+  for (const type in on) {
+    if (!Object.hasOwn(on, type)) {
+      continue;
+    }
+    if (!isElementEventType(type)) {
+      continue;
+    }
+    const handler = on[type];
     if (handler === undefined) {
       continue;
     }
-    scope.on(el, type as keyof HTMLElementEventMap, handler as (ev: Event) => void);
+    bindDomEvent(el, type, handler, scope);
   }
+}
+
+function bindDomEvent<K extends keyof ViewEventMap>(
+  el: HTMLElement,
+  type: K,
+  handler: NonNullable<ViewEventMap[K]>,
+  scope: DisposableScope
+): void {
+  scope.on(el, type, handler);
+}
+
+const elementEventProbe = document.createElement('div');
+
+function isElementEventType(type: string): type is keyof ViewEventMap {
+  const prop = `on${type}`;
+  return prop in elementEventProbe;
 }
 
 type InternalNode = {
@@ -463,7 +486,9 @@ export function downloadUrl(url: string, filename: string): void {
   );
   const portal = createPortal(null, { to: 'body', className: 'ocm-portal-host--transient' });
   portal.el.append(el);
-  (el as HTMLAnchorElement).click();
+  if (el instanceof HTMLAnchorElement) {
+    el.click();
+  }
   el.remove();
   destroy();
   portal.destroy();
@@ -496,7 +521,8 @@ export function pickFile(
         style: { display: 'none' },
         on: {
           change: (e) => {
-            resolve((e.target as HTMLInputElement).files);
+            const t = e.target;
+            resolve(t instanceof HTMLInputElement ? t.files : null);
             el.remove();
             destroy();
             portal.destroy();
@@ -505,7 +531,9 @@ export function pickFile(
       })
     );
     portal.el.append(el);
-    (el as HTMLInputElement).click();
+    if (el instanceof HTMLInputElement) {
+      el.click();
+    }
   });
 }
 

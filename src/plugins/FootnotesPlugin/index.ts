@@ -6,6 +6,28 @@ import type { ViewSpec } from '@on-codemerge/sdk';
 import { FootnoteMenu } from './components/FootnoteMenu';
 import { footnoteIcon } from '../../icons';
 
+function optionalStringProp(value: unknown, key: string): string | undefined {
+  if (typeof value !== 'object' || value === null) {
+    return undefined;
+  }
+  const desc = Object.getOwnPropertyDescriptor(value, key);
+  return typeof desc?.value === 'string' ? desc.value : undefined;
+}
+
+function footnoteItemsFromJson(raw: unknown): { id?: string; note?: string }[] {
+  if (!Array.isArray(raw)) {
+    return [];
+  }
+  const items: { id?: string; note?: string }[] = [];
+  for (const entry of raw) {
+    items.push({
+      id: optionalStringProp(entry, 'id'),
+      note: optionalStringProp(entry, 'note'),
+    });
+  }
+  return items;
+}
+
 export function FootnotesPlugin() {
   let openFootnote: (() => void) | null = null;
 
@@ -53,10 +75,8 @@ export function FootnotesPlugin() {
         render(attrs): ViewSpec {
           let items: { id?: string; note?: string }[] = [];
           try {
-            const parsed = JSON.parse(asAttr(attrs.items, '[]')) as unknown;
-            if (Array.isArray(parsed)) {
-              items = parsed as typeof items;
-            }
+            const parsed: unknown = JSON.parse(asAttr(attrs.items, '[]'));
+            items = footnoteItemsFromJson(parsed);
           } catch {
             items = [];
           }

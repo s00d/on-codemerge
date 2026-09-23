@@ -82,7 +82,11 @@ export function FileUploadPlugin(config: Partial<UploadConfig> = {}) {
       });
 
       ctx.onDom('host', 'click', (e) => {
-        const fileLink = (e.target as Element).closest('.file-link');
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const fileLink = target.closest('.file-link');
         if (!(fileLink instanceof HTMLElement)) {
           return;
         }
@@ -91,11 +95,13 @@ export function FileUploadPlugin(config: Partial<UploadConfig> = {}) {
           return;
         }
         e.preventDefault();
-        ctx.defer(() =>
-          uploader.downloadFile(fileId).catch((error) => {
+        ctx.defer(async () => {
+          try {
+            await uploader.downloadFile(fileId);
+          } catch (error) {
             console.error('Download failed:', error);
-          })
-        );
+          }
+        });
       });
     },
     widgets: {

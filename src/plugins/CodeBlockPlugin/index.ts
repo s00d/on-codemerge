@@ -34,7 +34,7 @@ export function CodeBlockPlugin() {
     setup(ctx) {
       const editor = ctx.editor;
       const modal = new CodeBlockModal(editor, ctx.scope);
-      openModal = (code = '', language = 'plaintext', onSave) => {
+      openModal = (code = '', language = 'plaintext', onSave?) => {
         modal.show(
           (newCode, newLanguage) => {
             if (onSave) {
@@ -88,9 +88,11 @@ export function CodeBlockPlugin() {
       });
 
       ctx.onDom('host', 'contextmenu', (e) => {
-        const codeBlock = (e.target as Element).closest(
-          '.code-block, [data-ocm-type="code_block"]'
-        );
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const codeBlock = target.closest('.code-block, [data-ocm-type="code_block"]');
         if (!(codeBlock instanceof HTMLElement)) {
           return;
         }

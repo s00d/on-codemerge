@@ -40,9 +40,14 @@ export class MathContextMenu {
             if (!expr) {
               return;
             }
-            void navigator.clipboard.writeText(expr).then(() => {
-              this.editor.notify(t('common.copied'));
-            });
+            void (async () => {
+              try {
+                await navigator.clipboard.writeText(expr);
+                this.editor.notify(t('common.copied'));
+              } catch {
+                /* clipboard unavailable */
+              }
+            })();
           },
         },
         { type: 'divider' },
@@ -51,7 +56,7 @@ export class MathContextMenu {
           icon: deleteIcon,
           variant: 'danger',
           onClick: () => {
-            removeAtomAt(pathFromEl(shell) ?? shell, (cmd) => this.editor.run(cmd as never));
+            removeAtomAt(pathFromEl(shell) ?? shell, (cmd) => this.editor.run(cmd));
           },
         },
       ],

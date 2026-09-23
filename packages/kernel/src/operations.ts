@@ -2,6 +2,7 @@ import type { DocNode, Mark, Selection } from './types';
 import {
   cloneNode,
   copyAttrs,
+  emptyAttrsRecord,
   createText,
   deepCloneNode,
   getNodeAt,
@@ -535,13 +536,12 @@ export function applyOp(
     }
     case 'set_attrs': {
       const node = getNodeAt(doc, op.path);
-      const prevSnapshot =
-        copyAttrs(node.attrs) ?? (Object.create(null) as Record<string, unknown>);
+      const prevSnapshot = copyAttrs(node.attrs) ?? emptyAttrsRecord();
       let nextAttrs: Record<string, unknown>;
       if (op.replace) {
-        nextAttrs = copyAttrs(op.attrs) ?? (Object.create(null) as Record<string, unknown>);
+        nextAttrs = copyAttrs(op.attrs) ?? emptyAttrsRecord();
       } else {
-        nextAttrs = copyAttrs(node.attrs) ?? (Object.create(null) as Record<string, unknown>);
+        nextAttrs = copyAttrs(node.attrs) ?? emptyAttrsRecord();
         for (const [key, value] of Object.entries(op.attrs)) {
           if (value === null) {
             delete nextAttrs[key];
@@ -642,7 +642,7 @@ export function applyOp(
       const insertedMarks: Mark[][] = [];
       for (const run of op.runs) {
         const marks = cloneMarks(run.marks);
-        for (let i = 0; i < run.text.length; i++) {
+        for (const _ of run.text) {
           insertedMarks.push(cloneMarks(marks));
         }
       }

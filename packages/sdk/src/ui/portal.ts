@@ -1,7 +1,12 @@
 import type { ViewSpec } from './view';
 
 /** Built-in targets — Vue Teleport–style named outlets. */
-export type PortalTargetName = 'body' | 'menu' | 'popup' | 'notify' | (string & {});
+export type PortalTargetName =
+  | 'body'
+  | 'menu'
+  | 'popup'
+  | 'notify'
+  | (string & Record<never, never>);
 
 export type PortalTo = PortalTargetName | HTMLElement;
 
@@ -98,7 +103,12 @@ export type ViewTeleportSpec = {
 };
 
 export function isTeleport(spec: unknown): spec is ViewTeleportSpec {
-  return typeof spec === 'object' && spec !== null && (spec as ViewTeleportSpec).teleport;
+  return (
+    typeof spec === 'object' &&
+    spec !== null &&
+    'teleport' in spec &&
+    Reflect.get(spec, 'teleport') === true
+  );
 }
 
 /**
@@ -114,23 +124,17 @@ export function teleport(
   toOrOpts: PortalTo | PortalOptions,
   ...children: ViewSpec[]
 ): ViewTeleportSpec {
-  if (
-    typeof toOrOpts === 'object' &&
-    toOrOpts !== null &&
-    !(toOrOpts instanceof HTMLElement) &&
-    ('to' in toOrOpts || 'className' in toOrOpts || 'attrs' in toOrOpts)
-  ) {
-    const opts = toOrOpts;
+  if (toOrOpts instanceof HTMLElement || typeof toOrOpts === 'string') {
     return {
       teleport: true,
-      to: opts.to ?? 'body',
-      className: opts.className,
+      to: toOrOpts,
       children: children.length === 1 ? children[0] : children,
     };
   }
   return {
     teleport: true,
-    to: toOrOpts as PortalTo,
+    to: toOrOpts.to ?? 'body',
+    className: toOrOpts.className,
     children: children.length === 1 ? children[0] : children,
   };
 }

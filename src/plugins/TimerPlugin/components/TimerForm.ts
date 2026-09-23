@@ -49,7 +49,8 @@ export class TimerForm {
             props: { value },
             on: {
               input: (e) => {
-                onInput((e.target as HTMLTextAreaElement).value);
+                const el = e.target;
+                onInput(el instanceof HTMLTextAreaElement ? el.value : '');
               },
             },
           })
@@ -59,7 +60,8 @@ export class TimerForm {
             props: { value },
             on: {
               input: (e) => {
-                onInput((e.target as HTMLInputElement).value);
+                const el = e.target;
+                onInput(el instanceof HTMLInputElement ? el.value : '');
               },
             },
           }),

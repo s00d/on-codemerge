@@ -1,6 +1,6 @@
 import type { ChartPoint, ChartSeries, ChartOptions } from '../types';
 import { BaseChartRenderer } from './BaseChartRenderer';
-import { validateChartData } from '../utils/validation';
+import { normalizeChartData, validateChartData } from '../utils/validation';
 
 export class BarChartRenderer extends BaseChartRenderer {
   public render(
@@ -13,11 +13,11 @@ export class BarChartRenderer extends BaseChartRenderer {
       return;
     }
 
-    // Multi-series поддержка
-    const isMulti = Array.isArray(data) && 'data' in data[0];
-    const seriesArr: ChartSeries[] = isMulti
-      ? (data as ChartSeries[])
-      : [{ name: '', data: data as ChartPoint[] }];
+    const seriesArr = normalizeChartData(data);
+    if (seriesArr.length === 0) {
+      this.drawNoDataMessage(ctx, options);
+      return;
+    }
     const categories = seriesArr[0].data.map((p) => p.label || '');
     const mode = options.mode ?? 'default';
     const orientation = options.orientation ?? 'vertical';
@@ -46,14 +46,12 @@ export class BarChartRenderer extends BaseChartRenderer {
       } else {
         this.drawSingleBars(ctx, seriesArr, options, maxValue, this.getColors(options));
       }
+    } else if (mode === 'stacked') {
+      this.drawHorizontalStackedBars(ctx, seriesArr, options, maxValue, this.getColors(options));
+    } else if (mode === 'grouped') {
+      this.drawHorizontalGroupedBars(ctx, seriesArr, options, maxValue, this.getColors(options));
     } else {
-      if (mode === 'stacked') {
-        this.drawHorizontalStackedBars(ctx, seriesArr, options, maxValue, this.getColors(options));
-      } else if (mode === 'grouped') {
-        this.drawHorizontalGroupedBars(ctx, seriesArr, options, maxValue, this.getColors(options));
-      } else {
-        this.drawHorizontalBars(ctx, seriesArr, options, maxValue, this.getColors(options));
-      }
+      this.drawHorizontalBars(ctx, seriesArr, options, maxValue, this.getColors(options));
     }
 
     this.drawAxisLabels(ctx, options);

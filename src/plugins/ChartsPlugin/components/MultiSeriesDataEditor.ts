@@ -90,8 +90,9 @@ export class MultiSeriesDataEditor {
         props: { value: point.label },
         on: {
           input: (e) => {
+            const el = e.target;
             bump(() => {
-              point.label = (e.target as HTMLInputElement).value;
+              point.label = el instanceof HTMLInputElement ? el.value : '';
             });
           },
         },
@@ -102,8 +103,9 @@ export class MultiSeriesDataEditor {
         props: { value: String(point.value) },
         on: {
           input: (e) => {
+            const el = e.target;
             bump(() => {
-              point.value = Number((e.target as HTMLInputElement).value) || 0;
+              point.value = Number(el instanceof HTMLInputElement ? el.value : '') || 0;
             });
           },
         },
@@ -114,8 +116,9 @@ export class MultiSeriesDataEditor {
         props: { value: String(point.x) },
         on: {
           input: (e) => {
+            const el = e.target;
             bump(() => {
-              point.x = Number((e.target as HTMLInputElement).value) || 0;
+              point.x = Number(el instanceof HTMLInputElement ? el.value : '') || 0;
             });
           },
         },
@@ -126,8 +129,9 @@ export class MultiSeriesDataEditor {
         props: { value: String(point.y) },
         on: {
           input: (e) => {
+            const el = e.target;
             bump(() => {
-              point.y = Number((e.target as HTMLInputElement).value) || 0;
+              point.y = Number(el instanceof HTMLInputElement ? el.value : '') || 0;
             });
           },
         },
@@ -167,7 +171,8 @@ export class MultiSeriesDataEditor {
             props: { value: series.name },
             on: {
               input: (e) => {
-                series.name = (e.target as HTMLInputElement).value;
+                const el = e.target;
+                series.name = el instanceof HTMLInputElement ? el.value : '';
                 this.emit();
               },
             },

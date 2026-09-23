@@ -79,7 +79,11 @@ export function LinkPlugin() {
       });
 
       ctx.onDom('host', 'contextmenu', (e) => {
-        const a = (e.target as Element).closest('a');
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const a = target.closest('a');
         if (!(a instanceof HTMLAnchorElement)) {
           return;
         }

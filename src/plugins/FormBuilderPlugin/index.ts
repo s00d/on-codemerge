@@ -84,9 +84,11 @@ export function FormBuilderPlugin() {
       });
 
       const onCtx = (e: MouseEvent) => {
-        const form = (e.target as Element).closest(
-          'form, .ocm-form-atom, .ocm-form, [data-ocm-type="form"]'
-        );
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const form = target.closest('form, .ocm-form-atom, .ocm-form, [data-ocm-type="form"]');
         if (!(form instanceof HTMLElement)) {
           return;
         }

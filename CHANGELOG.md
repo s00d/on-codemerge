@@ -46,6 +46,10 @@ Breaking rewrite of the editor around a virtual JSON document, SDK plugin surfac
 - Font Settings empty content after remount; `t()` interpolation for available font count
 - Block Style color picker closing the parent modal (inline ColorWell)
 - Popup close-on-overlay for Font / Block Style / History
+- Typed `removeAtomAt` with kernel `Command` (no `as never` at call sites)
+- Safe DOM event handling (`instanceof` / guards instead of unsafe casts)
+- Chart data validation (empty series / NaN / empty labels); timer payload defaults
+- oxlint `--deny-warnings` gate; jsdom canvas `getContext` stub for unit tests
 
 ## [1.3.2]
 

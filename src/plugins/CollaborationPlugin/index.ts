@@ -17,6 +17,32 @@ export interface OpsCollabBinding {
   onLocal(ops: Operation[]): void;
 }
 
+function isDocNode(v: unknown): v is DocNode {
+  return typeof v === 'object' && v !== null && 'type' in v && typeof v.type === 'string';
+}
+
+function parseCollabWireMessage(raw: unknown): {
+  type: string;
+  ops?: Operation[];
+  snapshot?: DocNode;
+} | null {
+  if (typeof raw !== 'object' || raw === null || !('type' in raw)) {
+    return null;
+  }
+  const typeVal = raw.type;
+  if (typeof typeVal !== 'string') {
+    return null;
+  }
+  const out: { type: string; ops?: Operation[]; snapshot?: DocNode } = { type: typeVal };
+  if ('ops' in raw && Array.isArray(raw.ops)) {
+    out.ops = raw.ops;
+  }
+  if ('snapshot' in raw && isDocNode(raw.snapshot)) {
+    out.snapshot = raw.snapshot;
+  }
+  return out;
+}
+
 export function createOpsCollabBinding(
   initial: DocNode,
   broadcast: (ops: Operation[]) => void = () => {}
@@ -133,11 +159,11 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
           });
           ws.addEventListener('message', (ev) => {
             try {
-              const msg = JSON.parse(String(ev.data)) as {
-                type: string;
-                ops?: Operation[];
-                snapshot?: DocNode;
-              };
+              const parsed: unknown = JSON.parse(String(ev.data));
+              const msg = parseCollabWireMessage(parsed);
+              if (!msg) {
+                return;
+              }
               if (msg.type === 'init' && msg.snapshot) {
                 applyingRemote = true;
                 try {

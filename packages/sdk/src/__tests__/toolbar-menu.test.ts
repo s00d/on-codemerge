@@ -2,7 +2,10 @@ import { afterEach, describe, expect, it } from 'vitest';
 import { clearPortalRoot } from '../ui/portal';
 import { ToolbarPanel } from '../ui/toolbar';
 
-const waitTick = (): Promise<void> => new Promise((resolve) => setTimeout(resolve, 0));
+const waitTick = (): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, 0);
+  });
 
 describe('toolbarPanel menus', () => {
   afterEach(() => {

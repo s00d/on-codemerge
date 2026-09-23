@@ -14,13 +14,29 @@ import {
   OllamaDriver,
 } from './drivers';
 import type { AIDriver } from './drivers';
-import type { OptionsDescription } from './drivers/AIDriver';
+import type { DriverOptions, OptionDescription, OptionsDescription } from './drivers/AIDriver';
 
 const LOCAL_STORAGE_KEY = 'aiAssistantSettings';
 
 const defaultPrompt =
   'Write an article about the benefits of using artificial intelligence in web development.';
 const defaultStructurePrompt = `The response should be formatted as HTML. Use h1-h3, p, ul/ol/li, pre/code, strong/em, a, table. Do not include html/head/body.`;
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function optionFieldValue(
+  merged: Record<string, unknown>,
+  key: string,
+  field: OptionDescription
+): string | number | boolean | undefined {
+  const raw = merged[key];
+  if (typeof raw === 'string' || typeof raw === 'number' || typeof raw === 'boolean') {
+    return raw;
+  }
+  return field.default;
+}
 
 function defaultsFromDesc(desc: OptionsDescription): Record<string, unknown> {
   const out: Record<string, unknown> = {};
@@ -30,6 +46,21 @@ function defaultsFromDesc(desc: OptionsDescription): Record<string, unknown> {
     }
   }
   return out;
+}
+
+function toDriverOptions(merged: Record<string, unknown>): DriverOptions {
+  const model = typeof merged.model === 'string' ? merged.model : '';
+  const options: DriverOptions = { model };
+  if (typeof merged.temperature === 'number') {
+    options.temperature = merged.temperature;
+  }
+  if (typeof merged.maxTokens === 'number') {
+    options.maxTokens = merged.maxTokens;
+  }
+  if (typeof merged.topP === 'number') {
+    options.topP = merged.topP;
+  }
+  return options;
 }
 
 export function AIAssistantPlugin() {
@@ -55,31 +86,27 @@ export function AIAssistantPlugin() {
       try {
         const raw = localStorage.getItem(LOCAL_STORAGE_KEY);
         if (raw) {
-          const s = JSON.parse(raw) as Record<string, unknown>;
-          // Never restore secrets from localStorage (purge legacy blobs).
-          driverName = asAttr(s.driverName, 'openai');
-          prompt = asAttr(s.prompt, defaultPrompt);
-          structurePrompt = asAttr(s.structurePrompt, defaultStructurePrompt);
-          // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
-          driverOptions =
-            s.driverOptions !== null &&
-            s.driverOptions !== undefined &&
-            typeof s.driverOptions === 'object' &&
-            !Array.isArray(s.driverOptions)
-              ? (s.driverOptions as Record<string, unknown>)
-              : {};
-          if ('apiKey' in s) {
-            localStorage.setItem(
-              LOCAL_STORAGE_KEY,
-              JSON.stringify({ driverName, prompt, structurePrompt, driverOptions })
-            );
+          const parsed: unknown = JSON.parse(raw);
+          if (isRecord(parsed)) {
+            const s = parsed;
+            // Never restore secrets from localStorage (purge legacy blobs).
+            driverName = asAttr(s.driverName, 'openai');
+            prompt = asAttr(s.prompt, defaultPrompt);
+            structurePrompt = asAttr(s.structurePrompt, defaultStructurePrompt);
+            driverOptions = isRecord(s.driverOptions) ? { ...s.driverOptions } : {};
+            if ('apiKey' in s) {
+              localStorage.setItem(
+                LOCAL_STORAGE_KEY,
+                JSON.stringify({ driverName, prompt, structurePrompt, driverOptions })
+              );
+            }
           }
         }
       } catch {
         /* ignore */
       }
 
-      const drivers: Record<string, AIDriver<any>> = {
+      const drivers: Record<string, AIDriver<DriverOptions>> = {
         openai: new OpenAIDriver(apiKey),
         deepseek: new DeepSeekDriver(apiKey),
         huggingface: new HuggingFaceDriver(apiKey),
@@ -180,19 +207,19 @@ export function AIAssistantPlugin() {
         const driver = drivers[driverName];
         const desc = driver?.getOptionsDescription() ?? {};
         const merged = resolveDriverOptions();
-        for (const [key, field] of Object.entries(desc)) {
-          items.push({
-            type: field.type,
-            id: `driver-option-${key}`,
-            label: field.label,
-            options: field.type === 'list' ? field.options : undefined,
-            value: merged[key] as string | number | boolean | undefined,
-            onChange: (value) => {
-              driverOptions[key] = value;
+        items.push(
+          ...Object.entries(desc).map(([optionKey, fieldDef]) => ({
+            type: fieldDef.type,
+            id: `driver-option-${optionKey}`,
+            label: fieldDef.label,
+            options: fieldDef.type === 'list' ? fieldDef.options : undefined,
+            value: optionFieldValue(merged, optionKey, fieldDef),
+            onChange: (value: unknown) => {
+              driverOptions[optionKey] = value;
               saveSettings();
             },
-          });
-        }
+          }))
+        );
 
         return items;
       };
@@ -206,9 +233,14 @@ export function AIAssistantPlugin() {
           return;
         }
         try {
-          (driver as { apiKey?: string }).apiKey = apiKey;
+          if ('apiKey' in driver) {
+            Reflect.set(driver, 'apiKey', apiKey);
+          }
           const fullPrompt = `${structurePrompt}\n\n${prompt}`;
-          const generatedText = await driver.generateText(fullPrompt, resolveDriverOptions());
+          const generatedText = await driver.generateText(
+            fullPrompt,
+            toDriverOptions(resolveDriverOptions())
+          );
           const current = api.getHTML();
           api.setHTML(`${current}${generatedText}`);
           popups.close();

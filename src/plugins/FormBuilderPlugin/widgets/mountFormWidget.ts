@@ -2,6 +2,7 @@ import type { EditorAPI, DisposableScope } from '@on-codemerge/sdk';
 import { attrString, mount, h } from '@on-codemerge/sdk';
 import { FormManager } from '../services/FormManager';
 import type { FormConfig } from '../types';
+import { isFormConfig } from '../types';
 import { atomAlignStyle } from '../../../utils/atomAlign';
 
 /** Mount form atom; teardown via `scope`. */
@@ -27,7 +28,8 @@ export function mountFormWidget(
   let config: FormConfig | null = null;
   try {
     const raw = attrs.schema;
-    config = JSON.parse(typeof raw === 'string' ? raw : '{}') as FormConfig;
+    const parsed: unknown = JSON.parse(typeof raw === 'string' ? raw : '{}');
+    config = isFormConfig(parsed) ? parsed : null;
   } catch {
     config = null;
   }

@@ -148,9 +148,12 @@ export class PopupService {
         props: { value: initial },
         on: {
           input: (e) => {
-            const v = (e.target as HTMLTextAreaElement).value;
-            values[item.id] = v;
-            item.onChange?.(v);
+            const t = e.target;
+            if (!(t instanceof HTMLTextAreaElement)) {
+              return;
+            }
+            values[item.id] = t.value;
+            item.onChange?.(t.value);
           },
         },
       });
@@ -164,9 +167,12 @@ export class PopupService {
         props: { checked: initial },
         on: {
           change: (e) => {
-            const v = (e.target as HTMLInputElement).checked;
-            values[item.id] = v;
-            item.onChange?.(v);
+            const t = e.target;
+            if (!(t instanceof HTMLInputElement)) {
+              return;
+            }
+            values[item.id] = t.checked;
+            item.onChange?.(t.checked);
           },
         },
       });
@@ -183,9 +189,12 @@ export class PopupService {
           props: { value: initial },
           on: {
             change: (e) => {
-              const v = (e.target as HTMLSelectElement).value;
-              values[item.id] = v;
-              item.onChange?.(v);
+              const t = e.target;
+              if (!(t instanceof HTMLSelectElement)) {
+                return;
+              }
+              values[item.id] = t.value;
+              item.onChange?.(t.value);
             },
           },
         },
@@ -203,7 +212,11 @@ export class PopupService {
         attrs: { id: item.id, type: 'file' },
         on: {
           change: (e) => {
-            const v = (e.target as HTMLInputElement).files?.[0]?.name ?? '';
+            const t = e.target;
+            if (!(t instanceof HTMLInputElement)) {
+              return;
+            }
+            const v = t.files?.[0]?.name ?? '';
             values[item.id] = v;
             item.onChange?.(v);
           },
@@ -231,8 +244,11 @@ export class PopupService {
       props: { value: initial },
       on: {
         input: (e) => {
-          const raw = (e.target as HTMLInputElement).value;
-          const v = item.type === 'number' ? Number(raw) || 0 : raw;
+          const t = e.target;
+          if (!(t instanceof HTMLInputElement)) {
+            return;
+          }
+          const v = item.type === 'number' ? Number(t.value) || 0 : t.value;
           values[item.id] = v;
           item.onChange?.(v);
         },

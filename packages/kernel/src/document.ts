@@ -35,6 +35,19 @@ export function createDoc(content?: DocNode[]): DocNode {
   };
 }
 
+function isAttrsRecord(value: unknown): value is Record<string, unknown> {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** Null-prototype attrs bag (no __proto__ pollution). */
+export function emptyAttrsRecord(): Record<string, unknown> {
+  const raw: unknown = Object.create(null);
+  if (!isAttrsRecord(raw)) {
+    return {};
+  }
+  return raw;
+}
+
 /** Copy own enumerable attrs onto a null-prototype bag (no __proto__ pollution). */
 export function copyAttrs(
   src?: Record<string, unknown> | null
@@ -42,7 +55,7 @@ export function copyAttrs(
   if (!src) {
     return undefined;
   }
-  const out = Object.create(null) as Record<string, unknown>;
+  const out = emptyAttrsRecord();
   for (const key of Object.keys(src)) {
     out[key] = src[key];
   }

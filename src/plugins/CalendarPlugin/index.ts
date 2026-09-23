@@ -10,6 +10,7 @@ import { CalendarContextMenu } from './components/CalendarContextMenu';
 import type { Calendar, CalendarEvent } from './types';
 import { downloadJson, pickJsonFile, mountCalendarView } from './widgets/domOps';
 import { asAttr } from '../../utils/asAttr';
+import { isCalendar, parseCalendarImportPayload } from './utils/storageGuards';
 
 function serializeCalendar(cal: Calendar, events: CalendarEvent[]): string {
   return JSON.stringify({ calendar: cal, events });
@@ -20,10 +21,8 @@ function parsePayload(raw: unknown): { calendar: Calendar; events: CalendarEvent
     return null;
   }
   try {
-    const parsed = JSON.parse(raw) as { calendar?: Calendar; events?: CalendarEvent[] };
-    if (parsed.calendar) {
-      return { calendar: parsed.calendar, events: parsed.events ?? [] };
-    }
+    const parsed: unknown = JSON.parse(raw);
+    return parseCalendarImportPayload(parsed);
   } catch {
     /* ignore */
   }
@@ -143,8 +142,11 @@ export function CalendarPlugin() {
   const showImport = () => {
     pickJsonFile((text) => {
       try {
-        const calendar = JSON.parse(text) as Calendar;
-        manager.importCalendar(JSON.stringify({ calendar, events: calendar.events ?? [] }));
+        const imported: unknown = JSON.parse(text);
+        if (!isCalendar(imported)) {
+          throw new Error('Invalid calendar');
+        }
+        manager.importCalendar(JSON.stringify({ calendar: imported, events: imported.events }));
         editor.notify(editor.t('calendar.calendarImportedSuccessfully') || 'Imported');
         menu.show((cal) => {
           insertCalendar(cal);
@@ -204,7 +206,11 @@ export function CalendarPlugin() {
       });
 
       ctx.onDom('host', 'click', (e) => {
-        const eventElement = (e.target as Element).closest<HTMLElement>('.calendar-event');
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const eventElement = target.closest<HTMLElement>('.calendar-event');
         if (!eventElement) {
           return;
         }
@@ -223,8 +229,12 @@ export function CalendarPlugin() {
       });
 
       ctx.onDom('host', 'contextmenu', (e) => {
-        const calendarElement = (e.target as Element).closest('.calendar-widget');
-        const eventElement = (e.target as Element).closest('.calendar-event');
+        const target = e.target;
+        if (!(target instanceof Element)) {
+          return;
+        }
+        const calendarElement = target.closest('.calendar-widget');
+        const eventElement = target.closest('.calendar-event');
         if (calendarElement instanceof HTMLElement) {
           e.preventDefault();
           const calendarId = calendarElement.dataset.calendarId;

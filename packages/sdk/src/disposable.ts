@@ -1,3 +1,10 @@
+function isDomEventForType<K extends keyof HTMLElementEventMap>(
+  type: K,
+  ev: Event
+): ev is HTMLElementEventMap[K] {
+  return ev.type === type;
+}
+
 /** Disposable callback registered in a scope. */
 export type DisposeFn = () => void;
 
@@ -113,10 +120,14 @@ export class DisposableScope {
     listener: (ev: HTMLElementEventMap[K]) => void,
     options?: boolean | AddEventListenerOptions
   ): DisposeFn {
-    const handler = listener as EventListener;
-    target.addEventListener(type, handler, options);
+    const wrapped: EventListener = (ev) => {
+      if (isDomEventForType(type, ev)) {
+        listener(ev);
+      }
+    };
+    target.addEventListener(type, wrapped, options);
     return this.disposable(() => {
-      target.removeEventListener(type, handler, options);
+      target.removeEventListener(type, wrapped, options);
     });
   }
 

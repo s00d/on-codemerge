@@ -1,4 +1,5 @@
 import { definePublishRuntime, readOcmConfig } from '../../../../packages/sdk/src/publish';
+import { isRecord } from '../utils/storageGuards';
 
 export interface ReminderPublishItem {
   id: string;
@@ -75,17 +76,49 @@ function showToast(item: ReminderPublishItem, dismissMs: number): void {
   }, dismissMs);
 }
 
+function isReminderPublishItem(value: unknown): value is ReminderPublishItem {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.id === 'string' &&
+    typeof value.triggerTime === 'number' &&
+    typeof value.message === 'string'
+  );
+}
+
+function readRemindersPublishConfig(
+  config: unknown,
+  el: HTMLElement
+): CalendarRemindersPublishConfig | null {
+  const raw = config ?? readOcmConfig(el);
+  if (!isRecord(raw)) {
+    return null;
+  }
+  const remindersRaw = raw.reminders;
+  if (!Array.isArray(remindersRaw)) {
+    return null;
+  }
+  const reminders = remindersRaw.filter(isReminderPublishItem);
+  if (reminders.length === 0) {
+    return null;
+  }
+  return {
+    reminders,
+    pollMs: typeof raw.pollMs === 'number' ? raw.pollMs : undefined,
+    dismissMs: typeof raw.dismissMs === 'number' ? raw.dismissMs : undefined,
+  };
+}
+
 /** Published reminders — picked up by src/public.ts via import.meta.glob. */
 export const runtime = definePublishRuntime({
   id: 'calendar-reminders',
   mount(el, config) {
-    const cfg =
-      (config as CalendarRemindersPublishConfig | null) ??
-      (readOcmConfig(el) as CalendarRemindersPublishConfig | null);
-    const reminders = cfg?.reminders;
-    if (!reminders || reminders.length === 0) {
-      return;
+    const cfg = readRemindersPublishConfig(config, el);
+    if (!cfg) {
+      return undefined;
     }
+    const reminders = cfg.reminders;
     const pollMs = cfg.pollMs ?? 60_000;
     const dismissMs = cfg.dismissMs ?? 30_000;
     const shown = new Set<string>();
