@@ -1,78 +1,48 @@
 # Rust Actix-web
 
-Serve a Vite-built editor and persist document **JSON** with Actix-web.
-
-Verified with Actix-web 4 + `actix-files` + Vite + `on-codemerge@2.0.3` (browser smoke).
+On-Codemerge in the browser; Actix stores **HTML** (or Markdown).
 
 ## Install
 
-```toml
-# Cargo.toml
-actix-web = "4"
-actix-files = "0.6"
-serde_json = "1"
-```
-
 ```bash
 npm install on-codemerge
-npm install -D vite
 ```
 
-## Minimal example
+## Editor
 
-Build editor into `public/dist`, then:
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-```rust
-use actix_files::{Files, NamedFile};
-use actix_web::{get, put, web, App, HttpServer, Responder, Result};
-use serde_json::{json, Value};
-use std::fs;
-
-#[get("/api/doc")]
-async fn get_doc() -> impl Responder {
-    let body = fs::read_to_string("data/doc.json").unwrap();
-    web::Json(serde_json::from_str::<Value>(&body).unwrap())
+async function main() {
+  const editor = new Editor(document.getElementById('editor'), {
+    plugins: createCorePlugins(),
+  });
+  const { html } = await fetch('/api/doc').then((r) => r.json());
+  editor.setHTML(html ?? '<p>Hello from Actix</p>');
+  editor.on('docChanged', () => {
+    fetch('/api/doc', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ html: editor.getHTML() }),
+    });
+  });
 }
-
-#[put("/api/doc")]
-async fn put_doc(body: web::Json<Value>) -> impl Responder {
-    let out = json!({ "doc": body.get("doc") });
-    fs::write("data/doc.json", serde_json::to_string_pretty(&out).unwrap()).unwrap();
-    web::Json(json!({ "ok": true }))
-}
-
-#[get("/")]
-async fn index() -> Result<NamedFile> {
-    Ok(NamedFile::open("public/index.html")?)
-}
-
-#[actix_web::main]
-async fn main() -> std::io::Result<()> {
-    HttpServer::new(|| {
-        App::new()
-            .service(index)
-            .service(get_doc)
-            .service(put_doc)
-            .service(Files::new("/dist", "public/dist"))
-    })
-    .bind(("127.0.0.1", 3000))?
-    .run()
-    .await
-}
+main();
 ```
 
-## Persist
+Serve Vite `public/dist` with `actix-files`; API body `{ html }`.
 
-`PUT /api/doc` with `{ "doc": editor.getJSON() }`.
+### Extract
 
-## Gotchas
-
-- Serve built Vite assets; do not try to import the npm package from Rust.
-- Persist JSON, not HTML.
+```js
+const html = editor.getHTML();
+const md = editor.getMarkdown();
+```
 
 ## Related
 
 - [Chrome & host](./chrome-and-host.md)
 - [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
 - [Integrate overview](/integrate/)

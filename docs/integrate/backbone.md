@@ -1,8 +1,6 @@
 # Backbone.js
 
-Embed On-Codemerge in a Backbone view. Persist **JSON** on the model (`getJSON` / `setJSON`), not HTML.
-
-Verified with Vite + `backbone@1.6` + `on-codemerge@2.0.3` (build + browser smoke).
+Embed On-Codemerge in a Backbone view. Load / save with **HTML** (or Markdown) on the model.
 
 ## Install
 
@@ -12,33 +10,23 @@ npm install on-codemerge backbone jquery underscore
 
 ## Minimal example
 
-Working view from the temp demo:
-
 ```js
 import Backbone from 'backbone';
 import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 
-const INITIAL = {
-  version: 1,
-  doc: {
-    type: 'doc',
-    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello from Backbone' }] }],
-  },
-};
-
 const DocModel = Backbone.Model.extend({
-  defaults: { doc: INITIAL },
+  defaults: { html: '<p>Hello from Backbone</p>' },
 });
 
 const EditorView = Backbone.View.extend({
   initialize() {
     this.$el.html('<div class="host" style="min-height:300px"></div>');
     this.editor = new Editor(this.$('.host')[0], { plugins: createCorePlugins() });
-    this.editor.setJSON(this.model.get('doc'));
+    this.editor.setHTML(this.model.get('html'));
     this.editor.on('docChanged', () => {
-      this.model.set('doc', this.editor.getJSON());
+      this.model.set('html', this.editor.getHTML());
     });
   },
   remove() {
@@ -47,25 +35,15 @@ const EditorView = Backbone.View.extend({
   },
 });
 
-const model = new DocModel();
-new EditorView({ el: '#app', model });
+new EditorView({ el: '#app', model: new DocModel() });
 ```
 
-## Persist
+### Extract
 
 ```js
-this.editor.on('docChanged', () => {
-  const json = this.editor.getJSON();
-  this.model.set('doc', json);
-  // sync model to your API
-});
+const html = this.editor.getHTML();
+const md = this.editor.getMarkdown();
 ```
-
-## Gotchas
-
-- Pass a real DOM node: `this.$('.host')[0]`, not a jQuery object.
-- Destroy the editor in `remove()`.
-- Import both CSS entry points.
 
 ## Related
 

@@ -90,6 +90,19 @@ describe('io html', () => {
     expect(out).toContain('C1');
   });
 
+  it('imports <a href> as link marks and round-trips', () => {
+    expect.hasAssertions();
+    const doc = importHTML('<p>See <a href="https://example.com/x" title="t">docs</a> please.</p>');
+    const nodes = doc.content![0].content ?? [];
+    const linked = nodes.find((n) => n.text === 'docs');
+    expect(
+      linked?.marks?.some((m) => m.type === 'link' && m.attrs?.href === 'https://example.com/x')
+    ).toBe(true);
+    const out = exportHTML(doc);
+    expect(out).toContain('href="https://example.com/x"');
+    expect(out).toContain('docs');
+  });
+
   it('imports span style color and highlight marks', () => {
     expect.hasAssertions();
     const doc = importHTML(

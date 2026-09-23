@@ -1,49 +1,48 @@
 # Symfony
 
-Serve a Vite-built editor and persist document **JSON** with Symfony HttpFoundation + Routing (same contract as a full Symfony app controller).
-
-Verified with `symfony/http-foundation` + `symfony/routing` 6.4 + Vite + `on-codemerge@2.0.3` (browser smoke).
+On-Codemerge in the browser; Symfony (or HttpFoundation front controller) stores **HTML** / Markdown.
 
 ## Install
 
 ```bash
-composer require symfony/http-foundation symfony/routing
 npm install on-codemerge
-npm install -D vite
 ```
 
-## Minimal example
+## Editor
 
-Build the editor into `public/dist`. Front controller sketch:
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-```php
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\Routing\Route;
-use Symfony\Component\Routing\RouteCollection;
-
-$routes = new RouteCollection();
-$routes->add('api_get', new Route('/api/doc', ['_controller' => 'api'], [], [], '', [], ['GET']));
-$routes->add('api_put', new Route('/api/doc', ['_controller' => 'api'], [], [], '', [], ['PUT']));
-
-// GET -> JsonResponse(json_decode(file_get_contents('data/doc.json'), true))
-// PUT -> write { doc: body['doc'] }
+async function main() {
+  const editor = new Editor(document.getElementById('editor'), {
+    plugins: createCorePlugins(),
+  });
+  const { html } = await fetch('/api/doc').then((r) => r.json());
+  editor.setHTML(html ?? '<p>Hello from Symfony</p>');
+  editor.on('docChanged', () => {
+    fetch('/api/doc', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ html: editor.getHTML() }),
+    });
+  });
+}
+main();
 ```
 
-In a full Symfony app, the same handlers live in a controller + `routes.yaml`. Client is the shared Vite entry using `getJSON` / `setJSON`.
+With `php -S … public/index.php`, return `false` for real files under `public/dist` so JS is not served as HTML.
 
-## Persist
+### Extract
 
-`PUT /api/doc` with `{ "doc": editor.getJSON() }`.
-
-## Gotchas
-
-- With `php -S … public/index.php`, the router must `return false` for existing static files under `public/dist`, otherwise JS is served as `text/html` and the module fails to load.
-- Persist JSON, not HTML.
+```js
+const html = editor.getHTML();
+const md = editor.getMarkdown();
+```
 
 ## Related
 
 - [Chrome & host](./chrome-and-host.md)
 - [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
 - [Integrate overview](/integrate/)

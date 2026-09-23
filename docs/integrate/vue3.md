@@ -1,6 +1,6 @@
 # Vue 3
 
-Embed On-Codemerge in a Vue 3 app. Persist **JSON** (`getJSON` / `setJSON`), not HTML.
+Embed On-Codemerge in Vue 3. Load / save with **HTML** (or Markdown).
 
 ## Install
 
@@ -21,27 +21,17 @@ import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 
-type DocJson = ReturnType<Editor['getJSON']>;
-
-const props = defineProps<{ modelValue?: DocJson }>();
-const emit = defineEmits<{ 'update:modelValue': [DocJson] }>();
+const props = defineProps<{ modelValue?: string }>();
+const emit = defineEmits<{ 'update:modelValue': [string] }>();
 
 const host = ref<HTMLElement | null>(null);
 let editor: Editor | null = null;
 
-const fallback: DocJson = {
-  version: 1,
-  doc: {
-    type: 'doc',
-    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello from Vue 3' }] }],
-  },
-};
-
 onMounted(() => {
   if (!host.value) return;
   editor = new Editor(host.value, { plugins: createCorePlugins() });
-  editor.setJSON(props.modelValue ?? fallback);
-  editor.on('docChanged', () => emit('update:modelValue', editor!.getJSON()));
+  editor.setHTML(props.modelValue ?? '<p>Hello from Vue 3</p>');
+  editor.on('docChanged', () => emit('update:modelValue', editor!.getHTML()));
 });
 
 onBeforeUnmount(() => {
@@ -52,9 +42,9 @@ onBeforeUnmount(() => {
 watch(
   () => props.modelValue,
   (next) => {
-    if (!editor || !next) return;
-    if (JSON.stringify(editor.getJSON()) === JSON.stringify(next)) return;
-    editor.setJSON(next);
+    if (!editor || next === undefined) return;
+    if (editor.getHTML() === next) return;
+    editor.setHTML(next);
   }
 );
 </script>
@@ -64,37 +54,19 @@ watch(
 <script setup lang="ts">
 import { ref } from 'vue';
 import MyEditor from './MyEditor.vue';
-
-const doc = ref({
-  version: 1,
-  doc: {
-    type: 'doc',
-    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Initial' }] }],
-  },
-});
+const html = ref('<p>Initial</p>');
 </script>
-
 <template>
-  <MyEditor v-model="doc" />
+  <MyEditor v-model="html" />
 </template>
 ```
 
-## Persist
+### Extract
 
 ```ts
-editor.on('docChanged', () => {
-  const json = editor.getJSON();
-  // POST / save
-});
+const html = editor.getHTML();
+const md = editor.getMarkdown();
 ```
-
-HTML / Markdown are boundaries only.
-
-## Gotchas
-
-- Destroy the editor in `onBeforeUnmount`.
-- Guard `setJSON` from props against equality to avoid loops.
-- Import both CSS entry points.
 
 ## Related
 

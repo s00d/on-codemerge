@@ -1,22 +1,17 @@
 # Flutter
 
-Host the Vite-built editor inside a WebView and bridge **JSON** both ways.
-
-Verified: web asset build + browser smoke (`Flutter JSON SoT` screenshot). Dart uses **`flutter_inappwebview`** (not `webview_flutter`) for `addJavaScriptHandler` / `evaluateJavascript`.
+Host the Vite-built editor in a WebView and bridge **HTML** (or Markdown). Use **`flutter_inappwebview`**.
 
 ## Install
 
 ```bash
 flutter pub add flutter_inappwebview
 npm install on-codemerge
-npm install -D vite
 ```
 
-Ship built files under `assets/editor/` (`index.html`, `editor.js`, `editor.css`) and register them in `pubspec.yaml`.
+Ship `assets/editor/` (`index.html`, `editor.js`, `editor.css`) with Vite `base: './'`.
 
-## Minimal example
-
-Web shell (working smoke `editor.js`):
+## Web shell
 
 ```js
 import { Editor, createCorePlugins } from 'on-codemerge';
@@ -27,15 +22,18 @@ const editor = new Editor(document.getElementById('editor'), {
   plugins: createCorePlugins(),
 });
 
-window.ocmLoad = (doc) => editor.setJSON(doc);
+window.ocmLoadHtml = (html) => editor.setHTML(html);
+window.ocmLoadMarkdown = (md) => editor.setMarkdown(md);
 
 editor.on('docChanged', () => {
-  const doc = editor.getJSON();
-  window.flutter_inappwebview?.callHandler('ocm-save', doc);
+  window.flutter_inappwebview?.callHandler('ocm-save', {
+    html: editor.getHTML(),
+    md: editor.getMarkdown(),
+  });
 });
 ```
 
-Dart host:
+## Dart
 
 ```dart
 InAppWebView(
@@ -44,33 +42,22 @@ InAppWebView(
     controller.addJavaScriptHandler(
       handlerName: 'ocm-save',
       callback: (args) {
-        final doc = Map<String, dynamic>.from(args.first as Map);
-        // persist JSON
+        final map = Map<String, dynamic>.from(args.first as Map);
+        // persist map['html'] or map['md']
         return null;
       },
     );
   },
   onLoadStop: (controller, url) async {
     await controller.evaluateJavascript(
-      source: 'window.ocmLoad(${jsonEncode(savedDoc)});',
+      source: "window.ocmLoadHtml(${jsonEncode(savedHtml)});",
     );
   },
 );
 ```
 
-## Persist
-
-SoT is the JSON map from `getJSON` / `ocm-save`. Do not store HTML from the WebView.
-
-## Gotchas
-
-- Use `flutter_inappwebview` for named JS handlers; older `webview_flutter`-only samples do not match this bridge.
-- Build with Vite `base: './'` for asset paths inside the WebView.
-- Load JSON via `window.ocmLoad(...)`, not `setHTML`.
-
 ## Related
 
 - [Chrome & host](./chrome-and-host.md)
 - [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
 - [Integrate overview](/integrate/)

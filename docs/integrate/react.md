@@ -1,6 +1,6 @@
 # React
 
-Embed On-Codemerge in a React app. Persist **JSON** (`getJSON` / `setJSON`), not HTML.
+Embed On-Codemerge in React. Load and save with **HTML** (or Markdown) — that is the usual integrate path.
 
 ## Install
 
@@ -16,22 +16,12 @@ import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 
-type DocJson = ReturnType<Editor['getJSON']>;
-
-const INITIAL: DocJson = {
-  version: 1,
-  doc: {
-    type: 'doc',
-    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello from React' }] }],
-  },
-};
-
 export function MyEditor({
-  value = INITIAL,
+  value = '<p>Hello from React</p>',
   onChange,
 }: {
-  value?: DocJson;
-  onChange?: (doc: DocJson) => void;
+  value?: string;
+  onChange?: (html: string) => void;
 }) {
   const hostRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<Editor | null>(null);
@@ -43,23 +33,22 @@ export function MyEditor({
     if (!el) return;
 
     const editor = new Editor(el, { plugins: createCorePlugins() });
-    editor.setJSON(value);
-    editor.on('docChanged', () => onChangeRef.current?.(editor.getJSON()));
+    editor.setHTML(value);
+    editor.on('docChanged', () => onChangeRef.current?.(editor.getHTML()));
     editorRef.current = editor;
 
     return () => {
       editor.destroy();
       editorRef.current = null;
     };
-    // mount once — sync value in a separate effect
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   useEffect(() => {
     const editor = editorRef.current;
-    if (!editor || !value) return;
-    if (JSON.stringify(editor.getJSON()) === JSON.stringify(value)) return;
-    editor.setJSON(value);
+    if (!editor || value === undefined) return;
+    if (editor.getHTML() === value) return;
+    editor.setHTML(value);
   }, [value]);
 
   return <div ref={hostRef} style={{ minHeight: 300 }} />;
@@ -71,35 +60,34 @@ import { useState } from 'react';
 import { MyEditor } from './MyEditor';
 
 export function App() {
-  const [doc, setDoc] = useState({
-    version: 1 as const,
-    doc: {
-      type: 'doc' as const,
-      content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Initial' }] }],
-    },
-  });
-
-  return <MyEditor value={doc} onChange={setDoc} />;
+  const [html, setHtml] = useState('<p>Initial</p>');
+  return <MyEditor value={html} onChange={setHtml} />;
 }
 ```
 
-## Persist
+### Markdown instead of HTML
 
 ```ts
+editor.setMarkdown('# Title\n\nHello **world**');
 editor.on('docChanged', () => {
-  const json = editor.getJSON();
-  // POST / save to your API
+  const md = editor.getMarkdown();
 });
 ```
 
-HTML (`getHTML` / `setHTML`) and Markdown are boundaries (paste / export), not the stored document.
+### Extract on save
+
+```ts
+const html = editor.getHTML();
+const md = editor.getMarkdown();
+// optional kernel snapshot:
+const json = editor.getJSON();
+```
 
 ## Gotchas
 
-- Call `editor.destroy()` in the effect cleanup (React Strict Mode remounts in dev).
-- Keep `onChange` in a ref so the mount effect does not re-run on every render.
-- Compare JSON before `setJSON` from props to avoid feedback loops.
-- CSS: both `on-codemerge/index.css` and `on-codemerge/public.css`.
+- Destroy in effect cleanup (Strict Mode remounts in dev).
+- Keep `onChange` in a ref; compare `getHTML()` before re-applying props.
+- Import both CSS entry points.
 
 ## Related
 

@@ -470,6 +470,22 @@ function parseBlock(node: ChildNode): DocNode | null {
   if (tag === 'br') {
     return { content: [{ type: 'text', text: '' }], type: 'paragraph' };
   }
+  if (tag === 'blockquote') {
+    // Flatten to paragraph(s); nested structure is not modeled yet.
+    const inner = [...el.childNodes]
+      .map((c) => parseBlock(c))
+      .filter((b): b is DocNode => b !== null);
+    if (inner.length === 1 && inner[0].type === 'paragraph') {
+      return inner[0];
+    }
+    if (inner.length > 0) {
+      return inner[0];
+    }
+    return { content: parseInline(el), type: 'paragraph' };
+  }
+  if (tag === 'hr') {
+    return { content: [{ type: 'text', text: '' }], type: 'paragraph' };
+  }
   // Fallback: treat as paragraph
   return { content: parseInline(el), type: 'paragraph' };
 }
@@ -501,6 +517,23 @@ function parseInline(el: HTMLElement): DocNode[] {
       }
       if (tag === 's' || tag === 'strike') {
         next.push({ type: 'strike' });
+      }
+      if (tag === 'a') {
+        const href = allowedLinkHref(e.getAttribute('href') ?? '');
+        const title = e.getAttribute('title') ?? undefined;
+        const target = e.getAttribute('target') ?? undefined;
+        const rel = e.getAttribute('rel') ?? undefined;
+        const attrs: Record<string, unknown> = { href };
+        if (title) {
+          attrs.title = title;
+        }
+        if (target) {
+          attrs.target = target;
+        }
+        if (rel) {
+          attrs.rel = rel;
+        }
+        next.push({ type: 'link', attrs });
       }
       if (tag === 'span') {
         const color = cssColorToHex(e.style.color);

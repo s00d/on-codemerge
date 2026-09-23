@@ -1,53 +1,48 @@
 # Spring Boot
 
-Serve a Vite-built editor and persist document **JSON** from a Spring controller (same HTTP contract as the verified smoke).
-
-Verified with a JDK `HttpServer` smoke on port 4195 (static `public/` + `GET/PUT /api/doc`) and screenshot. Spring mapping below matches that contract.
+On-Codemerge in the browser; Spring stores **HTML** (or Markdown).
 
 ## Install
 
 ```bash
-# Spring Boot app (start.spring.io or your existing project)
 npm install on-codemerge
-npm install -D vite
 ```
 
-Build the editor into `src/main/resources/static/dist` (or `public/dist`).
+## Editor
 
-## Minimal example
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-```java
-@RestController
-public class DocController {
-  private final Path data = Path.of("data/doc.json");
-
-  @GetMapping("/api/doc")
-  public String get() throws IOException {
-    return Files.readString(data);
-  }
-
-  @PutMapping("/api/doc")
-  public Map<String, Object> put(@RequestBody Map<String, Object> body) throws IOException {
-    Files.writeString(data, new ObjectMapper().writeValueAsString(body));
-    return Map.of("ok", true);
-  }
+async function main() {
+  const editor = new Editor(document.getElementById('editor'), {
+    plugins: createCorePlugins(),
+  });
+  const { html } = await fetch('/api/doc').then((r) => r.json());
+  editor.setHTML(html ?? '<p>Hello from Spring</p>');
+  editor.on('docChanged', () => {
+    fetch('/api/doc', {
+      method: 'PUT',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ html: editor.getHTML() }),
+    });
+  });
 }
+main();
 ```
 
-Client: Vite entry calling `editor.getJSON()` / `setJSON()` (see Express guide).
+`@GetMapping` / `@PutMapping` on `/api/doc` with a `{ html }` body. Serve Vite-built static assets.
 
-## Persist
+### Extract
 
-`PUT /api/doc` with `{ "doc": editor.getJSON() }`.
-
-## Gotchas
-
-- Bundle the editor with Vite; Spring only serves assets + JSON.
-- Persist JSON, not HTML.
+```js
+const html = editor.getHTML();
+const md = editor.getMarkdown();
+```
 
 ## Related
 
 - [Chrome & host](./chrome-and-host.md)
 - [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
 - [Integrate overview](/integrate/)

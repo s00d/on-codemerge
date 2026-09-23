@@ -1,8 +1,6 @@
 # Vue 2
 
-Embed On-Codemerge in Vue 2.7 (SFC). Persist **JSON** (`getJSON` / `setJSON`), not HTML.
-
-Verified against a Vite + `@vitejs/plugin-vue2` temp app with `on-codemerge@2.0.3`.
+Embed On-Codemerge in Vue 2.7 (SFC). Load / save with **HTML** (or Markdown).
 
 ## Install
 
@@ -10,17 +8,11 @@ Verified against a Vite + `@vitejs/plugin-vue2` temp app with `on-codemerge@2.0.
 npm install on-codemerge vue@^2.7
 ```
 
-Dev tooling used in the smoke: `vite@5`, `@vitejs/plugin-vue2`, `vue-template-compiler@2.7`.
-
 ## Minimal example
-
-This is the working SFC from the temp demo (trimmed for the guide):
 
 ```vue
 <template>
-  <div>
-    <div ref="host" style="min-height: 300px"></div>
-  </div>
+  <div ref="host" style="min-height: 300px"></div>
 </template>
 
 <script>
@@ -28,56 +20,37 @@ import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 
-const INITIAL = {
-  version: 1,
-  doc: {
-    type: 'doc',
-    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello from Vue 2' }] }],
-  },
-};
-
 export default {
   name: 'MyEditor',
+  props: { value: { type: String, default: '<p>Hello from Vue 2</p>' } },
   mounted() {
     this.editor = new Editor(this.$refs.host, { plugins: createCorePlugins() });
-    this.editor.setJSON(INITIAL);
+    this.editor.setHTML(this.value);
     this.editor.on('docChanged', () => {
-      this.$emit('input', this.editor.getJSON());
+      this.$emit('input', this.editor.getHTML());
     });
   },
   beforeDestroy() {
     if (this.editor) this.editor.destroy();
   },
+  watch: {
+    value(next) {
+      if (!this.editor || this.editor.getHTML() === next) return;
+      this.editor.setHTML(next);
+    },
+  },
 };
 </script>
 ```
 
-```js
-// main.js
-import Vue from 'vue';
-import App from './App.vue';
+Use an SFC (runtime-only Vue + string `template:` failed in smoke). Vue 2 `v-model` is `value` + `input`.
 
-new Vue({
-  render: (h) => h(App),
-}).$mount('#app');
-```
-
-## Persist
+### Extract
 
 ```js
-this.editor.on('docChanged', () => {
-  const json = this.editor.getJSON();
-  // POST / save
-});
+const html = this.editor.getHTML();
+const md = this.editor.getMarkdown();
 ```
-
-HTML / Markdown are boundaries only.
-
-## Gotchas
-
-- Use an **SFC** (or a full Vue build with template compiler). Runtime-only Vue + string `template:` in `new Vue({…})` failed in smoke (`$refs.host` never mounted; editor threw on `classList`).
-- Destroy in `beforeDestroy`.
-- Import both `on-codemerge/index.css` and `on-codemerge/public.css`.
 
 ## Related
 

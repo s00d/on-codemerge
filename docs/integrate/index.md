@@ -1,10 +1,10 @@
 # Integrate
 
-Step-by-step guides for embedding On-Codemerge in apps and hosts. The editor is browser JS: backends typically **serve static assets** and **persist JSON** from `getJSON()` / `setJSON()`.
+Guides for embedding On-Codemerge. Day-to-day apps usually load and save **HTML** (`setHTML` / `getHTML`) or **Markdown** (`setMarkdown` / `getMarkdown`).
 
-Install and CSS once: [Editor API — Getting Started](/guide/editor#getting-started). Prefer JSON as source of truth; HTML (`getHTML` / `setHTML`) and Markdown (`getMarkdown` / `setMarkdown`) are boundaries for paste / export / SSR. Published pages: `getPublishedDocument()`. SDK surface: [SDK reference](/guide/sdk).
+JSON (`getJSON` / `setJSON`) is the internal document model — useful for advanced sync / tooling, not the default integrate path.
 
-Upgrading from 1.x: [Migration v1 → v2](/guide/migration-v1-to-v2).
+Install and CSS: [Editor API — Getting Started](/guide/editor#getting-started). Published pages: `getPublishedDocument()`. SDK: [SDK reference](/guide/sdk). Upgrading from 1.x: [Migration v1 → v2](/guide/migration-v1-to-v2).
 
 ## Chrome & host
 
@@ -24,14 +24,14 @@ Upgrading from 1.x: [Migration v1 → v2](/guide/migration-v1-to-v2).
 
 ## Meta-frameworks
 
-| Guide                   | Stack             |
-| ----------------------- | ----------------- |
-| [Next.js](./next.md)    | Next.js           |
-| [Nuxt 3 / 4](./nuxt.md) | Nuxt (ClientOnly) |
+| Guide                   | Stack               |
+| ----------------------- | ------------------- |
+| [Next.js](./next.md)    | Next.js             |
+| [Nuxt 3 / 4](./nuxt.md) | Nuxt (`ClientOnly`) |
 
 ## Backend
 
-Each guide shows how to serve the editor and save/load document JSON (or HTML boundary where noted).
+Each guide focuses on the **editor** (load / edit / extract). Your server only stores the string you choose (HTML or Markdown).
 
 | Guide                                    | Stack              |
 | ---------------------------------------- | ------------------ |
@@ -49,14 +49,16 @@ Each guide shows how to serve the editor and save/load document JSON (or HTML bo
 
 ## Hosts
 
-| Guide                     | Stack                                |
-| ------------------------- | ------------------------------------ |
-| [Flutter](./flutter.md)   | `flutter_inappwebview` + JSON bridge |
-| [Electron](./electron.md) | Electron + Vite renderer             |
+| Guide                     | Stack                                   |
+| ------------------------- | --------------------------------------- |
+| [Flutter](./flutter.md)   | `flutter_inappwebview` + HTML/MD bridge |
+| [Electron](./electron.md) | Electron + Vite renderer                |
 
 ## Shared expectations
 
-- CSS: `on-codemerge/index.css` + `on-codemerge/public.css` (optional a-la-carte plugin CSS + `on-codemerge/sdk.css`)
-- Plugins: examples often use `createCorePlugins()` (lean essentials) plus extras you need — or `createDefaultPlugins()` for the full set. See [Plugins overview](/plugins/).
-- Persist: `editor.on('docChanged', () => { … editor.getJSON() })`
+- CSS: `on-codemerge/index.css` + `on-codemerge/public.css`
+- Plugins: `createCorePlugins()` or `createDefaultPlugins()` — [Plugins overview](/plugins/)
+- Load: `editor.setHTML(html)` or `editor.setMarkdown(md)`
+- Extract: `editor.getHTML()` / `editor.getMarkdown()` on `docChanged` (or on save)
+- Optional kernel: `getJSON` / `setJSON`
 - Localization: `await editor.setLocale('…')`

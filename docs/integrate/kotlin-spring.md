@@ -1,45 +1,35 @@
 # Kotlin Spring Boot
 
-Same contract as [Spring Boot](./spring.md): Vite-built editor + JSON API. Keep this short — Kotlin is a thin syntax layer over the Java smoke.
+Same as [Spring Boot](./spring.md): editor in the browser, store **HTML** / Markdown.
 
-Verified via the Java HTTP smoke (`Spring JSON SoT` screenshot); Kotlin controller equivalent:
+## Editor
 
-```kotlin
-@RestController
-class DocController(
-  private final val data: Path = Path.of("data/doc.json"),
-  private final val mapper: ObjectMapper = ObjectMapper(),
-) {
-  @GetMapping("/api/doc")
-  fun get(): String = Files.readString(data)
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
 
-  @PutMapping("/api/doc")
-  fun put(@RequestBody body: Map<String, Any?>): Map<String, Boolean> {
-    Files.writeString(data, mapper.writeValueAsString(body))
-    return mapOf("ok" to true)
-  }
-}
+const editor = new Editor(document.getElementById('editor'), {
+  plugins: createCorePlugins(),
+});
+editor.setHTML('<p>Hello from Kotlin Spring</p>');
+editor.on('docChanged', () => {
+  const html = editor.getHTML();
+  // PUT { html } to your API
+});
 ```
 
-## Install
+### Extract
 
-```bash
-npm install on-codemerge
-npm install -D vite
+```js
+const html = editor.getHTML();
+const md = editor.getMarkdown();
 ```
 
-## Persist
-
-`PUT /api/doc` with `{ "doc": editor.getJSON() }`. HTML is not SoT.
-
-## Gotchas
-
-- Identical to Java Spring: serve built assets, persist JSON.
-- See [Spring Boot](./spring.md) for the longer static+API notes.
+Kotlin `@RestController` only needs to accept/return that string field.
 
 ## Related
 
 - [Spring Boot](./spring.md)
-- [Chrome & host](./chrome-and-host.md)
 - [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)

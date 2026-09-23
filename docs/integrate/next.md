@@ -1,8 +1,6 @@
 # Next.js
 
-Embed On-Codemerge in the App Router as a **client-only** component. Persist **JSON** (`getJSON` / `setJSON`), not HTML.
-
-Verified with `create-next-app@15` (App Router) + `on-codemerge@2.0.3` (`next build` + browser smoke).
+Client-only App Router embed. Load / save with **HTML** (or Markdown).
 
 ## Install
 
@@ -12,7 +10,7 @@ npm install on-codemerge
 
 ## Minimal example
 
-`EditorClient.tsx` (client component — real working file from the temp app):
+`EditorClient.tsx`:
 
 ```tsx
 'use client';
@@ -22,35 +20,23 @@ import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 
-const INITIAL = {
-  version: 1 as const,
-  doc: {
-    type: 'doc' as const,
-    content: [
-      {
-        type: 'paragraph',
-        content: [{ type: 'text', text: 'Hello from Next.js' }],
-      },
-    ],
-  },
-};
-
-export default function EditorClient() {
+export default function EditorClient({
+  value = '<p>Hello from Next.js</p>',
+  onChange,
+}: {
+  value?: string;
+  onChange?: (html: string) => void;
+}) {
   const hostRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<Editor | null>(null);
 
   useEffect(() => {
     const el = hostRef.current;
     if (!el || editorRef.current) return;
-
     const editor = new Editor(el, { plugins: createCorePlugins() });
-    editor.setJSON(INITIAL);
-    editor.on('docChanged', () => {
-      const json = editor.getJSON();
-      // persist json
-    });
+    editor.setHTML(value);
+    editor.on('docChanged', () => onChange?.(editor.getHTML()));
     editorRef.current = editor;
-
     return () => {
       editor.destroy();
       editorRef.current = null;
@@ -61,33 +47,28 @@ export default function EditorClient() {
 }
 ```
 
-`page.tsx` must also be a client page (or a client wrapper) if it renders the editor directly:
+`page.tsx` must be a client page (or client wrapper):
 
 ```tsx
 'use client';
-
 import EditorClient from './EditorClient';
-
 export default function Home() {
   return <EditorClient />;
 }
 ```
 
-## Persist
+### Extract
 
 ```ts
-editor.on('docChanged', () => {
-  const json = editor.getJSON();
-  // POST / save
-});
+const html = editor.getHTML();
+const md = editor.getMarkdown();
 ```
 
 ## Gotchas
 
-- Editor needs DOM APIs — keep it in a `'use client'` module.
-- `next/dynamic(..., { ssr: false })` **cannot** be used inside a Server Component (Next 15 build error). Put `ssr: false` only inside a Client Component, or just mark the page/wrapper `'use client'` as above.
-- Call `editor.destroy()` in the effect cleanup (Strict Mode remounts in dev).
-- Import both CSS entry points in the client module.
+- Keep the editor in `'use client'` modules.
+- `next/dynamic(..., { ssr: false })` cannot live in a Server Component (Next 15).
+- Destroy in effect cleanup.
 
 ## Related
 

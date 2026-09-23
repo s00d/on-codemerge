@@ -1,6 +1,6 @@
 # Chrome & host
 
-How the editor presents chrome and how to host it. Document **source of truth stays JSON** (`getJSON` / `setJSON`) regardless of packaging.
+How the editor presents chrome and how to host it. Day-to-day load/save uses **HTML** or **Markdown**; JSON is the internal model if you need it.
 
 ## Install & CSS
 
@@ -24,24 +24,19 @@ import { Editor, createCorePlugins } from 'on-codemerge';
 ```ts
 const editor = new Editor(container, {
   chrome: 'page',
-  plugins: createCorePlugins(), // or createDefaultPlugins()
+  plugins: createCorePlugins(),
 });
 
-editor.setJSON({
-  version: 1,
-  doc: {
-    type: 'doc',
-    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello' }] }],
-  },
-});
+editor.setHTML('<p>Hello</p>');
+// or: editor.setMarkdown('# Hello');
 
 editor.on('docChanged', () => {
-  const json = editor.getJSON();
-  // persist json
+  const html = editor.getHTML();
+  // const md = editor.getMarkdown();
 });
 ```
 
-With `chrome: 'page'`, the root gets `ocm-editor-root--page`. Click the content area to open the toolbar popup.
+With `chrome: 'page'`, the root gets `ocm-editor-root--page`.
 
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
@@ -57,79 +52,53 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 ## Host packaging (isolation)
 
-`Editor` mounts into the host element you pass. There is **no** `EditorOptions.mode` (`direct` / `shadowRoot` / `iframe`) — isolation is your host’s job:
-
-| Approach         | When                                 | Notes                                                       |
-| ---------------- | ------------------------------------ | ----------------------------------------------------------- |
-| Direct (default) | SPA / simple embed                   | Mount on a normal DOM node                                  |
-| Shadow DOM host  | Style isolation / web components     | Attach shadow, mount editor inside, route portals if needed |
-| Iframe host      | Strong isolation / third-party embed | Load editor page (or inject) inside iframe document         |
+`Editor` mounts into the host element you pass. There is **no** `EditorOptions.mode` — isolation is your host’s job (direct / Shadow DOM / iframe).
 
 ### Shadow DOM
 
 ```ts
-const host = document.createElement('div');
-container.appendChild(host);
 const shadow = host.attachShadow({ mode: 'open' });
 const mountEl = document.createElement('div');
 shadow.appendChild(mountEl);
-
-// Import CSS into the shadow (or inject link/style nodes) as your bundler allows.
-const editor = new Editor(mountEl, {
-  plugins: createCorePlugins(),
-});
+const editor = new Editor(mountEl, { plugins: createCorePlugins() });
 ```
 
-Overlays (popup / menu / notify / toolbar dropdowns) use SDK **portals** under `document.body` by default. For a closed shadow or iframe, override portal roots — see [Authoring plugins — Portals](/guide/authoring-plugins#portals-teleport):
-
-```ts
-import { setPortalRoot } from 'on-codemerge/sdk';
-
-setPortalRoot('popup', shadow);
-setPortalRoot('menu', shadow);
-setPortalRoot('notify', shadow);
-```
+Portals default to `document.body` — override with `setPortalRoot` from `on-codemerge/sdk` inside closed shadow / iframe.
 
 ### Iframe
 
-Serve a minimal HTML page that loads On-Codemerge and posts JSON to the parent (`postMessage`), or inject the editor into `iframe.contentDocument` after load. Prefer JSON over HTML for persistence across the frame boundary.
+Prefer posting HTML or Markdown across the frame (or JSON if you already sync the kernel):
 
 ```ts
-// Parent
-iframe.contentWindow?.postMessage({ type: 'ocm-load', doc: savedJson }, origin);
+// Parent → child
+iframe.contentWindow?.postMessage({ type: 'ocm-load', html: savedHtml }, origin);
 
-// Child (editor page)
+// Child
 window.addEventListener('message', (ev) => {
-  if (ev.data?.type === 'ocm-load') editor.setJSON(ev.data.doc);
+  if (ev.data?.type === 'ocm-load') editor.setHTML(ev.data.html);
 });
 editor.on('docChanged', () => {
-  parent.postMessage({ type: 'ocm-save', doc: editor.getJSON() }, parentOrigin);
+  parent.postMessage({ type: 'ocm-save', html: editor.getHTML() }, parentOrigin);
 });
 ```
 
-## Persist
+## Extract
 
-- SoT: `editor.getJSON()` / `editor.setJSON(doc)`
-- HTML / Markdown: paste, export, SSR boundaries only — not the stored document
+```ts
+editor.getHTML();
+editor.getMarkdown();
+editor.getJSON(); // optional kernel snapshot
+```
 
 ## Gotchas
 
-- Always import both `on-codemerge/index.css` and `on-codemerge/public.css` (or a-la-carte plugin CSS + `on-codemerge/sdk.css`).
-- Shadow/iframe hosts need `setPortalRoot` or overlays render on the wrong document.
-- There is no v1 `HTMLEditor` / `editor.init()` — construct with `new Editor(el, options)`.
-
-## Comparison (host choice)
-
-| Feature          | Direct                  | Shadow host                | Iframe host       |
-| ---------------- | ----------------------- | -------------------------- | ----------------- |
-| CSS isolation    | Low                     | High (scoped)              | Full              |
-| DOM isolation    | Low                     | Medium                     | Full              |
-| Integration cost | Low                     | Medium                     | Higher            |
-| Portals          | Default `document.body` | Often need `setPortalRoot` | Separate document |
+- Import both CSS entry points.
+- Shadow/iframe hosts often need `setPortalRoot`.
+- Construct with `new Editor(el, options)` — no v1 `HTMLEditor` / `editor.init()`.
 
 ## Related
 
-- [Editor API](/guide/editor) — `chrome`, `colorScheme`, document API
+- [Editor API](/guide/editor)
 - [Authoring plugins — Portals](/guide/authoring-plugins#portals-teleport)
 - [Integrate overview](/integrate/)
 - [Plugins overview](/plugins/)

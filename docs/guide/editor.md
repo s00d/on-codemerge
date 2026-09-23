@@ -1,6 +1,6 @@
 # Editor API
 
-Single public API: **`Editor`** + **plugins** on a virtual document kernel. Document **source of truth is JSON** (`getJSON` / `setJSON`). HTML and Markdown are **boundaries** (import / export / paste / SSR) — they never replace the JSON model.
+Single public API: **`Editor`** + **plugins** on a virtual document kernel. The kernel model is JSON (`getJSON` / `setJSON`). For app integrate / persist, prefer **HTML** (`getHTML` / `setHTML`) or **Markdown** (`getMarkdown` / `setMarkdown`) — see [Integrate](/integrate/).
 
 ```ts
 import 'on-codemerge/index.css';
@@ -18,7 +18,7 @@ editor.run(insertText('Hello'));
 1. Install `on-codemerge`
 2. Import `index.css` + `public.css`
 3. Construct `Editor(host, { plugins: [...] })`
-4. Persist with `getJSON()` / restore with `setJSON()` (use HTML or Markdown boundaries when the host speaks those formats)
+4. Load / save with `setHTML` / `getHTML` (or Markdown). Use `getJSON` / `setJSON` when you need the kernel snapshot.
 
 ```ts
 import { Editor, ToolbarPlugin, AlignmentPlugin, ListsPlugin } from 'on-codemerge';
@@ -27,8 +27,9 @@ const editor = new Editor(host, {
   plugins: [ToolbarPlugin(), AlignmentPlugin(), ListsPlugin()],
 });
 
+editor.setHTML(localStorage.getItem('doc-html') ?? '<p></p>');
 editor.on('docChanged', () => {
-  localStorage.setItem('doc', JSON.stringify(editor.getJSON()));
+  localStorage.setItem('doc-html', editor.getHTML());
 });
 
 editor.command('bulletList');
@@ -57,41 +58,41 @@ Plugins never own the panel or reinvent modals. Authoring surface: [SDK referenc
 
 ## Document API
 
-| Method                                       | Role                                                                          |
-| -------------------------------------------- | ----------------------------------------------------------------------------- |
-| `getJSON()` / `setJSON(doc)`                 | Source of truth                                                               |
-| `getHTML()` / `setHTML(html)`                | Semantic HTML boundary (round-trip attrs; atoms are empty `data-node` shells) |
-| `getMarkdown()` / `setMarkdown(md)`          | Markdown boundary (CommonMark/GFM subset)                                     |
-| `getPublishedHTML()`                         | Hydrated HTML for published pages (plugin `publish.render` fills atoms)       |
-| `getPublishedJS()`                           | `dist/public.js` href when runtimes are needed; otherwise `null`              |
-| `getPublishedDocument()`                     | Standalone HTML document (`public.css` + optional `public.js`)                |
-| `run(command)`                               | Execute a command function                                                    |
-| `command(name, …args)`                       | Named plugin/core command                                                     |
-| `use(plugin)`                                | Register a plugin after construct                                             |
-| `on('docChanged' \| 'selectionChanged', cb)` | Subscriptions — callback receives editor **state**                            |
-| `destroy()`                                  | Tear down editor + plugins                                                    |
+| Method                                       | Role                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------- |
+| `getJSON()` / `setJSON(doc)`                 | Kernel document (collab / advanced sync)                                |
+| `getHTML()` / `setHTML(html)`                | Usual app load/save (semantic HTML; atoms as empty `data-node` shells)  |
+| `getMarkdown()` / `setMarkdown(md)`          | Markdown load/save (CommonMark/GFM subset)                              |
+| `getPublishedHTML()`                         | Hydrated HTML for published pages (plugin `publish.render` fills atoms) |
+| `getPublishedJS()`                           | `dist/public.js` href when runtimes are needed; otherwise `null`        |
+| `getPublishedDocument()`                     | Standalone HTML document (`public.css` + optional `public.js`)          |
+| `run(command)`                               | Execute a command function                                              |
+| `command(name, …args)`                       | Named plugin/core command                                               |
+| `use(plugin)`                                | Register a plugin after construct                                       |
+| `on('docChanged' \| 'selectionChanged', cb)` | Subscriptions — callback receives editor **state**                      |
+| `destroy()`                                  | Tear down editor + plugins                                              |
 
 ### Boundaries: JSON vs HTML vs Markdown vs published
 
 ```ts
-const json = editor.getJSON(); // persist this
-editor.setJSON(json);
+const html = editor.getHTML();
+editor.setHTML(html);
 
 const md = editor.getMarkdown();
 editor.setMarkdown('# Title\n\nHello **world**');
 
-const semantic = editor.getHTML(); // empty atom shells — good for round-trip
-editor.setHTML(semantic);
+const json = editor.getJSON(); // optional kernel snapshot
+editor.setJSON(json);
 
-const published = editor.getPublishedHTML(); // timer/calendar/form markup hydrated
-const page = editor.getPublishedDocument(); // full <!DOCTYPE html>…
+const published = editor.getPublishedHTML();
+const page = editor.getPublishedDocument();
 ```
 
 | Format                | Use when                                                              |
 | --------------------- | --------------------------------------------------------------------- |
-| JSON                  | App persistence, collab, undo history                                 |
+| `getHTML` / `setHTML` | Default app persistence, paste, SSR shells                            |
 | Markdown              | Notes apps, CMS that store MD, `ExportPlugin` → `.md`                 |
-| `getHTML` / `setHTML` | Paste, SSR shells, round-trip of attrs without widget DOM             |
+| JSON                  | Collab, advanced sync, undo internals                                 |
 | `getPublished*`       | Public pages, export HTML/PDF, live preview with `public.js` runtimes |
 
 Atoms (timer, calendar, …) stay as `data-node="…"` + attrs in **semantic** HTML. Published HTML runs each plugin’s `publish.render` and may set `data-ocm-runtime` / `data-ocm-config` for `dist/public.js`.

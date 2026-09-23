@@ -1,55 +1,63 @@
 # Go Gin
 
-Serve a Vite-built editor and persist document **JSON** with Gin.
-
-Verified with Gin 1.10 + Vite + `on-codemerge@2.0.3` (browser smoke).
+Use On-Codemerge in the browser; Gin only stores the HTML (or Markdown) string you extract.
 
 ## Install
 
 ```bash
-go get github.com/gin-gonic/gin
 npm install on-codemerge
-npm install -D vite
 ```
 
-## Minimal example
+## Editor (what matters)
 
-Build the editor into `public/dist`, then:
+```js
+import { Editor, createCorePlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
+
+const editor = new Editor(document.getElementById('editor'), {
+  plugins: createCorePlugins(),
+});
+
+// Load from your API (HTML is the usual path)
+const { html } = await fetch('/api/doc').then((r) => r.json());
+editor.setHTML(html ?? '<p>Hello from Gin</p>');
+
+// Extract + save
+editor.on('docChanged', () => {
+  const html = editor.getHTML();
+  // or: const md = editor.getMarkdown();
+  fetch('/api/doc', {
+    method: 'PUT',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ html }),
+  });
+});
+```
+
+Bundle with Vite (or any bundler) and serve `index.html` + assets from Gin like any static SPA.
+
+### Markdown
+
+```js
+editor.setMarkdown(md);
+const md = editor.getMarkdown();
+```
+
+### Optional kernel
+
+```js
+const json = editor.getJSON(); // advanced / internal model
+```
+
+## Tiny API shape (server is secondary)
 
 ```go
-r := gin.Default()
-r.Static("/dist", "./public/dist")
-r.StaticFile("/", "./public/index.html")
-
-r.GET("/api/doc", func(c *gin.Context) {
-  b, _ := os.ReadFile("data/doc.json")
-  c.Data(http.StatusOK, "application/json", b)
-})
-
-r.PUT("/api/doc", func(c *gin.Context) {
-  var body map[string]any
-  if err := c.BindJSON(&body); err != nil {
-    c.JSON(400, gin.H{"error": err.Error()})
-    return
-  }
-  out, _ := json.MarshalIndent(map[string]any{"doc": body["doc"]}, "", "  ")
-  _ = os.WriteFile("data/doc.json", out, 0o644)
-  c.JSON(200, gin.H{"ok": true})
-})
-
-r.Run("127.0.0.1:3000")
+// GET  /api/doc  →  { "html": "<p>…</p>" }
+// PUT  /api/doc  ←  { "html": "<p>…</p>" }
 ```
 
-Client uses `getJSON` / `setJSON` (same Vite entry as Express).
-
-## Persist
-
-`PUT /api/doc` with `{ "doc": editor.getJSON() }`.
-
-## Gotchas
-
-- Bundle the editor with Vite; Gin only serves the built assets + JSON API.
-- Persist JSON, not HTML.
+Same idea for `"md"` if you store Markdown. Gin static file serving is ordinary — keep the focus on `setHTML` / `getHTML`.
 
 ## Related
 
