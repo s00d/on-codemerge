@@ -1,182 +1,87 @@
 # Vue 2
 
-Welcome to the Vue 2-specific documentation for **On-Codemerge**, a versatile web editor designed for seamless integration with Vue.js 2 projects.
+Embed On-Codemerge in Vue 2.7 (SFC). Persist **JSON** (`getJSON` / `setJSON`), not HTML.
 
-## Getting Started with Vue 2 Integration
+Verified against a Vite + `@vitejs/plugin-vue2` temp app with `on-codemerge@2.0.3`.
 
-To integrate On-Codemerge into a Vue.js 2 project, install the package:
+## Install
 
 ```bash
-npm install on-codemerge
+npm install on-codemerge vue@^2.7
 ```
 
-## Vue 2 Integration Example
+Dev tooling used in the smoke: `vite@5`, `@vitejs/plugin-vue2`, `vue-template-compiler@2.7`.
 
-Here's an example of how to integrate On-Codemerge into a Vue.js 2 component:
+## Minimal example
 
-```vue title="OnCodemergeEditor.vue"
+This is the working SFC from the temp demo (trimmed for the guide):
+
+```vue
 <template>
   <div>
-    <div ref="editorContainer" style="min-height: 300px;"></div>
-    <div v-if="showOutput" class="output">
-      <h3>Current HTML:</h3>
-      <pre>{{ currentContent }}</pre>
-    </div>
+    <div ref="host" style="min-height: 300px"></div>
   </div>
 </template>
 
 <script>
+import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
-import { Editor, createCorePlugins, AlignmentPlugin } from 'on-codemerge';
+
+const INITIAL = {
+  version: 1,
+  doc: {
+    type: 'doc',
+    content: [{ type: 'paragraph', content: [{ type: 'text', text: 'Hello from Vue 2' }] }],
+  },
+};
 
 export default {
-  name: 'OnCodemergeEditor',
-  props: {
-    value: {
-      type: String,
-      default: '',
-    },
-    showOutput: {
-      type: Boolean,
-      default: false,
-    },
-  },
-  data() {
-    return {
-      editor: null,
-      currentContent: '',
-    };
-  },
+  name: 'MyEditor',
   mounted() {
-    this.initEditor();
+    this.editor = new Editor(this.$refs.host, { plugins: createCorePlugins() });
+    this.editor.setJSON(INITIAL);
+    this.editor.on('docChanged', () => {
+      this.$emit('input', this.editor.getJSON());
+    });
   },
   beforeDestroy() {
-    if (this.editor) {
-      this.editor.destroy();
-    }
-  },
-  methods: {
-    async initEditor() {
-      if (this.$refs.editorContainer) {
-        this.editor = new Editor(this.$refs.editorContainer, {
-          plugins: [...createCorePlugins(), AlignmentPlugin()],
-        });
-
-        // Set initial content
-        if (this.value) {
-          this.editor.setHTML(this.value);
-        } else {
-          this.editor.setHTML('<p>Welcome to On-Codemerge with Vue 2!</p>');
-        }
-
-        // Subscribe to content changes
-        this.editor.on('docChanged', (newContent) => {
-          this.currentContent = newContent;
-          this.$emit('input', newContent);
-        });
-
-        // Set initial content for output
-        this.currentContent = this.editor.getHTML();
-      }
-    },
-  },
-  watch: {
-    value(newValue) {
-      if (this.editor && newValue !== this.editor.getHTML()) {
-        this.editor.setHTML(newValue);
-      }
-    },
+    if (this.editor) this.editor.destroy();
   },
 };
 </script>
-
-<style scoped>
-.output {
-  margin-top: 20px;
-  padding: 15px;
-  background: #f8f9fa;
-  border-radius: 4px;
-}
-
-.output pre {
-  margin: 0;
-  white-space: pre-wrap;
-  word-wrap: break-word;
-}
-</style>
 ```
 
-## Usage Example
+```js
+// main.js
+import Vue from 'vue';
+import App from './App.vue';
 
-```vue title="App.vue"
-<template>
-  <div id="app">
-    <h1>Vue 2 App with On-Codemerge</h1>
-    <OnCodemergeEditor v-model="content" :showOutput="true" />
-    <div class="controls">
-      <button @click="saveContent">Save Content</button>
-      <button @click="loadContent">Load Content</button>
-    </div>
-  </div>
-</template>
-
-<script>
-import OnCodemergeEditor from './OnCodemergeEditor.vue';
-
-export default {
-  name: 'App',
-  components: {
-    OnCodemergeEditor,
-  },
-  data() {
-    return {
-      content: '<p>Initial content</p>',
-    };
-  },
-  methods: {
-    saveContent() {
-      console.log('Saving content:', this.content);
-      // Add your save logic here
-    },
-    loadContent() {
-      this.content = '<p>Loaded content</p>';
-    },
-  },
-};
-</script>
-
-<style>
-#app {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 20px;
-}
-
-.controls {
-  margin-top: 20px;
-}
-
-.controls button {
-  margin-right: 10px;
-  padding: 8px 16px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background: #f8f9fa;
-  cursor: pointer;
-}
-
-.controls button:hover {
-  background: #e9ecef;
-}
-</style>
+new Vue({
+  render: (h) => h(App),
+}).$mount('#app');
 ```
 
-## Key Features
+## Persist
 
-- **Vue 2 Compatibility**: Full support for Vue 2 Options API
-- **v-model Support**: Two-way data binding with `v-model`
-- **Component Lifecycle**: Proper cleanup in `beforeDestroy`
-- **Plugin System**: Easy plugin registration and management
-- **Localization**: Built-in multi-language support
-- **Content Management**: Simple HTML content setting and retrieval
+```js
+this.editor.on('docChanged', () => {
+  const json = this.editor.getJSON();
+  // POST / save
+});
+```
+
+HTML / Markdown are boundaries only.
+
+## Gotchas
+
+- Use an **SFC** (or a full Vue build with template compiler). Runtime-only Vue + string `template:` in `new Vue({…})` failed in smoke (`$refs.host` never mounted; editor threw on `classList`).
+- Destroy in `beforeDestroy`.
+- Import both `on-codemerge/index.css` and `on-codemerge/public.css`.
+
+## Related
+
+- [Chrome & host](./chrome-and-host.md)
+- [Editor API](/guide/editor)
+- [Plugins overview](/plugins/)
+- [Integrate overview](/integrate/)
