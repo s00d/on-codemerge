@@ -10,6 +10,30 @@ import { scssPreprocessorOptions } from './scripts/scss-vite-options.ts';
 const root = import.meta.dirname;
 const packageJson = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
 
+/** Runtime deps stay on the consumer install — never copy into `dist/node_modules`. */
+const runtimeExternals = new Set([
+  ...Object.keys(packageJson.dependencies ?? {}),
+  ...Object.keys(packageJson.peerDependencies ?? {}),
+]);
+
+function isRuntimeExternal(id: string): boolean {
+  if (
+    !id ||
+    id.startsWith('\0') ||
+    id.startsWith('.') ||
+    id.startsWith('/') ||
+    /^[A-Za-z]:[\\/]/.test(id)
+  ) {
+    return false;
+  }
+  for (const dep of runtimeExternals) {
+    if (id === dep || id.startsWith(`${dep}/`)) {
+      return true;
+    }
+  }
+  return false;
+}
+
 const shared = {
   css: {
     postcss: './postcss.config.js',
@@ -61,7 +85,7 @@ const libConfig = defineConfig({
       formats: ['es', 'cjs'],
     },
     rolldownOptions: {
-      external: [],
+      external: isRuntimeExternal,
       output: {
         dir: 'dist',
         exports: 'named',

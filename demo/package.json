@@ -12,7 +12,7 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
-    "on-codemerge": "2.0.4"
+    "on-codemerge": "2.0.5"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",

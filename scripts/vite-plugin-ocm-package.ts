@@ -144,6 +144,15 @@ function stripViteBrowserExternal(distDir: string): WalkStats {
   return stats;
 }
 
+function removeDistNodeModules(distDir: string): void {
+  const nm = resolve(distDir, 'node_modules');
+  if (!existsSync(nm)) {
+    return;
+  }
+  rmSync(nm, { recursive: true, force: true });
+  console.log('[ocm-package] removed dist/node_modules (deps are package.json externals)');
+}
+
 function removeOrphanToolbarDividerDts(root: string): void {
   const dts = resolve(root, 'dist/src/plugins/ToolbarDividerPlugin/index.d.ts');
   if (!existsSync(dts)) {
@@ -295,6 +304,8 @@ export function ocmPackagePlugin(root = process.cwd()): Plugin {
         console.log(
           `[ocm-package] browser-external: scanned ${browserExt.files}, patched ${browserExt.patched}, removed ${browserExt.removed ?? 0}`
         );
+
+        removeDistNodeModules(distDir);
 
         removeOrphanToolbarDividerDts(root);
         emitPackageCss(root);
