@@ -95,7 +95,9 @@ export function FormBuilderPlugin(opts?: PluginToolbarOpts) {
         if (!(target instanceof Element)) {
           return;
         }
-        const form = target.closest('form, .ocm-form-atom, .ocm-form, [data-ocm-type="form"]');
+        const form = target.closest(
+          'form, .ocm-form-atom, .ocm-form, [data-ocm-type="form"], [data-type="form"][data-ocm-atom="1"]'
+        );
         if (!(form instanceof HTMLElement)) {
           return;
         }

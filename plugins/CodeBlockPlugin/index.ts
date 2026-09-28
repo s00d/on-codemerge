@@ -97,7 +97,9 @@ export function CodeBlockPlugin(opts?: PluginToolbarOpts) {
         if (!(target instanceof Element)) {
           return;
         }
-        const codeBlock = target.closest('.code-block, [data-ocm-type="code_block"]');
+        const codeBlock = target.closest(
+          '.code-block, [data-type="codeBlock"], [data-ocm-type="codeBlock"]'
+        );
         if (!(codeBlock instanceof HTMLElement)) {
           return;
         }

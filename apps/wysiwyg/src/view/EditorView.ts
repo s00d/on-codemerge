@@ -276,9 +276,10 @@ export class EditorView {
         .join('');
       return `<table class="html-editor-table not-prose${tableStyleClass(node)}" data-ocm-block="${index}" data-type="table" data-ocm-type="table"${blockDomAttrs(node)}><tbody>${rows}</tbody></table>`;
     }
-    // Atom / unknown
+    // Atom / unknown — emit both data-type and data-ocm-type (plugins query either).
     const attrs = encodeURIComponent(JSON.stringify(node.attrs ?? {}));
-    return `<div data-ocm-block="${index}" ${pathAttr([index])} data-type="${escapeAttr(node.type)}" data-attrs="${attrs}" contenteditable="false" data-ocm-atom="1"></div>`;
+    const type = escapeAttr(node.type);
+    return `<div data-ocm-block="${index}" ${pathAttr([index])} data-type="${type}" data-ocm-type="${type}" data-attrs="${attrs}" contenteditable="false" data-ocm-atom="1"></div>`;
   }
 
   private mountWidgets(): void {

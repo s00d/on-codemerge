@@ -16,6 +16,34 @@ export function pathFromEl(el: Element | null): number[] | null {
   return pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
 }
 
+/**
+ * Find mounted atom hosts for a node type.
+ * Matches CE shell (`data-ocm-atom` + `data-type` / `data-ocm-type`) and plugin
+ * wrapper classes (`ocm-<type>-atom`) used by Timer/Calendar/Form mounts.
+ */
+export function queryAtomHosts(root: ParentNode, type: string): HTMLElement[] {
+  const seen = new Set<HTMLElement>();
+  const out: HTMLElement[] = [];
+  const add = (el: Element): void => {
+    if (!(el instanceof HTMLElement)) {
+      return;
+    }
+    const shell = el.matches('[data-ocm-atom="1"]')
+      ? el
+      : (el.closest<HTMLElement>('[data-ocm-atom="1"]') ?? el);
+    if (seen.has(shell)) {
+      return;
+    }
+    seen.add(shell);
+    out.push(shell);
+  };
+  const safe = CSS.escape(type);
+  root.querySelectorAll(`[data-ocm-atom="1"][data-type="${safe}"]`).forEach(add);
+  root.querySelectorAll(`[data-ocm-type="${safe}"]`).forEach(add);
+  root.querySelectorAll(`.ocm-${safe}-atom`).forEach(add);
+  return out;
+}
+
 /** Remove top-level atom by DOM node or doc path. */
 export function removeAtomAt(
   target: Element | number[] | null | undefined,

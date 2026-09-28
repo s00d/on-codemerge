@@ -16,6 +16,7 @@ import { CalendarContextMenu } from './components/CalendarContextMenu';
 import type { Calendar, CalendarEvent } from './types';
 import { downloadJson, pickJsonFile, mountCalendarView } from './widgets/domOps';
 import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
+import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
 import { isCalendar, parseCalendarImportPayload } from './utils/storageGuards';
 
@@ -103,32 +104,29 @@ export function CalendarPlugin(opts?: PluginToolbarOpts) {
   };
 
   const persistOpenCalendars = () => {
-    editor.host
-      .querySelectorAll<HTMLElement>('[data-ocm-type="calendar"], .ocm-calendar')
-      .forEach((el) => {
-        const pathRaw = el.dataset.ocmPath ?? el.dataset.ocmBlock;
-        const calId =
-          el.querySelector<HTMLElement>('.calendar-widget')?.dataset.calendarId ??
-          el.dataset.calendarId;
-        if (pathRaw === undefined || !calId) {
-          return;
-        }
-        const cal = manager.getCalendar(calId);
-        if (!cal) {
-          return;
-        }
-        const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
-        editor.run(() => [
-          {
-            type: 'set_attrs',
-            path,
-            attrs: {
-              payload: calendarPayload(cal, manager.getEvents(cal.id)),
-              title: cal.title,
-            },
+    for (const el of queryAtomHosts(editor.host, 'calendar')) {
+      const path = pathFromEl(el);
+      const calId =
+        el.querySelector<HTMLElement>('.calendar-widget')?.dataset.calendarId ??
+        el.dataset.calendarId;
+      if (!path || !calId) {
+        continue;
+      }
+      const cal = manager.getCalendar(calId);
+      if (!cal) {
+        continue;
+      }
+      editor.run(() => [
+        {
+          type: 'set_attrs',
+          path,
+          attrs: {
+            payload: calendarPayload(cal, manager.getEvents(cal.id)),
+            title: cal.title,
           },
-        ]);
-      });
+        },
+      ]);
+    }
   };
 
   const showExport = (calendar: Calendar) => {

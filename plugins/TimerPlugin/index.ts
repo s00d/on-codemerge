@@ -15,7 +15,7 @@ import { TimerManager } from './services/TimerManager';
 import { timerIcon } from '@ocm/wysiwyg/icons';
 import type { Timer } from './types';
 import { TimerContextMenu } from './components/TimerContextMenu';
-import { pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
+import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
 import { attrToHtmlValue, readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
 import { downloadJson, pickJsonFile, mountTimerView, tickTimerWidget } from './widgets/domOps';
 
@@ -96,26 +96,24 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
   };
 
   const persistTimer = (timer: Timer) => {
-    editor.host
-      .querySelectorAll<HTMLElement>('[data-ocm-type="timer"], .ocm-timer-atom')
-      .forEach((el) => {
-        const widget = el.querySelector<HTMLElement>('.timer-widget') ?? el;
-        const id = widget.dataset.timerId;
-        if (id !== timer.id) {
-          return;
-        }
-        const path = pathFromEl(el);
-        if (!path) {
-          return;
-        }
-        editor.run(() => [
-          {
-            type: 'set_attrs',
-            path,
-            attrs: { payload: timerPayload(timer), title: timer.title },
-          },
-        ]);
-      });
+    for (const el of queryAtomHosts(editor.host, 'timer')) {
+      const widget = el.querySelector<HTMLElement>('.timer-widget') ?? el;
+      const id = widget.dataset.timerId;
+      if (id !== timer.id) {
+        continue;
+      }
+      const path = pathFromEl(el);
+      if (!path) {
+        continue;
+      }
+      editor.run(() => [
+        {
+          type: 'set_attrs',
+          path,
+          attrs: { payload: timerPayload(timer), title: timer.title },
+        },
+      ]);
+    }
   };
 
   const handleContextAction = (action: string, target: Timer) => {
