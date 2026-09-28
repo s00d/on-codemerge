@@ -1,19 +1,19 @@
 # on-codemerge demo
 
-Стенд на **опубликованном** npm-пакете: три режима — **WYSIWYG** (`on-codemerge`), **JSON** (`on-codemerge/json`), **Markdown** (`on-codemerge/markdown`).
+Stand against the **published** npm package: three modes — **WYSIWYG** (`on-codemerge`), **JSON** (`on-codemerge/json`), **Markdown** (`on-codemerge/markdown`).
 
-## С npm (основной путь)
+## From npm (primary)
 
 ```bash
 cd demo
 pnpm add on-codemerge@2.1.1
-pnpm exec playwright install chromium   # один раз
+pnpm exec playwright install chromium   # once
 pnpm dev                                # http://localhost:3001
 ```
 
-## Из monorepo (только отладка локального `dist`)
+## From monorepo (local `dist` only)
 
-Не для проверки релиза. Сначала `pnpm run build` в корне, затем:
+Not for release verification. Build the package at the repo root first, then:
 
 ```bash
 cd demo
