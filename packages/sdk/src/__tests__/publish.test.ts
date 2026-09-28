@@ -50,6 +50,52 @@ describe('publish registry', () => {
     expect(withJs).toContain('public.js');
   });
 
+  it('composePublishedDocument handles null css, empty js, title, and escapes', () => {
+    expect.hasAssertions();
+    const bare = composePublishedDocument({
+      bodyHtml: '<p>x</p>',
+      cssHref: null,
+      jsHref: '',
+      title: 'A & B <C>',
+      contentClass: 'custom-content',
+    });
+    expect(bare).not.toContain('stylesheet');
+    expect(bare).not.toContain('<script');
+    expect(bare).toContain('<title>A &amp; B &lt;C&gt;</title>');
+    expect(bare).toContain('class="custom-content"');
+
+    const undefinedCss = composePublishedDocument({
+      bodyHtml: '<p>y</p>',
+      jsHref: undefined,
+    });
+    expect(undefinedCss).not.toContain('stylesheet');
+    expect(undefinedCss).toContain(PUBLISHED_CONTENT_CLASS);
+  });
+
+  it('boot skips missing runtime id and non-function cleanup', () => {
+    expect.hasAssertions();
+    const registry = new PublishRuntimeRegistry();
+    registry.register(
+      definePublishRuntime({
+        id: 'noop',
+        mount() {
+          return undefined as unknown as () => void;
+        },
+      })
+    );
+    const known = document.createElement('div');
+    known.dataset.ocmRuntime = 'noop';
+    const unknown = document.createElement('div');
+    unknown.dataset.ocmRuntime = 'missing';
+    const empty = document.createElement('div');
+    empty.setAttribute('data-ocm-runtime', '');
+    document.body.append(known, unknown, empty);
+    registry.boot(document);
+    expect(known.dataset.ocmBooted).toBe('1');
+    expect(unknown.dataset.ocmBooted).toBeUndefined();
+    registry.unboot(document);
+  });
+
   it('boot mounts once and cleanup unboots', () => {
     expect.hasAssertions();
     const mounts: HTMLElement[] = [];
