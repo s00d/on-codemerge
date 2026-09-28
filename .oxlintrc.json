@@ -12,7 +12,7 @@
     "**/coverage/**",
     "docs/.vitepress/cache/**",
     "docs/.vitepress/dist/**",
-    "demo/dist/**",
+    "demo/**",
     "plugins/CodeBlockPlugin/utils/languages/definitions/**",
     "apps/wysiwyg/src/__mocks__/**"
   ],
@@ -234,17 +234,6 @@
       "env": {
         "node": true
       },
-      "rules": {
-        "typescript/no-unsafe-assignment": "off",
-        "typescript/no-unsafe-call": "off",
-        "typescript/no-unsafe-member-access": "off",
-        "typescript/no-unsafe-argument": "off",
-        "typescript/no-unsafe-return": "off",
-        "typescript/no-unsafe-type-assertion": "off"
-      }
-    },
-    {
-      "files": ["demo/**/*.{ts,js,mjs}"],
       "rules": {
         "typescript/no-unsafe-assignment": "off",
         "typescript/no-unsafe-call": "off",
