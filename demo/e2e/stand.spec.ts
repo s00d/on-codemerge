@@ -1,7 +1,7 @@
 import { expect, test } from '@playwright/test';
 
 test.describe('npm demo stand', () => {
-  test('boots editor, CSS, APIs, and live published preview', async ({ page }) => {
+  test('wysiwyg boots, CSS, APIs, and live published preview', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(String(err)));
 
@@ -11,11 +11,11 @@ test.describe('npm demo stand', () => {
     await expect(page.locator('#pkg-version')).toContainText(/version:/);
     await expect(page.locator('#css-ok')).toContainText('ocm-toolbar OK');
     await expect(page.locator('#exports-ok')).toContainText('Editor/plugins OK');
+    await expect(page.locator('#mode-label')).toContainText('wysiwyg');
 
     const toolbar = page.locator('.ocm-toolbar').first();
     await expect(toolbar).toBeVisible({ timeout: 15_000 });
 
-    // Published iframe must show content without clicking (was empty white box)
     const frame = page.frameLocator('[data-testid="publish"]');
     await expect(frame.locator('body')).toContainText('on-codemerge', { timeout: 10_000 });
 
@@ -36,6 +36,33 @@ test.describe('npm demo stand', () => {
     await expect(page.getByTestId('output')).toContainText('Published document');
     await expect(page.getByTestId('output')).toContainText('public.css');
     await expect(frame.locator('body')).toContainText('Sample');
+
+    expect(pageErrors, `page errors: ${pageErrors.join('\n')}`).toEqual([]);
+    await expect(page.locator('#errors')).toBeEmpty();
+  });
+
+  test('switches to JSON and Markdown modes', async ({ page }) => {
+    const pageErrors: string[] = [];
+    page.on('pageerror', (err) => pageErrors.push(String(err)));
+
+    await page.goto('/');
+    await expect(page.getByTestId('mode-wysiwyg')).toBeVisible();
+
+    await page.getByTestId('mode-json').click();
+    await expect(page.locator('#mode-label')).toContainText('json');
+    await expect(page.getByTestId('actions-json')).toBeVisible();
+    await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('output')).toContainText('hello');
+    await page.getByTestId('btn-json-sample').click();
+    await expect(page.getByTestId('output')).toContainText('json editor');
+
+    await page.getByTestId('mode-markdown').click();
+    await expect(page.locator('#mode-label')).toContainText('markdown');
+    await expect(page.getByTestId('actions-markdown')).toBeVisible();
+    await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('output')).toContainText('Markdown editor');
+    await page.getByTestId('btn-md-text').click();
+    await expect(page.getByTestId('output')).toContainText('Markdown editor');
 
     expect(pageErrors, `page errors: ${pageErrors.join('\n')}`).toEqual([]);
     await expect(page.locator('#errors')).toBeEmpty();

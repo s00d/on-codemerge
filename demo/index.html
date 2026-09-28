@@ -12,6 +12,7 @@
         --border: #e4e4e7;
         --text: #18181b;
         --muted: #71717a;
+        --accent: #0284c7;
       }
       * {
         box-sizing: border-box;
@@ -54,6 +55,28 @@
         border-radius: 999px;
         padding: 4px 10px;
       }
+      .modes {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .modes button {
+        border: 1px solid var(--border);
+        background: #fff;
+        border-radius: 999px;
+        padding: 8px 14px;
+        cursor: pointer;
+        font: inherit;
+      }
+      .modes button:hover {
+        background: #fafafa;
+      }
+      .modes button.active {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
       .card {
         background: var(--card);
         border: 1px solid var(--border);
@@ -62,13 +85,16 @@
         margin-bottom: 16px;
       }
       #editor {
-        min-height: 320px;
+        min-height: 360px;
       }
       .actions {
         display: flex;
         flex-wrap: wrap;
         gap: 8px;
-        margin: 12px 0;
+        margin: 12px 0 0;
+      }
+      .actions[hidden] {
+        display: none;
       }
       .actions button {
         border: 1px solid var(--border);
@@ -82,8 +108,8 @@
         background: #fafafa;
       }
       .actions button.primary {
-        background: #0284c7;
-        border-color: #0284c7;
+        background: var(--accent);
+        border-color: var(--accent);
         color: #fff;
       }
       pre.out {
@@ -104,6 +130,9 @@
         border-radius: 8px;
         background: #fff;
       }
+      #publish-card[hidden] {
+        display: none;
+      }
       #errors {
         color: #b91c1c;
         font-size: 13px;
@@ -119,21 +148,32 @@
       <header>
         <h1>on-codemerge demo stand</h1>
         <p>
-          Connects the <strong>npm</strong> package (not the monorepo source). Use this to
-          smoke-test installs, CSS, and APIs before / after publish.
+          Smoke-tests the package entry points:
+          <code>on-codemerge</code>, <code>on-codemerge/json</code>,
+          <code>on-codemerge/markdown</code>.
         </p>
         <div class="meta">
           <span id="pkg-version">version: …</span>
           <span id="css-ok">css: …</span>
           <span id="exports-ok">exports: …</span>
+          <span id="mode-label">mode: …</span>
         </div>
       </header>
 
       <div id="errors" class="card"></div>
 
+      <div class="modes" role="tablist" aria-label="Editor mode">
+        <button type="button" class="active" data-mode="wysiwyg" data-testid="mode-wysiwyg">
+          WYSIWYG
+        </button>
+        <button type="button" data-mode="json" data-testid="mode-json">JSON</button>
+        <button type="button" data-mode="markdown" data-testid="mode-markdown">Markdown</button>
+      </div>
+
       <div class="card">
         <div id="editor" data-testid="editor-host"></div>
-        <div class="actions">
+
+        <div class="actions" data-actions="wysiwyg" data-testid="actions-wysiwyg">
           <button type="button" class="primary" id="btn-bold" data-testid="btn-bold">Bold</button>
           <button type="button" id="btn-json" data-testid="btn-json">Show JSON</button>
           <button type="button" id="btn-html" data-testid="btn-html">Show HTML</button>
@@ -146,6 +186,32 @@
           </button>
           <button type="button" id="btn-clear" data-testid="btn-clear">Clear</button>
         </div>
+
+        <div class="actions" data-actions="json" data-testid="actions-json" hidden>
+          <button type="button" class="primary" id="btn-json-text" data-testid="btn-json-text">
+            Show text
+          </button>
+          <button type="button" id="btn-json-sample" data-testid="btn-json-sample">
+            Load sample JSON
+          </button>
+          <button type="button" id="btn-clear-json" data-testid="btn-clear-json">
+            Clear → null
+          </button>
+        </div>
+
+        <div class="actions" data-actions="markdown" data-testid="actions-markdown" hidden>
+          <button type="button" class="primary" id="btn-md-text" data-testid="btn-md-text">
+            Show text
+          </button>
+          <button type="button" id="btn-md-html" data-testid="btn-md-html">Show HTML</button>
+          <button type="button" id="btn-md-sample" data-testid="btn-md-sample">
+            Load sample MD
+          </button>
+          <button type="button" id="btn-md-publish" data-testid="btn-md-publish">
+            Published preview
+          </button>
+          <button type="button" id="btn-clear-md" data-testid="btn-clear-md">Clear</button>
+        </div>
       </div>
 
       <div class="card">
@@ -153,7 +219,7 @@
         <pre class="out" id="output" data-testid="output"></pre>
       </div>
 
-      <div class="card">
+      <div class="card" id="publish-card">
         <h3>Published document</h3>
         <iframe id="publish" data-testid="publish" title="Published preview"></iframe>
       </div>
