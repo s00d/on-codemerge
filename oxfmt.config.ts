@@ -7,6 +7,8 @@ export default defineConfig({
   endOfLine: 'lf',
   ignorePatterns: [
     '**/dist/**',
+    '**/dist-json/**',
+    '**/dist-markdown/**',
     '**/node_modules/**',
     '**/coverage/**',
     'pnpm-lock.yaml',

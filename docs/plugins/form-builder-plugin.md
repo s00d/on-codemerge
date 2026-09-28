@@ -37,7 +37,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['FormBuilderPlugin']" />
+<EditorComponent
+  :activePlugins="['FormBuilderPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Internals (not a public SDK)
 

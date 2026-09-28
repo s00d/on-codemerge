@@ -1,7 +1,21 @@
 import type { Command, DocNode, Operation, Selection } from '@on-codemerge/kernel';
-import { isCollapsed } from '@on-codemerge/kernel';
+import { isCollapsed, plainText } from '@on-codemerge/kernel';
 import { core } from './core';
 import type { EditorAPI } from './types';
+
+/** Marks treated as visual styles (not links / comments / track-changes). */
+const STYLE_MARK_TYPES = new Set([
+  'bold',
+  'italic',
+  'underline',
+  'strike',
+  'textColor',
+  'highlight',
+  'fontFamily',
+  'fontSize',
+]);
+
+const STYLE_BLOCK_ATTRS = ['style', 'align', 'lineHeight'] as const;
 
 /** Coerce unknown attrs (e.g. widget props) to a string safely. */
 export function attrString(value: unknown, fallback = ''): string {
@@ -84,6 +98,211 @@ export function setMarkAttrs(markType: string, attrs: Record<string, unknown>): 
         type: 'set_mark',
       },
     ];
+  };
+}
+
+const BLOCKISH = new Set([
+  'paragraph',
+  'heading',
+  'blockquote',
+  'bulletList',
+  'orderedList',
+  'listItem',
+  'table',
+  'tableRow',
+  'tableCell',
+  'code_block',
+  'codeBlock',
+]);
+
+function collectTextLeaves(node: DocNode, path: number[], out: number[][]): void {
+  const kids = node.content ?? [];
+  const hasBlockChild = kids.some((c) => BLOCKISH.has(c.type));
+  if ((node.type === 'paragraph' || node.type === 'heading') && !hasBlockChild) {
+    out.push([...path]);
+    return;
+  }
+  kids.forEach((child, i) => {
+    if (child.type === 'text') {
+      return;
+    }
+    collectTextLeaves(child, [...path, i], out);
+  });
+}
+
+function samePath(a: number[], b: number[]): boolean {
+  return a.length === b.length && a.every((v, i) => v === b[i]);
+}
+
+function markTypesInRange(para: DocNode, from: number, to: number): string[] {
+  const types = new Set<string>();
+  let pos = 0;
+  for (const child of para.content ?? []) {
+    if (child.type !== 'text' || typeof child.text !== 'string') {
+      continue;
+    }
+    const len = child.text.length;
+    const start = pos;
+    const end = pos + len;
+    pos = end;
+    if (end <= from || start >= to) {
+      continue;
+    }
+    for (const m of child.marks ?? []) {
+      if (STYLE_MARK_TYPES.has(m.type)) {
+        types.add(m.type);
+      }
+    }
+  }
+  return [...types];
+}
+
+function blockPaintPath(doc: DocNode, leafPath: number[]): number[] {
+  const cell = findAncestorPath(doc, leafPath, 'tableCell');
+  if (cell !== null) {
+    return cell;
+  }
+  const listItem = findAncestorPath(doc, leafPath, 'listItem');
+  if (listItem !== null) {
+    return listItem;
+  }
+  return [leafPath[0] ?? 0];
+}
+
+function blockHasStyleAttrs(node: DocNode): boolean {
+  const attrs = node.attrs ?? {};
+  for (const key of STYLE_BLOCK_ATTRS) {
+    const v = attrs[key];
+    if (v !== undefined && v !== null && v !== '') {
+      return true;
+    }
+  }
+  return false;
+}
+
+/**
+ * Clear visual styles: style marks + block style/align/lineHeight.
+ * - Collapsed caret → whole document
+ * - Non-empty selection → only covered text leaves / their paint hosts
+ */
+export function clearStyles(): Command {
+  return (state) => {
+    const ops: Operation[] = [];
+    const { from, to } = core.orderedRange(state.selection);
+    const collapsed = samePath(from.path, to.path) && from.offset === to.offset;
+    const leaves: number[][] = [];
+    collectTextLeaves(state.doc, [], leaves);
+    if (leaves.length === 0) {
+      return null;
+    }
+
+    type Span = { path: number[]; from: number; to: number };
+    const spans: Span[] = [];
+
+    if (collapsed) {
+      for (const path of leaves) {
+        let len = 0;
+        try {
+          len = plainText(core.getNodeAt(state.doc, path)).length;
+        } catch {
+          continue;
+        }
+        if (len > 0) {
+          spans.push({ path, from: 0, to: len });
+        }
+      }
+    } else if (samePath(from.path, to.path)) {
+      if (from.offset !== to.offset) {
+        spans.push({ path: from.path, from: from.offset, to: to.offset });
+      }
+    } else {
+      const i0 = leaves.findIndex((p) => samePath(p, from.path));
+      const i1 = leaves.findIndex((p) => samePath(p, to.path));
+      if (i0 === -1 || i1 === -1) {
+        return null;
+      }
+      const lo = Math.min(i0, i1);
+      const hi = Math.max(i0, i1);
+      for (let i = lo; i <= hi; i++) {
+        const path = leaves[i];
+        if (path === undefined) {
+          continue;
+        }
+        let len = 0;
+        try {
+          len = plainText(core.getNodeAt(state.doc, path)).length;
+        } catch {
+          continue;
+        }
+        const start = samePath(path, from.path) ? from.offset : 0;
+        const end = samePath(path, to.path) ? to.offset : len;
+        if (end > start) {
+          spans.push({ path, from: start, to: end });
+        }
+      }
+    }
+
+    const paintPaths = new Map<string, number[]>();
+    for (const span of spans) {
+      let para: DocNode;
+      try {
+        para = core.getNodeAt(state.doc, span.path);
+      } catch {
+        continue;
+      }
+      for (const markType of markTypesInRange(para, span.from, span.to)) {
+        ops.push({
+          type: 'remove_mark',
+          path: span.path,
+          from: span.from,
+          to: span.to,
+          markType,
+        });
+      }
+      const paint = blockPaintPath(state.doc, span.path);
+      paintPaths.set(paint.join('.'), paint);
+    }
+
+    if (collapsed) {
+      // Also clear style attrs on every paint-capable block in the doc.
+      const walk = (node: DocNode, path: number[]) => {
+        if (
+          (node.type === 'paragraph' ||
+            node.type === 'heading' ||
+            node.type === 'blockquote' ||
+            node.type === 'listItem' ||
+            node.type === 'tableCell') &&
+          blockHasStyleAttrs(node)
+        ) {
+          paintPaths.set(path.join('.'), path);
+        }
+        (node.content ?? []).forEach((child, i) => {
+          if (child.type !== 'text') {
+            walk(child, [...path, i]);
+          }
+        });
+      };
+      walk(state.doc, []);
+    }
+
+    for (const path of paintPaths.values()) {
+      let node: DocNode;
+      try {
+        node = core.getNodeAt(state.doc, path);
+      } catch {
+        continue;
+      }
+      if (!blockHasStyleAttrs(node)) {
+        continue;
+      }
+      ops.push({
+        type: 'set_attrs',
+        path,
+        attrs: { style: '', align: '', lineHeight: '' },
+      });
+    }
+
+    return ops.length > 0 ? ops : null;
   };
 }
 

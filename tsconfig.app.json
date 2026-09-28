@@ -18,18 +18,34 @@
     "noUnusedParameters": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
+      "@on-codemerge/editor": ["./packages/editor/src/index.ts"],
+      "@on-codemerge/editor/*": ["./packages/editor/src/*"],
       "@on-codemerge/kernel": ["./packages/kernel/src/index.ts"],
       "@on-codemerge/sdk": ["./packages/sdk/src/index.ts"],
-      "@on-codemerge/sdk/*": ["./packages/sdk/src/*"]
+      "@on-codemerge/sdk/*": ["./packages/sdk/src/*"],
+      "@ocm/wysiwyg": ["./apps/wysiwyg/src"],
+      "@ocm/wysiwyg/*": ["./apps/wysiwyg/src/*"],
+      "@ocm/plugins": ["./plugins/index.ts"],
+      "@ocm/plugins/*": ["./plugins/*"]
     }
   },
-  "include": ["src", "packages/kernel/src", "packages/sdk/src"],
+  "include": [
+    "apps/wysiwyg/src",
+    "apps/json/src",
+    "apps/markdown/src",
+    "plugins",
+    "packages/kernel/src",
+    "packages/sdk/src",
+    "packages/editor/src"
+  ],
   "exclude": [
     "**/__tests__/**",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "src/__mocks__/**",
-    "src/core/**",
-    "src/main.ts"
+    "apps/wysiwyg/src/__mocks__/**",
+    "apps/wysiwyg/src/core/**",
+    "apps/wysiwyg/src/main.ts",
+    "apps/json/src/main.ts",
+    "apps/markdown/src/main.ts"
   ]
 }

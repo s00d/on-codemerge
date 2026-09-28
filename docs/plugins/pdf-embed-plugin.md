@@ -37,7 +37,11 @@ Tip: try `https://example.com/sample.pdf` and resize the container.
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['PDFEmbedPlugin']" />
+<EditorComponent
+  :activePlugins="['PDFEmbedPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

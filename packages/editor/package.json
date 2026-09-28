@@ -1,0 +1,22 @@
+{
+  "name": "@on-codemerge/editor",
+  "version": "2.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css",
+    "**/*.svg"
+  ],
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@i18n-micro/runtime": "^1.0.0",
+    "@on-codemerge/kernel": "workspace:*",
+    "@on-codemerge/sdk": "workspace:*"
+  }
+}

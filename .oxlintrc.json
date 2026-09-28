@@ -7,13 +7,14 @@
   },
   "ignorePatterns": [
     "**/dist/**",
+    "**/dist-json/**",
     "**/node_modules/**",
     "**/coverage/**",
     "docs/.vitepress/cache/**",
     "docs/.vitepress/dist/**",
     "demo/dist/**",
-    "src/plugins/CodeBlockPlugin/utils/languages/definitions/**",
-    "src/__mocks__/**"
+    "plugins/CodeBlockPlugin/utils/languages/definitions/**",
+    "apps/wysiwyg/src/__mocks__/**"
   ],
   "categories": {
     "correctness": "error",
@@ -174,7 +175,7 @@
   },
   "overrides": [
     {
-      "files": ["**/__mocks__/**/*.{ts,js,mjs}", "src/__mocks__/**/*.{ts,js,mjs}"],
+      "files": ["**/__mocks__/**/*.{ts,js,mjs}", "apps/wysiwyg/src/__mocks__/**/*.{ts,js,mjs}"],
       "rules": {
         "typescript/no-unsafe-type-assertion": "off",
         "typescript/consistent-type-assertions": "off"

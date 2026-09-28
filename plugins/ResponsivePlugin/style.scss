@@ -1,0 +1,137 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.viewport-indicator {
+  @apply flex cursor-pointer items-center gap-2 rounded-ocm border border-ocm-border bg-ocm-surface-muted px-3 py-1.5 text-sm font-medium text-ocm-text transition-all duration-200 hover:bg-ocm-surface-hover;
+
+  .viewport-icon {
+    @apply text-ocm-text-muted;
+
+    svg {
+      @apply size-4;
+    }
+  }
+
+  .viewport-label {
+    @apply font-semibold;
+  }
+
+  .viewport-width {
+    @apply font-mono text-xs text-ocm-text-muted;
+  }
+
+  &:hover {
+    @apply -translate-y-px border-ocm-text-muted shadow-sm;
+  }
+
+  &:active {
+    @apply translate-y-0;
+  }
+}
+
+.responsive-menu {
+  .viewport-btn {
+    @apply w-full text-left transition-all duration-200;
+
+    &:hover {
+      @apply -translate-y-0.5 shadow-md;
+    }
+
+    &:active {
+      @apply translate-y-0;
+    }
+
+    svg {
+      @apply text-ocm-text-muted;
+    }
+
+    .screen-preview {
+      @apply relative;
+
+      &::before {
+        content: '';
+        @apply absolute inset-0 rounded bg-gradient-to-br from-ocm-accent-soft to-ocm-accent-soft opacity-50;
+      }
+    }
+
+    animation: fadeInUp 0.3s ease-out;
+
+    @for $i from 1 through 6 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.05}s;
+      }
+    }
+  }
+}
+
+/* @apply disallowed inside @keyframes — keep raw keyframe stops */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(1.25rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.html-editor {
+  @apply min-w-80 transition-[width,margin,max-width,padding] duration-300 ease-in-out will-change-[width,margin];
+
+  &:not([style*='width: 100%']) {
+    @apply shadow-lg;
+  }
+}
+
+@media (max-width: 768px) {
+  .viewport-indicator {
+    @apply px-2 py-1 text-xs;
+
+    .viewport-width {
+      @apply hidden;
+    }
+  }
+
+  .responsive-menu {
+    @apply max-w-sm;
+
+    .viewport-btn {
+      @apply p-3;
+    }
+  }
+}
+
+.html-editor-table {
+  @apply transition-all duration-300 ease-in-out;
+
+  &.responsive-table {
+    @apply w-full overflow-x-auto;
+  }
+}
+
+.viewport-btn {
+  @apply relative overflow-hidden;
+
+  &::before {
+    content: '';
+    @apply absolute top-0 -left-full h-full w-full bg-gradient-to-r from-transparent via-ocm-accent/10 to-transparent transition-[left] duration-500;
+  }
+
+  &:hover::before {
+    @apply left-full;
+  }
+}
+
+.html-editor-responsive-resize-handle {
+  @apply absolute top-0 -right-2 z-ocm-toolbar flex h-full w-4 cursor-ew-resize items-center justify-center bg-transparent;
+
+  &::after {
+    content: '';
+    @apply block h-10 w-1 rounded-sm bg-ocm-text-muted/80 opacity-50 transition-colors;
+  }
+
+  &:hover::after {
+    @apply bg-ocm-accent opacity-80;
+  }
+}

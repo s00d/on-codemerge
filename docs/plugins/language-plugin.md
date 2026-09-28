@@ -22,7 +22,11 @@ editor.t('common.cancel');
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['LanguagePlugin']" />
+<EditorComponent
+  :activePlugins="['LanguagePlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## How loading works
 

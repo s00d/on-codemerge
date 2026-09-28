@@ -1,0 +1,171 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.ocm-content.ocm-md-root,
+.ocm-shell-content.ocm-md-root {
+  /* Fill host; scroll only inside panes — never grow the shell endlessly. */
+  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden p-0;
+}
+
+.ocm-md-root {
+  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden;
+}
+
+.ocm-md-shell {
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden;
+}
+
+.ocm-md-panes {
+  @apply grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden md:grid-cols-2;
+}
+
+.ocm-md-pane {
+  @apply relative min-h-0 overflow-hidden;
+}
+
+.ocm-md-pane--editor {
+  @apply border-ocm-border md:border-r;
+}
+
+.ocm-md-pane--preview {
+  @apply overflow-auto bg-ocm-surface p-3 text-[13px] text-ocm-text;
+}
+
+.ocm-md-status {
+  @apply shrink-0 border-t border-ocm-border bg-ocm-surface-muted/30 px-2 py-1;
+}
+
+.ocm-md-cm-host {
+  @apply h-full min-h-0;
+}
+
+.ocm-md-cm-host .cm-editor {
+  @apply h-full max-h-full border-0 bg-ocm-surface text-ocm-text;
+}
+
+.ocm-md-cm-host .cm-scroller {
+  overflow: auto !important;
+  padding: 0 !important;
+}
+
+.ocm-md-cm-host .cm-content {
+  padding: 0 !important;
+  @apply font-mono text-[13px] text-ocm-text;
+}
+
+.ocm-md-cm-host .cm-gutters {
+  border-right: 0;
+  padding-right: 4px !important;
+  @apply bg-ocm-surface-muted text-ocm-text-muted;
+}
+
+.ocm-md-preview {
+  @apply prose prose-sm max-w-none;
+
+  pre {
+    @apply overflow-x-auto rounded-ocm-sm border border-ocm-border bg-ocm-surface-muted p-2 text-[12px];
+  }
+
+  code.language-mermaid {
+    @apply font-mono text-ocm-text-muted whitespace-pre;
+  }
+}
+
+.ocm-md-mermaid {
+  @apply my-3;
+}
+
+.ocm-md-mermaid__frame {
+  @apply block w-full min-h-[4rem] border-0 bg-transparent;
+}
+
+.ocm-md-callout {
+  @apply my-3 rounded-ocm-sm border px-3 py-2 text-[13px];
+}
+
+.ocm-md-callout__title {
+  @apply mb-1 text-sm font-semibold;
+}
+
+.ocm-md-callout__body {
+  @apply text-[13px] leading-relaxed;
+
+  > :first-child {
+    @apply mt-0;
+  }
+
+  > :last-child {
+    @apply mb-0;
+  }
+}
+
+.ocm-md-callout__actions {
+  @apply mt-2 flex flex-wrap gap-2;
+}
+
+.ocm-md-callout__btn {
+  @apply inline-flex items-center rounded-ocm-sm border border-ocm-border bg-ocm-surface px-2.5 py-1 text-[12px] font-medium text-ocm-text no-underline hover:bg-ocm-surface-hover;
+}
+
+.ocm-md-callout--info {
+  @apply border-sky-300 bg-sky-50 text-sky-950;
+
+  .ocm-md-callout__title {
+    @apply text-sky-800;
+  }
+}
+
+.ocm-md-callout--warn {
+  @apply border-amber-300 bg-amber-50 text-amber-950;
+
+  .ocm-md-callout__title {
+    @apply text-amber-800;
+  }
+}
+
+.ocm-md-callout--error {
+  @apply border-red-300 bg-red-50 text-red-950;
+
+  .ocm-md-callout__title {
+    @apply text-red-800;
+  }
+}
+
+.ocm-md-embed {
+  @apply my-2 block max-w-full;
+}
+
+.ocm-md-embed__card {
+  @apply flex max-h-[420px] min-h-[220px] flex-col overflow-hidden rounded-ocm-sm border border-ocm-border bg-ocm-surface;
+}
+
+.ocm-md-embed__header {
+  @apply flex shrink-0 items-center justify-between gap-2 border-b border-ocm-border bg-ocm-surface-muted/40 px-2 py-1 text-xs;
+}
+
+.ocm-md-embed__badge {
+  @apply font-semibold tracking-wide text-ocm-text-muted uppercase;
+}
+
+.ocm-md-embed__body {
+  @apply min-h-0 flex-1 overflow-hidden;
+}
+
+.ocm-md-embed__body .ocm-md-root {
+  @apply h-full;
+}
+
+.ocm-md-publish {
+  @apply my-2 overflow-hidden rounded-ocm-sm border border-ocm-border bg-ocm-surface;
+}
+
+.ocm-md-publish__header {
+  @apply border-b border-ocm-border bg-ocm-surface-muted/40 px-2 py-1 text-xs;
+}
+
+.ocm-md-publish__badge {
+  @apply font-semibold tracking-wide text-ocm-text-muted uppercase;
+}
+
+.ocm-md-publish__body {
+  @apply p-3 text-[13px];
+}

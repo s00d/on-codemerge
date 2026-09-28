@@ -1,0 +1,17 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.lists-menu {
+  @apply max-w-lg w-full;
+
+  .list-option {
+    @apply w-full text-left;
+
+    svg {
+      @apply text-ocm-text-muted;
+    }
+
+    &:hover svg {
+      @apply text-ocm-accent;
+    }
+  }
+}

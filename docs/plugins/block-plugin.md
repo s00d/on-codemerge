@@ -31,7 +31,11 @@ editor.command('insertBlock');
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['BlockPlugin']" />
+<EditorComponent
+  :activePlugins="['BlockPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Commands
 

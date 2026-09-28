@@ -1,0 +1,9 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.anchor-link {
+  @apply text-ocm-accent no-underline;
+
+  &:hover {
+    @apply underline;
+  }
+}

@@ -23,7 +23,11 @@ Overflow menus **Insert / Review / Tools** are registered by `Editor` itself —
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['ToolbarPlugin', 'HistoryPlugin']" />
+<EditorComponent
+  :activePlugins="['ToolbarPlugin', 'HistoryPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## What it does
 

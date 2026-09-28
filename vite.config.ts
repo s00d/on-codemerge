@@ -43,8 +43,11 @@ const shared = {
   },
   resolve: {
     alias: {
+      '@on-codemerge/editor': resolve(root, 'packages/editor/src'),
       '@on-codemerge/kernel': resolve(root, 'packages/kernel/src'),
       '@on-codemerge/sdk': resolve(root, 'packages/sdk/src'),
+      '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
+      '@ocm/plugins': resolve(root, 'plugins'),
     },
   },
   plugins: [
@@ -77,7 +80,9 @@ const libConfig = defineConfig({
     cssCodeSplit: true,
     lib: {
       entry: {
-        app: './src/app.ts',
+        app: './apps/wysiwyg/src/app.ts',
+        json: './apps/json/src/app.ts',
+        markdown: './apps/markdown/src/app.ts',
         'packages/sdk/src/index': './packages/sdk/src/index.ts',
         'packages/kernel/src/index': './packages/kernel/src/index.ts',
       },

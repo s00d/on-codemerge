@@ -12,6 +12,7 @@ const pluginSidebar = [
   { text: 'Font Plugin', link: '/plugins/font-plugin' },
   { text: 'Typography Plugin', link: '/plugins/typography-plugin' },
   { text: 'Color Plugin', link: '/plugins/color-plugin' },
+  { text: 'Clear Styles Plugin', link: '/plugins/clear-styles-plugin' },
   { text: 'Alignment Plugin', link: '/plugins/alignment-plugin' },
   { text: 'Block Style Plugin', link: '/plugins/block-style-plugin' },
   { text: 'Block Plugin', link: '/plugins/block-plugin' },
@@ -23,6 +24,8 @@ const pluginSidebar = [
   { text: 'YouTube Video Plugin', link: '/plugins/youtube-video-plugin' },
   { text: 'File Upload Plugin', link: '/plugins/file-upload-plugin' },
   { text: 'Code Block Plugin', link: '/plugins/code-block-plugin' },
+  { text: 'JSON Plugin', link: '/plugins/json-plugin' },
+  { text: 'Markdown Plugin', link: '/plugins/markdown-plugin' },
   { text: 'Math Plugin', link: '/plugins/math-plugin' },
   { text: 'HTML Viewer Plugin', link: '/plugins/html-viewer-plugin' },
   { text: 'Link Plugin', link: '/plugins/link-plugin' },
@@ -178,7 +181,10 @@ export default defineConfig({
       {
         text: 'Guide',
         items: [
+          { text: 'Editors', link: '/guide/editors' },
           { text: 'Editor API', link: '/guide/editor' },
+          { text: 'JSON Editor', link: '/guide/json-editor' },
+          { text: 'Markdown Editor', link: '/guide/markdown-editor' },
           { text: 'SDK reference', link: '/guide/sdk' },
           { text: 'Document model', link: '/guide/document-model' },
           { text: 'Authoring plugins', link: '/guide/authoring-plugins' },
@@ -199,7 +205,10 @@ export default defineConfig({
           text: 'Guide',
           items: [
             { text: 'Introduction', link: '/' },
+            { text: 'Editors', link: '/guide/editors' },
             { text: 'Editor API', link: '/guide/editor' },
+            { text: 'JSON Editor', link: '/guide/json-editor' },
+            { text: 'Markdown Editor', link: '/guide/markdown-editor' },
             { text: 'SDK reference', link: '/guide/sdk' },
             { text: 'Document model', link: '/guide/document-model' },
             { text: 'Authoring plugins', link: '/guide/authoring-plugins' },
@@ -312,6 +321,8 @@ export default defineConfig({
             { text: 'Migration v1 → v2', link: '/guide/migration-v1-to-v2' },
             { text: 'Plugins overview', link: '/plugins/' },
             { text: 'Integrate', link: '/integrate/' },
+            { text: 'JSON Editor', link: '/guide/json-editor' },
+            { text: 'Markdown Editor', link: '/guide/markdown-editor' },
             { text: 'v1 archive', link: '/v1/' },
           ],
         },
@@ -336,6 +347,9 @@ export default defineConfig({
       alias: {
         '@on-codemerge/kernel': resolve(root, 'packages/kernel/src'),
         '@on-codemerge/sdk': resolve(root, 'packages/sdk/src'),
+        '@on-codemerge/editor': resolve(root, 'packages/editor/src'),
+        '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
+        '@ocm/plugins': resolve(root, 'plugins'),
       },
     },
     css: {

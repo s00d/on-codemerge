@@ -31,7 +31,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['CodeBlockPlugin']" />
+<EditorComponent
+  :activePlugins="['CodeBlockPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## API Reference
 

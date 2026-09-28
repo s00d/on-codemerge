@@ -1,0 +1,10 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.misspelled-word {
+  @apply relative inline;
+}
+
+.misspelled-word::after {
+  content: '';
+  @apply absolute inset-x-0 -bottom-0.5 h-0.5 bg-ocm-danger;
+}

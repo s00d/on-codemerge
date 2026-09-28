@@ -1,0 +1,142 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.ocm-block-container.editor-block,
+.editor-block {
+  @apply relative my-2 box-border min-h-14 rounded-lg border border-ocm-border bg-ocm-surface-muted p-3 transition-all duration-200 ease-in-out;
+
+  &:hover {
+    @apply border-ocm-text-muted shadow-[0_2px_8px_rgb(0_0_0/0.08)];
+  }
+
+  &.active {
+    @apply border-ocm-accent shadow-[0_4px_12px_rgb(2_132_199/0.15)];
+  }
+
+  &.layout-row,
+  &.split-container.horizontal {
+    @apply flex flex-row items-stretch gap-3;
+  }
+
+  &.layout-column,
+  &.split-container.vertical {
+    @apply flex flex-col items-stretch gap-2;
+  }
+
+  .block-content,
+  .block-container-inner {
+    @apply box-border w-full p-2 text-center text-[13px] text-ocm-text-muted italic select-none;
+  }
+
+  .block-split-panes {
+    @apply contents;
+
+    /* Nested splits must be real flex boxes (not display:contents). */
+    &.split-nested {
+      @apply m-0 flex min-h-12 min-w-0 flex-[1_1_0] gap-2 border-0 p-0;
+    }
+
+    &.split-nested.split-horizontal {
+      @apply flex-row items-stretch;
+    }
+
+    &.split-nested.split-vertical {
+      @apply flex-col items-stretch;
+    }
+  }
+
+  .block-pane {
+    @apply m-0 box-border flex min-h-12 min-w-0 flex-[1_1_0] items-center justify-center rounded-md border border-ocm-border bg-ocm-surface p-2 text-xs text-ocm-text-muted italic;
+  }
+}
+
+/* @apply disallowed inside @keyframes — keep raw keyframe stops */
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.editor-block.ocm-resize--selected {
+  @apply border-ocm-accent;
+}
+
+.block-context-menu {
+  .menu-item {
+    @apply rounded px-3 py-2 transition-colors duration-200;
+
+    &:hover {
+      @apply bg-ocm-surface-hover;
+    }
+
+    &.danger {
+      @apply text-ocm-danger;
+
+      &:hover {
+        @apply bg-ocm-danger-soft;
+      }
+    }
+  }
+
+  .submenu {
+    @apply ml-2 border-l-2 border-ocm-border pl-2;
+  }
+}
+
+.editor-block[data-block-type='text'] {
+  .block-content {
+    @apply cursor-text;
+  }
+}
+
+.editor-block[data-block-type='container'] {
+  .block-content {
+    @apply cursor-pointer;
+  }
+}
+
+.editor-block[data-block-type='split'] {
+  .block-content {
+    @apply cursor-default;
+  }
+}
+
+@media (max-width: 768px) {
+  .editor-block {
+    @apply my-1;
+
+    &.split-container {
+      /* stack split panes on narrow viewports — !important beats inline flex-direction */
+      @apply flex-col! gap-2 p-2;
+
+      > .editor-block {
+        @apply m-0 mb-1 last:mb-0;
+      }
+    }
+
+    .block-content {
+      @apply px-3 py-2 text-[13px];
+    }
+  }
+}
+
+.editor-block.dragging {
+  @apply z-[1000] rotate-2 opacity-50;
+}
+
+.editor-block.drag-over {
+  @apply border-emerald-500 bg-emerald-50;
+
+  html.dark & {
+    @apply border-emerald-400 bg-emerald-950/40;
+  }
+}
+
+.editor-block:empty::after {
+  content: 'Empty block';
+  @apply pointer-events-none absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs text-ocm-text-muted italic;
+}

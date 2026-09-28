@@ -6,10 +6,10 @@ Document SoT is JSON (`getJSON` / `setJSON`). HTML and Markdown are boundaries (
 
 ## Plugin sets
 
-| Helper                   | Contents                                                                                                                                                                                                                                                                                                                                                                         |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `createDefaultPlugins()` | Full ship set: toolbar marks, history, typography/color/font/link/alignment, lists, block, block-style, table, media (image/video/youtube/file/pdf), code, math, charts, calendar, timer, form builder, comments, mentions, footnotes, footer, shortcuts, export, HTML viewer, templates, responsive, language, AI, track changes, anchor links. **Not** collaboration (opt-in). |
-| `createCorePlugins()`    | Lean essentials: Toolbar, History, Typography, Color, Font, Link, Alignment, Lists, Block, Table, Image, CodeBlock, Math, Export, Shortcuts.                                                                                                                                                                                                                                     |
+| Helper                   | Contents                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `createDefaultPlugins()` | Full ship set: toolbar marks, history, typography/color/font/link/**clear-styles**/alignment, lists, block, block-style, table, media (image/video/youtube/file/pdf), code, **JSON embed**, **Markdown embed**, math, charts, calendar, timer, form builder, comments, mentions, footnotes, footer, shortcuts, export, HTML viewer, templates, responsive, language, AI, track changes, anchor links. **Not** collaboration (opt-in). |
+| `createCorePlugins()`    | Lean essentials: Toolbar, History, Typography, Color, Font, Link, **ClearStyles**, Alignment, Lists, Block, Table, Image, CodeBlock, Math, Export, Shortcuts.                                                                                                                                                                                                                                                                         |
 
 Toolbar overflow menus (`insert` / `review` / `tools`) are registered by **`Editor`**, not by these helpers. See [Authoring plugins — Toolbar](/guide/authoring-plugins#toolbar-bar-vs-menus).
 
@@ -23,13 +23,14 @@ Toolbar overflow menus (`insert` / `review` / `tools`) are registered by **`Edit
 
 ### Text formatting
 
-| Plugin               | Description                       | Docs                               |
-| -------------------- | --------------------------------- | ---------------------------------- |
-| **FontPlugin**       | Font family, size, and style.     | [Details](./font-plugin.md)        |
-| **TypographyPlugin** | Line height, letter spacing, etc. | [Details](./typography-plugin.md)  |
-| **ColorPlugin**      | Text and background colors.       | [Details](./color-plugin.md)       |
-| **AlignmentPlugin**  | Left, center, right, justify.     | [Details](./alignment-plugin.md)   |
-| **BlockStylePlugin** | Class and style editor.           | [Details](./block-style-plugin.md) |
+| Plugin                | Description                                                          | Docs                                |
+| --------------------- | -------------------------------------------------------------------- | ----------------------------------- |
+| **FontPlugin**        | Font family, size, and style.                                        | [Details](./font-plugin.md)         |
+| **TypographyPlugin**  | Line height, letter spacing, etc.                                    | [Details](./typography-plugin.md)   |
+| **ColorPlugin**       | Text and background colors.                                          | [Details](./color-plugin.md)        |
+| **ClearStylesPlugin** | Clear style marks + block style/align (selection or whole document). | [Details](./clear-styles-plugin.md) |
+| **AlignmentPlugin**   | Left, center, right, justify.                                        | [Details](./alignment-plugin.md)    |
+| **BlockStylePlugin**  | Class and style editor.                                              | [Details](./block-style-plugin.md)  |
 
 ### Content
 
@@ -51,11 +52,14 @@ Toolbar overflow menus (`insert` / `review` / `tools`) are registered by **`Edit
 
 ### Code and technical
 
-| Plugin               | Description                     | Docs                               |
-| -------------------- | ------------------------------- | ---------------------------------- |
-| **CodeBlockPlugin**  | Syntax-highlighted code blocks. | [Details](./code-block-plugin.md)  |
-| **MathPlugin**       | LaTeX math via KaTeX.           | [Details](./math-plugin.md)        |
-| **HTMLViewerPlugin** | Raw HTML view.                  | [Details](./html-viewer-plugin.md) |
+| Plugin              | Description                                                                    | Docs                              |
+| ------------------- | ------------------------------------------------------------------------------ | --------------------------------- |
+| **CodeBlockPlugin** | Syntax-highlighted code blocks.                                                | [Details](./code-block-plugin.md) |
+| **JsonPlugin**      | JSON embed atom (WYSIWYG) / Tree+Raw workspace (`on-codemerge/json`).          | [Details](./json-plugin.md)       |
+| **MarkdownPlugin**  | Markdown embed atom (WYSIWYG) / dual-pane workspace (`on-codemerge/markdown`). | [Details](./markdown-plugin.md)   |
+
+| **MathPlugin** | TeX-subset → MathML formulas. | [Details](./math-plugin.md) |
+| **HTMLViewerPlugin** | Raw HTML view. | [Details](./html-viewer-plugin.md) |
 
 ### Interactive
 

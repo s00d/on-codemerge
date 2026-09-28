@@ -27,6 +27,11 @@ export interface EditorAPI {
    */
   readonly host: HTMLElement;
   /**
+   * Stable content root from the ViewPort (`contentElement` / HTMLElement `contentTarget`).
+   * Prefer this over querying `.ocm-content` under `host`.
+   */
+  contentElement(): HTMLElement | null;
+  /**
    * `bar` — sticky toolbar + footer.
    * `page` — fullscreen content; toolbar shown in a popup on click.
    */

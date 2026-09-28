@@ -11,6 +11,10 @@ export {
 } from './plugin';
 export type { EditorAPI, LocaleMessages, TranslateParams } from './types';
 export type { ToolbarButton, ToolbarMenuDef, ToolbarAction, ToolbarText } from './ui/toolbar';
+export type { ToolbarConfig, ToolbarConfigItem, PluginToolbarOpts } from './ui/toolbarConfig';
+export { applyToolbarConfig, pluginToolbarPlacement } from './ui/toolbarConfig';
+export { KERNEL_UNDO_REDO_HOTKEYS, historyToolbarItems } from './ui/historyToolbar';
+export type { HistoryToolbarIcons } from './ui/historyToolbar';
 export type { PopupHandle, PopupOptions, PopupItem, PopupButton } from './ui/popup';
 export { PopupService, PopupController } from './ui/popup';
 export type { MenuItem, MenuPosition } from './ui/context-menu';
@@ -73,6 +77,7 @@ export {
   withMarkTarget,
   setMarkAttrs,
   setBlockAttr,
+  clearStyles,
   convertBlockType,
   replaceBlockType,
   insertAtomAfter,

@@ -42,7 +42,13 @@ export function readOcmConfig(el: Element): unknown {
 }
 
 export function setOcmConfig(el: Element, config: unknown): void {
-  el.setAttribute(OCM_CONFIG_ATTR, JSON.stringify(config));
+  let encoded = '';
+  try {
+    encoded = JSON.stringify(config) ?? '';
+  } catch {
+    encoded = '';
+  }
+  el.setAttribute(OCM_CONFIG_ATTR, encoded);
 }
 
 /** Collect unique runtime ids from `[data-ocm-runtime]` under root. */

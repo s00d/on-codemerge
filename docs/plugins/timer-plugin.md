@@ -39,7 +39,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['TimerPlugin']" />
+<EditorComponent
+  :activePlugins="['TimerPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

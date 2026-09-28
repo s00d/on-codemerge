@@ -24,7 +24,7 @@ export default defineConfig({
     emptyOutDir: false,
     outDir: 'dist',
     lib: {
-      entry: resolve(root, 'src/public.ts'),
+      entry: resolve(root, 'apps/wysiwyg/src/public.ts'),
       name: 'OcmPublic',
       formats: ['iife'],
       fileName: () => 'public.js',

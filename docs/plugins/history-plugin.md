@@ -32,7 +32,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['HistoryPlugin']" />
+<EditorComponent
+  :activePlugins="['HistoryPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

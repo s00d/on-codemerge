@@ -1,0 +1,11 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.link-menu {
+  input {
+    @apply font-mono text-sm whitespace-pre-wrap;
+  }
+}
+
+.link-button {
+  @apply text-ocm-accent cursor-pointer hover:text-sky-800;
+}

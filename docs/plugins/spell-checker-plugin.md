@@ -10,7 +10,11 @@ Toggle: **Tools → Spell Checker** or `Mod-Shift-s`. Misspellings get a `misspe
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['SpellCheckerPlugin']" :showDescription="false" />
+<EditorComponent
+  :activePlugins="['SpellCheckerPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Install dictionaries
 

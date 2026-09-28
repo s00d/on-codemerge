@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 /**
- * Ensure every non-en locale under src/i18n/locales shares en's nested key tree.
+ * Ensure every non-en locale under packages/editor/src/i18n/locales shares en's nested key tree.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 
 const root = path.resolve(import.meta.dirname, '..');
-const localesDir = path.join(root, 'src/i18n/locales');
+const localesDir = path.join(root, 'packages/editor/src/i18n/locales');
 const enPath = path.join(localesDir, 'en.json');
 
 function flatten(obj, prefix = '', out = {}) {

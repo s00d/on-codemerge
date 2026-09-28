@@ -32,7 +32,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['FootnotesPlugin']" />
+<EditorComponent
+  :activePlugins="['FootnotesPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

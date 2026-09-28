@@ -1,0 +1,16 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+/* Alignment menu */
+.alignment-menu {
+  .alignment-option {
+    @apply w-full text-left;
+
+    svg {
+      @apply text-ocm-text-muted;
+    }
+
+    &:hover svg {
+      @apply text-ocm-accent;
+    }
+  }
+}

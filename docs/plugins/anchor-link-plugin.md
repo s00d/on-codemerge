@@ -34,4 +34,8 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['AnchorLinkPlugin']" />
+<EditorComponent
+  :activePlugins="['AnchorLinkPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>

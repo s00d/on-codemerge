@@ -23,7 +23,11 @@ const editor = new HTMLEditор(container);
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['MentionsPlugin']" />
+<EditorComponent
+  :activePlugins="['MentionsPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

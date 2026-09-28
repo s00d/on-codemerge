@@ -19,6 +19,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run check
       - run: pnpm run test:coverage
 
   docs:
@@ -35,6 +36,11 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
+      - run: pnpm run check:json-export
+      - run: pnpm run check:json-types
+      - run: pnpm run build:json
+      - run: pnpm run check:markdown-export
+      - run: pnpm run check:markdown-types
       - run: pnpm run docs:build
 
   e2e:

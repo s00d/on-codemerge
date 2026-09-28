@@ -29,7 +29,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['ColorPlugin']" />
+<EditorComponent
+  :activePlugins="['ColorPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API
 

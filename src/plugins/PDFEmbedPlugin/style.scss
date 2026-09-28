@@ -1,9 +1,0 @@
-@reference "../../tailwind.css";
-
-.pdf-embed-container {
-  @apply relative bg-ocm-surface-muted border border-ocm-border rounded-ocm-sm overflow-hidden;
-}
-
-.pdf-embed-frame {
-  @apply block;
-}

@@ -17,7 +17,7 @@ export const recipes = defineRecipes(
       env: { UNTESTUTILS_E2E: '1' },
       viteConfig: { build: { outDir: 'dist-e2e' } },
       hashInputs: [
-        resolve(root, 'src'),
+        resolve(root, 'apps/wysiwyg/src'),
         resolve(root, 'index.html'),
         resolve(root, 'vite.config.ts'),
         resolve(root, 'package.json'),

@@ -32,7 +32,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['HTMLViewerPlugin']" />
+<EditorComponent
+  :activePlugins="['HTMLViewerPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

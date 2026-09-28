@@ -20,6 +20,8 @@ export interface HistoryController {
   canUndo: () => boolean;
   canRedo: () => boolean;
   depth: () => number;
+  /** Drop stacks after out-of-band full-document replace (setJSON / replaceDocument). */
+  clear: () => void;
 }
 
 interface Entry {
@@ -79,6 +81,10 @@ export function createHistory(options: HistoryOptions = {}): HistoryController {
     },
     canRedo: () => redoStack.length > 0,
     canUndo: () => undoStack.length > 0,
+    clear() {
+      undoStack.length = 0;
+      redoStack.length = 0;
+    },
     depth: () => undoStack.length,
     redo(state) {
       const entry = redoStack.pop();

@@ -31,14 +31,18 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['ChartsPlugin']" />
+<EditorComponent
+  :activePlugins="['ChartsPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## API Reference
 
 ### Commands
 
 ```javascript
-// Opens the chart modal (toolbar Insert → Chart). Hotkey: Mod-Alt-g
+// Opens the chart modal (toolbar: Insert ▾ → Chart, or bar when menus: []). Hotkey: Mod-Alt-g
 editor.command('insertChart');
 ```
 

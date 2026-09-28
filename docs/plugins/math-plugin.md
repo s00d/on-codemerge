@@ -8,7 +8,11 @@ Insert via **Insert → Math** or `Mod-Shift-m`. Expressions use a **TeX subset*
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['MathPlugin']" :showDescription="false" />
+<EditorComponent
+  :activePlugins="['MathPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 > Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 

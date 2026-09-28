@@ -13,6 +13,8 @@ import type { Plugin } from 'vite';
 
 const CTS_ENTRIES = [
   'dist/app.d.ts',
+  'dist/json.d.ts',
+  'dist/markdown.d.ts',
   'dist/packages/sdk/src/index.d.ts',
   'dist/packages/kernel/src/index.d.ts',
 ] as const;
@@ -154,7 +156,7 @@ function removeDistNodeModules(distDir: string): void {
 }
 
 function removeOrphanToolbarDividerDts(root: string): void {
-  const dts = resolve(root, 'dist/src/plugins/ToolbarDividerPlugin/index.d.ts');
+  const dts = resolve(root, 'dist/plugins/ToolbarDividerPlugin/index.d.ts');
   if (!existsSync(dts)) {
     return;
   }
@@ -226,9 +228,9 @@ function withDistFontUrls(css: string): string {
 }
 
 function emitPackageCss(root: string): void {
-  const twSrc = resolve(root, 'dist/src/tailwind.css');
-  const indexSrc = resolve(root, 'dist/src/index.css');
-  const publicSrc = resolve(root, 'dist/src/public.css');
+  const twSrc = resolve(root, 'dist/apps/wysiwyg/src/tailwind.css');
+  const indexSrc = resolve(root, 'dist/apps/wysiwyg/src/index.css');
+  const publicSrc = resolve(root, 'dist/apps/wysiwyg/src/public.css');
   const sdkCss = resolve(root, 'dist/packages/sdk/src/ui/sdk.css');
 
   for (const required of [twSrc, indexSrc, publicSrc, sdkCss]) {
@@ -237,8 +239,8 @@ function emitPackageCss(root: string): void {
     }
   }
 
-  const pluginStyles = findNamedDeep(resolve(root, 'dist/src/plugins'), 'style.css').toSorted(
-    (a, b) => a.localeCompare(b)
+  const pluginStyles = findNamedDeep(resolve(root, 'dist/plugins'), 'style.css').toSorted((a, b) =>
+    a.localeCompare(b)
   );
 
   const tw = readFileSync(twSrc, 'utf8');

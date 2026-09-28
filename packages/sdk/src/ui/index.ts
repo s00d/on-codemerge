@@ -5,6 +5,10 @@ export {
   type ToolbarAction,
   type ToolbarText,
 } from './toolbar';
+export type { ToolbarConfig, ToolbarConfigItem, PluginToolbarOpts } from './toolbarConfig';
+export { applyToolbarConfig, pluginToolbarPlacement } from './toolbarConfig';
+export { KERNEL_UNDO_REDO_HOTKEYS, historyToolbarItems } from './historyToolbar';
+export type { HistoryToolbarIcons } from './historyToolbar';
 export {
   PopupService,
   type PopupHandle,

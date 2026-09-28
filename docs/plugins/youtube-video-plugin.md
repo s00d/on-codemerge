@@ -31,7 +31,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['YouTubeVideoPlugin']" />
+<EditorComponent
+  :activePlugins="['YouTubeVideoPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

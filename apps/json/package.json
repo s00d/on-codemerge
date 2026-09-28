@@ -1,0 +1,27 @@
+{
+  "name": "@on-codemerge/json",
+  "version": "2.1.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css"
+  ],
+  "main": "./src/app.ts",
+  "types": "./src/app.ts",
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "dependencies": {
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/lint": "^6.9.7",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.43.13",
+    "@i18n-micro/runtime": "^1.0.0",
+    "@on-codemerge/editor": "workspace:*",
+    "@on-codemerge/kernel": "workspace:*",
+    "@on-codemerge/sdk": "workspace:*",
+    "codemirror": "^6.0.2"
+  }
+}

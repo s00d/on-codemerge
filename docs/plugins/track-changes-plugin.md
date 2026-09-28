@@ -36,4 +36,8 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['TrackChangesPlugin']" />
+<EditorComponent
+  :activePlugins="['TrackChangesPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>

@@ -29,7 +29,12 @@ const editor = new Editor(container, {
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
-<EditorComponent :activePlugins="['AIAssistantPlugin']" />
+
+<EditorComponent
+  :activePlugins="['AIAssistantPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Public API (v2)
 

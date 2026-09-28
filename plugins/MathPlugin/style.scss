@@ -1,0 +1,9 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+/* Math menu chrome — most classes are Tailwind on ViewSpec. */
+
+.math-wrapper {
+  &.dragging {
+    @apply opacity-50 border-2 border-dashed border-ocm-accent;
+  }
+}

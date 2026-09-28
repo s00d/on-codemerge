@@ -79,9 +79,9 @@ Rules:
 
 - **Chrome** (the sticky bar) is always created by `Editor` → SDK `ToolbarPanel`.
 - **`ToolbarPlugin()`** only registers Bold / Italic / Underline / Strike.
-- Overflow menus **`insert` / `review` / `tools`** are registered by **`Editor`** itself. Other plugins put buttons there with `menu: 'insert' | 'review' | 'tools'`.
+- Overflow menus come from **`Editor` `toolbar.menus`** (omit → Insert / Review / Tools; `{ menus: [] }` → flat bar). Plugins place items with `menu: '…'` / `PluginToolbarOpts`; missing menu id → bar button.
 - `ToolbarDividerPlugin` is a no-op; separators come from `group` changes on the bar.
-- There is **no** `ToolbarMenusPlugin` — removed in favor of core registration.
+- There is **no** `ToolbarMenusPlugin` / `flattenOverflowMenus` — removed in favor of declarative `toolbar.menus`.
 
 ## Persistence
 

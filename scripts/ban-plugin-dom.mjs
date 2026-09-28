@@ -5,7 +5,7 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-const ROOT = join(import.meta.dirname, '..', 'src', 'plugins');
+const ROOTS = [join(import.meta.dirname, '..', 'plugins')];
 
 const BANNED = [
   { re: /\bdocument\.createElement\b/, msg: 'document.createElement' },
@@ -74,18 +74,25 @@ function stripStrings(src) {
 }
 
 const violations = [];
-for (const file of walk(ROOT)) {
-  const raw = readFileSync(file, 'utf8');
-  const src = stripStrings(stripForeignBlocks(raw));
-  const lines = src.split('\n');
-  for (let n = 0; n < lines.length; n++) {
-    const line = lines[n];
-    if (line.trimStart().startsWith('//') || line.trimStart().startsWith('*')) {
-      continue;
-    }
-    for (const ban of BANNED) {
-      if (ban.re.test(line)) {
-        violations.push(`${relative(process.cwd(), file)}:${n + 1}: banned ${ban.msg}`);
+for (const root of ROOTS) {
+  try {
+    statSync(root);
+  } catch {
+    continue;
+  }
+  for (const file of walk(root)) {
+    const raw = readFileSync(file, 'utf8');
+    const src = stripStrings(stripForeignBlocks(raw));
+    const lines = src.split('\n');
+    for (let n = 0; n < lines.length; n++) {
+      const line = lines[n];
+      if (line.trimStart().startsWith('//') || line.trimStart().startsWith('*')) {
+        continue;
+      }
+      for (const ban of BANNED) {
+        if (ban.re.test(line)) {
+          violations.push(`${relative(process.cwd(), file)}:${n + 1}: banned ${ban.msg}`);
+        }
       }
     }
   }

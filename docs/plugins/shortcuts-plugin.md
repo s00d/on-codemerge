@@ -33,7 +33,11 @@ const editor = new Editor(container, {
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['ShortcutsPlugin']" />
+<EditorComponent
+  :activePlugins="['ShortcutsPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## API Reference
 

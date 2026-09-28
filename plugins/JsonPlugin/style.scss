@@ -1,0 +1,149 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+/* Shell content is already inside .ocm-editor-root — kill prose padding + fill height. */
+.ocm-content.ocm-json-root,
+.ocm-shell-content.ocm-json-root {
+  @apply flex min-h-0 flex-1 flex-col p-0;
+}
+
+.ocm-json-root {
+  @apply flex min-h-0 flex-1 flex-col;
+}
+
+.ocm-json-shell {
+  @apply flex min-h-0 flex-1 flex-col;
+}
+
+.ocm-json-tree {
+  @apply text-[13px];
+}
+
+.ocm-json-row--root::before {
+  content: none;
+}
+
+.ocm-json-type {
+  @apply ml-0.5;
+}
+
+.ocm-json-cm-host,
+.ocm-json-cm-foreign,
+.ocm-json-raw-slot {
+  @apply min-h-0;
+}
+
+.ocm-json-cm-host {
+  @apply h-full;
+}
+
+.ocm-json-cm-host .cm-editor {
+  @apply h-full max-h-none border-0 bg-ocm-surface text-ocm-text;
+}
+
+.ocm-json-cm-host .cm-scroller {
+  overflow: auto;
+  padding: 0 !important;
+}
+
+.ocm-json-cm-host .cm-content {
+  padding: 0 !important;
+  @apply font-mono text-[13px] text-ocm-text;
+}
+
+.ocm-json-cm-host .cm-gutters {
+  border-right: 0;
+  padding-right: 4px !important;
+  @apply bg-ocm-surface-muted text-ocm-text-muted;
+}
+
+.ocm-json-cm-host .cm-line {
+  padding: 0 0 0 4px !important;
+}
+
+/* CE json_embed atom — same Tree/Raw surface as JSON Editor; colors follow ocm theme tokens */
+.ocm-json-embed {
+  @apply my-2 block max-w-full;
+}
+
+.ocm-json-embed__card {
+  @apply flex max-h-[420px] min-h-[220px] flex-col overflow-hidden rounded-ocm-sm border border-ocm-border bg-ocm-surface;
+}
+
+.ocm-json-embed__header {
+  @apply flex shrink-0 items-center justify-between gap-2 border-b border-ocm-border bg-ocm-surface-muted/40 px-2 py-1 text-xs;
+}
+
+.ocm-json-embed__badge {
+  @apply font-semibold tracking-wide text-ocm-text-muted uppercase;
+}
+
+.ocm-json-embed__modes-slot {
+  @apply flex items-center;
+}
+
+.ocm-json-embed__modes {
+  @apply flex items-center gap-0.5;
+}
+
+.ocm-json-embed__mode {
+  @apply inline-flex h-7 w-7 cursor-pointer items-center justify-center rounded-ocm-sm text-ocm-text-muted hover:bg-ocm-surface-hover hover:text-ocm-text;
+
+  &.is-active {
+    @apply bg-ocm-surface-hover text-ocm-text;
+  }
+
+  svg {
+    @apply h-4 w-4;
+  }
+}
+
+.ocm-json-embed__body {
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden bg-ocm-surface text-ocm-text;
+}
+
+.ocm-json-embed__body.ocm-json-root,
+.ocm-json-embed__body .ocm-json-shell {
+  @apply min-h-0 flex-1;
+}
+
+/* Published / Preview (published HTML) — static highlight, no CM */
+.ocm-json-publish {
+  @apply my-3 overflow-hidden rounded-ocm-sm border border-ocm-border bg-ocm-surface font-mono text-[13px] text-ocm-text;
+}
+
+.ocm-json-publish__header {
+  @apply flex items-center border-b border-ocm-border bg-ocm-surface-muted/50 px-2 py-1;
+}
+
+.ocm-json-publish__badge {
+  @apply text-[11px] font-semibold tracking-wide text-ocm-text-muted uppercase;
+}
+
+.ocm-json-publish__pre {
+  @apply m-0 max-h-[28rem] overflow-auto bg-ocm-surface p-3 leading-snug;
+  tab-size: 2;
+}
+
+.ocm-json-publish__pre code {
+  @apply block bg-transparent p-0 text-ocm-text;
+}
+
+.ocm-json-tok-key {
+  @apply text-violet-700 dark:text-violet-300;
+}
+
+.ocm-json-tok-string {
+  @apply text-emerald-700 dark:text-emerald-300;
+}
+
+.ocm-json-tok-number {
+  @apply text-amber-700 dark:text-amber-300;
+}
+
+.ocm-json-tok-literal {
+  @apply text-sky-700 dark:text-sky-300;
+}
+
+.ocm-json-tok-punct {
+  @apply text-ocm-text-muted;
+}

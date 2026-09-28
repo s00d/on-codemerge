@@ -5,6 +5,58 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.1.0] - 2026-09-28
+
+### Added
+
+- **Multi-surface apps**: `apps/wysiwyg`, `apps/json` (`on-codemerge/json`), `apps/markdown` (`on-codemerge/markdown`) + shared `@on-codemerge/editor`
+- **Declarative WYSIWYG toolbar menus**: `Editor` option `toolbar.menus` / `defaultWysiwygToolbarMenus()`; `{ menus: [] }` → flat bar
+- **`PluginToolbarOpts` / `pluginToolbarPlacement`**: optional `menu` / `group` / `order` on insert/review/tools plugin factories (incl. Json/Markdown atom chrome)
+- **Typed SoT attrs**: structured `DocNode.attrs` (objects/arrays) with `attrToHtmlValue` / `readJsonAttr` / `coerceHtmlJsonAttr` on the HTML boundary
+- **ClearStylesPlugin**: clear marks + block style/align (selection or whole document); `Mod-\`
+- Docs: focused plugin demos via `toolbar: { menus: [] }` (no flatten/compact flags); Clear Styles + editors guides
+
+### Changed
+
+- Overflow menus **only** from host `toolbar.menus` (or plugin `defineMenu`); missing menu id → button on the bar
+- Charts / Calendar / Timer / Block / BlockStyle / Form / Footnotes SoT parsers unified on `readJsonAttr`; DOM/publish encode via `attrToHtmlValue`
+- `CalendarManager.importCalendar` accepts typed payload (string still supported for file import)
+- Kernel scale bench budget softened for CI variance
+
+### Removed
+
+- `flattenOverflowMenus`, `defaultOverflowMenus`, docs `compactToolbar` demo hacks
+
+## [2.0.5] - 2026-09-24
+
+### Fixed
+
+- Build: externalize runtime dependencies from `dist` (correct peer/runtime resolution)
+
+## [2.0.4] - 2026-09-23
+
+### Fixed
+
+- Docs/IO: HTML/Markdown as integrate load path; link import + load tests
+- Kitchen-sink HTML coverage for element round-trip
+
+## [2.0.3] - 2026-09-23
+
+### Changed
+
+- Branding / screenshots for v2; integrate guide rewrites across stacks
+- Toolbar titles refresh on `setLocale`
+
+### Fixed
+
+- Demo published preview with local `public.css`
+
+## [2.0.2] - 2026-09-23
+
+### Fixed
+
+- Patch release after 2.0.1 (docs/demo follow-ups)
+
 ## [2.0.1] - 2026-09-23
 
 ### Fixed

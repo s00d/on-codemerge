@@ -10,7 +10,11 @@ Toolbar menu to download the current document. Formats map onto the same Editor 
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['ExportPlugin']" />
+<EditorComponent
+  :activePlugins="['ExportPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Usage
 

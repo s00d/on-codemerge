@@ -1,0 +1,36 @@
+import '@ocm/wysiwyg/tailwind.css';
+import '@on-codemerge/sdk/ui/sdk.scss';
+
+export { Editor, type EditorOptions } from './editor/Editor';
+export {
+  JsonPlugin,
+  createDefaultPlugins,
+  defaultJsonToolbar,
+  HistoryChromePlugin,
+  valueToDoc,
+  docToValue,
+  toEditorDoc,
+  emptyEditorDoc,
+  isJsonEditorDoc,
+  indentFromDoc,
+  parseText,
+  serializeText,
+  serializeDoc,
+  ParseError,
+  setValue,
+  insertProperty,
+  insertItem,
+  deleteNode,
+  renameKey,
+  changeType,
+  moveItem,
+  duplicateNode,
+  jsonCommandMap,
+  type JsonLeafType,
+  type JsonPluginOptions,
+  type JsonPluginFeatures,
+  type JsonToolbarOptions,
+  type JsonToolbarItem,
+  type JsonToolbarMenu,
+  type JsonToolbarActionApi,
+} from '../../../plugins/JsonPlugin';

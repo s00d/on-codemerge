@@ -15,6 +15,8 @@ editor.run(insertText('Hello'));
 
 ## Getting Started
 
+This page is the **WYSIWYG** Editor API. Launch snippets for all three products (WYSIWYG / JSON / Markdown): [Editors](/guide/editors) and the home [Getting Started](/#getting-started).
+
 1. Install `on-codemerge`
 2. Import `index.css` + `public.css`
 3. Construct `Editor(host, { plugins: [...] })`
@@ -55,6 +57,7 @@ Plugins never own the panel or reinvent modals. Authoring surface: [SDK referenc
 | `locale` / `fallbackLocale` / `messages` | i18n bootstrap                                                                                                      |
 | `colorScheme`                            | `host` (default — leave `<html class="dark">` alone) or `system` (sync `prefers-color-scheme` to `documentElement`) |
 | `chrome`                                 | `bar` (default sticky chrome) or `page` (popup toolbar) — see [Chrome & host](/integrate/chrome-and-host)           |
+| `toolbar`                                | `{ menus?: ToolbarMenuDef[] }` — overflow dropdowns. Omit → Insert / Review / Tools. `{ menus: [] }` → flat bar     |
 
 ## Document API
 

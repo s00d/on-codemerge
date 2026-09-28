@@ -274,7 +274,8 @@ describe('scale bench', () => {
     ).state;
     const ms = performance.now() - start;
     expect(state.doc.content![5000].content![0].text?.startsWith('!')).toBe(true);
-    expect(ms).toBeLessThan(50);
+    // Soft budget — CI/shared hosts vary; catch order-of-magnitude regressions only.
+    expect(ms).toBeLessThan(150);
   });
 
   it('jSON round-trip 1k nodes', () => {

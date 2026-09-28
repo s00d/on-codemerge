@@ -40,7 +40,11 @@ Open the Review → Collaboration popup and click **Start**, or set `autoStart: 
 import EditorComponent from '../components/EditorComponent.vue';
 </script>
 
-<EditorComponent :activePlugins="['CollaborationPlugin']" />
+<EditorComponent
+  :activePlugins="['CollaborationPlugin']"
+  :showDescription="false"
+  :showResults="false"
+/>
 
 ## Options
 
