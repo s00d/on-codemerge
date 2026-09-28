@@ -3,6 +3,12 @@ import type { SharedEditorOptions } from '@on-codemerge/editor';
 import { applyTransaction, docFromJSON } from '@on-codemerge/kernel';
 import type { Command, DocNode, JSONDoc, Transaction } from '@on-codemerge/kernel';
 import type { PluginDefinition } from '@on-codemerge/sdk';
+import {
+  composePublishedDocument,
+  neededRuntimeIds,
+  publishedCssHref,
+  publishedJsHref,
+} from '@on-codemerge/sdk';
 import type { Translations } from '@i18n-micro/runtime';
 import { exportMarkdown, importHTML } from '@ocm/wysiwyg/io';
 import {
@@ -91,6 +97,39 @@ export class Editor extends SharedEditor {
     if (err) {
       this.notify(err.message);
     }
+  }
+
+  /**
+   * Published body: same projector as live preview; mermaid hosts get `data-ocm-runtime`
+   * so `public.js` can hydrate.
+   */
+  override getPublishedHTML(): string {
+    const body = this.getHTML();
+    if (!body) {
+      return '';
+    }
+    if (
+      body.includes('data-node="mermaid"') ||
+      body.includes('ocm-md-mermaid') ||
+      body.includes('data-ocm-mermaid')
+    ) {
+      return `<div class="ocm-md-publish" data-ocm-runtime="md-mermaid">${body}</div>`;
+    }
+    return body;
+  }
+
+  override getPublishedJS(): string | null {
+    const html = this.getPublishedHTML();
+    return neededRuntimeIds(html).length > 0 ? publishedJsHref() : null;
+  }
+
+  override getPublishedDocument(): string {
+    const bodyHtml = this.getPublishedHTML();
+    return composePublishedDocument({
+      bodyHtml,
+      cssHref: publishedCssHref(),
+      jsHref: neededRuntimeIds(bodyHtml).length > 0 ? publishedJsHref() : null,
+    });
   }
 
   private accepts(tr: Transaction): boolean {

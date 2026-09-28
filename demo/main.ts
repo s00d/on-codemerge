@@ -13,6 +13,7 @@ import 'on-codemerge/index.css';
 import 'on-codemerge/tailwind.css';
 import 'on-codemerge/public.css';
 import publicCssUrl from 'on-codemerge/public.css?url';
+import publicJsUrl from 'on-codemerge/public.js?url';
 
 type Mode = 'wysiwyg' | 'json' | 'markdown';
 type AnyEditor = WysiwygEditor | JsonEditor | MarkdownEditor;
@@ -64,12 +65,14 @@ function probeCss(): void {
   setText(cssOkEl, hasToolbarCss ? 'css: ocm-toolbar OK' : 'css: MISSING ocm-toolbar');
 }
 
-function publishedSrcdoc(bodyHtml: string): string {
+function publishedSrcdoc(bodyHtml: string, jsHref: string | null = null): string {
+  const script = jsHref === null || jsHref === '' ? '' : `<script src="${jsHref}" defer></script>`;
   return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">
   <link rel="stylesheet" href="${publicCssUrl}">
+  ${script}
 </head>
 <body>
   <div class="ocm-content">${bodyHtml}</div>
@@ -156,8 +159,10 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     const bodyHtml = editor.getPublishedHTML();
     const full = editor.getPublishedDocument();
+    const needsJs = editor.getPublishedJS() !== null;
     if (publishEl instanceof HTMLIFrameElement) {
-      publishEl.srcdoc = publishedSrcdoc(bodyHtml);
+      // Prefer local public.js over CDN href from getPublishedJS (demo / file: install).
+      publishEl.srcdoc = publishedSrcdoc(bodyHtml, needsJs ? publicJsUrl : null);
     }
     return { bodyHtml, full };
   };

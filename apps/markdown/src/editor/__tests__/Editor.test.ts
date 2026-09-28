@@ -51,6 +51,47 @@ describe('Markdown Editor', () => {
     expect(editor.getHTML()).toMatch(/<strong>world<\/strong>/i);
   });
 
+  it('getPublishedHTML / getPublishedDocument use preview projector', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    hosts.push(host);
+    const editor = new Editor(host, {
+      chrome: 'bar',
+      doc: emptyEditorDoc('# Published\n\nHello **world**\n'),
+      plugins: createDefaultPlugins(),
+    });
+    Reflect.set(host, '__editor', editor);
+
+    const published = editor.getPublishedHTML();
+    expect(published).toMatch(/Published/);
+    expect(published).toMatch(/<strong>world<\/strong>/i);
+    expect(editor.getPublishedJS()).toBeNull();
+
+    const doc = editor.getPublishedDocument();
+    expect(doc).toContain('<!DOCTYPE html>');
+    expect(doc).toContain(published);
+    expect(doc).toContain('public.css');
+    expect(doc).not.toContain('public.js');
+  });
+
+  it('getPublishedHTML wraps mermaid with md-mermaid runtime', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    hosts.push(host);
+    const editor = new Editor(host, {
+      chrome: 'bar',
+      doc: emptyEditorDoc('```mermaid\nflowchart LR\n  A-->B\n```\n'),
+      plugins: createDefaultPlugins(),
+    });
+    Reflect.set(host, '__editor', editor);
+
+    const published = editor.getPublishedHTML();
+    expect(published).toContain('data-ocm-runtime="md-mermaid"');
+    expect(published).toContain('data-node="mermaid"');
+    expect(editor.getPublishedJS()).toContain('public.js');
+    expect(editor.getPublishedDocument()).toContain('public.js');
+  });
+
   it('getHTML / setHTML round-trips callout + mermaid bodies', () => {
     const host = document.createElement('div');
     document.body.append(host);

@@ -1,26 +1,23 @@
 # on-codemerge demo
 
-Стенд на пакете: три режима — **WYSIWYG** (`on-codemerge`), **JSON** (`on-codemerge/json`), **Markdown** (`on-codemerge/markdown`).
+Стенд на **опубликованном** npm-пакете: три режима — **WYSIWYG** (`on-codemerge`), **JSON** (`on-codemerge/json`), **Markdown** (`on-codemerge/markdown`).
 
-## Из monorepo (локальный `dist`)
-
-Сначала собери пакет в корне, затем:
+## С npm (основной путь)
 
 ```bash
-# repo root
-pnpm run build
-
 cd demo
-pnpm add on-codemerge@file:..
+pnpm add on-codemerge@2.1.1
 pnpm exec playwright install chromium   # один раз
 pnpm dev                                # http://localhost:3001
 ```
 
-## С npm (после publish)
+## Из monorepo (только отладка локального `dist`)
+
+Не для проверки релиза. Сначала `pnpm run build` в корне, затем:
 
 ```bash
 cd demo
-pnpm add on-codemerge@2.1.0
+pnpm add on-codemerge@file:..
 pnpm dev
 ```
 
