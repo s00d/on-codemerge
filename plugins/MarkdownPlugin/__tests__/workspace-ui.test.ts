@@ -299,7 +299,8 @@ describe('MarkdownPlugin workspace UI', () => {
       );
 
       expect(editorPane.style.flex).toMatch(/0 0 /);
-      const pct = Number(editorPane.style.width);
+      // width is `"NN.NN%"` — `Number("35.00%")` is NaN; strip the unit first.
+      const pct = Number(editorPane.style.width.replace('%', ''));
       expect(pct).toBeLessThan(50);
       expect(pct).toBeGreaterThan(20);
       expect(gutter.getAttribute('aria-valuenow')).toBe(String(Math.round(pct)));
