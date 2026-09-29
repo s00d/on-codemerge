@@ -15,6 +15,7 @@ const CTS_ENTRIES = [
   'dist/app.d.ts',
   'dist/json.d.ts',
   'dist/markdown.d.ts',
+  'dist/code.d.ts',
   'dist/packages/sdk/src/index.d.ts',
   'dist/packages/kernel/src/index.d.ts',
 ] as const;
