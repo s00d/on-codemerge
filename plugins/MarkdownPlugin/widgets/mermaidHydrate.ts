@@ -26,8 +26,53 @@ function readSource(host: HTMLElement): string {
   if (fromAttr !== null && fromAttr !== '') {
     return fromAttr;
   }
+  const hash = host.getAttribute('data-ocm-mermaid-hash');
+  if (hash !== null && hash !== '') {
+    return hash;
+  }
   const code = host.querySelector('code.language-mermaid');
   return code?.textContent ?? '';
+}
+
+/**
+ * Pull already-hydrated mermaid hosts out of the preview before a full DOM replace.
+ * Keyed by diagram source so unchanged diagrams skip `mermaid.render`.
+ */
+export function salvageMermaidHosts(root: HTMLElement): Map<string, HTMLElement> {
+  const out = new Map<string, HTMLElement>();
+  for (const host of root.querySelectorAll<HTMLElement>(
+    'div[data-node="mermaid"][data-ocm-mermaid-ready="1"], .ocm-md-mermaid[data-ocm-mermaid-ready="1"]'
+  )) {
+    const source = readSource(host);
+    if (!source.trim() || !host.querySelector('svg')) {
+      continue;
+    }
+    out.set(source, host);
+  }
+  return out;
+}
+
+/**
+ * Swap fresh projector hosts for salvaged hydrated hosts when the source matches.
+ */
+export function restoreMermaidHosts(root: HTMLElement, salvaged: Map<string, HTMLElement>): void {
+  if (salvaged.size === 0) {
+    return;
+  }
+  for (const host of root.querySelectorAll<HTMLElement>(
+    'div[data-node="mermaid"], .ocm-md-mermaid'
+  )) {
+    if (host.hasAttribute('data-ocm-mermaid-ready')) {
+      continue;
+    }
+    const source = readSource(host);
+    const prev = salvaged.get(source);
+    if (!prev) {
+      continue;
+    }
+    salvaged.delete(source);
+    host.replaceWith(prev);
+  }
 }
 
 /**

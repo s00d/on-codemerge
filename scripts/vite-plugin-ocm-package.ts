@@ -94,8 +94,8 @@ function patchEmptyCssElision(distDir: string): WalkStats {
 }
 
 /**
- * typo-js pulls Node `fs` via `__vite-browser-external`. SpellChecker always
- * passes dictionary text — inline an empty stub and drop the virtual module.
+ * Strip accidental `__vite-browser-external` stubs left by Rollup when a dep
+ * referenced Node builtins. Safe no-op when none are present.
  */
 function stripViteBrowserExternal(distDir: string): WalkStats {
   const stats: WalkStats = { files: 0, patched: 0, removed: 0 };
@@ -275,7 +275,7 @@ function emitPackageCss(root: string): void {
 
 /**
  * Post-build packaging for the library dist:
- * dual `.d.cts`, CSS elision fixes, typo-js browser-external cleanup,
+ * dual `.d.cts`, CSS elision fixes, browser-external cleanup,
  * convenience `dist/{index,public,tailwind}.css`.
  */
 export function ocmPackagePlugin(root = process.cwd()): Plugin {
@@ -311,7 +311,20 @@ export function ocmPackagePlugin(root = process.cwd()): Plugin {
 
         removeOrphanToolbarDividerDts(root);
         emitPackageCss(root);
+        emitThirdPartyNotices(root);
       },
     },
   };
+}
+
+/** Ship Typo.js BSD attribution with published dist (hunspell is bundled). */
+function emitThirdPartyNotices(root: string): void {
+  const src = resolve(root, 'packages/hunspell/NOTICE');
+  const dest = resolve(root, 'dist/THIRD_PARTY_NOTICES.txt');
+  if (!existsSync(src)) {
+    console.warn('[ocm-package] missing packages/hunspell/NOTICE — skip THIRD_PARTY_NOTICES');
+    return;
+  }
+  copyFileSync(src, dest);
+  console.log('[ocm-package] dist/THIRD_PARTY_NOTICES.txt <= packages/hunspell/NOTICE');
 }

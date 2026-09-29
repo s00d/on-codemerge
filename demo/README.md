@@ -6,7 +6,7 @@ Stand against the **published** npm package: three modes — **WYSIWYG** (`on-co
 
 ```bash
 cd demo
-pnpm add on-codemerge@2.1.2
+pnpm add on-codemerge@2.2.0
 pnpm exec playwright install chromium   # once
 pnpm dev                                # http://localhost:3001
 ```

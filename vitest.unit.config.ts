@@ -7,6 +7,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '@on-codemerge/editor': resolve(root, 'packages/editor/src'),
+      '@on-codemerge/hunspell': resolve(root, 'packages/hunspell/src'),
       '@on-codemerge/kernel': resolve(root, 'packages/kernel/src'),
       '@on-codemerge/sdk': resolve(root, 'packages/sdk/src'),
       '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
@@ -14,6 +15,7 @@ export default defineConfig({
       // Public import paths resolve to source in unit tests.
       'on-codemerge/json': resolve(root, 'apps/json/src/app.ts'),
       'on-codemerge/markdown': resolve(root, 'apps/markdown/src/app.ts'),
+      'on-codemerge/code': resolve(root, 'apps/code/src/app.ts'),
       'on-codemerge/app': resolve(root, 'apps/wysiwyg/src/app.ts'),
     },
   },
@@ -46,6 +48,7 @@ export default defineConfig({
       'apps/wysiwyg/src/**/*.{test,spec}.ts',
       'apps/json/src/**/*.{test,spec}.ts',
       'apps/markdown/src/**/*.{test,spec}.ts',
+      'apps/code/src/**/*.{test,spec}.ts',
       'plugins/**/*.{test,spec}.ts',
     ],
     exclude: ['**/node_modules/**', '**/dist/**', '**/test/e2e/**', '**/__tests__/helpers/**'],

@@ -66,9 +66,9 @@ describe('prose plugin smoke (on-codemerge/json)', () => {
     expect(notified).toBe(true);
     const contentRoot = host.querySelector('.ocm-content');
     expect(contentRoot).toBeTruthy();
-    // Shell host is not CE; CM raw pane may use contenteditable.
+    // Shell host is not CE; source editor uses textarea + mirror.
     expect((contentRoot as HTMLElement).getAttribute('contenteditable')).not.toBe('true');
-    expect(host.querySelector('.cm-editor')).toBeTruthy();
+    expect(host.querySelector('textarea[aria-label="Source editor"]')).toBeTruthy();
     expect(editor!.view.contentTarget()).toBe(contentRoot);
     expect(host.querySelector('[data-id="smoke-probe"]')).toBeTruthy();
     expect(editor!.listPlugins().some((p) => p.name === 'table')).toBe(true);

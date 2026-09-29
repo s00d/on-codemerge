@@ -4,10 +4,31 @@ import { definePlugin, pluginToolbarPlacement } from '@on-codemerge/sdk';
 import type { EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
 import type { DocNode, Operation } from '@on-codemerge/kernel';
 import { plainText, textLength } from '@on-codemerge/kernel';
-import Typo from 'typo-js';
+import { createDictionary } from '@on-codemerge/hunspell';
+import type { HunspellDictionary } from '@on-codemerge/hunspell';
 import { spellCheckIcon } from '@ocm/wysiwyg/icons';
 
-const WORD_RE = /[A-Za-zА-Яа-яЁё']{2,}/g;
+const WORD_RE = /[A-Za-zА-Яа-яЁё'\u2019]{2,}/g;
+
+/** Map typographic apostrophe to ASCII so Hunspell stems match. */
+export function normalizeSpellText(text: string): string {
+  return text.replaceAll('\u2019', "'");
+}
+
+/** Strip edge apostrophes; skip digits / tiny tokens (plugin + tests). */
+export function isMisspelledWord(spellChecker: HunspellDictionary | null, word: string): boolean {
+  if (!spellChecker) {
+    return false;
+  }
+  let clean = normalizeSpellText(word).replaceAll(/^'+|'+$/g, '');
+  if (clean.length < 2) {
+    return false;
+  }
+  if (/^\d+$/.test(clean)) {
+    return false;
+  }
+  return !spellChecker.check(clean);
+}
 
 /** Hunspell dictionary file URLs for one locale (`.aff` + `.dic`). */
 export type SpellDictionaryFiles = {
@@ -117,7 +138,7 @@ export function SpellCheckerPlugin(options: SpellCheckerOptions) {
     setup(ctx) {
       const editor = ctx.editor;
       let enabled = false;
-      let spellChecker: Typo | null = null;
+      let spellChecker: HunspellDictionary | null = null;
       let loadedLocale = '';
       let lastPlain = '';
       let applying = false;
@@ -135,7 +156,7 @@ export function SpellCheckerPlugin(options: SpellCheckerOptions) {
             fetchText(files.aff),
             fetchText(files.dic),
           ]);
-          spellChecker = new Typo(base, affData, wordsData);
+          spellChecker = createDictionary(affData, wordsData);
           loadedLocale = base;
         } catch (error) {
           console.error('Failed to load dictionary:', error);
@@ -147,24 +168,13 @@ export function SpellCheckerPlugin(options: SpellCheckerOptions) {
         }
       };
 
-      const isMisspelled = (word: string): boolean => {
-        if (!spellChecker) {
-          return false;
-        }
-        const clean = word.replaceAll(/^'+|'+$/g, '');
-        if (clean.length < 2) {
-          return false;
-        }
-        if (/^\d+$/.test(clean)) {
-          return false;
-        }
-        return !spellChecker.check(clean);
-      };
+      const isMisspelled = (word: string): boolean => isMisspelledWord(spellChecker, word);
 
       const paintMisspelledOps = (doc: DocNode): Operation[] => {
         const ops: Operation[] = [...clearMisspelledOps(doc)];
         eachTextBlock(doc, [], (path, block) => {
-          const text = plainText(block);
+          // Length-preserving: U+2019 → U+0027 so WORD_RE keeps contraction tokens.
+          const text = normalizeSpellText(plainText(block));
           WORD_RE.lastIndex = 0;
           let match: RegExpExecArray | null;
           while ((match = WORD_RE.exec(text))) {
@@ -272,6 +282,32 @@ export function SpellCheckerPlugin(options: SpellCheckerOptions) {
         }
         scheduleRescan();
       });
+
+      ctx.scope.disposable(
+        editor.onLocaleChange(() => {
+          if (!enabled) {
+            return;
+          }
+          ctx.defer(async () => {
+            const locale = resolveSpellLocale(
+              editor.getLocale() || defaultLocale,
+              dictionaries,
+              defaultLocale
+            );
+            if (loadedLocale === locale) {
+              return;
+            }
+            await loadDictionary(locale);
+            if (!spellChecker) {
+              enabled = false;
+              editor.toolbar.refresh();
+              return;
+            }
+            lastPlain = '';
+            rescan();
+          });
+        })
+      );
 
       ctx.toolbar.add({
         id: 'spell',

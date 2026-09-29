@@ -1,31 +1,15 @@
 # Code Block Plugin
 
-The Code Block Plugin provides syntax highlighting and code block management for the on-CodeMerge editor, supporting 30+ programming languages.
+`CodeBlockPlugin` is the shared code surface for both editors:
 
-## Features
+- **WYSIWYG (`surface: 'atom'`)** — Insert menu embeds a `code_block` atom. Edit via modal hosting the shared source editor (widget is not contenteditable). Shipped in `createDefaultPlugins()`.
+- **Code app (`surface: 'workspace'`)** — full-height source editor that owns the document (`on-codemerge/code`).
 
-- **Syntax Highlighting**: Custom highlighter (no Prism) for 30+ languages
-- **Code Block Management**: Insert, edit, and delete code blocks
-- **Copy to Clipboard**: One-click copy from the widget header
-- **Language Selection**: Choose from supported programming languages
-- **Context Menu**: Right-click for edit / copy
-- **Modal Editor**: Edit code via modal (widget is not contenteditable)
+Language is free-text **metadata** (fence / status / download). Paint always uses one shared internal structural ruleset — the same contour as JSON Raw / Markdown source (not a separate public npm package).
 
-> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
+## Demo (WYSIWYG embed)
 
-## Basic Usage
-
-```javascript
-import { Editor, CodeBlockPlugin } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-
-const editor = new Editor(container, {
-  plugins: [CodeBlockPlugin()],
-});
-```
-
-## Demo
+Live code-block atom. **Insert → Code block** / `Mod-Alt-Q` opens the modal; double-click or context menu edits.
 
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
@@ -37,101 +21,122 @@ import EditorComponent from '../components/EditorComponent.vue';
   :showResults="false"
 />
 
-## API Reference
+> Full Code-only app: [Code Editor](/guide/code-editor) · compare surfaces: [Editors](/guide/editors).
 
-### Commands
+## Basic usage
 
-```javascript
-// Opens the code-block modal. Hotkey: Mod-Alt-q / Ctrl+Alt+Q
+### Atom (inside WYSIWYG)
+
+```ts
+import { Editor, CodeBlockPlugin, createDefaultPlugins } from 'on-codemerge';
+import 'on-codemerge/index.css';
+import 'on-codemerge/public.css';
+
+// Included in createDefaultPlugins() as CodeBlockPlugin({ surface: 'atom' })
+const editor = new Editor(host, {
+  plugins: createDefaultPlugins(),
+});
+
+// Or alone:
+new Editor(host, {
+  plugins: [CodeBlockPlugin({ surface: 'atom', features: { toolbar: true } })],
+});
+
 editor.command('insertCodeBlock');
 ```
 
-Edit and copy are available from the code-block context menu. There are no separate `editCodeBlock` / `copyCodeBlock` / `createCodeBlock` commands.
+Document node: `code_block` atom with `{ language: string; code: string }` (`CodeBlockAttrs`). In the editor: read-only widget + modal source editor. **Published HTML** / `getHTML()`: `<pre data-language="…"><code>…</code></pre>` with structural highlight spans.
 
-Document changes:
+### Workspace (Code-only app)
 
-```javascript
-editor.on('docChanged', () => {});
-editor.on('selectionChanged', () => {});
+```ts
+import { Editor, createDefaultPlugins } from 'on-codemerge/code';
+
+const editor = new Editor(host, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(), // HistoryChrome + CodeBlockPlugin({ surface: 'workspace' })
+});
+
+editor.setText('const x = 1;\n');
+console.log(editor.getText());
 ```
 
-## Keyboard Shortcuts
+SoT node: `code_source` with `{ text: string; language: string }` (`CodeSourceAttrs`). Seed with `emptyEditorDoc(text?, language?)`.
 
-| Shortcut     | Description       | Command           |
-| ------------ | ----------------- | ----------------- |
-| `Ctrl+Alt+Q` | Insert code block | `insertCodeBlock` |
+## Options
 
-## Supported Programming Languages
+```ts
+CodeBlockPlugin({
+  surface: 'workspace' | 'atom', // default 'atom'
+  /** Sole source of workspace bar buttons. Omit → defaultCodeToolbar(). */
+  toolbar?: { menus?: …; items?: … },
+  /** Atom Insert placement (`PluginToolbarOpts`). `menu: null` → bar. */
+  menu?: string | null,
+  group?: string,
+  order?: number,
+  features?: {
+    toolbar?: boolean; // Insert button (atom only); default true
+    historyChrome?: boolean; // include HistoryChromePlugin in createDefaultPlugins
+  },
+});
+```
 
-### Web Development
+Workspace bar buttons never come from feature flags — configure `toolbar` (or use `defaultCodeToolbar` / `createDefaultPlugins()`). Atom chrome never runs on `surface: 'workspace'`; atom Insert uses `menu` / `group` / `order`.
 
-- **JavaScript** (`javascript`, alias `js`)
-- **TypeScript** (`typescript`, alias `ts`)
-- **JSX / TSX** (`jsx`, `tsx`)
-- **HTML** (`html`)
-- **CSS / SCSS** (`css`, `scss`)
+### Custom toolbar
 
-### Systems Programming
+```ts
+import { defaultCodeToolbar } from 'on-codemerge/code';
 
-- **Rust** (`rust`)
-- **C++** (`cpp`, `c++`)
-- **C** (`c`)
+const base = defaultCodeToolbar();
+CodeBlockPlugin({
+  surface: 'workspace',
+  toolbar: {
+    menus: base.menus,
+    items: [
+      ...(base.items ?? []),
+      {
+        id: 'code-ping',
+        label: 'Ping',
+        menu: 'edit',
+        run: ({ editor, workspace }) => {
+          editor.notify('ok');
+          workspace?.focus();
+        },
+      },
+    ],
+  },
+});
+```
 
-### General Purpose
+| Field     | Role                                                    |
+| --------- | ------------------------------------------------------- |
+| `command` | SDK `ToolbarButton.command` → `onCommand`               |
+| `run`     | Deferred click (`{ editor, workspace }`) — prefer `run` |
 
-- **Python** (`python`)
-- **Java** (`java`)
-- **C#** (`csharp`, `c#`)
-- **Go** (`go`)
-- **Ruby** (`ruby`)
-- **PHP** (`php`)
+Default workspace menus: **Edit** (copy / select all / clear / indent / outdent) and **File** (download / upload). Undo/redo = `HistoryChromePlugin`.
 
-### Mobile Development
+## Commands
 
-- **Swift** (`swift`)
-- **Kotlin** (`kotlin`)
-- **Dart** (`dart`)
+| Command           | Surface | Role                             |
+| ----------------- | ------- | -------------------------------- |
+| `insertCodeBlock` | atom    | Open modal → insert `code_block` |
 
-### JVM Languages
+Edit and copy use the atom context menu / widget header — there are no separate `editCodeBlock` / `copyCodeBlock` commands.
 
-- **Scala** (`scala`)
+## Keyboard
 
-### Shell Scripting
+| Shortcut          | Surface                    | Command                           |
+| ----------------- | -------------------------- | --------------------------------- |
+| `Mod-Alt-Q`       | atom                       | `insertCodeBlock`                 |
+| `Mod-z` / `Mod-y` | workspace (focused source) | Local source-buffer undo/redo     |
+| Toolbar History   | workspace                  | Kernel SoT undo/redo after commit |
 
-- **Shell** (`shell`, `bash`, `zsh`)
-
-### Data & Configuration
-
-- **JSON** (`json`)
-- **YAML** (`yaml`, `yml`)
-- **SQL** (`sql`)
-
-### Documentation
-
-- **Markdown** (`markdown`)
-
-### Scientific Computing
-
-- **R** (`r`)
-- **MATLAB** (`matlab`)
-- **Julia** (`julia`)
-
-### Functional Programming
-
-- **Haskell** (`haskell`)
-- **Elixir** (`elixir`)
-- **Erlang** (`erlang`)
-- **Clojure** (`clojure`)
-
-### Fallback
-
-- **Plaintext** (`plaintext`) — default for unsupported languages
-
-## Context Menu
+## Context menu (atom)
 
 Right-click a code block:
 
-- **Edit Code Block** — open modal
+- **Edit Code Block** — open modal (source editor)
 - **Copy Code** — clipboard
 
 ## HTML boundary (`getHTML` / `setHTML`)
@@ -140,10 +145,11 @@ Right-click a code block:
 <pre data-language="javascript"><code>console.log("Hello World");</code></pre>
 ```
 
-Live chrome (`.code-block` header / copy button) is view-only and is not the HTML export shape.
+`data-language` is metadata only — highlight does not switch grammars. Live chrome (`.code-block` header / copy button) is view-only and is not the HTML export shape.
 
 ## Troubleshooting
 
-1. Highlighting missing — check `data-language` / attrs.language matches a supported id (or alias).
+1. Highlighting missing — ensure published / editor CSS includes shared `.token.*` styles from the source-editor contour.
 2. Edit does nothing — use the context menu / modal; the widget itself is not contenteditable.
-3. Document not updating — listen to `editor.on('docChanged')`.
+3. Workspace throws on mount — seed `emptyEditorDoc()` and use `createShellView` / `on-codemerge/code` (not a prose CE host).
+4. Document not updating — listen to `editor.on('docChanged')`; `getText()` flushes the debounce window.

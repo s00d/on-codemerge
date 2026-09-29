@@ -34,12 +34,11 @@ describe('MarkdownPlugin workspace UI', () => {
     return { host, editor };
   }
 
-  it('keeps CM mounted across selectionChanged', () => {
+  it('keeps source draft text across selectionChanged', () => {
     const { editor } = mountEditor();
-    const cm = editor.contentElement()?.querySelector('.cm-editor');
-    expect(cm).toBeTruthy();
+    const before = editor.getText();
     editor.setSelection(editor.getState().selection);
-    expect(editor.contentElement()?.querySelector('.cm-editor')).toBe(cm);
+    expect(editor.getText()).toBe(before);
   });
 
   it('renders history + marks + insert/turn-into chrome on workspace', () => {
@@ -137,7 +136,7 @@ describe('MarkdownPlugin workspace UI', () => {
     expect(editor.getText()).toContain('```mermaid');
   });
 
-  it('toolbar Insert retargets current CM line (not append at end)', async () => {
+  it('toolbar Insert retargets current source line (not append at end)', async () => {
     const { editor } = mountEditor('hello world\n');
     const insertTrigger = editor.host.querySelector('[data-menu="md-insert"]');
     expect(insertTrigger).toBeInstanceOf(HTMLElement);
@@ -147,8 +146,10 @@ describe('MarkdownPlugin workspace UI', () => {
     ) as HTMLButtonElement | null;
     expect(h1).toBeTruthy();
     h1!.click();
-    const cm = editor.contentElement()?.querySelector('.cm-content');
-    expect(cm?.textContent ?? '').toMatch(/# hello world/);
+    const ta = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement | null;
+    expect(ta?.value ?? '').toMatch(/# hello world/);
     await new Promise<void>((resolve) => {
       setTimeout(resolve, 200);
     });
@@ -167,20 +168,25 @@ describe('MarkdownPlugin workspace UI', () => {
   it('setText updates preview host content', async () => {
     const { editor } = mountEditor('');
     expect(editor.setText('## Title\n')).toBeNull();
-    // docChanged → surface.update → projectPreviewHtml(state.doc)
+    // docChanged → surface.update → coalesced projectPreviewHtml(state.doc)
     await new Promise<void>((resolve) => {
-      setTimeout(resolve, 200);
+      setTimeout(resolve, 450);
     });
     const preview = editor.contentElement()?.querySelector('.ocm-md-pane--preview');
     expect(preview?.textContent ?? '').toMatch(/Title/);
   });
 
-  it('setText from empty seeds CodeMirror source pane (not only preview)', () => {
+  it('setText from empty seeds source pane (not only preview)', () => {
     const { editor } = mountEditor('');
-    expect(editor.contentElement()?.querySelector('.cm-content')?.textContent ?? '').toBe('');
+    const ta0 = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement | null;
+    expect((ta0?.value ?? '').trim()).toBe('');
     expect(editor.setText('# hello from setText\n')).toBeNull();
-    const cm = editor.contentElement()?.querySelector('.cm-content');
-    expect(cm?.textContent ?? '').toContain('hello from setText');
+    const ta = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement | null;
+    expect(ta?.value ?? '').toContain('hello from setText');
     expect(editor.getText()).toContain('hello from setText');
   });
 
@@ -188,7 +194,7 @@ describe('MarkdownPlugin workspace UI', () => {
     const { editor } = mountEditor('');
     expect(editor.setText('```mermaid\nflowchart LR\n  A-->B\n```\n')).toBeNull();
     await new Promise<void>((resolve) => {
-      setTimeout(resolve, 400);
+      setTimeout(resolve, 700);
     });
     const preview = editor.contentElement()?.querySelector('.ocm-md-pane--preview');
     expect(preview?.querySelector('[data-node="mermaid"]')).toBeTruthy();
@@ -200,12 +206,12 @@ describe('MarkdownPlugin workspace UI', () => {
     expect(ready).toBeTruthy();
   });
 
-  it('syncs preview scroll proportionally with CM scroller', () => {
+  it('syncs preview scroll proportionally with source scroller', () => {
     const long = `# long\n\n${'paragraph\n\n'.repeat(80)}`;
     const { editor } = mountEditor(long);
     const root = editor.contentElement();
     const preview = root?.querySelector('.ocm-md-pane--preview');
-    const scroller = root?.querySelector('.cm-scroller');
+    const scroller = root?.querySelector('textarea[aria-label="Source editor"]');
     expect(preview).toBeInstanceOf(HTMLElement);
     expect(scroller).toBeInstanceOf(HTMLElement);
     if (!(preview instanceof HTMLElement) || !(scroller instanceof HTMLElement)) {
@@ -218,5 +224,87 @@ describe('MarkdownPlugin workspace UI', () => {
     scroller.scrollTop = 800; // 50% of (2000-400)
     scroller.dispatchEvent(new Event('scroll'));
     expect(preview.scrollTop).toBe(300); // 50% of (1000-400)
+  });
+
+  it('pane gutter drag adjusts editor width on desktop', () => {
+    const { editor } = mountEditor('# split\n');
+    const root = editor.contentElement();
+    const panes = root?.querySelector('.ocm-md-panes');
+    const editorPane = root?.querySelector('.ocm-md-pane--editor');
+    const gutter = root?.querySelector('.ocm-md-gutter');
+    expect(panes).toBeInstanceOf(HTMLElement);
+    expect(editorPane).toBeInstanceOf(HTMLElement);
+    expect(gutter).toBeInstanceOf(HTMLElement);
+    if (
+      !(panes instanceof HTMLElement) ||
+      !(editorPane instanceof HTMLElement) ||
+      !(gutter instanceof HTMLElement)
+    ) {
+      return;
+    }
+
+    Object.defineProperty(panes, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => ({
+        x: 0,
+        y: 0,
+        top: 0,
+        left: 0,
+        bottom: 400,
+        right: 800,
+        width: 800,
+        height: 400,
+        toJSON: () => ({}),
+      }),
+    });
+
+    const mq = {
+      matches: true,
+      media: '(min-width: 768px)',
+      onchange: null,
+      addListener: () => {},
+      removeListener: () => {},
+      addEventListener: () => {},
+      removeEventListener: () => {},
+      dispatchEvent: () => false,
+    };
+    const originalMatchMedia = globalThis.matchMedia;
+    globalThis.matchMedia = (() => mq) as typeof matchMedia;
+
+    try {
+      gutter.dispatchEvent(
+        new PointerEvent('pointerdown', {
+          button: 0,
+          clientX: 400,
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+        })
+      );
+      gutter.dispatchEvent(
+        new PointerEvent('pointermove', {
+          clientX: 280,
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+        })
+      );
+      gutter.dispatchEvent(
+        new PointerEvent('pointerup', {
+          clientX: 280,
+          bubbles: true,
+          cancelable: true,
+          pointerId: 1,
+        })
+      );
+
+      expect(editorPane.style.flex).toMatch(/0 0 /);
+      const pct = Number(editorPane.style.width);
+      expect(pct).toBeLessThan(50);
+      expect(pct).toBeGreaterThan(20);
+      expect(gutter.getAttribute('aria-valuenow')).toBe(String(Math.round(pct)));
+    } finally {
+      globalThis.matchMedia = originalMatchMedia;
+    }
   });
 });

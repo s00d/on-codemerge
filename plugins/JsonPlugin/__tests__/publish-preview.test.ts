@@ -1,26 +1,30 @@
+/**
+ * @jest-environment jsdom
+ */
 import { describe, expect, it } from 'vitest';
 import { viewToHtml } from '@on-codemerge/sdk';
+import { highlightHtml, lex } from '@on-codemerge/editor';
 import { docToPublishedHTML } from '../../../apps/wysiwyg/src/io/html';
-import { highlightJsonHtml, renderJsonEmbedPublish } from '../publish/preview';
+import { prettyJsonText, renderJsonEmbedPublish } from '../publish/preview';
 
 describe('json_embed publish preview', () => {
-  it('highlights keys and strings without CodeMirror classes', () => {
+  it('highlights structural tokens for JSON text', () => {
     expect.hasAssertions();
-    const html = highlightJsonHtml('{"hello":true}');
-    expect(html).toContain('ocm-json-tok-key');
-    expect(html).toContain('ocm-json-tok-literal');
-    expect(html).not.toContain('cm-editor');
+    const pretty = prettyJsonText('{"hello":true}');
+    const src = highlightHtml(pretty);
+    const tokens = lex(pretty);
+    expect(tokens.some((t) => t.type === 'string')).toBe(true);
+    expect(tokens.some((t) => t.type === 'boolean')).toBe(true);
+    expect(src.includes('hello')).toBe(true);
   });
 
-  it('publish ViewSpec is a static card', () => {
+  it('publish ViewSpec is a static card with data attrs', () => {
     expect.hasAssertions();
     const html = viewToHtml(renderJsonEmbedPublish({ text: '{\n  "a": 1\n}' }));
     expect(html).toContain('ocm-json-publish');
     expect(html).toContain('data-node="json_embed"');
     expect(html).toContain('data-text="{&quot;a&quot;:1}"');
     expect(html).not.toMatch(/data-text="[^"]*\n[^"]*"/);
-    expect(html).toContain('ocm-json-tok-key');
-    expect(html).not.toContain('cm-editor');
   });
 
   it('docToPublishedHTML uses publish.render for json_embed', () => {
@@ -42,7 +46,6 @@ describe('json_embed publish preview', () => {
       publishers
     );
     expect(html).toContain('ocm-json-publish');
-    expect(html).toContain('ocm-json-tok-key');
-    expect(html).not.toContain('cm-editor');
+    expect(html).toContain('hello');
   });
 });

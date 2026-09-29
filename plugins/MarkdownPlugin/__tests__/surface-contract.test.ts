@@ -103,7 +103,8 @@ describe('MarkdownPlugin surface contract', () => {
     const root = editor.contentElement();
     expect(root?.classList.contains('ocm-md-root')).toBe(true);
     expect(root?.querySelector('.ocm-md-panes')).toBeTruthy();
-    expect(root?.querySelector('.cm-editor')).toBeTruthy();
+    expect(root?.querySelector('.ocm-md-gutter')).toBeTruthy();
+    expect(root?.querySelector('textarea[aria-label="Source editor"]')).toBeTruthy();
     expect(root?.querySelector('.ocm-md-preview')).toBeTruthy();
   });
 

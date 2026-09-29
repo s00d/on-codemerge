@@ -1,6 +1,6 @@
 {
   "name": "@on-codemerge/wysiwyg",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -18,11 +18,11 @@
   "dependencies": {
     "@i18n-micro/runtime": "^1.0.0",
     "@on-codemerge/editor": "workspace:*",
+    "@on-codemerge/hunspell": "workspace:*",
     "@on-codemerge/kernel": "workspace:*",
     "@on-codemerge/sdk": "workspace:*",
     "dompurify": "^3.4.15",
     "tailwind-merge": "^3.7.0",
-    "tailwind-variants": "^3.3.1",
-    "typo-js": "^1.3.2"
+    "tailwind-variants": "^3.3.1"
   }
 }

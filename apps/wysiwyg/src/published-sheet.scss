@@ -6,3 +6,4 @@
 
 @include meta.load-css('./styles/published/prose');
 @include meta.load-css('./styles/published/atoms');
+@include meta.load-css('../../../packages/editor/src/sourceEditor/sourceEditor');

@@ -15,9 +15,34 @@ export type ParseTextResult =
   | { ok: true; doc: DocNode; value: unknown }
   | { ok: false; error: ParseError };
 
-const MAX_JSON_BYTES = 1_000_000;
+export const MAX_JSON_BYTES = 1_000_000;
 const MAX_PARSE_DEPTH = 64;
 const MAX_NODES = 100_000;
+
+/** Caps + JSON.parse + node budget — shared by Apply (`parseText`) and live lint. */
+export function jsonTextPreflight(
+  text: string
+): { ok: true; value: unknown } | { ok: false; error: ParseError } {
+  if (text.length > MAX_JSON_BYTES) {
+    return { ok: false, error: new ParseError('JSON too large') };
+  }
+  if (nestingDepth(text) > MAX_PARSE_DEPTH) {
+    return { ok: false, error: new ParseError('JSON too deeply nested') };
+  }
+  let value: unknown;
+  try {
+    value = JSON.parse(text) as unknown;
+  } catch (err) {
+    const message = err instanceof Error ? err.message : 'Invalid JSON';
+    const match = /position\s+(\d+)/i.exec(message);
+    const offset = match ? Number(match[1]) : undefined;
+    return { ok: false, error: new ParseError(message, offset) };
+  }
+  if (countNodes(value) > MAX_NODES) {
+    return { ok: false, error: new ParseError('JSON too many nodes') };
+  }
+  return { ok: true, value };
+}
 
 /** Nesting depth of `{}` / `[]` outside JSON strings (preflight before JSON.parse). */
 function nestingDepth(text: string): number {
@@ -80,27 +105,13 @@ function isPlainRecord(value: unknown): value is Record<string, unknown> {
 
 /** JSON.parse → adapters; failure → ParseError (SoT untouched by caller). */
 export function parseText(text: string, indent = 2): ParseTextResult {
-  if (text.length > MAX_JSON_BYTES) {
-    return { ok: false, error: new ParseError('JSON too large') };
-  }
-  if (nestingDepth(text) > MAX_PARSE_DEPTH) {
-    return { ok: false, error: new ParseError('JSON too deeply nested') };
-  }
-  let value: unknown;
-  try {
-    value = JSON.parse(text) as unknown;
-  } catch (err) {
-    const message = err instanceof Error ? err.message : 'Invalid JSON';
-    const match = /position\s+(\d+)/i.exec(message);
-    const offset = match ? Number(match[1]) : undefined;
-    return { ok: false, error: new ParseError(message, offset) };
-  }
-  if (countNodes(value) > MAX_NODES) {
-    return { ok: false, error: new ParseError('JSON too many nodes') };
+  const pre = jsonTextPreflight(text);
+  if (!pre.ok) {
+    return { ok: false, error: pre.error };
   }
   try {
-    const jsonRoot = valueToDoc(value, indent);
-    return { ok: true, doc: toEditorDoc(jsonRoot), value };
+    const jsonRoot = valueToDoc(pre.value, indent);
+    return { ok: true, doc: toEditorDoc(jsonRoot), value: pre.value };
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Invalid JSON value';
     return { ok: false, error: new ParseError(message) };

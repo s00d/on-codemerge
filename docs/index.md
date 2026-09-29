@@ -20,12 +20,16 @@ hero:
     - theme: alt
       text: Markdown Editor
       link: /guide/markdown-editor
+    - theme: alt
+      text: Code Editor
+      link: /guide/code-editor
 ---
 
 <script setup>
 import EditorComponent from './components/EditorComponent.vue';
 import JsonEditorComponent from './components/JsonEditorComponent.vue';
 import MarkdownEditorComponent from './components/MarkdownEditorComponent.vue';
+import CodeEditorComponent from './components/CodeEditorComponent.vue';
 </script>
 
 # Introduction
@@ -59,9 +63,15 @@ Dual-pane Markdown via **`on-codemerge/markdown`**: shell ViewPort + `MarkdownPl
 
 <MarkdownEditorComponent :showDescription="false" />
 
+## Code Editor
+
+Plain-text source via **`on-codemerge/code`**: shell ViewPort + `CodeBlockPlugin({ surface: 'workspace' })`. Shared gutter / highlight contour with JSON Raw and Markdown source. Interchange with `getText` / `setText`.
+
+<CodeEditorComponent :showDescription="false" />
+
 ## Getting Started
 
-Three Editor products share the same kernel + SDK. Pick by document shape — full comparison: [Editors](/guide/editors).
+Four Editor products share the same kernel + SDK. Pick by document shape — full comparison: [Editors](/guide/editors).
 
 ### Installation
 
@@ -130,6 +140,25 @@ editor.on('docChanged', () => {
 });
 ```
 
+### 4. Code Editor (`on-codemerge/code`)
+
+Plain-text source — persist with `getText` / `setText`.
+
+```ts
+import 'on-codemerge/index.css';
+import { Editor, createDefaultPlugins } from 'on-codemerge/code';
+
+const editor = new Editor(document.getElementById('code-app')!, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(),
+});
+
+editor.setText('const x = 1;\n');
+editor.on('docChanged', () => {
+  console.log(editor.getText());
+});
+```
+
 ## Available Plugins
 
 On-Codemerge ships with a full plugin ecosystem (tables, lists, media, collaboration, and more).
@@ -138,12 +167,14 @@ On-Codemerge ships with a full plugin ecosystem (tables, lists, media, collabora
 
 ## Next Steps
 
-- [Editors](/guide/editors) — WYSIWYG / JSON / Markdown, launch snippets
+- [Editors](/guide/editors) — WYSIWYG / JSON / Markdown / Code, launch snippets
 - [Editor API](/guide/editor) — JSON / HTML / Markdown / published
 - [JSON Editor](/guide/json-editor) — Tree + Raw via `on-codemerge/json`
 - [Markdown Editor](/guide/markdown-editor) — dual-pane via `on-codemerge/markdown`
+- [Code Editor](/guide/code-editor) — source contour via `on-codemerge/code`
 - [JSON Plugin](/plugins/json-plugin) — embed atom + workspace options
 - [Markdown Plugin](/plugins/markdown-plugin) — embed atom + workspace options
+- [Code Block Plugin](/plugins/code-block-plugin) — atom insert + workspace Code Editor
 - [SDK reference](/guide/sdk) — `on-codemerge/sdk` public surface
 - [Document model](/guide/document-model) — JSON document & operations
 - [Authoring plugins](/guide/authoring-plugins) — `definePlugin`

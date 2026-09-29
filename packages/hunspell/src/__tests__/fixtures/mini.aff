@@ -1,0 +1,18 @@
+SET UTF-8
+
+TRY esianrtolcdugmphbyfvkwzESIANRTOLCDUGMPHBYFVKWZ'
+
+REP 2
+REP f ph
+REP ph f
+
+SFX S Y 2
+SFX S   0     s          [^s]
+SFX S   0     es         [sx]
+
+PFX U Y 1
+PFX U   0     un         .
+
+KEEPCASE K
+NOSUGGEST !
+NEEDAFFIX +

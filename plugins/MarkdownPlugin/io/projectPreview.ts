@@ -9,6 +9,11 @@ import { escapeHtml } from './escape';
 
 export type ProjectPreviewOptions = {
   elements?: MdElementRegistry;
+  /**
+   * When false, skip sanitizeHTML (caller must sanitize once at the DOM sink).
+   * Default true for string-export / publish callers.
+   */
+  sanitize?: boolean;
 };
 
 type CalloutAction = { label: string; href: string };
@@ -92,5 +97,8 @@ export function projectPreviewHtml(doc: DocNode, options: ProjectPreviewOptions 
   const registry = options.elements ?? defaultMdElementRegistry;
   const root = doc.type === 'doc' ? doc : { type: 'doc', content: [doc] };
   const html = (root.content ?? []).map((n) => projectBlock(n, registry)).join('');
+  if (options.sanitize === false) {
+    return html;
+  }
   return sanitizeHTML(html);
 }

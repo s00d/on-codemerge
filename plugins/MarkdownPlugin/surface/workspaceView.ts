@@ -7,9 +7,21 @@ import { defaultMdElementRegistry } from '../elements/registry';
 import type { MdElementRegistry } from '../elements/types';
 import { docToText, emptyEditorDoc, parseText } from '../io';
 import { projectPreviewHtml } from '../io/projectPreview';
-import { mountMdEditor } from '../widgets/mdEditor';
-import type { MdEditorHandle } from '../widgets/mdEditor';
-import { hydrateMermaidBlocks } from '../widgets/mermaidHydrate';
+import { mountSourceEditor } from '@on-codemerge/editor';
+import type { SourceEditorHandle } from '@on-codemerge/editor';
+import {
+  hydrateMermaidBlocks,
+  restoreMermaidHosts,
+  salvageMermaidHosts,
+} from '../widgets/mermaidHydrate';
+
+/** SoT CM→kernel debounce (typing). */
+const SOT_DEBOUNCE_MS = 150;
+/**
+ * Preview paint debounce — longer than SoT so typing stays responsive while the
+ * right pane coalesces full project+DOM+mermaid work.
+ */
+const PREVIEW_DEBOUNCE_MS = 280;
 
 export type MdWorkspaceHost = EditorAPI & {
   replaceDocument?(doc: DocNode | JSONDoc): void;
@@ -134,6 +146,148 @@ function bindProportionalScroll(editor: HTMLElement, preview: HTMLElement): Scro
   };
 }
 
+const SPLIT_MIN = 0.22;
+const SPLIT_MAX = 0.78;
+const SPLIT_DEFAULT = 0.5;
+const MD_SPLIT_MQ = '(min-width: 768px)';
+
+function isDesktopSplit(): boolean {
+  return typeof matchMedia === 'function' && matchMedia(MD_SPLIT_MQ).matches;
+}
+
+function bindPaneSplitter(
+  panes: HTMLElement,
+  editorPane: HTMLElement,
+  gutter: HTMLElement
+): { unbind(): void } {
+  let ratio = SPLIT_DEFAULT;
+  let dragging = false;
+  let startX = 0;
+  let startRatio = SPLIT_DEFAULT;
+
+  const apply = (): void => {
+    if (!isDesktopSplit()) {
+      editorPane.style.flex = '';
+      editorPane.style.width = '';
+      editorPane.style.maxWidth = '';
+      gutter.setAttribute('aria-valuenow', '50');
+      return;
+    }
+    const pct = `${(ratio * 100).toFixed(2)}%`;
+    editorPane.style.flex = `0 0 ${pct}`;
+    editorPane.style.width = pct;
+    editorPane.style.maxWidth = pct;
+    gutter.setAttribute('aria-valuenow', String(Math.round(ratio * 100)));
+  };
+
+  const onWindowResize = (): void => {
+    apply();
+  };
+
+  const endDrag = (e: PointerEvent): void => {
+    if (!dragging) {
+      return;
+    }
+    dragging = false;
+    gutter.classList.remove('ocm-md-gutter--active');
+    document.body.style.removeProperty('cursor');
+    document.body.style.removeProperty('user-select');
+    try {
+      gutter.releasePointerCapture?.(e.pointerId);
+    } catch {
+      // already released / unsupported
+    }
+  };
+
+  const onPointerDown = (e: PointerEvent): void => {
+    if (e.button !== 0 || !isDesktopSplit()) {
+      return;
+    }
+    e.preventDefault();
+    dragging = true;
+    startX = e.clientX;
+    startRatio = ratio;
+    gutter.classList.add('ocm-md-gutter--active');
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+    gutter.setPointerCapture?.(e.pointerId);
+  };
+
+  const onPointerMove = (e: PointerEvent): void => {
+    if (!dragging) {
+      return;
+    }
+    const w = panes.getBoundingClientRect().width;
+    if (w <= 0) {
+      return;
+    }
+    ratio = Math.min(SPLIT_MAX, Math.max(SPLIT_MIN, startRatio + (e.clientX - startX) / w));
+    apply();
+  };
+
+  const onDblClick = (e: MouseEvent): void => {
+    e.preventDefault();
+    ratio = SPLIT_DEFAULT;
+    apply();
+  };
+
+  const onKeyDown = (e: KeyboardEvent): void => {
+    if (!isDesktopSplit()) {
+      return;
+    }
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      ratio = Math.max(SPLIT_MIN, ratio - 0.02);
+      apply();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      ratio = Math.min(SPLIT_MAX, ratio + 0.02);
+      apply();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      ratio = SPLIT_MIN;
+      apply();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      ratio = SPLIT_MAX;
+      apply();
+    }
+  };
+
+  gutter.addEventListener('pointerdown', onPointerDown);
+  gutter.addEventListener('pointermove', onPointerMove);
+  gutter.addEventListener('pointerup', endDrag);
+  gutter.addEventListener('pointercancel', endDrag);
+  gutter.addEventListener('dblclick', onDblClick);
+  gutter.addEventListener('keydown', onKeyDown);
+  globalThis.addEventListener('resize', onWindowResize);
+  apply();
+
+  return {
+    unbind: () => {
+      gutter.removeEventListener('pointerdown', onPointerDown);
+      gutter.removeEventListener('pointermove', onPointerMove);
+      gutter.removeEventListener('pointerup', endDrag);
+      gutter.removeEventListener('pointercancel', endDrag);
+      gutter.removeEventListener('dblclick', onDblClick);
+      gutter.removeEventListener('keydown', onKeyDown);
+      globalThis.removeEventListener('resize', onWindowResize);
+      document.body.style.removeProperty('cursor');
+      document.body.style.removeProperty('user-select');
+    },
+  };
+}
+
+/** Cheap fingerprint — avoid storing full HTML in a data attribute. */
+function previewHtmlHash(html: string): string {
+  let hash = 2166136261;
+  for (let i = 0; i < html.length; i += 1) {
+    hash ^= html.charCodeAt(i);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `${html.length}:${hash >>> 0}`;
+}
+
 async function paintPreviewFromDoc(
   slot: HTMLElement,
   doc: DocNode,
@@ -141,19 +295,25 @@ async function paintPreviewFromDoc(
   sync?: ScrollSync | null,
   hydrateCtl?: { abort: AbortController | null; set: (next: AbortController) => void }
 ): Promise<void> {
-  const html = projectPreviewHtml(doc, { elements });
+  // Sanitize once at the DOM sink (not also inside the projector).
+  const html = projectPreviewHtml(doc, { elements, sanitize: false });
+  const hash = previewHtmlHash(html);
   const pendingHosts = slot.querySelector(
     'div[data-node="mermaid"]:not([data-ocm-mermaid-ready]), .ocm-md-mermaid:not([data-ocm-mermaid-ready])'
   );
-  // Skip DOM thrash only when projector output + hydrate are both settled.
-  if (slot.getAttribute('data-ocm-preview-html') === html && !pendingHosts) {
+  if (slot.getAttribute('data-ocm-preview-hash') === hash && !pendingHosts) {
     return;
   }
+
   hydrateCtl?.abort?.abort();
   const ac = new AbortController();
   hydrateCtl?.set(ac);
-  slot.setAttribute('data-ocm-preview-html', html);
+
+  const salvaged = salvageMermaidHosts(slot);
   replaceChildrenWithSafeHtml(slot, html);
+  restoreMermaidHosts(slot, salvaged);
+  slot.setAttribute('data-ocm-preview-hash', hash);
+
   requestAnimationFrame(() => {
     if (!ac.signal.aborted) {
       sync?.alignPreviewToEditor();
@@ -161,8 +321,8 @@ async function paintPreviewFromDoc(
   });
   await hydrateMermaidBlocks(slot, { signal: ac.signal });
   if (ac.signal.aborted) {
-    // Allow a later paint with the same HTML to retry hydrate.
-    slot.removeAttribute('data-ocm-preview-html');
+    // Allow a later paint with the same hash to retry hydrate.
+    slot.removeAttribute('data-ocm-preview-hash');
     return;
   }
   sync?.alignPreviewToEditor();
@@ -180,10 +340,14 @@ export function mountMdWorkspace(
   let dirty = false;
   let lastSoTMd = docToText(editor.getState().doc);
   let sotTimer: ReturnType<typeof setTimeout> | null = null;
-  let draftPreviewTimer: ReturnType<typeof setTimeout> | null = null;
+  let previewTimer: ReturnType<typeof setTimeout> | null = null;
+  let previewRaf = 0;
+  let pendingPreviewDoc: DocNode | null = null;
   let shellHandle: MountHandle | null = null;
-  let mdHandle: MdEditorHandle | null = null;
+  let mdHandle: SourceEditorHandle | null = null;
+  const scrollCapture: { el: HTMLElement | null } = { el: null };
   let scrollSync: ScrollSync | null = null;
+  let paneSplitter: { unbind(): void } | null = null;
   let hydrateAbort: AbortController | null = null;
   const hydrateCtl = {
     get abort() {
@@ -254,11 +418,38 @@ export function mountMdWorkspace(
     );
   };
 
-  const paintFromState = (state: EditorState): void => {
+  const flushPreviewPaint = (): void => {
+    const doc = pendingPreviewDoc;
+    pendingPreviewDoc = null;
     const slot = shellHandle?.refs.preview;
-    if (slot instanceof HTMLElement) {
-      void paintPreviewFromDoc(slot, state.doc, elements, scrollSync, hydrateCtl);
+    if (!(slot instanceof HTMLElement) || !doc) {
+      return;
     }
+    if (previewRaf) {
+      cancelAnimationFrame(previewRaf);
+      previewRaf = 0;
+    }
+    previewRaf = requestAnimationFrame(() => {
+      previewRaf = 0;
+      void paintPreviewFromDoc(slot, doc, elements, scrollSync, hydrateCtl);
+    });
+  };
+
+  /** Coalesce expensive preview paints; `immediate` for mount / Apply / external setText. */
+  const schedulePreviewPaint = (state: EditorState, immediate = false): void => {
+    pendingPreviewDoc = state.doc;
+    if (previewTimer) {
+      clearTimeout(previewTimer);
+      previewTimer = null;
+    }
+    if (immediate) {
+      flushPreviewPaint();
+      return;
+    }
+    previewTimer = setTimeout(() => {
+      previewTimer = null;
+      flushPreviewPaint();
+    }, PREVIEW_DEBOUNCE_MS);
   };
 
   /** True while CM→SoT commit runs — update() must not rewrite CM (caret jump). */
@@ -294,27 +485,25 @@ export function mountMdWorkspace(
     sotTimer = setTimeout(() => {
       sotTimer = null;
       commitLiveSoT(text);
-    }, 150);
+    }, SOT_DEBOUNCE_MS);
   };
 
   const onEditorChanged = (): void => {
     const text = mdHandle?.getText() ?? '';
     if (dirtyDraft) {
       setDirty(text !== lastSoTMd);
-      // Draft preview: debounce parse → projector (parent SoT untouched).
-      if (draftPreviewTimer) {
-        clearTimeout(draftPreviewTimer);
+      // Draft preview: debounce parse → coalesced projector (parent SoT untouched).
+      if (previewTimer) {
+        clearTimeout(previewTimer);
       }
-      draftPreviewTimer = setTimeout(() => {
-        draftPreviewTimer = null;
+      previewTimer = setTimeout(() => {
+        previewTimer = null;
         const parsed = parseText(text);
         if (parsed.ok) {
-          const slot = shellHandle?.refs.preview;
-          if (slot instanceof HTMLElement) {
-            void paintPreviewFromDoc(slot, parsed.doc, elements, scrollSync, hydrateCtl);
-          }
+          pendingPreviewDoc = parsed.doc;
+          flushPreviewPaint();
         }
-      }, 120);
+      }, PREVIEW_DEBOUNCE_MS);
       return;
     }
     scheduleLiveSoT(text);
@@ -336,7 +525,7 @@ export function mountMdWorkspace(
 
   const discardDraft = (): void => {
     mdHandle?.setText(lastSoTMd);
-    paintFromState(editor.getState());
+    schedulePreviewPaint(editor.getState(), true);
     setDirty(false);
     options.onDiscard?.();
   };
@@ -344,19 +533,47 @@ export function mountMdWorkspace(
   shellHandle = mount(
     contentHost,
     h('div', { class: 'ocm-md-shell' }, [
-      h('div', { class: 'ocm-md-panes' }, [
-        foreign((host, scope) => {
-          host.classList.add('ocm-md-pane', 'ocm-md-pane--editor', 'ocm-md-cm-host');
-          mdHandle = mountMdEditor(host, {
-            initialText: lastSoTMd,
-            onDocChanged: onEditorChanged,
-            onApplyRequest: dirtyDraft ? () => applyDraft() : undefined,
-          });
-          scope.disposable(() => {
-            mdHandle?.destroy();
-            mdHandle = null;
-          });
-        }),
+      h('div', { ref: 'panes', class: 'ocm-md-panes' }, [
+        h('div', { ref: 'editorPane', class: 'ocm-md-pane ocm-md-pane--editor' }, [
+          foreign((host, scope) => {
+            host.classList.add(
+              'ocm-md-source-host',
+              'flex',
+              'h-full',
+              'min-h-0',
+              'flex-1',
+              'flex-col'
+            );
+            mdHandle = mountSourceEditor(host, {
+              initialText: lastSoTMd,
+              onDocChanged: onEditorChanged,
+              onApplyRequest: dirtyDraft ? () => applyDraft() : undefined,
+            });
+            scrollCapture.el = mdHandle.scrollDOM;
+            scope.disposable(() => {
+              mdHandle?.destroy();
+              mdHandle = null;
+              scrollCapture.el = null;
+            });
+          }),
+        ]),
+        h(
+          'div',
+          {
+            ref: 'gutter',
+            class: 'ocm-md-gutter',
+            attrs: {
+              role: 'separator',
+              'aria-orientation': 'vertical',
+              'aria-label': 'Resize source and preview',
+              'aria-valuemin': '22',
+              'aria-valuemax': '78',
+              'aria-valuenow': '50',
+              tabindex: '0',
+            },
+          },
+          [h('span', { class: 'ocm-md-gutter__grip', attrs: { 'aria-hidden': 'true' } })]
+        ),
         h('div', {
           ref: 'preview',
           class: 'ocm-md-pane ocm-md-pane--preview ocm-md-preview',
@@ -367,11 +584,21 @@ export function mountMdWorkspace(
   );
 
   const previewSlot = shellHandle.refs.preview;
-  const cmScroll = contentHost.querySelector('.cm-scroller');
-  if (cmScroll instanceof HTMLElement && previewSlot instanceof HTMLElement) {
-    scrollSync = bindProportionalScroll(cmScroll, previewSlot);
+  const panesEl = shellHandle.refs.panes;
+  const editorPaneEl = shellHandle.refs.editorPane;
+  const gutterEl = shellHandle.refs.gutter;
+  const sourceScrollEl = scrollCapture.el;
+  if (sourceScrollEl !== null && previewSlot instanceof HTMLElement) {
+    scrollSync = bindProportionalScroll(sourceScrollEl, previewSlot);
   }
-  paintFromState(editor.getState());
+  if (
+    panesEl instanceof HTMLElement &&
+    editorPaneEl instanceof HTMLElement &&
+    gutterEl instanceof HTMLElement
+  ) {
+    paneSplitter = bindPaneSplitter(panesEl, editorPaneEl, gutterEl);
+  }
+  schedulePreviewPaint(editor.getState(), true);
   paintStatus();
 
   return {
@@ -381,22 +608,21 @@ export function mountMdWorkspace(
         return;
       }
 
-      // Own CM→SoT commit echo: preview only — never rewrite the source pane.
+      // Own CM→SoT commit echo: schedule coalesced preview — never rewrite the source pane.
       if (applyingSoT) {
         lastSoTMd = nextMd;
-        paintFromState(state);
+        schedulePreviewPaint(state);
         return;
       }
 
       if (!dirtyDraft && sotTimer && nextMd === lastSoTMd) {
-        // Debounce still owns the next CM→SoT write; preview can refresh.
-        paintFromState(state);
+        // Debounce still owns the next CM→SoT write; skip preview noise.
         return;
       }
 
       if (nextMd === lastSoTMd) {
-        // Echo / structural no-op for MD text — refresh preview from prose SoT.
-        paintFromState(state);
+        // Structural SoT change without MD text change — coalesce preview.
+        schedulePreviewPaint(state);
         return;
       }
 
@@ -410,7 +636,7 @@ export function mountMdWorkspace(
       if (cmText !== nextMd) {
         mdHandle?.setText(nextMd, { caret: 'preserve' });
       }
-      paintFromState(state);
+      schedulePreviewPaint(state, true);
       setDirty(false);
     },
     flushPendingSoT(): void {
@@ -424,11 +650,19 @@ export function mountMdWorkspace(
     destroy(): void {
       hydrateAbort?.abort();
       hydrateAbort = null;
+      paneSplitter?.unbind();
+      paneSplitter = null;
       scrollSync?.unbind();
       scrollSync = null;
-      if (draftPreviewTimer) {
-        clearTimeout(draftPreviewTimer);
+      if (previewTimer) {
+        clearTimeout(previewTimer);
+        previewTimer = null;
       }
+      if (previewRaf) {
+        cancelAnimationFrame(previewRaf);
+        previewRaf = 0;
+      }
+      pendingPreviewDoc = null;
       if (sotTimer) {
         clearTimeout(sotTimer);
         if (!dirtyDraft && mdHandle) {

@@ -43,7 +43,7 @@ new Editor(host, {
 editor.command('insertJsonEmbed');
 ```
 
-Document node: `json_embed` atom with `{ text: string }`. In the editor: live Tree/Raw workspace. **Preview (published HTML)** / `getPublishedHTML()`: static card with lightweight JSON highlight — no CodeMirror.
+Document node: `json_embed` atom with `{ text: string }`. In the editor: live Tree/Raw workspace. **Preview (published HTML)** / `getPublishedHTML()`: static card with universal structural highlight.
 
 ### Workspace (JSON-only app)
 
@@ -72,7 +72,7 @@ JsonPlugin({
   order?: number,
   features?: {
     toolbar?: boolean; // Insert embed (atom only); default true
-    rawPane?: boolean; // Raw CodeMirror (workspace)
+    rawPane?: boolean; // Raw source editor (workspace)
     treeChrome?: boolean; // tree context menu (workspace)
     historyChrome?: boolean; // include HistoryChromePlugin in createDefaultPlugins
     shortcuts?: boolean; // shortcuts popup + Mod-/ (workspace)

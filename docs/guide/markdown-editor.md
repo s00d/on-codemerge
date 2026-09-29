@@ -29,7 +29,8 @@ editor.on('docChanged', () => {
 ## Notes
 
 - SoT is a prose `doc` (paragraph, heading, lists, `callout`, `mermaid`, …) — same kernel model as WYSIWYG, MD-shaped subset. Legacy `doc → markdown.text` blob is rejected.
-- Live preview projects HTML **from `state.doc`** (`projectPreviewHtml`) — no second Markdown parse on each keystroke. CodeMirror debounce is the only MD→tree path.
+- Live preview projects HTML **from `state.doc`** (`projectPreviewHtml`) — no second Markdown parse on each keystroke. Source-editor debounce is the only MD→tree path; preview paint is coalesced separately so typing stays responsive.
+- Desktop: drag the middle **gutter** (or ←/→ when focused) to resize source vs preview; double-click resets to 50/50.
 - Toolbar **Insert** / **Turn into** mutate kernel state (`insert_node` / `set_attrs`); CM reserializes from SoT.
 - **Custom callouts:** `elements: [{ id, label, toPreviewHtml }]` (merged with info/warn/error) — auto Insert / Turn into entries.
 - **Custom toolbar:** `toolbar: { menus?, items? }` — sole source of domain bar buttons (`command` / `run`). Omit → `defaultMdToolbar({ elements })`. Undo/redo via `HistoryChromePlugin` in `createDefaultPlugins`. Empty bar → `{ menus: [], items: [] }` (see [Markdown Plugin](/plugins/markdown-plugin)).

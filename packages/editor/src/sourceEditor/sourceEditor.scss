@@ -1,0 +1,93 @@
+/* Shared source-editor chrome + TOKEN_TYPE_ALLOWLIST paint (plain CSS — no @apply /
+ * @reference, so the sheet works both as a Vite CSS entry and via meta.load-css). */
+
+.ocm-source-editor .ocm-source-editor__mirror,
+.ocm-source-editor .ocm-source-editor__code {
+  margin: 0;
+  border-radius: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  white-space: pre;
+}
+
+.ocm-source-editor .ocm-source-editor__input {
+  color: var(--color-ocm-text, #18181b);
+  caret-color: var(--color-ocm-text, #18181b);
+  -webkit-text-fill-color: transparent;
+}
+
+.ocm-source-editor .token,
+.ocm-hl .token,
+.code-block-pre .token,
+.ocm-json-publish .token {
+  font-style: normal;
+}
+
+.ocm-source-editor .token.string,
+.ocm-hl .token.string,
+.code-block-pre .token.string,
+.ocm-json-publish .token.string {
+  color: var(--color-ocm-hl-string, #047857);
+}
+
+.ocm-source-editor .token.number,
+.ocm-hl .token.number,
+.code-block-pre .token.number,
+.ocm-json-publish .token.number {
+  color: var(--color-ocm-hl-number, #b45309);
+}
+
+.ocm-source-editor .token.boolean,
+.ocm-hl .token.boolean,
+.code-block-pre .token.boolean,
+.ocm-json-publish .token.boolean {
+  color: var(--color-ocm-hl-boolean, #0369a1);
+}
+
+.ocm-source-editor .token.punctuation,
+.ocm-source-editor .token.operator,
+.ocm-hl .token.punctuation,
+.ocm-hl .token.operator,
+.code-block-pre .token.punctuation,
+.code-block-pre .token.operator,
+.ocm-json-publish .token.punctuation,
+.ocm-json-publish .token.operator {
+  color: var(--color-ocm-text-muted, #71717a);
+}
+
+.ocm-source-editor .token.ident,
+.ocm-hl .token.ident,
+.code-block-pre .token.ident,
+.ocm-json-publish .token.ident {
+  color: var(--color-ocm-text, #18181b);
+}
+
+.ocm-source-editor .token.comment,
+.ocm-hl .token.comment,
+.code-block-pre .token.comment,
+.ocm-json-publish .token.comment {
+  color: var(--color-ocm-hl-comment, #6b7280);
+  font-style: italic;
+}
+
+html.dark .ocm-source-editor .token.string,
+html.dark .ocm-hl .token.string,
+html.dark .code-block-pre .token.string,
+html.dark .ocm-json-publish .token.string {
+  color: var(--color-ocm-hl-string-dark, #6ee7b7);
+}
+
+html.dark .ocm-source-editor .token.number,
+html.dark .ocm-hl .token.number,
+html.dark .code-block-pre .token.number,
+html.dark .ocm-json-publish .token.number {
+  color: var(--color-ocm-hl-number-dark, #fcd34d);
+}
+
+html.dark .ocm-source-editor .token.boolean,
+html.dark .ocm-hl .token.boolean,
+html.dark .code-block-pre .token.boolean,
+html.dark .ocm-json-publish .token.boolean {
+  color: var(--color-ocm-hl-boolean-dark, #7dd3fc);
+}

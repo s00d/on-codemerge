@@ -56,7 +56,7 @@ function isEditingInside(host: HTMLElement): boolean {
   if (tag === 'SELECT' || tag === 'INPUT' || tag === 'TEXTAREA' || ae.isContentEditable) {
     return true;
   }
-  return Boolean(ae.closest('.cm-editor'));
+  return Boolean(ae.closest('.ocm-source-editor'));
 }
 
 function replaceDoc(editor: JsonWorkspaceHost, doc: DocNode | JSONDoc): void {
@@ -400,7 +400,9 @@ export function mountJsonWorkspace(
               foreign(
                 (host, scope) => {
                   host.classList.add(
-                    'ocm-json-cm-host',
+                    'ocm-json-source-host',
+                    'flex',
+                    'flex-col',
                     'h-full',
                     'min-h-0',
                     'flex-1',
@@ -409,11 +411,13 @@ export function mountJsonWorkspace(
                   rawHandle = mountRawEditor(host, {
                     initialText: lastSoTText,
                     onDirty: () => {
-                      if (!rawDirty) {
-                        rawDirty = true;
-                        updateStatus();
-                        options.onModeChange?.();
+                      const nextDirty = (rawHandle?.getText() ?? '') !== lastSoTText;
+                      if (nextDirty === rawDirty) {
+                        return;
                       }
+                      rawDirty = nextDirty;
+                      updateStatus();
+                      options.onModeChange?.();
                     },
                     onApplyRequest: () => {
                       if (rawHandle) {
@@ -428,7 +432,7 @@ export function mountJsonWorkspace(
                     },
                   });
                 },
-                { class: 'ocm-json-cm-foreign flex h-full min-h-0 flex-1 flex-col' }
+                { class: 'ocm-json-source-foreign flex h-full min-h-0 flex-1 flex-col' }
               ),
             ]
           )

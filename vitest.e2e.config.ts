@@ -17,7 +17,7 @@ export default defineConfig({
     untestutils({
       recipes,
       browsers: ['chromium'],
-      prewarm: ['editor'],
+      prewarm: ['editor', 'sourceEditor'],
       artifactsRoot: fileURLToPath(new URL('test/.untestutils', import.meta.url)),
       session: 'vitest-e2e',
     }),

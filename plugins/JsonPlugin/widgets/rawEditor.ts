@@ -1,13 +1,8 @@
-import { basicSetup } from 'codemirror';
-import { EditorState } from '@codemirror/state';
-import { EditorView, keymap } from '@codemirror/view';
-import { json } from '@codemirror/lang-json';
-import { linter, lintGutter } from '@codemirror/lint';
-import type { Diagnostic } from '@codemirror/lint';
-import { defaultKeymap } from '@codemirror/commands';
-
-/** Match parseText byte cap — skip uncapped JSON.parse in the linter. */
-export const CM_MAX_JSON_BYTES = 1_000_000;
+import { h, mount } from '@on-codemerge/sdk';
+import type { MountHandle } from '@on-codemerge/sdk';
+import { mountSourceEditor } from '@on-codemerge/editor';
+import type { SourceEditorHandle } from '@on-codemerge/editor';
+import { jsonTextPreflight } from '../io/text';
 
 export type RawEditorHandle = {
   getText(): string;
@@ -24,136 +19,105 @@ export type RawEditorOptions = {
   onApplyRequest(): void;
 };
 
-function sizeAwareJsonLinter() {
-  return linter((view) => {
-    const text = view.state.doc.toString();
-    if (text.length > CM_MAX_JSON_BYTES) {
-      return [
-        {
-          from: 0,
-          to: Math.min(text.length, 1),
-          severity: 'error',
-          message: `JSON exceeds ${CM_MAX_JSON_BYTES} bytes`,
-        } satisfies Diagnostic,
-      ];
-    }
-    try {
-      JSON.parse(text);
-      return [];
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Invalid JSON';
-      let from = 0;
-      let to = Math.min(text.length, 1);
-      const match = /position\s+(\d+)/i.exec(message);
-      if (match) {
-        const pos = Number(match[1]);
-        if (Number.isFinite(pos)) {
-          from = Math.max(0, Math.min(pos, text.length));
-          to = Math.min(text.length, from + 1);
-        }
-      }
-      return [{ from, to, severity: 'error', message } satisfies Diagnostic];
-    }
-  });
+type LintDiag = { from: number; to: number; message: string };
+
+function lintJson(text: string): LintDiag[] {
+  const pre = jsonTextPreflight(text);
+  if (pre.ok) {
+    return [];
+  }
+  const from = Math.max(0, Math.min(pre.error.offset ?? 0, Math.max(text.length, 0)));
+  const to = text.length === 0 ? 0 : Math.min(text.length, from + 1);
+  return [{ from, to, message: pre.error.message }];
 }
 
 /**
- * Mount CodeMirror 6 JSON editor into a stable host (never remount via ViewSpec paint).
+ * Mount JSON source editor into a stable host (never remount via ViewSpec paint).
  * SoT writes must go through workspace `parseText` — this module never calls replaceDocument.
  */
 export function mountRawEditor(host: HTMLElement, options: RawEditorOptions): RawEditorHandle {
-  host.classList.add('ocm-json-cm');
   host.replaceChildren();
 
-  let suppressDirty = false;
+  let source: SourceEditorHandle | null = null;
+  let lintMount: MountHandle | null = null;
+  let lintHost: HTMLElement | null = null;
 
-  const view = new EditorView({
-    parent: host,
-    state: EditorState.create({
-      doc: options.initialText,
-      extensions: [
-        basicSetup,
-        json(),
-        lintGutter(),
-        sizeAwareJsonLinter(),
-        keymap.of([
-          ...defaultKeymap,
-          {
-            key: 'Mod-s',
-            run: () => {
-              options.onApplyRequest();
-              return true;
-            },
-          },
-        ]),
-        EditorView.updateListener.of((update) => {
-          if (update.docChanged && !suppressDirty) {
-            options.onDirty();
-          }
-        }),
-        EditorView.theme({
-          '&': {
-            height: '100%',
-            fontSize: '13px',
-            backgroundColor: 'var(--color-ocm-surface, #fff)',
-            color: 'var(--color-ocm-text, #18181b)',
-          },
-          '.cm-scroller': {
-            fontFamily: 'ui-monospace, SFMono-Regular, Menlo, monospace',
-            padding: '0',
-          },
-          '.cm-content': { padding: '0', caretColor: 'currentColor' },
-          '.cm-gutters': {
-            paddingRight: '4px',
-            border: 'none',
-            backgroundColor: 'var(--color-ocm-surface-muted, #fafafa)',
-            color: 'var(--color-ocm-text-muted, #71717a)',
-          },
-          '.cm-activeLineGutter': {
-            backgroundColor: 'var(--color-ocm-surface-hover, #f4f4f5)',
-          },
-          '.cm-activeLine': {
-            backgroundColor: 'var(--color-ocm-surface-hover, #f4f4f5)',
-          },
-          '.cm-selectionBackground, &.cm-focused .cm-selectionBackground': {
-            backgroundColor: 'var(--color-ocm-accent-soft, #e0f2fe) !important',
-          },
-          '.cm-cursor, .cm-dropCursor': {
-            borderLeftColor: 'var(--color-ocm-text, #18181b)',
-          },
-          '.cm-line': { padding: '0 0 0 4px' },
-          '&.cm-focused': { outline: 'none' },
-        }),
-      ],
-    }),
+  const paintLint = (text: string): void => {
+    if (!lintHost) {
+      return;
+    }
+    const diags = lintJson(text);
+    lintMount?.destroy();
+    lintMount = null;
+    if (diags.length === 0) {
+      lintHost.replaceChildren();
+      return;
+    }
+    const d = diags.at(0);
+    if (d === undefined) {
+      return;
+    }
+    lintMount = mount(
+      lintHost,
+      h(
+        'div',
+        {
+          class:
+            'ocm-source-lint border-t border-ocm-border bg-ocm-surface-muted/50 px-2 py-1 text-xs text-red-600',
+          attrs: { role: 'status' },
+        },
+        d.message
+      )
+    );
+  };
+
+  // flex-1 (not only h-full): absolute mirror/textarea do not size the slot — flex must.
+  const shell = mount(
+    host,
+    h('div', { class: 'ocm-json-source-shell flex h-full min-h-0 flex-1 flex-col' }, [
+      h('div', {
+        class: 'ocm-json-source-editor-slot flex min-h-0 flex-1 flex-col',
+        ref: 'editor',
+      }),
+      h('div', { class: 'ocm-json-source-lint-slot shrink-0', ref: 'lint' }),
+    ])
+  );
+
+  const editorHost = shell.refs.editor;
+  lintHost = shell.refs.lint;
+
+  source = mountSourceEditor(editorHost, {
+    initialText: options.initialText,
+    onDocChanged: () => {
+      paintLint(source?.getText() ?? '');
+      options.onDirty();
+    },
+    onApplyRequest: () => {
+      options.onApplyRequest();
+    },
   });
+  paintLint(options.initialText);
 
   return {
     dom: host,
     getText() {
-      return view.state.doc.toString();
+      return source?.getText() ?? '';
     },
     setText(text: string) {
-      const cur = view.state.doc.toString();
-      if (cur === text) {
-        return;
-      }
-      suppressDirty = true;
-      try {
-        view.dispatch({
-          changes: { from: 0, to: view.state.doc.length, insert: text },
-        });
-      } finally {
-        suppressDirty = false;
-      }
+      source?.setText(text);
+      paintLint(text);
     },
     focus() {
-      view.focus();
+      source?.focus();
     },
     destroy() {
-      view.destroy();
+      source?.destroy();
+      source = null;
+      lintMount?.destroy();
+      lintMount = null;
+      shell.destroy();
+      lintHost = null;
       host.replaceChildren();
-      host.classList.remove('ocm-json-cm');
     },
   };
 }

@@ -1,4 +1,5 @@
 import type { DocNode, Mark } from '@on-codemerge/kernel';
+import { highlightHtml } from '@on-codemerge/editor';
 import { viewToHtml } from '@on-codemerge/sdk';
 import type { PublishNodeDefinition } from '@on-codemerge/sdk';
 import { asAttr } from '../utils/asAttr';
@@ -128,12 +129,13 @@ function docToHTMLInner(
     )}><tbody>${rows}</tbody></table>`;
   }
   if (doc.type === 'codeBlock' || doc.type === 'code_block') {
-    const lang = escapeAttr(asAttr(doc.attrs?.language, 'plaintext'));
-    const code =
+    const lang = escapeAttr(asAttr(doc.attrs?.language));
+    const raw =
       typeof doc.attrs?.code === 'string'
-        ? escapeHTML(doc.attrs.code)
-        : escapeHTML((doc.content ?? []).map((c) => c.text ?? '').join(''));
-    return `<pre data-language="${lang}"${serializeDataAttrs(doc.attrs, ['language', 'code'])}><code>${code}</code></pre>`;
+        ? doc.attrs.code
+        : (doc.content ?? []).map((c) => c.text ?? '').join('');
+    const code = highlightHtml(raw);
+    return `<pre class="code-block-pre" data-language="${lang}"${serializeDataAttrs(doc.attrs, ['language', 'code'])}><code>${code}</code></pre>`;
   }
   if (doc.type === 'blockquote') {
     return `<blockquote${serializeDataAttrs(doc.attrs)}>${(doc.content ?? []).map((n) => docToHTMLInner(n, publishers)).join('')}</blockquote>`;

@@ -1,4 +1,5 @@
 import { h, renderDetached } from '@on-codemerge/sdk';
+import { safeLangToken } from '../io';
 
 export function renderCodeBlockDom(
   code: string,
@@ -10,6 +11,8 @@ export function renderCodeBlockDom(
   const copyLabel = t('common.copy');
   const copied = t('common.copied');
 
+  const tok = safeLangToken(language);
+  const langClass = language.trim() ? `language-${tok}` : undefined;
   const { el } = renderDetached(
     h('div', { class: 'code-block', attrs: { id: uniqueId } }, [
       h('div', { class: 'code-header' }, [
@@ -46,7 +49,7 @@ export function renderCodeBlockDom(
       ]),
       h('pre', null, [
         h('code', {
-          class: `language-${language}`,
+          class: langClass,
           // Read-only in the surface — edits go through the modal (dblclick / context menu).
           props: { contentEditable: false, textContent: code },
           on: {

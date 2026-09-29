@@ -1,0 +1,36 @@
+{
+  "rules": [
+    {
+      "type": "punctuation",
+      "match": "^://"
+    },
+    {
+      "type": "comment",
+      "match": "^(?://(?![A-Za-z0-9._-]*\\.[A-Za-z])[^\\n]*|/\\*[\\s\\S]*?\\*/)"
+    },
+    {
+      "type": "string",
+      "match": "^(['\"`])(?:\\\\[\\s\\S]|(?!\\1)[^\\\\])*\\1"
+    },
+    {
+      "type": "number",
+      "match": "^(?:0[xX][0-9a-fA-F]+|\\d+(?:\\.\\d+)?(?:[eE][+-]?\\d+)?)"
+    },
+    {
+      "type": "boolean",
+      "match": "^(?:true|false|null)\\b"
+    },
+    {
+      "type": "operator",
+      "match": "^(?:=>|===|!==|&&|\\|\\||[+\\-*/%<>=!]=?)"
+    },
+    {
+      "type": "punctuation",
+      "match": "^[{}\\[\\]();,.:]"
+    },
+    {
+      "type": "ident",
+      "match": "^[A-Za-z_$][\\w$]*"
+    }
+  ]
+}

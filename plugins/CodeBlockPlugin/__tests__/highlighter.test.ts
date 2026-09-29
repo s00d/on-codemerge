@@ -1,25 +1,17 @@
 import { describe, expect, it } from 'vitest';
-import { SyntaxHighlighter } from '../services/SyntaxHighlighter';
-import { getLanguageDefinition, isLanguageSupported } from '../utils/languages';
+import { highlightHtml, lex } from '@on-codemerge/editor';
 
-describe('syntaxHighlighter', () => {
-  it('highlights javascript without throwing on sticky patterns', () => {
+describe('code block highlight', () => {
+  it('paints structurally; identical source → identical tokens', () => {
     expect.hasAssertions();
-    const highlighter = new SyntaxHighlighter();
-    const html = highlighter.highlightHtml('const x = 1;', 'javascript');
-    expect(html).toContain('token');
-    expect(html).toContain('const');
-  });
-
-  it('resolves js/ts/jsx/tsx/scss/c aliases', () => {
-    expect.hasAssertions();
-    expect(isLanguageSupported('js')).toBe(true);
-    expect(isLanguageSupported('ts')).toBe(true);
-    expect(isLanguageSupported('jsx')).toBe(true);
-    expect(isLanguageSupported('tsx')).toBe(true);
-    expect(isLanguageSupported('scss')).toBe(true);
-    expect(isLanguageSupported('c')).toBe(true);
-    expect(getLanguageDefinition('js')).toBe(getLanguageDefinition('javascript'));
-    expect(getLanguageDefinition('ts')).toBe(getLanguageDefinition('typescript'));
+    const src = 'const x = 1;';
+    expect(
+      lex(src)
+        .map((t) => t.value)
+        .join('')
+    ).toBe(src);
+    expect(highlightHtml(src)).toBe(highlightHtml(src));
+    expect(lex(src).some((t) => t.type === 'number')).toBe(true);
+    expect(lex(src).some((t) => t.type === 'keyword')).toBe(false);
   });
 });

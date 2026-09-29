@@ -2,7 +2,7 @@ import { attrString, h } from '@on-codemerge/sdk';
 import type { ViewSpec } from '@on-codemerge/sdk';
 import { compactMarkdownText, prettyMarkdownText, renderMarkdownPreviewHtml } from '../io/preview';
 
-/** Static published / preview markup — no CodeMirror. */
+/** Static published / preview markup. */
 export function renderMdEmbedPublish(attrs: Record<string, unknown>): ViewSpec {
   const raw = attrString(attrs.text, '');
   const compact = compactMarkdownText(raw);

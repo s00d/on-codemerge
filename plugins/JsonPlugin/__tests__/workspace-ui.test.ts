@@ -55,15 +55,22 @@ describe('JsonPlugin workspace UI', () => {
     expect(tree!.querySelectorAll('[data-ocm-json-actions]').length).toBeGreaterThan(0);
   });
 
-  it('keeps CM mounted across selectionChanged', () => {
+  it('keeps raw draft text across selectionChanged', () => {
     const { editor } = mountEditor({ a: 'x' });
-    const cm = editor.contentElement()?.querySelector('.cm-editor');
-    expect(cm).toBeTruthy();
-    const content = cm!.querySelector('.cm-content') as HTMLElement;
-    content.focus();
-    expect(document.activeElement).toBe(content);
+    openRaw(editor);
+    const ta = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement;
+    expect(ta).toBeTruthy();
+    const before = ta.value;
+    ta.focus();
+    expect(document.activeElement).toBe(ta);
     editor.setSelection(editor.getState().selection);
-    expect(editor.contentElement()?.querySelector('.cm-editor')).toBe(cm);
+    const ta2 = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement;
+    expect(ta2.value).toBe(before);
+    expect(document.activeElement).toBe(ta2);
   });
 
   it('changes type via command (menu Type path)', () => {
@@ -130,17 +137,19 @@ describe('JsonPlugin workspace UI', () => {
     expect(afterTree.querySelector('button[aria-expanded="false"]')).toBeTruthy();
   });
 
-  it('dirty Raw draft is fail-closed: tree op blocked until Discard', async () => {
+  it('dirty Raw draft is fail-closed: tree op blocked until Discard', () => {
     const { editor } = mountEditor({ a: 1 });
     openRaw(editor);
-    const { EditorView } = await import('@codemirror/view');
-    const cmEl = editor.contentElement()!.querySelector('.cm-editor') as HTMLElement;
-    const view = EditorView.findFromDOM(cmEl);
-    expect(view).toBeTruthy();
-    view!.dispatch({
-      changes: { from: 0, to: view!.state.doc.length, insert: '{"a":1,' },
-    });
+    const ta = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement;
+    expect(ta).toBeTruthy();
+    ta.value = '{"a":1,';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
     expect(editor.contentElement()?.textContent).toContain('Draft dirty');
+    expect(editor.contentElement()?.querySelector('[role="status"]')?.textContent ?? '').toMatch(
+      /JSON|Unexpected|position|token|end/i
+    );
 
     const before = docToValue(editor.getState().doc);
     // Cannot leave Raw while dirty.
@@ -160,6 +169,24 @@ describe('JsonPlugin workspace UI', () => {
     expect(editor.contentElement()?.textContent).toContain('SoT synced');
     (editor.host.querySelector('[data-id="json-mode-tree"]') as HTMLButtonElement).click();
     expect(editor.contentElement()?.getAttribute('data-ocm-json-mode')).toBe('tree');
+  });
+
+  it('Apply commits valid Raw draft into SoT', () => {
+    const { editor } = mountEditor({ a: 1 });
+    openRaw(editor);
+    const ta = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement;
+    ta.value = '{"a":2,"b":true}';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(editor.contentElement()?.textContent).toContain('Draft dirty');
+    const apply = [...editor.contentElement()!.querySelectorAll('button')].find(
+      (b) => b.textContent === 'Apply'
+    ) as HTMLButtonElement;
+    expect(apply).toBeTruthy();
+    apply.click();
+    expect(docToValue(editor.getState().doc)).toStrictEqual({ a: 2, b: true });
+    expect(editor.contentElement()?.textContent).toContain('SoT synced');
   });
 
   it('rejected rename heals key inputs from SoT', () => {
@@ -200,15 +227,26 @@ describe('JsonPlugin workspace UI', () => {
     expect(docToValue(editor.getState().doc)).toStrictEqual({ b: 1 });
   });
 
-  it('Discard clears dirty status after invalid Apply attempt', () => {
+  it('Discard restores SoT after invalid Raw draft', () => {
     const { editor } = mountEditor({ a: 1 });
     openRaw(editor);
+    const ta = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement;
+    ta.value = '{"a":';
+    ta.dispatchEvent(new Event('input', { bubbles: true }));
+    expect(editor.contentElement()?.textContent).toContain('Draft dirty');
     const discard = [...editor.contentElement()!.querySelectorAll('button')].find(
       (b) => b.textContent === 'Discard'
     ) as HTMLButtonElement;
     expect(discard).toBeTruthy();
     discard.click();
     expect(editor.contentElement()?.textContent).toContain('SoT synced');
+    expect(docToValue(editor.getState().doc)).toStrictEqual({ a: 1 });
+    const restored = editor
+      .contentElement()
+      ?.querySelector('textarea[aria-label="Source editor"]') as HTMLTextAreaElement;
+    expect(JSON.parse(restored.value)).toStrictEqual({ a: 1 });
   });
 
   it('Raw mode replaces Tree (not stacked below)', () => {

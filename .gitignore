@@ -11,7 +11,9 @@ node_modules
 dist
 dist-json
 dist-markdown
+dist-code
 dist-e2e
+dist-e2e-source
 dist-ssr
 *.local
 

@@ -232,25 +232,7 @@ table.html-editor-table {
   @apply block bg-transparent p-0 text-ocm-text;
 }
 
-.ocm-json-tok-key {
-  @apply text-violet-700 dark:text-violet-300;
-}
-
-.ocm-json-tok-string {
-  @apply text-emerald-700 dark:text-emerald-300;
-}
-
-.ocm-json-tok-number {
-  @apply text-amber-700 dark:text-amber-300;
-}
-
-.ocm-json-tok-literal {
-  @apply text-sky-700 dark:text-sky-300;
-}
-
-.ocm-json-tok-punct {
-  @apply text-ocm-text-muted;
-}
+/* Token colors: packages/editor sourceEditor.scss (.ocm-json-publish .token, .code-block-pre .token) */
 
 /* —— Forms / Timer / Calendar atoms (shared skins) —— */
 @import '../atoms/form.scss';

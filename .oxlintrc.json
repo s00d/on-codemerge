@@ -8,12 +8,15 @@
   "ignorePatterns": [
     "**/dist/**",
     "**/dist-json/**",
+    "**/dist-markdown/**",
+    "**/dist-code/**",
+    "**/dist-e2e/**",
+    "**/dist-e2e-source/**",
     "**/node_modules/**",
     "**/coverage/**",
     "docs/.vitepress/cache/**",
     "docs/.vitepress/dist/**",
     "demo/**",
-    "plugins/CodeBlockPlugin/utils/languages/definitions/**",
     "apps/wysiwyg/src/__mocks__/**"
   ],
   "categories": {

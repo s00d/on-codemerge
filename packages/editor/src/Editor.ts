@@ -333,14 +333,26 @@ export class Editor implements EditorAPI {
       if (!hit) {
         return;
       }
-      e.preventDefault();
-      if (hit.command === 'undo') {
-        this.undo();
-      } else if (hit.command === 'redo') {
-        this.redo();
-      } else {
-        this.command(hit.command);
+      const target = e.target;
+      const inSource = target instanceof Element && target.closest('.ocm-source-editor') !== null;
+      if (inSource && (hit.command === 'undo' || hit.command === 'redo')) {
+        // Source editor owns undo/redo (local stack + Mod-z/y on the textarea).
+        return;
       }
+      if (hit.command === 'undo') {
+        if (this.undo()) {
+          e.preventDefault();
+        }
+        return;
+      }
+      if (hit.command === 'redo') {
+        if (this.redo()) {
+          e.preventDefault();
+        }
+        return;
+      }
+      e.preventDefault();
+      this.command(hit.command);
     });
   }
 

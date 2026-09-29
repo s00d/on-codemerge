@@ -27,6 +27,26 @@ export const recipes = defineRecipes(
       readyTimeoutMs: 180_000,
       workspaceDeps: true,
     }),
+    sourceEditor: vite({
+      id: 'sourceEditor',
+      root: resolve(root, 'test/stands/source-editor'),
+      run: 'preview',
+      viteConfig: { build: { outDir: '../../../dist-e2e-source' } },
+      hashInputs: [
+        resolve(root, 'test/stands/source-editor'),
+        resolve(root, 'packages/editor/src'),
+        resolve(root, 'plugins/JsonPlugin'),
+        resolve(root, 'plugins/MarkdownPlugin'),
+        resolve(root, 'plugins/CodeBlockPlugin'),
+        resolve(root, 'packages/sdk/src'),
+        resolve(root, 'apps/wysiwyg/src/tailwind.css'),
+        resolve(root, 'package.json'),
+        resolve(root, 'postcss.config.js'),
+      ],
+      readyPath: '/',
+      readyTimeoutMs: 180_000,
+      workspaceDeps: true,
+    }),
   },
   import.meta.url
 );

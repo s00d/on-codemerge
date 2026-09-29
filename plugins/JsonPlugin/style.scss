@@ -26,38 +26,25 @@
   @apply ml-0.5;
 }
 
-.ocm-json-cm-host,
-.ocm-json-cm-foreign,
+.ocm-json-source-host,
+.ocm-json-source-foreign,
 .ocm-json-raw-slot {
-  @apply min-h-0;
+  @apply flex min-h-0 flex-1 flex-col;
 }
 
-.ocm-json-cm-host {
-  @apply h-full;
+.ocm-json-source-host {
+  @apply h-full overflow-hidden;
 }
 
-.ocm-json-cm-host .cm-editor {
-  @apply h-full max-h-none border-0 bg-ocm-surface text-ocm-text;
+/* Absolute mirror/textarea contribute no intrinsic height — grow via flex-1. */
+.ocm-json-source-host .ocm-json-source-shell,
+.ocm-json-source-host .ocm-json-source-editor-slot {
+  @apply flex h-full min-h-0 flex-1 flex-col bg-ocm-surface text-ocm-text;
 }
 
-.ocm-json-cm-host .cm-scroller {
-  overflow: auto;
-  padding: 0 !important;
-}
-
-.ocm-json-cm-host .cm-content {
-  padding: 0 !important;
-  @apply font-mono text-[13px] text-ocm-text;
-}
-
-.ocm-json-cm-host .cm-gutters {
-  border-right: 0;
-  padding-right: 4px !important;
-  @apply bg-ocm-surface-muted text-ocm-text-muted;
-}
-
-.ocm-json-cm-host .cm-line {
-  padding: 0 0 0 4px !important;
+/* Grid layout lives inline on .ocm-source-editor — do not force flex-row (collapses gutter). */
+.ocm-json-source-host .ocm-source-editor {
+  @apply h-full min-h-0 flex-1 bg-ocm-surface text-ocm-text;
 }
 
 /* CE json_embed atom — same Tree/Raw surface as JSON Editor; colors follow ocm theme tokens */
@@ -128,22 +115,4 @@
   @apply block bg-transparent p-0 text-ocm-text;
 }
 
-.ocm-json-tok-key {
-  @apply text-violet-700 dark:text-violet-300;
-}
-
-.ocm-json-tok-string {
-  @apply text-emerald-700 dark:text-emerald-300;
-}
-
-.ocm-json-tok-number {
-  @apply text-amber-700 dark:text-amber-300;
-}
-
-.ocm-json-tok-literal {
-  @apply text-sky-700 dark:text-sky-300;
-}
-
-.ocm-json-tok-punct {
-  @apply text-ocm-text-muted;
-}
+/* Token colors: packages/editor sourceEditor.scss (.ocm-json-publish .token) */

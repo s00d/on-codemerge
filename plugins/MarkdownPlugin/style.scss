@@ -15,47 +15,59 @@
 }
 
 .ocm-md-panes {
-  @apply grid min-h-0 flex-1 grid-cols-1 gap-0 overflow-hidden md:grid-cols-2;
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden md:flex-row;
 }
 
 .ocm-md-pane {
-  @apply relative min-h-0 overflow-hidden;
+  @apply relative min-h-0 min-w-0 overflow-hidden;
 }
 
 .ocm-md-pane--editor {
-  @apply border-ocm-border md:border-r;
+  @apply flex min-h-[12rem] flex-1 flex-col md:min-h-0;
+}
+
+.ocm-md-gutter {
+  @apply relative z-10 hidden shrink-0 touch-none select-none md:flex;
+  @apply w-2.5 cursor-col-resize flex-col items-center justify-center;
+  @apply border-x border-ocm-border bg-ocm-surface-muted/50;
+  @apply transition-colors hover:bg-ocm-accent-soft/60;
+
+  &:focus-visible {
+    @apply outline-none ring-2 ring-ocm-accent ring-inset;
+  }
+
+  &--active {
+    @apply bg-ocm-accent-soft;
+  }
+}
+
+.ocm-md-gutter__grip {
+  @apply pointer-events-none h-10 w-1 rounded-full bg-ocm-border shadow-sm;
+  @apply transition-colors;
+}
+
+.ocm-md-gutter:hover .ocm-md-gutter__grip,
+.ocm-md-gutter--active .ocm-md-gutter__grip,
+.ocm-md-gutter:focus-visible .ocm-md-gutter__grip {
+  @apply bg-ocm-accent;
 }
 
 .ocm-md-pane--preview {
-  @apply overflow-auto bg-ocm-surface p-3 text-[13px] text-ocm-text;
+  @apply min-h-[12rem] flex-1 overflow-auto bg-ocm-surface p-3 text-[13px] text-ocm-text md:min-h-0;
+  contain: layout style paint;
 }
 
 .ocm-md-status {
   @apply shrink-0 border-t border-ocm-border bg-ocm-surface-muted/30 px-2 py-1;
 }
 
-.ocm-md-cm-host {
-  @apply h-full min-h-0;
+.ocm-md-source-host {
+  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden;
 }
 
-.ocm-md-cm-host .cm-editor {
-  @apply h-full max-h-full border-0 bg-ocm-surface text-ocm-text;
-}
-
-.ocm-md-cm-host .cm-scroller {
-  overflow: auto !important;
-  padding: 0 !important;
-}
-
-.ocm-md-cm-host .cm-content {
-  padding: 0 !important;
-  @apply font-mono text-[13px] text-ocm-text;
-}
-
-.ocm-md-cm-host .cm-gutters {
-  border-right: 0;
-  padding-right: 4px !important;
-  @apply bg-ocm-surface-muted text-ocm-text-muted;
+/* Grid layout lives inline on .ocm-source-editor — do not force flex-row. */
+.ocm-md-source-host .ocm-source-editor {
+  @apply h-full min-h-0 flex-1 border-0 bg-ocm-surface text-ocm-text;
 }
 
 .ocm-md-preview {

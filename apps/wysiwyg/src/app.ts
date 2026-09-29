@@ -75,6 +75,7 @@ export {
 export type { SpellCheckerOptions, SpellDictionaryFiles } from './plugins';
 export type { JsonPluginOptions, JsonPluginFeatures } from './plugins';
 export type { MarkdownPluginOptions, MarkdownPluginFeatures } from './plugins';
+export type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from './plugins';
 
 export {
   createDoc,

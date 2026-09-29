@@ -4,5 +4,9 @@
  */
 export function replaceChildrenWithHtml(el: HTMLElement, html: string): void {
   const doc = new DOMParser().parseFromString(html, 'text/html');
-  el.replaceChildren(...[...doc.body.childNodes].map((n) => el.ownerDocument.importNode(n, true)));
+  const frag = el.ownerDocument.createDocumentFragment();
+  for (const node of Array.from(doc.body.childNodes)) {
+    frag.append(el.ownerDocument.importNode(node, true));
+  }
+  el.replaceChildren(frag);
 }

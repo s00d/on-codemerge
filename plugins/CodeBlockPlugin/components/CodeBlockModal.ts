@@ -1,98 +1,23 @@
-import { PopupController, foreign, h, mount } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
-import { SUPPORTED_LANGUAGES } from '../constants';
+import { PopupController, foreign, h } from '@on-codemerge/sdk';
+import type { DisposableScope, EditorAPI } from '@on-codemerge/sdk';
+import { mountSourceEditor } from '@on-codemerge/editor';
+import type { SourceEditorHandle } from '@on-codemerge/editor';
 
 export class CodeBlockModal {
   private readonly editor: EditorAPI;
   private readonly popups: PopupController;
   private callback: ((code: string, language: string) => void) | null = null;
-  private language = 'plaintext';
+  private language = '';
   private code = '';
+  private source: SourceEditorHandle | null = null;
 
   constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
     this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
   }
 
-  private languagePicker(): ViewSpec {
-    const t = (k: string) => this.editor.t(k) || k;
-    return foreign((host, scope) => {
-      let filter = '';
-      let listEl: HTMLElement | null = null;
-
-      const paint = () => {
-        if (!listEl) {
-          return;
-        }
-        const q = filter.trim().toLowerCase();
-        for (const btn of listEl.querySelectorAll<HTMLButtonElement>('.language-option')) {
-          const lang = btn.dataset.lang ?? '';
-          const hidden = q.length > 0 && !lang.includes(q);
-          const active = lang === this.language;
-          btn.dataset.hidden = hidden ? 'true' : 'false';
-          btn.classList.toggle('is-active', active);
-          btn.setAttribute('aria-selected', active ? 'true' : 'false');
-        }
-      };
-
-      const handle = mount(
-        host,
-        h('div', { class: 'language-selector' }, [
-          h('div', { class: 'language-search' }, [
-            h('input', {
-              class: 'search-input',
-              attrs: {
-                type: 'search',
-                placeholder: t('Search languages…'),
-                'aria-label': t('Search languages'),
-              },
-              on: {
-                input: (e) => {
-                  const el = e.target;
-                  filter = el instanceof HTMLInputElement ? el.value : '';
-                  paint();
-                },
-              },
-            }),
-          ]),
-          h(
-            'div',
-            {
-              class: 'language-list',
-              attrs: { role: 'listbox', 'aria-label': t('common.language') },
-            },
-            SUPPORTED_LANGUAGES.map((lang) =>
-              h(
-                'button',
-                {
-                  class: 'language-option',
-                  attrs: {
-                    type: 'button',
-                    role: 'option',
-                    'data-lang': lang,
-                    'aria-selected': lang === this.language ? 'true' : 'false',
-                  },
-                  on: {
-                    click: () => {
-                      this.language = lang;
-                      paint();
-                    },
-                  },
-                },
-                lang
-              )
-            )
-          ),
-        ])
-      );
-      scope.own(handle);
-      listEl = host.querySelector('.language-list');
-      paint();
-    });
-  }
-
   private open(initialCode: string, initialLanguage: string): void {
-    this.language = initialLanguage || 'plaintext';
+    this.language = initialLanguage;
     this.code = initialCode;
     const t = (k: string) => this.editor.t(k) || k;
     this.popups.open({
@@ -108,25 +33,38 @@ export class CodeBlockModal {
             h('div', { class: 'code-block-modal__body' }, [
               h('div', { class: 'code-block-modal__main' }, [
                 h('label', { class: 'code-block-modal__label' }, t('Code')),
-                h('textarea', {
-                  class: 'code-block-modal__code',
-                  attrs: {
-                    id: 'code',
-                    placeholder: t('common.enterYourCodeHere'),
-                    rows: '14',
-                  },
-                  props: { value: this.code },
-                  on: {
-                    input: (e) => {
-                      const el = e.target;
-                      this.code = el instanceof HTMLTextAreaElement ? el.value : '';
+                foreign((host, scope) => {
+                  host.className = 'code-block-modal__editor';
+                  this.source?.destroy();
+                  this.source = mountSourceEditor(host, {
+                    initialText: this.code,
+                    onDocChanged: () => {
+                      this.code = this.source?.getText() ?? '';
                     },
-                  },
+                  });
+                  scope.disposable(() => {
+                    this.source?.destroy();
+                    this.source = null;
+                  });
                 }),
               ]),
               h('div', { class: 'code-block-modal__side' }, [
-                h('div', { class: 'code-block-modal__label' }, t('common.language')),
-                this.languagePicker(),
+                h('label', { class: 'code-block-modal__label' }, t('common.language')),
+                h('input', {
+                  class: 'code-block-modal__lang',
+                  attrs: {
+                    type: 'text',
+                    placeholder: 'metadata only (e.g. js, python)',
+                    'aria-label': t('common.language'),
+                  },
+                  props: { value: this.language },
+                  on: {
+                    input: (e) => {
+                      const el = e.target;
+                      this.language = el instanceof HTMLInputElement ? el.value : '';
+                    },
+                  },
+                }),
               ]),
             ]),
         },
@@ -152,15 +90,15 @@ export class CodeBlockModal {
     if (!this.callback) {
       return;
     }
-    const language = this.language || 'plaintext';
-    this.callback(this.code, language);
+    this.code = this.source?.getText() ?? this.code;
+    this.callback(this.code, this.language.trim());
     this.popups.close();
   }
 
   public show(
     callback: (code: string, language: string) => void,
     initialCode = '',
-    initialLanguage = 'plaintext'
+    initialLanguage = ''
   ): void {
     this.callback = callback;
     this.open(initialCode, initialLanguage);

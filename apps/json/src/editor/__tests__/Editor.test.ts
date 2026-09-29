@@ -85,7 +85,8 @@ describe('json Editor entry', () => {
     expect(discard).toBeTruthy();
     discard.click();
     expect(editor.host.textContent).toContain('SoT synced');
-    expect(editor.host.querySelector('.cm-editor')).toBeTruthy();
+    expect(editor.getText()).toContain('"a"');
+    expect(editor.contentElement()?.getAttribute('data-ocm-json-mode')).toBe('raw');
   });
 
   it('renameKey same key is no-op', () => {

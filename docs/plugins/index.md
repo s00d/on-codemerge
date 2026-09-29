@@ -54,7 +54,7 @@ Toolbar overflow menus (`insert` / `review` / `tools`) are registered by **`Edit
 
 | Plugin              | Description                                                                    | Docs                              |
 | ------------------- | ------------------------------------------------------------------------------ | --------------------------------- |
-| **CodeBlockPlugin** | Syntax-highlighted code blocks.                                                | [Details](./code-block-plugin.md) |
+| **CodeBlockPlugin** | Code embed atom (WYSIWYG) / source workspace (`on-codemerge/code`).            | [Details](./code-block-plugin.md) |
 | **JsonPlugin**      | JSON embed atom (WYSIWYG) / Tree+Raw workspace (`on-codemerge/json`).          | [Details](./json-plugin.md)       |
 | **MarkdownPlugin**  | Markdown embed atom (WYSIWYG) / dual-pane workspace (`on-codemerge/markdown`). | [Details](./markdown-plugin.md)   |
 
@@ -79,14 +79,14 @@ Toolbar overflow menus (`insert` / `review` / `tools`) are registered by **`Edit
 
 ### Utility
 
-| Plugin                 | Description                                | Docs                                 |
-| ---------------------- | ------------------------------------------ | ------------------------------------ |
-| **HistoryPlugin**      | Undo / redo.                               | [Details](./history-plugin.md)       |
-| **ExportPlugin**       | Export (HTML, PDF, …).                     | [Details](./export-plugin.md)        |
-| **ShortcutsPlugin**    | Keyboard shortcuts UI.                     | [Details](./shortcuts-plugin.md)     |
-| **ResponsivePlugin**   | Responsive layout helpers.                 | [Details](./responsive-plugin.md)    |
-| **LanguagePlugin**     | Locale picker UI.                          | [Details](./language-plugin.md)      |
-| **SpellCheckerPlugin** | Spell-check (Typo.js + your dictionaries). | [Details](./spell-checker-plugin.md) |
+| Plugin                 | Description                                          | Docs                                 |
+| ---------------------- | ---------------------------------------------------- | ------------------------------------ |
+| **HistoryPlugin**      | Undo / redo.                                         | [Details](./history-plugin.md)       |
+| **ExportPlugin**       | Export (HTML, PDF, …).                               | [Details](./export-plugin.md)        |
+| **ShortcutsPlugin**    | Keyboard shortcuts UI.                               | [Details](./shortcuts-plugin.md)     |
+| **ResponsivePlugin**   | Responsive layout helpers.                           | [Details](./responsive-plugin.md)    |
+| **LanguagePlugin**     | Locale picker UI.                                    | [Details](./language-plugin.md)      |
+| **SpellCheckerPlugin** | Spell-check (in-house Hunspell + your dictionaries). | [Details](./spell-checker-plugin.md) |
 
 ### AI and advanced
 

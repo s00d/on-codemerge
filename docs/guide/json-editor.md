@@ -78,7 +78,7 @@ JsonPlugin({
   toolbar?: { menus?: …; items?: … },
   features?: {
     toolbar?: boolean; // Insert embed (atom only)
-    rawPane?: boolean; // Raw CodeMirror pane (workspace)
+    rawPane?: boolean; // Raw source editor pane (workspace)
     treeChrome?: boolean; // tree context menu (workspace)
     historyChrome?: boolean; // include HistoryChromePlugin in createDefaultPlugins
     shortcuts?: boolean; // shortcuts popup + Mod-/

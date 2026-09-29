@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       on-codemerge:
-        specifier: file:..
-        version: file:..
+        specifier: 2.1.2
+        version: 2.1.2
     devDependencies:
       '@playwright/test':
         specifier: ^1.63.0
@@ -837,8 +837,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  on-codemerge@file:..:
-    resolution: {directory: .., type: directory}
+  on-codemerge@2.1.2:
+    resolution: {integrity: sha512-Uh8/qkgEmj6GQrXbrlcdS0h/+90UTlJ8dKUGnhXUth3dK6N9pv9HgO3ZgpVzwgSz/mGM16hw8QSJ9TqSOA99FQ==}
     engines: {node: '>=20'}
 
   package-manager-detector@1.8.0:
@@ -1854,7 +1854,7 @@ snapshots:
 
   nanoid@3.3.19: {}
 
-  on-codemerge@file:..:
+  on-codemerge@2.1.2:
     dependencies:
       '@codemirror/commands': 6.11.1
       '@codemirror/lang-json': 6.0.2

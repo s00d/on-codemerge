@@ -20,6 +20,7 @@
     "paths": {
       "@on-codemerge/editor": ["./packages/editor/src/index.ts"],
       "@on-codemerge/editor/*": ["./packages/editor/src/*"],
+      "@on-codemerge/hunspell": ["./packages/hunspell/src/index.ts"],
       "@on-codemerge/kernel": ["./packages/kernel/src/index.ts"],
       "@on-codemerge/sdk": ["./packages/sdk/src/index.ts"],
       "@on-codemerge/sdk/*": ["./packages/sdk/src/*"],
@@ -33,10 +34,12 @@
     "apps/wysiwyg/src",
     "apps/json/src",
     "apps/markdown/src",
+    "apps/code/src",
     "plugins",
     "packages/kernel/src",
     "packages/sdk/src",
-    "packages/editor/src"
+    "packages/editor/src",
+    "packages/hunspell/src"
   ],
   "exclude": [
     "**/__tests__/**",
@@ -46,6 +49,7 @@
     "apps/wysiwyg/src/core/**",
     "apps/wysiwyg/src/main.ts",
     "apps/json/src/main.ts",
-    "apps/markdown/src/main.ts"
+    "apps/markdown/src/main.ts",
+    "apps/code/src/main.ts"
   ]
 }

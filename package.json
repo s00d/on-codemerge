@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "2.1.2",
+  "version": "2.2.0",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
   "keywords": [
     "JavaScript",
@@ -96,6 +96,16 @@
         "default": "./dist/markdown.cjs"
       }
     },
+    "./code": {
+      "import": {
+        "types": "./dist/code.d.ts",
+        "default": "./dist/code.mjs"
+      },
+      "require": {
+        "types": "./dist/code.d.cts",
+        "default": "./dist/code.cjs"
+      }
+    },
     "./index.css": "./dist/index.css",
     "./public.css": "./dist/public.css",
     "./public.js": "./dist/public.js",
@@ -106,24 +116,28 @@
   },
   "scripts": {
     "release": "pnpm publish -r",
-    "prepublishOnly": "pnpm run check && pnpm run build && pnpm run check:json-export && pnpm run check:json-types && pnpm run check:markdown-export && pnpm run check:markdown-types && pnpm run build:json && pnpm run build:markdown && pnpm run publint",
+    "prepublishOnly": "pnpm run check && pnpm run build && pnpm run check:json-export && pnpm run check:json-types && pnpm run check:markdown-export && pnpm run check:markdown-types && pnpm run check:code-export && pnpm run check:code-types && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run publint",
     "check:json-export": "node ./scripts/check-json-export.mjs",
     "check:json-types": "node ./scripts/check-json-types.mjs",
     "check:markdown-export": "node ./scripts/check-markdown-export.mjs",
     "check:markdown-types": "node ./scripts/check-markdown-types.mjs",
+    "check:code-export": "node ./scripts/check-code-export.mjs",
+    "check:code-types": "node ./scripts/check-code-types.mjs",
     "dev": "vite",
     "dev:json": "vite --config vite.json.config.ts",
     "dev:markdown": "vite --config vite.markdown.config.ts",
+    "dev:code": "vite --config vite.code.config.ts",
     "build": "vite build && vite build --config vite.public.config.ts",
     "build:json": "vite build --config vite.json.config.ts",
     "build:markdown": "vite build --config vite.markdown.config.ts",
+    "build:code": "vite build --config vite.code.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs",
     "lint:fix": "oxlint --type-aware --fix .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "check": "oxfmt --check . && oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs && node ./scripts/check-locales.js && pnpm run typecheck",
+    "check": "oxfmt --check . && oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs && node ./scripts/check-locales.js && node ./scripts/check-hunspell-license.mjs && pnpm run typecheck",
     "check:locales": "node ./scripts/check-locales.js",
     "publint": "publint --strict",
     "test": "vitest run --config vitest.unit.config.ts && vitest run --config vitest.e2e.config.ts",
@@ -136,23 +150,15 @@
     "test:perf": "untestutils perf --config ./perf.config.ts"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.11.1",
-    "@codemirror/lang-json": "^6.0.2",
-    "@codemirror/lang-markdown": "^6.5.0",
-    "@codemirror/language": "^6.12.4",
-    "@codemirror/lint": "^6.9.7",
-    "@codemirror/state": "^6.7.6",
-    "@codemirror/view": "^6.43.13",
     "@i18n-micro/runtime": "^1.0.0",
-    "codemirror": "^6.0.2",
     "dompurify": "^3.4.15",
     "mermaid": "^11",
     "tailwind-merge": "^3.7.0",
-    "tailwind-variants": "^3.3.1",
-    "typo-js": "^1.3.2"
+    "tailwind-variants": "^3.3.1"
   },
   "devDependencies": {
     "@on-codemerge/editor": "workspace:*",
+    "@on-codemerge/hunspell": "workspace:*",
     "@on-codemerge/kernel": "workspace:*",
     "@on-codemerge/sdk": "workspace:*",
     "@on-codemerge/wysiwyg": "workspace:*",
@@ -162,7 +168,6 @@
     "@tailwindcss/vite": "^4.3.3",
     "@types/dompurify": "^3.2.0",
     "@types/node": "^22.15.34",
-    "@types/typo-js": "^1.2.2",
     "@untestutils/perf": "^0.6.11",
     "@untestutils/vite": "^0.6.11",
     "@vitest/coverage-v8": "^5.0.1",

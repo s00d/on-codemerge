@@ -9,6 +9,7 @@ import { CalendarPlugin } from './CalendarPlugin';
 import { ChartsPlugin } from './ChartsPlugin';
 import { ClearStylesPlugin } from './ClearStylesPlugin';
 import { CodeBlockPlugin } from './CodeBlockPlugin';
+import type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from './CodeBlockPlugin';
 import { CollaborationPlugin, createOpsCollabBinding } from './CollaborationPlugin';
 import { ColorPlugin } from './ColorPlugin';
 import { CommentsPlugin } from './CommentsPlugin';
@@ -91,6 +92,7 @@ export {
 
 export type { JsonPluginOptions, JsonPluginFeatures };
 export type { MarkdownPluginOptions, MarkdownPluginFeatures };
+export type { CodeBlockPluginOptions, CodeBlockPluginFeatures };
 export type { SpellCheckerOptions, SpellDictionaryFiles } from './SpellCheckerPlugin';
 
 /** Full default plugin set (toolbar panel is core-owned; plugins register buttons). */

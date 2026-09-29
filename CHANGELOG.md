@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.2.0] - 2026-09-29
+
+### Added
+
+- **Code Editor** surface: `apps/code` → public entry `on-codemerge/code` (+ docs Guide / plugin demos)
+- **Source contour** in `@on-codemerge/editor`: `mountSourceEditor`, shared lexer/highlight (`highlightHtml` / `lex`) — used by CodeBlock, Json raw, Markdown source
+- **In-house Hunspell** (`@on-codemerge/hunspell`): typed `.aff`/`.dic` engine (`createDictionary` → `check` / `suggest`); replaces `typo-js`
+- CodeBlock dual-surface (`atom` + `workspace`), IO adapters, chrome toolbar
+- Markdown dual-pane: draggable middle gutter + coalesced preview / mermaid salvage
+- SpellChecker: typographic apostrophe normalize, locale reload while enabled, Cyrillic-aware suggest alphabet from `.aff` `TRY`
+- Source-editor e2e stand + screenshots / stress specs
+
+### Changed
+
+- SpellCheckerPlugin loads dictionaries via `@on-codemerge/hunspell` (dictionaries still not bundled — pass URL options)
+- Removed runtime deps: `typo-js`, CodeMirror packages (source editing is in-house)
+- `prepublishOnly` / check gates include `on-codemerge/code` export + hunspell NOTICE attribution (`dist/THIRD_PARTY_NOTICES.txt`)
+
+### Fixed
+
+- Code workspace status counts without banned `textContent` assignment
+- Markdown preview lag with many lines (hash + deferred mermaid hydrate)
+
 ## [2.1.2] - 2026-09-28
 
 ### Fixed
