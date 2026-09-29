@@ -150,7 +150,7 @@
         <p>
           Smoke-tests the package entry points:
           <code>on-codemerge</code>, <code>on-codemerge/json</code>,
-          <code>on-codemerge/markdown</code>.
+          <code>on-codemerge/markdown</code>, <code>on-codemerge/code</code>.
         </p>
         <div class="meta">
           <span id="pkg-version">version: …</span>
@@ -168,6 +168,7 @@
         </button>
         <button type="button" data-mode="json" data-testid="mode-json">JSON</button>
         <button type="button" data-mode="markdown" data-testid="mode-markdown">Markdown</button>
+        <button type="button" data-mode="code" data-testid="mode-code">Code</button>
       </div>
 
       <div class="card">
@@ -211,6 +212,16 @@
             Published preview
           </button>
           <button type="button" id="btn-clear-md" data-testid="btn-clear-md">Clear</button>
+        </div>
+
+        <div class="actions" data-actions="code" data-testid="actions-code" hidden>
+          <button type="button" class="primary" id="btn-code-text" data-testid="btn-code-text">
+            Show text
+          </button>
+          <button type="button" id="btn-code-sample" data-testid="btn-code-sample">
+            Load sample code
+          </button>
+          <button type="button" id="btn-clear-code" data-testid="btn-clear-code">Clear</button>
         </div>
       </div>
 

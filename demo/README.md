@@ -1,6 +1,6 @@
 # on-codemerge demo
 
-Stand against the **published** npm package: three modes — **WYSIWYG** (`on-codemerge`), **JSON** (`on-codemerge/json`), **Markdown** (`on-codemerge/markdown`).
+Stand against the **published** npm package: four modes — **WYSIWYG** (`on-codemerge`), **JSON** (`on-codemerge/json`), **Markdown** (`on-codemerge/markdown`), **Code** (`on-codemerge/code`).
 
 ## From npm (primary)
 

@@ -9,14 +9,19 @@ import {
   createDefaultPlugins as createMdPlugins,
   Editor as MarkdownEditor,
 } from 'on-codemerge/markdown';
+import {
+  createDefaultPlugins as createCodePlugins,
+  Editor as CodeEditor,
+  emptyEditorDoc,
+} from 'on-codemerge/code';
 import 'on-codemerge/index.css';
 import 'on-codemerge/tailwind.css';
 import 'on-codemerge/public.css';
 import publicCssUrl from 'on-codemerge/public.css?url';
 import publicJsUrl from 'on-codemerge/public.js?url';
 
-type Mode = 'wysiwyg' | 'json' | 'markdown';
-type AnyEditor = WysiwygEditor | JsonEditor | MarkdownEditor;
+type Mode = 'wysiwyg' | 'json' | 'markdown' | 'code';
+type AnyEditor = WysiwygEditor | JsonEditor | MarkdownEditor | CodeEditor;
 
 const errorsEl = document.querySelector('#errors');
 const outputEl = document.querySelector('#output');
@@ -100,15 +105,28 @@ Use the toolbar for callouts and blocks.
 :::
 `;
 
+const SAMPLE_CODE = `// Code editor demo
+const greet = (name) => {
+  return \`hello, \${name}\`;
+};
+
+greet('on-codemerge');
+`;
+
 document.addEventListener('DOMContentLoaded', () => {
   const apiOk =
     typeof WysiwygEditor === 'function' &&
     typeof JsonEditor === 'function' &&
     typeof MarkdownEditor === 'function' &&
+    typeof CodeEditor === 'function' &&
     typeof createWysiwygPlugins === 'function' &&
     typeof createJsonPlugins === 'function' &&
-    typeof createMdPlugins === 'function';
-  setText(exportsOkEl, apiOk ? 'exports: Editor/plugins OK (wysiwyg+json+md)' : 'exports: BROKEN');
+    typeof createMdPlugins === 'function' &&
+    typeof createCodePlugins === 'function';
+  setText(
+    exportsOkEl,
+    apiOk ? 'exports: Editor/plugins OK (wysiwyg+json+md+code)' : 'exports: BROKEN'
+  );
   setText(versionEl, 'version: on-codemerge');
   probeCss();
 
@@ -140,7 +158,7 @@ document.addEventListener('DOMContentLoaded', () => {
       el.hidden = el.dataset.actions !== active;
     }
     if (publishCard instanceof HTMLElement) {
-      publishCard.hidden = active === 'json';
+      publishCard.hidden = active === 'json' || active === 'code';
     }
   };
 
@@ -180,6 +198,10 @@ document.addEventListener('DOMContentLoaded', () => {
       show('Text (JSON)', editor.getText());
       return;
     }
+    if (editor instanceof CodeEditor) {
+      show('Text (Code)', editor.getText());
+      return;
+    }
     show('Text (Markdown)', editor.getText());
     refreshPublish();
   };
@@ -213,7 +235,7 @@ document.addEventListener('DOMContentLoaded', () => {
           ed.notify(err.message);
         }
         editor = ed;
-      } else {
+      } else if (mode === 'markdown') {
         const ed = new MarkdownEditor(host, {
           chrome: 'bar',
           history: { maxDepth: 100, mergeWindowMs: 500 },
@@ -224,6 +246,13 @@ document.addEventListener('DOMContentLoaded', () => {
           ed.notify(err.message);
         }
         editor = ed;
+      } else {
+        editor = new CodeEditor(host, {
+          chrome: 'bar',
+          history: { maxDepth: 100, mergeWindowMs: 500 },
+          plugins: createCodePlugins(),
+          doc: emptyEditorDoc(SAMPLE_CODE, 'javascript'),
+        });
       }
     } catch (err) {
       reportError(err);
@@ -240,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
   for (const btn of document.querySelectorAll<HTMLButtonElement>('[data-mode]')) {
     btn.addEventListener('click', () => {
       const next = btn.dataset.mode;
-      if (next === 'wysiwyg' || next === 'json' || next === 'markdown') {
+      if (next === 'wysiwyg' || next === 'json' || next === 'markdown' || next === 'code') {
         mount(next);
       }
     });
@@ -329,6 +358,24 @@ document.addEventListener('DOMContentLoaded', () => {
   });
   document.querySelector('#btn-clear-md')?.addEventListener('click', () => {
     if (editor instanceof MarkdownEditor) {
+      editor.setText('');
+    }
+  });
+  document.querySelector('#btn-code-text')?.addEventListener('click', () => {
+    if (editor instanceof CodeEditor) {
+      show('Text (Code)', editor.getText());
+    }
+  });
+  document.querySelector('#btn-code-sample')?.addEventListener('click', () => {
+    if (editor instanceof CodeEditor) {
+      const err = editor.setText(SAMPLE_CODE);
+      if (err) {
+        editor.notify(err.message);
+      }
+    }
+  });
+  document.querySelector('#btn-clear-code')?.addEventListener('click', () => {
+    if (editor instanceof CodeEditor) {
       editor.setText('');
     }
   });

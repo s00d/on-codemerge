@@ -64,6 +64,18 @@ test.describe('npm demo stand', () => {
     await page.getByTestId('btn-md-text').click();
     await expect(page.getByTestId('output')).toContainText('Markdown editor');
 
+    await page.getByTestId('mode-code').click();
+    await expect(page.locator('#mode-label')).toContainText('code');
+    await expect(page.getByTestId('actions-code')).toBeVisible();
+    await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('output')).toContainText('Code editor demo');
+    await expect(page.locator('.ocm-source-editor .token.comment').first()).toBeVisible({
+      timeout: 10_000,
+    });
+    await page.getByTestId('btn-code-sample').click();
+    await expect(page.getByTestId('output')).toContainText('greet');
+    await expect(page.locator('.ocm-source-editor .token.string').first()).toBeVisible();
+
     expect(pageErrors, `page errors: ${pageErrors.join('\n')}`).toEqual([]);
     await expect(page.locator('#errors')).toBeEmpty();
   });
