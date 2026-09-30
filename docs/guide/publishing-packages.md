@@ -25,7 +25,12 @@ Or the orchestrated script (same filters):
 pnpm run release
 ```
 
-(`prepublishOnly` on the root package runs `build:packages` + full check/build/publint.)
+(`check` builds scoped packages and runs `publint --strict` on each. Full product `publint` including root `dist/` is `pnpm run publint` / `prepublishOnly`.)
+
+## Workspace deps
+
+- Internal packages: `workspace:^` (not `workspace:*`)
+- Shared third-party versions: pnpm `catalog:` in [`pnpm-workspace.yaml`](../../pnpm-workspace.yaml)
 
 ## Consumer guidance
 

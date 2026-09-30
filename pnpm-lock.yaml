@@ -4,223 +4,331 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+catalogs:
+  default:
+    '@i18n-micro/runtime':
+      specifier: ^1.0.0
+      version: 1.0.0
+    '@playwright/test':
+      specifier: ^1.63.0
+      version: 1.63.0
+    '@tailwindcss/postcss':
+      specifier: ^4.3.3
+      version: 4.3.3
+    '@tailwindcss/typography':
+      specifier: ^0.5.20
+      version: 0.5.20
+    '@tailwindcss/vite':
+      specifier: ^4.3.3
+      version: 4.3.3
+    '@types/dompurify':
+      specifier: ^3.2.0
+      version: 3.2.0
+    '@types/node':
+      specifier: ^22.15.34
+      version: 22.15.34
+    '@untestutils/perf':
+      specifier: ^0.6.11
+      version: 0.6.11
+    '@untestutils/vite':
+      specifier: ^0.6.11
+      version: 0.6.11
+    '@vitest/coverage-v8':
+      specifier: ^5.0.1
+      version: 5.0.1
+    dictionary-en:
+      specifier: ^4.0.0
+      version: 4.0.0
+    dompurify:
+      specifier: ^3.4.15
+      version: 3.4.15
+    jsdom:
+      specifier: ^30.1.1
+      version: 30.1.1
+    mermaid:
+      specifier: ^11
+      version: 11.17.2
+    oxfmt:
+      specifier: ^0.70.0
+      version: 0.70.0
+    oxlint:
+      specifier: ^1.85.0
+      version: 1.85.0
+    oxlint-tsgolint:
+      specifier: ^7.0.2002
+      version: 7.0.2002
+    postcss:
+      specifier: ^8.5.28
+      version: 8.5.28
+    publint:
+      specifier: ^0.3.24
+      version: 0.3.24
+    sass:
+      specifier: ^1.104.1
+      version: 1.104.1
+    tailwind-merge:
+      specifier: ^3.7.0
+      version: 3.7.0
+    tailwind-variants:
+      specifier: ^3.3.1
+      version: 3.3.1
+    tailwindcss:
+      specifier: ^4.3.3
+      version: 4.3.3
+    tsup:
+      specifier: ^8.5.1
+      version: 8.5.1
+    tsx:
+      specifier: ^4.23.15
+      version: 4.23.15
+    typescript:
+      specifier: ~6.0.3
+      version: 6.0.3
+    untestutils:
+      specifier: ^0.6.11
+      version: 0.6.11
+    vite:
+      specifier: ^8.3.0
+      version: 8.3.0
+    vite-plugin-banner:
+      specifier: ^0.8.1
+      version: 0.8.1
+    vite-plugin-dts:
+      specifier: ^5.1.1
+      version: 5.1.1
+    vite-svg-loader:
+      specifier: ^5.1.3
+      version: 5.1.3
+    vitepress:
+      specifier: 2.0.0-alpha.20
+      version: 2.0.0-alpha.20
+    vitest:
+      specifier: ^5.0.1
+      version: 5.0.1
+    vue:
+      specifier: ^3.5.43
+      version: 3.5.43
+    ws:
+      specifier: ^8.12.0
+      version: 8.22.0
+
 importers:
 
   .:
     dependencies:
       '@i18n-micro/runtime':
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0
       dompurify:
-        specifier: ^3.4.15
+        specifier: 'catalog:'
         version: 3.4.15
       mermaid:
-        specifier: ^11
+        specifier: 'catalog:'
         version: 11.17.2
       tailwind-merge:
-        specifier: ^3.7.0
+        specifier: 'catalog:'
         version: 3.7.0
       tailwind-variants:
-        specifier: ^3.3.1
+        specifier: 'catalog:'
         version: 3.3.1(tailwind-merge@3.7.0)(tailwindcss@4.3.3)
     devDependencies:
       '@codemerge/editor':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:packages/editor
       '@codemerge/hunspell':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:packages/hunspell
       '@codemerge/kernel':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:packages/kernel
       '@codemerge/sdk':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:packages/sdk
       '@codemerge/wysiwyg':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:apps/wysiwyg
       '@playwright/test':
-        specifier: ^1.63.0
+        specifier: 'catalog:'
         version: 1.63.0
       '@tailwindcss/postcss':
-        specifier: ^4.3.3
+        specifier: 'catalog:'
         version: 4.3.3
       '@tailwindcss/typography':
-        specifier: ^0.5.20
+        specifier: 'catalog:'
         version: 0.5.20(tailwindcss@4.3.3)
       '@tailwindcss/vite':
-        specifier: ^4.3.3
+        specifier: 'catalog:'
         version: 4.3.3(vite@8.3.0(@types/node@22.15.34)(esbuild@0.27.7)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(tsx@4.23.15)(yaml@2.6.1))
       '@types/dompurify':
-        specifier: ^3.2.0
+        specifier: 'catalog:'
         version: 3.2.0
       '@types/node':
-        specifier: ^22.15.34
+        specifier: 'catalog:'
         version: 22.15.34
       '@untestutils/perf':
-        specifier: ^0.6.11
+        specifier: 'catalog:'
         version: 0.6.11
       '@untestutils/vite':
-        specifier: ^0.6.11
+        specifier: 'catalog:'
         version: 0.6.11(vite@8.3.0(@types/node@22.15.34)(esbuild@0.27.7)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(tsx@4.23.15)(yaml@2.6.1))
       '@vitest/coverage-v8':
-        specifier: ^5.0.1
+        specifier: 'catalog:'
         version: 5.0.1(vitest@5.0.1)
       dictionary-en:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.0.0
       jsdom:
-        specifier: ^30.1.1
+        specifier: 'catalog:'
         version: 30.1.1
       oxfmt:
-        specifier: ^0.70.0
+        specifier: 'catalog:'
         version: 0.70.0
       oxlint:
-        specifier: ^1.85.0
+        specifier: 'catalog:'
         version: 1.85.0(oxlint-tsgolint@7.0.2002)
       oxlint-tsgolint:
-        specifier: ^7.0.2002
+        specifier: 'catalog:'
         version: 7.0.2002
       postcss:
-        specifier: ^8.5.28
+        specifier: 'catalog:'
         version: 8.5.28
       publint:
-        specifier: ^0.3.24
+        specifier: 'catalog:'
         version: 0.3.24
       sass:
-        specifier: ^1.104.1
+        specifier: 'catalog:'
         version: 1.104.1
       tailwindcss:
-        specifier: ^4.3.3
+        specifier: 'catalog:'
         version: 4.3.3
       tsup:
-        specifier: ^8.5.1
+        specifier: 'catalog:'
         version: 8.5.1(@microsoft/api-extractor@7.52.8(@types/node@22.15.34))(jiti@2.7.0)(postcss@8.5.28)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.6.1)
       tsx:
-        specifier: ^4.23.15
+        specifier: 'catalog:'
         version: 4.23.15
       typescript:
-        specifier: ~6.0.3
+        specifier: 'catalog:'
         version: 6.0.3
       untestutils:
-        specifier: ^0.6.11
+        specifier: 'catalog:'
         version: 0.6.11(@playwright/test@1.63.0)(@untestutils/ai@0.6.11(playwright-core@1.63.0))(@untestutils/perf@0.6.11)(@untestutils/vite@0.6.11(vite@8.3.0(@types/node@22.15.34)(esbuild@0.27.7)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(tsx@4.23.15)(yaml@2.6.1)))(playwright-core@1.63.0)(vitest@5.0.1)
       vite:
-        specifier: ^8.3.0
+        specifier: 'catalog:'
         version: 8.3.0(@types/node@22.15.34)(esbuild@0.27.7)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(tsx@4.23.15)(yaml@2.6.1)
       vite-plugin-banner:
-        specifier: ^0.8.1
+        specifier: 'catalog:'
         version: 0.8.1
       vite-plugin-dts:
-        specifier: ^5.1.1
+        specifier: 'catalog:'
         version: 5.1.1(@microsoft/api-extractor@7.52.8(@types/node@22.15.34))(esbuild@0.27.7)(rolldown@1.2.9)(rollup@4.44.1)(typescript@6.0.3)(vite@8.3.0(@types/node@22.15.34)(esbuild@0.27.7)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(tsx@4.23.15)(yaml@2.6.1))
       vite-svg-loader:
-        specifier: ^5.1.3
+        specifier: 'catalog:'
         version: 5.1.3(vue@3.5.43(typescript@6.0.3))
       vitepress:
-        specifier: 2.0.0-alpha.20
+        specifier: 'catalog:'
         version: 2.0.0-alpha.20(@types/node@22.15.34)(esbuild@0.27.7)(jiti@2.7.0)(less@4.9.1)(postcss@8.5.28)(sass-embedded@1.104.1)(sass@1.104.1)(tsx@4.23.15)(typescript@6.0.3)(yaml@2.6.1)
       vitest:
-        specifier: ^5.0.1
+        specifier: 'catalog:'
         version: 5.0.1(@types/node@22.15.34)(@vitest/coverage-v8@5.0.1)(jsdom@30.1.1)(vite@8.3.0(@types/node@22.15.34)(esbuild@0.27.7)(jiti@2.7.0)(less@4.9.1)(sass-embedded@1.104.1)(sass@1.104.1)(tsx@4.23.15)(yaml@2.6.1))
       vue:
-        specifier: ^3.5.43
+        specifier: 'catalog:'
         version: 3.5.43(typescript@6.0.3)
 
   apps/code:
     dependencies:
       '@codemerge/editor':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/editor
       '@codemerge/kernel':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/kernel
       '@codemerge/sdk':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/sdk
       '@i18n-micro/runtime':
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0
 
   apps/json:
     dependencies:
       '@codemerge/editor':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/editor
       '@codemerge/kernel':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/kernel
       '@codemerge/sdk':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/sdk
       '@i18n-micro/runtime':
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0
 
   apps/markdown:
     dependencies:
       '@codemerge/editor':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/editor
       '@codemerge/kernel':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/kernel
       '@codemerge/sdk':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/sdk
       '@i18n-micro/runtime':
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0
 
   apps/wysiwyg:
     dependencies:
       '@codemerge/editor':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/editor
       '@codemerge/hunspell':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/hunspell
       '@codemerge/kernel':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/kernel
       '@codemerge/sdk':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../../packages/sdk
       '@i18n-micro/runtime':
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0
       dompurify:
-        specifier: ^3.4.15
+        specifier: 'catalog:'
         version: 3.4.15
       tailwind-merge:
-        specifier: ^3.7.0
+        specifier: 'catalog:'
         version: 3.7.0
       tailwind-variants:
-        specifier: ^3.3.1
+        specifier: 'catalog:'
         version: 3.3.1(tailwind-merge@3.7.0)(tailwindcss@4.3.3)
 
   packages/collaboration-server:
     dependencies:
       ws:
-        specifier: ^8.12.0
+        specifier: 'catalog:'
         version: 8.22.0
 
   packages/editor:
     dependencies:
       '@codemerge/kernel':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../kernel
       '@codemerge/sdk':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../sdk
       '@i18n-micro/runtime':
-        specifier: ^1.0.0
+        specifier: 'catalog:'
         version: 1.0.0
 
   packages/hunspell:
     devDependencies:
       dictionary-en:
-        specifier: ^4.0.0
+        specifier: 'catalog:'
         version: 4.0.0
 
   packages/kernel: {}
@@ -228,13 +336,13 @@ importers:
   packages/sdk:
     dependencies:
       '@codemerge/kernel':
-        specifier: workspace:*
+        specifier: workspace:^
         version: link:../kernel
       tailwind-merge:
-        specifier: ^3.7.0
+        specifier: 'catalog:'
         version: 3.7.0
       tailwind-variants:
-        specifier: ^3.3.1
+        specifier: 'catalog:'
         version: 3.3.1(tailwind-merge@3.7.0)(tailwindcss@4.3.3)
 
 packages:
@@ -2151,15 +2259,6 @@ packages:
       supports-color:
         optional: true
 
-  debug@4.4.1:
-    resolution: {integrity: sha512-KcKCqiftBJcZr++7ykoDIEwSa3XWowTfNPo92BYxjXiyYEVrUQh2aLyhxBCwww+heortUFxEJYcRzosstTEBYQ==}
-    engines: {node: '>=6.0'}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
   debug@4.4.3:
     resolution: {integrity: sha512-RGwwWnwQvkVfavKVt22FGLw+xYSdzARwm0ru6DhTVA3umU5hZc28V3kO4stgYryrTlLpuvgI9GiijltAjNbcqA==}
     engines: {node: '>=6.0'}
@@ -3308,9 +3407,6 @@ packages:
     resolution: {integrity: sha512-y2TvuxSZPDyQakkFRPZHKFm+KKVqIisdg9/CZwm9ftvKXLP8NRWj38/ODjNbr43SsoXqNuAisEf1GdCxqWcdBw==}
     engines: {node: '>=14.17'}
     hasBin: true
-
-  ufo@1.5.4:
-    resolution: {integrity: sha512-UsUk3byDzKd04EyoZ7U4DOlxQaD14JUKQl6/P7wiX4FNvUfm3XL246n9W5AmqwW5RSFJ27NAuM0iLscAOYUiGQ==}
 
   ufo@1.6.4:
     resolution: {integrity: sha512-JFNbkD1Svwe0KvGi8GOeLcP4kAWQ609twvCdcHxq1oSL8svv39ZuSvajcD8B+5D0eL4+s1Is2D/O6KN3qcTeRA==}
@@ -5187,10 +5283,6 @@ snapshots:
       ms: 2.1.3
     optional: true
 
-  debug@4.4.1:
-    dependencies:
-      ms: 2.1.3
-
   debug@4.4.3:
     dependencies:
       ms: 2.1.3
@@ -5774,7 +5866,7 @@ snapshots:
       acorn: 8.15.0
       pathe: 2.0.3
       pkg-types: 1.3.0
-      ufo: 1.5.4
+      ufo: 1.6.4
 
   mri@1.2.0: {}
 
@@ -6403,8 +6495,6 @@ snapshots:
 
   typescript@6.0.3: {}
 
-  ufo@1.5.4: {}
-
   ufo@1.6.4: {}
 
   undici-types@6.21.0: {}
@@ -6532,7 +6622,7 @@ snapshots:
 
   vite-svg-loader@5.1.3(vue@3.5.43(typescript@6.0.3)):
     dependencies:
-      debug: 4.4.1
+      debug: 4.4.3
       svgo: 3.3.5
       vue: 3.5.43(typescript@6.0.3)
     transitivePeerDependencies:

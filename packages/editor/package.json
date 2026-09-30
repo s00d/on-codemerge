@@ -16,8 +16,8 @@
     "./sourceEditor/sourceEditor.scss": "./src/sourceEditor/sourceEditor.scss"
   },
   "dependencies": {
-    "@codemerge/kernel": "workspace:*",
-    "@codemerge/sdk": "workspace:*",
-    "@i18n-micro/runtime": "^1.0.0"
+    "@codemerge/kernel": "workspace:^",
+    "@codemerge/sdk": "workspace:^",
+    "@i18n-micro/runtime": "catalog:"
   }
 }

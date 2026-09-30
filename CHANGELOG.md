@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `@codemerge/collaboration-server` — demo WebSocket ops relay (`npx codemerge-collaboration-server`)
 - Workspace rename: `@on-codemerge/*` → `@codemerge/*` (internal only)
 - `pnpm run build:packages` + release filter order for scoped packages
+- pnpm **catalog** for shared dependency versions; internal links use `workspace:^`
+- `publint --strict` for every publishable package (`check` → scoped; `publint` / `prepublishOnly` → + root)
 
 ### Notes
 

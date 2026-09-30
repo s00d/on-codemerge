@@ -16,6 +16,7 @@
     "server.js",
     "README.md"
   ],
+  "type": "commonjs",
   "main": "./server.js",
   "publishConfig": {
     "access": "public"
@@ -23,10 +24,11 @@
   "scripts": {
     "start": "node server.js",
     "build": "node -e \"console.log('@codemerge/collaboration-server: no build (CJS server.js)')\"",
-    "prepublishOnly": "pnpm run build"
+    "publint": "publint --strict",
+    "prepublishOnly": "pnpm run build && pnpm run publint"
   },
   "dependencies": {
-    "ws": "^8.12.0"
+    "ws": "catalog:"
   },
   "engines": {
     "node": ">=18"

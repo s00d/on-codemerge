@@ -36,9 +36,13 @@
   },
   "scripts": {
     "build": "tsup --config tsup.config.ts && node ../../scripts/emit-d-cts.mjs dist/index.d.ts",
-    "prepublishOnly": "pnpm run build"
+    "publint": "publint --strict",
+    "prepublishOnly": "pnpm run build && pnpm run publint"
   },
   "devDependencies": {
-    "dictionary-en": "^4.0.0"
+    "dictionary-en": "catalog:"
+  },
+  "engines": {
+    "node": ">=20"
   }
 }
