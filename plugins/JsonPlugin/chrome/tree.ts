@@ -1,5 +1,5 @@
-import { getNodeAt } from '@on-codemerge/kernel';
-import type { EditorAPI, PluginContext } from '@on-codemerge/sdk';
+import { getNodeAt } from '@codemerge/kernel';
+import type { EditorAPI, PluginContext } from '@codemerge/sdk';
 import { JsonNodeMenu } from '../components/JsonNodeMenu';
 import type { JsonNodeMenuTarget } from '../components/JsonNodeMenu';
 

@@ -1,5 +1,5 @@
-import { foreign, h, img, mount } from '@on-codemerge/sdk';
-import type { ViewSpec } from '@on-codemerge/sdk';
+import { foreign, h, img, mount } from '@codemerge/sdk';
+import type { ViewSpec } from '@codemerge/sdk';
 import { clearIcon, deleteIcon, fileIcon, imageIcon, uploadIcon } from '@ocm/wysiwyg/icons';
 import type { MediaListItem } from '../services/mediaApi';
 

@@ -1,5 +1,5 @@
-import { h, mount } from '@on-codemerge/sdk';
-import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import { h, mount } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { ChartPoint } from '../types';
 import { toChartPoint } from '../utils/validation';
 import { getRandomColor } from '../utils/colors';

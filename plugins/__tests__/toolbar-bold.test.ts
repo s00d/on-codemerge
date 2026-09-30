@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { insertText } from '@on-codemerge/kernel';
+import { insertText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { ToolbarPlugin } from '../ToolbarPlugin';
 

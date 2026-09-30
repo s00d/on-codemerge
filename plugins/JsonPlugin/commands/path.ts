@@ -1,5 +1,5 @@
-import type { DocNode } from '@on-codemerge/kernel';
-import { getNodeAt } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
+import { getNodeAt } from '@codemerge/kernel';
 import { VALUE_TYPES } from './types';
 
 /** Decode a JSON value / property node to a plain JS value. */

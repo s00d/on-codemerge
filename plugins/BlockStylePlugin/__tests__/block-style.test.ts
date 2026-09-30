@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it, afterEach } from 'vitest';
-import { createDoc, createParagraph, createText } from '@on-codemerge/kernel';
-import { setBlockAttr } from '@on-codemerge/sdk';
+import { createDoc, createParagraph, createText } from '@codemerge/kernel';
+import { setBlockAttr } from '@codemerge/sdk';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { BlockStylePlugin } from '../index';
 import { ToolbarPlugin } from '../../ToolbarPlugin';

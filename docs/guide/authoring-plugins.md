@@ -1,6 +1,6 @@
 # Authoring plugins
 
-Plugins import the SDK via the published path **`on-codemerge/sdk`** (workspace may alias `@on-codemerge/sdk` to sources). App helpers under `src/utils` are **package-internal** — third-party plugins should use only the public SDK, not deep imports into that folder.
+Plugins import the SDK via the published path **`on-codemerge/sdk`** (workspace may alias `@codemerge/sdk` to sources). App helpers under `src/utils` are **package-internal** — third-party plugins should use only the public SDK, not deep imports into that folder.
 
 ```ts
 import { definePlugin, core, insertAtomAfter, setMarkAttrs } from 'on-codemerge/sdk';
@@ -27,13 +27,17 @@ export function MyPlugin() {
 
 `setup` receives a **`PluginContext`** (`ctx`), not the raw editor. Use `ctx.editor`, `ctx.toolbar`, `ctx.popup`, `ctx.menu`, `ctx.notify`, `ctx.on` / `ctx.onDom`, `ctx.own`, `ctx.scope`.
 
-## Workspaces
+## Workspaces / npm
 
-| Package               | Role                                                   |
-| --------------------- | ------------------------------------------------------ |
-| `on-codemerge/kernel` | Pure doc/ops model (workspace: `@on-codemerge/kernel`) |
-| `on-codemerge/sdk`    | `core.*`, `definePlugin`, UI services, command helpers |
-| `on-codemerge`        | Editor + plugins                                       |
+| Package                                     | Role                                                                   |
+| ------------------------------------------- | ---------------------------------------------------------------------- |
+| `on-codemerge`                              | Product Editor + plugins + CSS (prefer this for apps)                  |
+| `on-codemerge/sdk` / `@codemerge/sdk`       | `core.*`, `definePlugin`, UI services (compat subpath vs standalone)   |
+| `on-codemerge/kernel` / `@codemerge/kernel` | Pure doc/ops (plugins should use `core` from SDK, not kernel directly) |
+| `@codemerge/hunspell`                       | Spell engine without DOM                                               |
+| `@codemerge/collaboration-server`           | Demo ops WebSocket relay                                               |
+
+Do **not** mix `on-codemerge` and `@codemerge/sdk` in the same application bundle (two SDK instances). Use the product package alone, or the low-level packages alone for custom shells.
 
 ## Rules
 

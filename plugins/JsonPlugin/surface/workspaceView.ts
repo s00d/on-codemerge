@@ -1,8 +1,8 @@
-import type { Command, DocNode, EditorState, JSONDoc } from '@on-codemerge/kernel';
-import { collapsedAt, getNodeAt } from '@on-codemerge/kernel';
-import type { EditorAPI } from '@on-codemerge/sdk';
-import { foreign, h, mount } from '@on-codemerge/sdk';
-import type { MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import type { Command, DocNode, EditorState, JSONDoc } from '@codemerge/kernel';
+import { collapsedAt, getNodeAt } from '@codemerge/kernel';
+import type { EditorAPI } from '@codemerge/sdk';
+import { foreign, h, mount } from '@codemerge/sdk';
+import type { MountHandle, ViewSpec } from '@codemerge/sdk';
 import { indentFromDoc, serializeDoc } from '../io';
 import { parseText } from '../io/text';
 import {

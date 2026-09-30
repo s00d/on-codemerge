@@ -1,8 +1,8 @@
 import './style.scss';
 
-import type { Command } from '@on-codemerge/kernel';
-import { applyToolbarConfig, definePlugin, foreign, h, attrString } from '@on-codemerge/sdk';
-import type { PluginDefinition, PluginToolbarOpts, WidgetContext } from '@on-codemerge/sdk';
+import type { Command } from '@codemerge/kernel';
+import { applyToolbarConfig, definePlugin, foreign, h, attrString } from '@codemerge/sdk';
+import type { PluginDefinition, PluginToolbarOpts, WidgetContext } from '@codemerge/sdk';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import { defaultMdToolbar } from './chrome/defaultToolbar';

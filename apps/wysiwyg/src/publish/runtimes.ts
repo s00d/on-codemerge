@@ -1,6 +1,6 @@
 /** Register plugin publish runtimes (timer, calendar, …) without auto-booting the document. */
-import { publishRuntimes } from '@on-codemerge/sdk';
-import type { PublishRuntimeDefinition } from '@on-codemerge/sdk';
+import { publishRuntimes } from '@codemerge/sdk';
+import type { PublishRuntimeDefinition } from '@codemerge/sdk';
 
 const modules = import.meta.glob<{ runtime: PublishRuntimeDefinition }>(
   '../../../../plugins/*/publish/runtime.ts',

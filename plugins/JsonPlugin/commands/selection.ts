@@ -1,5 +1,5 @@
-import type { Command, DocNode, EditorState } from '@on-codemerge/kernel';
-import { getNodeAt } from '@on-codemerge/kernel';
+import type { Command, DocNode, EditorState } from '@codemerge/kernel';
+import { getNodeAt } from '@codemerge/kernel';
 import {
   changeType,
   deleteNode,

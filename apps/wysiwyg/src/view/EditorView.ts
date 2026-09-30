@@ -1,7 +1,7 @@
-import type { DocNode, Selection, EditorState } from '@on-codemerge/kernel';
-import { h, renderDetached, mount as mountView, DisposableScope } from '@on-codemerge/sdk';
-import type { MountHandle, WidgetDefinition, WidgetContext, EditorAPI } from '@on-codemerge/sdk';
-import { editorChromeTv } from '@on-codemerge/sdk/ui/chrome';
+import type { DocNode, Selection, EditorState } from '@codemerge/kernel';
+import { h, renderDetached, mount as mountView, DisposableScope } from '@codemerge/sdk';
+import type { MountHandle, WidgetDefinition, WidgetContext, EditorAPI } from '@codemerge/sdk';
+import { editorChromeTv } from '@codemerge/sdk/ui/chrome';
 import { docToHTML, escapeHTML } from '../io/html';
 import { asAttr } from '../utils/asAttr';
 import { replaceChildrenWithHtml } from '../utils/domHtml';

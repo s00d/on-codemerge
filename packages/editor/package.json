@@ -1,6 +1,6 @@
 {
-  "name": "@on-codemerge/editor",
-  "version": "2.3.0",
+  "name": "@codemerge/editor",
+  "version": "2.4.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -16,8 +16,8 @@
     "./sourceEditor/sourceEditor.scss": "./src/sourceEditor/sourceEditor.scss"
   },
   "dependencies": {
-    "@i18n-micro/runtime": "^1.0.0",
-    "@on-codemerge/kernel": "workspace:*",
-    "@on-codemerge/sdk": "workspace:*"
+    "@codemerge/kernel": "workspace:*",
+    "@codemerge/sdk": "workspace:*",
+    "@i18n-micro/runtime": "^1.0.0"
   }
 }

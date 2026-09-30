@@ -1,10 +1,10 @@
 import '@ocm/wysiwyg/tailwind.css';
-import '@on-codemerge/sdk/ui/sdk.scss';
+import '@codemerge/sdk/ui/sdk.scss';
 import '../../../plugins/JsonPlugin/style.scss';
 import '../../../plugins/MarkdownPlugin/style.scss';
 
-import { mountSourceEditor } from '@on-codemerge/editor';
-import type { SourceEditorHandle } from '@on-codemerge/editor';
+import { mountSourceEditor } from '@codemerge/editor';
+import type { SourceEditorHandle } from '@codemerge/editor';
 import { mountRawEditor } from '../../../plugins/JsonPlugin/widgets/rawEditor';
 import type { RawEditorHandle } from '../../../plugins/JsonPlugin/widgets/rawEditor';
 import { CORPUS } from './corpus';

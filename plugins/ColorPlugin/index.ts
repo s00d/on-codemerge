@@ -1,8 +1,8 @@
 import './style.scss';
 
-import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@on-codemerge/sdk';
-import type { EditorAPI } from '@on-codemerge/sdk';
-import type { Command, EditorState } from '@on-codemerge/kernel';
+import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
+import type { Command, EditorState } from '@codemerge/kernel';
 import { textColorIcon, backgroundColorIcon } from '@ocm/wysiwyg/icons';
 import { ColorWell } from '@ocm/wysiwyg/utils/ColorWell';
 

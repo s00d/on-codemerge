@@ -1,4 +1,4 @@
-import type { EditorAPI } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 
 const STORAGE_KEY = 'editor-language';
 

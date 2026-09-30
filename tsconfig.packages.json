@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2020",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "isolatedModules": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "strict": true,
+    "ignoreDeprecations": "6.0",
+    "paths": {
+      "@codemerge/kernel": ["./packages/kernel/src/index.ts"],
+      "@codemerge/kernel/*": ["./packages/kernel/src/*"]
+    }
+  },
+  "include": ["packages/kernel/src", "packages/sdk/src", "packages/hunspell/src"]
+}

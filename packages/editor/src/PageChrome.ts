@@ -1,5 +1,5 @@
-import { DisposableScope, getPortalRoot } from '@on-codemerge/sdk';
-import type { ToolbarAction, ToolbarPanel } from '@on-codemerge/sdk';
+import { DisposableScope, getPortalRoot } from '@codemerge/sdk';
+import type { ToolbarAction, ToolbarPanel } from '@codemerge/sdk';
 
 const PAD = 8;
 const OPEN_CLASS = 'is-page-open';

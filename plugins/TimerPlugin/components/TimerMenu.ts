@@ -1,5 +1,5 @@
-import { PopupController, foreign, h, pickFile } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, foreign, h, pickFile } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import type { TimerManager } from '../services/TimerManager';
 import type { Timer } from '../types';
 import { TimerForm } from './TimerForm';

@@ -4,8 +4,8 @@ import {
   neededRuntimeIds,
   publishedCssHref,
   publishedJsHref,
-} from '@on-codemerge/sdk';
-import type { EditorAPI } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 
 /**
  * Export formats from the live editor document.

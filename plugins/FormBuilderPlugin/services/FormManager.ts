@@ -1,7 +1,7 @@
 import type { FieldConfig, FormConfig, FieldType, FieldOptions } from '../types';
 import { isFieldType, parseFormHttpMethod } from '../types';
-import type { ViewSpec } from '@on-codemerge/sdk';
-import { h } from '@on-codemerge/sdk';
+import type { ViewSpec } from '@codemerge/sdk';
+import { h } from '@codemerge/sdk';
 import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';
 
 /** i18n surface for form labels (full EditorAPI or publish stub). */

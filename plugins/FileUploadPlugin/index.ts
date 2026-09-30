@@ -6,8 +6,8 @@ import {
   attrString,
   h,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { PluginToolbarOpts, ViewSpec } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { PluginToolbarOpts, ViewSpec } from '@codemerge/sdk';
 import { FileUploader } from './services/FileUploader';
 import { FileUploadMenu } from './components/FileUploadMenu';
 import type { UploadConfig } from './config/UploadConfig';

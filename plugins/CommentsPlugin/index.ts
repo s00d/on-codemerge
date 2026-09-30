@@ -1,12 +1,7 @@
 import './style.scss';
 
-import {
-  definePlugin,
-  withMarkTarget,
-  setMarkAttrs,
-  pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { PluginToolbarOpts } from '@on-codemerge/sdk';
+import { definePlugin, withMarkTarget, setMarkAttrs, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { CommentMenu } from './components/CommentMenu';
 import { commentIcon } from '@ocm/wysiwyg/icons';
 

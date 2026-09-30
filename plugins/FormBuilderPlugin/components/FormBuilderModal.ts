@@ -1,5 +1,5 @@
-import { PopupController, foreign, h, mount } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, foreign, h, mount } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { FieldConfig, FieldType, FormConfig } from '../types';
 import { parseFormHttpMethod } from '../types';
 import { FormManager } from '../services/FormManager';

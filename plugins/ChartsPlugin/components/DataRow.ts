@@ -1,5 +1,5 @@
-import { h } from '@on-codemerge/sdk';
-import type { EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { h } from '@codemerge/sdk';
+import type { EditorAPI, ViewSpec } from '@codemerge/sdk';
 import type { ChartPoint } from '../types';
 import { getRandomColor } from '../utils/colors';
 import { colorSwatchButton } from '@ocm/wysiwyg/utils/ColorWell';

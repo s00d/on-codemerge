@@ -2,12 +2,12 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it, afterEach } from 'vitest';
-import { createDoc, createParagraph, createText } from '@on-codemerge/kernel';
+import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { AlignmentPlugin } from '../AlignmentPlugin';
 import { MathPlugin } from '../MathPlugin';
 import { TimerPlugin } from '../TimerPlugin';
-import { h } from '@on-codemerge/sdk';
+import { h } from '@codemerge/sdk';
 
 describe('atom toolbar alignment', () => {
   let host: HTMLElement;

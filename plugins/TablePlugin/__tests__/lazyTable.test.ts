@@ -6,7 +6,7 @@ import {
   createText,
   applyTransaction,
   transaction,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import {
   fillTableFromMatrix,
   insertLazyTableShell,

@@ -1,5 +1,5 @@
-import { h, mount } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, MountHandle } from '@on-codemerge/sdk';
+import { h, mount } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, MountHandle } from '@codemerge/sdk';
 import { bracesIcon, listIcon } from '@ocm/wysiwyg/icons';
 import { mountJsonWorkspace } from '../surface/workspaceView';
 import type { JsonWorkspaceHandle } from '../surface/workspaceView';

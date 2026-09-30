@@ -1,6 +1,6 @@
 /**
  * Public kernel facade for plugins.
- * Values live here; kernel types import from `@on-codemerge/kernel`.
+ * Values live here; kernel types import from `@codemerge/kernel`.
  */
 import {
   applyOp,
@@ -28,7 +28,7 @@ import {
   selectionHasMark,
   rangeHasMark,
   offsetHasMark,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 
 export const core = {
   applyOp,

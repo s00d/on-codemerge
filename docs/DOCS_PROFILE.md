@@ -12,13 +12,13 @@ Product documentation profile for **on-codemerge** (VitePress site).
 - `packages/kernel` — document / ops model (`on-codemerge/kernel`)
 - `packages/sdk` — `definePlugin`, UI services (`on-codemerge/sdk`)
 - `packages/editor` — shared Editor facade + platform (`createShellView`)
-- `packages/hunspell` — private Hunspell `.aff`/`.dic` engine (SpellCheckerPlugin)
+- `packages/hunspell` — Hunspell `.aff`/`.dic` engine (`@codemerge/hunspell`; also bundled in `on-codemerge`)
 - `plugins/` — product plugins (prose + `JsonPlugin`); imported by apps
 - `apps/wysiwyg` — CE view (`createCeView`), HTML/MD IO, thin plugin barrel (public `on-codemerge` / `./app`)
 - `apps/json` — thin shell + `JsonPlugin({ surface: 'workspace' })` (`on-codemerge/json`)
 - `apps/markdown` — thin shell + `MarkdownPlugin({ surface: 'workspace' })` (`on-codemerge/markdown`)
 - `apps/code` — thin shell + `CodeBlockPlugin({ surface: 'workspace' })` (`on-codemerge/code`)
-- `collaboration-server/` — sample ops WebSocket server
+- `packages/collaboration-server` — sample ops WebSocket server (`@codemerge/collaboration-server`)
 
 ## Entry points
 
@@ -49,4 +49,4 @@ pnpm run check
 - Shared install/CSS lives in Guide — plugin pages link there instead of repeating `npm install`.
 - Do not document unwired APIs (`EditorOptions.mode` was removed for this reason).
 - JSON / Markdown / Code product surfaces are `guide/{json,markdown,code}-editor.md` + home demos — not separate design/phases trees.
-- `packages/editor` is a **private** workspace package (shared Editor facade + source contour). Public docs cite product entries (`on-codemerge`, `on-codemerge/code`, …), not `@on-codemerge/editor` as an npm import.
+- `packages/editor` is a **private** workspace package (shared Editor facade + source contour). Public docs cite product entries (`on-codemerge`, `on-codemerge/code`, …), not `@codemerge/editor` as an npm import.

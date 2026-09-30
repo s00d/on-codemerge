@@ -29,6 +29,12 @@ if (typeof pkg.license !== 'string' || !pkg.license.includes('BSD-3-Clause')) {
 if (!Array.isArray(pkg.files) || !pkg.files.includes('NOTICE')) {
   errors.push('packages/hunspell/package.json files[] must include NOTICE');
 }
+if (!Array.isArray(pkg.files) || !pkg.files.includes('dist')) {
+  errors.push('packages/hunspell/package.json files[] must include dist (publishable layout)');
+}
+if (pkg.private === true) {
+  errors.push('packages/hunspell/package.json must not be private (published package)');
+}
 
 if (errors.length > 0) {
   console.error('check-hunspell-license failed:');

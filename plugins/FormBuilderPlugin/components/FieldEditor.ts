@@ -1,5 +1,5 @@
-import { h, mount } from '@on-codemerge/sdk';
-import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import { h, mount } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { FieldConfig, FieldType } from '../types';
 import { isFieldType } from '../types';
 import type { FormManager } from '../services/FormManager';

@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { TimerPlugin } from '../index';
-import { insertAtomAfter } from '@on-codemerge/sdk';
+import { insertAtomAfter } from '@codemerge/sdk';
 
 function samplePayload() {
   const target = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);

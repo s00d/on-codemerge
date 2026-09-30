@@ -1,5 +1,5 @@
-import type { Command } from '@on-codemerge/kernel';
-import { getNodeAt } from '@on-codemerge/kernel';
+import type { Command } from '@codemerge/kernel';
+import { getNodeAt } from '@codemerge/kernel';
 
 const JSON_ROOT_PATH = [0];
 

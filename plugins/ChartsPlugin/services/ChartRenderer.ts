@@ -9,7 +9,7 @@ import { ScatterChartRenderer } from '../renderers/ScatterChartRenderer';
 import { BubbleChartRenderer } from '../renderers/BubbleChartRenderer';
 import { normalizeChartData } from '../utils/validation';
 import type { BaseChartRenderer } from '../renderers/BaseChartRenderer';
-import { canvas, renderDetached } from '@on-codemerge/sdk';
+import { canvas, renderDetached } from '@codemerge/sdk';
 import type { ChartI18n } from '../renderers/BaseChartRenderer';
 
 export class ChartRenderer {

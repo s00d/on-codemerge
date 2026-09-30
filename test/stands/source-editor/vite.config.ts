@@ -15,9 +15,9 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@on-codemerge/editor': resolve(repoRoot, 'packages/editor/src'),
-      '@on-codemerge/kernel': resolve(repoRoot, 'packages/kernel/src'),
-      '@on-codemerge/sdk': resolve(repoRoot, 'packages/sdk/src'),
+      '@codemerge/editor': resolve(repoRoot, 'packages/editor/src'),
+      '@codemerge/kernel': resolve(repoRoot, 'packages/kernel/src'),
+      '@codemerge/sdk': resolve(repoRoot, 'packages/sdk/src'),
       '@ocm/wysiwyg': resolve(repoRoot, 'apps/wysiwyg/src'),
       '@ocm/plugins': resolve(repoRoot, 'plugins'),
     },

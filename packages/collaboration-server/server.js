@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 const WebSocket = require('ws');
 
 const TOKEN = process.env.COLLAB_TOKEN;

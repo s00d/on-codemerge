@@ -1,4 +1,4 @@
-import type { DocNode } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
 import { docToHTML } from '@ocm/wysiwyg/io/html';
 import { sanitizeHTML } from '@ocm/wysiwyg/io/sanitize';
 import { asAttr } from '@ocm/wysiwyg/utils/asAttr';

@@ -1,5 +1,5 @@
-import { PopupController } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI } from '@on-codemerge/sdk';
+import { PopupController } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI } from '@codemerge/sdk';
 
 export interface LinkData {
   url: string;

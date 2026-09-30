@@ -1,11 +1,11 @@
 import './style.scss';
 
-import { definePlugin, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
-import type { DocNode, Operation } from '@on-codemerge/kernel';
-import { plainText, textLength } from '@on-codemerge/kernel';
-import { createDictionary } from '@on-codemerge/hunspell';
-import type { HunspellDictionary } from '@on-codemerge/hunspell';
+import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
+import type { DocNode, Operation } from '@codemerge/kernel';
+import { plainText, textLength } from '@codemerge/kernel';
+import { createDictionary } from '@codemerge/hunspell';
+import type { HunspellDictionary } from '@codemerge/hunspell';
 import { spellCheckIcon } from '@ocm/wysiwyg/icons';
 
 const WORD_RE = /[A-Za-zА-Яа-яЁё'\u2019]{2,}/g;

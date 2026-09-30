@@ -2,14 +2,8 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import {
-  createDoc,
-  createParagraph,
-  createText,
-  collapsedAt,
-  insertText,
-} from '@on-codemerge/kernel';
-import type { PluginDefinition } from '@on-codemerge/sdk';
+import { createDoc, createParagraph, createText, collapsedAt, insertText } from '@codemerge/kernel';
+import type { PluginDefinition } from '@codemerge/sdk';
 import { Editor } from '../Editor';
 import type { ViewPort } from '../ViewPort';
 

@@ -1,6 +1,6 @@
 import type { CalendarEvent, Reminder } from '../types';
 import type { CalendarManager } from './CalendarManager';
-import { h, renderDetached } from '@on-codemerge/sdk';
+import { h, renderDetached } from '@codemerge/sdk';
 import { parseJson } from '@ocm/wysiwyg/utils/asAttr';
 import { cssColorToHex } from '@ocm/wysiwyg/utils/colorMath';
 import { parseReminderArray } from '../utils/storageGuards';

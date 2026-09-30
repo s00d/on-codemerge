@@ -1,22 +1,22 @@
-# Collaboration Server
+# `@codemerge/collaboration-server`
 
 WebSocket **ops** relay for On-Codemerge’s `CollaborationPlugin`. Rooms are keyed by `docId`. Auth is fail-closed: **`COLLAB_TOKEN` is required**.
 
-This is a **local / demo** server, not a production collaboration product.
+This is a **local / demo** server, not a production collaboration product. Independent semver from `on-codemerge` / `@codemerge/kernel`.
 
-## Features
-
-- Real-time WebSocket fan-out of kernel ops
-- Per-document rooms with optional snapshot for late joiners
-- Token check on every message
-- Room cleanup when the last client disconnects
-- Simple single-file Node server
-
-## Setup
+## Install
 
 ```bash
-cd collaboration-server
-pnpm install   # or npm install
+npm i -D @codemerge/collaboration-server
+# or
+pnpm add -D @codemerge/collaboration-server
+```
+
+## Run
+
+```bash
+COLLAB_TOKEN=dev npx codemerge-collaboration-server
+# or from this package:
 COLLAB_TOKEN=dev pnpm start
 ```
 
@@ -89,6 +89,8 @@ There is **no** HTML `content` field in this protocol. Document SoT is JSON / op
 ## Editor wiring
 
 ```ts
+import { CollaborationPlugin } from 'on-codemerge';
+
 CollaborationPlugin({
   serverUrl: 'ws://localhost:8080',
   token: 'dev',
@@ -96,14 +98,10 @@ CollaborationPlugin({
 });
 ```
 
-See [Collaboration Plugin](https://github.com/s00d/on-codemerge/blob/main/docs/plugins/collaboration-plugin.md) in the docs site.
-
-## Custom server sketch
-
-Mirror `server.js`: Map of rooms `{ clients, snapshot }`, validate token, handle `join` / `ops`. You can swap storage or add auth — keep the message shapes the plugin expects.
+See [Collaboration Plugin](https://github.com/s00d/on-codemerge/blob/main/docs/plugins/collaboration-plugin.md).
 
 ## Out of scope
 
-- PM2 / Docker / Railway “production” recipes for this sample
+- PM2 / Docker / Railway production recipes for this sample
 - Presence lists, OT/CRDT merging beyond last-snapshot + ops fan-out
 - TLS termination (put a reverse proxy in front if you must expose it)

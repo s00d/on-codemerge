@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { createDoc, createParagraph, createText, insertText } from '@on-codemerge/kernel';
+import { createDoc, createParagraph, createText, insertText } from '@codemerge/kernel';
 import { Editor } from '../Editor';
 import { InputBridge, selectionFromOffsets } from '../../view/InputBridge';
 import { docToHTML, htmlToDoc } from '../../io/html';

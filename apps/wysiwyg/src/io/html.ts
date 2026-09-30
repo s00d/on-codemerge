@@ -1,7 +1,7 @@
-import type { DocNode, Mark } from '@on-codemerge/kernel';
-import { highlightHtml } from '@on-codemerge/editor';
-import { viewToHtml } from '@on-codemerge/sdk';
-import type { PublishNodeDefinition } from '@on-codemerge/sdk';
+import type { DocNode, Mark } from '@codemerge/kernel';
+import { highlightHtml } from '@codemerge/editor';
+import { viewToHtml } from '@codemerge/sdk';
+import type { PublishNodeDefinition } from '@codemerge/sdk';
 import { asAttr } from '../utils/asAttr';
 import { attrToHtmlValue, coerceHtmlJsonAttr } from '../utils/attrJson';
 import { cssColorToHex } from '../utils/colorMath';

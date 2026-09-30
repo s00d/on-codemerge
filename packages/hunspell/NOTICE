@@ -1,4 +1,4 @@
-@on-codemerge/hunspell
+@codemerge/hunspell
 ======================
 
 This package includes a TypeScript Hunspell-style dictionary engine derived from

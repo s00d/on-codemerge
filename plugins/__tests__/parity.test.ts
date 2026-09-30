@@ -7,13 +7,7 @@ import { TablePlugin } from '../TablePlugin';
 import { ListsPlugin } from '../ListsPlugin';
 import { BlockPlugin } from '../BlockPlugin';
 import { ToolbarPlugin } from '../ToolbarPlugin';
-import {
-  createDoc,
-  createParagraph,
-  createText,
-  insertText,
-  splitBlock,
-} from '@on-codemerge/kernel';
+import { createDoc, createParagraph, createText, insertText, splitBlock } from '@codemerge/kernel';
 import { insertTableCommand, addRow, deleteRow, deleteTable } from '../TablePlugin/tableOps';
 
 describe('wave1 lists/block', () => {

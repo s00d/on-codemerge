@@ -1,5 +1,5 @@
-import { PopupController, h } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, h } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import { copyIcon, saveIcon } from '@ocm/wysiwyg/icons';
 
 export class HTMLViewerModal {

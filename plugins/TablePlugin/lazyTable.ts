@@ -1,8 +1,8 @@
 /**
  * Lazy table: fetch remote JSON/CSV and materialize into the selected/current table.
  */
-import type { Command, DocNode } from '@on-codemerge/kernel';
-import { core } from '@on-codemerge/sdk';
+import type { Command, DocNode } from '@codemerge/kernel';
+import { core } from '@codemerge/sdk';
 import { findTablePath } from './tableOps';
 
 export type LazyFormat = 'json' | 'csv';

@@ -6,8 +6,8 @@ import type {
   UpdateCalendarData,
   UpdateEventData,
 } from '../types';
-import type { ViewSpec } from '@on-codemerge/sdk';
-import { h } from '@on-codemerge/sdk';
+import type { ViewSpec } from '@codemerge/sdk';
+import { h } from '@codemerge/sdk';
 import { CategoryManager } from './CategoryManager';
 import { ReminderService } from './ReminderService';
 import { parseJson } from '@ocm/wysiwyg/utils/asAttr';

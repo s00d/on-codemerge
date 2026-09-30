@@ -1,7 +1,7 @@
 import './tailwind.css';
 import './index.scss';
 import './public.css';
-import '@on-codemerge/sdk/ui/sdk.scss';
+import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
 export {
@@ -24,7 +24,7 @@ export {
   type ToolbarMenuDef,
   type PopupOptions,
   type MenuItem,
-} from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
 
 export {
   createDefaultPlugins,
@@ -93,7 +93,7 @@ export {
   type JSONDoc,
   type EditorState,
   type Command,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 
 export { exportHTML, importHTML, exportMarkdown, importMarkdown } from './io';
 export { docToMarkdown, markdownToDoc } from './io/markdown';

@@ -1,5 +1,5 @@
-import { PopupController, canvas, foreign, h, mount } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, canvas, foreign, h, mount } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import { clamp, hexToHsv, hsvToHex, neutrals, quickSwatches } from './colorMath';
 import type { Hsv } from './colorMath';
 

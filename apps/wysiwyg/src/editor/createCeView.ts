@@ -1,8 +1,8 @@
-import type { CreateView, ViewPort } from '@on-codemerge/editor';
+import type { CreateView, ViewPort } from '@codemerge/editor';
 import { EditorView } from '../view/EditorView';
 import { InputBridge } from '../view/InputBridge';
 
-/** CE ViewPort factory owned by `@on-codemerge/wysiwyg`. */
+/** CE ViewPort factory owned by `@codemerge/wysiwyg`. */
 export const createCeView: CreateView = (editor): ViewPort => {
   const view = new EditorView(editor.host, editor.getState(), {}, editor.getWidgets());
   view.setEditorAccessor(() => editor.asAlive());

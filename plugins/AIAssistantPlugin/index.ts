@@ -1,8 +1,8 @@
 import './style.scss';
 import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
 
-import { definePlugin, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { EditorAPI, PopupItem, PopupOptions, PluginToolbarOpts } from '@on-codemerge/sdk';
+import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { EditorAPI, PopupItem, PopupOptions, PluginToolbarOpts } from '@codemerge/sdk';
 import { aiAssistantIcon } from '@ocm/wysiwyg/icons';
 import {
   OpenAIDriver,

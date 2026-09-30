@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.4.0] - 2026-09-30
+
+### Added
+
+- Published low-level packages under **`@codemerge/*`** (product install unchanged: `on-codemerge`):
+  - `@codemerge/kernel` — headless doc / ops / selection
+  - `@codemerge/sdk` — plugin API + UI primitives (+ `sdk.css`)
+  - `@codemerge/hunspell` — spell engine (`NOTICE` in tarball)
+  - `@codemerge/collaboration-server` — demo WebSocket ops relay (`npx codemerge-collaboration-server`)
+- Workspace rename: `@on-codemerge/*` → `@codemerge/*` (internal only)
+- `pnpm run build:packages` + release filter order for scoped packages
+
+### Notes
+
+- `on-codemerge` still **bundles** kernel/sdk/hunspell (Phase A). Do **not** mix standalone `@codemerge/sdk` with `on-codemerge` in one app bundle.
+- `@codemerge/editor` and `apps/*` remain **private**; plugins stay inside the monolith.
+- Phase B/C (declare deps / Vite externalize) deferred.
+
 ## [2.3.0] - 2026-09-30
 
 ### Added
@@ -30,8 +48,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Code Editor** surface: `apps/code` → public entry `on-codemerge/code` (+ docs Guide / plugin demos)
-- **Source contour** in `@on-codemerge/editor`: `mountSourceEditor`, shared lexer/highlight (`highlightHtml` / `lex`) — used by CodeBlock, Json raw, Markdown source
-- **In-house Hunspell** (`@on-codemerge/hunspell`): typed `.aff`/`.dic` engine (`createDictionary` → `check` / `suggest`); replaces `typo-js`
+- **Source contour** in `@codemerge/editor`: `mountSourceEditor`, shared lexer/highlight (`highlightHtml` / `lex`) — used by CodeBlock, Json raw, Markdown source
+- **In-house Hunspell** (`@codemerge/hunspell`): typed `.aff`/`.dic` engine (`createDictionary` → `check` / `suggest`); replaces `typo-js`
 - CodeBlock dual-surface (`atom` + `workspace`), IO adapters, chrome toolbar
 - Markdown dual-pane: draggable middle gutter + coalesced preview / mermaid salvage
 - SpellChecker: typographic apostrophe normalize, locale reload while enabled, Cyrillic-aware suggest alphabet from `.aff` `TRY`
@@ -39,7 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- SpellCheckerPlugin loads dictionaries via `@on-codemerge/hunspell` (dictionaries still not bundled — pass URL options)
+- SpellCheckerPlugin loads dictionaries via `@codemerge/hunspell` (dictionaries still not bundled — pass URL options)
 - Removed runtime deps: `typo-js`, CodeMirror packages (source editing is in-house)
 - `prepublishOnly` / check gates include `on-codemerge/code` export + hunspell NOTICE attribution (`dist/THIRD_PARTY_NOTICES.txt`)
 
@@ -66,7 +84,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **Multi-surface apps**: `apps/wysiwyg`, `apps/json` (`on-codemerge/json`), `apps/markdown` (`on-codemerge/markdown`) + shared `@on-codemerge/editor`
+- **Multi-surface apps**: `apps/wysiwyg`, `apps/json` (`on-codemerge/json`), `apps/markdown` (`on-codemerge/markdown`) + shared `@codemerge/editor`
 - **Declarative WYSIWYG toolbar menus**: `Editor` option `toolbar.menus` / `defaultWysiwygToolbarMenus()`; `{ menus: [] }` → flat bar
 - **`PluginToolbarOpts` / `pluginToolbarPlacement`**: optional `menu` / `group` / `order` on insert/review/tools plugin factories (incl. Json/Markdown atom chrome)
 - **Typed SoT attrs**: structured `DocNode.attrs` (objects/arrays) with `attrToHtmlValue` / `readJsonAttr` / `coerceHtmlJsonAttr` on the HTML boundary
@@ -136,7 +154,7 @@ Breaking rewrite of the editor around a virtual JSON document, SDK plugin surfac
 - **`on-codemerge/sdk`**: `definePlugin`, ViewSpec UI (`h` / `mount` / portals), popup / toolbar / context-menu / notify
 - **`Editor`**: replaces `HTMLEditor`; JSON is source of truth (`getJSON` / `setJSON`); HTML/MD as boundaries via `src/io/`
 - **Package CSS**: `on-codemerge/index.css` (editor chrome) + `on-codemerge/public.css` + `on-codemerge/public.js` (published page)
-- **Workspace packages**: `@on-codemerge/kernel` / `@on-codemerge/sdk` (private; bundled into `on-codemerge`)
+- **Workspace packages**: `@codemerge/kernel` / `@codemerge/sdk` (private; bundled into `on-codemerge`)
 - **Vitest** unit + e2e (untestutils / Playwright); `oxlint` + `oxfmt`; locale parity (`check:locales`)
 - **Docs**: Guide (`editor`, `sdk`, `document-model`, `authoring-plugins`, migration), Integrate, Plugins catalog
 - Redesigned panels: Typography Styles, Font Settings (browser font detect), Block Style Editor (inline ColorWell), Edit History viewer

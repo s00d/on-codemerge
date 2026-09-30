@@ -1,4 +1,4 @@
-import type { EditorAPI } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import type { Viewport } from '../types';
 import type { ViewportManager } from '../services/ViewportManager';
 

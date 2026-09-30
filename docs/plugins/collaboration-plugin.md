@@ -105,16 +105,15 @@ Unauthorized token → WebSocket close `1008`.
 
 ## Collaboration server
 
-Sample implementation: [`collaboration-server/`](https://github.com/s00d/on-codemerge/tree/main/collaboration-server).
+Sample package: [`@codemerge/collaboration-server`](https://www.npmjs.com/package/@codemerge/collaboration-server) ([source](https://github.com/s00d/on-codemerge/tree/main/packages/collaboration-server)).
 
 ```bash
-cd collaboration-server
-pnpm install
-COLLAB_TOKEN=dev pnpm start
+npm i -D @codemerge/collaboration-server
+COLLAB_TOKEN=dev npx codemerge-collaboration-server
 # ws://localhost:8080
 ```
 
-See that README for env vars and a minimal custom-server sketch. **Not** production-hardened (no PM2/Docker recipe as a recommended deploy).
+See that package README for env vars and a minimal custom-server sketch. **Not** production-hardened (no PM2/Docker recipe as a recommended deploy).
 
 ## React example
 
@@ -165,6 +164,6 @@ export function CollaborativeEditor() {
 
 ## Related
 
-- [collaboration-server README](https://github.com/s00d/on-codemerge/tree/main/collaboration-server)
+- [@codemerge/collaboration-server README](https://github.com/s00d/on-codemerge/tree/main/packages/collaboration-server)
 - [Plugins overview](/plugins/)
 - [Document model](/guide/document-model)

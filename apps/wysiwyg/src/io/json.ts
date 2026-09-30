@@ -1,5 +1,5 @@
-import type { DocNode } from '@on-codemerge/kernel';
-import { docFromJSON, docToJSON } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
+import { docFromJSON, docToJSON } from '@codemerge/kernel';
 
 export function serializeJSON(doc: DocNode): string {
   return JSON.stringify(docToJSON(doc));

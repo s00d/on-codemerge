@@ -1,7 +1,7 @@
-import type { EditorState } from '@on-codemerge/kernel';
-import { getNodeAt } from '@on-codemerge/kernel';
-import { h } from '@on-codemerge/sdk';
-import type { ViewSpec } from '@on-codemerge/sdk';
+import type { EditorState } from '@codemerge/kernel';
+import { getNodeAt } from '@codemerge/kernel';
+import { h } from '@codemerge/sdk';
+import type { ViewSpec } from '@codemerge/sdk';
 import { deleteIcon, duplicateIcon, insertIcon } from '@ocm/wysiwyg/icons';
 import type { JsonNodeMenuTarget } from '../../components/JsonNodeMenu';
 import {

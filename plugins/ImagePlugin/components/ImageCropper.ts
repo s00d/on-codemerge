@@ -1,5 +1,5 @@
-import { foreign, h, img, mount } from '@on-codemerge/sdk';
-import type { ViewSpec } from '@on-codemerge/sdk';
+import { foreign, h, img, mount } from '@codemerge/sdk';
+import type { ViewSpec } from '@codemerge/sdk';
 import { applyAspectPreset, clampCrop, fitScale, fullFrame } from '../utils/cropMath';
 import type { AspectPreset, CropRect } from '../utils/cropMath';
 

@@ -10,7 +10,7 @@ import {
   docFromJSON,
   createDoc,
   clampSelection,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import type {
   DocNode,
   JSONDoc,
@@ -20,7 +20,7 @@ import type {
   HistoryController,
   Command,
   Mark,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import {
   createPlatform,
   destroyPlatform,
@@ -34,7 +34,7 @@ import {
   PopupService,
   ToolbarPanel,
   clearPortalRoot,
-} from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
 import type {
   DomTarget,
   EditorAPI,
@@ -43,8 +43,8 @@ import type {
   PluginDefinition,
   ToolbarMenuDef,
   WidgetDefinition,
-} from '@on-codemerge/sdk';
-import { editorChromeTv } from '@on-codemerge/sdk/ui/chrome';
+} from '@codemerge/sdk';
+import { editorChromeTv } from '@codemerge/sdk/ui/chrome';
 import { createI18n } from '@i18n-micro/runtime';
 import type { I18n, Params, Translations } from '@i18n-micro/runtime';
 import en from './i18n/locales/en.json';
@@ -66,7 +66,7 @@ export type ProseIoOverrides = Partial<
   >
 >;
 
-/** TARGET construct bag for `@on-codemerge/editor` — `createView` required. */
+/** TARGET construct bag for `@codemerge/editor` — `createView` required. */
 export interface SharedEditorOptions {
   plugins?: PluginDefinition[];
   doc?: DocNode | JSONDoc;

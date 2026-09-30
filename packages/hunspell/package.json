@@ -1,18 +1,42 @@
 {
-  "name": "@on-codemerge/hunspell",
-  "version": "2.3.0",
-  "private": true,
+  "name": "@codemerge/hunspell",
+  "version": "2.4.0",
+  "description": "In-house Hunspell .aff/.dic engine (check / suggest) for CodeMerge",
   "license": "MIT AND BSD-3-Clause",
+  "author": "Pavel Kuzmin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s00d/on-codemerge.git",
+    "directory": "packages/hunspell"
+  },
   "files": [
-    "src",
+    "dist",
     "NOTICE"
   ],
   "type": "module",
   "sideEffects": false,
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup --config tsup.config.ts && node ../../scripts/emit-d-cts.mjs dist/index.d.ts",
+    "prepublishOnly": "pnpm run build"
   },
   "devDependencies": {
     "dictionary-en": "^4.0.0"

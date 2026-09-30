@@ -2,8 +2,8 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { viewToHtml } from '@on-codemerge/sdk';
-import { highlightHtml, lex } from '@on-codemerge/editor';
+import { viewToHtml } from '@codemerge/sdk';
+import { highlightHtml, lex } from '@codemerge/editor';
 import { docToPublishedHTML } from '../../../apps/wysiwyg/src/io/html';
 import { prettyJsonText, renderJsonEmbedPublish } from '../publish/preview';
 

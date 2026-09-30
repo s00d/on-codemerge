@@ -1,6 +1,6 @@
 # Spell Checker Plugin
 
-Live spell check via the in-house Hunspell engine (private workspace package `@on-codemerge/hunspell`, bundled into `on-codemerge`). Dictionaries are **not** shipped with `on-codemerge` — you pass `.aff` / `.dic` URLs when creating the plugin.
+Live spell check via the in-house Hunspell engine (`@codemerge/hunspell`, also bundled into `on-codemerge`). Dictionaries are **not** shipped with `on-codemerge` — you pass `.aff` / `.dic` URLs when creating the plugin.
 
 Toggle: **Tools → Spell Checker** or `Mod-Shift-s`. Misspellings get a `misspelled` mark (red underline).
 

@@ -1,14 +1,14 @@
-import type { DocNode, EditorState, JSONDoc, Operation } from '@on-codemerge/kernel';
-import type { EditorAPI } from '@on-codemerge/sdk';
-import { foreign, h, mount } from '@on-codemerge/sdk';
-import type { MountHandle } from '@on-codemerge/sdk';
+import type { DocNode, EditorState, JSONDoc, Operation } from '@codemerge/kernel';
+import type { EditorAPI } from '@codemerge/sdk';
+import { foreign, h, mount } from '@codemerge/sdk';
+import type { MountHandle } from '@codemerge/sdk';
 import { replaceChildrenWithSafeHtml } from '@ocm/wysiwyg/utils/safeHtml';
 import { defaultMdElementRegistry } from '../elements/registry';
 import type { MdElementRegistry } from '../elements/types';
 import { docToText, emptyEditorDoc, escapeHtml, parseText } from '../io';
 import { projectPreviewHtml } from '../io/projectPreview';
-import { mountSourceEditor } from '@on-codemerge/editor';
-import type { SourceEditorHandle } from '@on-codemerge/editor';
+import { mountSourceEditor } from '@codemerge/editor';
+import type { SourceEditorHandle } from '@codemerge/editor';
 import {
   hydrateMermaidBlocks,
   restoreMermaidHosts,

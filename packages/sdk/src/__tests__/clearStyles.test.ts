@@ -6,7 +6,7 @@ import {
   createState,
   createText,
   runCommand,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import { clearStyles } from '../commands';
 
 describe('clearStyles', () => {

@@ -1,8 +1,8 @@
-import { Editor as SharedEditor, createShellView } from '@on-codemerge/editor';
-import type { SharedEditorOptions } from '@on-codemerge/editor';
-import { applyTransaction, docFromJSON } from '@on-codemerge/kernel';
-import type { Command, DocNode, JSONDoc, Transaction } from '@on-codemerge/kernel';
-import type { PluginDefinition } from '@on-codemerge/sdk';
+import { Editor as SharedEditor, createShellView } from '@codemerge/editor';
+import type { SharedEditorOptions } from '@codemerge/editor';
+import { applyTransaction, docFromJSON } from '@codemerge/kernel';
+import type { Command, DocNode, JSONDoc, Transaction } from '@codemerge/kernel';
+import type { PluginDefinition } from '@codemerge/sdk';
 import type { Translations } from '@i18n-micro/runtime';
 import {
   createDefaultPlugins,

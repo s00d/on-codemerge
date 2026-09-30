@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
  * @jest-environment jsdom
  */
 import { Editor } from '../Editor';
-import { insertText } from '@on-codemerge/kernel';
+import { insertText } from '@codemerge/kernel';
 import { HistoryPlugin } from '../../../../../plugins/HistoryPlugin';
 import { TypographyPlugin } from '../../../../../plugins/TypographyPlugin';
 

@@ -1,5 +1,5 @@
-import type { DocNode, EditorState, JSONDoc } from '@on-codemerge/kernel';
-import type { EditorAPI, PluginDefinition, WidgetDefinition } from '@on-codemerge/sdk';
+import type { DocNode, EditorState, JSONDoc } from '@codemerge/kernel';
+import type { EditorAPI, PluginDefinition, WidgetDefinition } from '@codemerge/sdk';
 
 /** Live editor surface passed to `createView` (facade + view-factory hooks). */
 export type ViewHost = EditorAPI & {

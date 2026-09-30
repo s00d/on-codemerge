@@ -8,8 +8,8 @@ import {
   textIcon,
   blockIcon,
 } from '@ocm/wysiwyg/icons';
-import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
-import { insertAtomAfter, core } from '@on-codemerge/sdk';
+import type { EditorAPI, MenuItem } from '@codemerge/sdk';
+import { insertAtomAfter, core } from '@codemerge/sdk';
 import { pathFromEl, removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
 import { layoutFromTree, leaf, serializeTree, split, splitAt, treeFromAttrs } from '../paneTree';
 

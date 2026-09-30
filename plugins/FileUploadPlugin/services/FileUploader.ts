@@ -1,4 +1,4 @@
-import { downloadBlob, downloadUrl } from '@on-codemerge/sdk';
+import { downloadBlob, downloadUrl } from '@codemerge/sdk';
 import { defaultConfig } from '../config/UploadConfig';
 import type { UploadConfig } from '../config/UploadConfig';
 import { assertFileAllowed, formatFileSize, listMedia, uploadMedia, deleteMedia } from './mediaApi';

@@ -1,8 +1,8 @@
 import type { ChartMenu } from './ChartMenu';
 import { editIcon, deleteIcon, exportIcon } from '@ocm/wysiwyg/icons';
 import { isChartType } from '../utils/validation';
-import { downloadUrl } from '@on-codemerge/sdk';
-import type { EditorAPI } from '@on-codemerge/sdk';
+import { downloadUrl } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import { pathFromEl, removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
 
 export class ChartContextMenu {

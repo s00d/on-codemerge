@@ -1,6 +1,6 @@
 import type { TimerManager } from '../services/TimerManager';
 import type { Timer } from '../types';
-import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
+import type { EditorAPI, MenuItem } from '@codemerge/sdk';
 import { copyIcon, deleteIcon, editIcon, exportIcon, uploadIcon } from '@ocm/wysiwyg/icons';
 
 export class TimerContextMenu {

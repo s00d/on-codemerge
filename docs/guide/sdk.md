@@ -1,6 +1,8 @@
 # SDK reference
 
-Published path: **`on-codemerge/sdk`** (workspace alias `@on-codemerge/sdk` → sources).
+Published path for apps: **`on-codemerge/sdk`** (bundled into the product package).
+
+Standalone low-level package: **`@codemerge/sdk`** (same API; do **not** install both into one app bundle — dual instances). Workspace sources still resolve via Vite alias `@codemerge/sdk`.
 
 Plugins and host apps that need UI primitives, commands, or publish helpers import from here — **not** from `on-codemerge/kernel` inside a plugin, and **not** from deep `src/utils/*` paths.
 
@@ -19,11 +21,15 @@ The **`Editor`** class and headless HTML/Markdown IO live on the package root (`
 
 ## Packages
 
-| Import                | Role                                                  |
-| --------------------- | ----------------------------------------------------- |
-| `on-codemerge`        | `Editor`, plugins, `importHTML` / `exportMarkdown`, … |
-| `on-codemerge/sdk`    | Plugin authoring + UI + publish helpers               |
-| `on-codemerge/kernel` | Pure doc/ops (use via `core` from plugins)            |
+| Import                            | Role                                                                |
+| --------------------------------- | ------------------------------------------------------------------- |
+| `on-codemerge`                    | Product: `Editor`, plugins, CSS, `importHTML` / `exportMarkdown`, … |
+| `on-codemerge/sdk`                | Plugin authoring + UI + publish helpers (compat subpath)            |
+| `on-codemerge/kernel`             | Pure doc/ops via product subpath                                    |
+| `@codemerge/sdk`                  | Same SDK as a standalone npm package (plugin authors / headless)    |
+| `@codemerge/kernel`               | Same kernel standalone                                              |
+| `@codemerge/hunspell`             | Spell engine without the editor                                     |
+| `@codemerge/collaboration-server` | Demo WebSocket ops relay                                            |
 
 ## Plugin authoring
 

@@ -1,4 +1,4 @@
-import type { DocNode } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
 import { textFromDoc, docFromText } from './adapters';
 
 export const MAX_CODE_BYTES = 2_000_000;

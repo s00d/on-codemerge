@@ -9,7 +9,7 @@ import {
   docToValue,
 } from 'on-codemerge/json';
 import { changeType, duplicateNode, pathToDot, pathToJsonPointer } from '../commands/jsonCommands';
-import { applyTransaction, createState, runCommand } from '@on-codemerge/kernel';
+import { applyTransaction, createState, runCommand } from '@codemerge/kernel';
 import { toEditorDoc, valueToDoc } from '../io';
 
 function openRaw(editor: JsonEditor): void {

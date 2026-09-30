@@ -7,8 +7,8 @@ import {
   setMarkAttrs,
   h,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { ViewSpec, PluginToolbarOpts } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { FootnoteMenu } from './components/FootnoteMenu';
 import { footnoteIcon } from '@ocm/wysiwyg/icons';
 

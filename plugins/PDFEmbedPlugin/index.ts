@@ -7,8 +7,8 @@ import {
   h,
   iframe,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
 import { editIcon, deleteIcon, linkIcon, pdfIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
 import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';

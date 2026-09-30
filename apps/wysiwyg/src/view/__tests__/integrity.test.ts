@@ -9,8 +9,8 @@ import {
   createState,
   createText,
   transaction,
-} from '@on-codemerge/kernel';
-import type { Mark } from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
+import type { Mark } from '@codemerge/kernel';
 import { EditorView } from '../EditorView';
 import { InputBridge } from '../InputBridge';
 

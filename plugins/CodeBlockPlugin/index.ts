@@ -1,5 +1,5 @@
 import './style.scss';
-import type { Command } from '@on-codemerge/kernel';
+import type { Command } from '@codemerge/kernel';
 import {
   applyToolbarConfig,
   definePlugin,
@@ -7,14 +7,9 @@ import {
   attrString,
   foreign,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type {
-  PluginDefinition,
-  WidgetContext,
-  ViewSpec,
-  PluginToolbarOpts,
-} from '@on-codemerge/sdk';
-import { highlightHtml } from '@on-codemerge/editor';
+} from '@codemerge/sdk';
+import type { PluginDefinition, WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
+import { highlightHtml } from '@codemerge/editor';
 import { HistoryChromePlugin } from '../HistoryPlugin';
 import { CodeBlockModal } from './components/CodeBlockModal';
 import { CodeBlockContextMenu } from './components/CodeBlockContextMenu';

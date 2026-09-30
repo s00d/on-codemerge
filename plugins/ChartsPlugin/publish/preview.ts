@@ -1,5 +1,5 @@
-import { attrString, h, img } from '@on-codemerge/sdk';
-import type { ViewSpec } from '@on-codemerge/sdk';
+import { attrString, h, img } from '@codemerge/sdk';
+import type { ViewSpec } from '@codemerge/sdk';
 import type { ChartI18n } from '../renderers/BaseChartRenderer';
 import { ChartRenderer } from '../services/ChartRenderer';
 import {

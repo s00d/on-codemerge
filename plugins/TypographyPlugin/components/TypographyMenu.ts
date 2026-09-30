@@ -1,5 +1,5 @@
-import { PopupController, h } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, h } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import { TYPOGRAPHY_STYLES } from '../constants';
 import type { TypographyStyle } from '../constants';
 import { clearIcon } from '@ocm/wysiwyg/icons';

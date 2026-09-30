@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { viewToHtml } from '@on-codemerge/sdk';
+import { viewToHtml } from '@codemerge/sdk';
 import { compactMarkdownText } from '../io/preview';
 import { renderMdEmbedPublish } from '../publish/preview';
 

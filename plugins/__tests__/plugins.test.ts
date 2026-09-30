@@ -4,8 +4,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest';
  */
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { createCorePlugins, createDefaultPlugins, createOpsCollabBinding } from '../index';
-import { createDoc, createParagraph, createText, insertText } from '@on-codemerge/kernel';
-import type { Operation } from '@on-codemerge/kernel';
+import { createDoc, createParagraph, createText, insertText } from '@codemerge/kernel';
+import type { Operation } from '@codemerge/kernel';
 
 function withSelection(editor: Editor, from: number, to: number) {
   editor.setSelection({

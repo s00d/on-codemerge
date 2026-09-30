@@ -1,13 +1,8 @@
 import './style.scss';
 
-import type { Command } from '@on-codemerge/kernel';
-import { applyToolbarConfig, definePlugin, foreign, attrString } from '@on-codemerge/sdk';
-import type {
-  PluginDefinition,
-  PluginToolbarOpts,
-  WidgetContext,
-  ViewSpec,
-} from '@on-codemerge/sdk';
+import type { Command } from '@codemerge/kernel';
+import { applyToolbarConfig, definePlugin, foreign, attrString } from '@codemerge/sdk';
+import type { PluginDefinition, PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';
 import { jsonCommandMap } from './commands/jsonCommands';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';

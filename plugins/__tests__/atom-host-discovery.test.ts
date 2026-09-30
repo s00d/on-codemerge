@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it, afterEach, beforeEach } from 'vitest';
-import { createDoc, createParagraph, createText } from '@on-codemerge/kernel';
+import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
 import { CalendarPlugin } from '../CalendarPlugin';

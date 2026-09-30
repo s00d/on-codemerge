@@ -1,5 +1,5 @@
-import { PopupController, h } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, h } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import type { Viewport } from '../types';
 import { responsiveIcon, mobileIcon, tabletIcon, desktopIcon } from '@ocm/wysiwyg/icons';
 import { SetViewportCommand } from '../commands/SetViewportCommand';

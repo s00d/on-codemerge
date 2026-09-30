@@ -1,5 +1,5 @@
-import { PopupController, downloadUrl, foreign, h, mount, renderDetached } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, downloadUrl, foreign, h, mount, renderDetached } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';
 import { ChartRenderer } from '../services/ChartRenderer';
 import type { ChartType, ChartSeries, ChartPoint } from '../types';

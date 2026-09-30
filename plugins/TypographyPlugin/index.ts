@@ -1,7 +1,7 @@
 import './style.scss';
 
-import { definePlugin, convertBlockType, insertAtomAfter, core } from '@on-codemerge/sdk';
-import { plainText } from '@on-codemerge/kernel';
+import { definePlugin, convertBlockType, insertAtomAfter, core } from '@codemerge/sdk';
+import { plainText } from '@codemerge/kernel';
 import { TypographyMenu } from './components/TypographyMenu';
 import { typographyIcon } from '@ocm/wysiwyg/icons';
 

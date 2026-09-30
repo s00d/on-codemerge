@@ -1,4 +1,4 @@
-import { h, renderDetached } from '@on-codemerge/sdk';
+import { h, renderDetached } from '@codemerge/sdk';
 
 import { computeResize, effectiveAspectLock } from './resizeMath';
 import type { ResizeHandle } from './resizeMath';

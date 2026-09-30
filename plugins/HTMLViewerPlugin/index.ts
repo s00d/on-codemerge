@@ -1,7 +1,7 @@
 import './style.scss';
 
-import { definePlugin, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { PluginToolbarOpts } from '@on-codemerge/sdk';
+import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { HTMLViewerModal } from './components/HTMLViewerModal';
 import { htmlIcon } from '@ocm/wysiwyg/icons';
 

@@ -1,6 +1,6 @@
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { LanguageManager } from './LanguageManager';
-import type { EditorAPI } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 
 function mockEditor(overrides: Partial<EditorAPI> = {}): EditorAPI {
   let locale = 'en';

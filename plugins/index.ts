@@ -1,4 +1,4 @@
-import type { PluginDefinition, PluginToolbarOpts } from '@on-codemerge/sdk';
+import type { PluginDefinition, PluginToolbarOpts } from '@codemerge/sdk';
 
 import { AIAssistantPlugin } from './AIAssistantPlugin';
 import { AlignmentPlugin } from './AlignmentPlugin';

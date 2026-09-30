@@ -24,6 +24,8 @@
 
 [Documentation](https://s00d.github.io/on-codemerge/) · [Editors](https://s00d.github.io/on-codemerge/guide/editors.html) · [Plugins](https://s00d.github.io/on-codemerge/plugins/) · [Integrate](https://s00d.github.io/on-codemerge/integrate/) · [npm](https://www.npmjs.com/package/on-codemerge)
 
+Low-level packages (optional — most apps only need `on-codemerge`): `@codemerge/kernel`, `@codemerge/sdk`, `@codemerge/hunspell`, `@codemerge/collaboration-server`. See [Publishing packages](https://s00d.github.io/on-codemerge/guide/publishing-packages.html). Do not mix standalone `@codemerge/sdk` with `on-codemerge` in one app bundle.
+
 <p align="center">
   <img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot-v2-editor.png?raw=true" alt="Editor demo — toolbar, lists, table" width="900">
 </p>
@@ -44,7 +46,7 @@
 - **Source contour** — shared gutter + structural highlight for JSON Raw, Markdown source, and Code
 - **i18n** — lazy locale packs (`en` bundled; `ru`, `de`, `fr`, … on demand)
 - **Chrome modes** — sticky toolbar (`bar`) or page-embed float (`page`)
-- **TypeScript-first** — typed `Editor` + `@on-codemerge/sdk` / kernel packages
+- **TypeScript-first** — typed `Editor` + `@codemerge/sdk` / kernel packages
 
 ## Installation
 

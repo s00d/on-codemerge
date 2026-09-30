@@ -1,4 +1,4 @@
-import { canvas, renderDetached } from '@on-codemerge/sdk';
+import { canvas, renderDetached } from '@codemerge/sdk';
 import { FONT_CANDIDATES, SYSTEM_FONT, cssStack } from '../constants';
 import type { FontOption } from '../constants';
 

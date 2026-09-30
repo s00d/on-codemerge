@@ -1,7 +1,7 @@
 import './style.scss';
 
-import { definePlugin, attrString, foreign, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { ViewSpec, PluginToolbarOpts } from '@on-codemerge/sdk';
+import { definePlugin, attrString, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { importHTML } from '@ocm/wysiwyg/io';
 import { TemplatesMenu } from './components/TemplatesMenu';
 import { TemplateManager } from './services/TemplateManager';

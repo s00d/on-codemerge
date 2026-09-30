@@ -1,4 +1,4 @@
-import type { ToolbarMenuDef } from '@on-codemerge/sdk';
+import type { ToolbarMenuDef } from '@codemerge/sdk';
 import commentIcon from './icons/comment.svg';
 import insertIcon from './icons/insert.svg';
 import shortcutsIcon from './icons/shortcuts.svg';

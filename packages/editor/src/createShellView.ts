@@ -1,5 +1,5 @@
 import type { CreateView, ViewPort } from './ViewPort';
-import { h, renderDetached } from '@on-codemerge/sdk';
+import { h, renderDetached } from '@codemerge/sdk';
 
 /**
  * Empty stable content host for plugin-owned surfaces (e.g. JsonPlugin workspace).

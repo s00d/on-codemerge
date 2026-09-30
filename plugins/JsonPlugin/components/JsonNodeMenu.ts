@@ -1,5 +1,5 @@
-import { getNodeAt } from '@on-codemerge/kernel';
-import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
+import { getNodeAt } from '@codemerge/kernel';
+import type { EditorAPI, MenuItem } from '@codemerge/sdk';
 import { copyIcon, deleteIcon, duplicateIcon, insertIcon, moveIcon } from '@ocm/wysiwyg/icons';
 import type { JsonLeafType } from '../commands/jsonCommands';
 import {

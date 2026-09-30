@@ -1,6 +1,6 @@
 import './style.scss';
 
-import { definePlugin } from '@on-codemerge/sdk';
+import { definePlugin } from '@codemerge/sdk';
 import { registerHistoryChrome } from './chrome';
 
 /**

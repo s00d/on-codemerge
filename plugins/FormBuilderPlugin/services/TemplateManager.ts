@@ -1,5 +1,5 @@
 import type { FormTemplate, FieldConfig } from '../types';
-import type { EditorAPI } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import { FieldBuilder } from './FieldBuilder';
 
 export class TemplateManager {

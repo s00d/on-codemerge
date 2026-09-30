@@ -1,5 +1,5 @@
-import type { EditorAPI, DisposableScope } from '@on-codemerge/sdk';
-import { attrString, mount, h } from '@on-codemerge/sdk';
+import type { EditorAPI, DisposableScope } from '@codemerge/sdk';
+import { attrString, mount, h } from '@codemerge/sdk';
 import { FormManager } from '../services/FormManager';
 import type { FormConfig } from '../types';
 import { isFormConfig } from '../types';

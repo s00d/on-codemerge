@@ -7,8 +7,8 @@ import {
   h,
   video,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
 import { VideoUploader } from './services/VideoUploader';
 import { editIcon, deleteIcon, uploadIcon, videoIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';

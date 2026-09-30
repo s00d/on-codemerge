@@ -1,7 +1,7 @@
 import { docToHTML, htmlToDoc, docToPublishedHTML } from './html';
 import { sanitizeHTML } from './sanitize';
 import { docToMarkdown, markdownToDoc } from './markdown';
-import type { PublishNodeDefinition } from '@on-codemerge/sdk';
+import type { PublishNodeDefinition } from '@codemerge/sdk';
 
 export function importHTML(html: string) {
   return htmlToDoc(sanitizeHTML(html));

@@ -1,5 +1,5 @@
-import type { DocNode, Mark } from '@on-codemerge/kernel';
-import { createDoc, createParagraph, createText } from '@on-codemerge/kernel';
+import type { DocNode, Mark } from '@codemerge/kernel';
+import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { asAttr } from '../utils/asAttr';
 
 /** Serialize document JSON tree to CommonMark/GFM-ish Markdown. */

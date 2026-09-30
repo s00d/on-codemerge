@@ -6,8 +6,8 @@ import {
   createState,
   createText,
   runCommand,
-} from '@on-codemerge/kernel';
-import type { Selection } from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
+import type { Selection } from '@codemerge/kernel';
 import {
   expandOffsetToWord,
   insertAtomAfter,

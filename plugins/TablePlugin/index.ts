@@ -1,7 +1,7 @@
 import './style.scss';
 import { tableIcon, lazyTableIcon } from '@ocm/wysiwyg/icons';
-import { definePlugin, core, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
+import { definePlugin, core, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
 import { TablePopup } from './components/TablePopup';
 import { buildTableContextMenu } from './components/tableContextMenu';
 import {

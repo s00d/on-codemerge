@@ -1,4 +1,4 @@
-import { definePublishRuntime, readOcmConfig } from '@on-codemerge/sdk';
+import { definePublishRuntime, readOcmConfig } from '@codemerge/sdk';
 
 export interface TimerPublishConfig {
   target: string;

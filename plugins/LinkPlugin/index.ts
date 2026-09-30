@@ -1,8 +1,8 @@
 import './style.scss';
 
-import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@on-codemerge/sdk';
-import type { EditorAPI } from '@on-codemerge/sdk';
-import type { Command } from '@on-codemerge/kernel';
+import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
+import type { Command } from '@codemerge/kernel';
 import { LinkMenu } from './components/LinkMenu';
 import type { LinkData } from './components/LinkMenu';
 import { linkIcon, editIcon, deleteIcon } from '@ocm/wysiwyg/icons';

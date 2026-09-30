@@ -1,14 +1,14 @@
-import { Editor as SharedEditor } from '@on-codemerge/editor';
-import type { ProseIoOverrides, SharedEditorOptions } from '@on-codemerge/editor';
-import type { DocNode, JSONDoc } from '@on-codemerge/kernel';
-import type { EditorAPI, PluginDefinition } from '@on-codemerge/sdk';
+import { Editor as SharedEditor } from '@codemerge/editor';
+import type { ProseIoOverrides, SharedEditorOptions } from '@codemerge/editor';
+import type { DocNode, JSONDoc } from '@codemerge/kernel';
+import type { EditorAPI, PluginDefinition } from '@codemerge/sdk';
 import {
   collectPublishNodes,
   composePublishedDocument,
   neededRuntimeIds,
   publishedCssHref,
   publishedJsHref,
-} from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
 import type { Translations } from '@i18n-micro/runtime';
 import { exportHTML, exportMarkdown, exportPublishedHTML, importHTML, importMarkdown } from '../io';
 import { createCeView } from './createCeView';
@@ -83,7 +83,7 @@ function createProseIo(): ProseIoOverrides {
 }
 
 /**
- * WYSIWYG entry: `@on-codemerge/editor` + CE ViewPort + prose HTML/MD/publish IO.
+ * WYSIWYG entry: `@codemerge/editor` + CE ViewPort + prose HTML/MD/publish IO.
  */
 export class Editor extends SharedEditor {
   constructor(host: HTMLElement, options: EditorOptions = {}) {

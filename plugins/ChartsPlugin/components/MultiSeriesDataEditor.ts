@@ -1,5 +1,5 @@
-import { h, mount } from '@on-codemerge/sdk';
-import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import { h, mount } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { ChartSeries } from '../types';
 import { deleteIcon } from '@ocm/wysiwyg/icons';
 import { getRandomColor } from '../utils/colors';

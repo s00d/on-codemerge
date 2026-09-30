@@ -1,4 +1,4 @@
-import type { DocNode } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
 import { docToValue, indentFromDoc, toEditorDoc, valueToDoc } from './adapters';
 
 export class ParseError extends Error {

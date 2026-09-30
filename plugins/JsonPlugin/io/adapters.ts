@@ -1,5 +1,5 @@
-import type { DocNode } from '@on-codemerge/kernel';
-import { nextId } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
+import { nextId } from '@codemerge/kernel';
 
 const VALUE_TYPES = new Set([
   'jsonObject',

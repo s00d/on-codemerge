@@ -1,5 +1,5 @@
-import type { Command, DocNode, EditorState, Operation } from '@on-codemerge/kernel';
-import { getNodeAt } from '@on-codemerge/kernel';
+import type { Command, DocNode, EditorState, Operation } from '@codemerge/kernel';
+import { getNodeAt } from '@codemerge/kernel';
 import { encodeJsonValue } from '../io/adapters';
 import { valueFromNode } from './path';
 import type { JsonLeafType } from './types';

@@ -1,9 +1,4 @@
-import type {
-  EditorAPI,
-  ToolbarConfig,
-  ToolbarConfigItem,
-  ToolbarMenuDef,
-} from '@on-codemerge/sdk';
+import type { EditorAPI, ToolbarConfig, ToolbarConfigItem, ToolbarMenuDef } from '@codemerge/sdk';
 import type { CodeWorkspaceHandle } from '../surface/workspaceView';
 
 export type CodeToolbarActionApi = {

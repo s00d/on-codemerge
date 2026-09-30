@@ -1,5 +1,5 @@
 import '@ocm/wysiwyg/tailwind.css';
-import '@on-codemerge/sdk/ui/sdk.scss';
+import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
 export {

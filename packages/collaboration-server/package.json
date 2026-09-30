@@ -1,0 +1,34 @@
+{
+  "name": "@codemerge/collaboration-server",
+  "version": "1.0.0",
+  "description": "Demo WebSocket ops relay for CodeMerge CollaborationPlugin",
+  "license": "MIT",
+  "author": "Pavel Kuzmin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s00d/on-codemerge.git",
+    "directory": "packages/collaboration-server"
+  },
+  "bin": {
+    "codemerge-collaboration-server": "./server.js"
+  },
+  "files": [
+    "server.js",
+    "README.md"
+  ],
+  "main": "./server.js",
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "build": "node -e \"console.log('@codemerge/collaboration-server: no build (CJS server.js)')\"",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "ws": "^8.12.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

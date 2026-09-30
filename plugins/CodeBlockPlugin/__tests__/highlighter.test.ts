@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { highlightHtml, lex } from '@on-codemerge/editor';
+import { highlightHtml, lex } from '@codemerge/editor';
 
 describe('code block highlight', () => {
   it('paints structurally; identical source → identical tokens', () => {

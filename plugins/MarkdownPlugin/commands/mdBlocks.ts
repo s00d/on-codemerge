@@ -1,5 +1,5 @@
-import type { Command, DocNode } from '@on-codemerge/kernel';
-import { createParagraph, createText, nextId } from '@on-codemerge/kernel';
+import type { Command, DocNode } from '@codemerge/kernel';
+import { createParagraph, createText, nextId } from '@codemerge/kernel';
 import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
 
 function appendBlock(node: DocNode): Command {

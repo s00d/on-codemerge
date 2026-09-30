@@ -1,5 +1,5 @@
-import { PopupController, foreign, h } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, foreign, h } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import type { CalendarManager } from '../services/CalendarManager';
 import { CategoryManager } from '../services/CategoryManager';
 import type { Calendar, CalendarEvent } from '../types';

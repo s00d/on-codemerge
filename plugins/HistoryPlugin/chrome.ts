@@ -1,5 +1,5 @@
-import { applyToolbarConfig, historyToolbarItems } from '@on-codemerge/sdk';
-import type { PluginContext } from '@on-codemerge/sdk';
+import { applyToolbarConfig, historyToolbarItems } from '@codemerge/sdk';
+import type { PluginContext } from '@codemerge/sdk';
 import { redoIcon, undoIcon } from '@ocm/wysiwyg/icons';
 
 /** Kernel undo/redo toolbar chrome (shared by HistoryPlugin + slim MD/JSON apps). */

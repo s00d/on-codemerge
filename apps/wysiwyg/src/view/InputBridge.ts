@@ -1,4 +1,4 @@
-import type { EditorState, Mark, Transaction } from '@on-codemerge/kernel';
+import type { EditorState, Mark, Transaction } from '@codemerge/kernel';
 import {
   collapsedAt,
   deleteBackward,
@@ -9,7 +9,7 @@ import {
   splitBlock,
   toggleMark,
   transaction,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import { pathFromAtomEl, selectionFromDom } from './EditorView';
 
 export type Dispatch = (tr: Transaction) => void;

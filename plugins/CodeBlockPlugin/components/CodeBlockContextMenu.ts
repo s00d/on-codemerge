@@ -1,5 +1,5 @@
 import { copyIcon, editIcon, deleteIcon } from '@ocm/wysiwyg/icons';
-import type { EditorAPI } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import { pathFromEl, removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
 
 export class CodeBlockContextMenu {

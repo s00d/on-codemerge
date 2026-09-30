@@ -1,4 +1,4 @@
-import type { DocNode } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
 import { docToMarkdown, markdownToDoc } from '@ocm/wysiwyg/io/markdown';
 import { docToText, emptyEditorDoc } from './adapters';
 

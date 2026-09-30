@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import { definePlugin } from '@on-codemerge/sdk';
+import { definePlugin } from '@codemerge/sdk';
 import { Editor } from '../Editor';
 import type { ViewPort } from '../ViewPort';
 

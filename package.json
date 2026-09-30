@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "2.3.0",
+  "version": "2.4.0",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
   "keywords": [
     "JavaScript",
@@ -115,8 +115,9 @@
     "./plugins/*/style.css": "./dist/plugins/*/style.css"
   },
   "scripts": {
-    "release": "pnpm publish -r",
-    "prepublishOnly": "pnpm run check && pnpm run build && pnpm run check:json-export && pnpm run check:json-types && pnpm run check:markdown-export && pnpm run check:markdown-types && pnpm run check:code-export && pnpm run check:code-types && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run publint",
+    "release": "pnpm publish -r --filter './packages/kernel' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter '.' --access public",
+    "build:packages": "pnpm --filter '@codemerge/kernel' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run build",
+    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:json-export && pnpm run check:json-types && pnpm run check:markdown-export && pnpm run check:markdown-types && pnpm run check:code-export && pnpm run check:code-types && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run publint",
     "check:json-export": "node ./scripts/check-json-export.mjs",
     "check:json-types": "node ./scripts/check-json-types.mjs",
     "check:markdown-export": "node ./scripts/check-markdown-export.mjs",
@@ -157,11 +158,11 @@
     "tailwind-variants": "^3.3.1"
   },
   "devDependencies": {
-    "@on-codemerge/editor": "workspace:*",
-    "@on-codemerge/hunspell": "workspace:*",
-    "@on-codemerge/kernel": "workspace:*",
-    "@on-codemerge/sdk": "workspace:*",
-    "@on-codemerge/wysiwyg": "workspace:*",
+    "@codemerge/editor": "workspace:*",
+    "@codemerge/hunspell": "workspace:*",
+    "@codemerge/kernel": "workspace:*",
+    "@codemerge/sdk": "workspace:*",
+    "@codemerge/wysiwyg": "workspace:*",
     "@playwright/test": "^1.63.0",
     "@tailwindcss/postcss": "^4.3.3",
     "@tailwindcss/typography": "^0.5.20",
@@ -180,6 +181,7 @@
     "publint": "^0.3.24",
     "sass": "^1.104.1",
     "tailwindcss": "^4.3.3",
+    "tsup": "^8.5.1",
     "tsx": "^4.23.15",
     "typescript": "~6.0.3",
     "untestutils": "^0.6.11",

@@ -1,7 +1,7 @@
 import './style.scss';
 
-import { definePlugin, insertAtomAfter, foreign, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@on-codemerge/sdk';
+import { definePlugin, insertAtomAfter, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { MathMenu } from './components/MathMenu';
 import { mountMathWidget } from './widgets/mountMathWidget';
 import { mathIcon } from '@ocm/wysiwyg/icons';

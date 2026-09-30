@@ -1,5 +1,5 @@
-import type { Command, DocNode, Operation, Selection } from '@on-codemerge/kernel';
-import { isCollapsed, plainText } from '@on-codemerge/kernel';
+import type { Command, DocNode, Operation, Selection } from '@codemerge/kernel';
+import { isCollapsed, plainText } from '@codemerge/kernel';
 import { core } from './core';
 import type { EditorAPI } from './types';
 

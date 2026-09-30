@@ -5,7 +5,7 @@ import {
   getNodeAt,
   runCommand,
   transaction,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import { emptyEditorDoc, valueToDoc, toEditorDoc, docToValue } from '../../io';
 import {
   insertProperty,

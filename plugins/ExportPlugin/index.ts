@@ -1,7 +1,7 @@
 import './style.scss';
 
-import { definePlugin, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { PluginToolbarOpts } from '@on-codemerge/sdk';
+import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { ExportMenu } from './components/ExportMenu';
 import { exportIcon } from '@ocm/wysiwyg/icons';
 

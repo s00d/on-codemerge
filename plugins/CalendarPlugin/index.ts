@@ -6,10 +6,10 @@ import {
   attrString,
   h,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import { foreign } from '@on-codemerge/sdk';
-import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@on-codemerge/sdk';
-import type { EditorAPI } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import { foreign } from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import { CalendarMenu } from './components/CalendarMenu';
 import { CalendarManager } from './services/CalendarManager';
 import { CalendarContextMenu } from './components/CalendarContextMenu';

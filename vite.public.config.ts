@@ -16,8 +16,8 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      '@on-codemerge/kernel': resolve(root, 'packages/kernel/src'),
-      '@on-codemerge/sdk': resolve(root, 'packages/sdk/src'),
+      '@codemerge/kernel': resolve(root, 'packages/kernel/src'),
+      '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
     },
   },
   build: {

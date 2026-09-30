@@ -7,7 +7,7 @@ import type {
   Schema,
   Selection,
   Transaction,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import type { ToolbarButton, ToolbarMenuDef } from './ui/toolbar';
 import type { PopupService } from './ui/popup';
 import type { ContextMenuService } from './ui/context-menu';

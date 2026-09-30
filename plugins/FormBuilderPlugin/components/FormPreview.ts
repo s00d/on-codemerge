@@ -1,5 +1,5 @@
-import { h, mount } from '@on-codemerge/sdk';
-import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import { h, mount } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';
 import type { FormConfig, FieldConfig } from '../types';
 

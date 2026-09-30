@@ -1,4 +1,4 @@
-/** App-local re-export — platform seal lives in `@on-codemerge/editor`. */
+/** App-local re-export — platform seal lives in `@codemerge/editor`. */
 export {
   createPlatform,
   destroyPlatform,
@@ -7,4 +7,4 @@ export {
   type Platform,
   type Extension,
   type EditorHost,
-} from '@on-codemerge/editor';
+} from '@codemerge/editor';

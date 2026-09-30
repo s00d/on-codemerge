@@ -1,6 +1,6 @@
 import type { Timer, CreateTimerData, UpdateTimerData, TimerTimeLeft } from '../types';
-import type { EditorAPI, ViewSpec } from '@on-codemerge/sdk';
-import { h } from '@on-codemerge/sdk';
+import type { EditorAPI, ViewSpec } from '@codemerge/sdk';
+import { h } from '@codemerge/sdk';
 import { parseJson } from '@ocm/wysiwyg/utils/asAttr';
 import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';
 import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';

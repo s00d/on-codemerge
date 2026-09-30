@@ -1,6 +1,6 @@
 import './style.scss';
 
-import { definePlugin, wrapInList } from '@on-codemerge/sdk';
+import { definePlugin, wrapInList } from '@codemerge/sdk';
 import { listBulletIcon, listNumberedIcon } from '@ocm/wysiwyg/icons';
 
 export function ListsPlugin() {

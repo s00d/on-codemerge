@@ -1,5 +1,5 @@
-import type { EditorAPI, DisposableScope } from '@on-codemerge/sdk';
-import { attrString, h, renderDetached } from '@on-codemerge/sdk';
+import type { EditorAPI, DisposableScope } from '@codemerge/sdk';
+import { attrString, h, renderDetached } from '@codemerge/sdk';
 import type { MathMenu } from '../components/MathMenu';
 import { MathContextMenu } from '../components/MathContextMenu';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';

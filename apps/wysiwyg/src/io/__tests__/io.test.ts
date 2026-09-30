@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { exportHTML, importHTML, exportMarkdown, importMarkdown } from '../index';
 import { parseJSON, serializeJSON } from '../json';
 import { sanitizeHTML } from '../sanitize';
-import { createDoc, createParagraph, createText, docToJSON } from '@on-codemerge/kernel';
+import { createDoc, createParagraph, createText, docToJSON } from '@codemerge/kernel';
 
 describe('io html', () => {
   it('exports and imports paragraph with bold', () => {

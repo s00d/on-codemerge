@@ -1,6 +1,6 @@
 import { sanitizeHTML } from './sanitize';
 import { htmlToDoc, docToHTML } from './html';
-import type { DocNode } from '@on-codemerge/kernel';
+import type { DocNode } from '@codemerge/kernel';
 
 export interface ClipboardPayload {
   html?: string;

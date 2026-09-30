@@ -1,5 +1,5 @@
-import { h, foreign, mount } from '@on-codemerge/sdk';
-import type { EditorAPI, MountHandle, ViewSpec } from '@on-codemerge/sdk';
+import { h, foreign, mount } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import { colorWellView } from '@ocm/wysiwyg/utils/ColorWell';
 import { BORDER_STYLES, BORDER_WIDTHS, FONT_SIZES, FONT_WEIGHTS, TEXT_ALIGNS } from '../constants';
 import type { StyleDraft } from '../constants';

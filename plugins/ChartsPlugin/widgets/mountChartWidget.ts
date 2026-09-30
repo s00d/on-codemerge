@@ -1,6 +1,6 @@
-import type { EditorAPI } from '@on-codemerge/sdk';
-import { attrString } from '@on-codemerge/sdk';
-import type { DisposableScope } from '@on-codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
+import { attrString } from '@codemerge/sdk';
+import type { DisposableScope } from '@codemerge/sdk';
 import { ChartMenu } from '../components/ChartMenu';
 import { ChartContextMenu } from '../components/ChartContextMenu';
 import { ChartRenderer } from '../services/ChartRenderer';

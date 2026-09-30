@@ -1,12 +1,6 @@
 import './style.scss';
-import {
-  definePlugin,
-  foreign,
-  h,
-  insertAtomAfter,
-  pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { PluginToolbarOpts, ViewSpec, WidgetContext } from '@on-codemerge/sdk';
+import { definePlugin, foreign, h, insertAtomAfter, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts, ViewSpec, WidgetContext } from '@codemerge/sdk';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
 import { deleteIcon, duplicateIcon, editIcon, formIcon } from '@ocm/wysiwyg/icons';
 import { TemplateManager } from './services/TemplateManager';

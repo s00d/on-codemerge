@@ -7,9 +7,9 @@ import {
   foreign,
   h,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { ViewSpec, PluginToolbarOpts } from '@on-codemerge/sdk';
-import type { EditorAPI } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import { TimerMenu } from './components/TimerMenu';
 import { TimerManager } from './services/TimerManager';
 import { timerIcon } from '@ocm/wysiwyg/icons';

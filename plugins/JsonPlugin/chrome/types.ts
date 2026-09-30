@@ -1,9 +1,4 @@
-import type {
-  EditorAPI,
-  ToolbarConfig,
-  ToolbarConfigItem,
-  ToolbarMenuDef,
-} from '@on-codemerge/sdk';
+import type { EditorAPI, ToolbarConfig, ToolbarConfigItem, ToolbarMenuDef } from '@codemerge/sdk';
 import type { JsonWorkspaceHandle } from '../surface/workspaceView';
 
 /** API passed to custom toolbar `run` handlers. */

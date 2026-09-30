@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createDoc, createParagraph, createText } from '@on-codemerge/kernel';
+import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { Editor } from '../../editor/Editor';
 import {
   blockIndexFromTarget,
@@ -7,7 +7,7 @@ import {
   selectionFromDom,
   textOffsetToDom,
 } from '../EditorView';
-import { h, mount, renderDetached } from '@on-codemerge/sdk';
+import { h, mount, renderDetached } from '@codemerge/sdk';
 
 describe('editor view branches', () => {
   it('renders headings, lists, tables, code, and atoms', () => {

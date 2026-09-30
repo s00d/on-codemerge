@@ -1,4 +1,4 @@
-import { h, renderDetached } from '@on-codemerge/sdk';
+import { h, renderDetached } from '@codemerge/sdk';
 import { parseMath } from '../utils/parse';
 import { astToMathML, escapeText } from '../utils/mathml';
 

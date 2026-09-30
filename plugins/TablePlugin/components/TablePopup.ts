@@ -1,5 +1,5 @@
-import { PopupController, foreign, h, mount } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, foreign, h, mount } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 
 export interface TableInsertOptions {
   rows: number;

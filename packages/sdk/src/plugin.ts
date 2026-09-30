@@ -1,4 +1,4 @@
-import type { Command, MarkSpec, NodeSpec } from '@on-codemerge/kernel';
+import type { Command, MarkSpec, NodeSpec } from '@codemerge/kernel';
 import type { EditorAPI } from './types';
 import type { PluginContext } from './context';
 import type { ViewSpec } from './ui/view';

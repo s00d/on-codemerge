@@ -1,5 +1,5 @@
-import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
-import { core } from '@on-codemerge/sdk';
+import type { EditorAPI, MenuItem } from '@codemerge/sdk';
+import { core } from '@codemerge/sdk';
 import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
 import { colorWellView } from '@ocm/wysiwyg/utils/ColorWell';
 import {

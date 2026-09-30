@@ -1,27 +1,75 @@
 {
-  "name": "@on-codemerge/sdk",
-  "version": "2.3.0",
-  "private": true,
+  "name": "@codemerge/sdk",
+  "version": "2.4.0",
+  "description": "Plugin API and UI primitives for CodeMerge editors",
   "license": "MIT",
+  "author": "Pavel Kuzmin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s00d/on-codemerge.git",
+    "directory": "packages/sdk"
+  },
   "files": [
-    "src",
-    "dist"
+    "dist",
+    "src/ui/sdk.scss",
+    "src/ui/tw-ref.css",
+    "src/ui/ocm-theme.css"
   ],
   "type": "module",
   "sideEffects": [
     "**/*.scss",
-    "**/*.css"
+    "**/*.css",
+    "./dist/sdk.css"
   ],
-  "main": "./src/index.ts",
-  "types": "./src/index.ts",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
   "exports": {
-    ".": "./src/index.ts",
-    "./ui": "./src/ui/index.ts",
-    "./ui/chrome": "./src/ui/chrome.ts",
-    "./ui/sdk.scss": "./src/ui/sdk.scss"
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./ui": {
+      "import": {
+        "types": "./dist/ui/index.d.ts",
+        "default": "./dist/ui/index.mjs"
+      },
+      "require": {
+        "types": "./dist/ui/index.d.cts",
+        "default": "./dist/ui/index.cjs"
+      }
+    },
+    "./ui/chrome": {
+      "import": {
+        "types": "./dist/ui/chrome.d.ts",
+        "default": "./dist/ui/chrome.mjs"
+      },
+      "require": {
+        "types": "./dist/ui/chrome.d.cts",
+        "default": "./dist/ui/chrome.cjs"
+      }
+    },
+    "./ui/sdk.scss": "./src/ui/sdk.scss",
+    "./sdk.css": "./dist/sdk.css",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build:js": "tsup --config tsup.config.ts && node ../../scripts/emit-d-cts.mjs dist/index.d.ts dist/ui/index.d.ts dist/ui/chrome.d.ts",
+    "build:css": "vite build --config vite.css.config.ts && node ../../scripts/cleanup-sdk-css-stub.mjs",
+    "build": "pnpm run build:js && pnpm run build:css",
+    "prepublishOnly": "pnpm run build"
   },
   "dependencies": {
-    "@on-codemerge/kernel": "workspace:*",
+    "@codemerge/kernel": "workspace:*",
     "tailwind-merge": "^3.7.0",
     "tailwind-variants": "^3.3.1"
   }

@@ -1,4 +1,4 @@
-import { definePublishRuntime } from '@on-codemerge/sdk';
+import { definePublishRuntime } from '@codemerge/sdk';
 import { hydrateMermaidBlocks } from '../widgets/mermaidHydrate';
 
 /** Published md_embed — hydrate mermaid hosts into inline SVG (data-node). */

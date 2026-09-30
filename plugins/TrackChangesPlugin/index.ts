@@ -1,8 +1,8 @@
 import './style.scss';
 
-import { definePlugin, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { PluginToolbarOpts } from '@on-codemerge/sdk';
-import type { Mark } from '@on-codemerge/kernel';
+import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts } from '@codemerge/sdk';
+import type { Mark } from '@codemerge/kernel';
 import { trackChangesIcon } from '@ocm/wysiwyg/icons';
 
 /**

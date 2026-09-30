@@ -1,7 +1,7 @@
 import './style.scss';
 
-import type { DocNode } from '@on-codemerge/kernel';
-import { definePlugin, setBlockAttr, core } from '@on-codemerge/sdk';
+import type { DocNode } from '@codemerge/kernel';
+import { definePlugin, setBlockAttr, core } from '@codemerge/sdk';
 import { styleIcon } from '@ocm/wysiwyg/icons';
 import { blockStylePanel } from './components/BlockStylePanel';
 import { draftToStyleJson, emptyDraft, parseStyleAttr } from './constants';

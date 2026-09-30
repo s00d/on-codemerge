@@ -1,6 +1,6 @@
 import './style.scss';
 
-import { clearStyles, definePlugin } from '@on-codemerge/sdk';
+import { clearStyles, definePlugin } from '@codemerge/sdk';
 import { clearIcon } from '@ocm/wysiwyg/icons';
 
 /**

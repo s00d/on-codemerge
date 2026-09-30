@@ -1,7 +1,7 @@
-import { h, mount } from '@on-codemerge/sdk';
-import type { MountHandle } from '@on-codemerge/sdk';
-import { mountSourceEditor } from '@on-codemerge/editor';
-import type { SourceEditorHandle } from '@on-codemerge/editor';
+import { h, mount } from '@codemerge/sdk';
+import type { MountHandle } from '@codemerge/sdk';
+import { mountSourceEditor } from '@codemerge/editor';
+import type { SourceEditorHandle } from '@codemerge/editor';
 import { jsonTextPreflight } from '../io/text';
 
 export type RawEditorHandle = {

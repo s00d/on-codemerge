@@ -1,6 +1,6 @@
 {
-  "name": "@on-codemerge/json",
-  "version": "2.3.0",
+  "name": "@codemerge/json",
+  "version": "2.4.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -14,9 +14,9 @@
     ".": "./src/app.ts"
   },
   "dependencies": {
-    "@i18n-micro/runtime": "^1.0.0",
-    "@on-codemerge/editor": "workspace:*",
-    "@on-codemerge/kernel": "workspace:*",
-    "@on-codemerge/sdk": "workspace:*"
+    "@codemerge/editor": "workspace:*",
+    "@codemerge/kernel": "workspace:*",
+    "@codemerge/sdk": "workspace:*",
+    "@i18n-micro/runtime": "^1.0.0"
   }
 }

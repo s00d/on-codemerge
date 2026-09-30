@@ -2,7 +2,7 @@
  * Prose plugin acceptance in JSON Editor (shell + JsonPlugin workspace).
  */
 import { describe, expect, it, afterEach } from 'vitest';
-import { definePlugin } from '@on-codemerge/sdk';
+import { definePlugin } from '@codemerge/sdk';
 import { Editor, JsonPlugin } from 'on-codemerge/json';
 import { TablePlugin } from 'on-codemerge/app';
 

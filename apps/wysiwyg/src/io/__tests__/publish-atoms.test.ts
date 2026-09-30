@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it, afterEach } from 'vitest';
-import { collectPublishNodes, insertAtomAfter } from '@on-codemerge/sdk';
+import { collectPublishNodes, insertAtomAfter } from '@codemerge/sdk';
 import { Editor } from '../../editor/Editor';
 import {
   BlockPlugin,

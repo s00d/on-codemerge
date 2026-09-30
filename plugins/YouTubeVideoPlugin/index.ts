@@ -5,8 +5,8 @@ import {
   h,
   iframe,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { YouTubeVideoMenu, extractYouTubeVideoId } from './components/YouTubeVideoMenu';
 import { editIcon, deleteIcon, linkIcon, youtubeIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';

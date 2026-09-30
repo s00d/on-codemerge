@@ -1,7 +1,7 @@
 import './style.scss';
 
-import { definePlugin, insertAtomAfter, foreign, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { PluginToolbarOpts, WidgetContext, ViewSpec } from '@on-codemerge/sdk';
+import { definePlugin, insertAtomAfter, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';
 import { barIcon } from '@ocm/wysiwyg/icons';
 import { ChartMenu } from './components/ChartMenu';
 import { renderChartPublish } from './publish/preview';

@@ -1,6 +1,6 @@
-import { definePlugin, h, core, pluginToolbarPlacement } from '@on-codemerge/sdk';
-import type { EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
-import type { Operation, DocNode, Transaction } from '@on-codemerge/kernel';
+import { definePlugin, h, core, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
+import type { Operation, DocNode, Transaction } from '@codemerge/kernel';
 import { collaborationIcon } from '@ocm/wysiwyg/icons';
 
 interface CollaborationPluginOptions extends PluginToolbarOpts {

@@ -6,9 +6,9 @@ import {
   createState,
   createText,
   runCommand,
-} from '@on-codemerge/kernel';
-import type { EditorState } from '@on-codemerge/kernel';
-import { core } from '@on-codemerge/sdk';
+} from '@codemerge/kernel';
+import type { EditorState } from '@codemerge/kernel';
+import { core } from '@codemerge/sdk';
 import {
   addColumn,
   addHeaderRow,

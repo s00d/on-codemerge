@@ -1,5 +1,5 @@
-import { PopupController, h } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI, ViewSpec } from '@on-codemerge/sdk';
+import { PopupController, h } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import { ExportService } from '../services/ExportService';
 import { htmlIcon, markdownIcon, textIcon, pdfIcon } from '@ocm/wysiwyg/icons';
 

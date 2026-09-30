@@ -1,5 +1,5 @@
 import type { Calendar, CalendarEvent } from '../types';
-import type { EditorAPI, MenuItem } from '@on-codemerge/sdk';
+import type { EditorAPI, MenuItem } from '@codemerge/sdk';
 import {
   copyIcon,
   deleteIcon,

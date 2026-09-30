@@ -1,5 +1,5 @@
-import { h, mount } from '@on-codemerge/sdk';
-import type { MountHandle } from '@on-codemerge/sdk';
+import { h, mount } from '@codemerge/sdk';
+import type { MountHandle } from '@codemerge/sdk';
 import { highlightHtml } from '../highlight';
 
 export type SourceEditorHandle = {

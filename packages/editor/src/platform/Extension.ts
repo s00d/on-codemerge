@@ -1,8 +1,8 @@
-import type { Command, Schema } from '@on-codemerge/kernel';
-import { createSchema, registerMark, registerNode, sealSchema } from '@on-codemerge/kernel';
-import type { EditorAPI, PluginDefinition, WidgetDefinition } from '@on-codemerge/sdk';
-import { KERNEL_UNDO_REDO_HOTKEYS, createPluginContext } from '@on-codemerge/sdk';
-import type { DomTarget } from '@on-codemerge/sdk';
+import type { Command, Schema } from '@codemerge/kernel';
+import { createSchema, registerMark, registerNode, sealSchema } from '@codemerge/kernel';
+import type { EditorAPI, PluginDefinition, WidgetDefinition } from '@codemerge/sdk';
+import { KERNEL_UNDO_REDO_HOTKEYS, createPluginContext } from '@codemerge/sdk';
+import type { DomTarget } from '@codemerge/sdk';
 
 export type EditorHost = EditorAPI;
 

@@ -7,8 +7,8 @@ import {
   h,
   img,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
 import type { UploadConfig } from '../FileUploadPlugin/config/UploadConfig';
 import { ImageInsertModal } from './components/ImageInsertModal';
 import { copyIcon, editIcon, deleteIcon, imageIcon, uploadIcon } from '@ocm/wysiwyg/icons';

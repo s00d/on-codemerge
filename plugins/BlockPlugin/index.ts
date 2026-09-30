@@ -8,8 +8,8 @@ import {
   h,
   mount,
   pluginToolbarPlacement,
-} from '@on-codemerge/sdk';
-import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@on-codemerge/sdk';
+} from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { BlockContextMenu } from './components/BlockContextMenu';
 import { blockIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';

@@ -1,7 +1,7 @@
-import { PopupController, foreign, h } from '@on-codemerge/sdk';
-import type { DisposableScope, EditorAPI } from '@on-codemerge/sdk';
-import { mountSourceEditor } from '@on-codemerge/editor';
-import type { SourceEditorHandle } from '@on-codemerge/editor';
+import { PopupController, foreign, h } from '@codemerge/sdk';
+import type { DisposableScope, EditorAPI } from '@codemerge/sdk';
+import { mountSourceEditor } from '@codemerge/editor';
+import type { SourceEditorHandle } from '@codemerge/editor';
 
 export class CodeBlockModal {
   private readonly editor: EditorAPI;

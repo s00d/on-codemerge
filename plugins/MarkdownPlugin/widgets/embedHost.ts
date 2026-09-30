@@ -6,7 +6,7 @@ import {
   docFromJSON,
   docToJSON,
   runCommand,
-} from '@on-codemerge/kernel';
+} from '@codemerge/kernel';
 import type {
   Command,
   DocNode,
@@ -15,8 +15,8 @@ import type {
   Mark,
   Selection,
   Transaction,
-} from '@on-codemerge/kernel';
-import type { EditorAPI } from '@on-codemerge/sdk';
+} from '@codemerge/kernel';
+import type { EditorAPI } from '@codemerge/sdk';
 import { emptyEditorDoc, isMarkdownEditorDoc, parseText, serializeDoc } from '../io';
 import type { MdWorkspaceHost } from '../surface/workspaceView';
 

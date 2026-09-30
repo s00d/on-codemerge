@@ -1,5 +1,5 @@
-import { h, foreign, mount } from '@on-codemerge/sdk';
-import type { EditorAPI, MountHandle, TranslateParams, ViewSpec } from '@on-codemerge/sdk';
+import { h, foreign, mount } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle, TranslateParams, ViewSpec } from '@codemerge/sdk';
 import { FONT_FAMILIES, FONT_SIZES, LINE_HEIGHTS } from '../constants';
 import type { FontDraft, FontOption } from '../constants';
 import { listAvailableFonts } from '../utils/detectFonts';

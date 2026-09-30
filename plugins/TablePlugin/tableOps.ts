@@ -1,8 +1,8 @@
 /**
  * Table structural operations on JSON doc (legacy UX parity, kernel SoT).
  */
-import type { Command, DocNode, Operation } from '@on-codemerge/kernel';
-import { core, insertBlockNearSelection } from '@on-codemerge/sdk';
+import type { Command, DocNode, Operation } from '@codemerge/kernel';
+import { core, insertBlockNearSelection } from '@codemerge/sdk';
 
 function emptyCell(): DocNode {
   return { content: [core.createParagraph([core.createText('')])], type: 'tableCell' };

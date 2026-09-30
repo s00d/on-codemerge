@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { PUBLISHED_CONTENT_CLASS } from '@on-codemerge/sdk';
+import { PUBLISHED_CONTENT_CLASS } from '@codemerge/sdk';
 import { ExportService } from '../ExportService';
 
 describe('exportService', () => {

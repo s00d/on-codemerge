@@ -1,4 +1,4 @@
-import { pickFile } from '@on-codemerge/sdk';
+import { pickFile } from '@codemerge/sdk';
 
 export class VideoUploader {
   public async selectFile(): Promise<File | null> {

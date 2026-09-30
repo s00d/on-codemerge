@@ -1,7 +1,7 @@
 import './style.scss';
 
-import { definePlugin, withMarkTarget, setMarkAttrs, setBlockAttr, core } from '@on-codemerge/sdk';
-import type { EditorAPI } from '@on-codemerge/sdk';
+import { definePlugin, withMarkTarget, setMarkAttrs, setBlockAttr, core } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import { fontSizeIcon } from '@ocm/wysiwyg/icons';
 import { defaultDraft } from './constants';
 import type { FontDraft } from './constants';

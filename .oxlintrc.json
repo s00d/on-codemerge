@@ -233,7 +233,7 @@
       }
     },
     {
-      "files": ["collaboration-server/**/*.{js,mjs,cjs}"],
+      "files": ["packages/collaboration-server/**/*.{js,mjs,cjs}"],
       "env": {
         "node": true
       },

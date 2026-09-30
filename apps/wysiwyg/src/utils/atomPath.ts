@@ -1,4 +1,4 @@
-import type { Command } from '@on-codemerge/kernel';
+import type { Command } from '@codemerge/kernel';
 
 /** Resolve JSON doc path from a mounted atom widget DOM node. */
 export function pathFromEl(el: Element | null): number[] | null {
