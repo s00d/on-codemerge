@@ -5,6 +5,26 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-09-30
+
+### Added
+
+- **Media gallery** shared UI for Image / FileUpload: search, refresh, grid/list, delete
+- **Image insert modal** with crop before insert; gallery + upload wired through media API
+- **Media API helpers** (`list` / `upload` / `delete`) and optional `endpoints.delete` on upload config
+- **Markdown remote preview**: busy spinner in toolbar (SDK `ToolbarButton` `align` + `view`)
+- **Docs DEV API** (VitePress `configureServer` only): media/files/md-preview against `docs/.vitepress/dev-api/uploads/`
+
+### Changed
+
+- ImagePlugin no longer ships a separate `ImageUploader`; uses FileUpload media stack
+- SDK toolbar buttons support end-aligned custom views (e.g. MD preview spinner)
+
+### Fixed
+
+- ChartMenu: clear preview/`setTimeout`/`rAF` on popup dispose (no leftover deferred callbacks)
+- `charts-plugin.md`: broken 4-backtick fences that could trip VitePress local-search Shiki WASM (`memory access out of bounds`)
+
 ## [2.2.0] - 2026-09-29
 
 ### Added

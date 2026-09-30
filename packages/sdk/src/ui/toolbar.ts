@@ -26,6 +26,16 @@ export interface ToolbarButton {
   order?: number;
   /** Drop into a named overflow menu instead of the top-level bar. */
   menu?: string;
+  /**
+   * Bar cluster: `start` (default, left) or `end` (trailing, after flex spacer).
+   * Menued items ignore this (they live in the overflow menu).
+   */
+  align?: 'start' | 'end';
+  /**
+   * Custom chrome instead of a button. When set, icon/label/onClick/command are ignored.
+   * Return `null` to hide (e.g. idle spinner). Still sorted by group/order/align.
+   */
+  view?: () => ViewSpec | null;
   active?: () => boolean;
   disabled?: () => boolean;
 }
@@ -38,6 +48,8 @@ export interface ToolbarMenuDef {
   order?: number;
   /** Bar segment for the menu trigger. */
   group?: string;
+  /** Same as ToolbarButton.align — trailing cluster when `end`. */
+  align?: 'start' | 'end';
 }
 
 export type ToolbarAction =
@@ -477,13 +489,26 @@ export class ToolbarPanel {
       entries.push({ kind: 'menu', def });
     }
 
-    entries.sort((a, b) => {
-      const aa = a.kind === 'btn' ? a.btn : a.def;
-      const bb = b.kind === 'btn' ? b.btn : b.def;
-      return compareBarItems(aa, bb);
-    });
+    const start = entries.filter((e) => (e.kind === 'btn' ? e.btn : e.def).align !== 'end');
+    const end = entries.filter((e) => (e.kind === 'btn' ? e.btn : e.def).align === 'end');
+    start.sort(compareBarEntries);
+    end.sort(compareBarEntries);
 
     const children: ViewSpec[] = [];
+    this.appendCluster(children, start);
+    if (end.length > 0) {
+      children.push(
+        h('span', {
+          class: 'ocm-toolbar__spacer',
+          attrs: { 'aria-hidden': 'true', 'data-ocm-toolbar-spacer': '1' },
+        })
+      );
+      this.appendCluster(children, end);
+    }
+    return h('fragment', null, ...children);
+  }
+
+  private appendCluster(children: ViewSpec[], entries: BarEntryLike[]): void {
     let lastGroup = '';
     for (const entry of entries) {
       const group = entry.kind === 'btn' ? entry.btn.group : entry.def.group;
@@ -496,11 +521,21 @@ export class ToolbarPanel {
         children.push(h('span', { class: this.ui.sep() }));
         lastGroup = '';
       }
-      children.push(
-        entry.kind === 'btn' ? this.buttonSpec(entry.btn) : this.menuTriggerSpec(entry.def)
-      );
+      const spec = this.entrySpec(entry);
+      if (spec !== null) {
+        children.push(spec);
+      }
     }
-    return h('fragment', null, ...children);
+  }
+
+  private entrySpec(entry: BarEntryLike): ViewSpec | null {
+    if (entry.kind === 'menu') {
+      return this.menuTriggerSpec(entry.def);
+    }
+    if (entry.btn.view) {
+      return entry.btn.view();
+    }
+    return this.buttonSpec(entry.btn);
   }
 
   private render(): void {
@@ -519,4 +554,12 @@ export class ToolbarPanel {
     this.buttons.clear();
     this.menus.clear();
   }
+}
+
+type BarEntryLike = { kind: 'btn'; btn: ToolbarButton } | { kind: 'menu'; def: ToolbarMenuDef };
+
+function compareBarEntries(a: BarEntryLike, b: BarEntryLike): number {
+  const aa = a.kind === 'btn' ? a.btn : a.def;
+  const bb = b.kind === 'btn' ? b.btn : b.def;
+  return compareBarItems(aa, bb);
 }

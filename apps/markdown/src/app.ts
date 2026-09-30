@@ -28,6 +28,7 @@ export {
   type MarkdownPluginFeatures,
   type MdCustomElement,
   type MdElementRegistry,
+  type MdRemotePreviewOptions,
   type MdToolbarOptions,
   type MdToolbarItem,
   type MdToolbarMenu,

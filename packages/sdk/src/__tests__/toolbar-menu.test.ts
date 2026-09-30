@@ -1,5 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { clearPortalRoot } from '../ui/portal';
+import { h } from '../ui/view';
 import { ToolbarPanel } from '../ui/toolbar';
 
 const waitTick = (): Promise<void> =>
@@ -224,6 +225,60 @@ describe('toolbarPanel menus', () => {
     bar.add({ id: 'x', label: 'X', group: 'custom' });
     bar.refresh();
     expect(host.querySelector('[data-id="x"]')).toBeTruthy();
+    bar.destroy();
+    host.remove();
+  });
+
+  it('align:end places items after spacer; view() can render custom chrome', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const bar = new ToolbarPanel(host, () => {});
+    bar.add({ id: 'left', label: 'L', group: 'marks', order: 1 });
+    bar.add({
+      id: 'right-btn',
+      label: 'R',
+      align: 'end',
+      group: 'tools',
+      order: 1,
+      onClick: () => {},
+    });
+    let showChrome = true;
+    bar.add({
+      id: 'custom',
+      align: 'end',
+      group: 'overlay',
+      order: 2,
+      view: () =>
+        showChrome ? h('span', { attrs: { 'data-ocm-custom-chrome': '1' } }, 'busy') : null,
+    });
+
+    const toolbar = host.querySelector('[role="toolbar"]');
+    expect(toolbar).toBeTruthy();
+    const spacer = host.querySelector('[data-ocm-toolbar-spacer]');
+    expect(spacer).toBeTruthy();
+    const left = host.querySelector('[data-id="left"]');
+    const right = host.querySelector('[data-id="right-btn"]');
+    const custom = host.querySelector('[data-ocm-custom-chrome]');
+    expect(left).toBeTruthy();
+    expect(right).toBeTruthy();
+    expect(custom?.textContent).toBe('busy');
+
+    // DOM order: left … spacer … right / custom
+    const kids = [...(toolbar?.children ?? [])];
+    const leftIdx = kids.indexOf(left as Element);
+    const spacerIdx = kids.indexOf(spacer as Element);
+    const rightIdx = kids.indexOf(right as Element);
+    expect(leftIdx).toBeGreaterThanOrEqual(0);
+    expect(spacerIdx).toBeGreaterThan(leftIdx);
+    expect(rightIdx).toBeGreaterThan(spacerIdx);
+
+    showChrome = false;
+    bar.refresh();
+    expect(host.querySelector('[data-ocm-custom-chrome]')).toBeNull();
+    // Spacer remains while other end items exist
+    expect(host.querySelector('[data-ocm-toolbar-spacer]')).toBeTruthy();
+
     bar.destroy();
     host.remove();
   });

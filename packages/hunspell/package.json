@@ -1,6 +1,6 @@
 {
   "name": "@on-codemerge/hunspell",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "private": true,
   "license": "MIT AND BSD-3-Clause",
   "files": [

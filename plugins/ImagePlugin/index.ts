@@ -9,12 +9,14 @@ import {
   pluginToolbarPlacement,
 } from '@on-codemerge/sdk';
 import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@on-codemerge/sdk';
-import { ImageUploader } from './services/ImageUploader';
+import type { UploadConfig } from '../FileUploadPlugin/config/UploadConfig';
+import { ImageInsertModal } from './components/ImageInsertModal';
 import { copyIcon, editIcon, deleteIcon, imageIcon, uploadIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
 import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
 import { removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
+
+export type ImagePluginOptions = Partial<UploadConfig> & PluginToolbarOpts;
 
 function alignStyle(align: string): Record<string, string> {
   if (align === 'left') {
@@ -29,76 +31,24 @@ function alignStyle(align: string): Record<string, string> {
   return {};
 }
 
-function openImageProps(
-  editor: EditorAPI,
-  attrs: Record<string, unknown>,
-  updateAttrs: (partial: Record<string, unknown>) => void
-): void {
-  const t = (k: string) => editor.t(k) || k;
-  const src = attrString(attrs.src, '');
-  const isData = src.startsWith('data:');
-  editor.ui.popup.open({
-    title: t('common.edit'),
-    className: 'image-props-popup',
-    size: 'md',
-    closeOnClickOutside: true,
-    items: [
-      {
-        type: 'input',
-        id: 'alt',
-        label: t('common.title'),
-        placeholder: 'Alt text',
-        value: attrString(attrs.alt, ''),
-      },
-      {
-        type: 'input',
-        id: 'src',
-        label: t('image.imageUrl'),
-        placeholder: 'https://…',
-        value: isData ? '' : src,
-      },
-      {
-        type: 'number',
-        id: 'width',
-        label: t('common.width'),
-        value: Number(attrs.width) || 0,
-      },
-      {
-        type: 'number',
-        id: 'height',
-        label: t('common.height'),
-        value: Number(attrs.height) || 0,
-      },
-    ],
-    buttons: [
-      { label: t('common.cancel'), variant: 'secondary', onClick: () => {} },
-      {
-        label: t('common.save'),
-        variant: 'primary',
-        onClick: (values) => {
-          const nextSrc = String(values.src ?? '').trim();
-          const width = Number(values.width) || 0;
-          const height = Number(values.height) || 0;
-          updateAttrs({
-            alt: String(values.alt ?? ''),
-            ...(nextSrc ? { src: nextSrc } : {}),
-            width,
-            height,
-          });
-        },
-      },
-    ],
-  });
+function dimPx(v: unknown): string | undefined {
+  const n = typeof v === 'number' ? v : Number(v);
+  if (!Number.isFinite(n) || n <= 0) {
+    return undefined;
+  }
+  return `${Math.round(n)}px`;
 }
 
-function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpec {
+function renderImage(
+  attrs: Record<string, unknown>,
+  wctx: WidgetContext,
+  modal: ImageInsertModal | null
+): ViewSpec {
   const align = attrString(attrs.align, '');
   const src = attrString(attrs.src, '');
   const alt = attrString(attrs.alt, '');
-  const widthStr = asAttr(attrs.width);
-  const heightStr = asAttr(attrs.height);
-  const width = widthStr === '' ? undefined : `${widthStr}px`;
-  const height = heightStr === '' ? undefined : `${heightStr}px`;
+  const width = dimPx(attrs.width);
+  const height = dimPx(attrs.height);
   const resizer = wctx.scope.slot<Resizer>();
 
   const openMenu = (x: number, y: number) => {
@@ -109,9 +59,18 @@ function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
           label: t('common.edit'),
           icon: editIcon,
           onClick: () => {
-            openImageProps(wctx.editor, attrs, (partial) => {
-              wctx.updateAttrs(partial);
-            });
+            modal?.show(
+              (result) => {
+                wctx.updateAttrs(result);
+              },
+              {
+                src,
+                alt,
+                align,
+                width: Number(attrs.width) || 0,
+                height: Number(attrs.height) || 0,
+              }
+            );
           },
         },
         {
@@ -133,22 +92,15 @@ function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
           },
         },
         {
-          label: t('fileUpload.title'),
+          label: t('image.changeSource'),
           icon: uploadIcon,
           onClick: () => {
-            void (async () => {
-              const uploader = new ImageUploader();
-              try {
-                const file = await uploader.selectFile();
-                if (!file) {
-                  return;
-                }
-                const dataUrl = await uploader.readFileAsDataUrl(file);
-                wctx.updateAttrs({ src: dataUrl, alt: file.name });
-              } catch {
-                wctx.editor.notify(t('image.failedToUploadImage'));
-              }
-            })();
+            modal?.show(
+              (result) => {
+                wctx.updateAttrs(result);
+              },
+              { alt, align }
+            );
           },
         },
         { type: 'divider' },
@@ -183,7 +135,11 @@ function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
                 resizer.clear();
               },
               onResizeEnd: () => {
-                wctx.updateAttrs({ width: host.offsetWidth, height: host.offsetHeight });
+                const nextW = host.offsetWidth;
+                const nextH = host.offsetHeight;
+                if (nextW > 0 && nextH > 0) {
+                  wctx.updateAttrs({ width: nextW, height: nextH });
+                }
               },
             })
           );
@@ -208,23 +164,37 @@ function renderImage(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
   );
 }
 
-async function pickAndInsert(editor: EditorAPI, uploader: ImageUploader): Promise<void> {
-  try {
-    const file = await uploader.selectFile();
-    if (!file) {
-      return;
-    }
-    const dataUrl = await uploader.readFileAsDataUrl(file);
-    editor.run(insertAtomAfter('image', { src: dataUrl, align: '', alt: file.name }));
-  } catch (error) {
-    console.error('Failed to upload image:', error);
-    editor.notify(editor.t('image.failedToUploadImage'));
+function insertResult(
+  editor: EditorAPI,
+  result: {
+    src: string;
+    alt: string;
+    align: string;
+    width: number;
+    height: number;
   }
+): void {
+  editor.run(
+    insertAtomAfter('image', {
+      src: result.src,
+      alt: result.alt,
+      align: result.align,
+      width: result.width,
+      height: result.height,
+    })
+  );
 }
 
-export function ImagePlugin(opts?: PluginToolbarOpts) {
-  const uploader = new ImageUploader();
-  let openPicker: (() => void) | null = null;
+export function ImagePlugin(opts: ImagePluginOptions = {}) {
+  const { menu, group, order, ...uploadConfig } = opts;
+  const toolbarOpts: PluginToolbarOpts = {
+    ...(menu !== undefined ? { menu } : {}),
+    ...(group !== undefined ? { group } : {}),
+    ...(order !== undefined ? { order } : {}),
+  };
+
+  let openPicker: ((seed?: { file?: File | null }) => void) | null = null;
+  let modalRef: ImageInsertModal | null = null;
 
   return definePlugin({
     name: 'image',
@@ -245,14 +215,18 @@ export function ImagePlugin(opts?: PluginToolbarOpts) {
     ],
     setup(ctx) {
       const editor = ctx.editor;
-      openPicker = () => {
-        ctx.defer(() => pickAndInsert(editor, uploader));
+      const modal = new ImageInsertModal(editor, uploadConfig, ctx.scope);
+      modalRef = modal;
+      openPicker = (seed = {}) => {
+        modal.show((result) => {
+          insertResult(editor, result);
+        }, seed);
       };
       ctx.toolbar.add({
         id: 'image',
         icon: imageIcon,
         title: () => editor.t('image.insert'),
-        ...pluginToolbarPlacement({ menu: 'insert', order: 40 }, opts),
+        ...pluginToolbarPlacement({ menu: 'insert', order: 40 }, toolbarOpts),
         onClick: () => openPicker?.(),
       });
 
@@ -262,14 +236,20 @@ export function ImagePlugin(opts?: PluginToolbarOpts) {
           return;
         }
         e.preventDefault();
-        ctx.defer(async () => {
-          const dataUrl = await uploader.readFileAsDataUrl(file);
-          editor.run(insertAtomAfter('image', { src: dataUrl, align: '', alt: file.name }));
-        });
+        openPicker?.({ file });
+      });
+
+      ctx.own({
+        destroy: () => {
+          modalRef = null;
+          openPicker = null;
+        },
       });
     },
     widgets: {
-      image: { render: renderImage },
+      image: {
+        render: (attrs, wctx) => renderImage(attrs, wctx, modalRef),
+      },
     },
   });
 }

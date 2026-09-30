@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import svgLoader from 'vite-svg-loader';
 import tailwindcss from '@tailwindcss/vite';
 import { scssPreprocessorOptions } from '../../scripts/scss-vite-options.ts';
+import { docsDevApiPlugin } from './dev-api/plugin.ts';
 
 const root = resolve(import.meta.dirname, '../..');
 
@@ -337,6 +338,8 @@ export default defineConfig({
   vite: {
     assetsInclude: ['**/*.aff', '**/*.dic'],
     plugins: [
+      // DEV-only /api/media|/api/files|/api/md-preview — configureServer only (not in static build).
+      docsDevApiPlugin(),
       // Vite 8 + VitePress SSR: @import "tailwindcss" fails via postcss-import alone.
       tailwindcss(),
       svgLoader({

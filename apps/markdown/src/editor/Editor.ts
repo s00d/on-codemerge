@@ -23,6 +23,7 @@ import {
 import type {
   MdCustomElement,
   MdElementRegistry,
+  MdRemotePreviewOptions,
   MdToolbarOptions,
   ParseError,
 } from '../../../../plugins/MarkdownPlugin';
@@ -41,6 +42,11 @@ export interface EditorOptions {
   elements?: MdCustomElement[];
   /** Declarative toolbar menus / items (passed to MarkdownPlugin workspace). */
   toolbar?: MdToolbarOptions;
+  /**
+   * Remote right-pane preview: POST `{ markdown }` → `text/html`.
+   * Omit → local projector. Does not affect `getHTML` / publish.
+   */
+  preview?: MdRemotePreviewOptions;
   /** Override default shell ViewPort (advanced hosts). */
   createView?: SharedEditorOptions['createView'];
 }
@@ -60,7 +66,11 @@ export class Editor extends SharedEditor {
       createView: options.createView ?? createShellView,
       plugins:
         options.plugins ??
-        createDefaultPlugins({ elements: options.elements, toolbar: options.toolbar }),
+        createDefaultPlugins({
+          elements: options.elements,
+          toolbar: options.toolbar,
+          preview: options.preview,
+        }),
     };
     super(host, shared);
     this.elements = elements;

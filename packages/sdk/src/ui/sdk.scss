@@ -61,6 +61,18 @@
   }
 }
 
+.ocm-toolbar__spacer {
+  @apply min-w-2 flex-1 shrink;
+}
+
+.ocm-toolbar__busy {
+  @apply inline-flex size-7 shrink-0 items-center justify-center text-ocm-text-muted;
+}
+
+.ocm-toolbar__busy-spinner {
+  @apply size-3.5 animate-spin rounded-full border-2 border-ocm-border border-t-sky-500;
+}
+
 .ocm-toolbar__btn {
   @apply inline-flex size-7 shrink-0 cursor-pointer items-center justify-center rounded-ocm-sm border-0 bg-transparent text-ocm-text-muted transition-colors;
   @apply hover:bg-ocm-surface-hover hover:text-ocm-text;

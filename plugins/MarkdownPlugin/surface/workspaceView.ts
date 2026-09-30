@@ -5,7 +5,7 @@ import type { MountHandle } from '@on-codemerge/sdk';
 import { replaceChildrenWithSafeHtml } from '@ocm/wysiwyg/utils/safeHtml';
 import { defaultMdElementRegistry } from '../elements/registry';
 import type { MdElementRegistry } from '../elements/types';
-import { docToText, emptyEditorDoc, parseText } from '../io';
+import { docToText, emptyEditorDoc, escapeHtml, parseText } from '../io';
 import { projectPreviewHtml } from '../io/projectPreview';
 import { mountSourceEditor } from '@on-codemerge/editor';
 import type { SourceEditorHandle } from '@on-codemerge/editor';
@@ -22,9 +22,22 @@ const SOT_DEBOUNCE_MS = 150;
  * right pane coalesces full project+DOM+mermaid work.
  */
 const PREVIEW_DEBOUNCE_MS = 280;
+/** Trailing debounce for remote POST preview (network-friendly default). */
+const REMOTE_PREVIEW_DEBOUNCE_MS = 500;
 
 export type MdWorkspaceHost = EditorAPI & {
   replaceDocument?(doc: DocNode | JSONDoc): void;
+};
+
+/**
+ * Optional server-side preview: POST `{ markdown }` → `text/html`.
+ * When set, local projector / mermaid hydrate are skipped for the right pane.
+ */
+export type MdRemotePreviewOptions = {
+  url: string;
+  headers?: Record<string, string>;
+  /** Trailing debounce before POST (default 500). */
+  debounceMs?: number;
 };
 
 export type MdWorkspaceOptions = {
@@ -38,6 +51,10 @@ export type MdWorkspaceOptions = {
   onDiscard?: () => void;
   /** Custom + builtin element registry for preview render. */
   elements?: MdElementRegistry;
+  /** Remote HTML preview (workspace). Omit → local `projectPreviewHtml`. */
+  preview?: MdRemotePreviewOptions;
+  /** Fired when a remote preview fetch starts / settles (toolbar busy chrome). */
+  onRemotePreviewBusy?: (busy: boolean) => void;
 };
 
 export type MdWorkspaceHandle = {
@@ -328,6 +345,96 @@ async function paintPreviewFromDoc(
   sync?.alignPreviewToEditor();
 }
 
+type RemotePreviewCtl = {
+  lastFetched: string | null;
+  hadGood: boolean;
+  fetchAbort: AbortController | null;
+  busy: boolean;
+  onBusyChange?: (busy: boolean) => void;
+};
+
+function setRemoteBusy(ctl: RemotePreviewCtl, busy: boolean): void {
+  if (ctl.busy === busy) {
+    return;
+  }
+  ctl.busy = busy;
+  ctl.onBusyChange?.(busy);
+}
+
+async function paintPreviewRemote(
+  slot: HTMLElement,
+  markdown: string,
+  preview: MdRemotePreviewOptions,
+  ctl: RemotePreviewCtl,
+  sync?: ScrollSync | null
+): Promise<void> {
+  if (markdown === ctl.lastFetched) {
+    setRemoteBusy(ctl, false);
+    return;
+  }
+
+  ctl.fetchAbort?.abort();
+  const ac = new AbortController();
+  ctl.fetchAbort = ac;
+  setRemoteBusy(ctl, true);
+
+  try {
+    const res = await fetch(preview.url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'text/html',
+        ...preview.headers,
+      },
+      body: JSON.stringify({ markdown }),
+      signal: ac.signal,
+    });
+    if (ac.signal.aborted) {
+      return;
+    }
+    if (!res.ok) {
+      throw new Error(`Preview HTTP ${res.status}`);
+    }
+    const html = await res.text();
+    if (ac.signal.aborted) {
+      return;
+    }
+    const hash = previewHtmlHash(html);
+    if (slot.getAttribute('data-ocm-preview-hash') === hash) {
+      ctl.lastFetched = markdown;
+      ctl.hadGood = true;
+      return;
+    }
+    replaceChildrenWithSafeHtml(slot, html);
+    slot.setAttribute('data-ocm-preview-hash', hash);
+    ctl.lastFetched = markdown;
+    ctl.hadGood = true;
+    requestAnimationFrame(() => {
+      if (!ac.signal.aborted) {
+        sync?.alignPreviewToEditor();
+      }
+    });
+  } catch (err) {
+    if (ac.signal.aborted || (err instanceof DOMException && err.name === 'AbortError')) {
+      return;
+    }
+    // Keep last good HTML; only paint an error stub when the pane is empty.
+    if (!ctl.hadGood) {
+      const msg = err instanceof Error ? err.message : 'Preview failed';
+      replaceChildrenWithSafeHtml(
+        slot,
+        `<p class="ocm-md-preview-error text-sm text-red-600 p-3">${escapeHtml(msg)}</p>`
+      );
+      slot.removeAttribute('data-ocm-preview-hash');
+    }
+  } finally {
+    if (ctl.fetchAbort === ac) {
+      ctl.fetchAbort = null;
+      setRemoteBusy(ctl, false);
+    }
+  }
+}
+
 export function mountMdWorkspace(
   editor: MdWorkspaceHost,
   contentHost: HTMLElement,
@@ -335,6 +442,10 @@ export function mountMdWorkspace(
 ): MdWorkspaceHandle {
   const dirtyDraft = options.dirtyDraft === true;
   const elements = options.elements ?? defaultMdElementRegistry;
+  const remotePreview = options.preview?.url ? options.preview : null;
+  const previewDebounceMs = remotePreview
+    ? Math.max(0, remotePreview.debounceMs ?? REMOTE_PREVIEW_DEBOUNCE_MS)
+    : PREVIEW_DEBOUNCE_MS;
   contentHost.classList.add('ocm-md-root');
 
   let dirty = false;
@@ -356,6 +467,13 @@ export function mountMdWorkspace(
     set(next: AbortController) {
       hydrateAbort = next;
     },
+  };
+  const remoteCtl: RemotePreviewCtl = {
+    lastFetched: null,
+    hadGood: false,
+    fetchAbort: null,
+    busy: false,
+    onBusyChange: options.onRemotePreviewBusy,
   };
 
   const setDirty = (next: boolean): void => {
@@ -431,6 +549,11 @@ export function mountMdWorkspace(
     }
     previewRaf = requestAnimationFrame(() => {
       previewRaf = 0;
+      if (remotePreview) {
+        setRemoteBusy(remoteCtl, true);
+        void paintPreviewRemote(slot, docToText(doc), remotePreview, remoteCtl, scrollSync);
+        return;
+      }
       void paintPreviewFromDoc(slot, doc, elements, scrollSync, hydrateCtl);
     });
   };
@@ -449,7 +572,7 @@ export function mountMdWorkspace(
     previewTimer = setTimeout(() => {
       previewTimer = null;
       flushPreviewPaint();
-    }, PREVIEW_DEBOUNCE_MS);
+    }, previewDebounceMs);
   };
 
   /** True while CM→SoT commit runs — update() must not rewrite CM (caret jump). */
@@ -493,17 +616,26 @@ export function mountMdWorkspace(
     if (dirtyDraft) {
       setDirty(text !== lastSoTMd);
       // Draft preview: debounce parse → coalesced projector (parent SoT untouched).
+      // Remote: still need a doc shell for flush; parse is local MD→tree only.
       if (previewTimer) {
         clearTimeout(previewTimer);
       }
       previewTimer = setTimeout(() => {
         previewTimer = null;
+        if (remotePreview) {
+          const slot = shellHandle?.refs.preview;
+          if (slot instanceof HTMLElement) {
+            setRemoteBusy(remoteCtl, true);
+            void paintPreviewRemote(slot, text, remotePreview, remoteCtl, scrollSync);
+          }
+          return;
+        }
         const parsed = parseText(text);
         if (parsed.ok) {
           pendingPreviewDoc = parsed.doc;
           flushPreviewPaint();
         }
-      }, PREVIEW_DEBOUNCE_MS);
+      }, previewDebounceMs);
       return;
     }
     scheduleLiveSoT(text);
@@ -650,6 +782,8 @@ export function mountMdWorkspace(
     destroy(): void {
       hydrateAbort?.abort();
       hydrateAbort = null;
+      remoteCtl.fetchAbort?.abort();
+      remoteCtl.fetchAbort = null;
       paneSplitter?.unbind();
       paneSplitter = null;
       scrollSync?.unbind();

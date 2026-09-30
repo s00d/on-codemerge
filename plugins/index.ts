@@ -1,4 +1,4 @@
-import type { PluginDefinition } from '@on-codemerge/sdk';
+import type { PluginDefinition, PluginToolbarOpts } from '@on-codemerge/sdk';
 
 import { AIAssistantPlugin } from './AIAssistantPlugin';
 import { AlignmentPlugin } from './AlignmentPlugin';
@@ -15,6 +15,7 @@ import { ColorPlugin } from './ColorPlugin';
 import { CommentsPlugin } from './CommentsPlugin';
 import { ExportPlugin } from './ExportPlugin';
 import { FileUploadPlugin } from './FileUploadPlugin';
+import type { UploadConfig } from './FileUploadPlugin/config/UploadConfig';
 import { FontPlugin } from './FontPlugin';
 import { FooterPlugin } from './FooterPlugin';
 import { FootnotesPlugin } from './FootnotesPlugin';
@@ -22,6 +23,7 @@ import { FormBuilderPlugin } from './FormBuilderPlugin';
 import { HistoryPlugin, HistoryChromePlugin } from './HistoryPlugin';
 import { HTMLViewerPlugin } from './HTMLViewerPlugin';
 import { ImagePlugin } from './ImagePlugin';
+import type { ImagePluginOptions } from './ImagePlugin';
 import { JsonPlugin } from './JsonPlugin';
 import type { JsonPluginOptions, JsonPluginFeatures } from './JsonPlugin';
 import { MarkdownPlugin } from './MarkdownPlugin';
@@ -94,9 +96,16 @@ export type { JsonPluginOptions, JsonPluginFeatures };
 export type { MarkdownPluginOptions, MarkdownPluginFeatures };
 export type { CodeBlockPluginOptions, CodeBlockPluginFeatures };
 export type { SpellCheckerOptions, SpellDictionaryFiles } from './SpellCheckerPlugin';
+export type { ImagePluginOptions } from './ImagePlugin';
+export type { UploadConfig } from './FileUploadPlugin/config/UploadConfig';
+
+export type CreateDefaultPluginsOptions = {
+  image?: ImagePluginOptions;
+  fileUpload?: Partial<UploadConfig> & PluginToolbarOpts;
+};
 
 /** Full default plugin set (toolbar panel is core-owned; plugins register buttons). */
-export function createDefaultPlugins(): PluginDefinition[] {
+export function createDefaultPlugins(opts: CreateDefaultPluginsOptions = {}): PluginDefinition[] {
   return [
     ToolbarPlugin(),
     HistoryPlugin(),
@@ -110,10 +119,10 @@ export function createDefaultPlugins(): PluginDefinition[] {
     BlockPlugin(),
     BlockStylePlugin(),
     TablePlugin(),
-    ImagePlugin(),
+    ImagePlugin(opts.image ?? {}),
     VideoPlugin(),
     YouTubeVideoPlugin(),
-    FileUploadPlugin(),
+    FileUploadPlugin(opts.fileUpload ?? {}),
     PDFEmbedPlugin(),
     CodeBlockPlugin(),
     MathPlugin(),

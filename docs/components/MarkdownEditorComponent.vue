@@ -37,6 +37,7 @@ import {
   hydrateMermaidBlocks,
   runInsertMarkdown,
 } from '../../apps/markdown/src/app';
+import { docsMdPreview } from './devMediaConfig';
 
 const DEMO_MD = `# Markdown editor
 
@@ -100,6 +101,7 @@ export default {
     const editor = new Editor(this.$refs.editorContainer, {
       chrome: this.chrome,
       elements: [tipElement],
+      ...(docsMdPreview ? { preview: docsMdPreview } : {}),
       // toolbar replaces the domain preset — spread defaultMdToolbar, then extras.
       toolbar: {
         menus: [...(base.menus ?? []), { id: 'md-tools', label: 'Tools', order: 20 }],

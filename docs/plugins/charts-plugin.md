@@ -346,8 +346,9 @@ function MyEditor() {
 
   useEffect(() => {
     if (editorRef.current && !editorInstance.current) {
-      editorInstance.current = new Editor(editorRef.current);
-      // v2: pass ChartsPlugin() in Editor constructor plugins: [...]
+      editorInstance.current = new Editor(editorRef.current, {
+        plugins: [ChartsPlugin()],
+      });
     }
 
     return () => {
@@ -376,14 +377,15 @@ import 'on-codemerge/public.css';
 export default {
   name: 'MyEditor',
   mounted() {
-    this.editor = new Editor(this.$refs.editorContainer);
-    this.// use plugins: [ChartsPlugin()];
+    this.editor = new Editor(this.$refs.editorContainer, {
+      plugins: [ChartsPlugin()],
+    });
   },
   beforeDestroy() {
     if (this.editor) {
       this.editor.destroy();
     }
-  }
+  },
 };
 </script>
 ```
@@ -408,11 +410,7 @@ const jsonData = `[
 
 ### Export Data
 
-````javascript
-// Export chart data
-const data =
-// Export chart as image
-const imageData = ```
+Chart data lives in the atom attrs (`data-data`, etc.). Export as PNG from the chart context menu (right-click → Export Chart). There is no separate `exportChart` command in v2.
 
 ## Troubleshooting
 
@@ -443,11 +441,11 @@ const imageData = ```
 Enable debug logging:
 
 ```javascript
-// Add console logging
 console.log('Charts plugin initialized');
-
-// Check chart events
-````
+editor.on('docChanged', () => {
+  console.log('doc changed');
+});
+```
 
 ## Browser Support
 

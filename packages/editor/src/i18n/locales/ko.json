@@ -507,7 +507,34 @@
     "insert": "이미지 삽입",
     "imageButton": "이미지 버튼",
     "imageUrl": "이미지 URL:",
-    "failedToUploadImage": "이미지 업로드 실패"
+    "failedToUploadImage": "이미지 업로드 실패",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading gallery…",
+    "galleryEmpty": "No images yet — upload one to get started",
+    "galleryFailed": "Failed to load gallery",
+    "changeSource": "Change image",
+    "aspectFree": "Free",
+    "align": "Align",
+    "alignNone": "None",
+    "insertConfirm": "Insert",
+    "inserting": "Inserting…",
+    "pickFirst": "Choose or upload an image first",
+    "fileTooLarge": "Image exceeds the maximum file size",
+    "invalidType": "Only image files are allowed",
+    "rotateLeft": "Rotate left 90°",
+    "rotateRight": "Rotate right 90°",
+    "rotateFailed": "Could not rotate image",
+    "lockSizeAspect": "Keep width/height aspect",
+    "outputFormat": "Output format",
+    "quality": "Quality",
+    "gallerySearchPlaceholder": "Search images by name…",
+    "galleryRefresh": "Refresh",
+    "galleryNoMatches": "No images match your search",
+    "galleryResults": "{n} images",
+    "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
+    "galleryDeleting": "Deleting…",
+    "galleryDeleteFailed": "Failed to delete image"
   },
   "font": {
     "size": "크기",
@@ -526,7 +553,24 @@
   },
   "fileUpload": {
     "title": "파일 업로드",
-    "uploading": "업로드 중"
+    "uploading": "업로드 중",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading files…",
+    "galleryEmpty": "No files yet — upload one to get started",
+    "galleryFailed": "Failed to load file list",
+    "changeFile": "Change file",
+    "confirmUpload": "Upload & insert",
+    "insert": "Insert",
+    "uploadFailed": "Upload failed",
+    "fileTooLarge": "File exceeds the maximum size",
+    "gallerySearchPlaceholder": "Search files by name or type…",
+    "galleryRefresh": "Refresh",
+    "galleryNoMatches": "No files match your search",
+    "galleryResults": "{n} files",
+    "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
+    "galleryDeleting": "Deleting…",
+    "galleryDeleteFailed": "Failed to delete file"
   },
   "comments": {
     "useCommentsToProvideFeedbackOrSuggestions": "피드백이나 제안을 제공하려면 댓글을 사용하세요.",
@@ -710,7 +754,8 @@
   },
   "markdown": {
     "insert": "Markdown 삽입",
-    "source": "Markdown"
+    "source": "Markdown",
+    "previewUpdating": "미리보기 업데이트 중…"
   },
   "clearStyles": {
     "title": "스타일 지우기",

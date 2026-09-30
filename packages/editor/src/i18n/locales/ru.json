@@ -507,7 +507,34 @@
     "insert": "Вставить Изображение",
     "imageButton": "Кнопка изображения",
     "imageUrl": "URL изображения:",
-    "failedToUploadImage": "Не удалось загрузить изображение"
+    "failedToUploadImage": "Не удалось загрузить изображение",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading gallery…",
+    "galleryEmpty": "Пока нет изображений — загрузите первое",
+    "galleryFailed": "Failed to load gallery",
+    "changeSource": "Change image",
+    "aspectFree": "Free",
+    "align": "Align",
+    "alignNone": "None",
+    "insertConfirm": "Insert",
+    "inserting": "Inserting…",
+    "pickFirst": "Choose or upload an image first",
+    "fileTooLarge": "Image exceeds the maximum file size",
+    "invalidType": "Only image files are allowed",
+    "rotateLeft": "Rotate left 90°",
+    "rotateRight": "Rotate right 90°",
+    "rotateFailed": "Could not rotate image",
+    "lockSizeAspect": "Keep width/height aspect",
+    "outputFormat": "Output format",
+    "quality": "Quality",
+    "gallerySearchPlaceholder": "Поиск изображений по имени…",
+    "galleryRefresh": "Обновить",
+    "galleryNoMatches": "Ничего не найдено",
+    "galleryResults": "{n} изображений",
+    "galleryDeleteConfirm": "Удалить «{name}» из галереи?",
+    "galleryDeleting": "Удаление…",
+    "galleryDeleteFailed": "Не удалось удалить изображение"
   },
   "font": {
     "size": "Размер",
@@ -526,7 +553,24 @@
   },
   "fileUpload": {
     "title": "Загрузить Файл",
-    "uploading": "Загрузка"
+    "uploading": "Загрузка",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading files…",
+    "galleryEmpty": "Пока нет файлов — загрузите первый",
+    "galleryFailed": "Failed to load file list",
+    "changeFile": "Change file",
+    "confirmUpload": "Upload & insert",
+    "insert": "Insert",
+    "uploadFailed": "Upload failed",
+    "fileTooLarge": "File exceeds the maximum size",
+    "gallerySearchPlaceholder": "Поиск файлов по имени или типу…",
+    "galleryRefresh": "Обновить",
+    "galleryNoMatches": "Ничего не найдено",
+    "galleryResults": "{n} файлов",
+    "galleryDeleteConfirm": "Удалить «{name}» из галереи?",
+    "galleryDeleting": "Удаление…",
+    "galleryDeleteFailed": "Не удалось удалить файл"
   },
   "comments": {
     "useCommentsToProvideFeedbackOrSuggestions": "Используйте комментарии, чтобы оставить отзыв или предложения.",
@@ -710,7 +754,8 @@
   },
   "markdown": {
     "insert": "Вставить Markdown",
-    "source": "Markdown"
+    "source": "Markdown",
+    "previewUpdating": "Обновление превью…"
   },
   "clearStyles": {
     "title": "Очистить стили",

@@ -1,82 +1,107 @@
+import { downloadBlob, downloadUrl } from '@on-codemerge/sdk';
 import { defaultConfig } from '../config/UploadConfig';
 import type { UploadConfig } from '../config/UploadConfig';
-import { downloadBlob, downloadUrl } from '@on-codemerge/sdk';
+import { assertFileAllowed, formatFileSize, listMedia, uploadMedia, deleteMedia } from './mediaApi';
+import type { MediaListItem, MediaUploadResult } from './mediaApi';
 
-interface UploadedFile {
+export type UploadedFile = {
   id: string;
   name: string;
   size: number;
   type: string;
-  data: ArrayBuffer;
-}
+  url?: string;
+  data?: ArrayBuffer;
+};
 
 export class FileUploader {
   private readonly files = new Map<string, UploadedFile>();
   private readonly config: UploadConfig;
 
   constructor(config: Partial<UploadConfig> = {}) {
-    this.config = { ...defaultConfig, ...config };
+    this.config = { ...defaultConfig, ...config, endpoints: { ...config.endpoints } };
+  }
+
+  public get listUrl(): string | undefined {
+    const url = this.config.endpoints?.list?.trim();
+    return url || undefined;
+  }
+
+  public get deleteUrl(): string | undefined {
+    const url = this.config.endpoints?.delete?.trim();
+    return url || undefined;
+  }
+
+  public get headers(): Record<string, string> | undefined {
+    return this.config.headers;
+  }
+
+  public listFiles(): Promise<MediaListItem[]> {
+    const url = this.listUrl;
+    if (!url) {
+      return Promise.resolve([]);
+    }
+    return listMedia(url, this.config.headers);
+  }
+
+  public async deleteListedFile(id: string): Promise<void> {
+    const url = this.deleteUrl;
+    if (!url) {
+      throw new Error('Delete endpoint is not configured');
+    }
+    await deleteMedia(url, id, this.config.headers);
+    this.files.delete(id);
   }
 
   public async uploadFile(file: File): Promise<UploadedFile> {
-    // Validate file
-    if (file.size > (this.config.maxFileSize ?? defaultConfig.maxFileSize!)) {
-      throw new Error(`File size exceeds ${this.formatFileSize(this.config.maxFileSize!)}`);
+    assertFileAllowed(file, {
+      maxFileSize: this.config.maxFileSize ?? defaultConfig.maxFileSize!,
+      allowedTypes: this.config.allowedTypes ?? defaultConfig.allowedTypes!,
+    });
+
+    const uploadUrl = this.config.endpoints?.upload?.trim();
+    if (uploadUrl && this.config.useEmulation !== true) {
+      const result = await uploadMedia(uploadUrl, file, this.config.headers, file.name);
+      return this.fromUploadResult(result, file.type);
     }
 
-    if (!this.isFileTypeAllowed(file)) {
-      throw new Error('File type not allowed');
-    }
+    return this.emulateUpload(file);
+  }
 
-    // Use real endpoints if configured and emulation is disabled
-    if (this.config.endpoints?.upload && !this.config.useEmulation) {
-      return await this.uploadToServer(file);
-    }
-
-    // Fallback to emulation
-    return await this.emulateUpload(file);
+  public uploadBlob(
+    blob: Blob,
+    filename: string,
+    mime = blob.type || 'application/octet-stream'
+  ): Promise<UploadedFile> {
+    const file = new File([blob], filename, { type: mime });
+    return this.uploadFile(file);
   }
 
   public async downloadFile(id: string): Promise<void> {
-    // Use real endpoint if configured and emulation is disabled
-    if (this.config.endpoints?.download && !this.config.useEmulation) {
+    if (this.config.endpoints?.download && this.config.useEmulation !== true) {
       await this.downloadFromServer(id);
       return;
     }
-
-    // Fallback to emulation
     this.emulateDownload(id);
   }
 
-  private async uploadToServer(file: File): Promise<UploadedFile> {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    const response = await fetch(this.config.endpoints!.upload!, {
-      method: 'POST',
-      body: formData,
-    });
-
-    if (!response.ok) {
-      throw new Error('Upload failed');
-    }
-
-    const data: unknown = await response.json();
-    let id = '';
-    if (typeof data === 'object' && data !== null && 'id' in data && typeof data.id === 'string') {
-      id = data.id;
-    }
-    return {
-      id,
-      name: file.name,
-      size: file.size,
-      type: file.type,
-      data: await file.arrayBuffer(),
+  private fromUploadResult(result: MediaUploadResult, fallbackType: string): UploadedFile {
+    const uploaded: UploadedFile = {
+      id: result.id,
+      name: result.name,
+      size: result.size ?? 0,
+      type: result.mime ?? fallbackType,
+      url: result.url,
     };
+    this.files.set(uploaded.id, uploaded);
+    return uploaded;
   }
 
   private async downloadFromServer(id: string): Promise<void> {
-    const response = await fetch(`${this.config.endpoints!.download!}/${id}`);
+    const base = this.config.endpoints!.download!.replace(/\/$/, '');
+    const response = await fetch(`${base}/${id}`, {
+      method: 'GET',
+      headers: { ...this.config.headers },
+    });
     if (!response.ok) {
       throw new Error('Download failed');
     }
@@ -91,17 +116,18 @@ export class FileUploader {
   }
 
   private async emulateUpload(file: File): Promise<UploadedFile> {
-    // Simulate network delay
     await new Promise<void>((resolve) => {
-      setTimeout(resolve, 1000);
+      setTimeout(resolve, 200);
     });
 
-    const uploadedFile = {
+    const data = await file.arrayBuffer();
+    const uploadedFile: UploadedFile = {
       id: crypto.randomUUID(),
       name: file.name,
       size: file.size,
       type: file.type,
-      data: await file.arrayBuffer(),
+      data,
+      url: URL.createObjectURL(new Blob([data], { type: file.type })),
     };
 
     this.files.set(uploadedFile.id, uploadedFile);
@@ -110,7 +136,7 @@ export class FileUploader {
 
   private emulateDownload(id: string): void {
     const file = this.files.get(id);
-    if (!file) {
+    if (!file?.data) {
       throw new Error('File not found');
     }
 
@@ -118,21 +144,7 @@ export class FileUploader {
     downloadBlob(blob, file.name, file.type);
   }
 
-  private isFileTypeAllowed(file: File): boolean {
-    const allowedTypes = this.config.allowedTypes ?? defaultConfig.allowedTypes!;
-    return allowedTypes.includes('*/*') || allowedTypes.includes(file.type);
-  }
-
   public formatFileSize(bytes: number): string {
-    const units = ['B', 'KB', 'MB', 'GB'];
-    let size = bytes;
-    let unitIndex = 0;
-
-    while (size >= 1024 && unitIndex < units.length - 1) {
-      size /= 1024;
-      unitIndex++;
-    }
-
-    return `${size.toFixed(1)} ${units[unitIndex]}`;
+    return formatFileSize(bytes);
   }
 }

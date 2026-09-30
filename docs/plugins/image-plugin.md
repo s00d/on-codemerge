@@ -38,7 +38,7 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 ## Public API (v2)
 
-Factory: `ImagePlugin()`.
+Factory: `ImagePlugin(config?)` — `Partial<UploadConfig> & PluginToolbarOpts`.
 
 | Command       |                                 |
 | ------------- | ------------------------------- |
@@ -50,37 +50,27 @@ Factory: `ImagePlugin()`.
 | ----------- | ------------- |
 | `Mod-Alt-i` | `insertImage` |
 
-> **Note:** Command `insertImage` (not `image`).
+Insert opens a modal: upload / drop (and **Gallery** when `endpoints.list` is set) → crop + alt / align / size → Insert. Gallery supports delete when `endpoints.delete` is set (`DELETE {delete}/{id}`). Cropped pixels are `POST`ed to `endpoints.upload` when configured (`useEmulation: false`); otherwise a data URL is stored on the atom.
 
-## Context Menu
+```ts
+ImagePlugin({
+  endpoints: {
+    upload: '/api/media/upload',
+    list: '/api/media/images', // optional gallery
+    delete: '/api/media', // optional DELETE {delete}/{id}
+  },
+  headers: { Authorization: 'Bearer …' },
+  maxFileSize: 5 * 1024 * 1024,
+  useEmulation: false,
+});
+```
 
-Right-click on an image to access:
+**Contracts**
 
-### Alignment Options
+- `GET list` → `{ items: [{ id, name, url, size?, mime?, thumbUrl? }] }`
+- `POST upload` multipart `file` → `{ id, name, url, size?, mime? }`
 
-- **Align Left**: Float image to the left with right margin
-- **Align Center**: Center image with auto margins
-- **Align Right**: Float image to the right with left margin
-
-### Image Operations
-
-- **Remove**: Delete the image from the editor
-
-## Image Upload Process
-
-The plugin handles image upload through several methods:
-
-### 1. Toolbar Button
-
-Click the image button in the toolbar to open file selection dialog.
-
-### 2. Drag & Drop
-
-Drag image files directly into the editor area.
-
-### 3. Programmatic Upload
-
-Use the API to insert images programmatically.
+Drop on the editor stages the file in the same modal (not an instant insert). Context menu **Edit** / **Change image** reopen the modal.
 
 ## Image Resizing
 
@@ -89,20 +79,6 @@ Images automatically get resize handles when clicked:
 ```javascript
 // The plugin automatically attaches ResizableElement to images
 // Users can drag the handles to resize images interactively
-```
-
-## File Upload Configuration
-
-The plugin uses `ImageUploader` service for file handling:
-
-```javascript
-// File selection
-const file = await imageUploader.selectFile();
-// Returns File object or null if cancelled
-
-// File reading
-const dataUrl = await imageUploader.readFileAsDataUrl(file);
-// Returns base64 data URL
 ```
 
 ## Examples

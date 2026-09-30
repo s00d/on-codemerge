@@ -507,7 +507,34 @@
     "insert": "Inserir imagem",
     "imageButton": "Botão de imagem",
     "imageUrl": "URL da imagem:",
-    "failedToUploadImage": "Falha ao carregar imagem"
+    "failedToUploadImage": "Falha ao carregar imagem",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading gallery…",
+    "galleryEmpty": "No images yet — upload one to get started",
+    "galleryFailed": "Failed to load gallery",
+    "changeSource": "Change image",
+    "aspectFree": "Free",
+    "align": "Align",
+    "alignNone": "None",
+    "insertConfirm": "Insert",
+    "inserting": "Inserting…",
+    "pickFirst": "Choose or upload an image first",
+    "fileTooLarge": "Image exceeds the maximum file size",
+    "invalidType": "Only image files are allowed",
+    "rotateLeft": "Rotate left 90°",
+    "rotateRight": "Rotate right 90°",
+    "rotateFailed": "Could not rotate image",
+    "lockSizeAspect": "Keep width/height aspect",
+    "outputFormat": "Output format",
+    "quality": "Quality",
+    "gallerySearchPlaceholder": "Search images by name…",
+    "galleryRefresh": "Refresh",
+    "galleryNoMatches": "No images match your search",
+    "galleryResults": "{n} images",
+    "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
+    "galleryDeleting": "Deleting…",
+    "galleryDeleteFailed": "Failed to delete image"
   },
   "font": {
     "size": "Tamanho",
@@ -526,7 +553,24 @@
   },
   "fileUpload": {
     "title": "Carregar ficheiro",
-    "uploading": "A carregar"
+    "uploading": "A carregar",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading files…",
+    "galleryEmpty": "No files yet — upload one to get started",
+    "galleryFailed": "Failed to load file list",
+    "changeFile": "Change file",
+    "confirmUpload": "Upload & insert",
+    "insert": "Insert",
+    "uploadFailed": "Upload failed",
+    "fileTooLarge": "File exceeds the maximum size",
+    "gallerySearchPlaceholder": "Search files by name or type…",
+    "galleryRefresh": "Refresh",
+    "galleryNoMatches": "No files match your search",
+    "galleryResults": "{n} files",
+    "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
+    "galleryDeleting": "Deleting…",
+    "galleryDeleteFailed": "Failed to delete file"
   },
   "comments": {
     "useCommentsToProvideFeedbackOrSuggestions": "Use comentários para dar feedback ou sugestões.",
@@ -710,7 +754,8 @@
   },
   "markdown": {
     "insert": "Inserir Markdown",
-    "source": "Markdown"
+    "source": "Markdown",
+    "previewUpdating": "A atualizar pré-visualização…"
   },
   "clearStyles": {
     "title": "Limpar estilos",

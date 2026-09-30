@@ -124,3 +124,47 @@ MarkdownPlugin({
 | `run`     | SDK deferred click (`{ editor, workspace }`) — use `runInsertMarkdown` for CM inserts |
 
 `elements` = callout kinds + preview (fed into `defaultMdToolbar`). Undo/redo = `HistoryChromePlugin` (same ids as HistoryPlugin).
+
+## Remote preview (`preview`)
+
+Workspace-only. When hosts already render Markdown on the server (custom blocks, CMS pipeline), point the right pane at that endpoint instead of shipping every custom element into the editor.
+
+**Default** (omit `preview`): local `projectPreviewHtml` + mermaid hydrate.
+
+**Remote:** trailing-debounced `POST` with JSON `{ markdown }`; response body is raw `text/html` (sanitized at the DOM sink). Local projector / mermaid hydrate are skipped for the pane. `getHTML` / publish stay on the local projector.
+
+```http
+POST /api/md-preview
+Content-Type: application/json
+Accept: text/html
+
+{"markdown":"# Hello\n"}
+
+→ 200 text/html
+```
+
+```ts
+import { Editor } from 'on-codemerge/markdown';
+
+new Editor(host, {
+  chrome: 'bar',
+  preview: {
+    url: '/api/md-preview',
+    headers: { Authorization: 'Bearer …' }, // optional
+    debounceMs: 500, // optional, default 500
+  },
+});
+```
+
+Or wire the plugin / factory explicitly:
+
+```ts
+createDefaultPlugins({ preview: { url: '/api/md-preview' } });
+// or
+MarkdownPlugin({
+  surface: 'workspace',
+  preview: { url: '/api/md-preview', debounceMs: 400 },
+});
+```
+
+Typing coalesces into one request (abort in-flight on supersede). Identical markdown after a successful paint is not re-fetched. Atom surface ignores `preview`.

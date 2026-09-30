@@ -1,7 +1,7 @@
 import './style.scss';
 
 import type { Command } from '@on-codemerge/kernel';
-import { applyToolbarConfig, definePlugin, foreign, attrString } from '@on-codemerge/sdk';
+import { applyToolbarConfig, definePlugin, foreign, h, attrString } from '@on-codemerge/sdk';
 import type { PluginDefinition, PluginToolbarOpts, WidgetContext } from '@on-codemerge/sdk';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
@@ -21,7 +21,7 @@ import { createMdElementRegistry } from './elements';
 import type { MdCustomElement, MdElementRegistry } from './elements';
 import { isMarkdownEditorDoc } from './io';
 import { mountMdWorkspace } from './surface/workspaceView';
-import type { MdWorkspaceHandle } from './surface/workspaceView';
+import type { MdRemotePreviewOptions, MdWorkspaceHandle } from './surface/workspaceView';
 import { mountMdEmbed } from './widgets/mountMdEmbed';
 import { renderMdEmbedPublish } from './publish/preview';
 
@@ -51,6 +51,7 @@ export type {
   MdToolbarMenu,
   MdToolbarOptions,
 } from './chrome/types';
+export type { MdRemotePreviewOptions } from './surface/workspaceView';
 export { HistoryChromePlugin } from '../HistoryPlugin';
 
 /** Atom surface (WYSIWYG embed) — only md_embed; prose nodes come from Typography/Lists/…. */
@@ -120,6 +121,11 @@ export type MarkdownPluginOptions = PluginToolbarOpts & {
    * Atom surface ignores this; use `menu` / `group` / `order` for Insert placement.
    */
   toolbar?: MdToolbarOptions;
+  /**
+   * Workspace-only: POST markdown to a host renderer for the right-pane preview.
+   * Omit → local `projectPreviewHtml`. Atom surface ignores this.
+   */
+  preview?: MdRemotePreviewOptions;
 };
 
 export function MarkdownPlugin(options: MarkdownPluginOptions = {}): PluginDefinition {
@@ -199,11 +205,46 @@ export function MarkdownPlugin(options: MarkdownPluginOptions = {}): PluginDefin
             'MarkdownPlugin({ surface: "workspace" }) requires createShellView contentTarget (data-ocm-shell)'
           );
         }
+        let remotePreviewBusy = false;
         const surfaceHandle = mountMdWorkspace(ctx.editor, contentEl, {
           dirtyDraft: false,
           elements,
+          preview: options.preview,
+          onRemotePreviewBusy: options.preview?.url
+            ? (busy) => {
+                remotePreviewBusy = busy;
+                ctx.editor.toolbar.refresh();
+              }
+            : undefined,
         });
         workspaceRef.current = surfaceHandle;
+        if (options.preview?.url) {
+          ctx.toolbar.add({
+            id: 'md-remote-preview-busy',
+            align: 'end',
+            group: 'overlay',
+            order: 90,
+            title: () => ctx.editor.t('markdown.previewUpdating') || 'Updating preview…',
+            view: () =>
+              remotePreviewBusy
+                ? h(
+                    'span',
+                    {
+                      class: 'ocm-toolbar__busy',
+                      attrs: {
+                        role: 'status',
+                        'aria-live': 'polite',
+                        'aria-label':
+                          ctx.editor.t('markdown.previewUpdating') || 'Updating preview…',
+                        title: ctx.editor.t('markdown.previewUpdating') || 'Updating preview…',
+                        'data-ocm-md-preview-busy': '1',
+                      },
+                    },
+                    h('span', { class: 'ocm-toolbar__busy-spinner' })
+                  )
+                : null,
+          });
+        }
         ctx.own({
           destroy: () => {
             workspaceRef.current = null;
@@ -287,6 +328,7 @@ export function createDefaultPlugins(
     elements?: MdCustomElement[];
     toolbar?: MdToolbarOptions;
     features?: MarkdownPluginFeatures;
+    preview?: MdRemotePreviewOptions;
   } = {}
 ): PluginDefinition[] {
   const elements = createMdElementRegistry(opts.elements ?? []);
@@ -302,6 +344,7 @@ export function createDefaultPlugins(
       elements: opts.elements,
       toolbar: opts.toolbar ?? defaultMdToolbar({ elements }),
       features,
+      preview: opts.preview,
     }),
   ];
 }

@@ -48,3 +48,7 @@ blob-report
 
 # pnpm is the package manager; do not commit divergent npm locks
 package-lock.json
+
+# Docs DEV media store — keep sample-* committed, ignore user uploads
+docs/.vitepress/dev-api/uploads/*
+!docs/.vitepress/dev-api/uploads/sample-*

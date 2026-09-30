@@ -511,7 +511,34 @@
     "insert": "Insert Image",
     "imageButton": "Image Button",
     "imageUrl": "Image URL:",
-    "failedToUploadImage": "Failed to upload image"
+    "failedToUploadImage": "Failed to upload image",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading gallery…",
+    "galleryEmpty": "No images yet — upload one to get started",
+    "galleryFailed": "Failed to load gallery",
+    "gallerySearchPlaceholder": "Search images by name…",
+    "galleryRefresh": "Refresh",
+    "galleryNoMatches": "No images match your search",
+    "galleryResults": "{n} images",
+    "changeSource": "Change image",
+    "aspectFree": "Free",
+    "align": "Align",
+    "alignNone": "None",
+    "insertConfirm": "Insert",
+    "inserting": "Inserting…",
+    "pickFirst": "Choose or upload an image first",
+    "fileTooLarge": "Image exceeds the maximum file size",
+    "invalidType": "Only image files are allowed",
+    "rotateLeft": "Rotate left 90°",
+    "rotateRight": "Rotate right 90°",
+    "rotateFailed": "Could not rotate image",
+    "lockSizeAspect": "Keep width/height aspect",
+    "outputFormat": "Output format",
+    "quality": "Quality",
+    "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
+    "galleryDeleting": "Deleting…",
+    "galleryDeleteFailed": "Failed to delete image"
   },
   "font": {
     "size": "Size",
@@ -530,7 +557,24 @@
   },
   "fileUpload": {
     "title": "Upload File",
-    "uploading": "Uploading"
+    "uploading": "Uploading",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading files…",
+    "galleryEmpty": "No files yet — upload one to get started",
+    "galleryFailed": "Failed to load file list",
+    "gallerySearchPlaceholder": "Search files by name or type…",
+    "galleryRefresh": "Refresh",
+    "galleryNoMatches": "No files match your search",
+    "galleryResults": "{n} files",
+    "changeFile": "Change file",
+    "confirmUpload": "Upload & insert",
+    "insert": "Insert",
+    "uploadFailed": "Upload failed",
+    "fileTooLarge": "File exceeds the maximum size",
+    "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
+    "galleryDeleting": "Deleting…",
+    "galleryDeleteFailed": "Failed to delete file"
   },
   "comments": {
     "useCommentsToProvideFeedbackOrSuggestions": "Use comments to provide feedback or suggestions.",
@@ -714,6 +758,7 @@
   },
   "markdown": {
     "insert": "Insert Markdown",
-    "source": "Markdown"
+    "source": "Markdown",
+    "previewUpdating": "Updating preview…"
   }
 }

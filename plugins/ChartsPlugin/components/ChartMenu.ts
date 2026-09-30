@@ -77,6 +77,8 @@ export class ChartMenu {
   private selectedType: ChartType = 'bar';
   private onInsert: ((element: HTMLElement) => void) | null = null;
   private previewTimeout: ReturnType<typeof setTimeout> | null = null;
+  private deferTimeout: ReturnType<typeof setTimeout> | null = null;
+  private previewRaf: number | null = null;
   private editingChart: HTMLElement | null = null;
   private chartTitle = '';
   private xAxisLabel = '';
@@ -100,13 +102,42 @@ export class ChartMenu {
     this.currentEditor = new ChartDataEditor(editor, (data) => {
       this.schedulePreviewUpdate([{ name: 'Series 1', data }]);
     });
+    scope.disposable(() => {
+      this.clearDeferredWork();
+    });
+  }
+
+  private clearDeferredWork(): void {
+    if (this.previewTimeout !== null) {
+      globalThis.clearTimeout(this.previewTimeout);
+      this.previewTimeout = null;
+    }
+    if (this.deferTimeout !== null) {
+      globalThis.clearTimeout(this.deferTimeout);
+      this.deferTimeout = null;
+    }
+    if (this.previewRaf !== null) {
+      globalThis.cancelAnimationFrame(this.previewRaf);
+      this.previewRaf = null;
+    }
+  }
+
+  private defer(fn: () => void): void {
+    if (this.deferTimeout !== null) {
+      globalThis.clearTimeout(this.deferTimeout);
+    }
+    this.deferTimeout = globalThis.setTimeout(() => {
+      this.deferTimeout = null;
+      fn();
+    }, 0);
   }
 
   private schedulePreviewUpdate(data: ChartPoint[] | ChartSeries[]): void {
-    if (this.previewTimeout) {
+    if (this.previewTimeout !== null) {
       globalThis.clearTimeout(this.previewTimeout);
     }
     this.previewTimeout = globalThis.setTimeout(() => {
+      this.previewTimeout = null;
       this.updatePreview(data);
     }, 100);
   }
@@ -135,10 +166,10 @@ export class ChartMenu {
     }
     this.mountEditor(type);
     if (data) {
-      globalThis.setTimeout(() => {
+      this.defer(() => {
         this.applyDataToEditor(data);
         this.updatePreview(data);
-      }, 0);
+      });
     } else {
       this.bumpPreview();
     }
@@ -502,14 +533,15 @@ export class ChartMenu {
           if (this.pendingEditData) {
             const data = this.pendingEditData;
             this.pendingEditData = null;
-            globalThis.setTimeout(() => {
+            this.defer(() => {
               this.applyDataToEditor(data);
               this.updatePreview(data);
-            }, 0);
+            });
           } else {
             this.bumpPreview();
           }
           scope.disposable(() => {
+            this.clearDeferredWork();
             if (this.editorHost === host) {
               this.editorHost = null;
             }
@@ -523,12 +555,17 @@ export class ChartMenu {
           host.textContent = this.editor.t('math.chartPreviewWillAppearHere');
           this.previewHost = host;
           // Wait for popup layout so clientWidth/Height are real.
-          requestAnimationFrame(() => {
+          if (this.previewRaf !== null) {
+            globalThis.cancelAnimationFrame(this.previewRaf);
+          }
+          this.previewRaf = globalThis.requestAnimationFrame(() => {
+            this.previewRaf = null;
             if (this.previewHost === host) {
               this.bumpPreview();
             }
           });
           scope.disposable(() => {
+            this.clearDeferredWork();
             if (this.previewHost === host) {
               this.previewHost = null;
             }
@@ -699,9 +736,9 @@ export class ChartMenu {
       this.chartOrientation = parseChartOrientation(chartElement.dataset.orientation ?? 'vertical');
       if (hidden) {
         this.mountEditor(typeRaw);
-        globalThis.setTimeout(() => {
+        this.defer(() => {
           this.applyDataToEditor(data);
-        }, 0);
+        });
       } else {
         this.openModal();
       }

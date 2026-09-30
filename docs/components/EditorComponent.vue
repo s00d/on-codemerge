@@ -85,6 +85,7 @@ import {
   JsonPlugin,
   MarkdownPlugin,
 } from '../../apps/wysiwyg/src/plugins';
+import { docsFileUpload, docsImageUpload } from './devMediaConfig';
 
 // dictionary-en package `exports` only exposes index.js (Node fs) — load Hunspell files as Vite URLs.
 const enAffUrl = new URL('../../node_modules/dictionary-en/index.aff', import.meta.url).href;
@@ -494,7 +495,10 @@ function resolveSeedHtml(initialHtml, activePlugins) {
 
 function resolvePlugins(activePlugins) {
   if (!activePlugins || activePlugins.length === 0) {
-    return createDefaultPlugins();
+    return createDefaultPlugins({
+      image: docsImageUpload,
+      fileUpload: docsFileUpload,
+    });
   }
   const names = [...activePlugins];
   // Focused demos: only History (undo). Marks / other chrome only if listed explicitly.
@@ -516,6 +520,12 @@ function resolvePlugins(activePlugins) {
       }
       if (name === 'MarkdownPlugin') {
         return MarkdownPlugin({ surface: 'atom', features: { toolbar: true } });
+      }
+      if (name === 'ImagePlugin') {
+        return ImagePlugin(docsImageUpload);
+      }
+      if (name === 'FileUploadPlugin') {
+        return FileUploadPlugin(docsFileUpload);
       }
       return factory();
     })

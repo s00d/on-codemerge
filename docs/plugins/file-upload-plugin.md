@@ -41,7 +41,7 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 ## Public API (v2)
 
-Factory: `FileUploadPlugin(config?)` — options: `Partial<UploadConfig>`.
+Factory: `FileUploadPlugin(config?)` — options: `Partial<UploadConfig> & PluginToolbarOpts`.
 
 | Command      |                                |
 | ------------ | ------------------------------ |
@@ -52,6 +52,28 @@ Factory: `FileUploadPlugin(config?)` — options: `Partial<UploadConfig>`.
 | Shortcut    | Command      |
 | ----------- | ------------ |
 | `Mod-Alt-u` | `insertFile` |
+
+Modal: stage a file (name / size) then **Upload & insert**, or pick from **Gallery** when `endpoints.list` is set. Gallery supports delete when `endpoints.delete` is set (`DELETE {delete}/{id}`). Upload uses `POST` multipart `file` with optional `headers`. Without `endpoints.upload` (or with `useEmulation: true`) uploads stay in-memory for demos.
+
+```ts
+FileUploadPlugin({
+  endpoints: {
+    upload: '/api/files/upload',
+    download: '/api/files/download', // GET {download}/{id}
+    list: '/api/files', // optional gallery
+    delete: '/api/files', // optional DELETE {delete}/{id}
+  },
+  headers: { Authorization: 'Bearer …' },
+  maxFileSize: 10 * 1024 * 1024,
+  useEmulation: false,
+});
+```
+
+**Contracts**
+
+- `GET list` → `{ items: [{ id, name, url, size?, mime?, thumbUrl? }] }`
+- `POST upload` → `{ id, name, url, size?, mime? }`
+- `GET download/{id}` → file body
 
 > **Note:** Command `insertFile` (not `insertFileLink`).
 
