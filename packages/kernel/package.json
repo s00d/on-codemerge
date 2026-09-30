@@ -34,7 +34,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup --config tsup.config.ts && node ../../scripts/emit-d-cts.mjs dist/index.d.ts",
+    "build": "tsx ../../scripts/build-published-package.mjs vite.lib.config.ts",
     "publint": "publint --strict",
     "prepublishOnly": "pnpm run build && pnpm run publint"
   },

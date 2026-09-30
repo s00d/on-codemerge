@@ -31,6 +31,7 @@ pnpm run release
 
 - Internal packages: `workspace:^` (not `workspace:*`)
 - Shared third-party versions: pnpm `catalog:` in [`pnpm-workspace.yaml`](../../pnpm-workspace.yaml)
+- Package builds: shared Vite factory [`scripts/create-published-lib-config.ts`](../../scripts/create-published-lib-config.ts) + `tsx scripts/build-published-package.mjs` (one stack with the monorepo — not tsup)
 
 ## Consumer guidance
 

@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `pnpm run build:packages` + release filter order for scoped packages
 - pnpm **catalog** for shared dependency versions; internal links use `workspace:^`
 - `publint --strict` for every publishable package (`check` → scoped; `publint` / `prepublishOnly` → + root)
+- Published package builds via shared Vite factory (`scripts/create-published-lib-config.ts`) — no tsup / CSS stub zoo
 
 ### Notes
 
