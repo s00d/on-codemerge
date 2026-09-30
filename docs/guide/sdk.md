@@ -29,7 +29,7 @@ The **`Editor`** class and headless HTML/Markdown IO live on the package root (`
 | `@codemerge/sdk`                  | Same SDK as a standalone npm package (plugin authors / headless)    |
 | `@codemerge/kernel`               | Same kernel standalone                                              |
 | `@codemerge/hunspell`             | Spell engine without the editor                                     |
-| `@codemerge/collaboration-server` | Demo WebSocket ops relay                                            |
+| `@codemerge/collaboration-server` | Authoritative collab server (ops op-log, presence, REST)            |
 
 ## Plugin authoring
 

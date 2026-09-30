@@ -1,7 +1,7 @@
 {
   "name": "@codemerge/collaboration-server",
-  "version": "1.0.0",
-  "description": "Demo WebSocket ops relay for CodeMerge CollaborationPlugin",
+  "version": "2.0.0",
+  "description": "Authoritative WebSocket collaboration server for CodeMerge (ops op-log, presence, REST)",
   "license": "MIT",
   "author": "Pavel Kuzmin",
   "repository": {
@@ -10,27 +10,65 @@
     "directory": "packages/collaboration-server"
   },
   "bin": {
-    "codemerge-collaboration-server": "./server.js"
+    "codemerge-collaboration-server": "./dist/cli.cjs"
   },
   "files": [
-    "server.js",
+    "dist",
     "README.md"
   ],
-  "type": "commonjs",
-  "main": "./server.js",
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./package.json": "./package.json"
+  },
   "publishConfig": {
     "access": "public"
   },
   "scripts": {
-    "start": "node server.js",
-    "build": "node -e \"console.log('@codemerge/collaboration-server: no build (CJS server.js)')\"",
+    "build": "vite build && vite build --config vite.cli.config.ts",
+    "start": "node ./dist/cli.cjs serve",
+    "test": "vitest run --config vitest.config.ts",
     "publint": "publint --strict",
     "prepublishOnly": "pnpm run build && pnpm run publint"
   },
   "dependencies": {
+    "@codemerge/kernel": "workspace:^",
     "ws": "catalog:"
   },
+  "devDependencies": {
+    "@types/ws": "^8.5.13",
+    "typescript": "catalog:",
+    "vite": "catalog:",
+    "vite-plugin-dts": "catalog:",
+    "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "pg": "^8.13.0",
+    "redis": "^4.7.0"
+  },
+  "peerDependenciesMeta": {
+    "pg": {
+      "optional": true
+    },
+    "redis": {
+      "optional": true
+    }
+  },
+  "optionalDependencies": {},
   "engines": {
-    "node": ">=18"
+    "node": ">=20"
   }
 }

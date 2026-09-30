@@ -10,7 +10,11 @@ import { ChartsPlugin } from './ChartsPlugin';
 import { ClearStylesPlugin } from './ClearStylesPlugin';
 import { CodeBlockPlugin } from './CodeBlockPlugin';
 import type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from './CodeBlockPlugin';
-import { CollaborationPlugin, createOpsCollabBinding } from './CollaborationPlugin';
+import {
+  CollaborationPlugin,
+  createOpsCollabBinding,
+  getCollaborationHandle,
+} from './CollaborationPlugin';
 import { ColorPlugin } from './ColorPlugin';
 import { CommentsPlugin } from './CommentsPlugin';
 import { ExportPlugin } from './ExportPlugin';
@@ -58,6 +62,7 @@ export {
   CodeBlockPlugin,
   CollaborationPlugin,
   createOpsCollabBinding,
+  getCollaborationHandle,
   ColorPlugin,
   CommentsPlugin,
   ExportPlugin,

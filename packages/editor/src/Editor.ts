@@ -87,7 +87,16 @@ export interface SharedEditorOptions {
   io?: ProseIoOverrides;
 }
 
+export type TransactionSource = 'local' | 'remote';
+
+export type TransactionEvent = {
+  tr: Transaction;
+  source: TransactionSource;
+  state: EditorState;
+};
+
 type Listener = (state: EditorState) => void;
+type TransactionListener = (event: TransactionEvent) => void;
 type LocaleLoader = () => Promise<LocaleMessages>;
 
 export class Editor implements EditorAPI {
@@ -100,6 +109,7 @@ export class Editor implements EditorAPI {
   private readonly platform: Platform;
   private readonly plugins: PluginDefinition[];
   private readonly listeners = new Map<string, Set<Listener>>();
+  private readonly transactionListeners = new Set<TransactionListener>();
   private destroyed = false;
   private readonly i18n: I18n;
   private readonly loadedLocales = new Set<string>();
@@ -583,20 +593,28 @@ export class Editor implements EditorAPI {
     void md;
   }
 
-  dispatch(tr: Transaction): void {
+  dispatch(tr: Transaction, opts?: { source?: TransactionSource }): void {
     if (this.destroyed) {
       return;
     }
+    const source: TransactionSource = opts?.source ?? 'local';
     const onlySelection = tr.ops.length > 0 && tr.ops.every((o) => o.type === 'set_selection');
     if (onlySelection) {
       this.state = applyTransaction(this.state, tr, this.platform.schema).state;
       this.projectSelection(this.state);
+      this.emitTransaction(tr, source);
       this.emit('selectionChanged');
       return;
     }
-    this.state = this.history.apply(this.state, tr);
+    if (source === 'remote') {
+      // Apply without touching local undo/redo stacks.
+      this.state = applyTransaction(this.state, tr, this.platform.schema).state;
+    } else {
+      this.state = this.history.apply(this.state, tr);
+    }
     this.view.update(this.state);
     this.toolbar.refresh();
+    this.emitTransaction(tr, source);
     this.emit('docChanged');
     this.emit('selectionChanged');
   }
@@ -647,12 +665,28 @@ export class Editor implements EditorAPI {
     return this.platform.schema;
   }
 
-  on(event: 'docChanged' | 'selectionChanged', cb: Listener): () => void {
+  on(
+    event: 'docChanged' | 'selectionChanged' | 'transaction',
+    cb: Listener | TransactionListener
+  ): () => void {
+    if (event === 'transaction') {
+      const listener = cb as unknown as TransactionListener;
+      this.transactionListeners.add(listener);
+      return () => this.transactionListeners.delete(listener);
+    }
+    const stateListener = cb as unknown as Listener;
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event)!.add(cb);
-    return () => this.listeners.get(event)?.delete(cb);
+    this.listeners.get(event)!.add(stateListener);
+    return () => this.listeners.get(event)?.delete(stateListener);
+  }
+
+  private emitTransaction(tr: Transaction, source: TransactionSource): void {
+    const event: TransactionEvent = { tr, source, state: this.state };
+    for (const cb of this.transactionListeners) {
+      cb(event);
+    }
   }
 
   private emit(event: string): void {
@@ -736,5 +770,6 @@ export class Editor implements EditorAPI {
     clearPortalRoot(undefined, false);
     destroyPlatform(this.platform);
     this.listeners.clear();
+    this.transactionListeners.clear();
   }
 }

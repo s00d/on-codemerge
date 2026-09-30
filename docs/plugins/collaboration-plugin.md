@@ -1,38 +1,53 @@
 # Collaboration Plugin
 
-Opt-in real-time collaboration over **kernel ops** (not HTML string sync). Not included in `createDefaultPlugins()` — you must pass a `token` that matches the server `COLLAB_TOKEN`.
+Совместное редактирование: **браузерный редактор** ↔ **WebSocket-сервер** ↔ **другие редакторы**.
 
-## Features
-
-- **Ops protocol**: local transactions fan out as ops; remotes apply via `createOpsCollabBinding`
-- **WebSocket rooms**: keyed by `docId` (also reflected in the URL query for sharing)
-- **Token auth**: every message carries `token`; server is fail-closed without `COLLAB_TOKEN`
-- **Join + snapshot**: first joiner may seed a snapshot; late joiners receive `init` with room snapshot
-- **Toolbar UI**: Review menu opens a popup (status, user id, share link, Start)
-- **Auto-start**: optional when `autoStart`, `token`, and `docId` (URL) are present
-- **Hotkey**: `Mod-Alt-O` opens the collaboration popup
-- **Local demo only**: sample server is not a production collab stack
-
-## Usage
-
-> Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
-
-```ts
-import { Editor, CollaborationPlugin, createCorePlugins } from 'on-codemerge';
-
-const editor = new Editor(container, {
-  plugins: [
-    ...createCorePlugins(),
-    CollaborationPlugin({
-      serverUrl: 'ws://localhost:8080',
-      token: 'dev', // must match COLLAB_TOKEN
-      autoStart: false,
-    }),
-  ],
-});
+```
+┌─────────────┐     ws://127.0.0.1:8787/collab      ┌──────────────────────┐
+│  Docs / App │ ─────────────────────────────────► │ collaboration-server │
+│  (плагин)   │ ◄───────────────────────────────── │  token = COLLAB_TOKEN│
+└─────────────┘         ops + presence             └──────────────────────┘
 ```
 
-Open the Review → Collaboration popup and click **Start**, or set `autoStart: true` with `?docId=` already in the URL.
+Плагин **сам по себе никуда не коннектится** без `docId` в URL — пока не нажмёшь **Start**.  
+Если в URL уже есть `?docId=…` (шаринговая ссылка) и задан `token` — коннект **автоматический**.  
+Сервер нужно поднять **отдельно**.
+
+---
+
+## Быстрый старт (docs в репо)
+
+**Терминал 1 — сервер:**
+
+```bash
+pnpm run collab:dev
+```
+
+Должно напечатать: `CodeMerge collab v2 on ws://0.0.0.0:8787/collab`.  
+Проверка: `curl -s http://127.0.0.1:8787/collab/health` → `{"ok":true,...}`.
+
+> Порт **8787**, не 8080 — на многих машинах 8080 занят прокси (Burp и т.п.), из‑за этого WS в браузере падает.
+
+**Терминал 2 — docs:**
+
+```bash
+pnpm run docs:dev
+```
+
+1. Открой эту страницу в браузере (Collaboration Plugin).
+2. В тулбаре справа — чип статуса (**Выкл** / **Синхронизация…** / **В сети** + счётчик peers). Клик открывает тот же попап, что Review → Collaboration (или `Mod-Alt-O`).
+3. В попапе нажми **Start Collaboration** (первый визит без `?docId=`).
+4. Статус станет `synced` / чип **В сети**. В адресной строке только `?docId=…` (без userId).
+5. **Share this link** / скопируй URL с `docId` → открой в другом окне/браузере. Второй клиент получит **свой** userId (sessionStorage), подключится сам. Печать синхронится без удвоения.
+
+В docs-демо уже задано:
+
+- `serverUrl: 'ws://127.0.0.1:8787/collab'`
+- `token: 'dev'` (= `COLLAB_TOKEN` у сервера)
+
+Без `pnpm run collab:dev` кнопка Start / автостарт выдаст ошибку коннекта — это нормально.
+
+---
 
 ## Demo
 
@@ -46,124 +61,96 @@ import EditorComponent from '../components/EditorComponent.vue';
   :showResults="false"
 />
 
+---
+
+## Куда «подключать» в своём приложении
+
+Не HTTP API редактора — а **опции плагина** + **отдельный WS-сервер**.
+
+| Что         | Куда                                                                                               |
+| ----------- | -------------------------------------------------------------------------------------------------- |
+| Сервер      | процесс `@codemerge/collaboration-server` (CLI или `createCollaborationServer` на своём Node HTTP) |
+| Клиент      | `CollaborationPlugin({ serverUrl, token \| getToken })` в `Editor({ plugins })`                    |
+| URL комнаты | `serverUrl` = `ws://HOST:PORT/collab` (путь `/collab` по умолчанию)                                |
+| Секрет      | `COLLAB_TOKEN` на сервере = `token` / `getToken()` у плагина                                       |
+| Документ    | `docId` в URL комнаты (`?docId=…` only — **не** `userId`)                                          |
+
+```ts
+import { Editor, CollaborationPlugin, createCorePlugins } from 'on-codemerge';
+
+new Editor(el, {
+  plugins: [
+    ...createCorePlugins(),
+    CollaborationPlugin({
+      serverUrl: 'ws://127.0.0.1:8787/collab', // ← адрес твоего collab:dev / прода
+      token: 'dev', // ← тот же, что COLLAB_TOKEN
+      // или: getToken: () => fetch('/api/collab-token').then(r => r.text()),
+      // Share links (?docId=) auto-connect; set autoStart:false to disable.
+      user: { name: 'Ada', color: '#2563eb' },
+    }),
+  ],
+});
+```
+
+Дальше: тулбар **Start**, или:
+
+```ts
+import { getCollaborationHandle } from 'on-codemerge';
+getCollaborationHandle(editor)?.start();
+```
+
+---
+
+## Сервер отдельно (prod-like)
+
+```bash
+pnpm add @codemerge/collaboration-server
+COLLAB_TOKEN=dev npx codemerge-collaboration-server serve --port 8787 --store sqlite:./collab.db
+```
+
+Встроить в свой HTTP:
+
+```ts
+import http from 'node:http';
+import {
+  createCollaborationServer,
+  staticTokenAuth,
+  memoryStore,
+} from '@codemerge/collaboration-server';
+
+const collab = await createCollaborationServer({
+  store: memoryStore(),
+  auth: staticTokenAuth({ token: process.env.COLLAB_TOKEN! }),
+  path: '/collab',
+});
+const server = http.createServer();
+collab.attach(server);
+server.listen(8787);
+```
+
+Подробности: [package README](https://github.com/s00d/on-codemerge/tree/main/packages/collaboration-server).
+
+---
+
 ## Options
 
 ```ts
 interface CollaborationPluginOptions {
-  /** WebSocket base URL (default `ws://localhost:8080`) */
-  serverUrl?: string;
-  /** Start when `docId` is already in the URL (default `false`) */
-  autoStart?: boolean;
-  /** Shared secret matching server `COLLAB_TOKEN` (required to join) */
-  token?: string;
-  /** Optional hook when local ops are broadcast */
+  serverUrl?: string; // default ws://localhost:8080/collab (override in docs/dev: 8787)
+  autoStart?: boolean; // true = always; false = never; omit = auto when ?docId= present
+  token?: string; // static auth (dev)
+  getToken?: () => Promise<string> | string;
+  docId?: string;
+  user?: { id?: string; name?: string; color?: string };
+  onStatus?: (s: CollabStatus) => void;
+  onPresence?: (peers: PresencePeer[]) => void;
   onBroadcast?: (ops: Operation[]) => void;
+  offlineQueue?: boolean; // default true
 }
 ```
-
-There is **no** public instance API such as `plugin.startCollaboration()` / `getConnectionStatus()` — the factory returns a sealed `definePlugin` descriptor. Control flow is: options + toolbar popup + `autoStart`.
 
 ## Helpers
 
-`createOpsCollabBinding(initialDoc, broadcast?)` — apply remote ops / track local ops against a `DocNode`. Used internally; exportable for custom hosts.
-
-## Protocol (with sample server)
-
-Client messages include `token`, `userId`, `docId`:
-
-**Join**
-
-```json
-{
-  "type": "join",
-  "docId": "…",
-  "token": "…",
-  "userId": "…",
-  "snapshot": {}
-}
-```
-
-**Ops**
-
-```json
-{
-  "type": "ops",
-  "docId": "…",
-  "token": "…",
-  "userId": "…",
-  "ops": [],
-  "snapshot": {}
-}
-```
-
-**Server → client**
-
-- `init` — `{ type, docId, userId, snapshot }`
-- `ops` — `{ type, docId, ops, userId }`
-
-Unauthorized token → WebSocket close `1008`.
-
-## Collaboration server
-
-Sample package: [`@codemerge/collaboration-server`](https://www.npmjs.com/package/@codemerge/collaboration-server) ([source](https://github.com/s00d/on-codemerge/tree/main/packages/collaboration-server)).
-
-```bash
-npm i -D @codemerge/collaboration-server
-COLLAB_TOKEN=dev npx codemerge-collaboration-server
-# ws://localhost:8080
-```
-
-See that package README for env vars and a minimal custom-server sketch. **Not** production-hardened (no PM2/Docker recipe as a recommended deploy).
-
-## React example
-
-```tsx
-import { useEffect, useRef } from 'react';
-import { Editor, CollaborationPlugin, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-
-export function CollaborativeEditor() {
-  const hostRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const host = hostRef.current;
-    if (!host) return;
-
-    const editor = new Editor(host, {
-      plugins: [
-        ...createCorePlugins(),
-        CollaborationPlugin({
-          serverUrl: 'ws://localhost:8080',
-          token: 'dev',
-          autoStart: true,
-        }),
-      ],
-    });
-
-    const off = editor.on('docChanged', () => {
-      // optional local persist of SoT
-      void editor.getJSON();
-    });
-
-    return () => {
-      off();
-      editor.destroy();
-    };
-  }, []);
-
-  return <div ref={hostRef} />;
-}
-```
-
-## Notes
-
-- Share the page URL after Start — it gains `docId` / `userId` query params.
-- Persist SoT with `getJSON()` / `setJSON()`; do not treat HTML as the collaboration payload.
-- Sample server cleans up a room when the last client disconnects.
-
-## Related
-
-- [@codemerge/collaboration-server README](https://github.com/s00d/on-codemerge/tree/main/packages/collaboration-server)
-- [Plugins overview](/plugins/)
-- [Document model](/guide/document-model)
+- `getCollaborationHandle(editor)` — `start` / `stop` / `getStatus` / `getPeers` / `forceResync`
+- `createCollabClient(opts)` — низкоуровневый клиент
+- `createOpsCollabBinding` — legacy binding для тестов

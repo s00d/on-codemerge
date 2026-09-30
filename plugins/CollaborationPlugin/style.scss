@@ -1,0 +1,52 @@
+@reference "../../apps/wysiwyg/src/tailwind.css";
+
+.ocm-collab-presence {
+  pointer-events: none;
+}
+
+.ocm-collab-status {
+  @apply inline-flex h-7 shrink-0 cursor-pointer items-center gap-1.5 rounded-ocm-sm border-0 bg-transparent px-2 text-xs font-medium text-ocm-text-muted transition-colors;
+  @apply hover:bg-ocm-surface-hover hover:text-ocm-text;
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400;
+
+  &[data-collab-state='synced'],
+  &[data-collab-state='readonly'] {
+    @apply text-ocm-text;
+  }
+
+  &[data-collab-state='error'] {
+    @apply text-red-600;
+  }
+}
+
+.ocm-collab-status__dot {
+  @apply size-2 shrink-0 rounded-full bg-ocm-text-muted;
+}
+
+.ocm-collab-status__dot.is-live {
+  @apply bg-emerald-500;
+}
+
+.ocm-collab-status__dot.is-busy {
+  @apply animate-pulse bg-amber-500;
+}
+
+.ocm-collab-status__dot.is-view {
+  @apply bg-sky-500;
+}
+
+.ocm-collab-status__dot.is-error {
+  @apply bg-red-500;
+}
+
+.ocm-collab-status__peers {
+  @apply inline-flex min-w-4 items-center justify-center rounded-full bg-ocm-accent-soft px-1.5 text-[10px] font-semibold leading-4 text-ocm-accent;
+}
+
+.ocm-collab-status__icon {
+  @apply inline-flex size-3.5 shrink-0 opacity-80;
+
+  svg {
+    @apply size-3.5;
+  }
+}

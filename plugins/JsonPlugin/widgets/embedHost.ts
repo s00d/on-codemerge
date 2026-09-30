@@ -141,11 +141,16 @@ export function createEmbedWorkspaceHost(
       emit('docChanged');
       return true;
     },
-    on: (event: 'docChanged' | 'selectionChanged', cb: (s: EditorState) => void) => {
-      listeners[event].add(cb);
-      return () => {
-        listeners[event].delete(cb);
-      };
+    on: (...args: Parameters<EditorAPI['on']>) => {
+      const [event, cb] = args;
+      if (event === 'docChanged' || event === 'selectionChanged') {
+        const fn = cb as (s: EditorState) => void;
+        listeners[event].add(fn);
+        return () => {
+          listeners[event].delete(fn);
+        };
+      }
+      return () => {};
     },
     t: parent.t.bind(parent),
     tc: parent.tc.bind(parent),

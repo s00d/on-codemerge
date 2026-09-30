@@ -61,7 +61,7 @@ export interface EditorAPI {
   getMarkdown: () => string;
   /** Replace document from Markdown (parses into JSON DocNode tree). */
   setMarkdown: (md: string) => void;
-  dispatch: (tr: Transaction) => void;
+  dispatch: (tr: Transaction, opts?: { source?: 'local' | 'remote' }) => void;
   setSelection: (selection: Selection) => void;
   getSelection: () => Selection;
   /** Marks applied to the next typed characters (track-changes, pending format). */
@@ -70,7 +70,12 @@ export interface EditorAPI {
   /** Soft-delete mark for backspace (track-changes deletion); null = hard delete. */
   getSoftDeleteMark: () => Mark | null;
   setSoftDeleteMark: (mark: Mark | null) => void;
-  on: (event: 'docChanged' | 'selectionChanged', cb: (state: EditorState) => void) => () => void;
+  on: (
+    event: 'docChanged' | 'selectionChanged' | 'transaction',
+    cb:
+      | ((state: EditorState) => void)
+      | ((event: { tr: Transaction; source: 'local' | 'remote'; state: EditorState }) => void)
+  ) => () => void;
   t: (key: string, params?: TranslateParams) => string;
   tc: (key: string, count: number) => string;
   getLocale: () => string;

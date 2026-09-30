@@ -34,7 +34,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsx ../../scripts/build-published-package.mjs vite.lib.config.ts",
+    "build": "vite build",
     "publint": "publint --strict",
     "prepublishOnly": "pnpm run build && pnpm run publint"
   },

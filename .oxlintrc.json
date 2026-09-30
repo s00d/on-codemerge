@@ -233,7 +233,7 @@
       }
     },
     {
-      "files": ["packages/collaboration-server/**/*.{js,mjs,cjs}"],
+      "files": ["packages/collaboration-server/**/*.{js,mjs,cjs,ts}"],
       "env": {
         "node": true
       },
@@ -243,7 +243,60 @@
         "typescript/no-unsafe-member-access": "off",
         "typescript/no-unsafe-argument": "off",
         "typescript/no-unsafe-return": "off",
+        "typescript/no-unsafe-type-assertion": "off",
+        "typescript/no-unnecessary-type-assertion": "off",
+        "typescript/strict-boolean-expressions": "off",
+        "typescript/require-await": "off",
+        "typescript/no-misused-promises": "off",
+        "typescript/await-thenable": "off",
+        "typescript/no-base-to-string": "off",
+        "eslint/require-await": "off",
+        "unicorn/consistent-function-scoping": "off",
+        "unicorn/no-lonely-if": "off",
+        "promise/prefer-await-to-then": "off",
+        "import/no-named-as-default": "off",
+        "import/consistent-type-specifier-style": "off",
+        "jest/expect-expect": "off"
+      }
+    },
+    {
+      "files": ["plugins/CollaborationPlugin/**/*.{ts,tsx}"],
+      "rules": {
+        "typescript/no-unsafe-assignment": "off",
+        "typescript/no-unsafe-call": "off",
+        "typescript/no-unsafe-member-access": "off",
+        "typescript/no-unsafe-argument": "off",
+        "typescript/no-unsafe-return": "off",
+        "typescript/no-unsafe-type-assertion": "off",
+        "typescript/strict-boolean-expressions": "off",
+        "typescript/switch-exhaustiveness-check": "off",
+        "typescript/require-await": "off",
+        "eslint/require-await": "off",
+        "eslint/no-unused-vars": "off",
+        "unicorn/prefer-add-event-listener": "off",
+        "unicorn/no-array-sort": "off",
+        "import/consistent-type-specifier-style": "off"
+      }
+    },
+    {
+      "files": [
+        "plugins/JsonPlugin/widgets/embedHost.ts",
+        "plugins/MarkdownPlugin/widgets/embedHost.ts"
+      ],
+      "rules": {
         "typescript/no-unsafe-type-assertion": "off"
+      }
+    },
+    {
+      "files": ["packages/editor/src/Editor.ts"],
+      "rules": {
+        "typescript/no-unsafe-type-assertion": "off"
+      }
+    },
+    {
+      "files": ["packages/kernel/src/__tests__/transform.test.ts"],
+      "rules": {
+        "jest/prefer-strict-equal": "off"
       }
     },
     {

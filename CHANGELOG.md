@@ -13,18 +13,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `@codemerge/kernel` — headless doc / ops / selection
   - `@codemerge/sdk` — plugin API + UI primitives (+ `sdk.css`)
   - `@codemerge/hunspell` — spell engine (`NOTICE` in tarball)
-  - `@codemerge/collaboration-server` — demo WebSocket ops relay (`npx codemerge-collaboration-server`)
+  - `@codemerge/collaboration-server` — collaboration server (protocol v2)
 - Workspace rename: `@on-codemerge/*` → `@codemerge/*` (internal only)
 - `pnpm run build:packages` + release filter order for scoped packages
 - pnpm **catalog** for shared dependency versions; internal links use `workspace:^`
 - `publint --strict` for every publishable package (`check` → scoped; `publint` / `prepublishOnly` → + root)
-- Published package builds via shared Vite factory (`scripts/create-published-lib-config.ts`) — no tsup / CSS stub zoo
+- Published package builds: per-package `vite build` via pnpm workspace filters (no tsup / orchestrator scripts)
+- **Collab stack rewrite (protocol v2)**
+  - Kernel: `ensureNodeIds`, `transformOp` / `rebaseOps`; editor `transaction` event + `dispatch(tr, { source: 'remote' })`
+  - `@codemerge/collaboration-server@2.0.0`: TypeScript authoritative op-log, CLI (`serve` / `compact` / `inspect`), embed API, static+JWT auth, SQLite/memory stores, Postgres adapter, Redis fanout, REST, webhooks, presence, comments, versions
+  - `CollaborationPlugin`: FSM client, reconnect, offline IndexedDB queue, presence avatars, toolbar sync chip (`align: end`), share URL = `?docId=` only, `getCollaborationHandle`, no dispatch monkey-patch
+- SDK toolbar: `align: 'end'` + custom `view` for trailing chrome (MD preview busy + collab status)
+
+### Breaking
+
+- Demo collab protocol v1 (`join`/`ops` + token on every message, `server.js`) removed
+- Default WS path is `/collab`; use `CollaborationPlugin({ serverUrl: 'ws://host:8787/collab', getToken })`
 
 ### Notes
 
 - `on-codemerge` still **bundles** kernel/sdk/hunspell (Phase A). Do **not** mix standalone `@codemerge/sdk` with `on-codemerge` in one app bundle.
 - `@codemerge/editor` and `apps/*` remain **private**; plugins stay inside the monolith.
 - Phase B/C (declare deps / Vite externalize) deferred.
+- Publish: `pnpm run release` (check + npm publish of scoped packages + root)
 
 ## [2.3.0] - 2026-09-30
 

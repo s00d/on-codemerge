@@ -5,6 +5,7 @@ export {
   createParagraph,
   cloneNode,
   deepCloneNode,
+  ensureNodeIds,
   docToJSON,
   docFromJSON,
   JSON_DOC_VERSION,
@@ -36,6 +37,7 @@ export {
   assertMaxTreeDepth,
   type Operation,
 } from './operations';
+export { transformOp, transformOps, rebaseOps } from './transform';
 export { normalize, isNormalizeIdempotent } from './normalize';
 export {
   createState,

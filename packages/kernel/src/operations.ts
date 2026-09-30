@@ -5,6 +5,7 @@ import {
   emptyAttrsRecord,
   createText,
   deepCloneNode,
+  ensureNodeIds,
   getNodeAt,
   nextId,
   replaceAt,
@@ -685,7 +686,7 @@ export function applyOp(
       const nextParent = cloneNode(parent);
       nextParent.content ??= [];
       const index = Math.max(0, Math.min(op.index, nextParent.content.length));
-      nextParent.content.splice(index, 0, deepCloneNode(op.node));
+      nextParent.content.splice(index, 0, ensureNodeIds(deepCloneNode(op.node)));
       const nextDoc = op.path.length > 0 ? replaceAt(doc, op.path, nextParent) : nextParent;
       return {
         doc: nextDoc,

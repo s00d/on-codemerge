@@ -82,6 +82,27 @@ export function deepCloneNode(node: DocNode): DocNode {
   return cloned;
 }
 
+/** Assign stable ids to every non-text node missing `id`. */
+export function ensureNodeIds(node: DocNode): DocNode {
+  const out: DocNode = {
+    ...node,
+    content: node.content ? node.content.map(ensureNodeIds) : undefined,
+    marks: node.marks ? node.marks.map((m) => ({ ...m })) : undefined,
+  };
+  if (out.type !== 'text' && !out.id) {
+    const prefix =
+      out.type === 'doc'
+        ? 'doc'
+        : out.type === 'paragraph'
+          ? 'p'
+          : out.type === 'listItem'
+            ? 'li'
+            : 'n';
+    out.id = nextId(prefix);
+  }
+  return out;
+}
+
 function deepClone<T>(value: T): T {
   return structuredClone(value);
 }
@@ -114,11 +135,11 @@ export function docFromJSON(json: JSONDoc | DocNode | object): DocNode {
       throw new Error('Expected root type "doc"');
     }
     assertTreeDepth(json.doc);
-    return deepClone(json.doc);
+    return ensureNodeIds(deepClone(json.doc));
   }
   if (isDocNode(json) && json.type === 'doc') {
     assertTreeDepth(json);
-    return deepClone(json);
+    return ensureNodeIds(deepClone(json));
   }
   throw new Error('Expected root type "doc"');
 }

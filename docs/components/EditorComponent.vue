@@ -527,6 +527,14 @@ function resolvePlugins(activePlugins) {
       if (name === 'FileUploadPlugin') {
         return FileUploadPlugin(docsFileUpload);
       }
+      if (name === 'CollaborationPlugin') {
+        return CollaborationPlugin({
+          serverUrl: 'ws://127.0.0.1:8787/collab',
+          token: 'dev',
+          // Share URL (?docId=) auto-connects; first visit still uses Start.
+          user: { name: 'Docs', color: '#0284c7' },
+        });
+      }
       return factory();
     })
     .filter(Boolean);

@@ -18,7 +18,7 @@ Product documentation profile for **on-codemerge** (VitePress site).
 - `apps/json` — thin shell + `JsonPlugin({ surface: 'workspace' })` (`on-codemerge/json`)
 - `apps/markdown` — thin shell + `MarkdownPlugin({ surface: 'workspace' })` (`on-codemerge/markdown`)
 - `apps/code` — thin shell + `CodeBlockPlugin({ surface: 'workspace' })` (`on-codemerge/code`)
-- `packages/collaboration-server` — sample ops WebSocket server (`@codemerge/collaboration-server`)
+- `packages/collaboration-server` — authoritative collaboration server (`@codemerge/collaboration-server`)
 
 ## Entry points
 

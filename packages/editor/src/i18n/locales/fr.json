@@ -715,7 +715,16 @@
   },
   "collaboration": {
     "title": "Travail collaboratif",
-    "localDemoOnlyPassToken": "Local/démo uniquement. Passez CollaborationPlugin({ token }) correspondant à COLLAB_TOKEN."
+    "localDemoOnlyPassToken": "1) Serveur : pnpm run collab:dev. 2) Start. Docs : ws://127.0.0.1:8787/collab ; token = COLLAB_TOKEN.",
+    "statusIdle": "Off",
+    "statusConnecting": "Connexion…",
+    "statusSyncing": "Synchronisation…",
+    "statusSynced": "En ligne",
+    "statusReconnecting": "Reconnexion…",
+    "statusOffline": "Hors ligne",
+    "statusError": "Erreur",
+    "statusReadonly": "Lecture seule",
+    "peersCount": "{n} en ligne"
   },
   "language": {
     "currentLocaleHint": "Langue actuelle - Cliquez pour modifier",

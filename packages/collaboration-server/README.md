@@ -1,107 +1,93 @@
 # `@codemerge/collaboration-server`
 
-WebSocket **ops** relay for On-Codemerge’s `CollaborationPlugin`. Rooms are keyed by `docId`. Auth is fail-closed: **`COLLAB_TOKEN` is required**.
+Authoritative real-time collaboration for CodeMerge (protocol **v2**).
 
-This is a **local / demo** server, not a production collaboration product. Independent semver from `on-codemerge` / `@codemerge/kernel`.
+- Versioned **op-log** over kernel ops (not Yjs)
+- **Auth adapters** (static token, HS256 JWT, or custom)
+- **Presence** channel (cursors / avatars)
+- **SQLite** or memory store; optional **Postgres** + **Redis** fanout
+- **REST** snapshot/inject + **webhooks**
+- **Comments** channel + named **versions**
+- **CLI** + **embed** into your Node HTTP server
 
 ## Install
 
 ```bash
-npm i -D @codemerge/collaboration-server
-# or
-pnpm add -D @codemerge/collaboration-server
+pnpm add @codemerge/collaboration-server
 ```
 
-## Run
+Requires **Node.js ≥ 20**. SQLite store needs **Node ≥ 22.5** (`node:sqlite`); otherwise use `--store memory` or `memoryStore()`.
+
+## CLI
 
 ```bash
-COLLAB_TOKEN=dev npx codemerge-collaboration-server
-# or from this package:
-COLLAB_TOKEN=dev pnpm start
+COLLAB_TOKEN=dev npx codemerge-collaboration-server serve --port 8080 --store sqlite:./collab.db
 ```
 
-Listens on `ws://localhost:8080` (override with `PORT`).
-
-### Environment
-
-| Variable       | Required | Default | Role                                                       |
-| -------------- | -------- | ------- | ---------------------------------------------------------- |
-| `COLLAB_TOKEN` | **yes**  | —       | Shared secret; must match `CollaborationPlugin({ token })` |
-| `PORT`         | no       | `8080`  | Listen port                                                |
-
-Without `COLLAB_TOKEN` the process exits immediately.
-
-## Protocol
-
-All client payloads must include `token` (=== `COLLAB_TOKEN`), `docId`, and usually `userId`.
-
-### Join
-
-```json
-{
-  "type": "join",
-  "docId": "abc",
-  "token": "dev",
-  "userId": "u1",
-  "snapshot": null
-}
+```bash
+codemerge-collaboration-server serve --auth jwt --jwt-secret "$SECRET" --store sqlite:./collab.db
+codemerge-collaboration-server compact --doc <docId> --keep 200
+codemerge-collaboration-server inspect <docId>
 ```
 
-Server responds:
+WS + REST base path defaults to `/collab`:
 
-```json
-{
-  "type": "init",
-  "docId": "abc",
-  "userId": "u1",
-  "snapshot": null
-}
-```
+- `ws://host:8080/collab`
+- `GET /collab/health`
+- `GET /collab/rooms/:docId` (Bearer token)
+- `POST /collab/rooms/:docId` body `{ "ops": [...], "baseVersion": n }`
+- `GET|POST /collab/rooms/:docId/versions`
 
-### Ops
-
-```json
-{
-  "type": "ops",
-  "docId": "abc",
-  "token": "dev",
-  "userId": "u1",
-  "ops": [],
-  "snapshot": {}
-}
-```
-
-Server fans out to other clients in the room (not echo):
-
-```json
-{
-  "type": "ops",
-  "docId": "abc",
-  "ops": [],
-  "userId": "u1"
-}
-```
-
-Bad token → close code `1008` (`unauthorized`).
-
-There is **no** HTML `content` field in this protocol. Document SoT is JSON / ops.
-
-## Editor wiring
+## Embed
 
 ```ts
-import { CollaborationPlugin } from 'on-codemerge';
+import http from 'node:http';
+import {
+  createCollaborationServer,
+  staticTokenAuth,
+  sqliteStore,
+} from '@codemerge/collaboration-server';
 
-CollaborationPlugin({
-  serverUrl: 'ws://localhost:8080',
-  token: 'dev',
-  autoStart: false,
+const collab = await createCollaborationServer({
+  store: sqliteStore({ path: './collab.db' }),
+  auth: staticTokenAuth({ token: process.env.COLLAB_TOKEN! }),
+  path: '/collab',
+  webhooks: [{ url: 'https://example.com/hooks/collab' }],
 });
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200);
+  res.end('ok');
+});
+collab.attach(server);
+server.listen(8080);
 ```
 
-See [Collaboration Plugin](https://github.com/s00d/on-codemerge/blob/main/docs/plugins/collaboration-plugin.md).
+Custom auth:
 
-## Out of scope
+```ts
+auth: {
+  async verify(token) {
+    const user = await mySessionStore.get(token);
+    if (!user) return null;
+    return { userId: user.id, role: 'write', docs: user.docIds };
+  },
+}
+```
 
-- PM2 / Docker / Railway production recipes for this sample
-- Presence lists, OT/CRDT merging beyond last-snapshot + ops fan-out
-- TLS termination (put a reverse proxy in front if you must expose it)
+## Protocol (v2)
+
+Handshake: `hello` → `hello_ok` → `auth` → `auth_ok` → `join` → `init`  
+Edits: `submit { baseVersion, ops }` → `ack | reject`  
+Ephemeral: `presence`, `ping`/`pong`, `comment`
+
+Clients must not send full document snapshots on every keystroke. Ops are rebased on the server when `baseVersion` lags.
+
+## Peer deps (optional)
+
+- `redis` — multi-instance fanout via `createRedisFanout({ url })`
+- `pg` — `postgresStore(pool)` + `postgresMigrate(pool)`
+
+## Migration from v1 demo
+
+v1 `join`/`ops` + shared token-in-every-message is **removed**. Use protocol v2 + `CollaborationPlugin` from current `on-codemerge`.

@@ -17,5 +17,10 @@
       "@codemerge/kernel/*": ["./packages/kernel/src/*"]
     }
   },
-  "include": ["packages/kernel/src", "packages/sdk/src", "packages/hunspell/src"]
+  "include": [
+    "packages/kernel/src",
+    "packages/sdk/src",
+    "packages/hunspell/src",
+    "packages/collaboration-server/src"
+  ]
 }

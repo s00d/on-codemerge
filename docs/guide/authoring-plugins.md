@@ -35,7 +35,7 @@ export function MyPlugin() {
 | `on-codemerge/sdk` / `@codemerge/sdk`       | `core.*`, `definePlugin`, UI services (compat subpath vs standalone)   |
 | `on-codemerge/kernel` / `@codemerge/kernel` | Pure doc/ops (plugins should use `core` from SDK, not kernel directly) |
 | `@codemerge/hunspell`                       | Spell engine without DOM                                               |
-| `@codemerge/collaboration-server`           | Demo ops WebSocket relay                                               |
+| `@codemerge/collaboration-server`           | Authoritative ops WebSocket server (embed + CLI)                       |
 
 Do **not** mix `on-codemerge` and `@codemerge/sdk` in the same application bundle (two SDK instances). Use the product package alone, or the low-level packages alone for custom shells.
 

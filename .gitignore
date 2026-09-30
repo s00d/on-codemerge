@@ -1,3 +1,6 @@
+# Accidental nested package path (do not commit)
+packages/kernel/kernel
+
 # Logs
 logs
 *.log
