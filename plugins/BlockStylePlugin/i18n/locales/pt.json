@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "Estilo do bloco",
+    "blockStyleEditor": "Estilo do bloco",
+    "cssClasses": "Classes CSS",
+    "inlineStyles": "Estilos em linha",
+    "previewTitle": "Pré-visualização",
+    "previewSample": "A rápida raposa castanha salta sobre o cão preguiçoso.",
+    "sectionText": "Texto",
+    "sectionBorder": "Borda",
+    "sectionColor": "Cores",
+    "fontSize": "Tamanho",
+    "fontWeight": "Peso",
+    "textAlign": "Alinhar",
+    "borderStyleLabel": "Estilo",
+    "borderWidth": "Largura",
+    "textColor": "Texto",
+    "backgroundColor": "Preenchimento",
+    "borderColor": "Borda",
+    "clearStyles": "Limpar",
+    "weightNormal": "Normal",
+    "weightBold": "Negrito",
+    "align": {
+      "left": "Esquerda",
+      "center": "Centro",
+      "right": "Direita",
+      "justify": "Justificar"
+    },
+    "borderStyle": {
+      "none": "Nenhum",
+      "solid": "Sólido",
+      "dashed": "Tracejado",
+      "dotted": "Pontilhado"
+    }
+  }
+}

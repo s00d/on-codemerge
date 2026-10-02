@@ -1,4 +1,6 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
 
 import type { DocNode } from '@codemerge/kernel';
 import { definePlugin, setBlockAttr, core } from '@codemerge/sdk';
@@ -6,6 +8,11 @@ import { styleIcon } from '@ocm/wysiwyg/icons';
 import { blockStylePanel } from './components/BlockStylePanel';
 import { draftToStyleJson, emptyDraft, parseStyleAttr } from './constants';
 import type { StyleDraft } from './constants';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 function readSelectedBlockStyle(editor: {
   getJSON: () => { doc: DocNode };
@@ -27,6 +34,9 @@ export function BlockStylePlugin() {
   return definePlugin({
     name: 'block-style',
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       const editor = ctx.editor;
 
       const open = () => {

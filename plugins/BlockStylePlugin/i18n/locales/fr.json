@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "Style de bloc",
+    "blockStyleEditor": "Style de bloc",
+    "cssClasses": "Classes CSS",
+    "inlineStyles": "Styles en ligne",
+    "previewTitle": "Aperçu",
+    "previewSample": "Portez ce vieux whisky au juge blond qui fume.",
+    "sectionText": "Texte",
+    "sectionBorder": "Bordure",
+    "sectionColor": "Couleurs",
+    "fontSize": "Taille",
+    "fontWeight": "Graisse",
+    "textAlign": "Alignement",
+    "borderStyleLabel": "Style",
+    "borderWidth": "Épaisseur",
+    "textColor": "Texte",
+    "backgroundColor": "Remplissage",
+    "borderColor": "Bordure",
+    "clearStyles": "Effacer",
+    "weightNormal": "Normal",
+    "weightBold": "Gras",
+    "align": {
+      "left": "Gauche",
+      "center": "Centre",
+      "right": "Droite",
+      "justify": "Justifié"
+    },
+    "borderStyle": {
+      "none": "Aucune",
+      "solid": "Continue",
+      "dashed": "Tirets",
+      "dotted": "Pointillés"
+    }
+  }
+}

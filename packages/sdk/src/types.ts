@@ -81,10 +81,16 @@ export interface EditorAPI {
   getLocale: () => string;
   /** Always async — loads locale JSON on demand when needed. */
   setLocale: (locale: string) => Promise<void>;
-  /** Inject/merge messages for a locale (e.g. app-provided pack). */
+  /**
+   * Merge messages for a locale (plugin overlay or app pack).
+   * Does not mark the locale as base-loaded — `setLocale` still loads editor core JSON.
+   */
   registerLocale: (locale: string, dict: LocaleMessages) => void;
-  /** Optional custom loader; built-in locales resolve via `src/i18n/locales`. */
-  registerLocaleLoader: (locale: string, loader: () => Promise<LocaleMessages>) => void;
+  /**
+   * Register an async overlay loader awaited by `setLocale` (plugin locale packs).
+   * Returns unsubscribe.
+   */
+  registerLocaleOverlay: (load: (locale: string) => Promise<void>) => () => void;
   onLocaleChange: (cb: () => void) => () => void;
   /** Shipped locale codes (`en` + lazy files under `src/i18n/locales`). */
   listLocales: () => string[];

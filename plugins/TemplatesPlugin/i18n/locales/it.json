@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "Vuoi davvero eliminare questo modello?",
+    "selectTemplate": "Seleziona modello...",
+    "newTemplate": "Nuovo modello",
+    "noTemplate": "Nessun modello",
+    "templateOptional": "Modello (opzionale):",
+    "noTemplatesFound": "Nessun modello trovato",
+    "useTemplate": "Usa modello",
+    "formTemplates": "Modelli modulo",
+    "templateName": "Nome modello",
+    "noTemplatesYetClickNewTemplateToCreateOne": "Ancora nessun modello. Fai clic su \"Nuovo modello\" per crearne uno."
+  }
+}

@@ -1,113 +1,119 @@
-export interface CalendarEvent {
+/** Calendar view mode in studio / widget. */
+export type CalendarView = 'month' | 'week' | 'day' | 'year' | 'agenda';
+
+export type CalendarLayer = {
   id: string;
   title: string;
-  description?: string;
-  date: string;
-  time: string;
-  duration?: number; // в минутах
-  location?: string;
-  color?: string;
-  isAllDay?: boolean;
-  priority?: 'low' | 'medium' | 'high';
-  category?: string;
-  tags?: string[];
-  attendees?: string[];
-  reminder?: number; // минуты до события
-  recurring?: {
-    type: 'daily' | 'weekly' | 'monthly' | 'yearly';
-    interval: number;
-    endDate?: string;
-  };
-  attachments?: {
-    name: string;
-    url: string;
-    type: string;
-  }[];
-  createdAt: number;
-  updatedAt: number;
-}
+  color: string;
+  visible: boolean;
+};
 
-export interface Calendar {
+export type CalendarRRule = {
+  freq: 'daily' | 'weekly' | 'monthly' | 'yearly';
+  interval: number;
+  until?: string;
+  count?: number;
+  /** 0 = Monday … 6 = Sunday */
+  byweekday?: number[];
+};
+
+export type CalendarEvent = {
   id: string;
+  calendarId: string;
   title: string;
-  description?: string;
-  events: CalendarEvent[];
-  createdAt: number;
-  updatedAt: number;
-}
-
-export interface CreateEventData {
-  title: string;
-  description?: string;
-  date: string;
-  time: string;
-  duration?: number;
+  /** ISO local datetime `YYYY-MM-DDTHH:mm` or date `YYYY-MM-DD` for allDay */
+  start: string;
+  end: string;
+  allDay: boolean;
   location?: string;
+  description?: string;
   color?: string;
-  isAllDay?: boolean;
-  priority?: 'low' | 'medium' | 'high';
-  category?: string;
-  tags?: string[];
-  attendees?: string[];
+  /** Minutes before start */
   reminder?: number;
-  recurring?: {
-    type: 'daily' | 'weekly' | 'monthly' | 'yearly';
-    interval: number;
-    endDate?: string;
-  };
-  attachments?: {
-    name: string;
-    url: string;
-    type: string;
-  }[];
-}
+  rrule?: CalendarRRule;
+};
 
-export interface CreateCalendarData {
+export type CalendarDoc = {
   title: string;
-  description?: string;
-  events?: CreateEventData[];
-}
+  /** IANA timezone for display (single doc-level tz). */
+  tz: string;
+  view: CalendarView;
+  /** Focused civil day `YYYY-MM-DD`. */
+  cursor: string;
+  calendars: CalendarLayer[];
+  events: CalendarEvent[];
+};
 
-export type UpdateEventData = Partial<CreateEventData>;
+export type DateRange = { start: string; end: string };
 
-export type UpdateCalendarData = Partial<CreateCalendarData>;
-
-// Новые типы для категорий и тегов
-export interface Category {
-  id: string;
-  name: string;
-  color: string;
-  createdAt: number;
-}
-
-export interface Tag {
-  id: string;
-  name: string;
-  color: string;
-  createdAt: number;
-}
-
-// Типы для напоминаний
-export interface Reminder {
-  id: string;
+export type Occurrence = {
   eventId: string;
   calendarId: string;
-  triggerTime: number; // timestamp
-  message: string;
-  isShown: boolean;
-  createdAt: number;
+  title: string;
+  start: string;
+  end: string;
+  allDay: boolean;
+  color?: string;
+  isMaster: boolean;
+};
+
+export type CalendarI18n = { t: (key: string) => string };
+
+export function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
-// Типы для повторяющихся событий
-export interface RecurringEvent {
-  id: string;
-  baseEventId: string;
-  calendarId: string;
-  nextOccurrence: string;
-  pattern: {
-    type: 'daily' | 'weekly' | 'monthly' | 'yearly';
-    interval: number;
-    endDate?: string;
-  };
-  createdAt: number;
+export function isCalendarView(value: unknown): value is CalendarView {
+  return (
+    value === 'month' ||
+    value === 'week' ||
+    value === 'day' ||
+    value === 'year' ||
+    value === 'agenda'
+  );
+}
+
+export function isCalendarLayer(value: unknown): value is CalendarLayer {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.id === 'string' &&
+    typeof value.title === 'string' &&
+    typeof value.color === 'string' &&
+    typeof value.visible === 'boolean'
+  );
+}
+
+export function isCalendarEvent(value: unknown): value is CalendarEvent {
+  if (!isRecord(value)) {
+    return false;
+  }
+  return (
+    typeof value.id === 'string' &&
+    typeof value.calendarId === 'string' &&
+    typeof value.title === 'string' &&
+    typeof value.start === 'string' &&
+    typeof value.end === 'string' &&
+    typeof value.allDay === 'boolean'
+  );
+}
+
+export function isCalendarDoc(value: unknown): value is CalendarDoc {
+  if (!isRecord(value)) {
+    return false;
+  }
+  if (typeof value.title !== 'string' || typeof value.tz !== 'string') {
+    return false;
+  }
+  if (!isCalendarView(value.view) || typeof value.cursor !== 'string') {
+    return false;
+  }
+  if (!Array.isArray(value.calendars) || !value.calendars.every(isCalendarLayer)) {
+    return false;
+  }
+  if (!Array.isArray(value.events) || !value.events.every(isCalendarEvent)) {
+    return false;
+  }
+  return true;
 }

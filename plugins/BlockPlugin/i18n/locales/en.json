@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "New Block",
+    "splitHorizontally": "Split Horizontally",
+    "splitVertically": "Split Vertically",
+    "horizontalLine": "Horizontal Line",
+    "enableHorizontalScroll": "Enable Horizontal Scroll",
+    "textBlock": "Text Block",
+    "containerBlock": "Container Block",
+    "splitContainer": "Split Container",
+    "split": "Split",
+    "horizontally": "Horizontally",
+    "vertically": "Vertically",
+    "merge": "Merge",
+    "insert": "Insert Block",
+    "mergeHorizontally": "Merge Horizontally",
+    "mergeVertically": "Merge Vertically",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "Note: Width is disabled when Horizontal Scroll is enabled"
+  }
+}

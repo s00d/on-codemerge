@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "Temporizador",
+    "days": "días",
+    "hours": "horas",
+    "sec": "s",
+    "timeExpired": "Tiempo expirado",
+    "editTimer": "Editar temporizador",
+    "copyTimer": "Copiar temporizador",
+    "exportTimer": "Exportar temporizador",
+    "importTimer": "Importar temporizador",
+    "deleteTimer": "Eliminar temporizador",
+    "timerCopiedSuccessfully": "Temporizador copiado correctamente",
+    "failedToCopyTimer": "No se pudo copiar el temporizador",
+    "timerImportedSuccessfully": "Temporizador importado correctamente",
+    "enterTimerTitle": "Introduce el título del temporizador",
+    "enterTimerDescription": "Introduce la descripción del temporizador",
+    "newTimer": "Nuevo temporizador",
+    "noTimersFound": "No se encontraron temporizadores",
+    "createYourFirstTimerToGetStarted": "Crea tu primer temporizador para empezar",
+    "areYouSureYouWantToDeleteThisTimer": "¿Seguro que quieres eliminar este temporizador?",
+    "expired": "Expirado",
+    "active": "Activo",
+    "timerExpired": "Temporizador expirado",
+    "invalidDateTimeFormat": "Formato de fecha/hora no válido"
+  }
+}

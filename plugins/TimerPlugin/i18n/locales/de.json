@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "Zeitgeber",
+    "days": "Tage",
+    "hours": "Stunden",
+    "sec": "Sek.",
+    "timeExpired": "Zeit abgelaufen",
+    "editTimer": "Zeitgeber bearbeiten",
+    "copyTimer": "Zeitgeber kopieren",
+    "exportTimer": "Zeitgeber exportieren",
+    "importTimer": "Zeitgeber importieren",
+    "deleteTimer": "Zeitgeber löschen",
+    "timerCopiedSuccessfully": "Zeitgeber erfolgreich kopiert",
+    "failedToCopyTimer": "Zeitgeber konnte nicht kopiert werden",
+    "timerImportedSuccessfully": "Zeitgeber erfolgreich importiert",
+    "enterTimerTitle": "Titel für Zeitgeber eingeben",
+    "enterTimerDescription": "Beschreibung für Zeitgeber eingeben",
+    "newTimer": "Neuer Zeitgeber",
+    "noTimersFound": "Keine Zeitgeber gefunden",
+    "createYourFirstTimerToGetStarted": "Erstellen Sie Ihren ersten Zeitgeber, um loszulegen",
+    "areYouSureYouWantToDeleteThisTimer": "Möchten Sie diesen Zeitgeber wirklich löschen?",
+    "expired": "Abgelaufen",
+    "active": "Aktiv",
+    "timerExpired": "Zeitgeber abgelaufen",
+    "invalidDateTimeFormat": "Ungültiges Datums-/Zeitformat"
+  }
+}

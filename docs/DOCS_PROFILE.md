@@ -18,6 +18,9 @@ Product documentation profile for **on-codemerge** (VitePress site).
 - `apps/json` — thin shell + `JsonPlugin({ surface: 'workspace' })` (`on-codemerge/json`)
 - `apps/markdown` — thin shell + `MarkdownPlugin({ surface: 'workspace' })` (`on-codemerge/markdown`)
 - `apps/code` — thin shell + `CodeBlockPlugin({ surface: 'workspace' })` (`on-codemerge/code`)
+- `apps/forms` — thin shell + `FormBuilderPlugin({ surface: 'workspace' })` (`on-codemerge/forms`)
+- `apps/charts` — thin shell + `ChartsPlugin({ surface: 'workspace' })` (`on-codemerge/charts`)
+- `apps/calendar` — thin shell + `CalendarPlugin({ surface: 'workspace' })` (`on-codemerge/calendar`)
 - `packages/collaboration-server` — authoritative collaboration server (`@codemerge/collaboration-server`)
 
 ## Entry points
@@ -29,6 +32,9 @@ Product documentation profile for **on-codemerge** (VitePress site).
 | JSON Editor      | `docs/guide/json-editor.md`        |
 | Markdown Editor  | `docs/guide/markdown-editor.md`    |
 | Code Editor      | `docs/guide/code-editor.md`        |
+| Forms Editor     | `docs/guide/forms-editor.md`       |
+| Charts Editor    | `docs/guide/charts-editor.md`      |
+| Calendar Editor  | `docs/guide/calendar-editor.md`    |
 | Document model   | `docs/guide/document-model.md`     |
 | Write a plugin   | `docs/guide/authoring-plugins.md`  |
 | Plugin catalog   | `docs/plugins/`                    |

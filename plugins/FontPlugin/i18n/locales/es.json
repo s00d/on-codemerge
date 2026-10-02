@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "Tamaño",
+    "family": "Fuente",
+    "settings": "Fuente",
+    "lineHeight": "Altura de línea",
+    "previewSample": "El veloz murciélago hindú comía feliz cardillo y kiwi.",
+    "lhTight": "Compacta",
+    "lhSnug": "Ajustada",
+    "lhNormal": "Normal",
+    "lhRelaxed": "Relajada",
+    "lhLoose": "Amplia",
+    "lhDefault": "Predeterminado",
+    "detecting": "detectando…",
+    "availableCount": "{n} en este dispositivo"
+  }
+}

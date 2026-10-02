@@ -1,0 +1,27 @@
+{
+  "responsive": {
+    "view": "Responsive Ansicht",
+    "mobileView": "Mobilansicht",
+    "desktopView": "Desktopansicht",
+    "largeDesktopView": "Große Desktopansicht",
+    "ultraWideView": "Ultraweite Ansicht",
+    "title": "Responsiv",
+    "selectAViewportSizeToPreviewYourContentAtDifferentScreenWidthsBrUseTheResizeHandlesInResponsiveModeToAdjustTheWidthManually": "Wählen Sie eine Viewport-Größe, um Ihre Inhalte bei verschiedenen Bildschirmbreiten zu prüfen.<br>Verwenden Sie die Größenänderungsgriffe im responsiven Modus, um die Breite manuell anzupassen.",
+    "responsiveSettings": "Responsive Einstellungen",
+    "enableCardsOnMobile": "Karten auf Mobilgeräten aktivieren",
+    "mobile": "Mobil",
+    "desktop": "Desktop",
+    "ultra": "Ultra",
+    "currentViewportClickToChange": "Aktueller Viewport - Zum Ändern klicken",
+    "largeDesktop": "Großer Desktop",
+    "largeDesktopView2": "Große Desktopansicht",
+    "selectViewport": "Viewport auswählen",
+    "standardDesktop": "Standard-Desktop",
+    "ultraWide": "Ultraweit",
+    "ultraWideScreen": "Ultraweiter Bildschirm",
+    "responsiveModeAllowsManualResizing": "• Responsiver Modus erlaubt manuelle Größenänderung",
+    "viewportStateIsSavedAutomatically": "• Viewport-Status wird automatisch gespeichert",
+    "tablet": "Tablet",
+    "tabletView2": "Tablet-Ansicht"
+  }
+}

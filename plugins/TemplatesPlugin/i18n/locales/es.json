@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "¿Seguro que quieres eliminar esta plantilla?",
+    "selectTemplate": "Selecciona una plantilla...",
+    "newTemplate": "Nueva plantilla",
+    "noTemplate": "Sin plantilla",
+    "templateOptional": "Plantilla (opcional):",
+    "noTemplatesFound": "No se encontraron plantillas",
+    "useTemplate": "Usar plantilla",
+    "formTemplates": "Plantillas de formulario",
+    "templateName": "Nombre de la plantilla",
+    "noTemplatesYetClickNewTemplateToCreateOne": "Aún no hay plantillas. Haz clic en \"Nueva plantilla\" para crear una."
+  }
+}

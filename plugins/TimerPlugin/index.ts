@@ -1,4 +1,6 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
 
 import {
   definePlugin,
@@ -18,6 +20,11 @@ import { TimerContextMenu } from './components/TimerContextMenu';
 import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
 import { attrToHtmlValue, readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
 import { downloadJson, pickJsonFile, mountTimerView, tickTimerWidget } from './widgets/domOps';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 /** Plain object for SoT (Dates → ISO). DOM dataset uses attrToHtmlValue. */
 function timerPayload(timer: Timer): Record<string, unknown> {
@@ -178,6 +185,9 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
       },
     ],
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       editor = ctx.editor;
       manager = new TimerManager(editor);
       menu = new TimerMenu(manager, editor, ctx.scope);

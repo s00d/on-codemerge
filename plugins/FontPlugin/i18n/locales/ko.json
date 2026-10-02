@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "크기",
+    "family": "글꼴",
+    "settings": "글꼴",
+    "lineHeight": "줄 높이",
+    "previewSample": "빠른 갈색 여우가 게으른 개를 뛰어넘습니다.",
+    "lhTight": "좁게",
+    "lhSnug": "약간 좁게",
+    "lhNormal": "보통",
+    "lhRelaxed": "약간 넓게",
+    "lhLoose": "넓게",
+    "lhDefault": "기본값",
+    "detecting": "감지 중…",
+    "availableCount": "이 기기에서 {n}"
+  }
+}

@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "Neuer Block",
+    "splitHorizontally": "Horizontal teilen",
+    "splitVertically": "Vertikal teilen",
+    "horizontalLine": "Horizontale Linie",
+    "enableHorizontalScroll": "Horizontalen Bildlauf aktivieren",
+    "textBlock": "Textblock",
+    "containerBlock": "Containerblock",
+    "splitContainer": "Container teilen",
+    "split": "Teilen",
+    "horizontally": "Horizontal",
+    "vertically": "Vertikal",
+    "merge": "Zusammenführen",
+    "insert": "Block einfügen",
+    "mergeHorizontally": "Horizontal zusammenführen",
+    "mergeVertically": "Vertikal zusammenführen",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "Hinweis: Die Breite ist deaktiviert, wenn horizontaler Bildlauf aktiviert ist"
+  }
+}

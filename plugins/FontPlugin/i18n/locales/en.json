@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "Size",
+    "family": "Font",
+    "settings": "Font",
+    "lineHeight": "Line height",
+    "previewSample": "The quick brown fox jumps over the lazy dog.",
+    "lhTight": "Tight",
+    "lhSnug": "Snug",
+    "lhNormal": "Normal",
+    "lhRelaxed": "Relaxed",
+    "lhLoose": "Loose",
+    "lhDefault": "Default",
+    "detecting": "detecting…",
+    "availableCount": "{n} on this device"
+  }
+}

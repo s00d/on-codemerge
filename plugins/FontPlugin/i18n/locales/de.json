@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "Größe",
+    "family": "Schriftart",
+    "settings": "Schrift",
+    "lineHeight": "Zeilenhöhe",
+    "previewSample": "Franz jagt im komplett verwahrlosten Taxi quer durch Bayern.",
+    "lhTight": "Eng",
+    "lhSnug": "Knapp",
+    "lhNormal": "Normal",
+    "lhRelaxed": "Locker",
+    "lhLoose": "Weit",
+    "lhDefault": "Standard",
+    "detecting": "wird erkannt…",
+    "availableCount": "{n} auf diesem Gerät"
+  }
+}

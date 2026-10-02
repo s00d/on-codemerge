@@ -10,21 +10,8 @@ import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk'
 import { YouTubeVideoMenu, extractYouTubeVideoId } from './components/YouTubeVideoMenu';
 import { editIcon, deleteIcon, linkIcon, youtubeIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
+import { mediaFloatAlign } from '@ocm/wysiwyg/utils/mediaFloatAlign';
 import { removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
-
-function alignStyle(align: string): Record<string, string> {
-  if (align === 'left') {
-    return { float: 'left', marginRight: '1rem' };
-  }
-  if (align === 'right') {
-    return { float: 'right', marginLeft: '1rem' };
-  }
-  if (align === 'center' || align === 'justify') {
-    return atomAlignStyle('center');
-  }
-  return {};
-}
 
 function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpec {
   const videoId = attrString(attrs.videoId, '');
@@ -129,7 +116,7 @@ function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): Vie
       src: `https://www.youtube.com/embed/${videoId}`,
       width: Number(attrs.width) || 800,
       height: Number(attrs.height) || 400,
-      style: alignStyle(attrString(attrs.align, '')),
+      style: mediaFloatAlign(attrString(attrs.align, '')),
     })
   );
 }
@@ -196,7 +183,7 @@ export function YouTubeVideoPlugin(opts?: PluginToolbarOpts) {
             src: `https://www.youtube.com/embed/${videoId}`,
             width: Number(attrs.width) || 800,
             height: Number(attrs.height) || 400,
-            style: alignStyle(attrString(attrs.align, '')),
+            style: mediaFloatAlign(attrString(attrs.align, '')),
           })
         );
       },

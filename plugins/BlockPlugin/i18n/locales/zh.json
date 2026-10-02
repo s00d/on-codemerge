@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "新块",
+    "splitHorizontally": "水平分割",
+    "splitVertically": "垂直分割",
+    "horizontalLine": "水平线",
+    "enableHorizontalScroll": "启用水平滚动",
+    "textBlock": "文本块",
+    "containerBlock": "容器块",
+    "splitContainer": "分割容器",
+    "split": "分割",
+    "horizontally": "水平",
+    "vertically": "垂直",
+    "merge": "合并",
+    "insert": "插入块",
+    "mergeHorizontally": "水平合并",
+    "mergeVertically": "垂直合并",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "注意：启用水平滚动时宽度被禁用"
+  }
+}

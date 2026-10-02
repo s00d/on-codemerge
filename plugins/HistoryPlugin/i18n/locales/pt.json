@@ -1,0 +1,23 @@
+{
+  "history": {
+    "undo": "Desfazer",
+    "redo": "Refazer",
+    "restore": "Restaurar esta versão",
+    "initialVersion": "Versão inicial",
+    "changesFromPrevious": "Alterações da versão anterior",
+    "editHistory": "Histórico de edição",
+    "viewHistory": "Ver histórico",
+    "close": "Fechar",
+    "history": "Histórico",
+    "versions": "Versões",
+    "versionN": "Versão {n}",
+    "versionCount": "{n} instantâneos",
+    "current": "Atual",
+    "empty": "Ainda sem histórico",
+    "justNow": "Agora mesmo",
+    "minutesAgo": "há {n} min",
+    "hoursAgo": "há {n} h",
+    "charsAdded": "+{n}",
+    "charsRemoved": "−{n}"
+  }
+}

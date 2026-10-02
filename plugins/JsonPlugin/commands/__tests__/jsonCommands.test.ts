@@ -89,10 +89,11 @@ describe('json structural commands', () => {
       state,
       runCommand(state, changeType([...arrPath, 1], 'jsonBoolean'))!
     ).state;
-    expect(docToValue(state.doc)).toStrictEqual({ arr: [9, false, 2] });
+    // number 1 → boolean via coerce (truthy)
+    expect(docToValue(state.doc)).toStrictEqual({ arr: [9, true, 2] });
 
     state = applyTransaction(state, runCommand(state, deleteNode([...arrPath, 2]))!).state;
-    expect(docToValue(state.doc)).toStrictEqual({ arr: [9, false] });
+    expect(docToValue(state.doc)).toStrictEqual({ arr: [9, true] });
   });
 
   it('deleteNodeCommand removes property from value-path selection', () => {

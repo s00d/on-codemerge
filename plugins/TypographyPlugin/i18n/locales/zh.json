@@ -1,0 +1,30 @@
+{
+  "typography": {
+    "title": "排版",
+    "styles": "文本样式",
+    "clearFormatting": "清除格式",
+    "heading1": "标题 1",
+    "heading2": "标题 2",
+    "heading3": "标题 3",
+    "heading4": "标题 4",
+    "paragraph": "段落",
+    "blockquote": "引用",
+    "paragraphs": "段落",
+    "fontWeight": "字重",
+    "fontStyle": "字体样式",
+    "clearHint": "恢复为普通段落",
+    "preformatted": "代码 / pre",
+    "horizontalLine": "水平线",
+    "sectionHeadings": "标题",
+    "sectionBody": "正文",
+    "sectionInsert": "插入",
+    "sampleHeading1": "标题 1",
+    "sampleHeading2": "标题 2",
+    "sampleHeading3": "标题 3",
+    "sampleHeading4": "标题 4",
+    "sampleParagraph": "普通段落文本",
+    "sampleBlockquote": "引用文本",
+    "samplePre": "预格式化代码",
+    "sampleHr": "分隔线"
+  }
+}

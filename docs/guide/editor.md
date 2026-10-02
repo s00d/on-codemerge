@@ -141,7 +141,7 @@ To author a plugin, see [Authoring plugins](./authoring-plugins.md) and the [SDK
 
 ## Localization
 
-UI copy uses **semantic nested keys** via [`@i18n-micro/runtime`](https://github.com/s00d/nuxt-i18n-micro). Only `en` is bundled; other packs under `src/i18n/locales/` load on demand.
+UI copy uses **semantic nested keys** via [`@i18n-micro/runtime`](https://github.com/s00d/nuxt-i18n-micro). Editor core ships shared namespaces (`common.*`, `toolbar.*`, …) under `packages/editor/src/i18n/locales/`. Large plugins ship their own packs under `plugins/<Name>Plugin/i18n/locales/` and merge them via `wirePluginLocales` / `registerLocale` — only the **current** non-`en` locale chunk loads asynchronously.
 
 ```ts
 await editor.setLocale('ru');
@@ -149,10 +149,11 @@ await editor.setLocale('en'); // same API
 editor.t('toolbar.bold');
 editor.t('greeting', { name: 'Ada' });
 editor.listLocales();
-editor.registerLocale('xx', { toolbar: { bold: 'Bold-XX' } });
+// Merge overlay (does not skip core locale load):
+editor.registerLocale('ru', { myPlugin: { title: 'Заголовок' } });
 ```
 
-Namespaces: `common.*`, `toolbar.*`, `table.*`, `formBuilder.*`, … Missing keys fall back to `fallbackLocale` (`en`), then the key string.
+`registerLocale` merges messages without marking the locale as base-loaded. Plugin packs register an overlay loader so `setLocale` awaits them after the core JSON. Missing keys fall back to `fallbackLocale` (`en`), then the key string.
 
 `LanguagePlugin` is optional UI for picking a language; loading does not depend on it.
 

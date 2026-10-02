@@ -1,0 +1,27 @@
+{
+  "responsive": {
+    "view": "Адаптивный Вид",
+    "mobileView": "Мобильный Вид",
+    "desktopView": "Десктопный Вид",
+    "largeDesktopView": "Большой Десктопный Вид",
+    "ultraWideView": "Сверхширокий Вид",
+    "title": "Адаптивный",
+    "selectAViewportSizeToPreviewYourContentAtDifferentScreenWidthsBrUseTheResizeHandlesInResponsiveModeToAdjustTheWidthManually": "Выберите размер области просмотра, чтобы предварительно просмотреть ваш контент на разных ширинах экрана.<br>Используйте ручки изменения размера в адаптивном режиме, чтобы вручную настроить ширину.",
+    "responsiveSettings": "Настройки Адаптивности",
+    "enableCardsOnMobile": "Включить Карточки на Мобильных",
+    "mobile": "Мобильный",
+    "desktop": "Десктоп",
+    "ultra": "Ультра",
+    "currentViewportClickToChange": "Текущий viewport - Нажмите для изменения",
+    "largeDesktop": "Большой рабочий стол",
+    "largeDesktopView2": "Вид большого рабочего стола",
+    "selectViewport": "Выбрать viewport",
+    "standardDesktop": "Стандартный рабочий стол",
+    "ultraWide": "Ультра широкий",
+    "ultraWideScreen": "Ультра широкий экран",
+    "responsiveModeAllowsManualResizing": "• Адаптивный режим позволяет изменять размер вручную",
+    "viewportStateIsSavedAutomatically": "• Состояние viewport сохраняется автоматически",
+    "tablet": "Планшет",
+    "tabletView2": "Вид планшета"
+  }
+}

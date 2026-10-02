@@ -5,13 +5,15 @@ The Charts Plugin provides comprehensive chart creation and management capabilit
 ## Features
 
 - **Multiple Chart Types**: Bar, Line, Pie, Doughnut, Area, Radar, Scatter, and Bubble charts
-- **Interactive Charts**: Click to resize, context menu for edit / PNG export / delete
-- **Data Management**: Modal data editor (single- and multi-series)
+- **Shared studio**: `mountChartWorkspace` powers both WYSIWYG atom popup and standalone Charts editor
+- **Interactive Charts**: Click to resize, context menu for edit / PNG export / delete (atom surface)
+- **Data Management**: Single- and multi-series data editors
 - **Chart Customization**: Title, axes, legend, grid, mode, orientation
-- **Export Support**: Export chart as PNG from the context menu
+- **Export Support**: Export chart as PNG from the studio / context menu
 - **HTML Boundary**: Persist via `data-node="chart"` attrs in `getHTML` / `setHTML`
 
 > Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
+> Full Charts-only app: [Charts Editor](/guide/charts-editor) · compare surfaces: [Editors](/guide/editors).
 
 ## Basic Usage
 
@@ -21,9 +23,22 @@ import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 
 const editor = new Editor(container, {
-  plugins: [ChartsPlugin()],
+  plugins: [ChartsPlugin()], // surface: 'atom' (default)
 });
 ```
+
+### Surfaces
+
+```ts
+ChartsPlugin({
+  surface: 'workspace' | 'atom', // default 'atom'
+  toolbar?: ChartToolbarOptions, // workspace bar; omit → defaultChartToolbar()
+  features?: { toolbar?: boolean; historyChrome?: boolean },
+  menu?: string | null,          // atom Insert placement
+});
+```
+
+`createDefaultPlugins()` (from `on-codemerge/charts`) = `HistoryChromePlugin` + `ChartsPlugin({ surface: 'workspace' })`.
 
 ## Demo
 
@@ -42,7 +57,8 @@ import EditorComponent from '../components/EditorComponent.vue';
 ### Commands
 
 ```javascript
-// Opens the chart modal (toolbar: Insert ▾ → Chart, or bar when menus: []). Hotkey: Mod-Alt-g
+// Opens the chart studio (toolbar: Insert ▾ → Chart). Hotkey: Mod-Alt-g
+// Does not silent-insert a default chart — opens mountChartWorkspace in a popup.
 editor.command('insertChart');
 ```
 

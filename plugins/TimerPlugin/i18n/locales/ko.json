@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "타이머",
+    "days": "일",
+    "hours": "시간",
+    "sec": "초",
+    "timeExpired": "시간 만료",
+    "editTimer": "타이머 편집",
+    "copyTimer": "타이머 복사",
+    "exportTimer": "타이머 내보내기",
+    "importTimer": "타이머 가져오기",
+    "deleteTimer": "타이머 삭제",
+    "timerCopiedSuccessfully": "타이머가 복사됨",
+    "failedToCopyTimer": "타이머 복사 실패",
+    "timerImportedSuccessfully": "타이머를 가져옴",
+    "enterTimerTitle": "타이머 제목 입력",
+    "enterTimerDescription": "타이머 설명 입력",
+    "newTimer": "새 타이머",
+    "noTimersFound": "타이머를 찾을 수 없음",
+    "createYourFirstTimerToGetStarted": "시작하려면 첫 타이머를 만드세요",
+    "areYouSureYouWantToDeleteThisTimer": "이 타이머를 삭제하시겠습니까?",
+    "expired": "만료됨",
+    "active": "활성",
+    "timerExpired": "타이머가 만료되었습니다",
+    "invalidDateTimeFormat": "잘못된 날짜/시간 형식"
+  }
+}

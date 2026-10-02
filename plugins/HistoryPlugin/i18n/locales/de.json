@@ -1,0 +1,23 @@
+{
+  "history": {
+    "undo": "Rückgängig",
+    "redo": "Wiederholen",
+    "restore": "Diese Version wiederherstellen",
+    "initialVersion": "Ausgangsversion",
+    "changesFromPrevious": "Änderungen zur vorherigen Version",
+    "editHistory": "Bearbeitungshistorie",
+    "viewHistory": "Historie anzeigen",
+    "close": "Schließen",
+    "history": "Historie",
+    "versions": "Versionen",
+    "versionN": "Version {n}",
+    "versionCount": "{n} Momentaufnahmen",
+    "current": "Aktuell",
+    "empty": "Noch keine Historie",
+    "justNow": "Gerade eben",
+    "minutesAgo": "vor {n} Min.",
+    "hoursAgo": "vor {n} Std.",
+    "charsAdded": "+{n}",
+    "charsRemoved": "−{n}"
+  }
+}

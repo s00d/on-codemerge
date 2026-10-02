@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "ブロックスタイル",
+    "blockStyleEditor": "ブロックスタイル",
+    "cssClasses": "CSSクラス",
+    "inlineStyles": "インラインスタイル",
+    "previewTitle": "プレビュー",
+    "previewSample": "素早い茶色の狐が怠け者の犬を飛び越えます。",
+    "sectionText": "テキスト",
+    "sectionBorder": "枠線",
+    "sectionColor": "色",
+    "fontSize": "サイズ",
+    "fontWeight": "太さ",
+    "textAlign": "配置",
+    "borderStyleLabel": "スタイル",
+    "borderWidth": "幅",
+    "textColor": "テキスト",
+    "backgroundColor": "塗りつぶし",
+    "borderColor": "枠線",
+    "clearStyles": "クリア",
+    "weightNormal": "標準",
+    "weightBold": "太字",
+    "align": {
+      "left": "左",
+      "center": "中央",
+      "right": "右",
+      "justify": "両端揃え"
+    },
+    "borderStyle": {
+      "none": "なし",
+      "solid": "実線",
+      "dashed": "破線",
+      "dotted": "点線"
+    }
+  }
+}

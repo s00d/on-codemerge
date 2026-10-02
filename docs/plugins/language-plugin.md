@@ -1,6 +1,6 @@
 # Language Plugin
 
-Toolbar UI for switching the editor locale. Locale **files and loading** live in the editor core (`src/i18n/locales`), not in this plugin.
+Toolbar UI for switching the editor locale. **Core** locale files live in `packages/editor/src/i18n/locales`. Large plugins add their own packs under `plugins/*/i18n/locales` and merge them on `setLocale`.
 
 ## Usage
 
@@ -30,20 +30,20 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 ## How loading works
 
-| Locale | How it loads                                                       |
-| ------ | ------------------------------------------------------------------ |
-| `en`   | Bundled with the editor (`src/i18n/locales/en.json`)               |
-| others | Async chunks via `import.meta.glob` from `src/i18n/locales/*.json` |
+| Locale | How it loads                                                                  |
+| ------ | ----------------------------------------------------------------------------- |
+| `en`   | Bundled with the editor (+ each plugin's `en.json` merged in `setup`)         |
+| others | Core pack via `import.meta.glob`, then plugin overlays awaited by `setLocale` |
 
-`editor.setLocale(code)` is **always** `Promise<void>`: it loads the pack if needed, then switches. `LanguagePlugin` only opens the language menu and remembers the choice in `localStorage`.
+`editor.setLocale(code)` is **always** `Promise<void>`: it loads the core pack if needed, awaits plugin overlays, then switches. `registerLocale(locale, dict)` merges without blocking the core load. `LanguagePlugin` only opens the language menu and remembers the choice in `localStorage`.
 
 ```ts
 editor.listLocales(); // ['de','en','es',…]
 await editor.setLocale('ja');
-editor.registerLocale('xx', { toolbar: { bold: 'Bld' } }); // app-provided pack
+editor.registerLocale('xx', { toolbar: { bold: 'Bld' } }); // merge overlay / custom pack
 ```
 
-Key parity across locale files: `pnpm run check:locales`.
+Key parity across locale packs: `pnpm run check:locales` (editor + each `plugins/*/i18n/locales`).
 
 ## Related
 

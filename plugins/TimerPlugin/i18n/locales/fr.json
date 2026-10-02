@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "Minuteur",
+    "days": "jours",
+    "hours": "heures",
+    "sec": "s",
+    "timeExpired": "Temps écoulé",
+    "editTimer": "Modifier le minuteur",
+    "copyTimer": "Copier le minuteur",
+    "exportTimer": "Exporter le minuteur",
+    "importTimer": "Importer le minuteur",
+    "deleteTimer": "Supprimer le minuteur",
+    "timerCopiedSuccessfully": "Minuteur copié avec succès",
+    "failedToCopyTimer": "Échec de la copie du minuteur",
+    "timerImportedSuccessfully": "Minuteur importé avec succès",
+    "enterTimerTitle": "Saisir le titre du minuteur",
+    "enterTimerDescription": "Saisir la description du minuteur",
+    "newTimer": "Nouveau minuteur",
+    "noTimersFound": "Aucun minuteur trouvé",
+    "createYourFirstTimerToGetStarted": "Créez votre premier minuteur pour commencer",
+    "areYouSureYouWantToDeleteThisTimer": "Voulez-vous vraiment supprimer ce minuteur ?",
+    "expired": "Expiré",
+    "active": "Actif",
+    "timerExpired": "Minuteur expiré",
+    "invalidDateTimeFormat": "Format de date/heure invalide"
+  }
+}

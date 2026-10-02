@@ -229,7 +229,52 @@ importers:
         specifier: 'catalog:'
         version: 3.5.43(typescript@6.0.3)
 
+  apps/calendar:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@i18n-micro/runtime':
+        specifier: 'catalog:'
+        version: 1.0.0
+
+  apps/charts:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@i18n-micro/runtime':
+        specifier: 'catalog:'
+        version: 1.0.0
+
   apps/code:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@i18n-micro/runtime':
+        specifier: 'catalog:'
+        version: 1.0.0
+
+  apps/forms:
     dependencies:
       '@codemerge/editor':
         specifier: workspace:^

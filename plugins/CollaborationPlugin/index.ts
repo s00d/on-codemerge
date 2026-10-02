@@ -1,4 +1,7 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
 import { definePlugin, h, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
 import type { Operation } from '@codemerge/kernel';
@@ -6,6 +9,11 @@ import { collaborationIcon } from '@ocm/wysiwyg/icons';
 import { createCollabClient, type CollabClient } from './client.ts';
 import type { CollabStatus, PresencePeer } from './protocol.ts';
 import { renderPresenceOverlay } from './presence-ui.ts';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 export type { CollabStatus, PresencePeer } from './protocol.ts';
 export {
@@ -143,6 +151,9 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
       },
     },
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       const editor = ctx.editor;
       const urlParams = new URLSearchParams(globalThis.location?.search ?? '');
       // userId is local identity (opts / sessionStorage) — never taken from share URL.

@@ -1,26 +1,117 @@
 import './style.scss';
-import { definePlugin, foreign, h, insertAtomAfter, pluginToolbarPlacement } from '@codemerge/sdk';
-import type { PluginToolbarOpts, ViewSpec, WidgetContext } from '@codemerge/sdk';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
+import type { Command } from '@codemerge/kernel';
+import { applyToolbarConfig, definePlugin, foreign, h } from '@codemerge/sdk';
+import type { PluginDefinition, PluginToolbarOpts, ViewSpec, WidgetContext } from '@codemerge/sdk';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
-import { deleteIcon, duplicateIcon, editIcon, formIcon } from '@ocm/wysiwyg/icons';
-import { TemplateManager } from './services/TemplateManager';
-import { FormBuilderModal } from './components/FormBuilderModal';
-import { FormManager } from './services/FormManager';
+import { HistoryChromePlugin } from '../HistoryPlugin';
+import { setupAtomChrome } from './chrome/atom';
+import type { AtomChromeHandle } from './chrome/atom';
+import { defaultFormToolbar } from './chrome/defaultToolbar';
+import type { FormToolbarOptions } from './chrome/types';
+import { isFormEditorDoc } from './io';
+import { mountFormWorkspace } from './surface/workspaceView';
+import type { FormWorkspaceHandle } from './surface/workspaceView';
 import { mountFormWidget } from './widgets/mountFormWidget';
-import type { FormConfig } from './types';
+import { formView } from './render/formView';
 import { isFormConfig } from './types';
 
-export function FormBuilderPlugin(opts?: PluginToolbarOpts) {
-  let openFormBuilder: ((existing?: HTMLElement | null) => void) | null = null;
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
+
+export {
+  emptyFormConfig,
+  emptyEditorDoc,
+  isFormEditorDoc,
+  resolveFormNode,
+  configFromDoc,
+  docFromConfig,
+  toEditorDoc,
+  ParseError,
+  parseText,
+  serializeText,
+  serializeDoc,
+  serializeConfig,
+  MAX_FORM_BYTES,
+  type ParseTextResult,
+} from './io';
+export { defaultFormToolbar } from './chrome/defaultToolbar';
+export type {
+  FormToolbarActionApi,
+  FormToolbarItem,
+  FormToolbarMenu,
+  FormToolbarOptions,
+} from './chrome/types';
+export { HistoryChromePlugin } from '../HistoryPlugin';
+export type { FormConfig, FieldConfig, FieldType, FormTemplate } from './types';
+export { isFormConfig, isFieldType } from './types';
+export { fieldView } from './render/fieldView';
+export { formView } from './render/formView';
+export {
+  DRIVERS,
+  getDriver,
+  paletteFieldTypes,
+  createField,
+  validateFieldForDriver,
+} from './drivers';
+export type { FieldDriver, FieldFamily, FormI18n } from './drivers';
+export { FormStore } from './services/FormStore';
+export { mountFormWorkspace } from './surface/workspaceView';
+export type { FormWorkspaceHandle } from './surface/workspaceView';
+
+export type FormBuilderPluginFeatures = {
+  toolbar?: boolean;
+  historyChrome?: boolean;
+};
+
+export type FormBuilderPluginOptions = PluginToolbarOpts & {
+  surface?: 'workspace' | 'atom';
+  features?: FormBuilderPluginFeatures;
+  toolbar?: FormToolbarOptions;
+};
+
+export function FormBuilderPlugin(options: FormBuilderPluginOptions = {}): PluginDefinition {
+  const surface = options.surface ?? 'atom';
+  const workspace = surface === 'workspace';
+  const feat = (key: keyof FormBuilderPluginFeatures, defaultOn: boolean): boolean => {
+    const v = options.features?.[key];
+    return v === undefined ? defaultOn : v;
+  };
+  const features: Required<FormBuilderPluginFeatures> = {
+    toolbar: feat('toolbar', true),
+    historyChrome: feat('historyChrome', workspace),
+  };
+  const toolbarConfig: FormToolbarOptions | undefined = workspace
+    ? (options.toolbar ?? defaultFormToolbar())
+    : undefined;
+
+  const atomChrome: { current: AtomChromeHandle | null } = { current: null };
+  const workspaceRef: { current: FormWorkspaceHandle | null } = { current: null };
+
+  const commands: Record<string, Command> = {
+    insertForm: () => {
+      atomChrome.current?.openBuilder();
+      return null;
+    },
+    'form.openTemplates': () => {
+      workspaceRef.current?.openTemplates();
+      return null;
+    },
+    'form.clearFields': () => {
+      workspaceRef.current?.clearFields();
+      return null;
+    },
+  };
+
+  const hotkeys = !workspace
+    ? [{ keys: 'Mod-Alt-f', command: 'insertForm', description: 'Insert form' }]
+    : [];
 
   return definePlugin({
-    commands: {
-      insertForm: () => {
-        openFormBuilder?.();
-        return null;
-      },
-    },
-    hotkeys: [{ keys: 'Mod-Alt-f', command: 'insertForm', description: 'Insert form' }],
     name: 'form-builder',
     nodes: [
       {
@@ -30,138 +121,91 @@ export function FormBuilderPlugin(opts?: PluginToolbarOpts) {
         attrs: { schema: {}, action: '', align: '' },
       },
     ],
+    commands,
+    hotkeys,
     setup(ctx) {
-      const editor = ctx.editor;
-      const templateManager = new TemplateManager(editor);
-      templateManager.initialize();
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
+      if (workspace) {
+        const doc = ctx.editor.getState().doc;
+        if (!isFormEditorDoc(doc)) {
+          throw new TypeError(
+            'FormBuilderPlugin({ surface: "workspace" }) requires form SoT (doc→form); seed emptyEditorDoc()'
+          );
+        }
+        const fromApi = ctx.editor.contentElement();
+        const contentEl =
+          fromApi instanceof HTMLElement && fromApi.getAttribute('data-ocm-shell') === 'true'
+            ? fromApi
+            : ctx.editor.host.querySelector('[data-ocm-shell="true"]');
+        if (!(contentEl instanceof HTMLElement)) {
+          throw new TypeError(
+            'FormBuilderPlugin({ surface: "workspace" }) requires createShellView contentTarget (data-ocm-shell)'
+          );
+        }
 
-      openFormBuilder = (existing?: HTMLElement | null) => {
-        const modal = new FormBuilderModal(editor, ctx.scope);
-        const pathEl = existing?.closest('[data-ocm-path], [data-ocm-block]') ?? existing ?? null;
-        const pathRaw =
-          pathEl instanceof HTMLElement
-            ? (pathEl.dataset.ocmPath ?? pathEl.dataset.ocmBlock ?? '')
-            : '';
-        const atomPath = pathRaw.includes('.')
-          ? pathRaw.split('.').map(Number)
-          : pathRaw === ''
-            ? null
-            : [Number(pathRaw)];
-
-        modal.show(
-          (formConfig: FormConfig) => {
-            if (atomPath && atomPath.every((n) => Number.isFinite(n))) {
-              editor.run(() => [
-                {
-                  type: 'set_attrs',
-                  path: atomPath,
-                  attrs: {
-                    schema: formConfig,
-                    action: formConfig.action || '',
-                  },
-                },
-              ]);
+        let writing = false;
+        const handle = mountFormWorkspace(ctx.editor, contentEl, {
+          mode: 'workspace',
+          scope: ctx.scope,
+          onChange: (formConfig) => {
+            if (writing) {
               return;
             }
-            editor.run(
-              insertAtomAfter('form', {
-                schema: formConfig,
-                action: formConfig.action || '',
-                align: '',
-              })
-            );
+            writing = true;
+            ctx.editor.run(() => [
+              {
+                type: 'set_attrs',
+                path: [0],
+                attrs: {
+                  schema: formConfig,
+                  action: formConfig.action || '',
+                },
+              },
+            ]);
+            writing = false;
+            ctx.editor.toolbar.refresh();
           },
-          Boolean(existing),
-          existing ?? null
-        );
-      };
-
-      ctx.toolbar.add({
-        id: 'form',
-        icon: formIcon,
-        title: () => editor.t('formBuilder.insertForm'),
-        ...pluginToolbarPlacement({ menu: 'insert', order: 53 }, opts),
-        onClick: () => openFormBuilder?.(),
-      });
-
-      const onCtx = (e: MouseEvent) => {
-        const target = e.target;
-        if (!(target instanceof Element)) {
-          return;
+        });
+        workspaceRef.current = handle;
+        ctx.own({
+          destroy: () => {
+            workspaceRef.current = null;
+            handle.destroy();
+          },
+        });
+        ctx.on('docChanged', () => {
+          if (!writing) {
+            handle.update(ctx.editor.getState());
+          }
+        });
+        if (toolbarConfig) {
+          applyToolbarConfig(ctx, toolbarConfig, () => ({
+            editor: ctx.editor,
+            workspace: workspaceRef.current,
+          }));
         }
-        const form = target.closest(
-          'form, .ocm-form-atom, .ocm-form, [data-ocm-type="form"], [data-type="form"][data-ocm-atom="1"]'
-        );
-        if (!(form instanceof HTMLElement)) {
-          return;
-        }
-        e.preventDefault();
-        editor.ui.menu.open(
-          [
-            {
-              label: editor.t('formBuilder.editForm'),
-              icon: editIcon,
-              onClick: () => openFormBuilder?.(form),
-            },
-            {
-              label: editor.t('formBuilder.duplicateForm'),
-              icon: duplicateIcon,
-              onClick: () => {
-                const pathRaw =
-                  form.dataset.ocmPath ??
-                  form.dataset.ocmBlock ??
-                  form.closest<HTMLElement>('[data-ocm-path], [data-ocm-block]')?.dataset.ocmPath ??
-                  form.closest<HTMLElement>('[data-ocm-block]')?.dataset.ocmBlock;
-                if (!pathRaw) {
-                  return;
-                }
-                const path = pathRaw.includes('.')
-                  ? pathRaw.split('.').map(Number)
-                  : [Number(pathRaw)];
-                try {
-                  const node = editor.getJSON().doc.content?.[path[0]];
-                  if (node?.type === 'form') {
-                    editor.run(insertAtomAfter('form', { ...node.attrs }));
-                  }
-                } catch {
-                  /* ignore */
-                }
-              },
-            },
-            { type: 'divider' },
-            {
-              label: editor.t('common.delete'),
-              icon: deleteIcon,
-              variant: 'danger',
-              onClick: () => {
-                const pathRaw =
-                  form.dataset.ocmPath ??
-                  form.dataset.ocmBlock ??
-                  form.closest<HTMLElement>('[data-ocm-path]')?.dataset.ocmPath ??
-                  form.closest<HTMLElement>('[data-ocm-block]')?.dataset.ocmBlock;
-                if (pathRaw === undefined || pathRaw === null) {
-                  return;
-                }
-                const index = Number(pathRaw.split('.')[0]);
-                editor.run(() => [{ type: 'remove_node', path: [], index }]);
-              },
-            },
-          ],
-          e.clientX,
-          e.clientY
-        );
-      };
-      ctx.onDom('host', 'contextmenu', onCtx);
+      } else if (features.toolbar) {
+        const { menu, group, order } = options;
+        atomChrome.current = setupAtomChrome(ctx, {
+          ...(menu !== undefined ? { menu } : {}),
+          ...(group !== undefined ? { group } : {}),
+          ...(order !== undefined ? { order } : {}),
+        });
+      }
     },
-    widgets: {
-      form: {
-        render(attrs, wctx: WidgetContext): ViewSpec {
-          return foreign((host, scope) => {
-            mountFormWidget(host, attrs, () => wctx.editor, scope);
-          });
+    widgets: workspace
+      ? undefined
+      : {
+          form: {
+            render(attrs, wctx: WidgetContext): ViewSpec {
+              return foreign((host, scope) => {
+                mountFormWidget(host, attrs, () => wctx.editor, scope);
+              });
+            },
+          },
         },
-      },
-    },
     publish: {
       node: 'form',
       render: (attrs) => {
@@ -172,11 +216,32 @@ export function FormBuilderPlugin(opts?: PluginToolbarOpts) {
         return h(
           'div',
           { class: 'ocm-form-publish', attrs: { 'data-node': 'form' } },
-          new FormManager({ t: (key: string) => key }).createForm(schema)
+          formView(schema, { i18n: { t: (key: string) => key } })
         );
       },
     },
   });
+}
+
+export function createDefaultPlugins(
+  opts: {
+    toolbar?: FormToolbarOptions;
+    features?: FormBuilderPluginFeatures;
+  } = {}
+): PluginDefinition[] {
+  const features: Required<FormBuilderPluginFeatures> = {
+    toolbar: true,
+    historyChrome: true,
+    ...opts.features,
+  };
+  return [
+    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
+    FormBuilderPlugin({
+      surface: 'workspace',
+      toolbar: opts.toolbar ?? defaultFormToolbar(),
+      features,
+    }),
+  ];
 }
 
 export default FormBuilderPlugin;

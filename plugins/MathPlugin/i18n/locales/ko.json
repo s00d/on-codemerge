@@ -1,0 +1,22 @@
+{
+  "math": {
+    "insert": "수학 삽입",
+    "chartPreviewWillAppearHere": "차트 미리보기가 여기에 표시됩니다",
+    "formPreview": "폼 미리보기",
+    "previewUnavailable": "미리보기를 사용할 수 없습니다",
+    "mathExpressionLatex": "식(TeX 하위 집합)",
+    "expression": "식",
+    "modeBuild": "빌드",
+    "modeSource": "소스",
+    "howToWriteFormulas": "수식 작성 방법",
+    "mathPreviewWillAppearHere": "수식 미리보기가 여기에 표시됩니다",
+    "enterYourMathExpressionHere": "여기에 수식을 입력하세요...",
+    "group": {
+      "structures": "구조",
+      "calculus": "미적분",
+      "ops": "연산자",
+      "funcs": "함수",
+      "greek": "그리스 문자"
+    }
+  }
+}

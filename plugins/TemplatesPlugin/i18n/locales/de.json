@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "Möchten Sie diese Vorlage wirklich löschen?",
+    "selectTemplate": "Vorlage auswählen...",
+    "newTemplate": "Neue Vorlage",
+    "noTemplate": "Keine Vorlage",
+    "templateOptional": "Vorlage (optional):",
+    "noTemplatesFound": "Keine Vorlagen gefunden",
+    "useTemplate": "Vorlage verwenden",
+    "formTemplates": "Formularvorlagen",
+    "templateName": "Vorlagenname",
+    "noTemplatesYetClickNewTemplateToCreateOne": "Noch keine Vorlagen. Klicken Sie auf \"Neue Vorlage\", um eine zu erstellen."
+  }
+}

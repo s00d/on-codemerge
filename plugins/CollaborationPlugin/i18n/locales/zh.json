@@ -1,0 +1,15 @@
+{
+  "collaboration": {
+    "title": "协作",
+    "localDemoOnlyPassToken": "1) 启动服务器：pnpm run collab:dev。2) 点击 Start。Docs：ws://127.0.0.1:8787/collab；token = COLLAB_TOKEN。",
+    "statusIdle": "关闭",
+    "statusConnecting": "连接中…",
+    "statusSyncing": "同步中…",
+    "statusSynced": "实时",
+    "statusReconnecting": "重连中…",
+    "statusOffline": "离线",
+    "statusError": "错误",
+    "statusReadonly": "只读",
+    "peersCount": "{n} 人在线"
+  }
+}

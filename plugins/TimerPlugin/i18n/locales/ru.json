@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "Таймер",
+    "days": "дней",
+    "hours": "часов",
+    "sec": "сек",
+    "timeExpired": "Время истекло",
+    "editTimer": "Редактировать Таймер",
+    "copyTimer": "Копировать Таймер",
+    "exportTimer": "Экспорт Таймера",
+    "importTimer": "Импорт Таймера",
+    "deleteTimer": "Удалить Таймер",
+    "timerCopiedSuccessfully": "Таймер успешно скопирован",
+    "failedToCopyTimer": "Не удалось скопировать таймер",
+    "timerImportedSuccessfully": "Таймер успешно импортирован",
+    "enterTimerTitle": "Введите заголовок таймера",
+    "enterTimerDescription": "Введите описание таймера",
+    "newTimer": "Новый Таймер",
+    "noTimersFound": "Таймеры не найдены",
+    "createYourFirstTimerToGetStarted": "Создайте свой первый таймер для начала работы",
+    "areYouSureYouWantToDeleteThisTimer": "Вы уверены, что хотите удалить этот таймер?",
+    "expired": "Истёк",
+    "active": "Активен",
+    "timerExpired": "Таймер истёк",
+    "invalidDateTimeFormat": "Неверный формат даты/времени"
+  }
+}

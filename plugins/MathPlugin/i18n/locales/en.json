@@ -1,0 +1,22 @@
+{
+  "math": {
+    "insert": "Insert Math",
+    "chartPreviewWillAppearHere": "Chart preview will appear here",
+    "formPreview": "Form Preview",
+    "previewUnavailable": "Preview unavailable",
+    "mathExpressionLatex": "Expression (TeX subset)",
+    "expression": "Expression",
+    "modeBuild": "Build",
+    "modeSource": "Source",
+    "howToWriteFormulas": "How to Write Formulas",
+    "mathPreviewWillAppearHere": "Math preview will appear here",
+    "enterYourMathExpressionHere": "Enter your math expression here...",
+    "group": {
+      "structures": "Structures",
+      "calculus": "Calculus",
+      "ops": "Operators",
+      "funcs": "Functions",
+      "greek": "Greek"
+    }
+  }
+}

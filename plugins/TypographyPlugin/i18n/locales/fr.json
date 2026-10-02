@@ -1,0 +1,30 @@
+{
+  "typography": {
+    "title": "Typographie",
+    "styles": "Styles de texte",
+    "clearFormatting": "Effacer la mise en forme",
+    "heading1": "Titre 1",
+    "heading2": "Titre 2",
+    "heading3": "Titre 3",
+    "heading4": "Titre 4",
+    "paragraph": "Paragraphe",
+    "blockquote": "Citation",
+    "paragraphs": "Paragraphes",
+    "fontWeight": "Graisse",
+    "fontStyle": "Style de police",
+    "clearHint": "Revenir à un paragraphe normal",
+    "preformatted": "Code / pre",
+    "horizontalLine": "Ligne horizontale",
+    "sectionHeadings": "Titres",
+    "sectionBody": "Corps",
+    "sectionInsert": "Insérer",
+    "sampleHeading1": "Titre 1",
+    "sampleHeading2": "Titre 2",
+    "sampleHeading3": "Titre 3",
+    "sampleHeading4": "Titre 4",
+    "sampleParagraph": "Texte de paragraphe",
+    "sampleBlockquote": "Texte cité",
+    "samplePre": "code préformaté",
+    "sampleHr": "Séparateur"
+  }
+}

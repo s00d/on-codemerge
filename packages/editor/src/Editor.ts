@@ -97,7 +97,6 @@ export type TransactionEvent = {
 
 type Listener = (state: EditorState) => void;
 type TransactionListener = (event: TransactionEvent) => void;
-type LocaleLoader = () => Promise<LocaleMessages>;
 
 export class Editor implements EditorAPI {
   readonly host: HTMLElement;
@@ -113,9 +112,9 @@ export class Editor implements EditorAPI {
   private destroyed = false;
   private readonly i18n: I18n;
   private readonly loadedLocales = new Set<string>();
-  private readonly localeLoaders = new Map<string, LocaleLoader>();
   private readonly localeChangeListeners = new Set<() => void>();
-  private readonly localeReady: Promise<void> = Promise.resolve();
+  private readonly localeOverlays = new Set<(locale: string) => Promise<void>>();
+  private localeReady: Promise<void> = Promise.resolve();
   private readonly toolbarPanel: ToolbarPanel;
   private pageChrome: PageChrome | null = null;
   /** Marks applied to the next typed characters (e.g. track-changes insertion). */
@@ -169,9 +168,6 @@ export class Editor implements EditorAPI {
       }
     }
     const initialLocale = options.locale && options.locale !== '' ? options.locale : 'en';
-    if (initialLocale !== 'en') {
-      this.localeReady = this.setLocale(initialLocale);
-    }
 
     const rawDoc = options.doc;
     let doc;
@@ -247,9 +243,13 @@ export class Editor implements EditorAPI {
     }
 
     this.bindShortcuts();
-    // Bootstrap TARGET: platform sealed → createView(editor) → setup(ctx)
+    // Bootstrap TARGET: platform sealed → createView(editor) → setup(ctx) → setLocale
+    // Plugins merge en overlays in setup before the initial non-en locale loads.
     this.view = options.createView(this);
     runExtensionSetup(this.platform, this.plugins, this, (t) => this.resolveDomTarget(t));
+    if (initialLocale !== 'en') {
+      this.localeReady = this.setLocale(initialLocale);
+    }
     this.setupColorScheme();
     if (this.chrome === 'page') {
       const contentEl = this.view.contentElement?.() ?? null;
@@ -410,14 +410,14 @@ export class Editor implements EditorAPI {
    */
   async setLocale(locale: string): Promise<void> {
     if (!this.loadedLocales.has(locale)) {
-      const custom = this.localeLoaders.get(locale);
-      const dict = custom ? await custom() : await loadLocale(locale);
+      const dict = await loadLocale(locale);
       if (dict !== null) {
         this.i18n.addTranslations(locale, dict, true);
         this.loadedLocales.add(locale);
       }
     }
     this.i18n.locale = locale;
+    await Promise.all([...this.localeOverlays].map((load) => load(locale)));
     this.toolbarPanel.refresh();
     for (const cb of this.localeChangeListeners) {
       cb();
@@ -429,13 +429,24 @@ export class Editor implements EditorAPI {
     return this.localeReady;
   }
 
+  /**
+   * Merge messages for a locale without marking it base-loaded.
+   * Plugins use this for overlay packs; `setLocale` still loads the editor core JSON.
+   */
   registerLocale(locale: string, dict: LocaleMessages): void {
     this.i18n.addTranslations(locale, dict, true);
-    this.loadedLocales.add(locale);
   }
 
-  registerLocaleLoader(locale: string, loader: LocaleLoader): void {
-    this.localeLoaders.set(locale, loader);
+  /**
+   * Plugin locale packs — awaited inside `setLocale` after the core JSON loads.
+   * Immediately runs once for the current locale.
+   */
+  registerLocaleOverlay(load: (locale: string) => Promise<void>): () => void {
+    this.localeOverlays.add(load);
+    void load(this.getLocale());
+    return () => {
+      this.localeOverlays.delete(load);
+    };
   }
 
   onLocaleChange(cb: () => void): () => void {

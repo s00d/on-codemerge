@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "2.4.0",
+  "version": "2.5.0",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
   "keywords": [
     "JavaScript",
@@ -106,6 +106,36 @@
         "default": "./dist/code.cjs"
       }
     },
+    "./forms": {
+      "import": {
+        "types": "./dist/forms.d.ts",
+        "default": "./dist/forms.mjs"
+      },
+      "require": {
+        "types": "./dist/forms.d.cts",
+        "default": "./dist/forms.cjs"
+      }
+    },
+    "./charts": {
+      "import": {
+        "types": "./dist/charts.d.ts",
+        "default": "./dist/charts.mjs"
+      },
+      "require": {
+        "types": "./dist/charts.d.cts",
+        "default": "./dist/charts.cjs"
+      }
+    },
+    "./calendar": {
+      "import": {
+        "types": "./dist/calendar.d.ts",
+        "default": "./dist/calendar.mjs"
+      },
+      "require": {
+        "types": "./dist/calendar.d.cts",
+        "default": "./dist/calendar.cjs"
+      }
+    },
     "./index.css": "./dist/index.css",
     "./public.css": "./dist/public.css",
     "./public.js": "./dist/public.js",
@@ -117,21 +147,33 @@
   "scripts": {
     "release": "pnpm run prepublishOnly && pnpm publish -r --filter './packages/kernel' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter '.' --access public --no-git-checks --ignore-scripts",
     "build:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run build",
-    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:json-export && pnpm run check:json-types && pnpm run check:markdown-export && pnpm run check:markdown-types && pnpm run check:code-export && pnpm run check:code-types && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run publint",
+    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:json-export && pnpm run check:json-types && pnpm run check:markdown-export && pnpm run check:markdown-types && pnpm run check:code-export && pnpm run check:code-types && pnpm run check:forms-export && pnpm run check:forms-types && pnpm run check:charts-export && pnpm run check:charts-types && pnpm run check:calendar-export && pnpm run check:calendar-types && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run publint",
     "check:json-export": "node ./scripts/check-json-export.mjs",
     "check:json-types": "node ./scripts/check-json-types.mjs",
     "check:markdown-export": "node ./scripts/check-markdown-export.mjs",
     "check:markdown-types": "node ./scripts/check-markdown-types.mjs",
     "check:code-export": "node ./scripts/check-code-export.mjs",
     "check:code-types": "node ./scripts/check-code-types.mjs",
+    "check:forms-export": "node ./scripts/check-forms-export.mjs",
+    "check:forms-types": "node ./scripts/check-forms-types.mjs",
+    "check:charts-export": "node ./scripts/check-charts-export.mjs",
+    "check:charts-types": "node ./scripts/check-charts-types.mjs",
+    "check:calendar-export": "node ./scripts/check-calendar-export.mjs",
+    "check:calendar-types": "node ./scripts/check-calendar-types.mjs",
     "dev": "vite",
     "dev:json": "vite --config vite.json.config.ts",
     "dev:markdown": "vite --config vite.markdown.config.ts",
     "dev:code": "vite --config vite.code.config.ts",
+    "dev:forms": "vite --config vite.forms.config.ts",
+    "dev:charts": "vite --config vite.charts.config.ts",
+    "dev:calendar": "vite --config vite.calendar.config.ts",
     "build": "vite build && vite build --config vite.public.config.ts",
     "build:json": "vite build --config vite.json.config.ts",
     "build:markdown": "vite build --config vite.markdown.config.ts",
     "build:code": "vite build --config vite.code.config.ts",
+    "build:forms": "vite build --config vite.forms.config.ts",
+    "build:charts": "vite build --config vite.charts.config.ts",
+    "build:calendar": "vite build --config vite.calendar.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs",

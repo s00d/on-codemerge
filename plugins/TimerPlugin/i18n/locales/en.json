@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "Timer",
+    "days": "days",
+    "hours": "hours",
+    "sec": "sec",
+    "timeExpired": "Time expired",
+    "editTimer": "Edit Timer",
+    "copyTimer": "Copy Timer",
+    "exportTimer": "Export Timer",
+    "importTimer": "Import Timer",
+    "deleteTimer": "Delete Timer",
+    "timerCopiedSuccessfully": "Timer copied successfully",
+    "failedToCopyTimer": "Failed to copy timer",
+    "timerImportedSuccessfully": "Timer imported successfully",
+    "enterTimerTitle": "Enter timer title",
+    "enterTimerDescription": "Enter timer description",
+    "newTimer": "New Timer",
+    "noTimersFound": "No timers found",
+    "createYourFirstTimerToGetStarted": "Create your first timer to get started",
+    "areYouSureYouWantToDeleteThisTimer": "Are you sure you want to delete this timer?",
+    "expired": "Expired",
+    "active": "Active",
+    "timerExpired": "Timer expired",
+    "invalidDateTimeFormat": "Invalid date/time format"
+  }
+}

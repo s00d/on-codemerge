@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "块样式",
+    "blockStyleEditor": "块样式",
+    "cssClasses": "CSS类",
+    "inlineStyles": "内联样式",
+    "previewTitle": "预览",
+    "previewSample": "敏捷的棕色狐狸跳过懒狗。",
+    "sectionText": "文本",
+    "sectionBorder": "边框",
+    "sectionColor": "颜色",
+    "fontSize": "大小",
+    "fontWeight": "字重",
+    "textAlign": "对齐",
+    "borderStyleLabel": "样式",
+    "borderWidth": "宽度",
+    "textColor": "文本",
+    "backgroundColor": "填充",
+    "borderColor": "边框",
+    "clearStyles": "清除",
+    "weightNormal": "正常",
+    "weightBold": "加粗",
+    "align": {
+      "left": "左",
+      "center": "居中",
+      "right": "右",
+      "justify": "两端对齐"
+    },
+    "borderStyle": {
+      "none": "无",
+      "solid": "实线",
+      "dashed": "虚线",
+      "dotted": "点线"
+    }
+  }
+}

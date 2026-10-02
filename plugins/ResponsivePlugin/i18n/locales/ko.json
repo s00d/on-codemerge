@@ -1,0 +1,27 @@
+{
+  "responsive": {
+    "view": "반응형 보기",
+    "mobileView": "모바일 보기",
+    "desktopView": "데스크톱 보기",
+    "largeDesktopView": "대형 데스크톱 보기",
+    "ultraWideView": "초광역 보기",
+    "title": "반응형",
+    "selectAViewportSizeToPreviewYourContentAtDifferentScreenWidthsBrUseTheResizeHandlesInResponsiveModeToAdjustTheWidthManually": "다양한 화면 너비에서 콘텐츠를 미리 보려면 뷰포트 크기를 선택하세요.<br>반응형 모드에서 크기 조절 핸들을 사용해 너비를 수동으로 조정하세요.",
+    "responsiveSettings": "반응형 설정",
+    "enableCardsOnMobile": "모바일에서 카드 사용",
+    "mobile": "모바일",
+    "desktop": "데스크톱",
+    "ultra": "울트라",
+    "currentViewportClickToChange": "현재 뷰포트 - 클릭하여 변경",
+    "largeDesktop": "대형 데스크톱",
+    "largeDesktopView2": "큰 데스크톱 보기",
+    "selectViewport": "뷰포트 선택",
+    "standardDesktop": "표준 데스크톱",
+    "ultraWide": "울트라 와이드",
+    "ultraWideScreen": "초광각 화면",
+    "responsiveModeAllowsManualResizing": "• 반응형 모드는 수동 크기 조정을 허용합니다",
+    "viewportStateIsSavedAutomatically": "• 뷰포트 상태가 자동으로 저장됩니다",
+    "tablet": "태블릿",
+    "tabletView2": "태블릿 보기"
+  }
+}

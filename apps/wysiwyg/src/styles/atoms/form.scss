@@ -7,11 +7,12 @@
   .form-field {
     @apply flex flex-col gap-1;
 
-    label {
+    > label,
+    > .form-field__legend {
       @apply text-[11px] font-medium text-ocm-text-muted;
     }
 
-    input,
+    input:not([type='checkbox']):not([type='radio']),
     textarea,
     select {
       @apply w-full rounded-lg border border-ocm-border bg-ocm-input px-2.5 py-1.5 text-sm text-ocm-text transition-[border-color,box-shadow] duration-100;
@@ -30,7 +31,8 @@
     }
   }
 
-  .form-field.required-field > label::after {
+  .form-field.required-field > label::after,
+  .form-field.required-field > .form-field__legend::after {
     content: ' *';
     @apply text-ocm-danger;
   }
@@ -58,5 +60,21 @@
     label {
       @apply m-0 text-sm text-ocm-text;
     }
+  }
+
+  .form-section {
+    @apply mt-1 mb-0.5 flex flex-col gap-0.5 border-b border-ocm-border pb-2;
+  }
+
+  .form-section__title {
+    @apply m-0 text-sm font-semibold text-ocm-text;
+  }
+
+  .form-section__desc {
+    @apply m-0 text-xs text-ocm-text-muted;
+  }
+
+  .form-divider {
+    @apply my-2 border-0 border-t border-ocm-border;
   }
 }

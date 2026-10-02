@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "Block style",
+    "blockStyleEditor": "Block style",
+    "cssClasses": "CSS Classes",
+    "inlineStyles": "Inline Styles",
+    "previewTitle": "Preview",
+    "previewSample": "The quick brown fox jumps over the lazy dog.",
+    "sectionText": "Text",
+    "sectionBorder": "Border",
+    "sectionColor": "Colors",
+    "fontSize": "Size",
+    "fontWeight": "Weight",
+    "textAlign": "Align",
+    "borderStyleLabel": "Style",
+    "borderWidth": "Width",
+    "textColor": "Text",
+    "backgroundColor": "Fill",
+    "borderColor": "Border",
+    "clearStyles": "Clear",
+    "weightNormal": "Normal",
+    "weightBold": "Bold",
+    "align": {
+      "left": "Left",
+      "center": "Center",
+      "right": "Right",
+      "justify": "Justify"
+    },
+    "borderStyle": {
+      "none": "None",
+      "solid": "Solid",
+      "dashed": "Dashed",
+      "dotted": "Dotted"
+    }
+  }
+}

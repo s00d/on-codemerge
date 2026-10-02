@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "Taille",
+    "family": "Police",
+    "settings": "Police",
+    "lineHeight": "Interligne",
+    "previewSample": "Portez ce vieux whisky au juge blond qui fume.",
+    "lhTight": "Serré",
+    "lhSnug": "Compact",
+    "lhNormal": "Normal",
+    "lhRelaxed": "Aéré",
+    "lhLoose": "Large",
+    "lhDefault": "Par défaut",
+    "detecting": "détection…",
+    "availableCount": "{n} sur cet appareil"
+  }
+}

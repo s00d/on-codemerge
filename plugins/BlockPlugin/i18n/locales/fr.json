@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "Nouveau bloc",
+    "splitHorizontally": "Diviser horizontalement",
+    "splitVertically": "Diviser verticalement",
+    "horizontalLine": "Ligne horizontale",
+    "enableHorizontalScroll": "Activer le défilement horizontal",
+    "textBlock": "Bloc de texte",
+    "containerBlock": "Bloc conteneur",
+    "splitContainer": "Diviser le conteneur",
+    "split": "Diviser",
+    "horizontally": "Horizontalement",
+    "vertically": "Verticalement",
+    "merge": "Fusionner",
+    "insert": "Insérer un bloc",
+    "mergeHorizontally": "Fusionner horizontalement",
+    "mergeVertically": "Fusionner verticalement",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "Remarque : la largeur est désactivée lorsque le défilement horizontal est activé"
+  }
+}

@@ -6,26 +6,35 @@ import {
   attrString,
   h,
   video,
+  pickFile,
   pluginToolbarPlacement,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
-import { VideoUploader } from './services/VideoUploader';
 import { editIcon, deleteIcon, uploadIcon, videoIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
+import { mediaFloatAlign } from '@ocm/wysiwyg/utils/mediaFloatAlign';
 import { removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
 
-function alignStyle(align: string): Record<string, string> {
-  if (align === 'left') {
-    return { float: 'left', marginRight: '1rem' };
-  }
-  if (align === 'right') {
-    return { float: 'right', marginLeft: '1rem' };
-  }
-  if (align === 'center' || align === 'justify') {
-    return atomAlignStyle('center');
-  }
-  return {};
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.addEventListener('load', () => {
+      if (typeof reader.result === 'string') {
+        resolve(reader.result);
+      } else {
+        reject(new Error('Failed to read file'));
+      }
+    });
+    reader.addEventListener('error', () => {
+      reject(reader.error ?? new Error('Failed to read file'));
+    });
+    reader.readAsDataURL(file);
+  });
+}
+
+async function pickVideoFile(): Promise<File | null> {
+  const files = await pickFile({ accept: 'video/*' });
+  return files?.[0] ?? null;
 }
 
 function openVideoProps(
@@ -125,13 +134,12 @@ function renderVideo(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
                 icon: uploadIcon,
                 onClick: () => {
                   void (async () => {
-                    const uploader = new VideoUploader();
                     try {
-                      const file = await uploader.selectFile();
+                      const file = await pickVideoFile();
                       if (!file) {
                         return;
                       }
-                      const dataUrl = await uploader.readFileAsDataUrl(file);
+                      const dataUrl = await readFileAsDataUrl(file);
                       wctx.updateAttrs({ src: dataUrl });
                     } catch {
                       wctx.editor.notify(t('video.failedToUploadVideo'));
@@ -161,19 +169,19 @@ function renderVideo(attrs: Record<string, unknown>, wctx: WidgetContext): ViewS
       controls: true,
       style: {
         ...(asAttr(attrs.width) === '' ? {} : { width: `${asAttr(attrs.width)}px` }),
-        ...alignStyle(attrString(attrs.align, '')),
+        ...mediaFloatAlign(attrString(attrs.align, '')),
       },
     })
   );
 }
 
-async function pickAndInsert(editor: EditorAPI, uploader: VideoUploader): Promise<void> {
+async function pickAndInsert(editor: EditorAPI): Promise<void> {
   try {
-    const file = await uploader.selectFile();
+    const file = await pickVideoFile();
     if (!file) {
       return;
     }
-    const dataUrl = await uploader.readFileAsDataUrl(file);
+    const dataUrl = await readFileAsDataUrl(file);
     editor.run(insertAtomAfter('video', { src: dataUrl, align: '' }));
   } catch (error) {
     console.error('Failed to upload video:', error);
@@ -182,7 +190,6 @@ async function pickAndInsert(editor: EditorAPI, uploader: VideoUploader): Promis
 }
 
 export function VideoPlugin(opts?: PluginToolbarOpts) {
-  const uploader = new VideoUploader();
   let openPicker: (() => void) | null = null;
 
   return definePlugin({
@@ -205,7 +212,7 @@ export function VideoPlugin(opts?: PluginToolbarOpts) {
     setup(ctx) {
       const editor = ctx.editor;
       openPicker = () => {
-        ctx.defer(() => pickAndInsert(editor, uploader));
+        ctx.defer(() => pickAndInsert(editor));
       };
       ctx.toolbar.add({
         id: 'video',
@@ -221,7 +228,7 @@ export function VideoPlugin(opts?: PluginToolbarOpts) {
         }
         e.preventDefault();
         ctx.defer(async () => {
-          const dataUrl = await uploader.readFileAsDataUrl(file);
+          const dataUrl = await readFileAsDataUrl(file);
           editor.run(insertAtomAfter('video', { src: dataUrl, align: '' }));
         });
       });
@@ -244,7 +251,7 @@ export function VideoPlugin(opts?: PluginToolbarOpts) {
             controls: true,
             style: {
               ...(asAttr(attrs.width) === '' ? {} : { width: `${asAttr(attrs.width)}px` }),
-              ...alignStyle(attrString(attrs.align, '')),
+              ...mediaFloatAlign(attrString(attrs.align, '')),
             },
           })
         ),

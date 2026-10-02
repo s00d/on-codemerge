@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "このテンプレートを削除してもよろしいですか？",
+    "selectTemplate": "テンプレートを選択...",
+    "newTemplate": "新しいテンプレート",
+    "noTemplate": "テンプレートなし",
+    "templateOptional": "テンプレート（任意）:",
+    "noTemplatesFound": "テンプレートが見つかりません",
+    "useTemplate": "テンプレートを使用",
+    "formTemplates": "フォームテンプレート",
+    "templateName": "テンプレート名",
+    "noTemplatesYetClickNewTemplateToCreateOne": "テンプレートはまだありません。「新規テンプレート」をクリックして作成してください。"
+  }
+}

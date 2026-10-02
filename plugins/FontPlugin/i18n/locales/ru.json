@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "Размер",
+    "family": "Шрифт",
+    "settings": "Шрифт",
+    "lineHeight": "Интервал",
+    "previewSample": "Съешь ещё этих мягких французских булок.",
+    "lhTight": "Узкий",
+    "lhSnug": "Плотный",
+    "lhNormal": "Обычный",
+    "lhRelaxed": "Свободный",
+    "lhLoose": "Широкий",
+    "lhDefault": "По умолчанию",
+    "detecting": "поиск…",
+    "availableCount": "{n} на этом устройстве"
+  }
+}

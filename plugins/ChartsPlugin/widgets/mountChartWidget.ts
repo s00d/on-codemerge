@@ -3,11 +3,12 @@ import { attrString } from '@codemerge/sdk';
 import type { DisposableScope } from '@codemerge/sdk';
 import { ChartMenu } from '../components/ChartMenu';
 import { ChartContextMenu } from '../components/ChartContextMenu';
-import { ChartRenderer } from '../services/ChartRenderer';
+import { renderChart } from '../drivers';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
 import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
 import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';
 import type { ChartSeries } from '../types';
+import { optionsFromAttrs } from '../utils/options';
 import {
   parseChartDataJson,
   parseChartMode,
@@ -34,7 +35,6 @@ export function mountChartWidget(
     return;
   }
 
-  const renderer = new ChartRenderer(api);
   const type = parseChartType(attrString(attrs.chartType, 'bar'));
   const data: ChartSeries[] = parseChartDataJson(attrs.data);
   const width = Number(attrs.width) || 800;
@@ -56,17 +56,22 @@ export function mountChartWidget(
   el.dataset.xAxisLabel = attrString(attrs.xAxisLabel);
   el.dataset.yAxisLabel = attrString(attrs.yAxisLabel);
 
-  const img = renderer.createChart(type, data, {
-    width,
-    height,
-    title: attrString(attrs.title),
-    xAxis: { title: attrString(attrs.xAxisLabel) },
-    yAxis: { title: attrString(attrs.yAxisLabel) },
-    legend: { show: attrs.showLegend !== false },
-    grid: { show: attrs.showGrid !== false },
-    mode: parseChartMode(attrString(attrs.mode, 'default')),
-    orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
-  });
+  const img = renderChart(
+    type,
+    data,
+    optionsFromAttrs({
+      title: attrString(attrs.title),
+      width,
+      height,
+      showLegend: attrs.showLegend !== false,
+      showGrid: attrs.showGrid !== false,
+      mode: parseChartMode(attrString(attrs.mode, 'default')),
+      orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
+      xAxisLabel: attrString(attrs.xAxisLabel),
+      yAxisLabel: attrString(attrs.yAxisLabel),
+    }),
+    api
+  );
   el.append(img);
 
   const resizer = scope.slot<Resizer>();

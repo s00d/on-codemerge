@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "Blockstil",
+    "blockStyleEditor": "Blockstil",
+    "cssClasses": "CSS-Klassen",
+    "inlineStyles": "Inline-Stile",
+    "previewTitle": "Vorschau",
+    "previewSample": "Franz jagt im komplett verwahrlosten Taxi quer durch Bayern.",
+    "sectionText": "Text",
+    "sectionBorder": "Rahmen",
+    "sectionColor": "Farben",
+    "fontSize": "Größe",
+    "fontWeight": "Stärke",
+    "textAlign": "Ausrichtung",
+    "borderStyleLabel": "Stil",
+    "borderWidth": "Breite",
+    "textColor": "Text",
+    "backgroundColor": "Füllung",
+    "borderColor": "Rahmen",
+    "clearStyles": "Zurücksetzen",
+    "weightNormal": "Normal",
+    "weightBold": "Fett",
+    "align": {
+      "left": "Links",
+      "center": "Zentriert",
+      "right": "Rechts",
+      "justify": "Blocksatz"
+    },
+    "borderStyle": {
+      "none": "Keiner",
+      "solid": "Durchgezogen",
+      "dashed": "Gestrichelt",
+      "dotted": "Gepunktet"
+    }
+  }
+}

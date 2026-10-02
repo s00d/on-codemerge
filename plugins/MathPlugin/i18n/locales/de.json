@@ -1,0 +1,22 @@
+{
+  "math": {
+    "insert": "Mathematik einfügen",
+    "chartPreviewWillAppearHere": "Diagrammvorschau wird hier angezeigt",
+    "formPreview": "Formularvorschau",
+    "previewUnavailable": "Vorschau nicht verfügbar",
+    "mathExpressionLatex": "Ausdruck (TeX-Teilmenge)",
+    "expression": "Ausdruck",
+    "modeBuild": "Erstellen",
+    "modeSource": "Quelle",
+    "howToWriteFormulas": "Formeln schreiben",
+    "mathPreviewWillAppearHere": "Mathematikvorschau wird hier angezeigt",
+    "enterYourMathExpressionHere": "Mathematischen Ausdruck hier eingeben...",
+    "group": {
+      "structures": "Strukturen",
+      "calculus": "Analysis",
+      "ops": "Operatoren",
+      "funcs": "Funktionen",
+      "greek": "Griechisch"
+    }
+  }
+}

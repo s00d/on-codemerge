@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "Estilo de bloque",
+    "blockStyleEditor": "Estilo de bloque",
+    "cssClasses": "Clases CSS",
+    "inlineStyles": "Estilos en línea",
+    "previewTitle": "Vista previa",
+    "previewSample": "El veloz murciélago hindú comía feliz cardillo y kiwi.",
+    "sectionText": "Texto",
+    "sectionBorder": "Borde",
+    "sectionColor": "Colores",
+    "fontSize": "Tamaño",
+    "fontWeight": "Grosor",
+    "textAlign": "Alinear",
+    "borderStyleLabel": "Estilo",
+    "borderWidth": "Ancho",
+    "textColor": "Texto",
+    "backgroundColor": "Relleno",
+    "borderColor": "Borde",
+    "clearStyles": "Borrar",
+    "weightNormal": "Normal",
+    "weightBold": "Negrita",
+    "align": {
+      "left": "Izquierda",
+      "center": "Centro",
+      "right": "Derecha",
+      "justify": "Justificar"
+    },
+    "borderStyle": {
+      "none": "Ninguno",
+      "solid": "Sólido",
+      "dashed": "Discontinuo",
+      "dotted": "Punteado"
+    }
+  }
+}

@@ -1,24 +1,27 @@
 # Editors
 
-On-Codemerge ships **four Editor products** on the same kernel + SDK. Pick by document shape.
+On-Codemerge ships **seven Editor products** on the same kernel + SDK. Pick by document shape.
 
-|             | **WYSIWYG** (`on-codemerge`)                | **JSON** (`on-codemerge/json`)         | **Markdown** (`on-codemerge/markdown`)                | **Code** (`on-codemerge/code`)              |
-| ----------- | ------------------------------------------- | -------------------------------------- | ----------------------------------------------------- | ------------------------------------------- |
-| Package     | `on-codemerge`                              | `on-codemerge/json`                    | `on-codemerge/markdown`                               | `on-codemerge/code`                         |
-| Document    | Prose JSON SoT (paragraphs, marks, atoms)   | Plain JSON tree SoT (`json` root)      | Prose JSON SoT (MD block subset: callout, mermaid, …) | Plain text SoT (`code_source`)              |
-| View        | ContentEditable + widgets                   | Shell + Tree / Raw                     | Shell + dual-pane (source + preview)                  | Shell + source editor                       |
-| Interchange | `getHTML` / `setHTML`, Markdown, publish    | `getText` / `setText`                  | `getJSON` / `getText` / `getHTML` (+ set*)            | `getText` / `setText`                       |
-| Plugin      | `JsonPlugin` / `MarkdownPlugin` atom embeds | `JsonPlugin({ surface: 'workspace' })` | `MarkdownPlugin({ surface: 'workspace' })`            | `CodeBlockPlugin({ surface: 'workspace' })` |
+|             | **WYSIWYG** (`on-codemerge`)                             | **JSON** (`on-codemerge/json`)         | **Markdown** (`on-codemerge/markdown`)                | **Code** (`on-codemerge/code`)              | **Forms** (`on-codemerge/forms`)              | **Charts** (`on-codemerge/charts`)       | **Calendar** (`on-codemerge/calendar`)     |
+| ----------- | -------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------- | ------------------------------------------- | --------------------------------------------- | ---------------------------------------- | ------------------------------------------ |
+| Package     | `on-codemerge`                                           | `on-codemerge/json`                    | `on-codemerge/markdown`                               | `on-codemerge/code`                         | `on-codemerge/forms`                          | `on-codemerge/charts`                    | `on-codemerge/calendar`                    |
+| Document    | Prose JSON SoT (paragraphs, marks, atoms)                | Plain JSON tree SoT (`json` root)      | Prose JSON SoT (MD block subset: callout, mermaid, …) | Plain text SoT (`code_source`)              | FormConfig SoT (`form` root)                  | Chart attrs SoT (`chart` root)           | CalendarDoc SoT (`calendar` root)          |
+| View        | ContentEditable + widgets                                | Shell + Tree / Raw                     | Shell + dual-pane (source + preview)                  | Shell + source editor                       | Shell + form studio                           | Shell + chart studio                     | Shell + calendar studio                    |
+| Interchange | `getHTML` / `setHTML`, Markdown, publish                 | `getText` / `setText`                  | `getJSON` / `getText` / `getHTML` (+ set*)            | `getText` / `setText`                       | `getText` / `setText`                         | `getText` / `setText`                    | `getText` / `setText` (+ thin ICS)         |
+| Plugin      | atom embeds (JSON / MD / Code / Form / Chart / Calendar) | `JsonPlugin({ surface: 'workspace' })` | `MarkdownPlugin({ surface: 'workspace' })`            | `CodeBlockPlugin({ surface: 'workspace' })` | `FormBuilderPlugin({ surface: 'workspace' })` | `ChartsPlugin({ surface: 'workspace' })` | `CalendarPlugin({ surface: 'workspace' })` |
 
 ## WYSIWYG
 
-Rich document editor. Toolbar, lists, tables, media, **Insert → JSON**, **Insert → Markdown**, and **Insert → Code block**.
+Rich document editor. Toolbar, lists, tables, media, **Insert → JSON**, **Insert → Markdown**, **Insert → Code block**, **Insert → Form**, and **Insert → Chart**.
 
 <script setup>
 import EditorComponent from '../components/EditorComponent.vue';
 import JsonEditorComponent from '../components/JsonEditorComponent.vue';
 import MarkdownEditorComponent from '../components/MarkdownEditorComponent.vue';
 import CodeEditorComponent from '../components/CodeEditorComponent.vue';
+import FormsEditorComponent from '../components/FormsEditorComponent.vue';
+import ChartsEditorComponent from '../components/ChartsEditorComponent.vue';
+import CalendarEditorComponent from '../components/CalendarEditorComponent.vue';
 </script>
 
 <EditorComponent :showDescription="false" />
@@ -118,6 +121,76 @@ editor.on('docChanged', () => {
 
 See [Code Editor](/guide/code-editor) and [Code Block Plugin](/plugins/code-block-plugin).
 
-## Same construct pattern
+## Forms Editor
 
-All apps use `new Editor(host, { plugins, chrome?, doc? })`. Differences are the **entry package**, **default plugins / ViewPort**, and **IO methods**. Do not mount `surface: 'workspace'` on a prose CE host — it requires a shell content target and the matching SoT (`emptyEditorDoc()`).
+Standalone form studio — palette, live preview, field inspector. SoT is `doc → form` with `attrs.schema` (`FormConfig`).
+
+<FormsEditorComponent :showDescription="false" />
+
+### Launch
+
+```ts
+import { Editor, createDefaultPlugins } from 'on-codemerge/forms';
+
+const editor = new Editor(document.getElementById('forms-editor')!, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(),
+});
+
+editor.setText('{"id":"f1","method":"POST","action":"","fields":[]}');
+editor.on('docChanged', () => {
+  console.log(editor.getText());
+});
+```
+
+See [Forms Editor](/guide/forms-editor) and [Form Builder Plugin](/plugins/form-builder-plugin).
+
+## Charts Editor
+
+Standalone chart studio — type, options, data table, live preview. SoT is `doc → chart`.
+
+<ChartsEditorComponent :showDescription="false" />
+
+### Launch
+
+```ts
+import { Editor, createDefaultPlugins } from 'on-codemerge/charts';
+
+const editor = new Editor(document.getElementById('charts-editor')!, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(),
+});
+
+editor.setText('{"chartType":"bar","title":"Chart","data":[],"width":800,"height":400}');
+editor.on('docChanged', () => {
+  console.log(editor.getText());
+});
+```
+
+See [Charts Editor](/guide/charts-editor) and [Charts Plugin](/plugins/charts-plugin).
+
+## Calendar Editor
+
+Standalone calendar studio — layers, month/week/day/year/agenda, event inspector. SoT is `doc → calendar` with `attrs.payload` (`CalendarDoc`).
+
+<CalendarEditorComponent :showDescription="false" />
+
+### Launch
+
+```ts
+import { Editor, createDefaultPlugins } from 'on-codemerge/calendar';
+
+const editor = new Editor(document.getElementById('calendar-editor')!, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(),
+});
+
+editor.setText(
+  '{"title":"Cal","tz":"UTC","view":"month","cursor":"2026-10-02","calendars":[{"id":"main","title":"Work","color":"#3b82f6","visible":true}],"events":[]}'
+);
+editor.on('docChanged', () => {
+  console.log(editor.getText());
+});
+```
+
+See [Calendar Editor](/guide/calendar-editor) and [Calendar Plugin](/plugins/calendar-plugin).

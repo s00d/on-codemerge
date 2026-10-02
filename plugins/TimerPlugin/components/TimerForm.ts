@@ -122,7 +122,7 @@ export class TimerForm {
     }
     const targetDate = new Date(`${date}T${time}`);
     if (isNaN(targetDate.getTime())) {
-      this.editor.notify(this.editor.t('formBuilder.invalidDateTimeFormat'));
+      this.editor.notify(this.editor.t('timer.invalidDateTimeFormat'));
       return;
     }
     const data: CreateTimerData = {

@@ -1,0 +1,30 @@
+{
+  "typography": {
+    "title": "Typography",
+    "styles": "Typography Styles",
+    "clearFormatting": "Clear formatting",
+    "heading1": "Heading 1",
+    "heading2": "Heading 2",
+    "heading3": "Heading 3",
+    "heading4": "Heading 4",
+    "paragraph": "Paragraph",
+    "blockquote": "Quote",
+    "paragraphs": "Paragraphs",
+    "fontWeight": "Font Weight",
+    "fontStyle": "Font Style",
+    "clearHint": "Reset block to a normal paragraph",
+    "preformatted": "Code / pre",
+    "horizontalLine": "Horizontal line",
+    "sectionHeadings": "Headings",
+    "sectionBody": "Body",
+    "sectionInsert": "Insert",
+    "sampleHeading1": "Heading 1",
+    "sampleHeading2": "Heading 2",
+    "sampleHeading3": "Heading 3",
+    "sampleHeading4": "Heading 4",
+    "sampleParagraph": "Regular paragraph text",
+    "sampleBlockquote": "Quoted text",
+    "samplePre": "preformatted code",
+    "sampleHr": "Divider across the page"
+  }
+}

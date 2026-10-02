@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "Tamanho",
+    "family": "Fonte",
+    "settings": "Fonte",
+    "lineHeight": "Altura da linha",
+    "previewSample": "A rápida raposa castanha salta sobre o cão preguiçoso.",
+    "lhTight": "Apertado",
+    "lhSnug": "Justo",
+    "lhNormal": "Normal",
+    "lhRelaxed": "Relaxado",
+    "lhLoose": "Amplo",
+    "lhDefault": "Predefinido",
+    "detecting": "detectando…",
+    "availableCount": "{n} neste dispositivo"
+  }
+}

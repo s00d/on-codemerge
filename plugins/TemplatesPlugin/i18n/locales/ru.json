@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "Вы уверены, что хотите удалить этот шаблон?",
+    "selectTemplate": "Выберите шаблон...",
+    "newTemplate": "Новый шаблон",
+    "noTemplate": "Без шаблона",
+    "templateOptional": "Шаблон (необязательно):",
+    "noTemplatesFound": "Шаблоны не найдены",
+    "useTemplate": "Использовать шаблон",
+    "formTemplates": "Шаблоны форм",
+    "templateName": "Название шаблона",
+    "noTemplatesYetClickNewTemplateToCreateOne": "Шаблонов пока нет. Нажмите «Новый шаблон», чтобы создать его."
+  }
+}

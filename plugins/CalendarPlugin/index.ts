@@ -1,311 +1,304 @@
 import './style.scss';
-import { calendarIcon } from '@ocm/wysiwyg/icons';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
+import type { Command } from '@codemerge/kernel';
 import {
+  applyToolbarConfig,
   definePlugin,
-  insertAtomAfter,
-  attrString,
+  foreign,
   h,
-  pluginToolbarPlacement,
+  OCM_CONFIG_ATTR,
+  OCM_RUNTIME_ATTR,
 } from '@codemerge/sdk';
-import { foreign } from '@codemerge/sdk';
-import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
-import type { EditorAPI } from '@codemerge/sdk';
-import { CalendarMenu } from './components/CalendarMenu';
-import { CalendarManager } from './services/CalendarManager';
-import { CalendarContextMenu } from './components/CalendarContextMenu';
-import type { Calendar, CalendarEvent } from './types';
-import { downloadJson, pickJsonFile, mountCalendarView } from './widgets/domOps';
-import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
-import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
+import type { PluginDefinition, PluginToolbarOpts, WidgetContext } from '@codemerge/sdk';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
-import { isCalendar, parseCalendarImportPayload } from './utils/storageGuards';
+import { HistoryChromePlugin } from '../HistoryPlugin';
+import { setupAtomChrome } from './chrome/atom';
+import type { AtomChromeHandle } from './chrome/atom';
+import type { CalendarToolbarOptions } from './chrome/types';
+import { coerceCalendarDoc } from './drivers/defaults';
+import { isCalendarDoc } from './types';
+import { isCalendarEditorDoc } from './io';
+import { mountCalendarWorkspace } from './surface/workspaceView';
+import type { CalendarWorkspaceHandle } from './surface/workspaceView';
+import { mountCalendarWidget } from './widgets/mountCalendarWidget';
+import { renderView } from './drivers/views';
 
-type CalendarPayload = { calendar: Calendar; events: CalendarEvent[] };
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
-/** SoT payload — typed object (legacy JSON string via readJsonAttr). */
-function calendarPayload(cal: Calendar, events: CalendarEvent[]): CalendarPayload {
-  return { calendar: cal, events };
+export {
+  emptyEditorDoc,
+  isCalendarEditorDoc,
+  resolveCalendarNode,
+  payloadFromDoc,
+  docFromPayload,
+  toEditorDoc,
+  ParseError,
+  parseText,
+  serializeText,
+  serializeDoc,
+  serializePayload,
+  MAX_CALENDAR_BYTES,
+  parseIcs,
+  serializeIcs,
+  importCalendarText,
+  type ParseTextResult,
+} from './io';
+export { defaultCalendarToolbar } from './chrome/defaultToolbar';
+export type {
+  CalendarToolbarActionApi,
+  CalendarToolbarItem,
+  CalendarToolbarMenu,
+  CalendarToolbarOptions,
+} from './chrome/types';
+export { HistoryChromePlugin } from '../HistoryPlugin';
+export type {
+  CalendarDoc,
+  CalendarEvent,
+  CalendarLayer,
+  CalendarView,
+  CalendarRRule,
+  Occurrence,
+} from './types';
+export { isCalendarDoc, isCalendarEvent, isCalendarView } from './types';
+export {
+  emptyCalendarDoc,
+  occurrences,
+  renderView,
+  eventInspector,
+  coerceCalendarDoc,
+  addEvent,
+  patchEvent,
+  removeEvent,
+} from './drivers';
+export { mountCalendarWorkspace } from './surface/workspaceView';
+export type { CalendarWorkspaceHandle } from './surface/workspaceView';
+
+export type CalendarPluginFeatures = {
+  toolbar?: boolean;
+  historyChrome?: boolean;
+};
+
+function hasToolbarItems(toolbar: CalendarToolbarOptions): boolean {
+  return (toolbar.items?.length ?? 0) > 0 || (toolbar.menus?.length ?? 0) > 0;
 }
 
-function parsePayload(raw: unknown): CalendarPayload | null {
-  return parseCalendarImportPayload(readJsonAttr(raw, null));
+export type CalendarPluginOptions = PluginToolbarOpts & {
+  surface?: 'workspace' | 'atom';
+  features?: CalendarPluginFeatures;
+  toolbar?: CalendarToolbarOptions;
+};
+
+function remindersConfig(payload: ReturnType<typeof coerceCalendarDoc>): {
+  reminders: Array<{ id: string; triggerTime: number; message: string; title: string }>;
+} | null {
+  const reminders = payload.events
+    .filter((e) => typeof e.reminder === 'number' && e.reminder > 0)
+    .map((e) => {
+      const start = e.allDay
+        ? Date.parse(`${e.start.slice(0, 10)}T09:00`)
+        : Date.parse(e.start.length === 16 ? `${e.start}:00` : e.start);
+      return {
+        id: e.id,
+        triggerTime: start - (e.reminder ?? 0) * 60_000,
+        message: e.title,
+        title: payload.title,
+      };
+    })
+    .filter((r) => Number.isFinite(r.triggerTime));
+  if (reminders.length === 0) {
+    return null;
+  }
+  return { reminders };
 }
 
-export function CalendarPlugin(opts?: PluginToolbarOpts) {
-  const manager = new CalendarManager();
-  let editor!: EditorAPI;
-  let menu!: CalendarMenu;
-  let contextMenu!: CalendarContextMenu;
-  let openCalendarMenu: (() => void) | null = null;
+export function CalendarPlugin(options: CalendarPluginOptions = {}): PluginDefinition {
+  const surface = options.surface ?? 'atom';
+  const workspace = surface === 'workspace';
+  const feat = (key: keyof CalendarPluginFeatures, defaultOn: boolean): boolean => {
+    const v = options.features?.[key];
+    return v === undefined ? defaultOn : v;
+  };
+  const features: Required<CalendarPluginFeatures> = {
+    toolbar: feat('toolbar', true),
+    historyChrome: feat('historyChrome', workspace),
+  };
+  const toolbarConfig: CalendarToolbarOptions | undefined =
+    workspace && options.toolbar && hasToolbarItems(options.toolbar) ? options.toolbar : undefined;
 
-  const refreshWidgets = () => {
-    // Remount via model attrs — do not invent DOM with replaceWithHtml.
-    persistOpenCalendars();
+  const atomChrome: { current: AtomChromeHandle | null } = { current: null };
+  const workspaceRef: { current: CalendarWorkspaceHandle | null } = { current: null };
+
+  const commands: Record<string, Command> = {
+    insertCalendar: () => {
+      atomChrome.current?.openStudio();
+      return null;
+    },
+    'calendar.addEvent': () => {
+      workspaceRef.current?.addEvent();
+      return null;
+    },
+    'calendar.clearEvents': () => {
+      workspaceRef.current?.clearEvents();
+      return null;
+    },
   };
 
-  const handleContextAction = (action: string, target: Calendar | CalendarEvent) => {
-    if ('events' in target) {
-      switch (action) {
-        case 'add-event': {
-          menu.showCreateEvent(target.id, refreshWidgets);
-          break;
-        }
-        case 'edit-calendar': {
-          menu.showEditCalendarForm(target);
-          break;
-        }
-        case 'copy-calendar': {
-          try {
-            manager.copyCalendar(target.id);
-            editor.notify(editor.t('calendar.calendarCopiedSuccessfully') || 'Calendar copied');
-            refreshWidgets();
-          } catch {
-            editor.notify(editor.t('calendar.failedToCopyCalendar') || 'Copy failed');
-          }
-          break;
-        }
-        case 'export-calendar': {
-          showExport(target);
-          break;
-        }
-        case 'import-calendar': {
-          showImport();
-          break;
-        }
-        case 'delete-calendar': {
-          manager.deleteCalendar(target.id);
-          refreshWidgets();
-          break;
-        }
-      }
-    } else {
-      switch (action) {
-        case 'edit-event': {
-          menu.showEditEvent(target, refreshWidgets);
-          break;
-        }
-        case 'copy-event': {
-          try {
-            manager.copyEvent(target.id);
-            editor.notify(editor.t('calendar.eventCopiedSuccessfully') || 'Event copied');
-            refreshWidgets();
-          } catch {
-            editor.notify(editor.t('calendar.failedToCopyEvent') || 'Copy failed');
-          }
-          break;
-        }
-        case 'delete-event': {
-          manager.deleteEvent(target.id);
-          refreshWidgets();
-          break;
-        }
-      }
-    }
-  };
-
-  const persistOpenCalendars = () => {
-    for (const el of queryAtomHosts(editor.host, 'calendar')) {
-      const path = pathFromEl(el);
-      const calId =
-        el.querySelector<HTMLElement>('.calendar-widget')?.dataset.calendarId ??
-        el.dataset.calendarId;
-      if (!path || !calId) {
-        continue;
-      }
-      const cal = manager.getCalendar(calId);
-      if (!cal) {
-        continue;
-      }
-      editor.run(() => [
-        {
-          type: 'set_attrs',
-          path,
-          attrs: {
-            payload: calendarPayload(cal, manager.getEvents(cal.id)),
-            title: cal.title,
-          },
-        },
-      ]);
-    }
-  };
-
-  const showExport = (calendar: Calendar) => {
-    try {
-      const data = JSON.stringify({ calendar, events: manager.getEvents(calendar.id) }, null, 2);
-      downloadJson(`calendar-${calendar.id}.json`, data);
-    } catch {
-      editor.notify(editor.t('export.exportFailed'));
-    }
-  };
-
-  const showImport = () => {
-    pickJsonFile((text) => {
-      try {
-        const imported: unknown = JSON.parse(text);
-        const wrapped = parseCalendarImportPayload(imported);
-        if (wrapped) {
-          manager.importCalendar(wrapped);
-        } else if (isCalendar(imported)) {
-          manager.importCalendar({ calendar: imported, events: imported.events ?? [] });
-        } else {
-          throw new Error('Invalid calendar');
-        }
-        editor.notify(editor.t('calendar.calendarImportedSuccessfully') || 'Imported');
-        menu.show((cal) => {
-          insertCalendar(cal);
-        });
-      } catch {
-        editor.notify(editor.t('common.importFailed'));
-      }
-    });
-  };
-
-  const insertCalendar = (calendarData: Calendar) => {
-    const events = manager.getEvents(calendarData.id);
-    editor.run(
-      insertAtomAfter('calendar', {
-        title: calendarData.title,
-        calendarId: calendarData.id,
-        payload: calendarPayload(calendarData, events),
-        align: '',
-      })
-    );
-  };
+  const hotkeys = !workspace
+    ? [{ keys: 'Mod-Alt-l', command: 'insertCalendar', description: 'Insert calendar' }]
+    : [];
 
   return definePlugin({
-    commands: {
-      insertCalendar: () => {
-        openCalendarMenu?.();
-        return null;
-      },
-    },
-    hotkeys: [{ keys: 'Mod-Alt-l', command: 'insertCalendar', description: 'Insert calendar' }],
     name: 'calendar',
     nodes: [
       {
         name: 'calendar',
         group: 'atom',
         atom: true,
-        attrs: { title: 'Calendar', calendarId: '', payload: null, align: '' },
+        attrs: { title: 'Calendar', payload: {}, align: '' },
       },
     ],
+    commands,
+    hotkeys,
     setup(ctx) {
-      editor = ctx.editor;
-      menu = new CalendarMenu(manager, editor, showImport, ctx.scope);
-      contextMenu = ctx.own(new CalendarContextMenu(editor, handleContextAction));
-      openCalendarMenu = () => {
-        menu.show((cal) => {
-          insertCalendar(cal);
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
+      if (workspace) {
+        const doc = ctx.editor.getState().doc;
+        if (!isCalendarEditorDoc(doc)) {
+          throw new TypeError(
+            'CalendarPlugin({ surface: "workspace" }) requires calendar SoT (doc→calendar); seed emptyEditorDoc()'
+          );
+        }
+        const fromApi = ctx.editor.contentElement();
+        const contentEl =
+          fromApi instanceof HTMLElement && fromApi.getAttribute('data-ocm-shell') === 'true'
+            ? fromApi
+            : ctx.editor.host.querySelector('[data-ocm-shell="true"]');
+        if (!(contentEl instanceof HTMLElement)) {
+          throw new TypeError(
+            'CalendarPlugin({ surface: "workspace" }) requires createShellView contentTarget (data-ocm-shell)'
+          );
+        }
+
+        let writing = false;
+        const handle = mountCalendarWorkspace(ctx.editor, contentEl, {
+          mode: 'workspace',
+          scope: ctx.scope,
+          onChange: (payload) => {
+            if (writing) {
+              return;
+            }
+            writing = true;
+            ctx.editor.run(() => [
+              {
+                type: 'set_attrs',
+                path: [0],
+                attrs: { title: payload.title, payload },
+              },
+            ]);
+            writing = false;
+            ctx.editor.toolbar.refresh();
+          },
         });
-      };
-
-      ctx.toolbar.add({
-        id: 'calendar',
-        icon: calendarIcon,
-        title: () => editor.t('calendar.title'),
-        ...pluginToolbarPlacement({ menu: 'insert', order: 51 }, opts),
-        onClick: () => openCalendarMenu?.(),
-      });
-
-      ctx.onDom('host', 'click', (e) => {
-        const target = e.target;
-        if (!(target instanceof Element)) {
-          return;
-        }
-        const eventElement = target.closest<HTMLElement>('.calendar-event');
-        if (!eventElement) {
-          return;
-        }
-        e.preventDefault();
-        const eventId = eventElement.dataset.eventId;
-        if (!eventId) {
-          return;
-        }
-        const ev = manager.getEvent(eventId);
-        if (ev) {
-          menu.showEditEvent(ev, () => {
-            refreshWidgets();
-            persistOpenCalendars();
-          });
-        }
-      });
-
-      ctx.onDom('host', 'contextmenu', (e) => {
-        const target = e.target;
-        if (!(target instanceof Element)) {
-          return;
-        }
-        const calendarElement = target.closest('.calendar-widget');
-        const eventElement = target.closest('.calendar-event');
-        if (calendarElement instanceof HTMLElement) {
-          e.preventDefault();
-          const calendarId = calendarElement.dataset.calendarId;
-          const calendar = calendarId ? manager.getCalendar(calendarId) : null;
-          if (calendar) {
-            contextMenu.show(calendar, e.clientX, e.clientY);
+        workspaceRef.current = handle;
+        ctx.own({
+          destroy: () => {
+            workspaceRef.current = null;
+            handle.destroy();
+          },
+        });
+        ctx.on('docChanged', () => {
+          if (!writing) {
+            handle.update(ctx.editor.getState());
           }
-        } else if (eventElement instanceof HTMLElement) {
-          e.preventDefault();
-          const eventId = eventElement.dataset.eventId;
-          const ev = eventId ? manager.getEvent(eventId) : null;
-          if (ev) {
-            contextMenu.show(ev, e.clientX, e.clientY);
-          }
+        });
+        if (toolbarConfig) {
+          applyToolbarConfig(ctx, toolbarConfig, () => ({
+            editor: ctx.editor,
+            workspace: workspaceRef.current,
+          }));
         }
-      });
+      } else if (features.toolbar) {
+        const { menu, group, order } = options;
+        atomChrome.current = setupAtomChrome(ctx, {
+          ...(menu !== undefined ? { menu } : {}),
+          ...(group !== undefined ? { group } : {}),
+          ...(order !== undefined ? { order } : {}),
+        });
+      }
     },
-    widgets: {
-      calendar: {
-        render(attrs, _wctx: WidgetContext): ViewSpec {
-          return foreign((host, scope) => {
-            const payload = parsePayload(attrs.payload);
-            let cal = payload?.calendar ?? null;
-            if (!cal && asAttr(attrs.calendarId)) {
-              cal = manager.getCalendar(asAttr(attrs.calendarId));
-            }
-            cal ??= manager.createCalendar({
-              title: attrString(attrs.title, 'Calendar'),
-              description: '',
-            });
-            if (!manager.getCalendar(cal.id)) {
-              manager.importCalendar({
-                calendar: cal,
-                events: payload?.events ?? cal.events ?? [],
-              });
-            }
-            const align = attrString(attrs.align, '');
-            const spec = manager.calendarView(cal, {
-              emptyLabel: editor.t('calendar.noEvents'),
-            });
-            mountCalendarView(host, spec, scope, align);
-          });
+    widgets: workspace
+      ? undefined
+      : {
+          calendar: {
+            render: (attrs, wctx: WidgetContext) =>
+              foreign((el, scope) => {
+                const payload = readJsonAttr(attrs.payload, null);
+                mountCalendarWidget(el, {
+                  payload,
+                  editor: wctx.editor,
+                  scope,
+                  onOpenStudio: () => {
+                    atomChrome.current?.openStudio(el.closest('[data-type="calendar"]'));
+                  },
+                });
+              }),
+          },
         },
-      },
-    },
     publish: {
       node: 'calendar',
       runtime: 'calendar-reminders',
       render: (attrs) => {
-        const payload = parsePayload(attrs.payload);
-        let cal = payload?.calendar ?? null;
-        if (!cal && asAttr(attrs.calendarId)) {
-          cal = manager.getCalendar(asAttr(attrs.calendarId));
-        }
-        if (!cal) {
-          return h('div', { attrs: { 'data-node': 'calendar' } });
-        }
-        if (!manager.getCalendar(cal.id)) {
-          manager.importCalendar({
-            calendar: cal,
-            events: payload?.events ?? cal.events ?? [],
-          });
-        }
-        return manager.calendarView(cal, {
-          publish: true,
-          emptyLabel: editor.t('calendar.noEvents'),
-          align: attrString(attrs.align, ''),
+        const payload = isCalendarDoc(attrs.payload)
+          ? attrs.payload
+          : coerceCalendarDoc(attrs.payload);
+        const stub = { t: (k: string) => k };
+        const view = renderView(payload, {
+          i18n: stub,
+          selectedEventId: null,
+          onSelectEvent: () => {},
+          onSelectDay: () => {},
+          onChangeView: () => {},
         });
+        const cfg = remindersConfig(payload);
+        const runtimeAttrs: Record<string, string> = {
+          'data-node': 'calendar',
+          [OCM_RUNTIME_ATTR]: 'calendar-reminders',
+        };
+        if (cfg !== null) {
+          runtimeAttrs[OCM_CONFIG_ATTR] = JSON.stringify(cfg);
+        }
+        return h('div', { class: 'ocm-calendar-publish', attrs: runtimeAttrs }, view);
       },
     },
   });
 }
+
+export function createDefaultPlugins(
+  opts: {
+    toolbar?: CalendarToolbarOptions;
+    features?: CalendarPluginFeatures;
+  } = {}
+): PluginDefinition[] {
+  const features: Required<CalendarPluginFeatures> = {
+    toolbar: true,
+    historyChrome: true,
+    ...opts.features,
+  };
+  return [
+    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
+    CalendarPlugin({
+      surface: 'workspace',
+      ...(opts.toolbar && hasToolbarItems(opts.toolbar) ? { toolbar: opts.toolbar } : {}),
+      features,
+    }),
+  ];
+}
+
+export default CalendarPlugin;

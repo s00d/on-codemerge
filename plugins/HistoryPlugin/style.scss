@@ -1,26 +1,13 @@
 @reference "../../apps/wysiwyg/src/tailwind.css";
 
-/* Large history shell — same idea as form-builder-modal */
-.ocm-popup.history-viewer-modal {
-  top: 4%;
-  width: min(100% - 1.5rem, 72rem);
-  height: min(92vh, 52rem);
-  max-height: min(92vh, 52rem);
-
+/* Large history shell — sizing from SDK .ocm-studio-popup */
+.ocm-popup.ocm-studio-popup.history-viewer-modal {
   .ocm-popup__content {
-    @apply flex min-h-0 flex-1 flex-col gap-0 overflow-hidden px-0 py-0;
-  }
-
-  .ocm-popup__row {
-    @apply min-h-0 flex-1 overflow-hidden;
+    @apply gap-0 px-0 py-0;
   }
 
   .ocm-popup-view {
     @apply flex h-full min-h-0 flex-col;
-  }
-
-  .ocm-popup__footer {
-    @apply shrink-0;
   }
 }
 
@@ -183,14 +170,6 @@ html.dark {
 }
 
 @media (max-width: 800px) {
-  .ocm-popup.history-viewer-modal {
-    top: 0;
-    width: 100%;
-    height: 100%;
-    max-height: none;
-    border-radius: 0;
-  }
-
   .hv-shell {
     @apply flex-col;
   }

@@ -44,9 +44,9 @@ export class ResponsiveMenu {
       {
         name: 'tablet',
         icon: tabletIcon,
-        label: editor.t('table.tablet'),
+        label: editor.t('responsive.tablet'),
         size: '768px',
-        description: editor.t('table.tabletView2'),
+        description: editor.t('responsive.tabletView2'),
         hotkey: 'Ctrl+2',
       },
       {

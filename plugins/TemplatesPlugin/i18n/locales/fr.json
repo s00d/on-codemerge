@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "Voulez-vous vraiment supprimer ce modèle ?",
+    "selectTemplate": "Sélectionner un modèle...",
+    "newTemplate": "Nouveau modèle",
+    "noTemplate": "Aucun modèle",
+    "templateOptional": "Modèle (facultatif) :",
+    "noTemplatesFound": "Aucun modèle trouvé",
+    "useTemplate": "Utiliser le modèle",
+    "formTemplates": "Modèles de formulaire",
+    "templateName": "Nom du modèle",
+    "noTemplatesYetClickNewTemplateToCreateOne": "Aucun modèle pour le moment. Cliquez sur \"Nouveau modèle\" pour en créer un."
+  }
+}

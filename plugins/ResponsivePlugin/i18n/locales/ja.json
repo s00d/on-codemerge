@@ -1,0 +1,27 @@
+{
+  "responsive": {
+    "view": "レスポンシブ表示",
+    "mobileView": "モバイル表示",
+    "desktopView": "デスクトップ表示",
+    "largeDesktopView": "大型デスクトップ表示",
+    "ultraWideView": "超ワイド表示",
+    "title": "レスポンシブ",
+    "selectAViewportSizeToPreviewYourContentAtDifferentScreenWidthsBrUseTheResizeHandlesInResponsiveModeToAdjustTheWidthManually": "さまざまな画面幅でコンテンツをプレビューするにはビューポートサイズを選択します。<br>レスポンシブモードではリサイズハンドルで幅を手動調整できます。",
+    "responsiveSettings": "レスポンシブ設定",
+    "enableCardsOnMobile": "モバイルでカードを有効化",
+    "mobile": "モバイル",
+    "desktop": "デスクトップ",
+    "ultra": "ウルトラ",
+    "currentViewportClickToChange": "現在のビューポート - クリックして変更",
+    "largeDesktop": "大型デスクトップ",
+    "largeDesktopView2": "大型デスクトップ表示",
+    "selectViewport": "ビューポートを選択",
+    "standardDesktop": "標準デスクトップ",
+    "ultraWide": "ウルトラワイド",
+    "ultraWideScreen": "超ワイド画面",
+    "responsiveModeAllowsManualResizing": "• レスポンシブモードでは手動リサイズできます",
+    "viewportStateIsSavedAutomatically": "• ビューポート状態は自動保存されます",
+    "tablet": "タブレット",
+    "tabletView2": "タブレット表示"
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "Стиль блока",
+    "blockStyleEditor": "Стиль блока",
+    "cssClasses": "CSS классы",
+    "inlineStyles": "Встроенные стили",
+    "previewTitle": "Превью",
+    "previewSample": "Съешь ещё этих мягких французских булок.",
+    "sectionText": "Текст",
+    "sectionBorder": "Рамка",
+    "sectionColor": "Цвета",
+    "fontSize": "Размер",
+    "fontWeight": "Начертание",
+    "textAlign": "Выравнивание",
+    "borderStyleLabel": "Стиль",
+    "borderWidth": "Толщина",
+    "textColor": "Текст",
+    "backgroundColor": "Заливка",
+    "borderColor": "Рамка",
+    "clearStyles": "Сбросить",
+    "weightNormal": "Обычный",
+    "weightBold": "Жирный",
+    "align": {
+      "left": "Слева",
+      "center": "По центру",
+      "right": "Справа",
+      "justify": "По ширине"
+    },
+    "borderStyle": {
+      "none": "Нет",
+      "solid": "Сплошная",
+      "dashed": "Пунктир",
+      "dotted": "Точки"
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "typography": {
+    "title": "Типографика",
+    "styles": "Стили текста",
+    "clearFormatting": "Сбросить оформление",
+    "heading1": "Заголовок 1",
+    "heading2": "Заголовок 2",
+    "heading3": "Заголовок 3",
+    "heading4": "Заголовок 4",
+    "paragraph": "Абзац",
+    "blockquote": "Цитата",
+    "paragraphs": "Абзацы",
+    "fontWeight": "Начертание",
+    "fontStyle": "Стиль шрифта",
+    "clearHint": "Сделать обычный абзац",
+    "preformatted": "Код / pre",
+    "horizontalLine": "Горизонтальная линия",
+    "sectionHeadings": "Заголовки",
+    "sectionBody": "Текст",
+    "sectionInsert": "Вставка",
+    "sampleHeading1": "Заголовок 1",
+    "sampleHeading2": "Заголовок 2",
+    "sampleHeading3": "Заголовок 3",
+    "sampleHeading4": "Заголовок 4",
+    "sampleParagraph": "Обычный абзац",
+    "sampleBlockquote": "Текст цитаты",
+    "samplePre": "preformatted code",
+    "sampleHr": "Разделитель на всю ширину"
+  }
+}

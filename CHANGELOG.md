@@ -5,6 +5,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.5.0] - 2026-10-02
+
+### Added
+
+- **Calendar Editor** surface: `apps/calendar` → public entry `on-codemerge/calendar` (+ docs Guide / live preview)
+- **Forms Editor** / **Charts Editor** surfaces: `on-codemerge/forms`, `on-codemerge/charts` (+ docs Guide / live previews)
+- SDK **studio layout** helpers: `studioPaneTabs`, `syncStudioPanel`, `STUDIO_POPUP_CLASS`, shared `ocm-studio*` chrome (mobile pane tabs)
+- Calendar / FormBuilder / Charts dual-surface (`atom` + `workspace`) with shared studio UI, drivers, IO adapters, default toolbars
+- Thin ICS import/export for Calendar (JSON `CalendarDoc` remains SoT)
+- `check:calendar-export` / `check:calendar-types` gates in `prepublishOnly`
+- Per-plugin locale packs wired via `wirePluginLocales` for many plugins
+
+### Changed
+
+- Calendar / Charts / FormBuilder rewritten around payload SoT + driver registries (legacy managers/renderers removed)
+- History / Forms / Charts / Calendar popups use shared studio popup class + responsive pane tabs
+- Empty default toolbars are no longer applied (avoids blank chrome)
+
+### Fixed
+
+- Docs Calendar preview: export `coerceCalendarDoc` from `apps/calendar` app entry
+- Studio desktop layout: avoid `is-studio-hidden` leak at ≥64rem
+
+### Notes
+
+- Publish: `pnpm run release` (includes forms/charts/calendar lib build + export gates)
+- Local SPAs: `pnpm dev:forms` / `dev:charts` / `dev:calendar`
+
 ## [2.4.0] - 2026-09-30
 
 ### Added

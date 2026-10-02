@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "Stile blocco",
+    "blockStyleEditor": "Stile blocco",
+    "cssClasses": "Classi CSS",
+    "inlineStyles": "Stili inline",
+    "previewTitle": "Anteprima",
+    "previewSample": "Quel fez sghembo copre davanti.",
+    "sectionText": "Testo",
+    "sectionBorder": "Bordo",
+    "sectionColor": "Colori",
+    "fontSize": "Dimensione",
+    "fontWeight": "Peso",
+    "textAlign": "Allinea",
+    "borderStyleLabel": "Stile",
+    "borderWidth": "Larghezza",
+    "textColor": "Testo",
+    "backgroundColor": "Riempimento",
+    "borderColor": "Bordo",
+    "clearStyles": "Cancella",
+    "weightNormal": "Normale",
+    "weightBold": "Grassetto",
+    "align": {
+      "left": "Sinistra",
+      "center": "Centro",
+      "right": "Destra",
+      "justify": "Giustifica"
+    },
+    "borderStyle": {
+      "none": "Nessuno",
+      "solid": "Continuo",
+      "dashed": "Tratteggiato",
+      "dotted": "Punteggiato"
+    }
+  }
+}

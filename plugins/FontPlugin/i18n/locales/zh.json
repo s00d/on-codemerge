@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "大小",
+    "family": "字体",
+    "settings": "字体",
+    "lineHeight": "行高",
+    "previewSample": "敏捷的棕色狐狸跳过懒狗。",
+    "lhTight": "紧凑",
+    "lhSnug": "较紧凑",
+    "lhNormal": "正常",
+    "lhRelaxed": "较宽松",
+    "lhLoose": "宽松",
+    "lhDefault": "默认",
+    "detecting": "检测中…",
+    "availableCount": "此设备上有 {n}"
+  }
+}

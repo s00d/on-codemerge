@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "Новый Блок",
+    "splitHorizontally": "Разделить Горизонтально",
+    "splitVertically": "Разделить Вертикально",
+    "horizontalLine": "Горизонтальная Линия",
+    "enableHorizontalScroll": "Включить Горизонтальную Прокрутку",
+    "textBlock": "Текстовый Блок",
+    "containerBlock": "Контейнерный Блок",
+    "splitContainer": "Разделить Контейнер",
+    "split": "Разделить",
+    "horizontally": "Горизонтально",
+    "vertically": "Вертикально",
+    "merge": "Объединить",
+    "insert": "Вставить Блок",
+    "mergeHorizontally": "Объединить по горизонтали",
+    "mergeVertically": "Объединить по вертикали",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "Примечание: Ширина отключена при включенной горизонтальной прокрутке"
+  }
+}

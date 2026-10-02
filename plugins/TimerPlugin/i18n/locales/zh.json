@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "计时器",
+    "days": "天",
+    "hours": "小时",
+    "sec": "秒",
+    "timeExpired": "时间已到",
+    "editTimer": "编辑计时器",
+    "copyTimer": "复制计时器",
+    "exportTimer": "导出计时器",
+    "importTimer": "导入计时器",
+    "deleteTimer": "删除计时器",
+    "timerCopiedSuccessfully": "计时器已复制",
+    "failedToCopyTimer": "复制计时器失败",
+    "timerImportedSuccessfully": "计时器已导入",
+    "enterTimerTitle": "输入计时器标题",
+    "enterTimerDescription": "输入计时器描述",
+    "newTimer": "新计时器",
+    "noTimersFound": "未找到计时器",
+    "createYourFirstTimerToGetStarted": "创建第一个计时器以开始",
+    "areYouSureYouWantToDeleteThisTimer": "确定要删除此计时器吗？",
+    "expired": "已过期",
+    "active": "活动",
+    "timerExpired": "计时器已到期",
+    "invalidDateTimeFormat": "日期/时间格式无效"
+  }
+}

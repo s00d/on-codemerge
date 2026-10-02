@@ -1,0 +1,23 @@
+{
+  "history": {
+    "undo": "Отменить",
+    "redo": "Повторить",
+    "restore": "Восстановить версию",
+    "initialVersion": "Начальная версия",
+    "changesFromPrevious": "Изменения относительно предыдущей",
+    "editHistory": "История правок",
+    "viewHistory": "Смотреть историю",
+    "close": "Закрыть",
+    "history": "История",
+    "versions": "Версии",
+    "versionN": "Версия {n}",
+    "versionCount": "{n} снимков",
+    "current": "Текущая",
+    "empty": "История пока пуста",
+    "justNow": "Только что",
+    "minutesAgo": "{n} мин назад",
+    "hoursAgo": "{n} ч назад",
+    "charsAdded": "+{n}",
+    "charsRemoved": "−{n}"
+  }
+}

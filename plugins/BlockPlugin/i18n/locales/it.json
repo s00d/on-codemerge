@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "Nuovo blocco",
+    "splitHorizontally": "Dividi orizzontalmente",
+    "splitVertically": "Dividi verticalmente",
+    "horizontalLine": "Linea orizzontale",
+    "enableHorizontalScroll": "Abilita scorrimento orizzontale",
+    "textBlock": "Blocco di testo",
+    "containerBlock": "Blocco contenitore",
+    "splitContainer": "Dividi contenitore",
+    "split": "Dividi",
+    "horizontally": "Orizzontalmente",
+    "vertically": "Verticalmente",
+    "merge": "Unisci",
+    "insert": "Inserisci blocco",
+    "mergeHorizontally": "Unisci orizzontalmente",
+    "mergeVertically": "Unisci verticalmente",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "Nota: la larghezza è disabilitata quando lo scorrimento orizzontale è attivo"
+  }
+}

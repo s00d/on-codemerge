@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "이 템플릿을 삭제하시겠습니까?",
+    "selectTemplate": "템플릿 선택...",
+    "newTemplate": "새 템플릿",
+    "noTemplate": "템플릿 없음",
+    "templateOptional": "템플릿(선택 사항):",
+    "noTemplatesFound": "템플릿을 찾을 수 없음",
+    "useTemplate": "템플릿 사용",
+    "formTemplates": "폼 템플릿",
+    "templateName": "템플릿 이름",
+    "noTemplatesYetClickNewTemplateToCreateOne": "아직 템플릿이 없습니다. \"새 템플릿\"을 클릭하여 만드세요."
+  }
+}

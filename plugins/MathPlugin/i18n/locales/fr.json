@@ -1,0 +1,22 @@
+{
+  "math": {
+    "insert": "Insérer des maths",
+    "chartPreviewWillAppearHere": "L’aperçu du graphique apparaîtra ici",
+    "formPreview": "Aperçu du formulaire",
+    "previewUnavailable": "Aperçu indisponible",
+    "mathExpressionLatex": "Expression (sous-ensemble TeX)",
+    "expression": "Expression",
+    "modeBuild": "Construire",
+    "modeSource": "Source",
+    "howToWriteFormulas": "Comment écrire des formules",
+    "mathPreviewWillAppearHere": "L’aperçu mathématique apparaîtra ici",
+    "enterYourMathExpressionHere": "Saisissez votre expression mathématique ici...",
+    "group": {
+      "structures": "Structures",
+      "calculus": "Analyse",
+      "ops": "Opérateurs",
+      "funcs": "Fonctions",
+      "greek": "Grec"
+    }
+  }
+}

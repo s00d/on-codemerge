@@ -148,7 +148,7 @@ export function createEmbedWorkspaceHost(
     getLocale: parent.getLocale.bind(parent),
     setLocale: parent.setLocale.bind(parent),
     registerLocale: parent.registerLocale.bind(parent),
-    registerLocaleLoader: parent.registerLocaleLoader.bind(parent),
+    registerLocaleOverlay: parent.registerLocaleOverlay.bind(parent),
     onLocaleChange: parent.onLocaleChange.bind(parent),
     listLocales: parent.listLocales.bind(parent),
     toolbar: parent.toolbar,

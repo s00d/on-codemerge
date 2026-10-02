@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "タイマー",
+    "days": "日",
+    "hours": "時間",
+    "sec": "秒",
+    "timeExpired": "時間切れ",
+    "editTimer": "タイマーを編集",
+    "copyTimer": "タイマーをコピー",
+    "exportTimer": "タイマーをエクスポート",
+    "importTimer": "タイマーをインポート",
+    "deleteTimer": "タイマーを削除",
+    "timerCopiedSuccessfully": "タイマーをコピーしました",
+    "failedToCopyTimer": "タイマーのコピーに失敗しました",
+    "timerImportedSuccessfully": "タイマーが正常にインポートされました",
+    "enterTimerTitle": "タイマータイトルを入力",
+    "enterTimerDescription": "タイマー説明を入力",
+    "newTimer": "新しいタイマー",
+    "noTimersFound": "タイマーが見つかりません",
+    "createYourFirstTimerToGetStarted": "最初のタイマーを作成して始めましょう",
+    "areYouSureYouWantToDeleteThisTimer": "このタイマーを削除してもよろしいですか？",
+    "expired": "期限切れ",
+    "active": "有効",
+    "timerExpired": "タイマーが終了しました",
+    "invalidDateTimeFormat": "日付/時刻の形式が無効です"
+  }
+}

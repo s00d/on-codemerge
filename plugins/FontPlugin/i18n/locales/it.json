@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "Dimensione",
+    "family": "Carattere",
+    "settings": "Carattere",
+    "lineHeight": "Interlinea",
+    "previewSample": "Quel fez sghembo copre davanti.",
+    "lhTight": "Stretta",
+    "lhSnug": "Compatta",
+    "lhNormal": "Normale",
+    "lhRelaxed": "Rilassata",
+    "lhLoose": "Ampia",
+    "lhDefault": "Predefinito",
+    "detecting": "rilevamento…",
+    "availableCount": "{n} su questo dispositivo"
+  }
+}

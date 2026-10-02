@@ -1,0 +1,24 @@
+{
+  "fileUpload": {
+    "title": "Загрузить Файл",
+    "uploading": "Загрузка",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading files…",
+    "galleryEmpty": "Пока нет файлов — загрузите первый",
+    "galleryFailed": "Failed to load file list",
+    "changeFile": "Change file",
+    "confirmUpload": "Upload & insert",
+    "insert": "Insert",
+    "uploadFailed": "Upload failed",
+    "fileTooLarge": "File exceeds the maximum size",
+    "gallerySearchPlaceholder": "Поиск файлов по имени или типу…",
+    "galleryRefresh": "Обновить",
+    "galleryNoMatches": "Ничего не найдено",
+    "galleryResults": "{n} файлов",
+    "galleryDeleteConfirm": "Удалить «{name}» из галереи?",
+    "galleryDeleting": "Удаление…",
+    "galleryDeleteFailed": "Не удалось удалить файл",
+    "browse": "выберите"
+  }
+}

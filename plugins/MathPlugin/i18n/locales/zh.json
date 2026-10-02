@@ -1,0 +1,22 @@
+{
+  "math": {
+    "insert": "插入数学公式",
+    "chartPreviewWillAppearHere": "图表预览将显示在此处",
+    "formPreview": "表单预览",
+    "previewUnavailable": "预览不可用",
+    "mathExpressionLatex": "表达式（TeX 子集）",
+    "expression": "表达式",
+    "modeBuild": "构建",
+    "modeSource": "源码",
+    "howToWriteFormulas": "如何编写公式",
+    "mathPreviewWillAppearHere": "数学预览将显示在此处",
+    "enterYourMathExpressionHere": "在此输入数学表达式...",
+    "group": {
+      "structures": "结构",
+      "calculus": "微积分",
+      "ops": "运算符",
+      "funcs": "函数",
+      "greek": "希腊字母"
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "templates": {
+    "areYouSureYouWantToDeleteThisTemplate": "Are you sure you want to delete this template?",
+    "selectTemplate": "Select template...",
+    "newTemplate": "New Template",
+    "noTemplate": "No template",
+    "templateOptional": "Template (optional):",
+    "noTemplatesFound": "No templates found",
+    "useTemplate": "Use Template",
+    "formTemplates": "Form Templates",
+    "templateName": "Template Name",
+    "noTemplatesYetClickNewTemplateToCreateOne": "No templates yet. Click \"New Template\" to create one."
+  }
+}

@@ -1,0 +1,15 @@
+{
+  "collaboration": {
+    "title": "협업",
+    "localDemoOnlyPassToken": "1) 서버: pnpm run collab:dev. 2) Start. Docs: ws://127.0.0.1:8787/collab; token = COLLAB_TOKEN.",
+    "statusIdle": "꺼짐",
+    "statusConnecting": "연결 중…",
+    "statusSyncing": "동기화 중…",
+    "statusSynced": "실시간",
+    "statusReconnecting": "다시 연결 중…",
+    "statusOffline": "오프라인",
+    "statusError": "오류",
+    "statusReadonly": "읽기 전용",
+    "peersCount": "{n}명 온라인"
+  }
+}

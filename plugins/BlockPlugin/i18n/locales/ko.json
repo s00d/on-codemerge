@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "새 블록",
+    "splitHorizontally": "수평으로 분할",
+    "splitVertically": "수직으로 분할",
+    "horizontalLine": "수평선",
+    "enableHorizontalScroll": "가로 스크롤 활성화",
+    "textBlock": "텍스트 블록",
+    "containerBlock": "컨테이너 블록",
+    "splitContainer": "컨테이너 분할",
+    "split": "분할",
+    "horizontally": "가로로",
+    "vertically": "세로로",
+    "merge": "병합",
+    "insert": "블록 삽입",
+    "mergeHorizontally": "가로로 병합",
+    "mergeVertically": "세로로 병합",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "참고: 가로 스크롤이 활성화되면 너비가 비활성화됩니다"
+  }
+}

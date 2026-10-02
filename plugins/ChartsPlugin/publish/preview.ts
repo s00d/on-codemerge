@@ -1,7 +1,8 @@
 import { attrString, h, img } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
-import type { ChartI18n } from '../renderers/BaseChartRenderer';
-import { ChartRenderer } from '../services/ChartRenderer';
+import type { ChartI18n } from '../drivers';
+import { renderChart } from '../drivers';
+import { optionsFromAttrs } from '../utils/options';
 import {
   parseChartDataJson,
   parseChartMode,
@@ -9,7 +10,6 @@ import {
   parseChartType,
 } from '../utils/validation';
 
-/** Minimal i18n stub for publish (no live editor). */
 const stubI18n: ChartI18n = {
   t: (key: string) => key,
 };
@@ -26,17 +26,22 @@ export function renderChartPublish(
   const title = attrString(attrs.title);
   let src = '';
   try {
-    const el = new ChartRenderer(editor).createChart(type, data, {
-      width,
-      height,
-      title,
-      xAxis: { title: attrString(attrs.xAxisLabel) },
-      yAxis: { title: attrString(attrs.yAxisLabel) },
-      legend: { show: attrs.showLegend !== false },
-      grid: { show: attrs.showGrid !== false },
-      mode: parseChartMode(attrString(attrs.mode, 'default')),
-      orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
-    });
+    const el = renderChart(
+      type,
+      data,
+      optionsFromAttrs({
+        title,
+        width,
+        height,
+        showLegend: attrs.showLegend !== false,
+        showGrid: attrs.showGrid !== false,
+        mode: parseChartMode(attrString(attrs.mode, 'default')),
+        orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
+        xAxisLabel: attrString(attrs.xAxisLabel),
+        yAxisLabel: attrString(attrs.yAxisLabel),
+      }),
+      editor
+    );
     src = el.src;
   } catch {
     src = '';

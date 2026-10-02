@@ -27,21 +27,4 @@ export function isInteractiveTarget(el: EventTarget | null): boolean {
   return el instanceof HTMLElement && Boolean(el.closest('[data-ocm-json-interactive]'));
 }
 
-export function typeLabel(type: string): string {
-  switch (type) {
-    case 'jsonObject':
-      return 'object';
-    case 'jsonArray':
-      return 'array';
-    case 'jsonString':
-      return 'string';
-    case 'jsonNumber':
-      return 'number';
-    case 'jsonBoolean':
-      return 'boolean';
-    case 'jsonNull':
-      return 'null';
-    default:
-      return type;
-  }
-}
+export { typeLabel } from '../../drivers';

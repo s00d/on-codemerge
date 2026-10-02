@@ -1,0 +1,15 @@
+{
+  "collaboration": {
+    "title": "Совместная работа",
+    "localDemoOnlyPassToken": "1) Запусти сервер: pnpm run collab:dev. 2) Нажми Start. Docs: ws://127.0.0.1:8787/collab; token = COLLAB_TOKEN.",
+    "statusIdle": "Выкл",
+    "statusConnecting": "Подключение…",
+    "statusSyncing": "Синхронизация…",
+    "statusSynced": "В сети",
+    "statusReconnecting": "Переподключение…",
+    "statusOffline": "Офлайн",
+    "statusError": "Ошибка",
+    "statusReadonly": "Только чтение",
+    "peersCount": "{n} онлайн"
+  }
+}

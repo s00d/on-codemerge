@@ -1,0 +1,23 @@
+{
+  "history": {
+    "undo": "실행 취소",
+    "redo": "다시 실행",
+    "restore": "이 버전 복원",
+    "initialVersion": "초기 버전",
+    "changesFromPrevious": "이전 버전 대비 변경 사항",
+    "editHistory": "편집 기록",
+    "viewHistory": "기록 보기",
+    "close": "닫기",
+    "history": "기록",
+    "versions": "버전",
+    "versionN": "버전 {n}",
+    "versionCount": "스냅샷 {n}개",
+    "current": "현재",
+    "empty": "아직 기록이 없습니다",
+    "justNow": "방금",
+    "minutesAgo": "{n}분 전",
+    "hoursAgo": "{n}시간 전",
+    "charsAdded": "+{n}",
+    "charsRemoved": "−{n}"
+  }
+}

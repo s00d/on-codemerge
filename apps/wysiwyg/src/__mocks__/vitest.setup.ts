@@ -51,7 +51,7 @@ function stubImageData(width: number, height: number): ImageData {
   };
 }
 
-/** 1×1 transparent PNG — enough for ChartRenderer / export menu data-URL paths. */
+/** 1×1 transparent PNG — enough for renderChart / export menu data-URL paths. */
 const STUB_PNG_DATA_URL =
   'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==';
 

@@ -1,0 +1,27 @@
+{
+  "timer": {
+    "title": "Temporizzatore",
+    "days": "giorni",
+    "hours": "ore",
+    "sec": "s",
+    "timeExpired": "Tempo scaduto",
+    "editTimer": "Modifica timer",
+    "copyTimer": "Copia timer",
+    "exportTimer": "Esporta timer",
+    "importTimer": "Importa timer",
+    "deleteTimer": "Elimina timer",
+    "timerCopiedSuccessfully": "Timer copiato correttamente",
+    "failedToCopyTimer": "Impossibile copiare il timer",
+    "timerImportedSuccessfully": "Timer importato correttamente",
+    "enterTimerTitle": "Inserisci titolo timer",
+    "enterTimerDescription": "Inserisci descrizione timer",
+    "newTimer": "Nuovo timer",
+    "noTimersFound": "Nessun timer trovato",
+    "createYourFirstTimerToGetStarted": "Crea il tuo primo timer per iniziare",
+    "areYouSureYouWantToDeleteThisTimer": "Vuoi davvero eliminare questo timer?",
+    "expired": "Scaduto",
+    "active": "Attivo",
+    "timerExpired": "Timer scaduto",
+    "invalidDateTimeFormat": "Formato data/ora non valido"
+  }
+}

@@ -13,6 +13,7 @@ import {
   pathToJsonPointer,
   valueAtDocPath,
 } from '../commands/jsonCommands';
+import { allJsonLeafTypes, getDriver } from '../drivers';
 
 export type JsonNodeMenuTarget = {
   /** Path for structural ops (property, array item, or container value). */
@@ -22,14 +23,10 @@ export type JsonNodeMenuTarget = {
   kind: 'property' | 'arrayItem' | 'object' | 'array' | 'leaf';
 };
 
-const TYPE_OPTIONS: { type: JsonLeafType; label: string }[] = [
-  { type: 'jsonObject', label: 'object' },
-  { type: 'jsonArray', label: 'array' },
-  { type: 'jsonString', label: 'string' },
-  { type: 'jsonNumber', label: 'number' },
-  { type: 'jsonBoolean', label: 'boolean' },
-  { type: 'jsonNull', label: 'null' },
-];
+const TYPE_OPTIONS: { type: JsonLeafType; label: string }[] = allJsonLeafTypes().map((type) => ({
+  type,
+  label: getDriver(type).label,
+}));
 
 async function writeClipboard(text: string): Promise<boolean> {
   try {

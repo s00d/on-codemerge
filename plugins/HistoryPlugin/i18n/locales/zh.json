@@ -1,0 +1,23 @@
+{
+  "history": {
+    "undo": "撤销",
+    "redo": "重做",
+    "restore": "恢复此版本",
+    "initialVersion": "初始版本",
+    "changesFromPrevious": "相对上一版本的更改",
+    "editHistory": "编辑历史",
+    "viewHistory": "查看历史",
+    "close": "关闭",
+    "history": "历史",
+    "versions": "版本",
+    "versionN": "版本 {n}",
+    "versionCount": "{n} 个快照",
+    "current": "当前",
+    "empty": "暂无历史记录",
+    "justNow": "刚刚",
+    "minutesAgo": "{n} 分钟前",
+    "hoursAgo": "{n} 小时前",
+    "charsAdded": "+{n}",
+    "charsRemoved": "−{n}"
+  }
+}

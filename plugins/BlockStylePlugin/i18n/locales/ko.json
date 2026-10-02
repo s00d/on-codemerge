@@ -1,0 +1,36 @@
+{
+  "blockStyle": {
+    "title": "블록 스타일",
+    "blockStyleEditor": "블록 스타일",
+    "cssClasses": "CSS 클래스",
+    "inlineStyles": "인라인 스타일",
+    "previewTitle": "미리보기",
+    "previewSample": "빠른 갈색 여우가 게으른 개를 뛰어넘습니다.",
+    "sectionText": "텍스트",
+    "sectionBorder": "테두리",
+    "sectionColor": "색상",
+    "fontSize": "크기",
+    "fontWeight": "굵기",
+    "textAlign": "정렬",
+    "borderStyleLabel": "스타일",
+    "borderWidth": "너비",
+    "textColor": "텍스트",
+    "backgroundColor": "채우기",
+    "borderColor": "테두리",
+    "clearStyles": "지우기",
+    "weightNormal": "보통",
+    "weightBold": "굵게",
+    "align": {
+      "left": "왼쪽",
+      "center": "가운데",
+      "right": "오른쪽",
+      "justify": "양쪽 맞춤"
+    },
+    "borderStyle": {
+      "none": "없음",
+      "solid": "실선",
+      "dashed": "파선",
+      "dotted": "점선"
+    }
+  }
+}

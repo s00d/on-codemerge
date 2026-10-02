@@ -1,0 +1,22 @@
+{
+  "math": {
+    "insert": "数式を挿入",
+    "chartPreviewWillAppearHere": "グラフのプレビューがここに表示されます",
+    "formPreview": "フォームプレビュー",
+    "previewUnavailable": "プレビューを利用できません",
+    "mathExpressionLatex": "式(TeXサブセット)",
+    "expression": "式",
+    "modeBuild": "ビルド",
+    "modeSource": "ソース",
+    "howToWriteFormulas": "数式の書き方",
+    "mathPreviewWillAppearHere": "数式プレビューがここに表示されます",
+    "enterYourMathExpressionHere": "ここに数式を入力...",
+    "group": {
+      "structures": "構造",
+      "calculus": "微積分",
+      "ops": "演算子",
+      "funcs": "関数",
+      "greek": "ギリシャ文字"
+    }
+  }
+}

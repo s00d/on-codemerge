@@ -1,0 +1,24 @@
+{
+  "fileUpload": {
+    "title": "Upload File",
+    "uploading": "Uploading",
+    "tabUpload": "Upload",
+    "tabGallery": "Gallery",
+    "galleryLoading": "Loading files…",
+    "galleryEmpty": "No files yet — upload one to get started",
+    "galleryFailed": "Failed to load file list",
+    "gallerySearchPlaceholder": "Search files by name or type…",
+    "galleryRefresh": "Refresh",
+    "galleryNoMatches": "No files match your search",
+    "galleryResults": "{n} files",
+    "changeFile": "Change file",
+    "confirmUpload": "Upload & insert",
+    "insert": "Insert",
+    "uploadFailed": "Upload failed",
+    "fileTooLarge": "File exceeds the maximum size",
+    "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
+    "galleryDeleting": "Deleting…",
+    "galleryDeleteFailed": "Failed to delete file",
+    "browse": "browse"
+  }
+}

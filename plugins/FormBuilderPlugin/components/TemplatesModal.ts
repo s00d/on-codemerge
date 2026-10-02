@@ -1,13 +1,12 @@
 import { PopupController, foreign, h, mount } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { FormTemplate } from '../types';
-import { TemplateManager } from '../services/TemplateManager';
+import { FORM_CATEGORIES, FORM_CATEGORY_NAMES, FORM_STARTERS } from '../templates/starters';
 
 /** Form templates picker — ViewSpec grid; search/filter keep focus via mount.update. */
 export class TemplatesModal {
   private readonly editor: EditorAPI;
   private readonly popups: PopupController;
-  private readonly templateManager: TemplateManager;
   private callback: ((template: FormTemplate) => void) | null = null;
   private search = '';
   private selectedCategory = 'all';
@@ -15,12 +14,10 @@ export class TemplatesModal {
   constructor(editor: EditorAPI, scope: DisposableScope) {
     this.editor = editor;
     this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
-    this.templateManager = new TemplateManager(editor);
-    this.templateManager.initialize();
   }
 
   private filtered(): FormTemplate[] {
-    return this.templateManager.getTemplates().filter((template) => {
+    return FORM_STARTERS.filter((template) => {
       const matchesCategory =
         this.selectedCategory === 'all' || template.category === this.selectedCategory;
       const q = this.search.toLowerCase();
@@ -34,7 +31,6 @@ export class TemplatesModal {
 
   private gridView(): ViewSpec {
     const templates = this.filtered();
-    const categoryNames = this.templateManager.getCategoryNames();
 
     if (templates.length === 0) {
       return h('div', { class: 'no-templates' }, this.editor.t('templates.noTemplatesFound'));
@@ -50,7 +46,7 @@ export class TemplatesModal {
             h(
               'div',
               { class: 'template-card-category' },
-              categoryNames[template.category] ?? template.category
+              FORM_CATEGORY_NAMES[template.category] ?? template.category
             ),
           ]),
           h('div', { class: 'template-card-description' }, template.description),
@@ -74,9 +70,6 @@ export class TemplatesModal {
   }
 
   private bodyView(): ViewSpec {
-    const categories = this.templateManager.getCategories();
-    const categoryNames = this.templateManager.getCategoryNames();
-
     return foreign((host, scope) => {
       host.className = 'templates-modal-content';
       let grid: MountHandle | null = null;
@@ -122,8 +115,8 @@ export class TemplatesModal {
                 },
               },
               h('option', { attrs: { value: 'all' } }, 'All Categories'),
-              ...categories.map((category) =>
-                h('option', { attrs: { value: category } }, categoryNames[category] ?? category)
+              ...FORM_CATEGORIES.map((category) =>
+                h('option', { attrs: { value: category } }, FORM_CATEGORY_NAMES[category])
               )
             ),
           ]),

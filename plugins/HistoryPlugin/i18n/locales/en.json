@@ -1,0 +1,23 @@
+{
+  "history": {
+    "undo": "Undo",
+    "redo": "Redo",
+    "restore": "Restore this version",
+    "initialVersion": "Initial version",
+    "changesFromPrevious": "Changes from previous version",
+    "editHistory": "Edit history",
+    "viewHistory": "View history",
+    "close": "Close",
+    "history": "History",
+    "versions": "Versions",
+    "versionN": "Version {n}",
+    "versionCount": "{n} snapshots",
+    "current": "Current",
+    "empty": "No history yet",
+    "justNow": "Just now",
+    "minutesAgo": "{n} min ago",
+    "hoursAgo": "{n} h ago",
+    "charsAdded": "+{n}",
+    "charsRemoved": "−{n}"
+  }
+}

@@ -271,7 +271,7 @@ export class ImageInsertModal {
                   },
                 },
               },
-              this.t('table.browse')
+              this.t('image.browse')
             ),
             h(
               'p',

@@ -1,4 +1,6 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
 
 import {
   definePlugin,
@@ -15,6 +17,11 @@ import { blockIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
 import type { BlockTree } from './paneTree';
 import { layoutFromTree, leaf, serializeTree, treeFromAttrs } from './paneTree';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 function paneLabel(path: number[]): string {
   if (path.length === 0) {
@@ -181,6 +188,9 @@ export function BlockPlugin(opts?: PluginToolbarOpts) {
       { keys: 'Mod-Alt-c', command: 'insertContainer', description: 'Insert container' },
     ],
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       const editor = ctx.editor;
       const blockMenu = ctx.own(new BlockContextMenu(editor));
 

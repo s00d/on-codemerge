@@ -23,6 +23,15 @@ hero:
     - theme: alt
       text: Code Editor
       link: /guide/code-editor
+    - theme: alt
+      text: Forms Editor
+      link: /guide/forms-editor
+    - theme: alt
+      text: Charts Editor
+      link: /guide/charts-editor
+    - theme: alt
+      text: Calendar Editor
+      link: /guide/calendar-editor
 ---
 
 <script setup>
@@ -30,6 +39,9 @@ import EditorComponent from './components/EditorComponent.vue';
 import JsonEditorComponent from './components/JsonEditorComponent.vue';
 import MarkdownEditorComponent from './components/MarkdownEditorComponent.vue';
 import CodeEditorComponent from './components/CodeEditorComponent.vue';
+import FormsEditorComponent from './components/FormsEditorComponent.vue';
+import ChartsEditorComponent from './components/ChartsEditorComponent.vue';
+import CalendarEditorComponent from './components/CalendarEditorComponent.vue';
 </script>
 
 # Introduction
@@ -69,9 +81,27 @@ Plain-text source via **`on-codemerge/code`**: shell ViewPort + `CodeBlockPlugin
 
 <CodeEditorComponent :showDescription="false" />
 
+## Forms Editor
+
+Form studio via **`on-codemerge/forms`**: shell ViewPort + `FormBuilderPlugin({ surface: 'workspace' })`. Interchange with `getText` / `setText` (`FormConfig` JSON).
+
+<FormsEditorComponent :showDescription="false" />
+
+## Charts Editor
+
+Chart studio via **`on-codemerge/charts`**: shell ViewPort + `ChartsPlugin({ surface: 'workspace' })`. Interchange with `getText` / `setText` (chart attrs JSON).
+
+<ChartsEditorComponent :showDescription="false" />
+
+## Calendar Editor
+
+Calendar studio via **`on-codemerge/calendar`**: shell ViewPort + `CalendarPlugin({ surface: 'workspace' })`. Interchange with `getText` / `setText` (`CalendarDoc` JSON).
+
+<CalendarEditorComponent :showDescription="false" />
+
 ## Getting Started
 
-Four Editor products share the same kernel + SDK. Pick by document shape — full comparison: [Editors](/guide/editors).
+Seven Editor products share the same kernel + SDK. Pick by document shape — full comparison: [Editors](/guide/editors).
 
 ### Installation
 
@@ -159,6 +189,36 @@ editor.on('docChanged', () => {
 });
 ```
 
+### 5. Forms Editor (`on-codemerge/forms`)
+
+FormConfig SoT — persist with `getText` / `setText`.
+
+```ts
+import { Editor, createDefaultPlugins } from 'on-codemerge/forms';
+
+const editor = new Editor(document.getElementById('forms-app')!, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(),
+});
+
+editor.setText('{"id":"f1","method":"POST","action":"","fields":[]}');
+```
+
+### 6. Charts Editor (`on-codemerge/charts`)
+
+Chart attrs SoT — persist with `getText` / `setText`.
+
+```ts
+import { Editor, createDefaultPlugins } from 'on-codemerge/charts';
+
+const editor = new Editor(document.getElementById('charts-app')!, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(),
+});
+
+editor.setText('{"chartType":"bar","title":"Chart","data":[],"width":800,"height":400}');
+```
+
 ## Available Plugins
 
 On-Codemerge ships with a full plugin ecosystem (tables, lists, media, collaboration, and more).
@@ -167,14 +227,20 @@ On-Codemerge ships with a full plugin ecosystem (tables, lists, media, collabora
 
 ## Next Steps
 
-- [Editors](/guide/editors) — WYSIWYG / JSON / Markdown / Code, launch snippets
+- [Editors](/guide/editors) — WYSIWYG / JSON / Markdown / Code / Forms / Charts / Calendar
 - [Editor API](/guide/editor) — JSON / HTML / Markdown / published
 - [JSON Editor](/guide/json-editor) — Tree + Raw via `on-codemerge/json`
 - [Markdown Editor](/guide/markdown-editor) — dual-pane via `on-codemerge/markdown`
 - [Code Editor](/guide/code-editor) — source contour via `on-codemerge/code`
+- [Forms Editor](/guide/forms-editor) — form studio via `on-codemerge/forms`
+- [Charts Editor](/guide/charts-editor) — chart studio via `on-codemerge/charts`
+- [Calendar Editor](/guide/calendar-editor) — calendar studio via `on-codemerge/calendar`
 - [JSON Plugin](/plugins/json-plugin) — embed atom + workspace options
 - [Markdown Plugin](/plugins/markdown-plugin) — embed atom + workspace options
 - [Code Block Plugin](/plugins/code-block-plugin) — atom insert + workspace Code Editor
+- [Form Builder Plugin](/plugins/form-builder-plugin) — atom + workspace Forms
+- [Charts Plugin](/plugins/charts-plugin) — atom + workspace Charts
+- [Calendar Plugin](/plugins/calendar-plugin) — atom + workspace Calendar
 - [SDK reference](/guide/sdk) — `on-codemerge/sdk` public surface
 - [Document model](/guide/document-model) — JSON document & operations
 - [Authoring plugins](/guide/authoring-plugins) — `definePlugin`

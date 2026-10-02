@@ -1,4 +1,6 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
 
 import { definePlugin, withMarkTarget, setMarkAttrs, setBlockAttr, core } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
@@ -6,6 +8,11 @@ import { fontSizeIcon } from '@ocm/wysiwyg/icons';
 import { defaultDraft } from './constants';
 import type { FontDraft } from './constants';
 import { fontSettingsPanel } from './components/FontSettingsPanel';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 function markAttrAtSelection(editor: EditorAPI, markType: string, attr: string): string | null {
   const state = editor.getState();
@@ -91,6 +98,9 @@ export function FontPlugin() {
       { keys: 'Mod-Shift-x', command: 'toggleStrike', description: 'Strikethrough' },
     ],
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       const editor = ctx.editor;
 
       ctx.toolbar.add({

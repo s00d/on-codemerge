@@ -1,0 +1,23 @@
+{
+  "history": {
+    "undo": "元に戻す",
+    "redo": "やり直す",
+    "restore": "このバージョンを復元",
+    "initialVersion": "初期バージョン",
+    "changesFromPrevious": "前のバージョンからの変更",
+    "editHistory": "編集履歴",
+    "viewHistory": "履歴を表示",
+    "close": "閉じる",
+    "history": "履歴",
+    "versions": "バージョン",
+    "versionN": "バージョン {n}",
+    "versionCount": "{n} 件のスナップショット",
+    "current": "現在",
+    "empty": "履歴はまだありません",
+    "justNow": "たった今",
+    "minutesAgo": "{n} 分前",
+    "hoursAgo": "{n} 時間前",
+    "charsAdded": "+{n}",
+    "charsRemoved": "−{n}"
+  }
+}

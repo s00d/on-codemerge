@@ -1,0 +1,27 @@
+{
+  "responsive": {
+    "view": "响应式视图",
+    "mobileView": "移动视图",
+    "desktopView": "桌面视图",
+    "largeDesktopView": "大桌面视图",
+    "ultraWideView": "超宽视图",
+    "title": "响应式",
+    "selectAViewportSizeToPreviewYourContentAtDifferentScreenWidthsBrUseTheResizeHandlesInResponsiveModeToAdjustTheWidthManually": "选择视口大小，以在不同屏幕宽度下预览内容。<br>在响应式模式下使用调整手柄手动调整宽度。",
+    "responsiveSettings": "响应式设置",
+    "enableCardsOnMobile": "在移动端启用卡片",
+    "mobile": "移动端",
+    "desktop": "桌面端",
+    "ultra": "超大",
+    "currentViewportClickToChange": "当前视口 - 点击更改",
+    "largeDesktop": "大桌面",
+    "largeDesktopView2": "大屏桌面视图",
+    "selectViewport": "选择视口",
+    "standardDesktop": "标准桌面",
+    "ultraWide": "超宽",
+    "ultraWideScreen": "超宽屏",
+    "responsiveModeAllowsManualResizing": "• 响应式模式允许手动调整大小",
+    "viewportStateIsSavedAutomatically": "• 视口状态会自动保存",
+    "tablet": "平板",
+    "tabletView2": "平板视图"
+  }
+}

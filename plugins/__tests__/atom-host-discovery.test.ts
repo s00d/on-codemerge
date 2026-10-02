@@ -6,7 +6,6 @@ import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
 import { CalendarPlugin } from '../CalendarPlugin';
-import { CalendarManager } from '../CalendarPlugin/services/CalendarManager';
 import { TimerPlugin } from '../TimerPlugin';
 
 describe('atom host discovery (data-ocm-type + ocm-*-atom)', () => {
@@ -58,14 +57,10 @@ describe('atom host discovery (data-ocm-type + ocm-*-atom)', () => {
     expect(pathFromEl(queryAtomHosts(host, 'timer')[0]!)).toStrictEqual([0]);
   });
 
-  it('calendar event persist remounts via queryAtomHosts (legacy .ocm-calendar misses)', () => {
+  it('calendar atom remounts via queryAtomHosts after payload set_attrs', () => {
     expect.hasAssertions();
     host = document.createElement('div');
     document.body.append(host);
-
-    // Same localStorage keys as CalendarPlugin's manager.
-    const seed = new CalendarManager();
-    const cal = seed.createCalendar({ title: 'test', description: '' });
 
     editor = new Editor(host, { plugins: [CalendarPlugin()] });
     editor.setJSON(
@@ -74,52 +69,58 @@ describe('atom host discovery (data-ocm-type + ocm-*-atom)', () => {
         {
           type: 'calendar',
           attrs: {
-            title: cal.title,
-            calendarId: cal.id,
+            title: 'test',
             align: '',
-            payload: { calendar: cal, events: [] },
+            payload: {
+              title: 'test',
+              tz: 'UTC',
+              view: 'month',
+              cursor: '2026-09-28',
+              calendars: [{ id: 'c1', title: 'test', color: '#3b82f6', visible: true }],
+              events: [],
+            },
           },
         },
       ])
     );
 
-    // Legacy broken selector used by CalendarPlugin before the fix.
     expect(host.querySelectorAll('.ocm-calendar')).toHaveLength(0);
     expect(queryAtomHosts(host, 'calendar')).toHaveLength(1);
     expect(host.querySelector('.ocm-calendar-atom')).toBeTruthy();
     expect(host.querySelector('[data-ocm-type="calendar"]')).toBeTruthy();
     expect(host.querySelector('.calendar-empty')).toBeTruthy();
 
-    seed.createEvent(
-      {
-        title: 'тест',
-        description: '',
-        date: '2026-09-28',
-        time: '14:00',
-        duration: 60,
-        color: '#3b82f6',
-        priority: 'low',
-      },
-      cal.id
-    );
-
     const path = pathFromEl(queryAtomHosts(host, 'calendar')[0]!);
     expect(path).toStrictEqual([1]);
 
-    // What refreshWidgets → persistOpenCalendars must do after createEvent.
     editor.run(() => [
       {
         type: 'set_attrs',
         path: path!,
         attrs: {
-          payload: { calendar: cal, events: seed.getEvents(cal.id) },
-          title: cal.title,
+          title: 'test',
+          payload: {
+            title: 'test',
+            tz: 'UTC',
+            view: 'month',
+            cursor: '2026-09-28',
+            calendars: [{ id: 'c1', title: 'test', color: '#3b82f6', visible: true }],
+            events: [
+              {
+                id: 'e1',
+                calendarId: 'c1',
+                title: 'тест',
+                start: '2026-09-28T14:00',
+                end: '2026-09-28T15:00',
+                allDay: false,
+              },
+            ],
+          },
         },
       },
     ]);
 
     expect(host.querySelector('.calendar-empty')).toBeNull();
-    expect(host.querySelector('.calendar-event')).toBeTruthy();
     expect(host.textContent).toContain('тест');
 
     const payload = editor.getJSON().doc.content?.[1]?.attrs?.payload as {

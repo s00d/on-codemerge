@@ -35,6 +35,9 @@
     "apps/json/src",
     "apps/markdown/src",
     "apps/code/src",
+    "apps/forms/src",
+    "apps/charts/src",
+    "apps/calendar/src",
     "plugins",
     "packages/kernel/src",
     "packages/sdk/src",
@@ -50,6 +53,9 @@
     "apps/wysiwyg/src/main.ts",
     "apps/json/src/main.ts",
     "apps/markdown/src/main.ts",
-    "apps/code/src/main.ts"
+    "apps/code/src/main.ts",
+    "apps/forms/src/main.ts",
+    "apps/charts/src/main.ts",
+    "apps/calendar/src/main.ts"
   ]
 }

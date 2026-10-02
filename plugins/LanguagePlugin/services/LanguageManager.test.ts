@@ -11,7 +11,7 @@ function mockEditor(overrides: Partial<EditorAPI> = {}): EditorAPI {
       locale = code;
     }),
     registerLocale: vi.fn(),
-    registerLocaleLoader: vi.fn(),
+    registerLocaleOverlay: vi.fn(() => () => {}),
     t: (k: string) => k,
     tc: (k: string) => k,
     onLocaleChange: () => () => {},

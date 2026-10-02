@@ -1,0 +1,20 @@
+{
+  "block": {
+    "newBlock": "新しいブロック",
+    "splitHorizontally": "水平に分割",
+    "splitVertically": "垂直に分割",
+    "horizontalLine": "水平線",
+    "enableHorizontalScroll": "水平スクロールを有効化",
+    "textBlock": "テキストブロック",
+    "containerBlock": "コンテナブロック",
+    "splitContainer": "コンテナを分割",
+    "split": "分割",
+    "horizontally": "水平に",
+    "vertically": "垂直に",
+    "merge": "結合",
+    "insert": "ブロックを挿入",
+    "mergeHorizontally": "水平方向に結合",
+    "mergeVertically": "垂直方向に結合",
+    "noteWidthIsDisabledWhenHorizontalScrollIsEnabled": "注意：水平スクロールが有効な場合、幅は無効になります"
+  }
+}

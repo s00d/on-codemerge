@@ -1,4 +1,7 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
 import { tableIcon, lazyTableIcon } from '@ocm/wysiwyg/icons';
 import { definePlugin, core, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
@@ -28,6 +31,11 @@ import {
   insertLazyTableShell,
   readLazyConfigFromTable,
 } from './lazyTable';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 const lazyKey = (id: string | undefined, url: string, index: number) => `${id ?? index}:${url}`;
 
@@ -175,6 +183,9 @@ export function TablePlugin(opts?: PluginToolbarOpts) {
       { name: 'tableCell', group: 'block' },
     ],
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       const editor = ctx.editor;
       const popup = new TablePopup(editor, ctx.scope);
       const loadedKeys = new Set<string>();

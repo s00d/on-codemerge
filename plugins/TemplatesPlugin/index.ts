@@ -1,4 +1,6 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
 
 import { definePlugin, attrString, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
@@ -7,6 +9,11 @@ import { TemplatesMenu } from './components/TemplatesMenu';
 import { TemplateManager } from './services/TemplateManager';
 import { templatesIcon } from '@ocm/wysiwyg/icons';
 import type { Template } from './types';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 function looksLikeHtml(s: string): boolean {
   return /<\/?[a-z][\s\S]*>/i.test(s);
@@ -34,6 +41,9 @@ export function TemplatesPlugin(opts?: PluginToolbarOpts) {
     },
     hotkeys: [{ keys: 'Mod-Alt-m', command: 'insertTemplate', description: 'Insert template' }],
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       const editor = ctx.editor;
       const menu = new TemplatesMenu(manager, editor, ctx.scope);
       openTemplates = () => {

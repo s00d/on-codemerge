@@ -1,4 +1,6 @@
 import './style.scss';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
 
 import {
   definePlugin,
@@ -12,6 +14,11 @@ import { FileUploader } from './services/FileUploader';
 import { FileUploadMenu } from './components/FileUploadMenu';
 import type { UploadConfig } from './config/UploadConfig';
 import { uploadIcon, fileIcon } from '@ocm/wysiwyg/icons';
+
+const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
+  './i18n/locales/*.json',
+  '!./i18n/locales/en.json',
+]);
 
 function renderFile(attrs: Record<string, unknown>): ViewSpec {
   const label = `${attrString(attrs.name, 'file')} (${attrString(attrs.sizeLabel, '')})`;
@@ -61,6 +68,9 @@ export function FileUploadPlugin(config: Partial<UploadConfig> & PluginToolbarOp
       },
     ],
     setup(ctx) {
+      ctx.disposable(
+        wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
+      );
       const editor = ctx.editor;
       const picker = new FileUploadMenu(
         editor,

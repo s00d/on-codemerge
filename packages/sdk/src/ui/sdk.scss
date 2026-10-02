@@ -362,3 +362,72 @@
 .ocm-math-content {
   @apply text-ocm-text;
 }
+
+/* Multi-pane studio shell — tabs on narrow, grid columns from --ocm-studio-cols on lg+ */
+.ocm-studio {
+  @apply flex h-full min-h-0 flex-1 flex-col gap-2 overflow-hidden;
+}
+
+.ocm-studio__tabs-host {
+  @apply shrink-0 lg:hidden;
+}
+
+.ocm-studio__tabs {
+  @apply flex gap-1 rounded-lg border border-ocm-border bg-ocm-surface-muted p-1;
+}
+
+.ocm-studio__tab {
+  @apply flex-1 rounded-md px-2 py-1.5 text-center text-xs font-medium text-ocm-text-muted;
+
+  &.is-active {
+    @apply bg-ocm-surface text-ocm-text shadow-sm;
+  }
+}
+
+.ocm-studio__body {
+  @apply grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden;
+
+  @media (width < 64rem) {
+    > [data-ocm-studio-pane].is-studio-hidden {
+      @apply hidden;
+    }
+  }
+
+  @media (width >= 64rem) {
+    grid-template-columns: var(--ocm-studio-cols, minmax(0, 1fr));
+
+    /* Always show all panes on desktop even if JS left is-studio-hidden */
+    > [data-ocm-studio-pane].is-studio-hidden {
+      display: block;
+    }
+  }
+}
+
+/* Wide studio popup (Forms / Charts / Calendar / History atom shells) */
+.ocm-popup.ocm-studio-popup {
+  top: 1.5%;
+  width: min(100% - 0.5rem, 72rem);
+  height: min(97vh, 54rem);
+  max-height: min(97vh, 54rem);
+  max-width: none;
+
+  @media (width < 40rem) {
+    top: 0;
+    width: 100%;
+    height: 100vh;
+    max-height: 100dvh;
+    border-radius: 0;
+  }
+
+  .ocm-popup__content {
+    @apply flex min-h-0 flex-1 flex-col overflow-hidden px-2 py-2 sm:px-3;
+  }
+
+  .ocm-popup__row {
+    @apply min-h-0 flex-1 overflow-hidden;
+  }
+
+  .ocm-popup__footer {
+    @apply shrink-0;
+  }
+}

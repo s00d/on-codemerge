@@ -1,0 +1,22 @@
+{
+  "math": {
+    "insert": "Вставить математику",
+    "chartPreviewWillAppearHere": "Здесь появится предпросмотр диаграммы",
+    "formPreview": "Предпросмотр формы",
+    "previewUnavailable": "Предпросмотр недоступен",
+    "mathExpressionLatex": "Выражение (подмножество TeX)",
+    "expression": "Выражение",
+    "modeBuild": "Конструктор",
+    "modeSource": "Исходный код",
+    "howToWriteFormulas": "Как писать формулы",
+    "mathPreviewWillAppearHere": "Здесь появится предпросмотр формулы",
+    "enterYourMathExpressionHere": "Введите математическое выражение здесь...",
+    "group": {
+      "structures": "Структуры",
+      "calculus": "Матанализ",
+      "ops": "Операторы",
+      "funcs": "Функции",
+      "greek": "Греческие буквы"
+    }
+  }
+}

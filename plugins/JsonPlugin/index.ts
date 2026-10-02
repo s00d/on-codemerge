@@ -53,6 +53,13 @@ export type {
   JsonToolbarOptions,
 } from './chrome/types';
 export { HistoryChromePlugin } from '../HistoryPlugin';
+export {
+  DRIVERS as JSON_VALUE_DRIVERS,
+  getDriver as getJsonValueDriver,
+  allJsonLeafTypes,
+  typeLabel as jsonTypeLabel,
+  type JsonValueDriver,
+} from './drivers';
 
 const JSON_NODES = [
   { name: 'json', group: 'block' as const, attrs: { indent: 2 } },

@@ -24,6 +24,12 @@ export { ContextMenuService } from './ui/context-menu';
 export { NotifyService } from './ui/notify';
 export { placeRoot, placeSubmenu, applyPlaceRoot, applyPlaceSubmenu } from './ui/place';
 export {
+  STUDIO_POPUP_CLASS,
+  studioPaneTabs,
+  syncStudioPanel,
+  type StudioPaneTab,
+} from './ui/studioLayout';
+export {
   DisposableScope,
   OwnedSlot,
   teardownOwnable,

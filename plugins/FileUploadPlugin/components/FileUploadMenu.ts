@@ -249,7 +249,7 @@ export class FileUploadMenu {
                     },
                   },
                 },
-                this.t('table.browse')
+                this.t('fileUpload.browse')
               ),
             ]),
             h(

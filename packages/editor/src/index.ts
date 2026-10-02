@@ -1,4 +1,5 @@
 export { Editor, type SharedEditorOptions, type ProseIoOverrides } from './Editor';
+export { loadLocaleFromGlob, wirePluginLocales } from './i18n/wirePluginLocales';
 export { defaultWysiwygToolbarMenus } from './toolbarMenus';
 export type { ViewPort, CreateView, ViewHost } from './ViewPort';
 export { createShellView } from './createShellView';

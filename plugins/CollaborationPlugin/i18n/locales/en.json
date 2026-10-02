@@ -1,0 +1,15 @@
+{
+  "collaboration": {
+    "title": "Collaboration",
+    "localDemoOnlyPassToken": "1) Run collab server (pnpm run collab:dev). 2) Press Start. Docs use ws://127.0.0.1:8787/collab; token must match COLLAB_TOKEN.",
+    "statusIdle": "Off",
+    "statusConnecting": "Connecting…",
+    "statusSyncing": "Syncing…",
+    "statusSynced": "Live",
+    "statusReconnecting": "Reconnecting…",
+    "statusOffline": "Offline",
+    "statusError": "Error",
+    "statusReadonly": "View only",
+    "peersCount": "{n} online"
+  }
+}

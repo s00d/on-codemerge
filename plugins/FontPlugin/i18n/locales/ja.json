@@ -1,0 +1,17 @@
+{
+  "font": {
+    "size": "サイズ",
+    "family": "フォント",
+    "settings": "フォント",
+    "lineHeight": "行の高さ",
+    "previewSample": "素早い茶色の狐が怠け者の犬を飛び越えます。",
+    "lhTight": "狭め",
+    "lhSnug": "やや狭め",
+    "lhNormal": "標準",
+    "lhRelaxed": "やや広め",
+    "lhLoose": "広め",
+    "lhDefault": "既定",
+    "detecting": "検出中…",
+    "availableCount": "このデバイスで {n}"
+  }
+}

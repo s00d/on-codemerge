@@ -45,17 +45,35 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 ## Internals (not a public SDK)
 
-UI lives in plugin modules (`FormBuilderModal`, `TemplateManager`, widget mount). There is **no** public `plugin.initialize()` / `FormManager` API on the sealed factory return value.
+UI lives in `mountFormWorkspace` (shared by atom popup and workspace surface), `FieldDriver` registry (`drivers/`), data-only `FORM_STARTERS`, and the form widget mount. There is **no** public `plugin.initialize()` / `FormManager` API on the sealed factory return value.
 
 Public surface:
 
-| Piece                          | Role                                                |
-| ------------------------------ | --------------------------------------------------- |
-| `FormBuilderPlugin()`          | Factory for `plugins: [...]`                        |
-| `editor.command('insertForm')` | Open builder / insert `form` atom                   |
-| Atom `form`                    | Attrs `schema` (JSON string of fields) and `action` |
-| Toolbar                        | Insert menu → form                                  |
-| Hotkey                         | `Mod-Alt-F` → `insertForm`                          |
+| Piece                                         | Role                                                             |
+| --------------------------------------------- | ---------------------------------------------------------------- |
+| `FormBuilderPlugin()`                         | Factory for `plugins: [...]` (default `surface: 'atom'`)         |
+| `FormBuilderPlugin({ surface: 'workspace' })` | Slim Forms app — mounts studio into shell `contentTarget`        |
+| `editor.command('insertForm')`                | Open builder / insert `form` atom (atom surface)                 |
+| Atom `form`                                   | Attrs `schema` (`FormConfig`), `action`, `align` — schema is SoT |
+| Toolbar                                       | Insert menu → form (atom) / `defaultFormToolbar` (workspace)     |
+| Hotkey                                        | `Mod-Alt-f` → open studio (atom)                                 |
+
+Edit loads from `attrs.schema` only (not DOM scrape). Legacy `parseForm(HTMLElement)` remains for HTML import paths.
+
+> Full Forms-only app: [Forms Editor](/guide/forms-editor) · compare surfaces: [Editors](/guide/editors).
+
+### Surfaces
+
+```ts
+FormBuilderPlugin({
+  surface: 'workspace' | 'atom', // default 'atom'
+  toolbar?: FormToolbarOptions,  // workspace bar; omit → defaultFormToolbar()
+  features?: { toolbar?: boolean; historyChrome?: boolean },
+  menu?: string | null,          // atom Insert placement
+});
+```
+
+`createDefaultPlugins()` (from `on-codemerge/forms`) = `HistoryChromePlugin` + `FormBuilderPlugin({ surface: 'workspace' })`.
 
 Context-menu edit / duplicate / delete operate on the selected form widget in the document.
 

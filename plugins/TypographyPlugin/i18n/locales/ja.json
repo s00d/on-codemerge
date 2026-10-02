@@ -1,0 +1,30 @@
+{
+  "typography": {
+    "title": "タイポグラフィ",
+    "styles": "テキストスタイル",
+    "clearFormatting": "書式をクリア",
+    "heading1": "見出し 1",
+    "heading2": "見出し 2",
+    "heading3": "見出し 3",
+    "heading4": "見出し 4",
+    "paragraph": "段落",
+    "blockquote": "引用",
+    "paragraphs": "段落",
+    "fontWeight": "太さ",
+    "fontStyle": "スタイル",
+    "clearHint": "通常の段落に戻す",
+    "preformatted": "コード / pre",
+    "horizontalLine": "水平線",
+    "sectionHeadings": "見出し",
+    "sectionBody": "本文",
+    "sectionInsert": "挿入",
+    "sampleHeading1": "見出し 1",
+    "sampleHeading2": "見出し 2",
+    "sampleHeading3": "見出し 3",
+    "sampleHeading4": "見出し 4",
+    "sampleParagraph": "通常の段落テキスト",
+    "sampleBlockquote": "引用テキスト",
+    "samplePre": "整形済みコード",
+    "sampleHr": "区切り線"
+  }
+}

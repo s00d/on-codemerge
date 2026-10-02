@@ -1,6 +1,7 @@
 import type { Command, DocNode, EditorState, Operation } from '@codemerge/kernel';
 import { getNodeAt } from '@codemerge/kernel';
 import { encodeJsonValue } from '../io/adapters';
+import { defaultValueForType, getDriver, isJsonLeafType } from '../drivers';
 import { valueFromNode } from './path';
 import type { JsonLeafType } from './types';
 import { VALUE_TYPES } from './types';
@@ -32,28 +33,6 @@ function objectKeys(objectNode: DocNode): Set<string> {
     }
   }
   return keys;
-}
-
-function defaultValueForType(type: JsonLeafType): unknown {
-  switch (type) {
-    case 'jsonObject':
-      return {};
-    case 'jsonArray':
-      return [];
-    case 'jsonString':
-      return '';
-    case 'jsonNumber':
-      return 0;
-    case 'jsonBoolean':
-      return false;
-    case 'jsonNull':
-      return null;
-    default: {
-      const _exhaustive: never = type;
-      void _exhaustive;
-      throw new Error('Unknown JSON leaf type');
-    }
-  }
 }
 
 function isValuePath(state: EditorState, path: number[]): boolean {
@@ -206,7 +185,7 @@ export function renameKey(propertyPath: number[], newKey: string): Command {
   };
 }
 
-/** Change value node type (replaces node with default for that type). */
+/** Change value node type via driver.coerce (best-effort preserve). */
 export function changeType(path: number[], newType: JsonLeafType): Command {
   return (state) => {
     if (!isValuePath(state, path)) {
@@ -216,7 +195,17 @@ export function changeType(path: number[], newType: JsonLeafType): Command {
     if (node.type === newType) {
       return [];
     }
-    return replaceAtPath(path, encodeJsonValue(defaultValueForType(newType)));
+    if (!isJsonLeafType(node.type)) {
+      return replaceAtPath(path, encodeJsonValue(defaultValueForType(newType)));
+    }
+    let from: unknown;
+    try {
+      from = valueFromNode(node);
+    } catch {
+      from = defaultValueForType(node.type);
+    }
+    const coerced = getDriver(newType).coerce(from);
+    return replaceAtPath(path, encodeJsonValue(coerced));
   };
 }
 

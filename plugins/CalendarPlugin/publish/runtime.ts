@@ -1,5 +1,5 @@
 import { definePublishRuntime, readOcmConfig } from '@codemerge/sdk';
-import { isRecord } from '../utils/storageGuards';
+import { isRecord } from '../types';
 
 export interface ReminderPublishItem {
   id: string;

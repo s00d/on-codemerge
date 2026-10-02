@@ -1,0 +1,30 @@
+{
+  "typography": {
+    "title": "Typografie",
+    "styles": "Textstile",
+    "clearFormatting": "Formatierung löschen",
+    "heading1": "Überschrift 1",
+    "heading2": "Überschrift 2",
+    "heading3": "Überschrift 3",
+    "heading4": "Überschrift 4",
+    "paragraph": "Absatz",
+    "blockquote": "Zitat",
+    "paragraphs": "Absätze",
+    "fontWeight": "Schriftstärke",
+    "fontStyle": "Schriftstil",
+    "clearHint": "Auf normalen Absatz zurücksetzen",
+    "preformatted": "Code / pre",
+    "horizontalLine": "Horizontale Linie",
+    "sectionHeadings": "Überschriften",
+    "sectionBody": "Fließtext",
+    "sectionInsert": "Einfügen",
+    "sampleHeading1": "Überschrift 1",
+    "sampleHeading2": "Überschrift 2",
+    "sampleHeading3": "Überschrift 3",
+    "sampleHeading4": "Überschrift 4",
+    "sampleParagraph": "Normaler Absatztext",
+    "sampleBlockquote": "Zitattext",
+    "samplePre": "vorformatierter Code",
+    "sampleHr": "Trennlinie"
+  }
+}

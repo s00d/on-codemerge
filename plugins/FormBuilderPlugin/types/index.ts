@@ -4,10 +4,11 @@ export interface FieldConfig {
   label: string;
   options?: FieldOptions;
   validation?: ValidationRules;
-  position?: number;
 }
 
 export type FieldType =
+  | 'heading'
+  | 'divider'
   | 'text'
   | 'textarea'
   | 'select'
@@ -37,6 +38,8 @@ export interface FieldOptions {
   readonly id?: string;
   readonly placeholder?: string;
   readonly value?: string;
+  /** Optional subtitle under a section heading. */
+  readonly description?: string;
   readonly className?: string;
   readonly readonly?: boolean;
   readonly disabled?: boolean;
@@ -73,11 +76,8 @@ export interface ValidationRules {
   readonly min?: number;
   readonly max?: number;
   readonly step?: number;
-  email?: boolean;
-  url?: boolean;
-  numeric?: boolean;
+  readonly numeric?: boolean;
   readonly alphanumeric?: boolean;
-  readonly custom?: (value: string) => true | string;
 }
 
 export interface FormConfig {
@@ -98,7 +98,9 @@ export interface FormTemplate {
   category: 'contact' | 'survey' | 'registration' | 'payment' | 'custom';
 }
 
-const FIELD_TYPE_SET: ReadonlySet<string> = new Set<FieldType>([
+const ALL_FIELD_TYPES: readonly FieldType[] = [
+  'heading',
+  'divider',
   'text',
   'textarea',
   'select',
@@ -122,10 +124,16 @@ const FIELD_TYPE_SET: ReadonlySet<string> = new Set<FieldType>([
   'image',
   'submit',
   'reset',
-]);
+];
+
+const FIELD_TYPE_SET: ReadonlySet<string> = new Set(ALL_FIELD_TYPES);
 
 export function isFieldType(value: string): value is FieldType {
   return FIELD_TYPE_SET.has(value);
+}
+
+export function allFieldTypes(): FieldType[] {
+  return [...ALL_FIELD_TYPES];
 }
 
 const FORM_HTTP_METHODS: ReadonlySet<string> = new Set<FormConfig['method']>([
@@ -161,7 +169,33 @@ export function parseFormHttpMethod(value: string): FormConfig['method'] {
 }
 
 export function isFormConfig(value: unknown): value is FormConfig {
-  return (
-    typeof value === 'object' && value !== null && 'fields' in value && Array.isArray(value.fields)
-  );
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  if (!('id' in value) || typeof value.id !== 'string') {
+    return false;
+  }
+  if (!('action' in value) || typeof value.action !== 'string') {
+    return false;
+  }
+  if (!('method' in value) || typeof value.method !== 'string' || !isFormHttpMethod(value.method)) {
+    return false;
+  }
+  if (!('fields' in value) || !Array.isArray(value.fields)) {
+    return false;
+  }
+  return value.fields.every((f) => isFieldConfigShape(f));
+}
+
+function isFieldConfigShape(value: unknown): boolean {
+  if (typeof value !== 'object' || value === null) {
+    return false;
+  }
+  if (!('id' in value) || typeof value.id !== 'string') {
+    return false;
+  }
+  if (!('type' in value) || typeof value.type !== 'string') {
+    return false;
+  }
+  return isFieldType(value.type);
 }

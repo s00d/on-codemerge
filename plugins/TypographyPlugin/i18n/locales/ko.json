@@ -1,0 +1,30 @@
+{
+  "typography": {
+    "title": "타이포그래피",
+    "styles": "텍스트 스타일",
+    "clearFormatting": "서식 지우기",
+    "heading1": "제목 1",
+    "heading2": "제목 2",
+    "heading3": "제목 3",
+    "heading4": "제목 4",
+    "paragraph": "단락",
+    "blockquote": "인용",
+    "paragraphs": "단락",
+    "fontWeight": "두께",
+    "fontStyle": "스타일",
+    "clearHint": "일반 단락으로 재설정",
+    "preformatted": "코드 / pre",
+    "horizontalLine": "가로줄",
+    "sectionHeadings": "제목",
+    "sectionBody": "본문",
+    "sectionInsert": "삽입",
+    "sampleHeading1": "제목 1",
+    "sampleHeading2": "제목 2",
+    "sampleHeading3": "제목 3",
+    "sampleHeading4": "제목 4",
+    "sampleParagraph": "일반 단락 텍스트",
+    "sampleBlockquote": "인용 텍스트",
+    "samplePre": "미리 서식된 코드",
+    "sampleHr": "구분선"
+  }
+}

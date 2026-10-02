@@ -1,4 +1,4 @@
-import { PopupController, h } from '@codemerge/sdk';
+import { PopupController, STUDIO_POPUP_CLASS, h } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import type { HistoryState } from '../types';
 import { formatClock, formatTimestamp } from '../utils/formatters';
@@ -186,7 +186,7 @@ export class HistoryViewerModal {
 
     return {
       title: this.t('history.editHistory'),
-      className: 'history-viewer-modal',
+      className: `${STUDIO_POPUP_CLASS} history-viewer-modal`,
       size: 'lg' as const,
       closeOnClickOutside: true,
       items: [{ type: 'view' as const, id: 'history-viewer', view: () => this.rootView() }],
