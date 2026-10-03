@@ -1,4 +1,4 @@
-@reference "../../apps/wysiwyg/src/tailwind.css";
+@reference '@codemerge/wysiwyg/tailwind.css';
 
 .mentions-dropdown {
   @apply absolute z-ocm-overlay bg-ocm-surface border border-ocm-border rounded-ocm-sm shadow-lg p-1;

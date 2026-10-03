@@ -1,0 +1,22 @@
+{
+  "name": "@ocm/pdf-embed-plugin",
+  "version": "2.6.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css",
+    "**/*.svg"
+  ],
+  "main": "./index.ts",
+  "types": "./index.ts",
+  "exports": {
+    ".": "./index.ts",
+    "./style.scss": "./style.scss"
+  },
+  "dependencies": {
+    "@codemerge/sdk": "workspace:^",
+    "@codemerge/wysiwyg": "workspace:^"
+  }
+}

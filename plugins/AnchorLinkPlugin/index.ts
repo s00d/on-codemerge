@@ -1,5 +1,3 @@
-import './style.scss';
-
 import { definePlugin, setBlockAttr, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { anchorAddIcon } from '@ocm/wysiwyg/icons';

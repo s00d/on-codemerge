@@ -1,5 +1,3 @@
-import './style.scss';
-
 import type { Command } from '@codemerge/kernel';
 import { applyToolbarConfig, definePlugin, foreign, attrString } from '@codemerge/sdk';
 import type { PluginDefinition, PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';

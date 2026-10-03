@@ -1,4 +1,3 @@
-import './style.scss';
 import type { Command } from '@codemerge/kernel';
 import {
   applyToolbarConfig,

@@ -1,4 +1,3 @@
-import './style.scss';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
 
 import {

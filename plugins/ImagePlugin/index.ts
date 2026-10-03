@@ -1,4 +1,3 @@
-import './style.scss';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 

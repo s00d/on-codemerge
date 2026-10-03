@@ -1,4 +1,4 @@
-@reference "../../apps/wysiwyg/src/tailwind.css";
+@reference '@codemerge/wysiwyg/tailwind.css';
 
 /* Shell content is already inside .ocm-editor-root — kill prose padding + fill height. */
 .ocm-content.ocm-json-root,

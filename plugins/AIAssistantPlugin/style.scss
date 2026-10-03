@@ -1,4 +1,4 @@
-@reference "../../apps/wysiwyg/src/tailwind.css";
+@reference '@codemerge/wysiwyg/tailwind.css';
 
 .ai-assistant-container {
   @apply flex flex-col gap-4 rounded-ocm border border-ocm-border bg-ocm-surface-muted p-4;

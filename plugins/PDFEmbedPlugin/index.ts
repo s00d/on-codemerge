@@ -1,5 +1,3 @@
-import './style.scss';
-
 import {
   definePlugin,
   insertAtomAfter,

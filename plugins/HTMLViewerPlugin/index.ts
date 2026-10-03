@@ -1,5 +1,3 @@
-import './style.scss';
-
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { HTMLViewerModal } from './components/HTMLViewerModal';

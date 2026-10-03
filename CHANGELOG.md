@@ -7,9 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.6.0] - 2026-10-03
+
 ### Fixed
 
-- Publish packaging: drop broken `package.json` `imports` (pointed at missing `.ts` sources), strip types-only `dist/packages/mermaid`, and remove duplicate nested `apps/wysiwyg/src/{public,tailwind,index}.css` after emitting root CSS
+- Publish packaging: drop broken `package.json` `imports` (pointed at missing `.ts` sources)
+
+### Changed
+
+- Plugins are private workspace packages (`plugins/*` → `@ocm/*-plugin`, source exports like `@codemerge/editor`; not published)
+- Library CSS: virtual `virtual:ocm-package-index.css` auto-collects each plugin `exports["./style.scss"]` → `dist/index.css` (+ `public.css` / `tailwind.css`); JS entries do not side-effect-import styles. `@codemerge/mermaid` types stay external via dts `exclude` / `aliasesExclude`
+
+### Breaking
+
+- Removed `on-codemerge/plugins/*/style.css` and `on-codemerge/sdk.css` — use `on-codemerge/index.css` (+ `public.css`) and `@codemerge/sdk/sdk.css` when needed
 
 ## [2.5.1] - 2026-10-03
 

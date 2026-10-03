@@ -1,5 +1,3 @@
-import './style.scss';
-
 import { definePlugin, setBlockAttr, core, findAncestorPath } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
 import {

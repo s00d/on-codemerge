@@ -5,6 +5,8 @@ import banner from 'vite-plugin-banner';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { ocmPackagePlugin } from './scripts/vite-plugin-ocm-package.ts';
+import { ocmPackageIndexCssPlugin } from './scripts/vite-plugin-ocm-package-index-css.ts';
+import { ocmPluginAliases } from './scripts/ocm-plugin-aliases.ts';
 import { scssPreprocessorOptions } from './scripts/scss-vite-options.ts';
 
 const root = import.meta.dirname;
@@ -48,11 +50,16 @@ const shared = {
       '@codemerge/kernel': resolve(root, 'packages/kernel/src'),
       '@codemerge/view': resolve(root, 'packages/view/src'),
       '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
+      // More specific than `@codemerge/sdk` → src (package-index imports built css).
+      '@codemerge/sdk/sdk.css': resolve(root, 'packages/sdk/dist/sdk.css'),
       '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
+      '@codemerge/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
       '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
       '@ocm/plugins': resolve(root, 'plugins'),
+      ...ocmPluginAliases(root),
     },
   },
+
   plugins: [
     svgLoader({
       // Avoid `*.svg?raw.mjs` preserveModules filenames (Node cannot resolve `?` queries).
@@ -61,6 +68,7 @@ const shared = {
         multipass: true,
       },
     }),
+    ocmPackageIndexCssPlugin(root),
   ],
 };
 
@@ -115,6 +123,9 @@ const libConfig = defineConfig({
     dts({
       insertTypesEntry: true,
       tsconfigPath: './tsconfig.app.json',
+      // Runtime external — keep `import '@codemerge/mermaid'` in .d.ts, do not emit types tree.
+      exclude: ['packages/mermaid/**'],
+      aliasesExclude: [/^@codemerge\/mermaid(?:\/|$)/],
     }),
     banner(
       `${packageJson.name} v${packageJson.version} @author ${packageJson.author} @license ${packageJson.license} @homepage ${packageJson.homepage} @repository ${packageJson.repository.url} Copyright (c) ${new Date().getFullYear()} ${packageJson.author} - Built on ${new Date().toISOString()}`

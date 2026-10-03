@@ -1,8 +1,3 @@
-import './tailwind.css';
-import './index.scss';
-import './public.css';
-import '@codemerge/sdk/ui/sdk.scss';
-
 export { Editor, type EditorOptions } from './editor/Editor';
 export {
   core,

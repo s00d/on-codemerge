@@ -1,4 +1,4 @@
-@reference "../../apps/wysiwyg/src/tailwind.css";
+@reference '@codemerge/wysiwyg/tailwind.css';
 
 .shortcuts-menu-body {
   @apply flex flex-col gap-3 -mx-1;

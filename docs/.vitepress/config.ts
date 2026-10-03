@@ -2,6 +2,8 @@ import { defineConfig } from 'vitepress';
 import { resolve } from 'node:path';
 import svgLoader from 'vite-svg-loader';
 import tailwindcss from '@tailwindcss/vite';
+import { ocmPluginAliases } from '../../scripts/ocm-plugin-aliases.ts';
+import { ocmPackageIndexCssPlugin } from '../../scripts/vite-plugin-ocm-package-index-css.ts';
 import { scssPreprocessorOptions } from '../../scripts/scss-vite-options.ts';
 import { docsDevApiPlugin } from './dev-api/plugin.ts';
 
@@ -176,19 +178,25 @@ export default defineConfig({
           multipass: true,
         },
       }),
+      ocmPackageIndexCssPlugin(root),
     ],
+
     resolve: {
       alias: {
         '@codemerge/kernel': resolve(root, 'packages/kernel/src'),
+        '@codemerge/sdk/sdk.css': resolve(root, 'packages/sdk/dist/sdk.css'),
         '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
         '@codemerge/editor': resolve(root, 'packages/editor/src'),
         '@codemerge/hunspell': resolve(root, 'packages/hunspell/src'),
         '@codemerge/view': resolve(root, 'packages/view/src'),
         '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
+        '@codemerge/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
         '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
         '@ocm/plugins': resolve(root, 'plugins'),
+        ...ocmPluginAliases(root),
       },
     },
+
     css: {
       preprocessorOptions: {
         scss: scssPreprocessorOptions,

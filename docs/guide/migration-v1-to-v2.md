@@ -6,15 +6,15 @@ See this migration guide for the v1 → v2 delta.
 
 ## Quick map
 
-| v1                                          | v2                                                       |
-| ------------------------------------------- | -------------------------------------------------------- |
-| `HTMLEditor`                                | `Editor`                                                 |
-| `new ToolbarPlugin()` class                 | `ToolbarPlugin()` factory (mark buttons only)            |
-| Plugin owns toolbar DOM                     | Core `ToolbarPanel` via `ctx.toolbar.add` / `defineMenu` |
-| `PopupManager` / `createElement` in plugins | `ctx.popup` / `ctx.menu` / ViewSpec + portals            |
-| HTML as source of truth                     | JSON: `getJSON` / `setJSON` (HTML is a boundary)         |
-| `plugins/FooPlugin/style.css` CDN           | `on-codemerge/index.css` + `public.css`                  |
-| Jest                                        | Vitest (+ Playwright / untestutils for e2e)              |
+| v1                                          | v2                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `HTMLEditor`                                | `Editor`                                                           |
+| `new ToolbarPlugin()` class                 | `ToolbarPlugin()` factory (mark buttons only)                      |
+| Plugin owns toolbar DOM                     | Core `ToolbarPanel` via `ctx.toolbar.add` / `defineMenu`           |
+| `PopupManager` / `createElement` in plugins | `ctx.popup` / `ctx.menu` / ViewSpec + portals                      |
+| HTML as source of truth                     | JSON: `getJSON` / `setJSON` (HTML is a boundary)                   |
+| `plugins/FooPlugin/style.css` CDN           | `on-codemerge/index.css` + `public.css` (no per-plugin CSS export) |
+| Jest                                        | Vitest (+ Playwright / untestutils for e2e)                        |
 
 ## Product surfaces (v2)
 

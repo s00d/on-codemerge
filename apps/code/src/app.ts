@@ -1,6 +1,3 @@
-import '@ocm/wysiwyg/tailwind.css';
-import '@codemerge/sdk/ui/sdk.scss';
-
 export { Editor, type EditorOptions } from './editor/Editor';
 export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 export {

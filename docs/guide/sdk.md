@@ -140,9 +140,9 @@ Full usage examples: [Editor API](./editor.md).
 
 | Import                    | Role                                                               |
 | ------------------------- | ------------------------------------------------------------------ |
-| `on-codemerge/index.css`  | Editor chrome                                                      |
+| `on-codemerge/index.css`  | Editor chrome (includes SDK + plugin styles)                       |
 | `on-codemerge/public.css` | Published atom skins + prose                                       |
-| `on-codemerge/sdk.css`    | SDK chrome styles                                                  |
+| `@codemerge/sdk/sdk.css`  | SDK chrome alone (optional; already in `index.css`)                |
 | `on-codemerge/public.js`  | Published runtimes bootstrap (timer, calendar, mermaid hydrate, …) |
 
 ## Related

@@ -1,4 +1,4 @@
-@reference "../../apps/wysiwyg/src/tailwind.css";
+@reference '@codemerge/wysiwyg/tailwind.css';
 
 .viewport-indicator {
   @apply flex cursor-pointer items-center gap-2 rounded-ocm border border-ocm-border bg-ocm-surface-muted px-3 py-1.5 text-sm font-medium text-ocm-text transition-all duration-200 hover:bg-ocm-surface-hover;

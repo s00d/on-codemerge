@@ -1,6 +1,8 @@
 /// <reference types="vite/client" />
 /// <reference types="vite-svg-loader" />
 
+declare module 'virtual:ocm-package-index.css' {}
+
 declare module '*.aff?url' {
   const src: string;
   export default src;

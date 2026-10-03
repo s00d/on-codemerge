@@ -407,6 +407,474 @@ importers:
 
   packages/view: {}
 
+  plugins/AIAssistantPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/AlignmentPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/AnchorLinkPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/BlockPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/BlockStylePlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/CalendarPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ChartsPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/mermaid':
+        specifier: workspace:^
+        version: link:../../packages/mermaid
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ClearStylesPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/CodeBlockPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/CollaborationPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ColorPlugin:
+    dependencies:
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/CommentsPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ExportPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/FileUploadPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/FontPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/FooterPlugin:
+    dependencies:
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+
+  plugins/FootnotesPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/FormBuilderPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/HTMLViewerPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/HistoryPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ImagePlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/JsonPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/LanguagePlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/LinkPlugin:
+    dependencies:
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ListsPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/MarkdownPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/mermaid':
+        specifier: workspace:^
+        version: link:../../packages/mermaid
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/MathPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/MentionsPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/PDFEmbedPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ResponsivePlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ShortcutsPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/SpellCheckerPlugin:
+    dependencies:
+      '@codemerge/hunspell':
+        specifier: workspace:^
+        version: link:../../packages/hunspell
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/TablePlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/TemplatesPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/TimerPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/ToolbarPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/TrackChangesPlugin:
+    dependencies:
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/TypographyPlugin:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/VideoPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
+  plugins/YouTubeVideoPlugin:
+    dependencies:
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@codemerge/wysiwyg':
+        specifier: workspace:^
+        version: link:../../apps/wysiwyg
+
 packages:
 
   '@alloc/quick-lru@5.2.0':

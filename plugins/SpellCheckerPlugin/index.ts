@@ -1,5 +1,3 @@
-import './style.scss';
-
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
 import type { DocNode, Operation } from '@codemerge/kernel';

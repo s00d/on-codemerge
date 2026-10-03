@@ -1,3 +1,4 @@
+import 'virtual:ocm-package-index.css';
 import { Editor, createDefaultPlugins } from './app';
 
 document.addEventListener('DOMContentLoaded', () => {

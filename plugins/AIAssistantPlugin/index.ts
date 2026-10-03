@@ -1,4 +1,3 @@
-import './style.scss';
 import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
 
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';

@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/wysiwyg",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "private": true,
   "license": "MIT",
   "type": "module",
@@ -13,7 +13,10 @@
   "types": "./src/app.ts",
   "exports": {
     ".": "./src/app.ts",
-    "./app": "./src/app.ts"
+    "./app": "./src/app.ts",
+    "./tailwind.css": "./src/tailwind.css",
+    "./public.css": "./src/public.css",
+    "./index.scss": "./src/index.scss"
   },
   "dependencies": {
     "@codemerge/editor": "workspace:^",

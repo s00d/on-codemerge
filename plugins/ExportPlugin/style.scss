@@ -1,4 +1,4 @@
-@reference "../../apps/wysiwyg/src/tailwind.css";
+@reference '@codemerge/wysiwyg/tailwind.css';
 
 .export-menu {
   @apply bg-ocm-surface rounded-ocm shadow-lg border border-ocm-border min-w-[200px];

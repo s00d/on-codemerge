@@ -1,5 +1,3 @@
-import './style.scss';
-
 import { definePlugin, withMarkTarget, setMarkAttrs, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { MentionsMenu } from './components/MentionsMenu';

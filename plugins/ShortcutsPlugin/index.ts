@@ -1,5 +1,3 @@
-import './style.scss';
-
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
 import { ShortcutsMenu } from './components/ShortcutsMenu';

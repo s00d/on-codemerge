@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "2.5.1",
+  "version": "2.6.0",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
   "keywords": [
     "JavaScript",
@@ -160,9 +160,7 @@
     "./public.css": "./dist/public.css",
     "./public.js": "./dist/public.js",
     "./tailwind.css": "./dist/tailwind.css",
-    "./sdk.css": "./dist/packages/sdk/src/ui/sdk.css",
-    "./package.json": "./package.json",
-    "./plugins/*/style.css": "./dist/plugins/*/style.css"
+    "./package.json": "./package.json"
   },
   "scripts": {
     "release": "pnpm run prepublishOnly && pnpm publish -r --filter './packages/kernel' --filter './packages/view' --filter './packages/mermaid' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter '.' --access public --no-git-checks --ignore-scripts",
@@ -178,7 +176,7 @@
     "dev:forms": "vite --config apps/forms/vite.config.ts",
     "dev:charts": "vite --config apps/charts/vite.config.ts",
     "dev:calendar": "vite --config apps/calendar/vite.config.ts",
-    "build": "vite build && vite build --config apps/wysiwyg/vite.public.config.ts",
+    "build": "pnpm --filter @codemerge/sdk build && vite build && vite build --config vite.styles.config.ts && vite build --config apps/wysiwyg/vite.public.config.ts",
     "build:json": "vite build --config apps/json/vite.config.ts",
     "build:markdown": "vite build --config apps/markdown/vite.config.ts",
     "build:code": "vite build --config apps/code/vite.config.ts",
