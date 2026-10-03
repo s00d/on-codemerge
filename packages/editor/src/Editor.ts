@@ -832,5 +832,8 @@ export class Editor implements EditorAPI {
     destroyPlatform(this.platform);
     this.listeners.clear();
     this.transactionListeners.clear();
+    // Host is reused across remounts (docs/demo tabs) — drop chrome classes we added.
+    const hostClasses = editorChromeTv().host().split(/\s+/).filter(Boolean);
+    this.host.classList.remove(...hostClasses, 'ocm-editor-root--page');
   }
 }

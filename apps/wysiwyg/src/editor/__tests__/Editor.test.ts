@@ -198,6 +198,24 @@ describe('editor facade', () => {
     host.remove();
   });
 
+  it('destroy clears host chrome classes for remount reuse', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const page = new Editor(host, { chrome: 'page', plugins: [HistoryPlugin()] });
+    expect(host.classList.contains('ocm-editor-root')).toBe(true);
+    expect(host.classList.contains('ocm-editor-root--page')).toBe(true);
+    page.destroy();
+    expect(host.classList.contains('ocm-editor-root')).toBe(false);
+    expect(host.classList.contains('ocm-editor-root--page')).toBe(false);
+
+    const bar = new Editor(host, { chrome: 'bar', plugins: [HistoryPlugin()] });
+    expect(host.classList.contains('ocm-editor-root')).toBe(true);
+    expect(host.classList.contains('ocm-editor-root--page')).toBe(false);
+    bar.destroy();
+    host.remove();
+  });
+
   it('page chrome hides sticky toolbar until content click', () => {
     expect.hasAssertions();
     const host = document.createElement('div');
