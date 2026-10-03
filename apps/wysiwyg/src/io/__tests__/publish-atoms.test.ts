@@ -71,7 +71,7 @@ describe('getPublishedHTML atom coverage', () => {
       const published = editor.getPublishedHTML();
       expectRichPublish(published, 'chart', 'ocm-chart-publish');
       expect(published).toContain('<img');
-      expect(published).toContain('data:image/png');
+      expect(published).toContain('data:image/svg+xml');
     });
   });
 

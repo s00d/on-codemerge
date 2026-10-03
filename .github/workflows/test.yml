@@ -35,6 +35,7 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - run: pnpm run build:packages
       - run: pnpm run build
       - run: node ./scripts/check-public-bundle.mjs
       - run: node ./scripts/check-surface.mjs json export

@@ -179,10 +179,10 @@ export default defineConfig({
     ],
     resolve: {
       alias: {
-        '@on-codemerge/kernel': resolve(root, 'packages/kernel/src'),
-        '@on-codemerge/sdk': resolve(root, 'packages/sdk/src'),
-        '@on-codemerge/editor': resolve(root, 'packages/editor/src'),
-        '@on-codemerge/hunspell': resolve(root, 'packages/hunspell/src'),
+        '@codemerge/kernel': resolve(root, 'packages/kernel/src'),
+        '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
+        '@codemerge/editor': resolve(root, 'packages/editor/src'),
+        '@codemerge/hunspell': resolve(root, 'packages/hunspell/src'),
         '@codemerge/view': resolve(root, 'packages/view/src'),
         '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
         '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),

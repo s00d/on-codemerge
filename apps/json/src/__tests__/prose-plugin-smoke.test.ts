@@ -4,7 +4,7 @@
 import { describe, expect, it, afterEach } from 'vitest';
 import { definePlugin } from '@codemerge/sdk';
 import { Editor, JsonPlugin } from 'on-codemerge/json';
-import { TablePlugin } from 'on-codemerge/app';
+import { TablePlugin } from 'on-codemerge/plugins';
 
 describe('prose plugin smoke (on-codemerge/json)', () => {
   const hosts: HTMLElement[] = [];

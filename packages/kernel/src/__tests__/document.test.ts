@@ -60,6 +60,8 @@ describe('document', () => {
       attrs: { level: 2 },
       content: [],
     });
-    expect(out.attrs).toStrictEqual({ level: 2 });
+    // copyAttrs uses a null-prototype bag — compare own entries, not Object prototype.
+    expect(Object.getPrototypeOf(out.attrs)).toBeNull();
+    expect(Object.entries(out.attrs ?? {})).toStrictEqual([['level', 2]]);
   });
 });

@@ -47,6 +47,7 @@ jobs:
 
       - name: Build with VitePress
         run: |
+          pnpm run build:packages
           pnpm run build
           pnpm run docs:build
 
