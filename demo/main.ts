@@ -354,8 +354,6 @@ document.addEventListener('DOMContentLoaded', () => {
     editor?.destroy();
     editor = null;
     host.replaceChildren();
-    // Older npm builds may leave chrome classes on a reused host after destroy.
-    host.classList.remove('ocm-editor-root', 'ocm-editor-root--page');
     mode = next;
     setModeTabs(mode);
     setActionsVisible(mode);
