@@ -198,21 +198,25 @@ describe('editor facade', () => {
     host.remove();
   });
 
-  it('destroy clears host chrome classes for remount reuse', () => {
+  it('destroy allows remount with different chrome on the same host', () => {
     expect.hasAssertions();
     const host = document.createElement('div');
     document.body.append(host);
+
     const page = new Editor(host, { chrome: 'page', plugins: [HistoryPlugin()] });
-    expect(host.classList.contains('ocm-editor-root')).toBe(true);
-    expect(host.classList.contains('ocm-editor-root--page')).toBe(true);
+    expect(page.chrome).toBe('page');
+    expect(host.querySelector('.ocm-toolbar-host .ocm-toolbar')).toBeTruthy();
     page.destroy();
-    expect(host.classList.contains('ocm-editor-root')).toBe(false);
-    expect(host.classList.contains('ocm-editor-root--page')).toBe(false);
 
     const bar = new Editor(host, { chrome: 'bar', plugins: [HistoryPlugin()] });
-    expect(host.classList.contains('ocm-editor-root')).toBe(true);
-    expect(host.classList.contains('ocm-editor-root--page')).toBe(false);
+    expect(bar.chrome).toBe('bar');
+    // Sticky bar chrome: toolbar is mounted under the host immediately.
+    expect(host.querySelector('.ocm-toolbar-host > .ocm-toolbar')).toBeTruthy();
     bar.destroy();
+
+    const pageAgain = new Editor(host, { chrome: 'page', plugins: [HistoryPlugin()] });
+    expect(pageAgain.chrome).toBe('page');
+    pageAgain.destroy();
     host.remove();
   });
 
@@ -225,7 +229,6 @@ describe('editor facade', () => {
       plugins: [HistoryPlugin()],
     });
     expect(editor.chrome).toBe('page');
-    expect(host.classList.contains('ocm-editor-root--page')).toBe(true);
     const toolbarHost = host.querySelector('.ocm-toolbar-host') as HTMLElement;
     expect(toolbarHost).toBeTruthy();
     expect(toolbarHost.classList.contains('is-page-open')).toBe(false);
@@ -344,7 +347,6 @@ describe('editor facade', () => {
     document.body.append(host);
     const editor = new Editor(host);
     expect(editor.chrome).toBe('bar');
-    expect(host.classList.contains('ocm-editor-root--page')).toBe(false);
     expect(host.querySelector('.ocm-toolbar-host > .ocm-toolbar')).toBeTruthy();
     editor.destroy();
     host.remove();

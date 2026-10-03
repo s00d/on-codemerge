@@ -135,6 +135,8 @@ export class Editor implements EditorAPI {
   private colorSchemeOnChange: ((e: MediaQueryListEvent) => void) | null = null;
   /** Roots where we added `dark` under `system` — only those we clear on destroy. */
   private readonly ownedDarkRoots = new WeakSet<Element>();
+  /** Host chrome tokens applied in `applyHostChrome` — removed symmetrically on destroy. */
+  private readonly hostChromeClasses: string[] = [];
   /** Menu ids registered via toolbar config or `defineMenu` (missing → bar). */
   private readonly toolbarMenuIds = new Set<string>();
   readonly ui: {
@@ -152,11 +154,8 @@ export class Editor implements EditorAPI {
 
   constructor(host: HTMLElement, options: SharedEditorOptions) {
     this.host = host;
-    this.host.classList.add(...editorChromeTv().host().split(/\s+/).filter(Boolean));
     this.chrome = options.chrome ?? 'bar';
-    if (this.chrome === 'page') {
-      this.host.classList.add('ocm-editor-root--page');
-    }
+    this.applyHostChrome();
     this.colorScheme = options.colorScheme ?? 'host';
     this.plugins = options.plugins ?? [];
     this.ioOverrides = options.io ?? {};
@@ -815,6 +814,24 @@ export class Editor implements EditorAPI {
     return this.plugins.slice();
   }
 
+  /** Apply chrome host tokens; track them so destroy can clear exactly what we added. */
+  private applyHostChrome(): void {
+    const tokens = editorChromeTv().host().split(/\s+/).filter(Boolean);
+    if (this.chrome === 'page') {
+      tokens.push('ocm-editor-root--page');
+    }
+    this.hostChromeClasses.push(...tokens);
+    this.host.classList.add(...tokens);
+  }
+
+  private clearHostChrome(): void {
+    if (this.hostChromeClasses.length === 0) {
+      return;
+    }
+    this.host.classList.remove(...this.hostChromeClasses);
+    this.hostChromeClasses.length = 0;
+  }
+
   destroy(): void {
     if (this.destroyed) {
       return;
@@ -832,8 +849,6 @@ export class Editor implements EditorAPI {
     destroyPlatform(this.platform);
     this.listeners.clear();
     this.transactionListeners.clear();
-    // Host is reused across remounts (docs/demo tabs) — drop chrome classes we added.
-    const hostClasses = editorChromeTv().host().split(/\s+/).filter(Boolean);
-    this.host.classList.remove(...hostClasses, 'ocm-editor-root--page');
+    this.clearHostChrome();
   }
 }
