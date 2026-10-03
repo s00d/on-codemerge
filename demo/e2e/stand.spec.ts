@@ -41,12 +41,18 @@ test.describe('npm demo stand', () => {
     await expect(page.locator('#errors')).toBeEmpty();
   });
 
-  test('switches to JSON and Markdown modes', async ({ page }) => {
+  test('switches across all product modes', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(String(err)));
 
     await page.goto('/');
     await expect(page.getByTestId('mode-wysiwyg')).toBeVisible();
+    await expect(page.locator('#exports-ok')).toContainText('all modes');
+
+    await page.getByTestId('mode-wysiwyg-page').click();
+    await expect(page.locator('#mode-label')).toContainText('wysiwyg-page');
+    await expect(page.getByTestId('actions-wysiwyg')).toBeVisible();
+    await expect(page.getByTestId('output')).toContainText('page');
 
     await page.getByTestId('mode-json').click();
     await expect(page.locator('#mode-label')).toContainText('json');
@@ -75,6 +81,24 @@ test.describe('npm demo stand', () => {
     await page.getByTestId('btn-code-sample').click();
     await expect(page.getByTestId('output')).toContainText('greet');
     await expect(page.locator('.ocm-source-editor .token.string').first()).toBeVisible();
+
+    await page.getByTestId('mode-forms').click();
+    await expect(page.locator('#mode-label')).toContainText('forms');
+    await expect(page.getByTestId('actions-forms')).toBeVisible();
+    await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('output')).toContainText('demo-contact');
+
+    await page.getByTestId('mode-charts').click();
+    await expect(page.locator('#mode-label')).toContainText('charts');
+    await expect(page.getByTestId('actions-charts')).toBeVisible();
+    await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('output')).toContainText('Sales');
+
+    await page.getByTestId('mode-calendar').click();
+    await expect(page.locator('#mode-label')).toContainText('calendar');
+    await expect(page.getByTestId('actions-calendar')).toBeVisible();
+    await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('output')).toContainText('Team calendar');
 
     expect(pageErrors, `page errors: ${pageErrors.join('\n')}`).toEqual([]);
     await expect(page.locator('#errors')).toBeEmpty();

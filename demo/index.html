@@ -29,7 +29,7 @@
         color: var(--text);
       }
       .wrap {
-        max-width: 1100px;
+        max-width: 1440px;
         margin: 0 auto;
         padding: 24px 16px 48px;
       }
@@ -84,8 +84,31 @@
         padding: 12px;
         margin-bottom: 16px;
       }
+      /* Studio / dual-pane surfaces need a real height budget (h-full / flex-1). */
       #editor {
-        min-height: 360px;
+        display: flex;
+        flex-direction: column;
+        height: min(72vh, 720px);
+        min-height: 480px;
+      }
+      #editor > .ocm-editor-root {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+        height: 100%;
+      }
+      #editor .ocm-editor,
+      #editor .ocm-shell-content,
+      #editor .ocm-content.ocm-md-root,
+      #editor .ocm-studio {
+        flex: 1 1 auto;
+        min-height: 0;
+      }
+      /* Page chrome wants viewport height — don’t clamp it to the studio box. */
+      #editor > .ocm-editor-root.ocm-editor-root--page {
+        height: auto;
+        min-height: min(70vh, 640px);
       }
       .actions {
         display: flex;
@@ -148,9 +171,11 @@
       <header>
         <h1>on-codemerge demo stand</h1>
         <p>
-          Smoke-tests the package entry points:
-          <code>on-codemerge</code>, <code>on-codemerge/json</code>,
-          <code>on-codemerge/markdown</code>, <code>on-codemerge/code</code>.
+          Smoke-tests package entry points:
+          <code>on-codemerge</code>, <code>/json</code>, <code>/markdown</code>, <code>/code</code>,
+          <code>/forms</code>, <code>/charts</code>,
+          <code>/calendar</code>
+          (+ WYSIWYG <code>chrome: 'page'</code>).
         </p>
         <div class="meta">
           <span id="pkg-version">version: …</span>
@@ -166,9 +191,13 @@
         <button type="button" class="active" data-mode="wysiwyg" data-testid="mode-wysiwyg">
           WYSIWYG
         </button>
+        <button type="button" data-mode="wysiwyg-page" data-testid="mode-wysiwyg-page">Page</button>
         <button type="button" data-mode="json" data-testid="mode-json">JSON</button>
         <button type="button" data-mode="markdown" data-testid="mode-markdown">Markdown</button>
         <button type="button" data-mode="code" data-testid="mode-code">Code</button>
+        <button type="button" data-mode="forms" data-testid="mode-forms">Forms</button>
+        <button type="button" data-mode="charts" data-testid="mode-charts">Charts</button>
+        <button type="button" data-mode="calendar" data-testid="mode-calendar">Calendar</button>
       </div>
 
       <div class="card">
@@ -222,6 +251,43 @@
             Load sample code
           </button>
           <button type="button" id="btn-clear-code" data-testid="btn-clear-code">Clear</button>
+        </div>
+
+        <div class="actions" data-actions="forms" data-testid="actions-forms" hidden>
+          <button type="button" class="primary" id="btn-forms-text" data-testid="btn-forms-text">
+            Show text
+          </button>
+          <button type="button" id="btn-forms-sample" data-testid="btn-forms-sample">
+            Load sample form
+          </button>
+          <button type="button" id="btn-clear-forms" data-testid="btn-clear-forms">Clear</button>
+        </div>
+
+        <div class="actions" data-actions="charts" data-testid="actions-charts" hidden>
+          <button type="button" class="primary" id="btn-charts-text" data-testid="btn-charts-text">
+            Show text
+          </button>
+          <button type="button" id="btn-charts-sample" data-testid="btn-charts-sample">
+            Load sample chart
+          </button>
+          <button type="button" id="btn-clear-charts" data-testid="btn-clear-charts">Clear</button>
+        </div>
+
+        <div class="actions" data-actions="calendar" data-testid="actions-calendar" hidden>
+          <button
+            type="button"
+            class="primary"
+            id="btn-calendar-text"
+            data-testid="btn-calendar-text"
+          >
+            Show text
+          </button>
+          <button type="button" id="btn-calendar-sample" data-testid="btn-calendar-sample">
+            Load sample calendar
+          </button>
+          <button type="button" id="btn-clear-calendar" data-testid="btn-clear-calendar">
+            Clear
+          </button>
         </div>
       </div>
 
