@@ -178,6 +178,40 @@ function removeOrphanToolbarDividerDts(root: string): void {
   console.log('[ocm-package] removed orphan ToolbarDividerPlugin/index.d.ts');
 }
 
+/**
+ * `@codemerge/mermaid` is a runtime external — vite-plugin-dts still emits types-only
+ * under dist/packages/mermaid. Drop that dead tree from the publishable tarball.
+ */
+function removeExternalMermaidDts(root: string): void {
+  const dir = resolve(root, 'dist/packages/mermaid');
+  if (!existsSync(dir)) {
+    return;
+  }
+  rmSync(dir, { recursive: true, force: true });
+  console.log(
+    '[ocm-package] removed dist/packages/mermaid (types-only; runtime is @codemerge/mermaid)'
+  );
+}
+
+/**
+ * emitPackageCss copies convenience CSS to dist/*.css — nested apps/wysiwyg copies are
+ * build intermediates and must not ship (duplicate bytes, not in exports).
+ */
+function removeNestedWysiwygCssCopies(root: string): void {
+  const nested = resolve(root, 'dist/apps/wysiwyg/src');
+  let removed = 0;
+  for (const name of ['tailwind.css', 'public.css', 'index.css']) {
+    const path = resolve(nested, name);
+    if (existsSync(path)) {
+      rmSync(path, { force: true });
+      removed += 1;
+    }
+  }
+  if (removed > 0) {
+    console.log(`[ocm-package] removed ${removed} nested apps/wysiwyg/src/*.css copies`);
+  }
+}
+
 /** Keep first `@layer properties{…}` block; drop the rest (Tailwind per-chunk noise). */
 function stripDuplicatePropertyLayers(css: string): string {
   let seen = false;
@@ -315,7 +349,9 @@ export function ocmPackagePlugin(root = process.cwd()): Plugin {
         removeDistNodeModules(distDir);
 
         removeOrphanToolbarDividerDts(root);
+        removeExternalMermaidDts(root);
         emitPackageCss(root);
+        removeNestedWysiwygCssCopies(root);
         emitThirdPartyNotices(root);
       },
     },

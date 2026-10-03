@@ -35,12 +35,6 @@
   "main": "./dist/app.cjs",
   "module": "./dist/app.mjs",
   "types": "./dist/app.d.ts",
-  "imports": {
-    "#view": "./packages/view/src/index.ts",
-    "#mermaid": "./packages/mermaid/src/index.ts",
-    "#sdk": "./packages/sdk/src/index.ts",
-    "#kernel": "./packages/kernel/src/index.ts"
-  },
   "exports": {
     ".": {
       "import": {
@@ -173,8 +167,9 @@
   "scripts": {
     "release": "pnpm run prepublishOnly && pnpm publish -r --filter './packages/kernel' --filter './packages/view' --filter './packages/mermaid' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter '.' --access public --no-git-checks --ignore-scripts",
     "build:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/view' --filter '@codemerge/mermaid' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run build",
-    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:public-bundle && pnpm run check:surfaces && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run publint",
+    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:public-bundle && pnpm run check:dist-package && pnpm run check:surfaces && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run publint",
     "check:public-bundle": "node ./scripts/check-public-bundle.mjs",
+    "check:dist-package": "node ./scripts/check-dist-package.mjs",
     "check:surfaces": "node ./scripts/check-surface.mjs all",
     "dev": "vite",
     "dev:json": "vite --config apps/json/vite.config.ts",
