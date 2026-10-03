@@ -11,7 +11,7 @@ import {
   registerPlugin,
   runExtensionSetup,
 } from '../../platform/Extension';
-import { TrackChangesPlugin } from '../../../../../plugins/TrackChangesPlugin';
+import { TrackChangesPlugin } from '@ocm/track-changes-plugin';
 
 function mount() {
   const host = document.createElement('div');

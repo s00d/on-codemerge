@@ -29,4 +29,4 @@ export {
   type MdToolbarItem,
   type MdToolbarMenu,
   type MdToolbarActionApi,
-} from '../../../plugins/MarkdownPlugin';
+} from '@ocm/markdown-plugin';

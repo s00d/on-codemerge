@@ -8,7 +8,7 @@ import { bindJsonViewModeActive, defaultJsonToolbar } from './chrome/defaultTool
 import { setFormatIndent } from './chrome/format';
 import { setupTreeContextMenu } from './chrome/tree';
 import type { JsonToolbarOptions } from './chrome/types';
-import { bindShortcutsPopup } from '../ShortcutsPlugin';
+import { bindShortcutsPopup } from '@ocm/shortcuts-plugin';
 import { isJsonEditorDoc } from './io/adapters';
 import { mountJsonWorkspace } from './surface/workspaceView';
 import type { JsonWorkspaceHandle } from './surface/workspaceView';

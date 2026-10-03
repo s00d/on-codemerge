@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { insertText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
-import { ToolbarPlugin } from '../ToolbarPlugin';
+import { ToolbarPlugin } from '@ocm/toolbar-plugin';
 
 describe('toolbarPlugin bold toggle', () => {
   let host: HTMLElement;

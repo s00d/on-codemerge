@@ -10,7 +10,7 @@ import {
   pluginToolbarPlacement,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
-import type { UploadConfig } from '../FileUploadPlugin/config/UploadConfig';
+import type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
 import { ImageInsertModal } from './components/ImageInsertModal';
 import { copyIcon, editIcon, deleteIcon, imageIcon, uploadIcon } from '@ocm/wysiwyg/icons';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';

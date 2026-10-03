@@ -21,4 +21,4 @@ export {
   type CodeBlockAttrs,
   type CodeSourceAttrs,
   type ParseTextResult,
-} from '../../../plugins/CodeBlockPlugin';
+} from '@ocm/code-block-plugin';

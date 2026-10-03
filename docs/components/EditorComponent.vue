@@ -83,7 +83,7 @@ import {
   AnchorLinkPlugin,
   JsonPlugin,
   MarkdownPlugin,
-} from '../../plugins';
+} from '@ocm/plugins';
 import { docsFileUpload, docsImageUpload } from './devMediaConfig';
 
 // dictionary-en package `exports` only exposes index.js (Node fs) — load Hunspell files as Vite URLs.

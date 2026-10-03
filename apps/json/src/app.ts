@@ -19,4 +19,4 @@ export {
   type JsonToolbarItem,
   type JsonToolbarMenu,
   type JsonToolbarActionApi,
-} from '../../../plugins/JsonPlugin';
+} from '@ocm/json-plugin';

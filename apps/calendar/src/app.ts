@@ -26,4 +26,4 @@ export {
   type CalendarLayer,
   type CalendarView,
   type ParseTextResult,
-} from '../../../plugins/CalendarPlugin';
+} from '@ocm/calendar-plugin';

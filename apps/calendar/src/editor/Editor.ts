@@ -8,8 +8,8 @@ import {
   parseText,
   serializeText,
   payloadFromDoc,
-} from '../../../../plugins/CalendarPlugin';
-import type { CalendarToolbarOptions, CalendarDoc } from '../../../../plugins/CalendarPlugin';
+} from '@ocm/calendar-plugin';
+import type { CalendarToolbarOptions, CalendarDoc } from '@ocm/calendar-plugin';
 
 export type EditorOptions = Omit<SharedEditorOptions, 'createView' | 'toolbar'> & {
   toolbar?: CalendarToolbarOptions;

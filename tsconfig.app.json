@@ -30,8 +30,7 @@
       "@codemerge/sdk/*": ["./packages/sdk/src/*"],
       "@ocm/wysiwyg": ["./apps/wysiwyg/src"],
       "@ocm/wysiwyg/*": ["./apps/wysiwyg/src/*"],
-      "@ocm/plugins": ["./plugins/index.ts"],
-      "@ocm/plugins/*": ["./plugins/*"]
+      "@ocm/plugins": ["./plugins/index.ts"]
     }
   },
   "include": [

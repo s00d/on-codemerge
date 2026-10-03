@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import { resolve } from 'node:path';
+import { ocmPluginAliases } from './scripts/ocm-plugin-aliases.ts';
 
 const root = import.meta.dirname;
 
@@ -13,7 +14,7 @@ export default defineConfig({
       '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
       '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
       '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
-      '@ocm/plugins': resolve(root, 'plugins'),
+      ...ocmPluginAliases(root),
       // Public import paths resolve to source in unit tests.
       'on-codemerge/json': resolve(root, 'apps/json/src/app.ts'),
       'on-codemerge/markdown': resolve(root, 'apps/markdown/src/app.ts'),

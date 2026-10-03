@@ -4,9 +4,9 @@
 import { describe, expect, it, afterEach } from 'vitest';
 import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
-import { AlignmentPlugin } from '../AlignmentPlugin';
-import { MathPlugin } from '../MathPlugin';
-import { TimerPlugin } from '../TimerPlugin';
+import { AlignmentPlugin } from '@ocm/alignment-plugin';
+import { MathPlugin } from '@ocm/math-plugin';
+import { TimerPlugin } from '@ocm/timer-plugin';
 import { h } from '@codemerge/sdk';
 
 describe('atom toolbar alignment', () => {

@@ -4,8 +4,8 @@ import { describe, expect, it } from 'vitest';
  */
 import { Editor } from '../Editor';
 import { insertText } from '@codemerge/kernel';
-import { HistoryPlugin } from '../../../../../plugins/HistoryPlugin';
-import { TypographyPlugin } from '../../../../../plugins/TypographyPlugin';
+import { HistoryPlugin } from '@ocm/history-plugin';
+import { TypographyPlugin } from '@ocm/typography-plugin';
 
 describe('editor facade', () => {
   it('types via dispatch and exposes getJSON', () => {

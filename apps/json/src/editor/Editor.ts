@@ -9,8 +9,8 @@ import {
   isJsonEditorDoc,
   parseText,
   serializeText,
-} from '../../../../plugins/JsonPlugin';
-import type { JsonToolbarOptions } from '../../../../plugins/JsonPlugin';
+} from '@ocm/json-plugin';
+import type { JsonToolbarOptions } from '@ocm/json-plugin';
 
 export type EditorOptions = Omit<SharedEditorOptions, 'createView' | 'toolbar'> & {
   toolbar?: JsonToolbarOptions;

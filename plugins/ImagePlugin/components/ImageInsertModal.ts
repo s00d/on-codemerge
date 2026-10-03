@@ -1,15 +1,15 @@
 import { PopupController, foreign, h, mount, pickFile } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
-import type { UploadConfig } from '../../FileUploadPlugin/config/UploadConfig';
-import { defaultConfig } from '../../FileUploadPlugin/config/UploadConfig';
+import type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
+import { defaultConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
 import {
   formatFileSize,
   listMedia,
   uploadMedia,
   deleteMedia,
 } from '../../FileUploadPlugin/services/mediaApi';
-import type { MediaListItem } from '../../FileUploadPlugin/services/mediaApi';
-import { mediaGalleryView } from '../../FileUploadPlugin/components/MediaGallery';
+import type { MediaListItem } from '@ocm/file-upload-plugin/services/mediaApi';
+import { mediaGalleryView } from '@ocm/file-upload-plugin/components/MediaGallery';
 import { imageCropperView } from './ImageCropper';
 import type { ImageCropperApi } from './ImageCropper';
 import type { AspectPreset } from '../utils/cropMath';

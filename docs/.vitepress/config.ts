@@ -192,7 +192,6 @@ export default defineConfig({
         '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
         '@codemerge/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
         '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
-        '@ocm/plugins': resolve(root, 'plugins'),
         ...ocmPluginAliases(root),
       },
     },

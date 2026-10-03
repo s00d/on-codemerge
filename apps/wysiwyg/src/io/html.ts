@@ -5,8 +5,8 @@ import type { PublishNodeDefinition } from '@codemerge/sdk';
 import { asAttr } from '../utils/asAttr';
 import { attrToHtmlValue, coerceHtmlJsonAttr } from '../utils/attrJson';
 import { cssColorToHex } from '../utils/colorMath';
-import { parseMath } from '../../../../plugins/MathPlugin/utils/parse';
-import { astToMathML } from '../../../../plugins/MathPlugin/utils/mathml';
+import { parseMath } from '@ocm/math-plugin/utils/parse';
+import { astToMathML } from '@ocm/math-plugin/utils/mathml';
 
 const MARK_TAG: Record<string, string> = {
   bold: 'strong',

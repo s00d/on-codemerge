@@ -46,9 +46,9 @@ export {
   AnchorLinkPlugin,
   JsonPlugin,
   MarkdownPlugin,
-} from '../../../plugins';
+} from '@ocm/plugins';
 
-export type { SpellCheckerOptions, SpellDictionaryFiles } from '../../../plugins';
-export type { JsonPluginOptions, JsonPluginFeatures } from '../../../plugins';
-export type { MarkdownPluginOptions, MarkdownPluginFeatures } from '../../../plugins';
-export type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from '../../../plugins';
+export type { SpellCheckerOptions, SpellDictionaryFiles } from '@ocm/plugins';
+export type { JsonPluginOptions, JsonPluginFeatures } from '@ocm/plugins';
+export type { MarkdownPluginOptions, MarkdownPluginFeatures } from '@ocm/plugins';
+export type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from '@ocm/plugins';

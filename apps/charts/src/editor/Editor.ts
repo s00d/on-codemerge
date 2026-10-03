@@ -8,8 +8,8 @@ import {
   parseText,
   serializeText,
   attrsFromDoc,
-} from '../../../../plugins/ChartsPlugin';
-import type { ChartToolbarOptions, ChartAttrs } from '../../../../plugins/ChartsPlugin';
+} from '@ocm/charts-plugin';
+import type { ChartToolbarOptions, ChartAttrs } from '@ocm/charts-plugin';
 
 export type EditorOptions = Omit<SharedEditorOptions, 'createView' | 'toolbar'> & {
   toolbar?: ChartToolbarOptions;

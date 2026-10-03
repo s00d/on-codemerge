@@ -1,6 +1,6 @@
 import { describe, expect, it, afterEach } from 'vitest';
 import { Editor } from '../Editor';
-import { createDefaultPlugins, insertProperty, renameKey } from '../../../../../plugins/JsonPlugin';
+import { createDefaultPlugins, insertProperty, renameKey } from '@ocm/json-plugin';
 import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 
 describe('json Editor entry', () => {

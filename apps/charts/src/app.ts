@@ -21,4 +21,4 @@ export {
   type ChartToolbarActionApi,
   type ChartAttrs,
   type ParseTextResult,
-} from '../../../plugins/ChartsPlugin';
+} from '@ocm/charts-plugin';

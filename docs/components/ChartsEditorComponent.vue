@@ -22,13 +22,13 @@
 
 <script>
 import { Editor, createDefaultPlugins, normalizeChartAttrs } from '../../apps/charts/src/app';
-import { renderChart } from '../../plugins/ChartsPlugin/drivers/renderChart';
-import { optionsFromAttrs } from '../../plugins/ChartsPlugin/utils/options';
+import { renderChart } from '@ocm/charts-plugin/drivers/renderChart';
+import { optionsFromAttrs } from '@ocm/charts-plugin/utils/options';
 import {
   parseChartMode,
   parseChartOrientation,
   parseChartType,
-} from '../../plugins/ChartsPlugin/utils/validation';
+} from '@ocm/charts-plugin/utils/validation';
 
 const DEMO_CHART = `{
   "chartType": "bar",

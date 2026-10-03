@@ -1,54 +1,54 @@
 import type { PluginDefinition, PluginToolbarOpts } from '@codemerge/sdk';
 
-import { AIAssistantPlugin } from './AIAssistantPlugin';
-import { AlignmentPlugin } from './AlignmentPlugin';
-import { AnchorLinkPlugin } from './AnchorLinkPlugin';
-import { BlockPlugin } from './BlockPlugin';
-import { BlockStylePlugin } from './BlockStylePlugin';
-import { CalendarPlugin } from './CalendarPlugin';
-import { ChartsPlugin } from './ChartsPlugin';
-import { ClearStylesPlugin } from './ClearStylesPlugin';
-import { CodeBlockPlugin } from './CodeBlockPlugin';
-import type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from './CodeBlockPlugin';
+import { AIAssistantPlugin } from '@ocm/ai-assistant-plugin';
+import { AlignmentPlugin } from '@ocm/alignment-plugin';
+import { AnchorLinkPlugin } from '@ocm/anchor-link-plugin';
+import { BlockPlugin } from '@ocm/block-plugin';
+import { BlockStylePlugin } from '@ocm/block-style-plugin';
+import { CalendarPlugin } from '@ocm/calendar-plugin';
+import { ChartsPlugin } from '@ocm/charts-plugin';
+import { ClearStylesPlugin } from '@ocm/clear-styles-plugin';
+import { CodeBlockPlugin } from '@ocm/code-block-plugin';
+import type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from '@ocm/code-block-plugin';
 import {
   CollaborationPlugin,
   createOpsCollabBinding,
   getCollaborationHandle,
-} from './CollaborationPlugin';
-import { ColorPlugin } from './ColorPlugin';
-import { CommentsPlugin } from './CommentsPlugin';
-import { ExportPlugin } from './ExportPlugin';
-import { FileUploadPlugin } from './FileUploadPlugin';
-import type { UploadConfig } from './FileUploadPlugin/config/UploadConfig';
-import { FontPlugin } from './FontPlugin';
-import { FooterPlugin } from './FooterPlugin';
-import { FootnotesPlugin } from './FootnotesPlugin';
-import { FormBuilderPlugin } from './FormBuilderPlugin';
-import { HistoryPlugin } from './HistoryPlugin';
-import { HTMLViewerPlugin } from './HTMLViewerPlugin';
-import { ImagePlugin } from './ImagePlugin';
-import type { ImagePluginOptions } from './ImagePlugin';
-import { JsonPlugin } from './JsonPlugin';
-import type { JsonPluginOptions, JsonPluginFeatures } from './JsonPlugin';
-import { MarkdownPlugin } from './MarkdownPlugin';
-import type { MarkdownPluginOptions, MarkdownPluginFeatures } from './MarkdownPlugin';
-import { LanguagePlugin } from './LanguagePlugin';
-import { LinkPlugin } from './LinkPlugin';
-import { ListsPlugin } from './ListsPlugin';
-import { MathPlugin } from './MathPlugin';
-import { MentionsPlugin } from './MentionsPlugin';
-import { PDFEmbedPlugin } from './PDFEmbedPlugin';
-import { ResponsivePlugin } from './ResponsivePlugin';
-import { ShortcutsPlugin } from './ShortcutsPlugin';
-import { SpellCheckerPlugin } from './SpellCheckerPlugin';
-import { TablePlugin } from './TablePlugin';
-import { TemplatesPlugin } from './TemplatesPlugin';
-import { TimerPlugin } from './TimerPlugin';
-import { ToolbarPlugin } from './ToolbarPlugin';
-import { TrackChangesPlugin } from './TrackChangesPlugin';
-import { TypographyPlugin } from './TypographyPlugin';
-import { VideoPlugin } from './VideoPlugin';
-import { YouTubeVideoPlugin } from './YouTubeVideoPlugin';
+} from '@ocm/collaboration-plugin';
+import { ColorPlugin } from '@ocm/color-plugin';
+import { CommentsPlugin } from '@ocm/comments-plugin';
+import { ExportPlugin } from '@ocm/export-plugin';
+import { FileUploadPlugin } from '@ocm/file-upload-plugin';
+import type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
+import { FontPlugin } from '@ocm/font-plugin';
+import { FooterPlugin } from '@ocm/footer-plugin';
+import { FootnotesPlugin } from '@ocm/footnotes-plugin';
+import { FormBuilderPlugin } from '@ocm/form-builder-plugin';
+import { HistoryPlugin } from '@ocm/history-plugin';
+import { HTMLViewerPlugin } from '@ocm/html-viewer-plugin';
+import { ImagePlugin } from '@ocm/image-plugin';
+import type { ImagePluginOptions } from '@ocm/image-plugin';
+import { JsonPlugin } from '@ocm/json-plugin';
+import type { JsonPluginOptions, JsonPluginFeatures } from '@ocm/json-plugin';
+import { MarkdownPlugin } from '@ocm/markdown-plugin';
+import type { MarkdownPluginOptions, MarkdownPluginFeatures } from '@ocm/markdown-plugin';
+import { LanguagePlugin } from '@ocm/language-plugin';
+import { LinkPlugin } from '@ocm/link-plugin';
+import { ListsPlugin } from '@ocm/lists-plugin';
+import { MathPlugin } from '@ocm/math-plugin';
+import { MentionsPlugin } from '@ocm/mentions-plugin';
+import { PDFEmbedPlugin } from '@ocm/pdf-embed-plugin';
+import { ResponsivePlugin } from '@ocm/responsive-plugin';
+import { ShortcutsPlugin } from '@ocm/shortcuts-plugin';
+import { SpellCheckerPlugin } from '@ocm/spell-checker-plugin';
+import { TablePlugin } from '@ocm/table-plugin';
+import { TemplatesPlugin } from '@ocm/templates-plugin';
+import { TimerPlugin } from '@ocm/timer-plugin';
+import { ToolbarPlugin } from '@ocm/toolbar-plugin';
+import { TrackChangesPlugin } from '@ocm/track-changes-plugin';
+import { TypographyPlugin } from '@ocm/typography-plugin';
+import { VideoPlugin } from '@ocm/video-plugin';
+import { YouTubeVideoPlugin } from '@ocm/youtube-video-plugin';
 
 export {
   AIAssistantPlugin,
@@ -98,9 +98,9 @@ export {
 export type { JsonPluginOptions, JsonPluginFeatures };
 export type { MarkdownPluginOptions, MarkdownPluginFeatures };
 export type { CodeBlockPluginOptions, CodeBlockPluginFeatures };
-export type { SpellCheckerOptions, SpellDictionaryFiles } from './SpellCheckerPlugin';
-export type { ImagePluginOptions } from './ImagePlugin';
-export type { UploadConfig } from './FileUploadPlugin/config/UploadConfig';
+export type { SpellCheckerOptions, SpellDictionaryFiles } from '@ocm/spell-checker-plugin';
+export type { ImagePluginOptions } from '@ocm/image-plugin';
+export type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
 
 export type CreateDefaultPluginsOptions = {
   image?: ImagePluginOptions;

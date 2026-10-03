@@ -3,12 +3,12 @@ import { describe, expect, it } from 'vitest';
  * @jest-environment jsdom
  */
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
-import { TablePlugin } from '../TablePlugin';
-import { ListsPlugin } from '../ListsPlugin';
-import { BlockPlugin } from '../BlockPlugin';
-import { ToolbarPlugin } from '../ToolbarPlugin';
+import { TablePlugin } from '@ocm/table-plugin';
+import { ListsPlugin } from '@ocm/lists-plugin';
+import { BlockPlugin } from '@ocm/block-plugin';
+import { ToolbarPlugin } from '@ocm/toolbar-plugin';
 import { createDoc, createParagraph, createText, insertText, splitBlock } from '@codemerge/kernel';
-import { insertTableCommand, addRow, deleteRow, deleteTable } from '../TablePlugin/tableOps';
+import { insertTableCommand, addRow, deleteRow, deleteTable } from '@ocm/table-plugin/tableOps';
 
 describe('wave1 lists/block', () => {
   it('wraps paragraph in list and Enter splits item', () => {

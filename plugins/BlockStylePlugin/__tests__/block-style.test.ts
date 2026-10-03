@@ -6,7 +6,7 @@ import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { setBlockAttr } from '@codemerge/sdk';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { BlockStylePlugin } from '../index';
-import { ToolbarPlugin } from '../../ToolbarPlugin';
+import { ToolbarPlugin } from '@ocm/toolbar-plugin';
 import { draftToStyleJson, emptyDraft, parseStyleAttr } from '../constants';
 
 describe('blockStylePlugin helpers', () => {

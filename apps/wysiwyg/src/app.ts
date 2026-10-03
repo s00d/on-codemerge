@@ -21,13 +21,13 @@ export {
   type MenuItem,
 } from '@codemerge/sdk';
 
-/** Lean / full plugin packs — individual plugins via `on-codemerge/plugins/<name>`. */
-export { createDefaultPlugins, createCorePlugins } from '../../../plugins';
+/** Lean / full plugin packs — individual constructors via `on-codemerge/plugins`. */
+export { createDefaultPlugins, createCorePlugins } from '@ocm/plugins';
 
-export type { SpellCheckerOptions, SpellDictionaryFiles } from '../../../plugins';
-export type { JsonPluginOptions, JsonPluginFeatures } from '../../../plugins';
-export type { MarkdownPluginOptions, MarkdownPluginFeatures } from '../../../plugins';
-export type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from '../../../plugins';
+export type { SpellCheckerOptions, SpellDictionaryFiles } from '@ocm/plugins';
+export type { JsonPluginOptions, JsonPluginFeatures } from '@ocm/plugins';
+export type { MarkdownPluginOptions, MarkdownPluginFeatures } from '@ocm/plugins';
+export type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from '@ocm/plugins';
 
 export {
   createDoc,

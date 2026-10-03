@@ -1,12 +1,12 @@
 import '@ocm/wysiwyg/tailwind.css';
 import '@codemerge/sdk/ui/sdk.scss';
-import '../../../plugins/JsonPlugin/style.scss';
-import '../../../plugins/MarkdownPlugin/style.scss';
+import '@ocm/json-plugin/style.scss';
+import '@ocm/markdown-plugin/style.scss';
 
 import { mountSourceEditor } from '@codemerge/editor';
 import type { SourceEditorHandle } from '@codemerge/editor';
-import { mountRawEditor } from '../../../plugins/JsonPlugin/widgets/rawEditor';
-import type { RawEditorHandle } from '../../../plugins/JsonPlugin/widgets/rawEditor';
+import { mountRawEditor } from '@ocm/json-plugin/widgets/rawEditor';
+import type { RawEditorHandle } from '@ocm/json-plugin/widgets/rawEditor';
 import { CORPUS } from './corpus';
 
 const LONG_WIDE = `${'line\n'.repeat(60)}${'x'.repeat(200)}\n${'tail\n'.repeat(10)}`;

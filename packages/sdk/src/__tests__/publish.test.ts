@@ -137,7 +137,7 @@ describe('timer runtime', () => {
   it('ticks countdown and expires', async () => {
     expect.hasAssertions();
     vi.useFakeTimers();
-    const { runtime } = await import('../../../../plugins/TimerPlugin/publish/runtime');
+    const { runtime } = await import('@ocm/timer-plugin/publish/runtime');
     const registry = new PublishRuntimeRegistry();
     registry.register(runtime);
 
@@ -175,7 +175,7 @@ describe('calendar-reminders runtime', () => {
     vi.useFakeTimers();
     const now = Date.now();
     vi.setSystemTime(now);
-    const { runtime } = await import('../../../../plugins/CalendarPlugin/publish/runtime');
+    const { runtime } = await import('@ocm/calendar-plugin/publish/runtime');
     const registry = new PublishRuntimeRegistry();
     registry.register(runtime);
 

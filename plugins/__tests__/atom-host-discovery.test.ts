@@ -5,8 +5,8 @@ import { describe, expect, it, afterEach, beforeEach } from 'vitest';
 import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
 import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
-import { CalendarPlugin } from '../CalendarPlugin';
-import { TimerPlugin } from '../TimerPlugin';
+import { CalendarPlugin } from '@ocm/calendar-plugin';
+import { TimerPlugin } from '@ocm/timer-plugin';
 
 describe('atom host discovery (data-ocm-type + ocm-*-atom)', () => {
   let host: HTMLElement;

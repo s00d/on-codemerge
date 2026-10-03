@@ -144,6 +144,129 @@ importers:
       '@codemerge/wysiwyg':
         specifier: workspace:^
         version: link:apps/wysiwyg
+      '@ocm/ai-assistant-plugin':
+        specifier: workspace:^
+        version: link:plugins/AIAssistantPlugin
+      '@ocm/alignment-plugin':
+        specifier: workspace:^
+        version: link:plugins/AlignmentPlugin
+      '@ocm/anchor-link-plugin':
+        specifier: workspace:^
+        version: link:plugins/AnchorLinkPlugin
+      '@ocm/block-plugin':
+        specifier: workspace:^
+        version: link:plugins/BlockPlugin
+      '@ocm/block-style-plugin':
+        specifier: workspace:^
+        version: link:plugins/BlockStylePlugin
+      '@ocm/calendar-plugin':
+        specifier: workspace:^
+        version: link:plugins/CalendarPlugin
+      '@ocm/charts-plugin':
+        specifier: workspace:^
+        version: link:plugins/ChartsPlugin
+      '@ocm/clear-styles-plugin':
+        specifier: workspace:^
+        version: link:plugins/ClearStylesPlugin
+      '@ocm/code-block-plugin':
+        specifier: workspace:^
+        version: link:plugins/CodeBlockPlugin
+      '@ocm/collaboration-plugin':
+        specifier: workspace:^
+        version: link:plugins/CollaborationPlugin
+      '@ocm/color-plugin':
+        specifier: workspace:^
+        version: link:plugins/ColorPlugin
+      '@ocm/comments-plugin':
+        specifier: workspace:^
+        version: link:plugins/CommentsPlugin
+      '@ocm/export-plugin':
+        specifier: workspace:^
+        version: link:plugins/ExportPlugin
+      '@ocm/file-upload-plugin':
+        specifier: workspace:^
+        version: link:plugins/FileUploadPlugin
+      '@ocm/font-plugin':
+        specifier: workspace:^
+        version: link:plugins/FontPlugin
+      '@ocm/footer-plugin':
+        specifier: workspace:^
+        version: link:plugins/FooterPlugin
+      '@ocm/footnotes-plugin':
+        specifier: workspace:^
+        version: link:plugins/FootnotesPlugin
+      '@ocm/form-builder-plugin':
+        specifier: workspace:^
+        version: link:plugins/FormBuilderPlugin
+      '@ocm/history-plugin':
+        specifier: workspace:^
+        version: link:plugins/HistoryPlugin
+      '@ocm/html-viewer-plugin':
+        specifier: workspace:^
+        version: link:plugins/HTMLViewerPlugin
+      '@ocm/image-plugin':
+        specifier: workspace:^
+        version: link:plugins/ImagePlugin
+      '@ocm/json-plugin':
+        specifier: workspace:^
+        version: link:plugins/JsonPlugin
+      '@ocm/language-plugin':
+        specifier: workspace:^
+        version: link:plugins/LanguagePlugin
+      '@ocm/link-plugin':
+        specifier: workspace:^
+        version: link:plugins/LinkPlugin
+      '@ocm/lists-plugin':
+        specifier: workspace:^
+        version: link:plugins/ListsPlugin
+      '@ocm/markdown-plugin':
+        specifier: workspace:^
+        version: link:plugins/MarkdownPlugin
+      '@ocm/math-plugin':
+        specifier: workspace:^
+        version: link:plugins/MathPlugin
+      '@ocm/mentions-plugin':
+        specifier: workspace:^
+        version: link:plugins/MentionsPlugin
+      '@ocm/pdf-embed-plugin':
+        specifier: workspace:^
+        version: link:plugins/PDFEmbedPlugin
+      '@ocm/plugins':
+        specifier: workspace:^
+        version: link:plugins
+      '@ocm/responsive-plugin':
+        specifier: workspace:^
+        version: link:plugins/ResponsivePlugin
+      '@ocm/shortcuts-plugin':
+        specifier: workspace:^
+        version: link:plugins/ShortcutsPlugin
+      '@ocm/spell-checker-plugin':
+        specifier: workspace:^
+        version: link:plugins/SpellCheckerPlugin
+      '@ocm/table-plugin':
+        specifier: workspace:^
+        version: link:plugins/TablePlugin
+      '@ocm/templates-plugin':
+        specifier: workspace:^
+        version: link:plugins/TemplatesPlugin
+      '@ocm/timer-plugin':
+        specifier: workspace:^
+        version: link:plugins/TimerPlugin
+      '@ocm/toolbar-plugin':
+        specifier: workspace:^
+        version: link:plugins/ToolbarPlugin
+      '@ocm/track-changes-plugin':
+        specifier: workspace:^
+        version: link:plugins/TrackChangesPlugin
+      '@ocm/typography-plugin':
+        specifier: workspace:^
+        version: link:plugins/TypographyPlugin
+      '@ocm/video-plugin':
+        specifier: workspace:^
+        version: link:plugins/VideoPlugin
+      '@ocm/youtube-video-plugin':
+        specifier: workspace:^
+        version: link:plugins/YouTubeVideoPlugin
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.63.0
@@ -243,6 +366,9 @@ importers:
       '@i18n-micro/runtime':
         specifier: 'catalog:'
         version: 1.0.0
+      '@ocm/calendar-plugin':
+        specifier: workspace:^
+        version: link:../../plugins/CalendarPlugin
 
   apps/charts:
     dependencies:
@@ -258,6 +384,9 @@ importers:
       '@i18n-micro/runtime':
         specifier: 'catalog:'
         version: 1.0.0
+      '@ocm/charts-plugin':
+        specifier: workspace:^
+        version: link:../../plugins/ChartsPlugin
 
   apps/code:
     dependencies:
@@ -273,6 +402,9 @@ importers:
       '@i18n-micro/runtime':
         specifier: 'catalog:'
         version: 1.0.0
+      '@ocm/code-block-plugin':
+        specifier: workspace:^
+        version: link:../../plugins/CodeBlockPlugin
 
   apps/forms:
     dependencies:
@@ -288,6 +420,9 @@ importers:
       '@i18n-micro/runtime':
         specifier: 'catalog:'
         version: 1.0.0
+      '@ocm/form-builder-plugin':
+        specifier: workspace:^
+        version: link:../../plugins/FormBuilderPlugin
 
   apps/json:
     dependencies:
@@ -303,6 +438,9 @@ importers:
       '@i18n-micro/runtime':
         specifier: 'catalog:'
         version: 1.0.0
+      '@ocm/json-plugin':
+        specifier: workspace:^
+        version: link:../../plugins/JsonPlugin
 
   apps/markdown:
     dependencies:
@@ -318,6 +456,9 @@ importers:
       '@i18n-micro/runtime':
         specifier: 'catalog:'
         version: 1.0.0
+      '@ocm/markdown-plugin':
+        specifier: workspace:^
+        version: link:../../plugins/MarkdownPlugin
 
   apps/wysiwyg:
     dependencies:
@@ -406,6 +547,129 @@ importers:
         version: 3.3.1(tailwind-merge@3.7.0)(tailwindcss@4.3.3)
 
   packages/view: {}
+
+  plugins:
+    dependencies:
+      '@ocm/ai-assistant-plugin':
+        specifier: workspace:^
+        version: link:AIAssistantPlugin
+      '@ocm/alignment-plugin':
+        specifier: workspace:^
+        version: link:AlignmentPlugin
+      '@ocm/anchor-link-plugin':
+        specifier: workspace:^
+        version: link:AnchorLinkPlugin
+      '@ocm/block-plugin':
+        specifier: workspace:^
+        version: link:BlockPlugin
+      '@ocm/block-style-plugin':
+        specifier: workspace:^
+        version: link:BlockStylePlugin
+      '@ocm/calendar-plugin':
+        specifier: workspace:^
+        version: link:CalendarPlugin
+      '@ocm/charts-plugin':
+        specifier: workspace:^
+        version: link:ChartsPlugin
+      '@ocm/clear-styles-plugin':
+        specifier: workspace:^
+        version: link:ClearStylesPlugin
+      '@ocm/code-block-plugin':
+        specifier: workspace:^
+        version: link:CodeBlockPlugin
+      '@ocm/collaboration-plugin':
+        specifier: workspace:^
+        version: link:CollaborationPlugin
+      '@ocm/color-plugin':
+        specifier: workspace:^
+        version: link:ColorPlugin
+      '@ocm/comments-plugin':
+        specifier: workspace:^
+        version: link:CommentsPlugin
+      '@ocm/export-plugin':
+        specifier: workspace:^
+        version: link:ExportPlugin
+      '@ocm/file-upload-plugin':
+        specifier: workspace:^
+        version: link:FileUploadPlugin
+      '@ocm/font-plugin':
+        specifier: workspace:^
+        version: link:FontPlugin
+      '@ocm/footer-plugin':
+        specifier: workspace:^
+        version: link:FooterPlugin
+      '@ocm/footnotes-plugin':
+        specifier: workspace:^
+        version: link:FootnotesPlugin
+      '@ocm/form-builder-plugin':
+        specifier: workspace:^
+        version: link:FormBuilderPlugin
+      '@ocm/history-plugin':
+        specifier: workspace:^
+        version: link:HistoryPlugin
+      '@ocm/html-viewer-plugin':
+        specifier: workspace:^
+        version: link:HTMLViewerPlugin
+      '@ocm/image-plugin':
+        specifier: workspace:^
+        version: link:ImagePlugin
+      '@ocm/json-plugin':
+        specifier: workspace:^
+        version: link:JsonPlugin
+      '@ocm/language-plugin':
+        specifier: workspace:^
+        version: link:LanguagePlugin
+      '@ocm/link-plugin':
+        specifier: workspace:^
+        version: link:LinkPlugin
+      '@ocm/lists-plugin':
+        specifier: workspace:^
+        version: link:ListsPlugin
+      '@ocm/markdown-plugin':
+        specifier: workspace:^
+        version: link:MarkdownPlugin
+      '@ocm/math-plugin':
+        specifier: workspace:^
+        version: link:MathPlugin
+      '@ocm/mentions-plugin':
+        specifier: workspace:^
+        version: link:MentionsPlugin
+      '@ocm/pdf-embed-plugin':
+        specifier: workspace:^
+        version: link:PDFEmbedPlugin
+      '@ocm/responsive-plugin':
+        specifier: workspace:^
+        version: link:ResponsivePlugin
+      '@ocm/shortcuts-plugin':
+        specifier: workspace:^
+        version: link:ShortcutsPlugin
+      '@ocm/spell-checker-plugin':
+        specifier: workspace:^
+        version: link:SpellCheckerPlugin
+      '@ocm/table-plugin':
+        specifier: workspace:^
+        version: link:TablePlugin
+      '@ocm/templates-plugin':
+        specifier: workspace:^
+        version: link:TemplatesPlugin
+      '@ocm/timer-plugin':
+        specifier: workspace:^
+        version: link:TimerPlugin
+      '@ocm/toolbar-plugin':
+        specifier: workspace:^
+        version: link:ToolbarPlugin
+      '@ocm/track-changes-plugin':
+        specifier: workspace:^
+        version: link:TrackChangesPlugin
+      '@ocm/typography-plugin':
+        specifier: workspace:^
+        version: link:TypographyPlugin
+      '@ocm/video-plugin':
+        specifier: workspace:^
+        version: link:VideoPlugin
+      '@ocm/youtube-video-plugin':
+        specifier: workspace:^
+        version: link:YouTubeVideoPlugin
 
   plugins/AIAssistantPlugin:
     dependencies:
@@ -652,6 +916,9 @@ importers:
       '@codemerge/wysiwyg':
         specifier: workspace:^
         version: link:../../apps/wysiwyg
+      '@ocm/file-upload-plugin':
+        specifier: workspace:^
+        version: link:../FileUploadPlugin
 
   plugins/JsonPlugin:
     dependencies:
@@ -667,6 +934,9 @@ importers:
       '@codemerge/wysiwyg':
         specifier: workspace:^
         version: link:../../apps/wysiwyg
+      '@ocm/shortcuts-plugin':
+        specifier: workspace:^
+        version: link:../ShortcutsPlugin
 
   plugins/LanguagePlugin:
     dependencies:

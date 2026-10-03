@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import svgLoader from 'vite-svg-loader';
 import { resolve } from 'node:path';
 import { scssPreprocessorOptions } from '../../../scripts/scss-vite-options.ts';
+import { ocmPluginAliases } from '../../../scripts/ocm-plugin-aliases.ts';
 
 const repoRoot = resolve(import.meta.dirname, '../../..');
 
@@ -20,7 +21,7 @@ export default defineConfig({
       '@codemerge/view': resolve(repoRoot, 'packages/view/src'),
       '@codemerge/sdk': resolve(repoRoot, 'packages/sdk/src'),
       '@ocm/wysiwyg': resolve(repoRoot, 'apps/wysiwyg/src'),
-      '@ocm/plugins': resolve(repoRoot, 'plugins'),
+      ...ocmPluginAliases(repoRoot),
     },
   },
   plugins: [

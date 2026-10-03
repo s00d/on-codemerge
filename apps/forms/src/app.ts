@@ -26,4 +26,4 @@ export {
   type FieldConfig,
   type FieldType,
   type ParseTextResult,
-} from '../../../plugins/FormBuilderPlugin';
+} from '@ocm/form-builder-plugin';

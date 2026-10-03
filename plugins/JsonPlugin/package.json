@@ -5,20 +5,20 @@
   "license": "MIT",
   "type": "module",
   "sideEffects": [
-    "**/*.scss",
-    "**/*.css",
-    "**/*.svg"
+    "**/*.scss"
   ],
   "main": "./index.ts",
   "types": "./index.ts",
   "exports": {
     ".": "./index.ts",
+    "./*": "./*.ts",
     "./style.scss": "./style.scss"
   },
   "dependencies": {
     "@codemerge/editor": "workspace:^",
     "@codemerge/kernel": "workspace:^",
     "@codemerge/sdk": "workspace:^",
-    "@codemerge/wysiwyg": "workspace:^"
+    "@codemerge/wysiwyg": "workspace:^",
+    "@ocm/shortcuts-plugin": "workspace:^"
   }
 }

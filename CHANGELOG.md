@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Plugins are private workspace packages (`plugins/*` → `@ocm/*-plugin`, source exports like `@codemerge/editor`; not published)
 - Library CSS: virtual `virtual:ocm-package-index.css` auto-collects each plugin `exports["./style.scss"]` → `dist/index.css` (+ `public.css` / `tailwind.css`); JS entries do not side-effect-import styles. `@codemerge/mermaid` types stay external via dts `exclude` / `aliasesExclude`
+- Internal TS imports use `@ocm/*-plugin`; barrel `@ocm/plugins`; plugin `exports` `.` / `./*` → `./*.ts` / `./style.scss`; Vite aliases from `plugins/*/package.json`; `sideEffects` trimmed to real assets
 
 ### Breaking
 

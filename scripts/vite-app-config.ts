@@ -26,7 +26,6 @@ export function defineAppConfig(app: string) {
         '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
         '@codemerge/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
         '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
-        '@ocm/plugins': resolve(root, 'plugins'),
         ...ocmPluginAliases(root),
       },
     },

@@ -8,8 +8,8 @@ import {
   parseText,
   serializeText,
   configFromDoc,
-} from '../../../../plugins/FormBuilderPlugin';
-import type { FormToolbarOptions, FormConfig } from '../../../../plugins/FormBuilderPlugin';
+} from '@ocm/form-builder-plugin';
+import type { FormToolbarOptions, FormConfig } from '@ocm/form-builder-plugin';
 
 export type EditorOptions = Omit<SharedEditorOptions, 'createView' | 'toolbar'> & {
   toolbar?: FormToolbarOptions;

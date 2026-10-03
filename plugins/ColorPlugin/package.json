@@ -4,15 +4,12 @@
   "private": true,
   "license": "MIT",
   "type": "module",
-  "sideEffects": [
-    "**/*.scss",
-    "**/*.css",
-    "**/*.svg"
-  ],
+  "sideEffects": false,
   "main": "./index.ts",
   "types": "./index.ts",
   "exports": {
-    ".": "./index.ts"
+    ".": "./index.ts",
+    "./*": "./*.ts"
   },
   "dependencies": {
     "@codemerge/kernel": "workspace:^",

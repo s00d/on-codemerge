@@ -16,13 +16,13 @@ import {
   parseText,
   projectPreviewHtml,
   serializeDoc,
-} from '../../../../plugins/MarkdownPlugin';
+} from '@ocm/markdown-plugin';
 import type {
   MdCustomElement,
   MdElementRegistry,
   MdRemotePreviewOptions,
   MdToolbarOptions,
-} from '../../../../plugins/MarkdownPlugin';
+} from '@ocm/markdown-plugin';
 
 export type EditorOptions = Omit<SharedEditorOptions, 'createView' | 'toolbar'> & {
   toolbar?: MdToolbarOptions;

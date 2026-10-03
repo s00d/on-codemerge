@@ -5,8 +5,8 @@
  */
 import { JSDOM } from 'jsdom';
 import { markdownToDoc } from '@ocm/wysiwyg/io/markdown';
-import { projectPreviewHtml } from '../../../plugins/MarkdownPlugin/io/projectPreview';
-import { escapeHtml } from '../../../plugins/MarkdownPlugin/io/escape';
+import { projectPreviewHtml } from '@ocm/markdown-plugin/io/projectPreview';
+import { escapeHtml } from '@ocm/markdown-plugin/io/escape';
 
 let domReady = false;
 

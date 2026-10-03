@@ -8,9 +8,9 @@ import {
   languageFromDoc,
   parseText,
   serializeText,
-} from '../../../../plugins/CodeBlockPlugin';
-import type { CodeToolbarOptions } from '../../../../plugins/CodeBlockPlugin';
-import { codeWorkspaceByEditor } from '../../../../plugins/CodeBlockPlugin/surface/workspaceView';
+} from '@ocm/code-block-plugin';
+import type { CodeToolbarOptions } from '@ocm/code-block-plugin';
+import { codeWorkspaceByEditor } from '@ocm/code-block-plugin/surface/workspaceView';
 
 export type EditorOptions = Omit<SharedEditorOptions, 'createView' | 'toolbar'> & {
   toolbar?: CodeToolbarOptions;

@@ -17,6 +17,7 @@
     "@codemerge/editor": "workspace:^",
     "@codemerge/kernel": "workspace:^",
     "@codemerge/sdk": "workspace:^",
-    "@i18n-micro/runtime": "catalog:"
+    "@i18n-micro/runtime": "catalog:",
+    "@ocm/charts-plugin": "workspace:^"
   }
 }
