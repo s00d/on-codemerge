@@ -19,7 +19,7 @@ export type DefaultJsonToolbarOptions = {
 
 /**
  * JSON domain toolbar preset (mode / format / structural).
- * Undo/redo come from `HistoryChromePlugin` — compose via `createDefaultPlugins`.
+ * Undo/redo toolbar is seeded by `/editor`.
  */
 export function defaultJsonToolbar(opts: DefaultJsonToolbarOptions = {}): JsonToolbarOptions {
   const viewMode = opts.viewMode !== false;

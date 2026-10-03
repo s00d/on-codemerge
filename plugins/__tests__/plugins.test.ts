@@ -113,6 +113,31 @@ describe('plugins via SDK', () => {
     e.destroy();
     h.remove();
   });
+
+  it('createCorePlugins builds only the lean set', () => {
+    expect.hasAssertions();
+    const names = createCorePlugins().map((p) => p.name);
+    expect(names).toStrictEqual([
+      'toolbar',
+      'history',
+      'typography',
+      'color',
+      'font',
+      'link',
+      'clear-styles',
+      'alignment',
+      'lists',
+      'block',
+      'table',
+      'image',
+      'code-block',
+      'math',
+      'shortcuts',
+      'export',
+    ]);
+    expect(names).not.toContain('charts');
+    expect(names).not.toContain('json');
+  });
 });
 
 describe('ops collab binding', () => {

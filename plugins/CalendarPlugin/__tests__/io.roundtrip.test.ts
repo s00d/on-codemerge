@@ -1,12 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-  emptyEditorDoc,
-  parseText,
-  serializeDoc,
-  parseIcs,
-  serializeIcs,
-  importCalendarText,
-} from '../io';
+import { emptyEditorDoc } from '../io/adapters';
+import { parseText, serializeDoc } from '../io/text';
+import { parseIcs, serializeIcs, importCalendarText } from '../io/ics';
 import { coerceCalendarDoc, emptyCalendarDoc } from '../drivers/defaults';
 import { isCalendarDoc } from '../types';
 
@@ -83,5 +78,11 @@ describe('io.roundtrip', () => {
     expect(back.title).toBe('ICS Cal');
     expect(back.events.some((e) => e.title === 'Coffee')).toBe(true);
     expect(importCalendarText(ics).events).toHaveLength(1);
+  });
+
+  it('rejects oversized importCalendarText', () => {
+    expect.hasAssertions();
+    const huge = 'x'.repeat(2_000_001);
+    expect(() => importCalendarText(huge)).toThrow(/exceeds/);
   });
 });

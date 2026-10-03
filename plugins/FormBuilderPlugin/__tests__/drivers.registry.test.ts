@@ -6,7 +6,7 @@ import {
   paletteFieldTypes,
   validateFieldForDriver,
   createField,
-} from '../drivers';
+} from '../drivers/registry';
 
 const stubI18n = { t: (k: string) => k };
 

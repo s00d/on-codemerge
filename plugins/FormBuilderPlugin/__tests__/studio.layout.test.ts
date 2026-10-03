@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { DisposableScope } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
-import { emptyFormConfig } from '../io';
+import { emptyFormConfig } from '../io/adapters';
 import { mountFormWorkspace } from '../surface/workspaceView';
 
 function stubEditor(): EditorAPI {

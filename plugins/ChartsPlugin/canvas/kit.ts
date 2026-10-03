@@ -17,14 +17,6 @@ export function plotBox(options: ChartOptions): PlotBox {
   return { padding, width: options.width, height: options.height, plotW, plotH };
 }
 
-export function circleBox(options: ChartOptions) {
-  return {
-    centerX: options.width / 2,
-    centerY: options.height / 2,
-    radius: Math.min(options.width, options.height) / 2 - 60,
-  };
-}
-
 export function themeColors(options: ChartOptions): string[] {
   if (options.colors && options.colors.length > 0) {
     return options.colors;
@@ -34,10 +26,6 @@ export function themeColors(options: ChartOptions): string[] {
 
 export function textColor(_options: ChartOptions): string {
   return '#222';
-}
-
-export function gridColor(options: ChartOptions): string {
-  return options.grid?.color ?? '#e5e7eb';
 }
 
 export function bgColor(_options: ChartOptions): string {
@@ -128,80 +116,6 @@ export function drawLegend(
     ctx.fillText(name, x + 15, y + 4);
     x += ctx.measureText(name).width + 40;
   });
-}
-
-/** Categorical Y-grid + optional X labels (bar/line/area). */
-export function drawCategoryGrid(
-  ctx: CanvasRenderingContext2D,
-  options: ChartOptions,
-  maxValue: number,
-  xLabels: string[],
-  kind: 'bar' | 'line' | 'area'
-): void {
-  if (options.grid?.show === false) {
-    return;
-  }
-  const { padding, width, height, plotW, plotH } = plotBox(options);
-  ctx.save();
-  ctx.strokeStyle = gridColor(options);
-  ctx.lineWidth = options.grid?.width ?? 1;
-  ctx.globalAlpha = options.grid?.opacity ?? 0.3;
-  ctx.fillStyle = '#6b7280';
-  ctx.font = '12px Inter, system-ui, sans-serif';
-  for (let i = 0; i <= 5; i++) {
-    const y = padding + (plotH * i) / 5;
-    const value = Math.round(maxValue * (1 - i / 5));
-    ctx.beginPath();
-    ctx.moveTo(padding, y);
-    ctx.lineTo(width - padding, y);
-    ctx.stroke();
-    ctx.globalAlpha = 1;
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(String(value), padding - 10, y);
-    ctx.globalAlpha = options.grid?.opacity ?? 0.3;
-  }
-  ctx.beginPath();
-  ctx.moveTo(padding, height - padding);
-  ctx.lineTo(width - padding, height - padding);
-  ctx.stroke();
-  ctx.globalAlpha = 1;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  ctx.fillStyle = textColor(options);
-  ctx.font = '11px Inter, system-ui, sans-serif';
-  xLabels.forEach((label, i) => {
-    const x =
-      kind === 'bar'
-        ? padding + (plotW / xLabels.length) * i + plotW / xLabels.length / 2
-        : padding + (plotW / Math.max(1, xLabels.length - 1)) * i;
-    ctx.save();
-    ctx.translate(x, height - padding + 8);
-    ctx.rotate(-Math.PI / 6);
-    ctx.fillText(label, 0, 0);
-    ctx.restore();
-  });
-  ctx.restore();
-}
-
-export function roundRect(
-  ctx: CanvasRenderingContext2D,
-  x: number,
-  y: number,
-  w: number,
-  h: number,
-  r: number
-): void {
-  const radius = Math.min(r, Math.abs(w) / 2, Math.abs(h) / 2);
-  ctx.beginPath();
-  ctx.moveTo(x + radius, y);
-  ctx.lineTo(x + w - radius, y);
-  ctx.quadraticCurveTo(x + w, y, x + w, y + radius);
-  ctx.lineTo(x + w, y + h);
-  ctx.lineTo(x, y + h);
-  ctx.lineTo(x, y + radius);
-  ctx.quadraticCurveTo(x, y, x + radius, y);
-  ctx.closePath();
 }
 
 export { colorWithOpacity };

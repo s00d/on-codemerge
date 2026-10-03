@@ -35,6 +35,12 @@
   "main": "./dist/app.cjs",
   "module": "./dist/app.mjs",
   "types": "./dist/app.d.ts",
+  "imports": {
+    "#view": "./packages/view/src/index.ts",
+    "#mermaid": "./packages/mermaid/src/index.ts",
+    "#sdk": "./packages/sdk/src/index.ts",
+    "#kernel": "./packages/kernel/src/index.ts"
+  },
   "exports": {
     ".": {
       "import": {
@@ -56,6 +62,16 @@
         "default": "./dist/app.cjs"
       }
     },
+    "./plugins": {
+      "import": {
+        "types": "./dist/plugins.d.ts",
+        "default": "./dist/plugins.mjs"
+      },
+      "require": {
+        "types": "./dist/plugins.d.cts",
+        "default": "./dist/plugins.cjs"
+      }
+    },
     "./sdk": {
       "import": {
         "types": "./dist/packages/sdk/src/index.d.ts",
@@ -74,6 +90,16 @@
       "require": {
         "types": "./dist/packages/kernel/src/index.d.cts",
         "default": "./dist/packages/kernel/src/index.cjs"
+      }
+    },
+    "./view": {
+      "import": {
+        "types": "./dist/packages/view/src/index.d.ts",
+        "default": "./dist/packages/view/src/index.mjs"
+      },
+      "require": {
+        "types": "./dist/packages/view/src/index.d.cts",
+        "default": "./dist/packages/view/src/index.cjs"
       }
     },
     "./json": {
@@ -145,35 +171,25 @@
     "./plugins/*/style.css": "./dist/plugins/*/style.css"
   },
   "scripts": {
-    "release": "pnpm run prepublishOnly && pnpm publish -r --filter './packages/kernel' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter '.' --access public --no-git-checks --ignore-scripts",
-    "build:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run build",
-    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:json-export && pnpm run check:json-types && pnpm run check:markdown-export && pnpm run check:markdown-types && pnpm run check:code-export && pnpm run check:code-types && pnpm run check:forms-export && pnpm run check:forms-types && pnpm run check:charts-export && pnpm run check:charts-types && pnpm run check:calendar-export && pnpm run check:calendar-types && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run publint",
-    "check:json-export": "node ./scripts/check-json-export.mjs",
-    "check:json-types": "node ./scripts/check-json-types.mjs",
-    "check:markdown-export": "node ./scripts/check-markdown-export.mjs",
-    "check:markdown-types": "node ./scripts/check-markdown-types.mjs",
-    "check:code-export": "node ./scripts/check-code-export.mjs",
-    "check:code-types": "node ./scripts/check-code-types.mjs",
-    "check:forms-export": "node ./scripts/check-forms-export.mjs",
-    "check:forms-types": "node ./scripts/check-forms-types.mjs",
-    "check:charts-export": "node ./scripts/check-charts-export.mjs",
-    "check:charts-types": "node ./scripts/check-charts-types.mjs",
-    "check:calendar-export": "node ./scripts/check-calendar-export.mjs",
-    "check:calendar-types": "node ./scripts/check-calendar-types.mjs",
+    "release": "pnpm run prepublishOnly && pnpm publish -r --filter './packages/kernel' --filter './packages/view' --filter './packages/mermaid' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter '.' --access public --no-git-checks --ignore-scripts",
+    "build:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/view' --filter '@codemerge/mermaid' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run build",
+    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:public-bundle && pnpm run check:surfaces && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run publint",
+    "check:public-bundle": "node ./scripts/check-public-bundle.mjs",
+    "check:surfaces": "node ./scripts/check-surface.mjs all",
     "dev": "vite",
-    "dev:json": "vite --config vite.json.config.ts",
-    "dev:markdown": "vite --config vite.markdown.config.ts",
-    "dev:code": "vite --config vite.code.config.ts",
-    "dev:forms": "vite --config vite.forms.config.ts",
-    "dev:charts": "vite --config vite.charts.config.ts",
-    "dev:calendar": "vite --config vite.calendar.config.ts",
-    "build": "vite build && vite build --config vite.public.config.ts",
-    "build:json": "vite build --config vite.json.config.ts",
-    "build:markdown": "vite build --config vite.markdown.config.ts",
-    "build:code": "vite build --config vite.code.config.ts",
-    "build:forms": "vite build --config vite.forms.config.ts",
-    "build:charts": "vite build --config vite.charts.config.ts",
-    "build:calendar": "vite build --config vite.calendar.config.ts",
+    "dev:json": "vite --config apps/json/vite.config.ts",
+    "dev:markdown": "vite --config apps/markdown/vite.config.ts",
+    "dev:code": "vite --config apps/code/vite.config.ts",
+    "dev:forms": "vite --config apps/forms/vite.config.ts",
+    "dev:charts": "vite --config apps/charts/vite.config.ts",
+    "dev:calendar": "vite --config apps/calendar/vite.config.ts",
+    "build": "vite build && vite build --config apps/wysiwyg/vite.public.config.ts",
+    "build:json": "vite build --config apps/json/vite.config.ts",
+    "build:markdown": "vite build --config apps/markdown/vite.config.ts",
+    "build:code": "vite build --config apps/code/vite.config.ts",
+    "build:forms": "vite build --config apps/forms/vite.config.ts",
+    "build:charts": "vite build --config apps/charts/vite.config.ts",
+    "build:calendar": "vite build --config apps/calendar/vite.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs",
@@ -184,7 +200,7 @@
     "test:collab": "pnpm --filter '@codemerge/collaboration-server' test && pnpm exec vitest run packages/kernel/src/__tests__/transform.test.ts",
     "check:locales": "node ./scripts/check-locales.js",
     "publint": "pnpm run build:packages && pnpm run build && pnpm run publint:packages && publint --strict",
-    "publint:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run publint",
+    "publint:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/view' --filter '@codemerge/mermaid' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run publint",
     "test": "vitest run --config vitest.unit.config.ts && vitest run --config vitest.e2e.config.ts",
     "docs:dev": "vitepress dev docs",
     "collab:dev": "pnpm --filter '@codemerge/collaboration-server' run build && COLLAB_TOKEN=dev pnpm --filter '@codemerge/collaboration-server' exec node ./dist/cli.cjs serve --port 8787 --store memory",
@@ -196,9 +212,9 @@
     "test:perf": "untestutils perf --config ./perf.config.ts"
   },
   "dependencies": {
+    "@codemerge/mermaid": "workspace:^",
     "@i18n-micro/runtime": "catalog:",
     "dompurify": "catalog:",
-    "mermaid": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwind-variants": "catalog:"
   },
@@ -207,6 +223,7 @@
     "@codemerge/hunspell": "workspace:^",
     "@codemerge/kernel": "workspace:^",
     "@codemerge/sdk": "workspace:^",
+    "@codemerge/view": "workspace:^",
     "@codemerge/wysiwyg": "workspace:^",
     "@playwright/test": "catalog:",
     "@tailwindcss/postcss": "catalog:",

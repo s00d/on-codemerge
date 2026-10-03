@@ -7,7 +7,7 @@ import {
   applyTransaction,
   transaction,
 } from '@codemerge/kernel';
-import { DisposableScope, OwnedSlot, teardownOwnable } from '../disposable';
+import { DisposableScope, OwnedSlot, teardownOwnable } from '@codemerge/view';
 import { createPluginContext } from '../context';
 import { isDeclarativeWidget } from '../plugin';
 import {
@@ -26,8 +26,8 @@ import {
 import { NotifyService } from '../ui/notify';
 import { ContextMenuService } from '../ui/context-menu';
 import { PopupController, PopupService } from '../ui/popup';
-import { clearPortalRoot, getPortalRoot, setPortalRoot } from '../ui/portal';
-import { downloadBlob, downloadUrl, h, pickFile } from '../ui/view';
+import { clearPortalRoot, getPortalRoot, setPortalRoot } from '@codemerge/view';
+import { downloadBlob, downloadUrl, h, pickFile } from '@codemerge/view';
 import { ToolbarPanel } from '../ui/toolbar';
 import { createI18n } from '@i18n-micro/runtime';
 

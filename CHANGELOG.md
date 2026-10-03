@@ -5,15 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [2.5.0] - 2026-10-02
+## [2.5.0] - 2026-10-03
 
 ### Added
 
 - **Calendar Editor** surface: `apps/calendar` → public entry `on-codemerge/calendar` (+ docs Guide / live preview)
 - **Forms Editor** / **Charts Editor** surfaces: `on-codemerge/forms`, `on-codemerge/charts` (+ docs Guide / live previews)
+- **`@codemerge/view`** — zero-dep ViewSpec DOM runtime (`h` / `mount` / portal / `DisposableScope`); also `on-codemerge/view`
+- Opt-in Editor `diagnostics.onMeasure` for dispatch / view.update / toolbar.refresh timings
+- **`@codemerge/mermaid`** — sync Mermaid-subset SVG renderer (8 types, typed IR, no CDN fonts); hydrate bundled in `public.js`
+- Opt-in plugin surface `on-codemerge/plugins` (individual constructors)
 - SDK **studio layout** helpers: `studioPaneTabs`, `syncStudioPanel`, `STUDIO_POPUP_CLASS`, shared `ocm-studio*` chrome (mobile pane tabs)
 - Calendar / FormBuilder / Charts dual-surface (`atom` + `workspace`) with shared studio UI, drivers, IO adapters, default toolbars
 - Thin ICS import/export for Calendar (JSON `CalendarDoc` remains SoT)
+- `ConstrainedEditor` facade for surface apps (fixed root node type)
+- Shared `ParseError` / `parseJsonPayload` in `@ocm/wysiwyg/utils/parseSoT`
+- History undo/redo toolbar seeded from `@codemerge/editor` (kernel history)
 - `check:calendar-export` / `check:calendar-types` gates in `prepublishOnly`
 - Per-plugin locale packs wired via `wirePluginLocales` for many plugins
 
@@ -22,11 +29,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Calendar / Charts / FormBuilder rewritten around payload SoT + driver registries (legacy managers/renderers removed)
 - History / Forms / Charts / Calendar popups use shared studio popup class + responsive pane tabs
 - Empty default toolbars are no longer applied (avoids blank chrome)
+- `createCorePlugins` builds an explicit lean list (no construct-all-then-filter)
+- Calendar ICS/JSON import enforces `MAX_CALENDAR_BYTES` (2MB)
+- Root `on-codemerge` entry no longer re-exports every plugin constructor (use `createDefaultPlugins` or `on-codemerge/plugins`)
+
+### Breaking
+
+- History chrome is always on via editor seed — there is no `features.historyChrome` / `HistoryChromePlugin`
+- Surface `app.ts` public APIs shrunk (Calendar/Charts/Forms/Json/Code/Markdown): prefer Editor + plugin entry points; middleman barrels (`io/index`, `drivers/index`) removed
+- `ParseError` for surface text IO lives under `@ocm/wysiwyg/utils/parseSoT` (not re-exported from every plugin `io` barrel)
+- Plugin constructors moved off the root entry → `import { XPlugin } from 'on-codemerge/plugins'`
+- `mermaid` / `@crafter/mermaid` runtime removed — diagrams render with `@codemerge/mermaid` (subset of types; unsupported → `data-ocm-mermaid-error`)
+- `on-codemerge/public-mermaid.js` removed (hydrate lives in `public.js`)
 
 ### Fixed
 
 - Docs Calendar preview: export `coerceCalendarDoc` from `apps/calendar` app entry
 - Studio desktop layout: avoid `is-studio-hidden` leak at ≥64rem
+- `ensureNodeIds` no longer writes `attrs: undefined` for empty attr bags
+- Root `require` types for `./forms` / `./charts` / `./calendar` emit `.d.cts`
 
 ### Notes
 

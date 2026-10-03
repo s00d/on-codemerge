@@ -2,14 +2,8 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import {
-  emptyEditorDoc,
-  isCodeEditorDoc,
-  languageFromDoc,
-  parseText,
-  serializeText,
-  textFromDoc,
-} from '../io';
+import { emptyEditorDoc, isCodeEditorDoc, languageFromDoc, textFromDoc } from '../io/adapters';
+import { parseText, serializeText } from '../io/text';
 
 describe('code editor io', () => {
   it('emptyEditorDoc is code SoT', () => {

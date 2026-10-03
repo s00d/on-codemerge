@@ -2,11 +2,11 @@ import '@ocm/wysiwyg/tailwind.css';
 import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
+export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 export {
   CodeBlockPlugin,
   createDefaultPlugins,
   defaultCodeToolbar,
-  HistoryChromePlugin,
   emptyEditorDoc,
   isCodeEditorDoc,
   parseText,
@@ -14,7 +14,6 @@ export {
   serializeDoc,
   textFromDoc,
   languageFromDoc,
-  ParseError,
   MAX_CODE_BYTES,
   type CodeBlockPluginOptions,
   type CodeBlockPluginFeatures,

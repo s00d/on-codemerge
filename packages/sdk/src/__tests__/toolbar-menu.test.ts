@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from 'vitest';
-import { clearPortalRoot } from '../ui/portal';
-import { h } from '../ui/view';
+import { clearPortalRoot } from '@codemerge/view';
+import { h } from '@codemerge/view';
 import { ToolbarPanel } from '../ui/toolbar';
 
 const waitTick = (): Promise<void> =>

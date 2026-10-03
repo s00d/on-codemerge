@@ -27,7 +27,10 @@
     "pieExpenses": "Kreis: Ausgaben",
     "lineVisitors": "Linie: Besucher",
     "barAreaMode": "Balken-/Flächenmodus",
-    "editChart": "Diagramm bearbeiten"
+    "editChart": "Diagramm bearbeiten",
+    "preview": "Vorschau",
+    "edit": "Bearbeiten",
+    "settings": "Einstellungen"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "Möchten Sie diese Vorlage wirklich löschen?",

@@ -9,6 +9,8 @@ export default defineConfig({
       '@codemerge/editor': resolve(root, 'packages/editor/src'),
       '@codemerge/hunspell': resolve(root, 'packages/hunspell/src'),
       '@codemerge/kernel': resolve(root, 'packages/kernel/src'),
+      '@codemerge/view': resolve(root, 'packages/view/src'),
+      '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
       '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
       '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
       '@ocm/plugins': resolve(root, 'plugins'),
@@ -16,7 +18,11 @@ export default defineConfig({
       'on-codemerge/json': resolve(root, 'apps/json/src/app.ts'),
       'on-codemerge/markdown': resolve(root, 'apps/markdown/src/app.ts'),
       'on-codemerge/code': resolve(root, 'apps/code/src/app.ts'),
+      'on-codemerge/forms': resolve(root, 'apps/forms/src/app.ts'),
+      'on-codemerge/charts': resolve(root, 'apps/charts/src/app.ts'),
+      'on-codemerge/calendar': resolve(root, 'apps/calendar/src/app.ts'),
       'on-codemerge/app': resolve(root, 'apps/wysiwyg/src/app.ts'),
+      'on-codemerge/plugins': resolve(root, 'apps/wysiwyg/src/plugins.ts'),
     },
   },
   css: {
@@ -49,6 +55,9 @@ export default defineConfig({
       'apps/json/src/**/*.{test,spec}.ts',
       'apps/markdown/src/**/*.{test,spec}.ts',
       'apps/code/src/**/*.{test,spec}.ts',
+      'apps/forms/src/**/*.{test,spec}.ts',
+      'apps/charts/src/**/*.{test,spec}.ts',
+      'apps/calendar/src/**/*.{test,spec}.ts',
       'plugins/**/*.{test,spec}.ts',
     ],
     exclude: ['**/node_modules/**', '**/dist/**', '**/test/e2e/**', '**/__tests__/helpers/**'],
@@ -67,6 +76,7 @@ export default defineConfig({
       // product UI is gated by e2e interaction-chains, not unit % theater.
       include: [
         'packages/kernel/src/**/*.ts',
+        'packages/view/src/**/*.ts',
         'packages/sdk/src/**/*.ts',
         'packages/editor/src/**/*.ts',
         'apps/wysiwyg/src/editor/**/*.ts',
@@ -74,7 +84,6 @@ export default defineConfig({
         'apps/wysiwyg/src/io/**/*.ts',
         'apps/wysiwyg/src/platform/**/*.ts',
         'plugins/index.ts',
-        'apps/wysiwyg/src/plugins/index.ts',
         'apps/wysiwyg/src/app.ts',
       ],
       exclude: [

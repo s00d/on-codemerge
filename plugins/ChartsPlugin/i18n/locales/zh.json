@@ -27,7 +27,10 @@
     "pieExpenses": "饼图：支出",
     "lineVisitors": "折线图：访客",
     "barAreaMode": "柱状图/面积图模式",
-    "editChart": "编辑图表"
+    "editChart": "编辑图表",
+    "preview": "预览",
+    "edit": "编辑",
+    "settings": "设置"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "确定要删除此模板吗？",

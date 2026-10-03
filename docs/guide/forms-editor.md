@@ -20,7 +20,7 @@ import { Editor, createDefaultPlugins } from 'on-codemerge/forms';
 const host = document.getElementById('forms-editor')!;
 const editor = new Editor(host, {
   chrome: 'bar',
-  plugins: createDefaultPlugins(), // HistoryChrome + FormBuilderPlugin({ surface: 'workspace' })
+  plugins: createDefaultPlugins(), // FormBuilderPlugin({ surface: 'workspace' })
 });
 
 editor.on('docChanged', () => {
@@ -68,7 +68,7 @@ SoT is `doc` → single `form` child. Field list and HTTP settings live in `attr
 
 ## Toolbar
 
-`createDefaultPlugins()` ships **HistoryChrome** plus Clear / wide·narrow preview (`defaultFormToolbar()`). Templates, field palette, and method live in the studio. Customize via `toolbar` / `createDefaultPlugins({ toolbar })`.
+`createDefaultPlugins()` ships Clear / wide·narrow preview (`defaultFormToolbar()`). Templates, field palette, and method live in the studio. Customize via `toolbar` / `createDefaultPlugins({ toolbar })`.
 
 ## Local demo
 

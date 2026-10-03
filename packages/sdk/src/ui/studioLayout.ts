@@ -1,5 +1,5 @@
-import { h } from './view';
-import type { ViewSpec } from './view';
+import { h } from '@codemerge/view';
+import type { ViewSpec } from '@codemerge/view';
 
 /** Class for wide atom/workspace studio popups (full-bleed on narrow viewports). */
 export const STUDIO_POPUP_CLASS = 'ocm-studio-popup';

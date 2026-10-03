@@ -1,4 +1,5 @@
 import type { DocNode } from '@codemerge/kernel';
+import { ParseError, parseJsonPayload } from '@ocm/wysiwyg/utils/parseSoT';
 import type { ChartAttrs } from './adapters';
 import {
   attrsFromDoc,
@@ -10,43 +11,28 @@ import {
 
 export const MAX_CHART_BYTES = 2_000_000;
 
-export class ParseError extends Error {
-  readonly offset?: number;
-
-  constructor(message: string, offset?: number) {
-    super(message);
-    this.name = 'ParseError';
-    this.offset = offset;
-  }
-}
-
 export type ParseTextResult = { ok: true; doc: DocNode } | { ok: false; error: ParseError };
 
 export function parseText(text: string): ParseTextResult {
-  if (text.length > MAX_CHART_BYTES) {
-    return {
-      ok: false,
-      error: new ParseError(`Chart JSON exceeds ${MAX_CHART_BYTES} bytes`),
-    };
+  const parsed = parseJsonPayload(
+    text,
+    MAX_CHART_BYTES,
+    `Chart JSON exceeds ${MAX_CHART_BYTES} bytes`
+  );
+  if (!parsed.ok) {
+    return { ok: false, error: new ParseError(parsed.message) };
   }
-  const trimmed = text.trim();
-  if (!trimmed) {
+  if (parsed.empty) {
     return { ok: true, doc: docFromAttrs(emptyChartAttrs()) };
   }
-  try {
-    const parsed: unknown = JSON.parse(trimmed);
-    if (!isChartAttrs(parsed) && typeof parsed === 'object' && parsed !== null) {
-      // allow partial JSON
-      return { ok: true, doc: docFromAttrs(normalizeChartAttrs(parsed)) };
-    }
-    if (!isChartAttrs(parsed)) {
-      return { ok: false, error: new ParseError('Expected chart attrs JSON') };
-    }
-    return { ok: true, doc: docFromAttrs(normalizeChartAttrs(parsed)) };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Invalid JSON';
-    return { ok: false, error: new ParseError(msg) };
+  const value = parsed.value;
+  if (!isChartAttrs(value) && typeof value === 'object' && value !== null) {
+    return { ok: true, doc: docFromAttrs(normalizeChartAttrs(value)) };
   }
+  if (!isChartAttrs(value)) {
+    return { ok: false, error: new ParseError('Expected chart attrs JSON') };
+  }
+  return { ok: true, doc: docFromAttrs(normalizeChartAttrs(value)) };
 }
 
 export function serializeText(doc: DocNode, indent: number | string = 2): string {

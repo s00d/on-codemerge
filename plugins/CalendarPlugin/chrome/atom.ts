@@ -1,4 +1,3 @@
-import type { DocNode } from '@codemerge/kernel';
 import {
   PopupController,
   STUDIO_POPUP_CLASS,
@@ -9,6 +8,7 @@ import {
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
 import { calendarIcon, deleteIcon, editIcon } from '@ocm/wysiwyg/icons';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+import { nodeAtPath, pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
 import type { CalendarDoc } from '../types';
 import { coerceCalendarDoc, emptyCalendarDoc } from '../drivers/defaults';
 import { isCalendarDoc } from '../types';
@@ -18,34 +18,10 @@ export type AtomChromeHandle = {
   openStudio: (existing?: HTMLElement | null) => void;
 };
 
-function pathFromEl(el: HTMLElement | null): number[] | null {
-  if (!el) {
-    return null;
-  }
-  const pathEl = el.closest('[data-ocm-path], [data-ocm-block]') ?? el;
-  const pathRaw =
-    pathEl instanceof HTMLElement ? (pathEl.dataset.ocmPath ?? pathEl.dataset.ocmBlock ?? '') : '';
-  if (pathRaw === '') {
-    return null;
-  }
-  const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
-  return path.every((n) => Number.isFinite(n)) ? path : null;
-}
-
 function payloadFromPath(editor: PluginContext['editor'], path: number[] | null): CalendarDoc {
-  if (!path) {
-    return emptyCalendarDoc();
-  }
   try {
-    let node: DocNode = editor.getState().doc;
-    for (const index of path) {
-      const child = node.content?.[index];
-      if (!child) {
-        return emptyCalendarDoc();
-      }
-      node = child;
-    }
-    if (node.type === 'calendar') {
+    const node = nodeAtPath(editor.getState().doc, path);
+    if (node?.type === 'calendar') {
       const payload = readJsonAttr(node.attrs?.payload, null);
       if (isCalendarDoc(payload)) {
         return payload;

@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { allJsonLeafTypes, DRIVERS, getDriver, defaultValueForType, typeLabel } from '../drivers';
+import {
+  allJsonLeafTypes,
+  DRIVERS,
+  getDriver,
+  defaultValueForType,
+  typeLabel,
+} from '../drivers/registry';
 
 describe('json drivers.registry', () => {
   it('registers every JsonLeafType', () => {

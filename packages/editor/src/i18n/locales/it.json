@@ -337,5 +337,9 @@
   "clearStyles": {
     "title": "Cancella stili",
     "nothingToClear": "Niente da cancellare"
+  },
+  "history": {
+    "undo": "Annulla",
+    "redo": "Ripeti"
   }
 }

@@ -69,6 +69,7 @@
   },
   "dependencies": {
     "@codemerge/kernel": "workspace:^",
+    "@codemerge/view": "workspace:^",
     "tailwind-merge": "catalog:",
     "tailwind-variants": "catalog:"
   },

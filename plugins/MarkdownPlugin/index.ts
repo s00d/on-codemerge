@@ -7,7 +7,6 @@ import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import { defaultMdToolbar } from './chrome/defaultToolbar';
 import type { MdToolbarActionApi, MdToolbarOptions } from './chrome/types';
-import { HistoryChromePlugin } from '../HistoryPlugin';
 import {
   insertMdBullet,
   insertMdCallout,
@@ -17,32 +16,33 @@ import {
   insertMdQuote,
   setFirstCalloutVariant,
 } from './commands/mdBlocks';
-import { createMdElementRegistry } from './elements';
-import type { MdCustomElement, MdElementRegistry } from './elements';
-import { isMarkdownEditorDoc } from './io';
+import { createMdElementRegistry } from './elements/registry';
+import type { MdCustomElement } from './elements/types';
+import type { MdElementRegistry } from './elements/types';
+import { isMarkdownEditorDoc } from './io/adapters';
 import { mountMdWorkspace } from './surface/workspaceView';
 import type { MdRemotePreviewOptions, MdWorkspaceHandle } from './surface/workspaceView';
 import { mountMdEmbed } from './widgets/mountMdEmbed';
 import { renderMdEmbedPublish } from './publish/preview';
 
-export { emptyEditorDoc, isMarkdownEditorDoc, docToText } from './io';
-export { ParseError, parseText, serializeText, serializeDoc, type ParseTextResult } from './io';
+export { emptyEditorDoc, isMarkdownEditorDoc, docToText } from './io/adapters';
+export { parseText, serializeText, serializeDoc } from './io/text';
+export type { ParseTextResult } from './io/text';
 export {
   renderMarkdownPreviewHtml,
-  projectPreviewHtml,
   compactMarkdownText,
   expandCompactMarkdownText,
   prettyMarkdownText,
-} from './io';
-export {
-  createMdElementRegistry,
-  defaultMdElementRegistry,
-  BUILTIN_MD_ELEMENTS,
-  type MdCustomElement,
-  type MdElementBlock,
-  type MdElementButton,
-  type MdElementRegistry,
-} from './elements';
+} from './io/preview';
+export { projectPreviewHtml } from './io/projectPreview';
+export { createMdElementRegistry, defaultMdElementRegistry } from './elements/registry';
+export { BUILTIN_MD_ELEMENTS } from './elements/builtins';
+export type {
+  MdCustomElement,
+  MdElementBlock,
+  MdElementButton,
+  MdElementRegistry,
+} from './elements/types';
 export { hydrateMermaidBlocks } from './widgets/mermaidHydrate';
 export { defaultMdToolbar, runInsertMarkdown, runMdCommand } from './chrome/defaultToolbar';
 export type {
@@ -52,7 +52,6 @@ export type {
   MdToolbarOptions,
 } from './chrome/types';
 export type { MdRemotePreviewOptions } from './surface/workspaceView';
-export { HistoryChromePlugin } from '../HistoryPlugin';
 
 /** Atom surface (WYSIWYG embed) — only md_embed; prose nodes come from Typography/Lists/…. */
 const MD_ATOM_NODES = [
@@ -95,11 +94,6 @@ const MD_WORKSPACE_NODES = [
 export type MarkdownPluginFeatures = {
   /** Atom Insert-embed chrome (default true). Workspace ignores this for bar buttons. */
   toolbar?: boolean;
-  /**
-   * Include `HistoryChromePlugin` in `createDefaultPlugins` (default true for workspace).
-   * Hotkeys are always seeded by the editor platform.
-   */
-  historyChrome?: boolean;
 };
 
 export type MarkdownPluginOptions = PluginToolbarOpts & {
@@ -137,7 +131,6 @@ export function MarkdownPlugin(options: MarkdownPluginOptions = {}): PluginDefin
   };
   const features: Required<MarkdownPluginFeatures> = {
     toolbar: feat('toolbar', true),
-    historyChrome: feat('historyChrome', workspace),
   };
   const elements: MdElementRegistry = createMdElementRegistry(options.elements ?? []);
   const toolbarConfig: MdToolbarOptions | undefined = workspace
@@ -322,28 +315,20 @@ export function MarkdownPlugin(options: MarkdownPluginOptions = {}): PluginDefin
   });
 }
 
-/** Default slim-app plugin set: HistoryChrome + workspace MarkdownPlugin. */
+/** Default slim-app plugin set: workspace MarkdownPlugin. */
 export function createDefaultPlugins(
   opts: {
     elements?: MdCustomElement[];
     toolbar?: MdToolbarOptions;
-    features?: MarkdownPluginFeatures;
     preview?: MdRemotePreviewOptions;
   } = {}
 ): PluginDefinition[] {
   const elements = createMdElementRegistry(opts.elements ?? []);
-  const features: Required<MarkdownPluginFeatures> = {
-    toolbar: true,
-    historyChrome: true,
-    ...opts.features,
-  };
   return [
-    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
     MarkdownPlugin({
       surface: 'workspace',
       elements: opts.elements,
       toolbar: opts.toolbar ?? defaultMdToolbar({ elements }),
-      features,
       preview: opts.preview,
     }),
   ];

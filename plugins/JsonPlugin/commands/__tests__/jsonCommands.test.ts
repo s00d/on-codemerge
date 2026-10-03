@@ -6,7 +6,7 @@ import {
   runCommand,
   transaction,
 } from '@codemerge/kernel';
-import { emptyEditorDoc, valueToDoc, toEditorDoc, docToValue } from '../../io';
+import { emptyEditorDoc, valueToDoc, toEditorDoc, docToValue } from '../../io/adapters';
 import {
   insertProperty,
   jsonCommandMap,

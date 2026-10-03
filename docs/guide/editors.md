@@ -2,6 +2,8 @@
 
 On-Codemerge ships **seven Editor products** on the same kernel + SDK. Pick by document shape.
 
+Live demos: [Home](/).
+
 |             | **WYSIWYG** (`on-codemerge`)                             | **JSON** (`on-codemerge/json`)         | **Markdown** (`on-codemerge/markdown`)                | **Code** (`on-codemerge/code`)              | **Forms** (`on-codemerge/forms`)              | **Charts** (`on-codemerge/charts`)       | **Calendar** (`on-codemerge/calendar`)     |
 | ----------- | -------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------- | ------------------------------------------- | --------------------------------------------- | ---------------------------------------- | ------------------------------------------ |
 | Package     | `on-codemerge`                                           | `on-codemerge/json`                    | `on-codemerge/markdown`                               | `on-codemerge/code`                         | `on-codemerge/forms`                          | `on-codemerge/charts`                    | `on-codemerge/calendar`                    |
@@ -12,21 +14,7 @@ On-Codemerge ships **seven Editor products** on the same kernel + SDK. Pick by d
 
 ## WYSIWYG
 
-Rich document editor. Toolbar, lists, tables, media, **Insert → JSON**, **Insert → Markdown**, **Insert → Code block**, **Insert → Form**, and **Insert → Chart**.
-
-<script setup>
-import EditorComponent from '../components/EditorComponent.vue';
-import JsonEditorComponent from '../components/JsonEditorComponent.vue';
-import MarkdownEditorComponent from '../components/MarkdownEditorComponent.vue';
-import CodeEditorComponent from '../components/CodeEditorComponent.vue';
-import FormsEditorComponent from '../components/FormsEditorComponent.vue';
-import ChartsEditorComponent from '../components/ChartsEditorComponent.vue';
-import CalendarEditorComponent from '../components/CalendarEditorComponent.vue';
-</script>
-
-<EditorComponent :showDescription="false" />
-
-### Launch
+Rich document editor. Toolbar, lists, tables, media, **Insert →** JSON / Markdown / Code / Form / Chart / Calendar.
 
 ```ts
 import 'on-codemerge/index.css';
@@ -44,17 +32,11 @@ editor.on('docChanged', () => {
 });
 ```
 
-Lean set: `createCorePlugins()`. Single plugins: `new Editor(host, { plugins: [ToolbarPlugin(), ListsPlugin()] })`.
-
-See [Editor API](/guide/editor) and [Plugins](/plugins/).
+Lean set: `createCorePlugins()`. See [Editor API](/guide/editor) and [Plugins](/plugins/).
 
 ## JSON Editor
 
 Tree + Raw for configuration / API payloads. No prose HTML.
-
-<JsonEditorComponent :showDescription="false" />
-
-### Launch
 
 ```ts
 import { Editor, createDefaultPlugins } from 'on-codemerge/json';
@@ -65,20 +47,13 @@ const editor = new Editor(document.getElementById('json-editor')!, {
 });
 
 editor.setText('{"hello":true}');
-editor.on('docChanged', () => {
-  console.log(editor.getText());
-});
 ```
 
 See [JSON Editor](/guide/json-editor) and [JSON Plugin](/plugins/json-plugin).
 
 ## Markdown Editor
 
-Dual-pane source + HTML preview projected from prose JSON SoT. Mermaid hosts hydrate to inline SVG (`data-node="mermaid"`).
-
-<MarkdownEditorComponent :showDescription="false" />
-
-### Launch
+Dual-pane source + HTML preview. Mermaid blocks hydrate via a **simplified** `@codemerge/mermaid` subset — see [Mermaid](/guide/mermaid).
 
 ```ts
 import { Editor, createDefaultPlugins } from 'on-codemerge/markdown';
@@ -89,21 +64,13 @@ const editor = new Editor(document.getElementById('md-editor')!, {
 });
 
 editor.setText('# Hello\n');
-editor.on('docChanged', () => {
-  console.log(editor.getText());
-  console.log(editor.getHTML());
-});
 ```
 
 See [Markdown Editor](/guide/markdown-editor) and [Markdown Plugin](/plugins/markdown-plugin).
 
 ## Code Editor
 
-Single-pane source editor with line gutter and universal structural highlight (same contour as JSON Raw / Markdown source).
-
-<CodeEditorComponent :showDescription="false" />
-
-### Launch
+Single-pane source with line gutter and structural highlight (same contour as JSON Raw / Markdown source).
 
 ```ts
 import { Editor, createDefaultPlugins } from 'on-codemerge/code';
@@ -114,9 +81,6 @@ const editor = new Editor(document.getElementById('code-editor')!, {
 });
 
 editor.setText('const x = 1;\n');
-editor.on('docChanged', () => {
-  console.log(editor.getText());
-});
 ```
 
 See [Code Editor](/guide/code-editor) and [Code Block Plugin](/plugins/code-block-plugin).
@@ -124,10 +88,6 @@ See [Code Editor](/guide/code-editor) and [Code Block Plugin](/plugins/code-bloc
 ## Forms Editor
 
 Standalone form studio — palette, live preview, field inspector. SoT is `doc → form` with `attrs.schema` (`FormConfig`).
-
-<FormsEditorComponent :showDescription="false" />
-
-### Launch
 
 ```ts
 import { Editor, createDefaultPlugins } from 'on-codemerge/forms';
@@ -138,20 +98,13 @@ const editor = new Editor(document.getElementById('forms-editor')!, {
 });
 
 editor.setText('{"id":"f1","method":"POST","action":"","fields":[]}');
-editor.on('docChanged', () => {
-  console.log(editor.getText());
-});
 ```
 
 See [Forms Editor](/guide/forms-editor) and [Form Builder Plugin](/plugins/form-builder-plugin).
 
 ## Charts Editor
 
-Standalone chart studio — type, options, data table, live preview. SoT is `doc → chart`.
-
-<ChartsEditorComponent :showDescription="false" />
-
-### Launch
+Chart studio — Type / Data / Settings tabs, live preview. Most chart types render through `@codemerge/mermaid`; scatter/bubble use canvas.
 
 ```ts
 import { Editor, createDefaultPlugins } from 'on-codemerge/charts';
@@ -162,20 +115,13 @@ const editor = new Editor(document.getElementById('charts-editor')!, {
 });
 
 editor.setText('{"chartType":"bar","title":"Chart","data":[],"width":800,"height":400}');
-editor.on('docChanged', () => {
-  console.log(editor.getText());
-});
 ```
 
-See [Charts Editor](/guide/charts-editor) and [Charts Plugin](/plugins/charts-plugin).
+See [Charts Editor](/guide/charts-editor), [Charts Plugin](/plugins/charts-plugin), and [Mermaid](/guide/mermaid).
 
 ## Calendar Editor
 
-Standalone calendar studio — layers, month/week/day/year/agenda, event inspector. SoT is `doc → calendar` with `attrs.payload` (`CalendarDoc`).
-
-<CalendarEditorComponent :showDescription="false" />
-
-### Launch
+Calendar studio — layers, month/week/day/year/agenda, event inspector. SoT is `doc → calendar` with `attrs.payload` (`CalendarDoc`).
 
 ```ts
 import { Editor, createDefaultPlugins } from 'on-codemerge/calendar';
@@ -188,9 +134,6 @@ const editor = new Editor(document.getElementById('calendar-editor')!, {
 editor.setText(
   '{"title":"Cal","tz":"UTC","view":"month","cursor":"2026-10-02","calendars":[{"id":"main","title":"Work","color":"#3b82f6","visible":true}],"events":[]}'
 );
-editor.on('docChanged', () => {
-  console.log(editor.getText());
-});
 ```
 
 See [Calendar Editor](/guide/calendar-editor) and [Calendar Plugin](/plugins/calendar-plugin).

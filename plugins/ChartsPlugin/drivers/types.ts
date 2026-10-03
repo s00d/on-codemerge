@@ -21,7 +21,8 @@ export type ChartDriver = {
   readonly hole?: number;
   defaults: () => ChartSeries[];
   coerce: (from: ChartSeries[]) => ChartSeries[];
-  paint: (
+  /** Canvas paint — only scatter/bubble; other types use `@codemerge/mermaid`. */
+  paint?: (
     ctx: CanvasRenderingContext2D,
     series: ChartSeries[],
     options: ChartOptions,

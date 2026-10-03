@@ -3,7 +3,7 @@ import { attrString } from '@codemerge/sdk';
 import type { DisposableScope } from '@codemerge/sdk';
 import { ChartMenu } from '../components/ChartMenu';
 import { ChartContextMenu } from '../components/ChartContextMenu';
-import { renderChart } from '../drivers';
+import { renderChart } from '../drivers/renderChart';
 import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
 import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
 import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';

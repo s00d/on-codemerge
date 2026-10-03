@@ -1,7 +1,7 @@
 import { attrString, h, img } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
-import type { ChartI18n } from '../drivers';
-import { renderChart } from '../drivers';
+import type { ChartI18n } from '../drivers/types';
+import { renderChart } from '../drivers/renderChart';
 import { optionsFromAttrs } from '../utils/options';
 import {
   parseChartDataJson,

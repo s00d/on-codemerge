@@ -1,5 +1,5 @@
 import { PUBLISHED_CONTENT_CLASS } from '../ui/chrome';
-import type { ViewSpec } from '../ui/view';
+import type { ViewSpec } from '@codemerge/view';
 
 /** Attribute holding JSON config for a publish runtime. */
 export const OCM_CONFIG_ATTR = 'data-ocm-config';
@@ -163,7 +163,7 @@ export function composePublishedDocument(opts: ComposePublishedDocumentOptions):
   const js =
     opts.jsHref === null || opts.jsHref === undefined || opts.jsHref === ''
       ? ''
-      : `<script src="${escapeAttr(opts.jsHref)}" defer></script>`;
+      : `<script src="${escapeAttr(opts.jsHref)}" data-ocm-public defer></script>`;
   const title = opts.title ? `<title>${escapeText(opts.title)}</title>` : '';
   const contentClass = opts.contentClass ?? PUBLISHED_CONTENT_CLASS;
   return `<!DOCTYPE html>

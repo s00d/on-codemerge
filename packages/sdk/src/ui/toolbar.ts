@@ -1,8 +1,8 @@
-import { DisposableScope } from '../disposable';
+import { DisposableScope } from '@codemerge/view';
 import { toolbarTv } from './chrome';
 import { applyPlaceRoot } from './place';
-import { createPortal, h, mount as mountView, renderDetached } from './view';
-import type { MountHandle, PortalHandle, ViewSpec } from './view';
+import { createPortal, h, mount as mountView, renderDetached } from '@codemerge/view';
+import type { MountHandle, PortalHandle, ViewSpec } from '@codemerge/view';
 
 /** Static text or locale-reactive resolver (re-read on every `refresh`). */
 export type ToolbarText = string | (() => string);

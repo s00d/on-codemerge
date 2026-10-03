@@ -27,7 +27,10 @@
     "pieExpenses": "파이: 지출",
     "lineVisitors": "선: 방문자",
     "barAreaMode": "막대/영역 모드",
-    "editChart": "차트 편집"
+    "editChart": "차트 편집",
+    "preview": "미리보기",
+    "edit": "편집",
+    "settings": "설정"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "이 템플릿을 삭제하시겠습니까?",

@@ -27,7 +27,10 @@
     "pieExpenses": "Pie: Expenses",
     "lineVisitors": "Line: Visitors",
     "barAreaMode": "Bar/Area Mode",
-    "editChart": "Edit Chart"
+    "editChart": "Edit Chart",
+    "preview": "Preview",
+    "edit": "Edit",
+    "settings": "Settings"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "Are you sure you want to delete this template?",

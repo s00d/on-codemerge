@@ -74,7 +74,6 @@ JsonPlugin({
     toolbar?: boolean; // Insert embed (atom only); default true
     rawPane?: boolean; // Raw source editor (workspace)
     treeChrome?: boolean; // tree context menu (workspace)
-    historyChrome?: boolean; // include HistoryChromePlugin in createDefaultPlugins
     shortcuts?: boolean; // shortcuts popup + Mod-/ (workspace)
   },
 });

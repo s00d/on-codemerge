@@ -1,18 +1,12 @@
 # History Plugin
 
-The History Plugin provides comprehensive document history management for the on-CodeMerge editor, allowing users to track changes, view history, and restore previous versions.
+Markdown **snapshot timeline** + viewer for the WYSIWYG editor (browse versions, restore). Kernel undo/redo (op stack, toolbar buttons, Mod-z/y) lives on `@codemerge/editor` — not this plugin.
 
 ## Features
 
-- **Change Tracking**: Automatic tracking of all document changes
-- **History Viewer**: Visual interface for browsing document history
-- **Version Comparison**: Side-by-side comparison of document versions
-- **Restore Points**: Restore document to any previous state
-- **Change Logging**: Detailed logging of all modifications
-- **Undo/Redo**: Enhanced undo and redo functionality
-- **History Export**: Export change history and diffs
-- **Performance Optimized**: Efficient history storage and retrieval
-- **Diff Visualization**: Visual diff highlighting
+- **Snapshot tracking**: markdown snapshots on `docChanged`
+- **History Viewer**: browse snapshots and restore
+- **Diff visualization**: highlight changes between versions
 
 > Install and CSS: see [Editor API — Getting Started](/guide/editor#getting-started).
 
@@ -44,20 +38,17 @@ Factory: `HistoryPlugin()`.
 
 | Command       |                                 |
 | ------------- | ------------------------------- |
-| `undo`        | `editor.command('undo')`        |
-| `redo`        | `editor.command('redo')`        |
 | `viewHistory` | `editor.command('viewHistory')` |
+
+Undo/redo: `editor.undo()` / `editor.redo()` (editor core; hotkeys Mod-z / Mod-y / Mod-Shift-z).
 
 ### Keyboard shortcuts
 
-| Shortcut      | Command       |
-| ------------- | ------------- |
-| `Mod-z`       | `undo`        |
-| `Mod-y`       | `redo`        |
-| `Mod-Shift-z` | `redo`        |
-| `Mod-Alt-h`   | `viewHistory` |
+| Shortcut    | Command       |
+| ----------- | ------------- |
+| `Mod-Alt-h` | `viewHistory` |
 
-> **Note:** Use `editor.undo()` / `editor.redo()` and `viewHistory` modal. Snapshots are internal markdown — no `getHistory`/`compareVersions`/`exportHistory` on the factory return.
+> Snapshots are internal markdown — no `getHistory`/`compareVersions`/`exportHistory` on the factory return.
 
 ## Examples
 

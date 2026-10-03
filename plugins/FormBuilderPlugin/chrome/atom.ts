@@ -1,4 +1,3 @@
-import type { DocNode } from '@codemerge/kernel';
 import {
   PopupController,
   STUDIO_POPUP_CLASS,
@@ -9,44 +8,20 @@ import {
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
 import { deleteIcon, duplicateIcon, editIcon, formIcon } from '@ocm/wysiwyg/icons';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+import { nodeAtPath, pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
 import type { FormConfig } from '../types';
 import { isFormConfig } from '../types';
-import { emptyFormConfig } from '../io';
+import { emptyFormConfig } from '../io/adapters';
 import { mountFormWorkspace } from '../surface/workspaceView';
 
 export type AtomChromeHandle = {
   openBuilder: (existing?: HTMLElement | null) => void;
 };
 
-function pathFromEl(el: HTMLElement | null): number[] | null {
-  if (!el) {
-    return null;
-  }
-  const pathEl = el.closest('[data-ocm-path], [data-ocm-block]') ?? el;
-  const pathRaw =
-    pathEl instanceof HTMLElement ? (pathEl.dataset.ocmPath ?? pathEl.dataset.ocmBlock ?? '') : '';
-  if (pathRaw === '') {
-    return null;
-  }
-  const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
-  return path.every((n) => Number.isFinite(n)) ? path : null;
-}
-
-/** Schema-first load from editor doc attrs (not DOM scrape). */
 function schemaFromPath(editor: PluginContext['editor'], path: number[] | null): FormConfig {
-  if (!path) {
-    return emptyFormConfig();
-  }
   try {
-    let node: DocNode = editor.getState().doc;
-    for (const index of path) {
-      const child = node.content?.[index];
-      if (!child) {
-        return emptyFormConfig();
-      }
-      node = child;
-    }
-    if (node.type === 'form') {
+    const node = nodeAtPath(editor.getState().doc, path);
+    if (node?.type === 'form') {
       const schema = readJsonAttr(node.attrs?.schema, null);
       if (isFormConfig(schema)) {
         return schema;

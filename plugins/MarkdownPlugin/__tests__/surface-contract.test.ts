@@ -22,7 +22,7 @@ describe('MarkdownPlugin surface contract', () => {
     hosts.length = 0;
   });
 
-  it('atom defaults: Insert Markdown chrome, no workspace undo chrome', () => {
+  it('atom defaults: Insert Markdown chrome, editor undo chrome always on', () => {
     const host = document.createElement('div');
     document.body.append(host);
     hosts.push(host);
@@ -34,8 +34,8 @@ describe('MarkdownPlugin surface contract', () => {
     Reflect.set(host, '__editor', editor);
 
     const ids = [...host.querySelectorAll('[data-id]')].map((el) => el.getAttribute('data-id'));
-    expect(ids).not.toContain('undo');
-    expect(ids).not.toContain('md-redo');
+    expect(ids).toContain('undo');
+    expect(ids).toContain('redo');
 
     const shortcutKeys = editor.listShortcuts().map((s) => s.keys);
     expect(shortcutKeys).toContain('Mod-Alt-m');

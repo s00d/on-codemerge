@@ -36,11 +36,12 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run build
-      - run: pnpm run check:json-export
-      - run: pnpm run check:json-types
+      - run: node ./scripts/check-public-bundle.mjs
+      - run: node ./scripts/check-surface.mjs json export
+      - run: node ./scripts/check-surface.mjs json types
       - run: pnpm run build:json
-      - run: pnpm run check:markdown-export
-      - run: pnpm run check:markdown-types
+      - run: node ./scripts/check-surface.mjs markdown export
+      - run: node ./scripts/check-surface.mjs markdown types
       - run: pnpm run docs:build
 
   e2e:

@@ -1,8 +1,8 @@
-import { DisposableScope } from '../disposable';
+import { DisposableScope } from '@codemerge/view';
 import { menuTv } from './chrome';
 import { applyPlaceRoot, applyPlaceSubmenu } from './place';
-import { createPortal, h } from './view';
-import type { PortalHandle, ViewSpec } from './view';
+import { createPortal, h } from '@codemerge/view';
+import type { PortalHandle, ViewSpec } from '@codemerge/view';
 
 export interface MenuItem {
   label?: string;

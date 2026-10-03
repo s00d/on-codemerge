@@ -20,7 +20,7 @@ import { Editor, createDefaultPlugins } from 'on-codemerge/code';
 const host = document.getElementById('code-editor')!;
 const editor = new Editor(host, {
   chrome: 'bar',
-  plugins: createDefaultPlugins(), // HistoryChrome + CodeBlockPlugin({ surface: 'workspace' })
+  plugins: createDefaultPlugins(), // CodeBlockPlugin({ surface: 'workspace' })
 });
 
 editor.on('docChanged', () => {
@@ -81,7 +81,7 @@ Paint uses one shared universal structural ruleset (comments, strings, numbers, 
 
 ## Toolbar
 
-`createDefaultPlugins()` ships **HistoryChrome** (undo/redo on kernel SoT) plus **Edit** and **File** overflow menus (copy / select all / clear / indent / outdent / download / upload). Language is editable in the status strip.
+`createDefaultPlugins()` ships **Edit** and **File** overflow menus (copy / select all / clear / indent / outdent / download / upload). Language is editable in the status strip.
 
 Local source-buffer undo (typing / Tab / paste) is keyboard-only: **Mod-z / Mod-y** on the focused editor. Toolbar History walks document history after SoT commits (debounced ~200ms while typing).
 
@@ -121,7 +121,6 @@ CodeBlockPlugin({
   order?: number,
   features?: {
     toolbar?: boolean; // Insert button (atom only); default true
-    historyChrome?: boolean; // include HistoryChromePlugin in createDefaultPlugins
   },
 });
 ```

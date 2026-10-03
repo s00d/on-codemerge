@@ -10,7 +10,7 @@ import {
 } from 'on-codemerge/json';
 import { changeType, duplicateNode, pathToDot, pathToJsonPointer } from '../commands/jsonCommands';
 import { applyTransaction, createState, runCommand } from '@codemerge/kernel';
-import { toEditorDoc, valueToDoc } from '../io';
+import { toEditorDoc, valueToDoc } from '../io/adapters';
 
 function openRaw(editor: JsonEditor): void {
   const btn = editor.host.querySelector('[data-id="json-mode-raw"]') as HTMLButtonElement;

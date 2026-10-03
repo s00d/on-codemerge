@@ -27,4 +27,4 @@ export function isInteractiveTarget(el: EventTarget | null): boolean {
   return el instanceof HTMLElement && Boolean(el.closest('[data-ocm-json-interactive]'));
 }
 
-export { typeLabel } from '../../drivers';
+export { typeLabel } from '../../drivers/registry';

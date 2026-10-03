@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { h, mount, renderDetached } from '../view';
+import { h, mount, renderDetached } from '@codemerge/view';
 import { studioPaneTabs, syncStudioPanel } from '../studioLayout';
 
 describe('studioLayout', () => {

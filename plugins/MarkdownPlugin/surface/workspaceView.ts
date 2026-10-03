@@ -5,12 +5,15 @@ import type { MountHandle } from '@codemerge/sdk';
 import { replaceChildrenWithSafeHtml } from '@ocm/wysiwyg/utils/safeHtml';
 import { defaultMdElementRegistry } from '../elements/registry';
 import type { MdElementRegistry } from '../elements/types';
-import { docToText, emptyEditorDoc, escapeHtml, parseText } from '../io';
+import { docToText, emptyEditorDoc } from '../io/adapters';
+import { escapeHtml } from '../io/escape';
+import { parseText } from '../io/text';
 import { projectPreviewHtml } from '../io/projectPreview';
 import { mountSourceEditor } from '@codemerge/editor';
 import type { SourceEditorHandle } from '@codemerge/editor';
 import {
   hydrateMermaidBlocks,
+  MERMAID_PENDING_SEL,
   restoreMermaidHosts,
   salvageMermaidHosts,
 } from '../widgets/mermaidHydrate';
@@ -31,7 +34,9 @@ export type MdWorkspaceHost = EditorAPI & {
 
 /**
  * Optional server-side preview: POST `{ markdown }` → `text/html`.
- * When set, local projector / mermaid hydrate are skipped for the right pane.
+ * When set, the right pane uses remote HTML instead of local `projectPreviewHtml`.
+ * Remote HTML may be a projector stub (mermaid hosts as `<pre><code>`); the client
+ * still runs `hydrateMermaidBlocks` after paint.
  */
 export type MdRemotePreviewOptions = {
   url: string;
@@ -305,19 +310,17 @@ function previewHtmlHash(html: string): string {
   return `${html.length}:${hash >>> 0}`;
 }
 
-async function paintPreviewFromDoc(
+function paintPreviewFromDoc(
   slot: HTMLElement,
   doc: DocNode,
   elements: MdElementRegistry,
   sync?: ScrollSync | null,
   hydrateCtl?: { abort: AbortController | null; set: (next: AbortController) => void }
-): Promise<void> {
+): void {
   // Sanitize once at the DOM sink (not also inside the projector).
   const html = projectPreviewHtml(doc, { elements, sanitize: false });
   const hash = previewHtmlHash(html);
-  const pendingHosts = slot.querySelector(
-    'div[data-node="mermaid"]:not([data-ocm-mermaid-ready]), .ocm-md-mermaid:not([data-ocm-mermaid-ready])'
-  );
+  const pendingHosts = slot.querySelector(MERMAID_PENDING_SEL);
   if (slot.getAttribute('data-ocm-preview-hash') === hash && !pendingHosts) {
     return;
   }
@@ -336,7 +339,7 @@ async function paintPreviewFromDoc(
       sync?.alignPreviewToEditor();
     }
   });
-  await hydrateMermaidBlocks(slot, { signal: ac.signal });
+  hydrateMermaidBlocks(slot, { signal: ac.signal });
   if (ac.signal.aborted) {
     // Allow a later paint with the same hash to retry hydrate.
     slot.removeAttribute('data-ocm-preview-hash');
@@ -368,7 +371,14 @@ async function paintPreviewRemote(
   ctl: RemotePreviewCtl,
   sync?: ScrollSync | null
 ): Promise<void> {
+  const pending = () => slot.querySelector(MERMAID_PENDING_SEL);
+
+  // Same markdown: skip network, but finish hydrate if a prior pass left pending hosts.
   if (markdown === ctl.lastFetched) {
+    if (pending()) {
+      hydrateMermaidBlocks(slot);
+      sync?.alignPreviewToEditor();
+    }
     setRemoteBusy(ctl, false);
     return;
   }
@@ -400,20 +410,27 @@ async function paintPreviewRemote(
       return;
     }
     const hash = previewHtmlHash(html);
-    if (slot.getAttribute('data-ocm-preview-hash') === hash) {
+    if (slot.getAttribute('data-ocm-preview-hash') === hash && !pending()) {
       ctl.lastFetched = markdown;
       ctl.hadGood = true;
       return;
     }
     replaceChildrenWithSafeHtml(slot, html);
     slot.setAttribute('data-ocm-preview-hash', hash);
-    ctl.lastFetched = markdown;
-    ctl.hadGood = true;
     requestAnimationFrame(() => {
       if (!ac.signal.aborted) {
         sync?.alignPreviewToEditor();
       }
     });
+    hydrateMermaidBlocks(slot, { signal: ac.signal });
+    if (ac.signal.aborted) {
+      // Allow retry of the same markdown (do not stamp lastFetched).
+      slot.removeAttribute('data-ocm-preview-hash');
+      return;
+    }
+    ctl.lastFetched = markdown;
+    ctl.hadGood = true;
+    sync?.alignPreviewToEditor();
   } catch (err) {
     if (ac.signal.aborted || (err instanceof DOMException && err.name === 'AbortError')) {
       return;
@@ -554,7 +571,7 @@ export function mountMdWorkspace(
         void paintPreviewRemote(slot, docToText(doc), remotePreview, remoteCtl, scrollSync);
         return;
       }
-      void paintPreviewFromDoc(slot, doc, elements, scrollSync, hydrateCtl);
+      paintPreviewFromDoc(slot, doc, elements, scrollSync, hydrateCtl);
     });
   };
 

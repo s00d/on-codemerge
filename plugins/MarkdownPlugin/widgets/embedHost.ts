@@ -17,7 +17,8 @@ import type {
   Transaction,
 } from '@codemerge/kernel';
 import type { EditorAPI } from '@codemerge/sdk';
-import { emptyEditorDoc, isMarkdownEditorDoc, parseText, serializeDoc } from '../io';
+import { emptyEditorDoc, isMarkdownEditorDoc } from '../io/adapters';
+import { parseText, serializeDoc } from '../io/text';
 import type { MdWorkspaceHost } from '../surface/workspaceView';
 
 export type EmbedWorkspaceController = {

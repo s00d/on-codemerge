@@ -27,7 +27,10 @@
     "pieExpenses": "Circular: gastos",
     "lineVisitors": "Línea: visitantes",
     "barAreaMode": "Modo barras/área",
-    "editChart": "Editar gráfico"
+    "editChart": "Editar gráfico",
+    "preview": "Vista previa",
+    "edit": "Editar",
+    "settings": "Ajustes"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "¿Seguro que quieres eliminar esta plantilla?",

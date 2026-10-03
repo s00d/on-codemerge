@@ -2,11 +2,11 @@ import '@ocm/wysiwyg/tailwind.css';
 import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
+export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 export {
   JsonPlugin,
   createDefaultPlugins,
   defaultJsonToolbar,
-  HistoryChromePlugin,
   valueToDoc,
   docToValue,
   toEditorDoc,
@@ -16,17 +16,6 @@ export {
   parseText,
   serializeText,
   serializeDoc,
-  ParseError,
-  setValue,
-  insertProperty,
-  insertItem,
-  deleteNode,
-  renameKey,
-  changeType,
-  moveItem,
-  duplicateNode,
-  jsonCommandMap,
-  type JsonLeafType,
   type JsonPluginOptions,
   type JsonPluginFeatures,
   type JsonToolbarOptions,

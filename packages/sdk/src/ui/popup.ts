@@ -1,8 +1,8 @@
-import type { OwnedSlot } from '../disposable';
-import { DisposableScope } from '../disposable';
+import type { OwnedSlot } from '@codemerge/view';
+import { DisposableScope } from '@codemerge/view';
 import { popupTv } from './chrome';
-import { createPortal, h } from './view';
-import type { PortalHandle, ViewSpec } from './view';
+import { createPortal, h } from '@codemerge/view';
+import type { PortalHandle, ViewSpec } from '@codemerge/view';
 
 export interface PopupItem {
   type:

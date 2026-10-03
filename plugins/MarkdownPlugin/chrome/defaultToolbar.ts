@@ -84,7 +84,7 @@ export function runInsertMarkdown(
 /**
  * Markdown domain toolbar preset.
  * Marks (B/I/S/`/link) are top-level like WYSIWYG ToolbarPlugin.
- * Insert / Turn into cover blocks. Undo/redo — `HistoryChromePlugin`.
+ * Insert / Turn into cover blocks. Undo/redo — editor kernel toolbar.
  */
 export function defaultMdToolbar(opts: DefaultMdToolbarOptions): MdToolbarOptions {
   const { elements } = opts;

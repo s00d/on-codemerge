@@ -19,7 +19,7 @@ describe('JsonPlugin surface contract', () => {
     hosts.length = 0;
   });
 
-  it('atom defaults: Insert JSON chrome, no workspace undo/format/shortcuts', () => {
+  it('atom defaults: Insert JSON chrome, editor undo + no workspace format/shortcuts', () => {
     const host = document.createElement('div');
     document.body.append(host);
     hosts.push(host);
@@ -32,8 +32,8 @@ describe('JsonPlugin surface contract', () => {
 
     const ids = [...host.querySelectorAll('[data-id]')].map((el) => el.getAttribute('data-id'));
     // Insert-menu items are portaled only while open — assert via shortcuts / commands.
-    expect(ids).not.toContain('undo');
-    expect(ids).not.toContain('redo');
+    expect(ids).toContain('undo');
+    expect(ids).toContain('redo');
     expect(ids).not.toContain('json-format-pretty');
     expect(ids).not.toContain('shortcuts');
     expect(ids).not.toContain('json-atom-info');
@@ -73,8 +73,9 @@ describe('JsonPlugin surface contract', () => {
     const content = editor.contentElement();
     expect(content?.getAttribute('data-ocm-shell')).toBe('true');
     expect(content?.querySelector('.ocm-json-tree')).toBeTruthy();
-    // Undo lives on HistoryChromePlugin — compose via createDefaultPlugins.
-    expect(host.querySelector('[data-id="undo"]')).toBeNull();
+    // Undo/redo toolbar is seeded by `@codemerge/editor` (no HistoryChrome plugin).
+    expect(host.querySelector('[data-id="undo"]')).toBeTruthy();
+    expect(host.querySelector('[data-id="redo"]')).toBeTruthy();
   });
 
   it('workspace ignores decoy .ocm-content outside contentElement', () => {

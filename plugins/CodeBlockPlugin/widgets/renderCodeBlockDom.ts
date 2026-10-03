@@ -1,5 +1,5 @@
 import { h, renderDetached } from '@codemerge/sdk';
-import { safeLangToken } from '../io';
+import { safeLangToken } from '../io/text';
 
 export function renderCodeBlockDom(
   code: string,

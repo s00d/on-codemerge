@@ -68,12 +68,11 @@ Edit loads from `attrs.schema` only (not DOM scrape). Legacy `parseForm(HTMLElem
 FormBuilderPlugin({
   surface: 'workspace' | 'atom', // default 'atom'
   toolbar?: FormToolbarOptions,  // workspace bar; omit → defaultFormToolbar()
-  features?: { toolbar?: boolean; historyChrome?: boolean },
   menu?: string | null,          // atom Insert placement
 });
 ```
 
-`createDefaultPlugins()` (from `on-codemerge/forms`) = `HistoryChromePlugin` + `FormBuilderPlugin({ surface: 'workspace' })`.
+`createDefaultPlugins()` (from `on-codemerge/forms`) = `FormBuilderPlugin({ surface: 'workspace' })`.
 
 Context-menu edit / duplicate / delete operate on the selected form widget in the document.
 

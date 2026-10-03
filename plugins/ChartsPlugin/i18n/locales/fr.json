@@ -27,7 +27,10 @@
     "pieExpenses": "Secteurs : dépenses",
     "lineVisitors": "Courbe : visiteurs",
     "barAreaMode": "Mode barres/aires",
-    "editChart": "Modifier le graphique"
+    "editChart": "Modifier le graphique",
+    "preview": "Aperçu",
+    "edit": "Éditer",
+    "settings": "Paramètres"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "Voulez-vous vraiment supprimer ce modèle ?",

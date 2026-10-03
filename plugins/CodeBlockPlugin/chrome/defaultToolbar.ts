@@ -12,7 +12,7 @@ import type { CodeToolbarItem, CodeToolbarOptions } from './types';
 
 /**
  * Code Editor toolbar preset.
- * Undo/redo come from HistoryChromePlugin.
+ * Undo/redo come from editor kernel toolbar.
  * Bar shows Edit / File menus (like JSON Format / JSON); items live in menus.
  */
 export function defaultCodeToolbar(): CodeToolbarOptions {

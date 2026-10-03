@@ -337,5 +337,9 @@
   "clearStyles": {
     "title": "Formatierung entfernen",
     "nothingToClear": "Nichts zu entfernen"
+  },
+  "history": {
+    "undo": "Rückgängig",
+    "redo": "Wiederholen"
   }
 }

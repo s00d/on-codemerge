@@ -20,9 +20,6 @@
     "@codemerge/hunspell": "workspace:^",
     "@codemerge/kernel": "workspace:^",
     "@codemerge/sdk": "workspace:^",
-    "@i18n-micro/runtime": "catalog:",
-    "dompurify": "catalog:",
-    "tailwind-merge": "catalog:",
-    "tailwind-variants": "catalog:"
+    "@i18n-micro/runtime": "catalog:"
   }
 }

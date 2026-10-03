@@ -2,6 +2,7 @@ import '@ocm/wysiwyg/tailwind.css';
 import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
+export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 export {
   MarkdownPlugin,
   createDefaultPlugins,
@@ -9,7 +10,6 @@ export {
   defaultMdElementRegistry,
   defaultMdToolbar,
   runInsertMarkdown,
-  HistoryChromePlugin,
   BUILTIN_MD_ELEMENTS,
   emptyEditorDoc,
   isMarkdownEditorDoc,
@@ -17,7 +17,6 @@ export {
   parseText,
   serializeText,
   serializeDoc,
-  ParseError,
   renderMarkdownPreviewHtml,
   projectPreviewHtml,
   hydrateMermaidBlocks,

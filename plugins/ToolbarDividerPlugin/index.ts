@@ -1,1 +1,0 @@
-export { ToolbarDividerPlugin } from '../ToolbarPlugin';

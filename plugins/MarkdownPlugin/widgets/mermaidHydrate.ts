@@ -1,31 +1,13 @@
-import { parseSafeSvg } from '@ocm/wysiwyg/utils/safeHtml';
-import type { Mermaid } from 'mermaid';
+import { render as renderMermaidSvg } from '@codemerge/mermaid';
+import { mountTrustedSvg } from '@ocm/wysiwyg/utils/safeHtml';
 
-let mermaidPromise: Promise<Mermaid> | null = null;
-let renderSeq = 0;
-
-function loadMermaid(): Promise<Mermaid> {
-  if (!mermaidPromise) {
-    mermaidPromise = (async () => {
-      const mod = await import('mermaid');
-      const api = mod.default;
-      api.initialize({
-        startOnLoad: false,
-        // strict: mermaid escapes label HTML / drops click handlers.
-        securityLevel: 'strict',
-        theme: 'neutral',
-      });
-      return api;
-    })();
-  }
-  return mermaidPromise;
-}
+export const MERMAID_HOST_SEL = 'div[data-node="mermaid"], .ocm-md-mermaid';
+export const MERMAID_PENDING_SEL =
+  'div[data-node="mermaid"]:not([data-ocm-mermaid-ready]), .ocm-md-mermaid:not([data-ocm-mermaid-ready])';
+export const MERMAID_READY_SEL =
+  'div[data-node="mermaid"][data-ocm-mermaid-ready="1"], .ocm-md-mermaid[data-ocm-mermaid-ready="1"]';
 
 function readSource(host: HTMLElement): string {
-  const fromAttr = host.getAttribute('data-source');
-  if (fromAttr !== null && fromAttr !== '') {
-    return fromAttr;
-  }
   const hash = host.getAttribute('data-ocm-mermaid-hash');
   if (hash !== null && hash !== '') {
     return hash;
@@ -36,13 +18,11 @@ function readSource(host: HTMLElement): string {
 
 /**
  * Pull already-hydrated mermaid hosts out of the preview before a full DOM replace.
- * Keyed by diagram source so unchanged diagrams skip `mermaid.render`.
+ * Keyed by diagram source so unchanged diagrams skip re-render.
  */
 export function salvageMermaidHosts(root: HTMLElement): Map<string, HTMLElement> {
   const out = new Map<string, HTMLElement>();
-  for (const host of root.querySelectorAll<HTMLElement>(
-    'div[data-node="mermaid"][data-ocm-mermaid-ready="1"], .ocm-md-mermaid[data-ocm-mermaid-ready="1"]'
-  )) {
+  for (const host of root.querySelectorAll<HTMLElement>(MERMAID_READY_SEL)) {
     const source = readSource(host);
     if (!source.trim() || !host.querySelector('svg')) {
       continue;
@@ -59,9 +39,7 @@ export function restoreMermaidHosts(root: HTMLElement, salvaged: Map<string, HTM
   if (salvaged.size === 0) {
     return;
   }
-  for (const host of root.querySelectorAll<HTMLElement>(
-    'div[data-node="mermaid"], .ocm-md-mermaid'
-  )) {
+  for (const host of root.querySelectorAll<HTMLElement>(MERMAID_HOST_SEL)) {
     if (host.hasAttribute('data-ocm-mermaid-ready')) {
       continue;
     }
@@ -77,23 +55,11 @@ export function restoreMermaidHosts(root: HTMLElement, salvaged: Map<string, HTM
 
 /**
  * Turn `[data-node="mermaid"]` hosts into inline SVG (parent DOM) with data-node retained.
- * Skips hosts whose hash matches an already-rendered SVG.
+ * Sync — `@codemerge/mermaid` render is sync; SVG is trusted (escaped at emit).
  */
-export async function hydrateMermaidBlocks(
-  root: HTMLElement,
-  opts: { signal?: AbortSignal } = {}
-): Promise<void> {
-  // Hosts only (div) — ignore SVG that already carries data-node after hydrate.
-  const hosts = [
-    ...root.querySelectorAll<HTMLElement>(
-      'div[data-node="mermaid"]:not([data-ocm-mermaid-ready]), .ocm-md-mermaid:not([data-ocm-mermaid-ready])'
-    ),
-  ];
+export function hydrateMermaidBlocks(root: HTMLElement, opts: { signal?: AbortSignal } = {}): void {
+  const hosts = [...root.querySelectorAll<HTMLElement>(MERMAID_PENDING_SEL)];
   if (hosts.length === 0) {
-    return;
-  }
-  const mermaid = await loadMermaid();
-  if (opts.signal?.aborted) {
     return;
   }
 
@@ -108,19 +74,17 @@ export async function hydrateMermaidBlocks(
       host.setAttribute('data-ocm-mermaid-ready', '1');
       continue;
     }
-    host.setAttribute('data-ocm-mermaid-ready', '1');
     if (!source.trim()) {
+      host.setAttribute('data-ocm-mermaid-ready', '1');
       continue;
     }
     host.setAttribute('data-ocm-mermaid-hash', source);
     try {
-      renderSeq += 1;
-      const id = `ocm-mmd-${renderSeq}`;
-      const { svg } = await mermaid.render(id, source);
+      const svg = renderMermaidSvg(source);
       if (opts.signal?.aborted) {
         return;
       }
-      const svgEl = parseSafeSvg(svg);
+      const svgEl = mountTrustedSvg(svg);
       if (!svgEl) {
         host.setAttribute('data-ocm-mermaid-error', '1');
         continue;
@@ -129,6 +93,7 @@ export async function hydrateMermaidBlocks(
       svgEl.setAttribute('data-ocm-mermaid-ready', '1');
       svgEl.classList.add('ocm-md-mermaid__svg');
       host.replaceChildren(svgEl);
+      host.setAttribute('data-ocm-mermaid-ready', '1');
     } catch {
       host.setAttribute('data-ocm-mermaid-error', '1');
     }

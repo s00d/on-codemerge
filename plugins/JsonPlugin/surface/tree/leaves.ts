@@ -1,7 +1,7 @@
 import type { DocNode } from '@codemerge/kernel';
 import { h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
-import { getDriver, isJsonLeafType } from '../../drivers';
+import { getDriver, isJsonLeafType } from '../../drivers/registry';
 import type { TreeHandlers } from './types';
 
 export function leafValueView(node: DocNode, path: number[], handlers: TreeHandlers): ViewSpec {

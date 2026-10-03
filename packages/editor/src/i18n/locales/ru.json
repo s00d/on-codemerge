@@ -337,5 +337,9 @@
   "clearStyles": {
     "title": "Очистить стили",
     "nothingToClear": "Нечего очищать"
+  },
+  "history": {
+    "undo": "Отменить",
+    "redo": "Повторить"
   }
 }

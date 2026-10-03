@@ -3,7 +3,7 @@
 `MarkdownPlugin` is the shared Markdown surface for both editors:
 
 - **WYSIWYG (`surface: 'atom'`)** — registers **only** `md_embed` (no `heading`/lists — those stay on Typography/Lists). Insert menu embeds dual-pane (draft + Apply/blur). Persist attr remains `text`.
-- **Markdown app (`surface: 'workspace'`)** — dual-pane workspace; SoT is prose JSON (`callout`, `mermaid`, headings, …). Preview uses `projectPreviewHtml(state.doc)` (no live MD re-parse).
+- **Markdown app (`surface: 'workspace'`)** — dual-pane workspace; SoT is prose JSON (`callout`, `mermaid`, headings, …). Preview uses `projectPreviewHtml(state.doc)` (no live MD re-parse). Mermaid blocks hydrate via **`@codemerge/mermaid`** — a simplified Mermaid-subset parser (not full Mermaid.js); see [Mermaid](/guide/mermaid).
 
 ## Demo (WYSIWYG embed)
 
@@ -123,7 +123,7 @@ MarkdownPlugin({
 | `command` | SDK `ToolbarButton.command` → `onCommand`                                             |
 | `run`     | SDK deferred click (`{ editor, workspace }`) — use `runInsertMarkdown` for CM inserts |
 
-`elements` = callout kinds + preview (fed into `defaultMdToolbar`). Undo/redo = `HistoryChromePlugin` (same ids as HistoryPlugin).
+`elements` = callout kinds + preview (fed into `defaultMdToolbar`). Undo/redo toolbar is built into `/editor` (same ids as HistoryPlugin).
 
 ## Remote preview (`preview`)
 

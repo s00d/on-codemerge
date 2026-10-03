@@ -12,15 +12,18 @@ export function nextId(prefix = 'n'): string {
 }
 
 export function createText(text: string, marks: Mark[] = []): DocNode {
-  return { marks: marks.length > 0 ? marks.map((m) => ({ ...m })) : undefined, text, type: 'text' };
+  return marks.length > 0
+    ? { marks: marks.map((m) => ({ ...m })), text, type: 'text' }
+    : { text, type: 'text' };
 }
 
 export function createParagraph(
   content: DocNode[] = [createText('')],
   attrs?: Record<string, unknown>
 ): DocNode {
+  const nextAttrs = copyAttrs(attrs);
   return {
-    attrs: copyAttrs(attrs),
+    ...(nextAttrs ? { attrs: nextAttrs } : {}),
     content: [...content],
     id: nextId('p'),
     type: 'paragraph',
@@ -64,13 +67,31 @@ export function copyAttrs(
 
 /** Shallow clone node; children array is new, child refs shared (structural sharing). */
 export function cloneNode(node: DocNode): DocNode {
-  return {
-    ...node,
-    attrs: copyAttrs(node.attrs),
-    content: node.content ? [...node.content] : undefined,
-    marks: node.marks ? node.marks.map((m) => ({ ...m, attrs: copyAttrs(m.attrs) })) : undefined,
-    text: node.text,
-  };
+  const out: DocNode = { type: node.type };
+  if (node.id !== undefined) {
+    out.id = node.id;
+  }
+  if (node.text !== undefined) {
+    out.text = node.text;
+  }
+  const attrs = copyAttrs(node.attrs);
+  if (attrs) {
+    out.attrs = attrs;
+  }
+  if (node.content) {
+    out.content = [...node.content];
+  }
+  if (node.marks) {
+    out.marks = node.marks.map((m) => {
+      const mark: Mark = { type: m.type };
+      const markAttrs = copyAttrs(m.attrs);
+      if (markAttrs) {
+        mark.attrs = markAttrs;
+      }
+      return mark;
+    });
+  }
+  return out;
 }
 
 /** Deep clone node tree (content recursively cloned). */
@@ -84,11 +105,30 @@ export function deepCloneNode(node: DocNode): DocNode {
 
 /** Assign stable ids to every non-text node missing `id`. */
 export function ensureNodeIds(node: DocNode): DocNode {
-  const out: DocNode = {
-    ...node,
-    content: node.content ? node.content.map(ensureNodeIds) : undefined,
-    marks: node.marks ? node.marks.map((m) => ({ ...m })) : undefined,
-  };
+  const out: DocNode = { type: node.type };
+  if (node.id !== undefined) {
+    out.id = node.id;
+  }
+  if (node.text !== undefined) {
+    out.text = node.text;
+  }
+  const attrs = copyAttrs(node.attrs);
+  if (attrs) {
+    out.attrs = attrs;
+  }
+  if (node.content) {
+    out.content = node.content.map(ensureNodeIds);
+  }
+  if (node.marks) {
+    out.marks = node.marks.map((m) => {
+      const mark: Mark = { type: m.type };
+      const markAttrs = copyAttrs(m.attrs);
+      if (markAttrs) {
+        mark.attrs = markAttrs;
+      }
+      return mark;
+    });
+  }
   if (out.type !== 'text' && !out.id) {
     const prefix =
       out.type === 'doc'

@@ -19,7 +19,7 @@ describe('CodeBlockPlugin surface contract', () => {
     hosts.length = 0;
   });
 
-  it('atom defaults: Insert hotkey, no workspace undo chrome', () => {
+  it('atom defaults: Insert hotkey, editor undo chrome always on', () => {
     const host = document.createElement('div');
     document.body.append(host);
     hosts.push(host);
@@ -31,8 +31,8 @@ describe('CodeBlockPlugin surface contract', () => {
     Reflect.set(host, '__editor', editor);
 
     const ids = [...host.querySelectorAll('[data-id]')].map((el) => el.getAttribute('data-id'));
-    expect(ids).not.toContain('undo');
-    expect(ids).not.toContain('redo');
+    expect(ids).toContain('undo');
+    expect(ids).toContain('redo');
 
     const shortcutKeys = editor.listShortcuts().map((s) => s.keys);
     expect(shortcutKeys).toContain('Mod-Alt-q');
@@ -68,7 +68,7 @@ describe('CodeBlockPlugin surface contract', () => {
     expect(content?.getAttribute('data-ocm-shell')).toBe('true');
     expect(content?.classList.contains('ocm-code-root')).toBe(true);
     expect(content?.querySelector('.ocm-source-editor')).toBeTruthy();
-    expect(host.querySelector('[data-id="undo"]')).toBeNull();
+    expect(host.querySelector('[data-id="undo"]')).toBeTruthy();
   });
 
   it('workspace ignores decoy .ocm-content outside contentElement', () => {

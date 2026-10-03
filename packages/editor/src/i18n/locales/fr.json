@@ -337,5 +337,9 @@
   "clearStyles": {
     "title": "Effacer les styles",
     "nothingToClear": "Rien à effacer"
+  },
+  "history": {
+    "undo": "Annuler",
+    "redo": "Rétablir"
   }
 }

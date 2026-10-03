@@ -3,11 +3,7 @@ import { describe, expect, it } from 'vitest';
  * @jest-environment jsdom
  */
 import { createPlatform } from '../Extension';
-import {
-  MathPlugin,
-  createCorePlugins,
-  createDefaultPlugins,
-} from '../../../../../apps/wysiwyg/src/plugins';
+import { MathPlugin, createCorePlugins, createDefaultPlugins } from '../../../../../plugins';
 
 describe('platform plugins', () => {
   it('seals schema with core plugins', () => {

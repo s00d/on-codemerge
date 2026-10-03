@@ -337,5 +337,9 @@
   "clearStyles": {
     "title": "스타일 지우기",
     "nothingToClear": "지울 항목이 없습니다"
+  },
+  "history": {
+    "undo": "실행 취소",
+    "redo": "다시 실행"
   }
 }

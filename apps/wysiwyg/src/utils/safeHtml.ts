@@ -70,6 +70,7 @@ const SVG_TAGS = new Set([
   'radialgradient',
   'stop',
   'marker',
+  'pattern',
   'use',
   'symbol',
   'title',
@@ -133,10 +134,11 @@ const SVG_ATTRS = new Set([
   'ry',
   'width',
   'height',
-  'viewBox',
+  // Keys must be lowercase — isAllowedAttr lowercases attr names before lookup.
+  'viewbox',
   'xmlns',
   'xmlns:xlink',
-  'preserveAspectRatio',
+  'preserveaspectratio',
   'text-anchor',
   'dominant-baseline',
   'alignment-baseline',
@@ -150,11 +152,20 @@ const SVG_ATTRS = new Set([
   'marker-start',
   'marker-end',
   'marker-mid',
+  'markerwidth',
+  'markerheight',
+  'markerunits',
+  'refx',
+  'refy',
+  'orient',
+  'patternunits',
+  'patterncontentunits',
+  'patterntransform',
   'offset',
   'stop-color',
   'stop-opacity',
-  'gradientUnits',
-  'gradientTransform',
+  'gradientunits',
+  'gradienttransform',
   'xlink:href',
   'href',
   'points',
@@ -183,29 +194,6 @@ function isSafeUrl(value: string): boolean {
     return false;
   }
   return true;
-}
-
-/** Drop scripts + on* / javascript: URLs in an already-built subtree. */
-function stripDangerous(root: Element): void {
-  for (const el of root.querySelectorAll('script')) {
-    el.remove();
-  }
-  for (const el of root.querySelectorAll('*')) {
-    for (let i = el.attributes.length - 1; i >= 0; i -= 1) {
-      const attr = el.attributes.item(i);
-      if (!attr) {
-        continue;
-      }
-      const name = attr.name.toLowerCase();
-      if (name.startsWith('on')) {
-        el.removeAttribute(attr.name);
-        continue;
-      }
-      if ((name === 'href' || name === 'src' || name === 'xlink:href') && !isSafeUrl(attr.value)) {
-        el.removeAttribute(attr.name);
-      }
-    }
-  }
 }
 
 function isAllowedAttr(tag: string, attr: string, value: string, svg: boolean): boolean {
@@ -270,14 +258,13 @@ function appendSanitized(parent: ParentNode, node: Node, doc: Document, svg: boo
     }
     return;
   }
-  // foreignObject holds XHTML labels — import subtree, then strip handlers.
+  // foreignObject holds XHTML labels — sanitize children via HTML allowlist.
   if (name === 'foreignobject') {
     const next = doc.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
     copySafeAttrs(node, next, true);
     for (const child of node.childNodes) {
-      next.append(doc.importNode(child, true));
+      appendSanitized(next, child, doc, false);
     }
-    stripDangerous(next);
     parent.append(next);
     return;
   }
@@ -334,6 +321,25 @@ export function parseSafeSvg(svg: string): SVGElement | null {
   appendSanitized(wrap, root, document, true);
   const cleaned = wrap.firstElementChild;
   return cleaned instanceof SVGElement ? cleaned : null;
+}
+
+/**
+ * Mount a trusted SVG string without sanitize walk.
+ * Trust boundary: only pass output from `@codemerge/mermaid` `render()` (labels escaped via escapeXml).
+ * Untrusted SVG must use `parseSafeSvg` instead.
+ * Still rejects parsererror / non-svg roots.
+ */
+export function mountTrustedSvg(svg: string): SVGElement | null {
+  if (typeof DOMParser === 'undefined') {
+    return null;
+  }
+  const parsed = new DOMParser().parseFromString(svg, 'image/svg+xml');
+  const root = parsed.documentElement;
+  if (root === null || root.nodeName === 'parsererror' || tagName(root) !== 'svg') {
+    return null;
+  }
+  const imported = document.importNode(root, true);
+  return imported instanceof SVGElement ? imported : null;
 }
 
 /** Replace element children with a sanitized HTML fragment. */

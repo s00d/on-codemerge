@@ -25,6 +25,19 @@
   @apply px-2 py-4 text-center text-xs text-ocm-text-muted;
 }
 
+/* Keep in sync with CalendarPlugin/style.scss — month must fit max-w-md. */
+.calendar-widget .cal-month {
+  @apply min-w-0 w-full;
+}
+
+.calendar-widget .cal-month-cell {
+  @apply min-h-[2.75rem] sm:min-h-[3.25rem];
+}
+
+.calendar-widget .cal-month-cell__events .cal-occ {
+  @apply max-w-full;
+}
+
 .calendar-event {
   @apply relative cursor-pointer rounded-lg border border-transparent px-2.5 py-2 pl-3 transition-colors duration-100;
 

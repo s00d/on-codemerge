@@ -26,8 +26,11 @@ The **`Editor`** class and headless HTML/Markdown IO live on the package root (`
 | `on-codemerge`                    | Product: `Editor`, plugins, CSS, `importHTML` / `exportMarkdown`, … |
 | `on-codemerge/sdk`                | Plugin authoring + UI + publish helpers (compat subpath)            |
 | `on-codemerge/kernel`             | Pure doc/ops via product subpath                                    |
+| `on-codemerge/view`               | ViewSpec DOM runtime (product subpath)                              |
 | `@codemerge/sdk`                  | Same SDK as a standalone npm package (plugin authors / headless)    |
 | `@codemerge/kernel`               | Same kernel standalone                                              |
+| `@codemerge/view`                 | Zero-dep `h` / `mount` / portals (also re-exported from sdk)        |
+| `@codemerge/mermaid`              | Sync Mermaid-subset SVG — see [Mermaid](./mermaid.md)               |
 | `@codemerge/hunspell`             | Spell engine without the editor                                     |
 | `@codemerge/collaboration-server` | Authoritative collab server (ops op-log, presence, REST)            |
 
@@ -73,15 +76,14 @@ Pair with Editor: `getPublishedHTML()` / `getPublishedDocument()` / `getPublishe
 
 Build plugin UI with ViewSpec — no `document.createElement` / `innerHTML` in plugins.
 
-| Export                                      | Role                                               |
-| ------------------------------------------- | -------------------------------------------------- |
-| `h` / `text` / `fragment`                   | Elements / text / fragments                        |
-| `foreign`                                   | Escape hatch (still mount children with `h`)       |
-| `img` / `video` / `iframe` / `canvas`       | Typed element helpers                              |
-| `mount` / `patch` / `renderDetached`        | Attach / update / detached root                    |
-| `viewToHtml`                                | Serialize ViewSpec → HTML string (export boundary) |
-| `ui`                                        | Namespace object mirroring the helpers above       |
-| `downloadUrl` / `downloadBlob` / `pickFile` | File download / picker portals                     |
+| Export                                      | Role                                                 |
+| ------------------------------------------- | ---------------------------------------------------- |
+| `h`                                         | Hyperscript elements (string/number children = text) |
+| `foreign`                                   | Escape hatch (still mount children with `h`)         |
+| `img` / `video` / `iframe` / `canvas`       | Typed element helpers                                |
+| `mount` / `renderDetached`                  | Attach / detached root (`handle.update` to refresh)  |
+| `viewToHtml`                                | Serialize ViewSpec → HTML string (export boundary)   |
+| `downloadUrl` / `downloadBlob` / `pickFile` | File download / picker portals                       |
 
 ## Portals
 
@@ -94,14 +96,15 @@ Required for shadow DOM / iframe hosts — see [Chrome & host](/integrate/chrome
 
 ## Chrome services
 
-| Export                                                                | Role                                         |
-| --------------------------------------------------------------------- | -------------------------------------------- |
-| `ToolbarPanel`                                                        | Core toolbar panel (Editor owns an instance) |
-| `PopupService` / `PopupController`                                    | Modal / popup stack                          |
-| `ContextMenuService`                                                  | Context menus                                |
-| `NotifyService`                                                       | Toasts / confirms                            |
-| `placeRoot` / `placeSubmenu` / `applyPlaceRoot` / `applyPlaceSubmenu` | Menu positioning                             |
-| `editorChromeTv`                                                      | Tailwind-variants tokens for chrome          |
+| Export                                                                | Role                                           |
+| --------------------------------------------------------------------- | ---------------------------------------------- |
+| `ToolbarPanel`                                                        | Core toolbar panel (Editor owns an instance)   |
+| `PopupService` / `PopupController`                                    | Modal / popup stack                            |
+| `ContextMenuService`                                                  | Context menus                                  |
+| `NotifyService`                                                       | Toasts / confirms                              |
+| `placeRoot` / `placeSubmenu` / `applyPlaceRoot` / `applyPlaceSubmenu` | Menu positioning                               |
+| `studioPaneTabs` / `syncStudioPanel`                                  | Multi-pane studio mobile tabs (Charts/Forms/…) |
+| `editorChromeTv`                                                      | Tailwind-variants tokens for chrome            |
 
 Types: `ToolbarButton`, `ToolbarMenuDef`, `PopupOptions`, `MenuItem`, `NotifyOptions`, …
 
@@ -135,16 +138,18 @@ Full usage examples: [Editor API](./editor.md).
 
 ## CSS entry points (package)
 
-| Import                    | Role                                    |
-| ------------------------- | --------------------------------------- |
-| `on-codemerge/index.css`  | Editor chrome                           |
-| `on-codemerge/public.css` | Published atom skins + prose            |
-| `on-codemerge/sdk.css`    | SDK chrome styles                       |
-| `on-codemerge/public.js`  | Published runtimes (timer, calendar, …) |
+| Import                    | Role                                                               |
+| ------------------------- | ------------------------------------------------------------------ |
+| `on-codemerge/index.css`  | Editor chrome                                                      |
+| `on-codemerge/public.css` | Published atom skins + prose                                       |
+| `on-codemerge/sdk.css`    | SDK chrome styles                                                  |
+| `on-codemerge/public.js`  | Published runtimes bootstrap (timer, calendar, mermaid hydrate, …) |
 
 ## Related
 
 - [Authoring plugins](./authoring-plugins.md)
 - [Editor API](./editor.md) — HTML / Markdown / published boundaries
+- [View runtime](./view.md)
+- [Mermaid](./mermaid.md)
 - [Document model](./document-model.md)
 - [Export plugin](/plugins/export-plugin)

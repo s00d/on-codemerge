@@ -386,6 +386,8 @@
 
 .ocm-studio__body {
   @apply grid min-h-0 flex-1 grid-cols-1 gap-2 overflow-hidden;
+  /* One row takes the flex leftover — avoid content-sized half-height panes. */
+  grid-template-rows: minmax(0, 1fr);
 
   @media (width < 64rem) {
     > [data-ocm-studio-pane].is-studio-hidden {

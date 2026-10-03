@@ -10,7 +10,7 @@ export type DefaultFormToolbarOptions = {
 
 /**
  * Forms workspace toolbar — only actions not already in the studio chrome.
- * Palette / Templates / method live in the workspace UI; undo/redo from HistoryChromePlugin.
+ * Palette / Templates / method live in the workspace UI; undo/redo from editor kernel toolbar.
  */
 export function defaultFormToolbar(opts: DefaultFormToolbarOptions = {}): FormToolbarOptions {
   const previewWidth = opts.previewWidth !== false;

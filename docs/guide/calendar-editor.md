@@ -20,7 +20,7 @@ import { Editor, createDefaultPlugins } from 'on-codemerge/calendar';
 const host = document.getElementById('calendar-editor')!;
 const editor = new Editor(host, {
   chrome: 'bar',
-  plugins: createDefaultPlugins(), // HistoryChrome + CalendarPlugin({ surface: 'workspace' })
+  plugins: createDefaultPlugins(), // CalendarPlugin({ surface: 'workspace' })
 });
 
 editor.on('docChanged', () => {
@@ -70,7 +70,7 @@ SoT is `doc` → single `calendar` child. Events, layers, view, and cursor live 
 
 ## Toolbar
 
-`createDefaultPlugins()` ships **HistoryChrome** (undo/redo). Studio chrome owns views, import/export, and add event (`defaultCalendarToolbar()` is empty). Customize via `toolbar` / `createDefaultPlugins({ toolbar })`.
+`createDefaultPlugins()` Undo/redo toolbar is built into the editor. Studio chrome owns views, import/export, and add event. Customize via `toolbar` / `createDefaultPlugins({ toolbar })`.
 
 ## Local demo
 

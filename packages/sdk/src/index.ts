@@ -13,8 +13,7 @@ export type { EditorAPI, LocaleMessages, TranslateParams } from './types';
 export type { ToolbarButton, ToolbarMenuDef, ToolbarAction, ToolbarText } from './ui/toolbar';
 export type { ToolbarConfig, ToolbarConfigItem, PluginToolbarOpts } from './ui/toolbarConfig';
 export { applyToolbarConfig, pluginToolbarPlacement } from './ui/toolbarConfig';
-export { KERNEL_UNDO_REDO_HOTKEYS, historyToolbarItems } from './ui/historyToolbar';
-export type { HistoryToolbarIcons } from './ui/historyToolbar';
+export { KERNEL_UNDO_REDO_HOTKEYS } from './ui/historyToolbar';
 export type { PopupHandle, PopupOptions, PopupItem, PopupButton } from './ui/popup';
 export { PopupService, PopupController } from './ui/popup';
 export type { MenuItem, MenuPosition } from './ui/context-menu';
@@ -36,7 +35,7 @@ export {
   type Disposable,
   type DisposeFn,
   type Ownable,
-} from './disposable';
+} from '@codemerge/view';
 export {
   createPluginContext,
   type PluginContext,
@@ -44,17 +43,13 @@ export {
   type CreatePluginContextOptions,
 } from './context';
 export {
-  ui,
   h,
-  text,
-  fragment,
   foreign,
   img,
   video,
   iframe,
   canvas,
   mount,
-  patch,
   renderDetached,
   viewToHtml,
   createPortal,
@@ -66,7 +61,7 @@ export {
   type ViewForeignSpec,
   type MountHandle,
   type PortalHandle,
-} from './ui/view';
+} from '@codemerge/view';
 export {
   getPortalRoot,
   setPortalRoot,
@@ -77,7 +72,7 @@ export {
   type PortalTargetName,
   type PortalOptions,
   type ViewTeleportSpec,
-} from './ui/portal';
+} from '@codemerge/view';
 export {
   attrString,
   withMarkTarget,

@@ -1,8 +1,8 @@
-import { DisposableScope } from '../disposable';
+import { DisposableScope } from '@codemerge/view';
 import { notifyTv } from './chrome';
 import type { PopupService } from './popup';
-import { createPortal, h } from './view';
-import type { PortalHandle, ViewSpec } from './view';
+import { createPortal, h } from '@codemerge/view';
+import type { PortalHandle, ViewSpec } from '@codemerge/view';
 
 export interface NotifyOptions {
   message: string;

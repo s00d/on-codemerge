@@ -1,6 +1,7 @@
 import { downloadBlob, h, mount, pickFile, studioPaneTabs, syncStudioPanel } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { EditorState } from '@codemerge/kernel';
+import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 import type { CalendarDoc, CalendarView } from '../types';
 import { isCalendarView } from '../types';
 import {
@@ -18,7 +19,8 @@ import {
 } from '../drivers/defaults';
 import { eventInspector } from '../drivers/eventInspector';
 import { renderView } from '../drivers/views';
-import { importCalendarText, serializeIcs, serializePayload } from '../io';
+import { importCalendarText, serializeIcs } from '../io/ics';
+import { MAX_CALENDAR_BYTES, serializePayload } from '../io/text';
 import { payloadFromDoc } from '../io/adapters';
 
 export type CalendarWorkspaceHandle = {
@@ -533,8 +535,15 @@ export function mountCalendarWorkspace(
                       if (!file) {
                         return;
                       }
+                      if (file.size > MAX_CALENDAR_BYTES) {
+                        editor.notify(`Calendar import exceeds ${MAX_CALENDAR_BYTES} bytes`);
+                        return;
+                      }
                       commit(importCalendarText(await file.text()));
-                    } catch {
+                    } catch (err) {
+                      if (err instanceof ParseError) {
+                        editor.notify(err.message);
+                      }
                       /* cancelled */
                     }
                   })();
@@ -674,7 +683,15 @@ export function mountCalendarWorkspace(
       commit({ ...doc, view });
     },
     importText: (text) => {
-      commit(importCalendarText(text));
+      try {
+        commit(importCalendarText(text));
+      } catch (err) {
+        if (err instanceof ParseError) {
+          editor.notify(err.message);
+          return;
+        }
+        throw err;
+      }
     },
     exportJson: () => serializePayload(doc),
     exportIcs: () => serializeIcs(doc),

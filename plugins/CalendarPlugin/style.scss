@@ -22,6 +22,19 @@
   @apply cursor-pointer px-2 py-4 text-center text-xs text-ocm-text-muted;
 }
 
+/* Month grid must shrink into atom chrome (max-w-md + body padding). */
+.calendar-widget .cal-month {
+  @apply min-w-0 w-full;
+}
+
+.calendar-widget .cal-month-cell {
+  @apply min-h-[2.75rem] sm:min-h-[3.25rem];
+}
+
+.calendar-widget .cal-month-cell__events .cal-occ {
+  @apply max-w-full;
+}
+
 /* Studio workspace */
 .cal-ws {
   @apply min-h-[28rem] font-sans text-sm text-ocm-text;

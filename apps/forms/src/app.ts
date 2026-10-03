@@ -2,11 +2,11 @@ import '@ocm/wysiwyg/tailwind.css';
 import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
+export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 export {
   FormBuilderPlugin,
   createDefaultPlugins,
   defaultFormToolbar,
-  HistoryChromePlugin,
   emptyEditorDoc,
   emptyFormConfig,
   isFormEditorDoc,
@@ -14,14 +14,11 @@ export {
   parseText,
   serializeText,
   serializeDoc,
-  ParseError,
   MAX_FORM_BYTES,
   isFormConfig,
   isFieldType,
   formView,
   fieldView,
-  FormStore,
-  getDriver,
   type FormBuilderPluginOptions,
   type FormBuilderPluginFeatures,
   type FormToolbarOptions,

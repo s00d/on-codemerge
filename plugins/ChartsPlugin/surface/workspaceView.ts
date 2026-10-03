@@ -1,14 +1,15 @@
 import type { EditorState } from '@codemerge/kernel';
 import type { DisposableScope, EditorAPI } from '@codemerge/sdk';
 import { ChartMenu } from '../components/ChartMenu';
-import type { ChartAttrs } from '../io';
-import { attrsFromDoc, emptyChartAttrs } from '../io';
+import type { ChartAttrs } from '../io/adapters';
+import { attrsFromDoc, emptyChartAttrs } from '../io/adapters';
 
 export type ChartWorkspaceHandle = {
   destroy: () => void;
   update: (state: EditorState) => void;
   getAttrs: () => ChartAttrs;
   setAttrs: (attrs: ChartAttrs) => void;
+  exportPng: () => void;
 };
 
 export type MountChartWorkspaceOptions = {
@@ -72,6 +73,9 @@ export function mountChartWorkspace(
       menu.applyChartAttrs(attrs);
       suppress = false;
       opts.onChange?.(attrs);
+    },
+    exportPng: () => {
+      menu.exportPng();
     },
   };
 }

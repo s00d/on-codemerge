@@ -4,14 +4,8 @@ import { foreign, h, mount, downloadBlob, pickFile } from '@codemerge/sdk';
 import type { MountHandle } from '@codemerge/sdk';
 import { mountSourceEditor } from '@codemerge/editor';
 import type { SourceEditorHandle } from '@codemerge/editor';
-import {
-  languageFromDoc,
-  MAX_CODE_BYTES,
-  parseText,
-  safeLangToken,
-  serializeText,
-  textFromDoc,
-} from '../io';
+import { languageFromDoc, textFromDoc } from '../io/adapters';
+import { MAX_CODE_BYTES, parseText, safeLangToken, serializeText } from '../io/text';
 
 export type CodeWorkspaceHost = EditorAPI & {
   replaceDocument?(doc: DocNode | JSONDoc): void;

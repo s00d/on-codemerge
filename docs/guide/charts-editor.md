@@ -8,6 +8,26 @@ import ChartsEditorComponent from '../components/ChartsEditorComponent.vue';
 
 <ChartsEditorComponent :showDescription="false" />
 
+## Studio layout
+
+Left pane (50%) + right live preview (50%):
+
+| Area         | Contents                                                                                                                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Title        | Always visible above tabs — rename without leaving Type/Data                                                                                                        |
+| **Type**     | Chart type grid + template picker                                                                                                                                   |
+| **Data**     | Series / points table (auto-opens after picking a type)                                                                                                             |
+| **Settings** | Axis labels; mode (bar/area). Legend / grid only for scatter & bubble (canvas). Mermaid-backed types ignore legend/grid/orientation — see [Mermaid](/guide/mermaid) |
+| Preview      | Fills the right pane; re-renders on resize                                                                                                                          |
+| Toolbar      | Undo / redo + **Export as PNG** (`defaultChartToolbar`)                                                                                                             |
+
+Narrow viewports: Preview / Edit studio tabs (`studioPaneTabs`).
+
+## Render path
+
+- Bar, line, area, pie, doughnut, radar, … → `@codemerge/mermaid` (`toMermaidSource` → `render`). This is a **Mermaid subset**, not full Mermaid.js — see [Mermaid](/guide/mermaid).
+- Scatter / bubble → small canvas paint path.
+
 ## Install
 
 ```bash
@@ -20,7 +40,7 @@ import { Editor, createDefaultPlugins } from 'on-codemerge/charts';
 const host = document.getElementById('charts-editor')!;
 const editor = new Editor(host, {
   chrome: 'bar',
-  plugins: createDefaultPlugins(), // HistoryChrome + ChartsPlugin({ surface: 'workspace' })
+  plugins: createDefaultPlugins(), // ChartsPlugin({ surface: 'workspace' }) + export toolbar
 });
 
 editor.on('docChanged', () => {
@@ -36,16 +56,14 @@ editor.destroy();
 ### Same plugin in WYSIWYG
 
 ```ts
-import { Editor, createDefaultPlugins, ChartsPlugin } from 'on-codemerge';
+import { Editor, createDefaultPlugins } from 'on-codemerge';
 
 new Editor(host, {
-  plugins: [
-    ...createDefaultPlugins(), // includes ChartsPlugin({ surface: 'atom' })
-  ],
+  plugins: [...createDefaultPlugins()], // includes ChartsPlugin({ surface: 'atom' })
 });
 ```
 
-`surface: 'atom'` opens the same `mountChartWorkspace` studio in an `lg` popup. Hotkey `Mod-Alt-g` **opens the studio** (does not silent-insert). See [Charts Plugin](/plugins/charts-plugin) and [Editors](/guide/editors).
+`surface: 'atom'` opens the same `mountChartWorkspace` studio in an `lg` popup. Hotkey `Mod-Alt-g` **opens the studio** (does not silent-insert). PNG export: chart context menu. See [Charts Plugin](/plugins/charts-plugin).
 
 ### Types
 
@@ -64,11 +82,11 @@ Published types for `on-codemerge/charts` expect TypeScript `moduleResolution: "
 
 ## Document shape
 
-SoT is `doc` → single `chart` child. Attrs hold `chartType`, `data`, title, axes, legend, grid, size, mode, orientation.
+SoT is `doc` → single `chart` child. Attrs: `chartType`, `data`, title, axes, legend, grid, size, mode, orientation.
 
 ## Toolbar
 
-`createDefaultPlugins()` ships **HistoryChrome** (undo/redo). Chart type lives in the studio (`defaultChartToolbar()` is empty). Customize via `toolbar` / `createDefaultPlugins({ toolbar })`.
+Undo/redo from the editor kernel. Workspace adds Export PNG via `defaultChartToolbar()` (override with `createDefaultPlugins({ toolbar })`).
 
 ## Local demo
 
@@ -79,6 +97,6 @@ pnpm build:charts  # → dist-charts/
 
 ## See also
 
-- [Editors](./editors.md) — product matrix
-- [Charts Plugin](/plugins/charts-plugin) — atom + workspace options
-- [Editor API](./editor.md) — WYSIWYG entry (`on-codemerge`)
+- [Charts Plugin](/plugins/charts-plugin)
+- [Mermaid](/guide/mermaid)
+- [Editors](/guide/editors)

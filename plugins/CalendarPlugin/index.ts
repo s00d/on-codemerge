@@ -13,13 +13,12 @@ import {
 } from '@codemerge/sdk';
 import type { PluginDefinition, PluginToolbarOpts, WidgetContext } from '@codemerge/sdk';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
-import { HistoryChromePlugin } from '../HistoryPlugin';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import type { CalendarToolbarOptions } from './chrome/types';
 import { coerceCalendarDoc } from './drivers/defaults';
 import { isCalendarDoc } from './types';
-import { isCalendarEditorDoc } from './io';
+import { isCalendarEditorDoc } from './io/adapters';
 import { mountCalendarWorkspace } from './surface/workspaceView';
 import type { CalendarWorkspaceHandle } from './surface/workspaceView';
 import { mountCalendarWidget } from './widgets/mountCalendarWidget';
@@ -37,25 +36,22 @@ export {
   payloadFromDoc,
   docFromPayload,
   toEditorDoc,
-  ParseError,
+} from './io/adapters';
+export {
   parseText,
   serializeText,
   serializeDoc,
   serializePayload,
   MAX_CALENDAR_BYTES,
-  parseIcs,
-  serializeIcs,
-  importCalendarText,
-  type ParseTextResult,
-} from './io';
-export { defaultCalendarToolbar } from './chrome/defaultToolbar';
+} from './io/text';
+export type { ParseTextResult } from './io/text';
+export { parseIcs, serializeIcs, importCalendarText } from './io/ics';
 export type {
   CalendarToolbarActionApi,
   CalendarToolbarItem,
   CalendarToolbarMenu,
   CalendarToolbarOptions,
 } from './chrome/types';
-export { HistoryChromePlugin } from '../HistoryPlugin';
 export type {
   CalendarDoc,
   CalendarEvent,
@@ -67,20 +63,19 @@ export type {
 export { isCalendarDoc, isCalendarEvent, isCalendarView } from './types';
 export {
   emptyCalendarDoc,
-  occurrences,
-  renderView,
-  eventInspector,
   coerceCalendarDoc,
   addEvent,
   patchEvent,
   removeEvent,
-} from './drivers';
+} from './drivers/defaults';
+export { occurrences } from './drivers/occurrences';
+export { renderView } from './drivers/views';
+export { eventInspector } from './drivers/eventInspector';
 export { mountCalendarWorkspace } from './surface/workspaceView';
 export type { CalendarWorkspaceHandle } from './surface/workspaceView';
 
 export type CalendarPluginFeatures = {
   toolbar?: boolean;
-  historyChrome?: boolean;
 };
 
 function hasToolbarItems(toolbar: CalendarToolbarOptions): boolean {
@@ -125,7 +120,6 @@ export function CalendarPlugin(options: CalendarPluginOptions = {}): PluginDefin
   };
   const features: Required<CalendarPluginFeatures> = {
     toolbar: feat('toolbar', true),
-    historyChrome: feat('historyChrome', workspace),
   };
   const toolbarConfig: CalendarToolbarOptions | undefined =
     workspace && options.toolbar && hasToolbarItems(options.toolbar) ? options.toolbar : undefined;
@@ -281,22 +275,12 @@ export function CalendarPlugin(options: CalendarPluginOptions = {}): PluginDefin
 }
 
 export function createDefaultPlugins(
-  opts: {
-    toolbar?: CalendarToolbarOptions;
-    features?: CalendarPluginFeatures;
-  } = {}
+  opts: { toolbar?: CalendarToolbarOptions } = {}
 ): PluginDefinition[] {
-  const features: Required<CalendarPluginFeatures> = {
-    toolbar: true,
-    historyChrome: true,
-    ...opts.features,
-  };
   return [
-    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
     CalendarPlugin({
       surface: 'workspace',
       ...(opts.toolbar && hasToolbarItems(opts.toolbar) ? { toolbar: opts.toolbar } : {}),
-      features,
     }),
   ];
 }

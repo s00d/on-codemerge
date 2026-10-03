@@ -6,12 +6,11 @@ import type { Command } from '@codemerge/kernel';
 import { applyToolbarConfig, definePlugin, foreign, h } from '@codemerge/sdk';
 import type { PluginDefinition, PluginToolbarOpts, ViewSpec, WidgetContext } from '@codemerge/sdk';
 import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
-import { HistoryChromePlugin } from '../HistoryPlugin';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import { defaultFormToolbar } from './chrome/defaultToolbar';
 import type { FormToolbarOptions } from './chrome/types';
-import { isFormEditorDoc } from './io';
+import { isFormEditorDoc } from './io/adapters';
 import { mountFormWorkspace } from './surface/workspaceView';
 import type { FormWorkspaceHandle } from './surface/workspaceView';
 import { mountFormWidget } from './widgets/mountFormWidget';
@@ -31,14 +30,9 @@ export {
   configFromDoc,
   docFromConfig,
   toEditorDoc,
-  ParseError,
-  parseText,
-  serializeText,
-  serializeDoc,
-  serializeConfig,
-  MAX_FORM_BYTES,
-  type ParseTextResult,
-} from './io';
+} from './io/adapters';
+export { parseText, serializeText, serializeDoc, serializeConfig, MAX_FORM_BYTES } from './io/text';
+export type { ParseTextResult } from './io/text';
 export { defaultFormToolbar } from './chrome/defaultToolbar';
 export type {
   FormToolbarActionApi,
@@ -46,7 +40,6 @@ export type {
   FormToolbarMenu,
   FormToolbarOptions,
 } from './chrome/types';
-export { HistoryChromePlugin } from '../HistoryPlugin';
 export type { FormConfig, FieldConfig, FieldType, FormTemplate } from './types';
 export { isFormConfig, isFieldType } from './types';
 export { fieldView } from './render/fieldView';
@@ -57,15 +50,13 @@ export {
   paletteFieldTypes,
   createField,
   validateFieldForDriver,
-} from './drivers';
-export type { FieldDriver, FieldFamily, FormI18n } from './drivers';
-export { FormStore } from './services/FormStore';
+} from './drivers/registry';
+export type { FieldDriver, FieldFamily, FormI18n } from './drivers/types';
 export { mountFormWorkspace } from './surface/workspaceView';
 export type { FormWorkspaceHandle } from './surface/workspaceView';
 
 export type FormBuilderPluginFeatures = {
   toolbar?: boolean;
-  historyChrome?: boolean;
 };
 
 export type FormBuilderPluginOptions = PluginToolbarOpts & {
@@ -83,7 +74,6 @@ export function FormBuilderPlugin(options: FormBuilderPluginOptions = {}): Plugi
   };
   const features: Required<FormBuilderPluginFeatures> = {
     toolbar: feat('toolbar', true),
-    historyChrome: feat('historyChrome', workspace),
   };
   const toolbarConfig: FormToolbarOptions | undefined = workspace
     ? (options.toolbar ?? defaultFormToolbar())
@@ -224,22 +214,12 @@ export function FormBuilderPlugin(options: FormBuilderPluginOptions = {}): Plugi
 }
 
 export function createDefaultPlugins(
-  opts: {
-    toolbar?: FormToolbarOptions;
-    features?: FormBuilderPluginFeatures;
-  } = {}
+  opts: { toolbar?: FormToolbarOptions } = {}
 ): PluginDefinition[] {
-  const features: Required<FormBuilderPluginFeatures> = {
-    toolbar: true,
-    historyChrome: true,
-    ...opts.features,
-  };
   return [
-    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
     FormBuilderPlugin({
       surface: 'workspace',
       toolbar: opts.toolbar ?? defaultFormToolbar(),
-      features,
     }),
   ];
 }

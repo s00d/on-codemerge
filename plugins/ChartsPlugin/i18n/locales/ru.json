@@ -27,7 +27,10 @@
     "pieExpenses": "Круговая: Расходы",
     "lineVisitors": "Линейный: Посетители",
     "barAreaMode": "Режим столбцов/областей",
-    "editChart": "Редактировать диаграмму"
+    "editChart": "Редактировать диаграмму",
+    "preview": "Превью",
+    "edit": "Редактор",
+    "settings": "Настройки"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "Вы уверены, что хотите удалить этот шаблон?",

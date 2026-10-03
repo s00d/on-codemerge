@@ -13,11 +13,16 @@ import type { Plugin } from 'vite';
 
 const CTS_ENTRIES = [
   'dist/app.d.ts',
+  'dist/plugins.d.ts',
   'dist/json.d.ts',
   'dist/markdown.d.ts',
   'dist/code.d.ts',
+  'dist/forms.d.ts',
+  'dist/charts.d.ts',
+  'dist/calendar.d.ts',
   'dist/packages/sdk/src/index.d.ts',
   'dist/packages/kernel/src/index.d.ts',
+  'dist/packages/view/src/index.d.ts',
 ] as const;
 
 const SDK_MARKER = '/* --- sdk.css --- */';
@@ -307,7 +312,6 @@ export function ocmPackagePlugin(root = process.cwd()): Plugin {
         console.log(
           `[ocm-package] browser-external: scanned ${browserExt.files}, patched ${browserExt.patched}, removed ${browserExt.removed ?? 0}`
         );
-
         removeDistNodeModules(distDir);
 
         removeOrphanToolbarDividerDts(root);

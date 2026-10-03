@@ -1,3 +1,4 @@
+import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 import type { CalendarDoc, CalendarEvent, CalendarRRule } from '../types';
 import {
   coerceCalendarDoc,
@@ -6,6 +7,7 @@ import {
   emptyLayer,
   newId,
 } from '../drivers/defaults';
+import { MAX_CALENDAR_BYTES } from './text';
 
 function foldIcs(line: string): string {
   if (line.length <= 75) {
@@ -218,6 +220,9 @@ export function parseIcs(text: string): CalendarDoc {
 }
 
 export function importCalendarText(text: string): CalendarDoc {
+  if (text.length > MAX_CALENDAR_BYTES) {
+    throw new ParseError(`Calendar import exceeds ${MAX_CALENDAR_BYTES} bytes`);
+  }
   const trimmed = text.trim();
   if (trimmed.toUpperCase().includes('BEGIN:VCALENDAR')) {
     return parseIcs(trimmed);

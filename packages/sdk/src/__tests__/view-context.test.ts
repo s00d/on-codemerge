@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { DisposableScope } from '../disposable';
-import { mount, h } from '../ui/view';
+import { DisposableScope } from '@codemerge/view';
+import { mount, h } from '@codemerge/view';
 import { createPluginContext } from '../context';
 import { PopupController, PopupService } from '../ui/popup';
 import type { EditorAPI } from '../types';

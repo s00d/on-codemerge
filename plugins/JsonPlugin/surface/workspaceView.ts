@@ -3,7 +3,8 @@ import { collapsedAt, getNodeAt } from '@codemerge/kernel';
 import type { EditorAPI } from '@codemerge/sdk';
 import { foreign, h, mount } from '@codemerge/sdk';
 import type { MountHandle, ViewSpec } from '@codemerge/sdk';
-import { indentFromDoc, serializeDoc } from '../io';
+import { indentFromDoc } from '../io/adapters';
+import { serializeDoc } from '../io/text';
 import { parseText } from '../io/text';
 import {
   deleteNode,

@@ -107,7 +107,8 @@ describe('MarkdownPlugin workspace UI', () => {
     );
     expect(barIds).toContain('menu-md-tools');
     expect(barIds).toContain('menu-md-insert');
-    expect(barIds).not.toContain('undo');
+    expect(barIds).toContain('undo');
+    expect(barIds).toContain('redo');
 
     const insertTrigger = editor.host.querySelector('[data-menu="md-insert"]');
     expect(insertTrigger).toBeInstanceOf(HTMLElement);
@@ -198,12 +199,9 @@ describe('MarkdownPlugin workspace UI', () => {
     });
     const preview = editor.contentElement()?.querySelector('.ocm-md-pane--preview');
     expect(preview?.querySelector('[data-node="mermaid"]')).toBeTruthy();
-    // Host or hydrated SVG — either marks the projector/hydrate path.
-    const ready =
-      preview?.querySelector('[data-ocm-mermaid-ready="1"]') ??
-      preview?.querySelector('svg[data-node="mermaid"]') ??
-      preview?.querySelector('.ocm-md-mermaid');
-    expect(ready).toBeTruthy();
+    expect(
+      preview?.querySelector('svg[data-node="mermaid"][data-ocm-mermaid-ready="1"]')
+    ).toBeTruthy();
   });
 
   it('syncs preview scroll proportionally with source scroller', () => {

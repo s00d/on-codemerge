@@ -4,17 +4,8 @@ import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { EditorAPI, PopupItem, PopupOptions, PluginToolbarOpts } from '@codemerge/sdk';
 import { aiAssistantIcon } from '@ocm/wysiwyg/icons';
-import {
-  OpenAIDriver,
-  DeepSeekDriver,
-  HuggingFaceDriver,
-  GitHubAzureDriver,
-  LlamaDriver,
-  MistralDriver,
-  OllamaDriver,
-} from './drivers';
-import type { AIDriver } from './drivers';
 import type { DriverOptions, OptionDescription, OptionsDescription } from './drivers/AIDriver';
+import { createDrivers, getDriver } from './drivers/registry';
 
 const LOCAL_STORAGE_KEY = 'aiAssistantSettings';
 
@@ -106,15 +97,7 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
         /* ignore */
       }
 
-      const drivers: Record<string, AIDriver<DriverOptions>> = {
-        openai: new OpenAIDriver(apiKey),
-        deepseek: new DeepSeekDriver(apiKey),
-        huggingface: new HuggingFaceDriver(apiKey),
-        github: new GitHubAzureDriver(apiKey),
-        llama: new LlamaDriver(apiKey),
-        mistral: new MistralDriver(apiKey),
-        ollama: new OllamaDriver(),
-      };
+      const drivers = createDrivers(apiKey);
 
       const saveSettings = () => {
         localStorage.setItem(
@@ -151,7 +134,7 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
       ];
 
       const resolveDriverOptions = (): Record<string, unknown> => {
-        const driver = drivers[driverName];
+        const driver = getDriver(drivers, driverName);
         const desc = driver?.getOptionsDescription() ?? {};
         return { ...defaultsFromDesc(desc), ...driverOptions };
       };
@@ -166,7 +149,7 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
             value: driverName,
             onChange: (v) => {
               driverName = String(v);
-              const next = drivers[driverName];
+              const next = getDriver(drivers, driverName);
               driverOptions = defaultsFromDesc(next?.getOptionsDescription() ?? {});
               popups.update({
                 ...popupChrome(),
@@ -204,7 +187,7 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
           },
         ];
 
-        const driver = drivers[driverName];
+        const driver = getDriver(drivers, driverName);
         const desc = driver?.getOptionsDescription() ?? {};
         const merged = resolveDriverOptions();
         items.push(
@@ -226,8 +209,7 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
 
       const handleGenerate = async (api: EditorAPI) => {
         saveSettings();
-        const driver = drivers[driverName];
-        // oxlint-disable-next-line typescript/strict-boolean-expressions -- non-null object guard
+        const driver = getDriver(drivers, driverName);
         if (!driver) {
           api.notify(api.t('common.unsupportedDriver'));
           return;

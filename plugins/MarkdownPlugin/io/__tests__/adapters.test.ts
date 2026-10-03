@@ -1,14 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
   compactMarkdownText,
-  docToText,
-  emptyEditorDoc,
   expandCompactMarkdownText,
-  isMarkdownEditorDoc,
-  parseText,
   renderMarkdownPreviewHtml,
-  serializeDoc,
-} from '../../io';
+} from '../../io/preview';
+import { docToText, emptyEditorDoc, isMarkdownEditorDoc } from '../../io/adapters';
+import { parseText, serializeDoc } from '../../io/text';
 
 describe('MarkdownPlugin io adapters', () => {
   it('emptyEditorDoc is markdown SoT', () => {

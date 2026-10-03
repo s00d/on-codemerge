@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { allChartTypes, DRIVERS, getDriver } from '../drivers';
+import { allChartTypes, DRIVERS, getDriver } from '../drivers/registry';
 import { validateSeriesForDriver } from '../utils/validation';
 
 describe('drivers.registry', () => {

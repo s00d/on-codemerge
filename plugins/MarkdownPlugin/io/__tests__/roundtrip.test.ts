@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { docToMarkdown, markdownToDoc } from '@ocm/wysiwyg/io/markdown';
-import { emptyEditorDoc, isMarkdownEditorDoc, projectPreviewHtml, serializeDoc } from '../index';
+import { emptyEditorDoc, isMarkdownEditorDoc } from '../adapters';
+import { projectPreviewHtml } from '../projectPreview';
+import { serializeDoc } from '../text';
 
 describe('Markdown callout / mermaid round-trip', () => {
   it(':::callout + @btn ↔ callout node', () => {

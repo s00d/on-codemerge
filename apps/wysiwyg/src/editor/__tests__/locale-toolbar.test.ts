@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { Editor } from '../Editor';
-import { createDefaultPlugins } from '../../plugins';
+import { createDefaultPlugins } from '../../../../../plugins';
 
 describe('locale toolbar live', () => {
   it('updates mark titles on setLocale', async () => {

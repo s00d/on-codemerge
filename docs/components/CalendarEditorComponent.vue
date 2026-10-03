@@ -139,14 +139,19 @@ export default {
   border-radius: 8px;
   overflow: hidden;
 }
+/* Same chrome as Forms/Charts docs preview — no max-width clamp. */
 .preview {
   min-height: 200px;
-  max-width: 28rem;
   padding: 12px;
   border: 1px solid var(--color-ocm-border, #ddd);
   border-radius: 8px;
   background: var(--color-ocm-surface, #fff);
   overflow: auto;
+}
+/* Atom defaults to max-w-md for in-doc widgets; docs preview needs full month. */
+.preview :deep(.calendar-widget) {
+  max-width: none;
+  margin: 0;
 }
 .result {
   max-height: 300px;

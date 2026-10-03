@@ -6,9 +6,9 @@ import { parseFormHttpMethod } from '../types';
 import { FormStore } from '../services/FormStore';
 import { FieldInspector } from '../components/FieldInspector';
 import { TemplatesModal } from '../components/TemplatesModal';
-import { paletteFieldTypes, getDriver } from '../drivers';
+import { paletteFieldTypes, getDriver } from '../drivers/registry';
 import { formView } from '../render/formView';
-import { configFromDoc, emptyFormConfig } from '../io';
+import { configFromDoc, emptyFormConfig } from '../io/adapters';
 
 export type FormWorkspaceHandle = {
   destroy: () => void;

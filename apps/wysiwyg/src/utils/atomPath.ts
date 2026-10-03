@@ -1,4 +1,4 @@
-import type { Command } from '@codemerge/kernel';
+import type { Command, DocNode } from '@codemerge/kernel';
 
 /** Resolve JSON doc path from a mounted atom widget DOM node. */
 export function pathFromEl(el: Element | null): number[] | null {
@@ -14,6 +14,21 @@ export function pathFromEl(el: Element | null): number[] | null {
     return null;
   }
   return pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
+}
+
+export function nodeAtPath(doc: DocNode, path: number[] | null): DocNode | null {
+  if (!path) {
+    return null;
+  }
+  let node: DocNode = doc;
+  for (const index of path) {
+    const child = node.content?.[index];
+    if (!child) {
+      return null;
+    }
+    node = child;
+  }
+  return node;
 }
 
 /**

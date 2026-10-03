@@ -24,7 +24,7 @@ import { FontPlugin } from './FontPlugin';
 import { FooterPlugin } from './FooterPlugin';
 import { FootnotesPlugin } from './FootnotesPlugin';
 import { FormBuilderPlugin } from './FormBuilderPlugin';
-import { HistoryPlugin, HistoryChromePlugin } from './HistoryPlugin';
+import { HistoryPlugin } from './HistoryPlugin';
 import { HTMLViewerPlugin } from './HTMLViewerPlugin';
 import { ImagePlugin } from './ImagePlugin';
 import type { ImagePluginOptions } from './ImagePlugin';
@@ -44,7 +44,7 @@ import { SpellCheckerPlugin } from './SpellCheckerPlugin';
 import { TablePlugin } from './TablePlugin';
 import { TemplatesPlugin } from './TemplatesPlugin';
 import { TimerPlugin } from './TimerPlugin';
-import { ToolbarDividerPlugin, ToolbarPlugin } from './ToolbarPlugin';
+import { ToolbarPlugin } from './ToolbarPlugin';
 import { TrackChangesPlugin } from './TrackChangesPlugin';
 import { TypographyPlugin } from './TypographyPlugin';
 import { VideoPlugin } from './VideoPlugin';
@@ -72,7 +72,6 @@ export {
   FootnotesPlugin,
   FormBuilderPlugin,
   HistoryPlugin,
-  HistoryChromePlugin,
   HTMLViewerPlugin,
   ImagePlugin,
   JsonPlugin,
@@ -89,7 +88,6 @@ export {
   TablePlugin,
   TemplatesPlugin,
   TimerPlugin,
-  ToolbarDividerPlugin,
   ToolbarPlugin,
   TrackChangesPlugin,
   TypographyPlugin,
@@ -155,7 +153,7 @@ export function createDefaultPlugins(opts: CreateDefaultPluginsOptions = {}): Pl
 }
 
 /** Lean set for demos / apps that want essentials only. */
-export function createCorePlugins(): PluginDefinition[] {
+export function createCorePlugins(opts: CreateDefaultPluginsOptions = {}): PluginDefinition[] {
   return [
     ToolbarPlugin(),
     HistoryPlugin(),
@@ -168,10 +166,10 @@ export function createCorePlugins(): PluginDefinition[] {
     ListsPlugin(),
     BlockPlugin(),
     TablePlugin(),
-    ImagePlugin(),
+    ImagePlugin(opts.image ?? {}),
     CodeBlockPlugin(),
     MathPlugin(),
-    ExportPlugin(),
     ShortcutsPlugin(),
+    ExportPlugin(),
   ];
 }

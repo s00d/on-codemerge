@@ -1,8 +1,14 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import { clearPortalRoot, getPortalRoot, setPortalRoot, teleport, isTeleport } from '../ui/portal';
+import {
+  clearPortalRoot,
+  getPortalRoot,
+  setPortalRoot,
+  teleport,
+  isTeleport,
+} from '@codemerge/view';
 import { ContextMenuService } from '../ui/context-menu';
 import { NotifyService } from '../ui/notify';
-import { h } from '../ui/view';
+import { h } from '@codemerge/view';
 
 describe('portal roots', () => {
   beforeEach(() => {

@@ -1,15 +1,6 @@
 import type { DocNode } from '@codemerge/kernel';
+import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 import { docToValue, indentFromDoc, toEditorDoc, valueToDoc } from './adapters';
-
-export class ParseError extends Error {
-  readonly name = 'ParseError';
-  readonly offset: number | undefined;
-
-  constructor(message: string, offset?: number) {
-    super(message);
-    this.offset = offset;
-  }
-}
 
 export type ParseTextResult =
   | { ok: true; doc: DocNode; value: unknown }

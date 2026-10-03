@@ -22,7 +22,7 @@
 
 <script>
 import { Editor, createDefaultPlugins, normalizeChartAttrs } from '../../apps/charts/src/app';
-import { renderChart } from '../../plugins/ChartsPlugin/drivers';
+import { renderChart } from '../../plugins/ChartsPlugin/drivers/renderChart';
 import { optionsFromAttrs } from '../../plugins/ChartsPlugin/utils/options';
 import {
   parseChartMode,
@@ -118,6 +118,13 @@ export default {
   min-height: 400px;
   border: 1px solid var(--color-ocm-border, #ddd);
   border-radius: 8px;
+  overflow: hidden;
+}
+
+.editorBlock :deep(.ocm-shell-content),
+.editorBlock :deep(.chart-ws-root) {
+  flex: 1 1 0;
+  min-height: 0;
   overflow: hidden;
 }
 .preview {

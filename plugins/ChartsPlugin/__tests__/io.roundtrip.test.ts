@@ -1,13 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import {
-  attrsFromDoc,
-  emptyEditorDoc,
-  normalizeChartAttrs,
-  parseText,
-  serializeAttrs,
-  serializeDoc,
-} from '../io';
-import { getDriver } from '../drivers';
+import { attrsFromDoc, emptyEditorDoc, normalizeChartAttrs } from '../io/adapters';
+import { parseText, serializeAttrs, serializeDoc } from '../io/text';
+import { getDriver } from '../drivers/registry';
 import { validateSeries } from '../utils/validation';
 
 describe('io.roundtrip', () => {

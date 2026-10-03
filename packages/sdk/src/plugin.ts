@@ -1,9 +1,9 @@
 import type { Command, MarkSpec, NodeSpec } from '@codemerge/kernel';
 import type { EditorAPI } from './types';
 import type { PluginContext } from './context';
-import type { ViewSpec } from './ui/view';
+import type { ViewSpec } from '@codemerge/view';
 import type { MenuItem } from './ui/context-menu';
-import type { DisposableScope } from './disposable';
+import type { DisposableScope } from '@codemerge/view';
 import type { PublishNodeDefinition } from './publish';
 
 export interface Hotkey {

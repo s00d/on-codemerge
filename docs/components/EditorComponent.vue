@@ -44,7 +44,6 @@ import { Editor } from '../../apps/wysiwyg/src/editor/Editor';
 import {
   createDefaultPlugins,
   ToolbarPlugin,
-  ToolbarDividerPlugin,
   HistoryPlugin,
   TypographyPlugin,
   ColorPlugin,
@@ -84,7 +83,7 @@ import {
   AnchorLinkPlugin,
   JsonPlugin,
   MarkdownPlugin,
-} from '../../apps/wysiwyg/src/plugins';
+} from '../../plugins';
 import { docsFileUpload, docsImageUpload } from './devMediaConfig';
 
 // dictionary-en package `exports` only exposes index.js (Node fs) — load Hunspell files as Vite URLs.
@@ -97,7 +96,6 @@ const SPELL_DICTIONARIES = {
 
 const PLUGIN_MAP = {
   ToolbarPlugin,
-  ToolbarDividerPlugin,
   HistoryPlugin,
   TypographyPlugin,
   ColorPlugin,
@@ -472,7 +470,7 @@ const DEMO_HTML_BY_PLUGIN = {
 `.trim(),
 };
 
-const ESSENTIAL_PLUGINS = new Set(['ToolbarPlugin', 'HistoryPlugin', 'ToolbarDividerPlugin']);
+const ESSENTIAL_PLUGINS = new Set(['ToolbarPlugin', 'HistoryPlugin']);
 
 function primaryPluginName(activePlugins) {
   if (!activePlugins || activePlugins.length === 0) {

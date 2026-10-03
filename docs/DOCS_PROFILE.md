@@ -5,12 +5,14 @@ Product documentation profile for **on-codemerge** (VitePress site).
 ## Doc root
 
 - `docs/` — VitePress sources (`docs/.vitepress/config.ts`)
-- Site sections: `guide/`, `plugins/`, `integrate/`, `v1/` (HTMLEditor archive)
+- Site sections: `guide/`, `plugins/`, `integrate/`
 
 ## Code roots (truth for drift checks)
 
 - `packages/kernel` — document / ops model (`on-codemerge/kernel`)
-- `packages/sdk` — `definePlugin`, UI services (`on-codemerge/sdk`)
+- `packages/view` — zero-dep ViewSpec DOM runtime (`@codemerge/view` / `on-codemerge/view`)
+- `packages/mermaid` — sync Mermaid-subset SVG (`@codemerge/mermaid`)
+- `packages/sdk` — `definePlugin`, UI services (`on-codemerge/sdk`); re-exports view
 - `packages/editor` — shared Editor facade + platform (`createShellView`)
 - `packages/hunspell` — Hunspell `.aff`/`.dic` engine (`@codemerge/hunspell`; also bundled in `on-codemerge`)
 - `plugins/` — product plugins (prose + `JsonPlugin`); imported by apps
@@ -25,22 +27,24 @@ Product documentation profile for **on-codemerge** (VitePress site).
 
 ## Entry points
 
-| User need        | Doc                                |
-| ---------------- | ---------------------------------- |
-| Install / API    | `docs/guide/editor.md`             |
-| Editors matrix   | `docs/guide/editors.md`            |
-| JSON Editor      | `docs/guide/json-editor.md`        |
-| Markdown Editor  | `docs/guide/markdown-editor.md`    |
-| Code Editor      | `docs/guide/code-editor.md`        |
-| Forms Editor     | `docs/guide/forms-editor.md`       |
-| Charts Editor    | `docs/guide/charts-editor.md`      |
-| Calendar Editor  | `docs/guide/calendar-editor.md`    |
-| Document model   | `docs/guide/document-model.md`     |
-| Write a plugin   | `docs/guide/authoring-plugins.md`  |
-| Plugin catalog   | `docs/plugins/`                    |
-| Framework / host | `docs/integrate/`                  |
-| v1 upgrade       | `docs/guide/migration-v1-to-v2.md` |
-| v1 archive       | `docs/v1/`                         |
+| User need         | Doc                                   |
+| ----------------- | ------------------------------------- |
+| Home / live demos | `docs/index.md` (+ `HomeEditorsDemo`) |
+| Install / API     | `docs/guide/editor.md`                |
+| Editors matrix    | `docs/guide/editors.md`               |
+| JSON Editor       | `docs/guide/json-editor.md`           |
+| Markdown Editor   | `docs/guide/markdown-editor.md`       |
+| Code Editor       | `docs/guide/code-editor.md`           |
+| Forms Editor      | `docs/guide/forms-editor.md`          |
+| Charts Editor     | `docs/guide/charts-editor.md`         |
+| Calendar Editor   | `docs/guide/calendar-editor.md`       |
+| Mermaid subset    | `docs/guide/mermaid.md`               |
+| Document model    | `docs/guide/document-model.md`        |
+| Write a plugin    | `docs/guide/authoring-plugins.md`     |
+| ViewSpec runtime  | `docs/guide/view.md`                  |
+| Plugin catalog    | `docs/plugins/`                       |
+| Framework / host  | `docs/integrate/`                     |
+| v1 upgrade        | `docs/guide/migration-v1-to-v2.md`    |
 
 ## Verify
 
@@ -54,5 +58,6 @@ pnpm run check
 - Integrations and per-plugin pages keep their substance; prefer restructuring and fixing drift over deleting recipes.
 - Shared install/CSS lives in Guide — plugin pages link there instead of repeating `npm install`.
 - Do not document unwired APIs (`EditorOptions.mode` was removed for this reason).
-- JSON / Markdown / Code product surfaces are `guide/{json,markdown,code}-editor.md` + home demos — not separate design/phases trees.
+- Live demos mount once on the home page tabs (`HomeEditorsDemo`); `guide/editors.md` is the matrix + launch recipes only.
+- JSON / Markdown / Code product surfaces are `guide/{json,markdown,code}-editor.md` — not separate design/phases trees.
 - `packages/editor` is a **private** workspace package (shared Editor facade + source contour). Public docs cite product entries (`on-codemerge`, `on-codemerge/code`, …), not `@codemerge/editor` as an npm import.

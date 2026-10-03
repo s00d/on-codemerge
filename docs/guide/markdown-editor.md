@@ -34,8 +34,8 @@ editor.on('docChanged', () => {
 - Desktop: drag the middle **gutter** (or ←/→ when focused) to resize source vs preview; double-click resets to 50/50.
 - Toolbar **Insert** / **Turn into** mutate kernel state (`insert_node` / `set_attrs`); CM reserializes from SoT.
 - **Custom callouts:** `elements: [{ id, label, toPreviewHtml }]` (merged with info/warn/error) — auto Insert / Turn into entries.
-- **Custom toolbar:** `toolbar: { menus?, items? }` — sole source of domain bar buttons (`command` / `run`). Omit → `defaultMdToolbar({ elements })`. Undo/redo via `HistoryChromePlugin` in `createDefaultPlugins`. Empty bar → `{ menus: [], items: [] }` (see [Markdown Plugin](/plugins/markdown-plugin)).
-- `getHTML` uses the same projector as the right pane; mermaid hosts hydrate to inline SVG (`data-node="mermaid"`). `setHTML` converts HTML → Markdown (lossy) then `setText`.
+- **Custom toolbar:** `toolbar: { menus?, items? }` — sole source of domain bar buttons (`command` / `run`). Omit → `defaultMdToolbar({ elements })`. Undo/redo toolbar is built into the editor. Empty bar → `{ menus: [], items: [] }` (see [Markdown Plugin](/plugins/markdown-plugin)).
+- `getHTML` uses the same projector as the right pane; mermaid hosts hydrate to inline SVG (`data-node="mermaid"`) through `@codemerge/mermaid` (subset — may differ from upstream Mermaid; see [Mermaid](/guide/mermaid)). `setHTML` converts HTML → Markdown (lossy) then `setText`.
 - `getMarkdown` / `setMarkdown` stay stubs — use `getText` / `setText` for Markdown interchange.
 - WYSIWYG embeds use `MarkdownPlugin({ surface: 'atom' })` and register **only** `md_embed` (no prose node collision with Typography).
 

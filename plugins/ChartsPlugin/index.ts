@@ -5,11 +5,11 @@ import pluginLocaleEn from './i18n/locales/en.json';
 import type { Command } from '@codemerge/kernel';
 import { applyToolbarConfig, definePlugin, foreign } from '@codemerge/sdk';
 import type { PluginDefinition, PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';
-import { HistoryChromePlugin } from '../HistoryPlugin';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
+import { defaultChartToolbar } from './chrome/defaultToolbar';
 import type { ChartToolbarOptions } from './chrome/types';
-import { isChartEditorDoc } from './io';
+import { isChartEditorDoc } from './io/adapters';
 import { mountChartWorkspace } from './surface/workspaceView';
 import type { ChartWorkspaceHandle } from './surface/workspaceView';
 import { renderChartPublish } from './publish/preview';
@@ -19,10 +19,6 @@ const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> 
   './i18n/locales/*.json',
   '!./i18n/locales/en.json',
 ]);
-
-function hasToolbarItems(toolbar: ChartToolbarOptions): boolean {
-  return (toolbar.items?.length ?? 0) > 0 || (toolbar.menus?.length ?? 0) > 0;
-}
 
 export {
   emptyChartAttrs,
@@ -35,29 +31,22 @@ export {
   normalizeChartAttrs,
   isChartAttrs,
   DEFAULT_CHART_DATA,
-  ParseError,
-  parseText,
-  serializeText,
-  serializeDoc,
-  serializeAttrs,
-  MAX_CHART_BYTES,
-  type ChartAttrs,
-  type ParseTextResult,
-} from './io';
-export { defaultChartToolbar } from './chrome/defaultToolbar';
+} from './io/adapters';
+export type { ChartAttrs } from './io/adapters';
+export { parseText, serializeText, serializeDoc, serializeAttrs, MAX_CHART_BYTES } from './io/text';
+export type { ParseTextResult } from './io/text';
 export type {
   ChartToolbarActionApi,
   ChartToolbarItem,
   ChartToolbarMenu,
   ChartToolbarOptions,
 } from './chrome/types';
-export { HistoryChromePlugin } from '../HistoryPlugin';
+export { defaultChartToolbar } from './chrome/defaultToolbar';
 export { mountChartWorkspace } from './surface/workspaceView';
 export type { ChartWorkspaceHandle } from './surface/workspaceView';
 
 export type ChartsPluginFeatures = {
   toolbar?: boolean;
-  historyChrome?: boolean;
 };
 
 export type ChartsPluginOptions = PluginToolbarOpts & {
@@ -75,11 +64,7 @@ export function ChartsPlugin(options: ChartsPluginOptions = {}): PluginDefinitio
   };
   const features: Required<ChartsPluginFeatures> = {
     toolbar: feat('toolbar', true),
-    historyChrome: feat('historyChrome', workspace),
   };
-  const toolbarConfig: ChartToolbarOptions | undefined =
-    workspace && options.toolbar && hasToolbarItems(options.toolbar) ? options.toolbar : undefined;
-
   const atomChrome: { current: AtomChromeHandle | null } = { current: null };
   const workspaceRef: { current: ChartWorkspaceHandle | null } = { current: null };
 
@@ -172,6 +157,9 @@ export function ChartsPlugin(options: ChartsPluginOptions = {}): PluginDefinitio
             handle.update(ctx.editor.getState());
           }
         });
+        const toolbarConfig =
+          options.toolbar ??
+          (features.toolbar ? defaultChartToolbar({ t: (k) => ctx.editor.t(k) }) : undefined);
         if (toolbarConfig) {
           applyToolbarConfig(ctx, toolbarConfig, () => ({
             editor: ctx.editor,
@@ -206,22 +194,13 @@ export function ChartsPlugin(options: ChartsPluginOptions = {}): PluginDefinitio
 }
 
 export function createDefaultPlugins(
-  opts: {
-    toolbar?: ChartToolbarOptions;
-    features?: ChartsPluginFeatures;
-  } = {}
+  opts: { toolbar?: ChartToolbarOptions } = {}
 ): PluginDefinition[] {
-  const features: Required<ChartsPluginFeatures> = {
-    toolbar: true,
-    historyChrome: true,
-    ...opts.features,
-  };
   return [
-    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
     ChartsPlugin({
       surface: 'workspace',
-      ...(opts.toolbar && hasToolbarItems(opts.toolbar) ? { toolbar: opts.toolbar } : {}),
-      features,
+      // Omit toolbar → setup builds defaultChartToolbar({ t: editor.t }).
+      ...(opts.toolbar ? { toolbar: opts.toolbar } : {}),
     }),
   ];
 }

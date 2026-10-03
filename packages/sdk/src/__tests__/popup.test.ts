@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { PopupService } from '../ui/popup';
-import { clearPortalRoot, getPortalRoot } from '../ui/portal';
-import { createPortal, h, mount, teleport } from '../ui/view';
+import { clearPortalRoot, getPortalRoot } from '@codemerge/view';
+import { createPortal, h, mount, teleport } from '@codemerge/view';
 
 describe('popupService ViewSpec', () => {
   let portal: HTMLElement;

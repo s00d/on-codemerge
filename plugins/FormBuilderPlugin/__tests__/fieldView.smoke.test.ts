@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { renderDetached } from '@codemerge/sdk';
 import { allFieldTypes } from '../types';
-import { createField, getDriver } from '../drivers';
+import { createField, getDriver } from '../drivers/registry';
 
 const stubI18n = { t: (k: string) => k };
 

@@ -1,4 +1,5 @@
 import type { DocNode } from '@codemerge/kernel';
+import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 import { textFromDoc, docFromText } from './adapters';
 
 export const MAX_CODE_BYTES = 2_000_000;
@@ -7,16 +8,6 @@ export const MAX_CODE_BYTES = 2_000_000;
 export function safeLangToken(lang: string): string {
   const t = lang.trim().toLowerCase();
   return /^[a-z0-9_+-]{1,32}$/.test(t) ? t : 'plaintext';
-}
-
-export class ParseError extends Error {
-  readonly offset?: number;
-
-  constructor(message: string, offset?: number) {
-    super(message);
-    this.name = 'ParseError';
-    this.offset = offset;
-  }
 }
 
 export type ParseTextResult = { ok: true; doc: DocNode } | { ok: false; error: ParseError };

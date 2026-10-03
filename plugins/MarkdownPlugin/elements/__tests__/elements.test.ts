@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import { changeCalloutKindAt, findCalloutAt } from '../calloutEdit';
 import { createMdElementRegistry } from '../registry';
-import { emptyEditorDoc, renderMarkdownPreviewHtml } from '../../io';
+import { emptyEditorDoc } from '../../io/adapters';
+import { renderMarkdownPreviewHtml } from '../../io/preview';
 import { escapeHtml } from '../../io/escape';
 import type { MdCustomElement } from '../types';
 

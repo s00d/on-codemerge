@@ -2,7 +2,7 @@
 
 on-codemerge **2.x** rewrites the editor around a virtual JSON document (`on-codemerge/kernel`), an SDK surface (`on-codemerge/sdk`), and plugins that **never own DOM**.
 
-Full v1 docs (trimmed archive): [docs/v1](/v1/).
+See this migration guide for the v1 → v2 delta.
 
 ## Quick map
 
@@ -16,6 +16,22 @@ Full v1 docs (trimmed archive): [docs/v1](/v1/).
 | `plugins/FooPlugin/style.css` CDN           | `on-codemerge/index.css` + `public.css`                  |
 | Jest                                        | Vitest (+ Playwright / untestutils for e2e)              |
 
+## Product surfaces (v2)
+
+Seven Editor entries share kernel + SDK — pick by document shape in [Editors](/guide/editors):
+
+| Package                 | Role               |
+| ----------------------- | ------------------ |
+| `on-codemerge`          | WYSIWYG prose      |
+| `on-codemerge/json`     | JSON Tree + Raw    |
+| `on-codemerge/markdown` | Dual-pane Markdown |
+| `on-codemerge/code`     | Source buffer      |
+| `on-codemerge/forms`    | Form studio        |
+| `on-codemerge/charts`   | Chart studio       |
+| `on-codemerge/calendar` | Calendar studio    |
+
+Scoped packages also published: `@codemerge/kernel`, `@codemerge/view`, `@codemerge/mermaid` (Mermaid **subset** — [Mermaid](/guide/mermaid)), `@codemerge/sdk`, `@codemerge/hunspell`, `@codemerge/collaboration-server`.
+
 ## Install
 
 ```bash
@@ -27,6 +43,7 @@ pnpm add on-codemerge
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 import { Editor, createDefaultPlugins, insertText } from 'on-codemerge';
+// Individual plugins: import { TablePlugin } from 'on-codemerge/plugins'
 
 const editor = new Editor(host, { plugins: createDefaultPlugins() });
 editor.run(insertText('Hello'));
@@ -80,7 +97,7 @@ Rules:
 - **Chrome** (the sticky bar) is always created by `Editor` → SDK `ToolbarPanel`.
 - **`ToolbarPlugin()`** only registers Bold / Italic / Underline / Strike.
 - Overflow menus come from **`Editor` `toolbar.menus`** (omit → Insert / Review / Tools; `{ menus: [] }` → flat bar). Plugins place items with `menu: '…'` / `PluginToolbarOpts`; missing menu id → bar button.
-- `ToolbarDividerPlugin` is a no-op; separators come from `group` changes on the bar.
+- Separators come from toolbar `group` boundaries (no `ToolbarDividerPlugin`).
 - There is **no** `ToolbarMenusPlugin` / `flattenOverflowMenus` — removed in favor of declarative `toolbar.menus`.
 
 ## Persistence
@@ -108,7 +125,9 @@ Unit: Vitest (`pnpm test:unit`). Browser: untestutils + Playwright (`pnpm test:e
 
 ## Further reading
 
+- [Editors](/guide/editors)
 - [Editor API](/guide/editor)
 - [Plugin guide](/guide/authoring-plugins)
 - [Core model](/guide/document-model)
+- [Mermaid](/guide/mermaid)
 - [Plugins overview](/plugins/)

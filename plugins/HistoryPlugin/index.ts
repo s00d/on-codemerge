@@ -6,15 +6,16 @@ import { definePlugin } from '@codemerge/sdk';
 import { HistoryManager } from './services/HistoryManager';
 import { HistoryViewerModal } from './components/HistoryViewerModal';
 import { historyIcon } from '@ocm/wysiwyg/icons';
-import { registerHistoryChrome } from './chrome';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',
   '!./i18n/locales/en.json',
 ]);
 
-export { HistoryChromePlugin } from './HistoryChromePlugin';
-
+/**
+ * Markdown snapshot timeline + viewer (WYSIWYG).
+ * Kernel undo/redo stack and toolbar buttons live on `@codemerge/editor` (not here).
+ */
 export function HistoryPlugin() {
   const historyManager = new HistoryManager();
   let openHistory: (() => void) | null = null;
@@ -23,8 +24,6 @@ export function HistoryPlugin() {
     name: 'history',
     hotkeys: [{ keys: 'Mod-Alt-h', command: 'viewHistory', description: 'View history' }],
     commands: {
-      undo: () => null,
-      redo: () => null,
       viewHistory: () => {
         openHistory?.();
         return null;
@@ -48,7 +47,6 @@ export function HistoryPlugin() {
         historyManager.addState(editor.getMarkdown());
       });
 
-      registerHistoryChrome(ctx);
       ctx.toolbar.add({
         id: 'history',
         icon: historyIcon,

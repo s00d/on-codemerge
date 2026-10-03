@@ -10,31 +10,20 @@ import {
 } from '@codemerge/sdk';
 import type { PluginDefinition, WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { highlightHtml } from '@codemerge/editor';
-import { HistoryChromePlugin } from '../HistoryPlugin';
 import { CodeBlockModal } from './components/CodeBlockModal';
 import { CodeBlockContextMenu } from './components/CodeBlockContextMenu';
 import { renderCodeBlockDom } from './widgets/renderCodeBlockDom';
 import { replaceChildrenWithHtml } from '@ocm/wysiwyg/utils/domHtml';
 import { insertIcon } from '@ocm/wysiwyg/icons';
-import { isCodeEditorDoc } from './io';
+import { isCodeEditorDoc } from './io/adapters';
 import { mountCodeWorkspace } from './surface/workspaceView';
 import type { CodeWorkspaceHandle } from './surface/workspaceView';
 import { defaultCodeToolbar } from './chrome/defaultToolbar';
 import type { CodeToolbarOptions } from './chrome/types';
 
-export {
-  emptyEditorDoc,
-  isCodeEditorDoc,
-  parseText,
-  serializeText,
-  serializeDoc,
-  textFromDoc,
-  languageFromDoc,
-  safeLangToken,
-  ParseError,
-  MAX_CODE_BYTES,
-  type ParseTextResult,
-} from './io';
+export { emptyEditorDoc, isCodeEditorDoc, textFromDoc, languageFromDoc } from './io/adapters';
+export { parseText, serializeText, serializeDoc, safeLangToken, MAX_CODE_BYTES } from './io/text';
+export type { ParseTextResult } from './io/text';
 export { defaultCodeToolbar } from './chrome/defaultToolbar';
 export type {
   CodeToolbarActionApi,
@@ -42,7 +31,6 @@ export type {
   CodeToolbarMenu,
   CodeToolbarOptions,
 } from './chrome/types';
-export { HistoryChromePlugin } from '../HistoryPlugin';
 export type { CodeBlockAttrs, CodeSourceAttrs } from './types';
 
 const CODE_SOURCE_NODE = {
@@ -61,8 +49,6 @@ const CODE_BLOCK_ATOM = {
 export type CodeBlockPluginFeatures = {
   /** Atom Insert toolbar button (default true on atom). */
   toolbar?: boolean;
-  /** Include HistoryChromePlugin in createDefaultPlugins (default true for workspace). */
-  historyChrome?: boolean;
 };
 
 export type CodeBlockPluginOptions = PluginToolbarOpts & {
@@ -88,7 +74,6 @@ export function CodeBlockPlugin(options: CodeBlockPluginOptions = {}): PluginDef
   };
   const features: Required<CodeBlockPluginFeatures> = {
     toolbar: feat('toolbar', true),
-    historyChrome: feat('historyChrome', workspace),
   };
 
   let openModal:
@@ -249,24 +234,14 @@ export function CodeBlockPlugin(options: CodeBlockPluginOptions = {}): PluginDef
   });
 }
 
-/** Default slim Code app plugin set: HistoryChrome + workspace CodeBlockPlugin. */
+/** Default slim Code app plugin set: workspace CodeBlockPlugin. */
 export function createDefaultPlugins(
-  opts: {
-    toolbar?: CodeToolbarOptions;
-    features?: CodeBlockPluginFeatures;
-  } = {}
+  opts: { toolbar?: CodeToolbarOptions } = {}
 ): PluginDefinition[] {
-  const features: Required<CodeBlockPluginFeatures> = {
-    toolbar: true,
-    historyChrome: true,
-    ...opts.features,
-  };
   return [
-    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
     CodeBlockPlugin({
       surface: 'workspace',
       toolbar: opts.toolbar ?? defaultCodeToolbar(),
-      features,
     }),
   ];
 }

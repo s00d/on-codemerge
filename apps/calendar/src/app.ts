@@ -2,11 +2,10 @@ import '@ocm/wysiwyg/tailwind.css';
 import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
+export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 export {
   CalendarPlugin,
   createDefaultPlugins,
-  defaultCalendarToolbar,
-  HistoryChromePlugin,
   emptyEditorDoc,
   emptyCalendarDoc,
   isCalendarEditorDoc,
@@ -15,14 +14,9 @@ export {
   serializeText,
   serializeDoc,
   serializePayload,
-  parseIcs,
-  serializeIcs,
-  importCalendarText,
-  ParseError,
   MAX_CALENDAR_BYTES,
   isCalendarDoc,
   coerceCalendarDoc,
-  occurrences,
   renderView,
   type CalendarPluginOptions,
   type CalendarPluginFeatures,

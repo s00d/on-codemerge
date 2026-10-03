@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { allFieldTypes } from '../types';
-import { createField, getDriver, validateFieldForDriver } from '../drivers';
+import { createField, getDriver, validateFieldForDriver } from '../drivers/registry';
 
 const stubI18n = { t: (k: string) => k };
 

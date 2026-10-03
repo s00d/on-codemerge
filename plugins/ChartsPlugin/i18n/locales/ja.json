@@ -27,7 +27,10 @@
     "pieExpenses": "円グラフ：支出",
     "lineVisitors": "折れ線：訪問者",
     "barAreaMode": "棒グラフ/エリアモード",
-    "editChart": "グラフを編集"
+    "editChart": "グラフを編集",
+    "preview": "プレビュー",
+    "edit": "編集",
+    "settings": "設定"
   },
   "templates": {
     "areYouSureYouWantToDeleteThisTemplate": "このテンプレートを削除してもよろしいですか？",

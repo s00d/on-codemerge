@@ -13,7 +13,7 @@ import {
   pathToJsonPointer,
   valueAtDocPath,
 } from '../commands/jsonCommands';
-import { allJsonLeafTypes, getDriver } from '../drivers';
+import { allJsonLeafTypes, getDriver } from '../drivers/registry';
 
 export type JsonNodeMenuTarget = {
   /** Path for structural ops (property, array item, or container value). */

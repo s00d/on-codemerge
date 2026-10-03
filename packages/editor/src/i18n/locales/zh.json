@@ -337,5 +337,9 @@
   "clearStyles": {
     "title": "清除样式",
     "nothingToClear": "没有可清除的内容"
+  },
+  "history": {
+    "undo": "撤销",
+    "redo": "重做"
   }
 }

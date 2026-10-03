@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { docToValue, toEditorDoc, valueToDoc } from '../adapters';
-import { ParseError, parseText, serializeText } from '../text';
+import { parseText, serializeText } from '../text';
+import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 
 describe('json adapters', () => {
   it('round-trips canonical values', () => {

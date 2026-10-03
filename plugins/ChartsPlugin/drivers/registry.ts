@@ -18,9 +18,6 @@ import {
   polarDefaults,
   xyDefaults,
 } from './coerce';
-import { paintCategorical } from './categorical';
-import { paintPolar } from './polar';
-import { paintRadar } from './radar';
 import { paintXy } from './xy';
 
 const CAT_FIELDS = ['label', 'value', 'color'] as const satisfies readonly PointField[];
@@ -28,7 +25,7 @@ const XY_FIELDS = ['label', 'x', 'y', 'color'] as const satisfies readonly Point
 const BUBBLE_FIELDS = ['label', 'x', 'y', 'r', 'color'] as const satisfies readonly PointField[];
 
 function cat(
-  type: 'bar' | 'line' | 'area',
+  type: 'bar' | 'line' | 'area' | 'radar',
   name: string,
   icon: string,
   extra?: Partial<ChartDriver>
@@ -41,10 +38,10 @@ function cat(
     seriesMode: 'multi',
     fields: CAT_FIELDS,
     supportsMode: type === 'bar' || type === 'area',
-    supportsOrientation: type === 'bar',
+    // Mermaid xychart path has no horizontal bars yet — hide until wired.
+    supportsOrientation: false,
     defaults: categoricalDefaults,
     coerce: coerceCategorical,
-    paint: (ctx, series, options, i18n) => paintCategorical(type, ctx, series, options, i18n),
     ...extra,
   };
 }
@@ -53,17 +50,10 @@ export const DRIVERS: Record<ChartType, ChartDriver> = {
   bar: cat('bar', 'Bar Chart', barIcon),
   line: cat('line', 'Line Chart', lineIcon, { supportsMode: false, supportsOrientation: false }),
   area: cat('area', 'Area Chart', areaIcon, { supportsOrientation: false }),
-  radar: {
-    type: 'radar',
-    family: 'categorical',
-    name: 'Radar Chart',
-    icon: radarIcon,
-    seriesMode: 'multi',
-    fields: CAT_FIELDS,
-    defaults: categoricalDefaults,
-    coerce: coerceCategorical,
-    paint: paintRadar,
-  },
+  radar: cat('radar', 'Radar Chart', radarIcon, {
+    supportsMode: false,
+    supportsOrientation: false,
+  }),
   pie: {
     type: 'pie',
     family: 'polar',
@@ -71,10 +61,9 @@ export const DRIVERS: Record<ChartType, ChartDriver> = {
     icon: pieIcon,
     seriesMode: 'single',
     fields: CAT_FIELDS,
-    supportsOrientation: true,
+    supportsOrientation: false,
     defaults: polarDefaults,
     coerce: coercePolar,
-    paint: (ctx, series, options, i18n) => paintPolar(ctx, series, options, i18n, 0),
   },
   doughnut: {
     type: 'doughnut',
@@ -84,10 +73,9 @@ export const DRIVERS: Record<ChartType, ChartDriver> = {
     seriesMode: 'single',
     fields: CAT_FIELDS,
     hole: 0.55,
-    supportsOrientation: true,
+    supportsOrientation: false,
     defaults: polarDefaults,
     coerce: coercePolar,
-    paint: (ctx, series, options, i18n) => paintPolar(ctx, series, options, i18n, 0.55),
   },
   scatter: {
     type: 'scatter',

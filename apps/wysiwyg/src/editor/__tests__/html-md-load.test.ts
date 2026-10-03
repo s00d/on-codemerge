@@ -4,7 +4,7 @@
 import { describe, expect, it } from 'vitest';
 import { Editor } from '../Editor';
 import { insertText } from '@codemerge/kernel';
-import { createCorePlugins, createDefaultPlugins } from '../../plugins';
+import { createCorePlugins, createDefaultPlugins } from '../../../../../plugins';
 import { docToHTML, htmlToDoc } from '../../io/html';
 import type { DocNode } from '@codemerge/kernel';
 

@@ -54,7 +54,7 @@ import { Editor, createDefaultPlugins } from 'on-codemerge/code';
 
 const editor = new Editor(host, {
   chrome: 'bar',
-  plugins: createDefaultPlugins(), // HistoryChrome + CodeBlockPlugin({ surface: 'workspace' })
+  plugins: createDefaultPlugins(), // CodeBlockPlugin({ surface: 'workspace' })
 });
 
 editor.setText('const x = 1;\n');
@@ -76,7 +76,6 @@ CodeBlockPlugin({
   order?: number,
   features?: {
     toolbar?: boolean; // Insert button (atom only); default true
-    historyChrome?: boolean; // include HistoryChromePlugin in createDefaultPlugins
   },
 });
 ```
@@ -114,7 +113,7 @@ CodeBlockPlugin({
 | `command` | SDK `ToolbarButton.command` → `onCommand`               |
 | `run`     | Deferred click (`{ editor, workspace }`) — prefer `run` |
 
-Default workspace menus: **Edit** (copy / select all / clear / indent / outdent) and **File** (download / upload). Undo/redo = `HistoryChromePlugin`.
+Default workspace menus: **Edit** (copy / select all / clear / indent / outdent) and **File** (download / upload). Undo/redo toolbar is built into `/editor`.
 
 ## Commands
 

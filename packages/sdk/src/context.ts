@@ -1,13 +1,13 @@
 import type { EditorAPI } from './types';
-import { DisposableScope } from './disposable';
-import type { DisposeFn, Ownable } from './disposable';
+import { DisposableScope } from '@codemerge/view';
+import type { DisposeFn, Ownable } from '@codemerge/view';
 import type { ToolbarButton, ToolbarMenuDef } from './ui/toolbar';
 import { PopupController } from './ui/popup';
 import type { PopupOptions, PopupHandle } from './ui/popup';
 import type { MenuItem, MenuPosition } from './ui/context-menu';
 import type { NotifyOptions } from './ui/notify';
-import type { MountHandle, ViewSpec } from './ui/view';
-import { mount as mountView } from './ui/view';
+import type { MountHandle, ViewSpec } from '@codemerge/view';
+import { mount as mountView } from '@codemerge/view';
 
 export type DomTarget = 'content' | 'chrome' | 'host';
 

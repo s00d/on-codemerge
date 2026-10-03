@@ -1,43 +1,29 @@
 import type { DocNode } from '@codemerge/kernel';
+import { ParseError, parseJsonPayload } from '@ocm/wysiwyg/utils/parseSoT';
 import type { FormConfig } from '../types';
 import { isFormConfig } from '../types';
 import { configFromDoc, docFromConfig, emptyFormConfig } from './adapters';
 
 export const MAX_FORM_BYTES = 2_000_000;
 
-export class ParseError extends Error {
-  readonly offset?: number;
-
-  constructor(message: string, offset?: number) {
-    super(message);
-    this.name = 'ParseError';
-    this.offset = offset;
-  }
-}
-
 export type ParseTextResult = { ok: true; doc: DocNode } | { ok: false; error: ParseError };
 
 export function parseText(text: string): ParseTextResult {
-  if (text.length > MAX_FORM_BYTES) {
-    return {
-      ok: false,
-      error: new ParseError(`Form JSON exceeds ${MAX_FORM_BYTES} bytes`),
-    };
+  const parsed = parseJsonPayload(
+    text,
+    MAX_FORM_BYTES,
+    `Form JSON exceeds ${MAX_FORM_BYTES} bytes`
+  );
+  if (!parsed.ok) {
+    return { ok: false, error: new ParseError(parsed.message) };
   }
-  const trimmed = text.trim();
-  if (!trimmed) {
+  if (parsed.empty) {
     return { ok: true, doc: docFromConfig(emptyFormConfig()) };
   }
-  try {
-    const parsed: unknown = JSON.parse(trimmed);
-    if (!isFormConfig(parsed)) {
-      return { ok: false, error: new ParseError('Expected FormConfig JSON with fields[]') };
-    }
-    return { ok: true, doc: docFromConfig(parsed) };
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : 'Invalid JSON';
-    return { ok: false, error: new ParseError(msg) };
+  if (!isFormConfig(parsed.value)) {
+    return { ok: false, error: new ParseError('Expected FormConfig JSON with fields[]') };
   }
+  return { ok: true, doc: docFromConfig(parsed.value) };
 }
 
 export function serializeText(doc: DocNode, indent: number | string = 2): string {

@@ -1,84 +1,80 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { parseSafeSvg } from '@ocm/wysiwyg/utils/safeHtml';
+import { describe, expect, it } from 'vitest';
 import { renderMarkdownPreviewHtml } from '../../io/preview';
-import { hydrateMermaidBlocks } from '../mermaidHydrate';
-
-const FO_LABEL_SVG =
-  '<svg xmlns="http://www.w3.org/2000/svg"><g class="node"><foreignObject width="50" height="20"><div xmlns="http://www.w3.org/1999/xhtml"><span class="nodeLabel">Source</span></div></foreignObject></g></svg>';
-
-const render = vi.fn(() =>
-  Promise.resolve({
-    svg: FO_LABEL_SVG,
-  })
-);
-
-vi.mock('mermaid', () => ({
-  default: {
-    initialize: vi.fn(),
-    render: (...args: unknown[]) => render(...args),
-  },
-}));
+import { hydrateMermaidBlocks, restoreMermaidHosts, salvageMermaidHosts } from '../mermaidHydrate';
 
 describe('hydrateMermaidBlocks', () => {
-  beforeEach(() => {
-    render.mockClear();
-  });
-
-  it('replaces mermaid host with inline SVG (data-node retained)', async () => {
+  it('replaces mermaid host with real SVG and sets ready only after success', () => {
     const root = document.createElement('div');
     root.innerHTML = renderMarkdownPreviewHtml('```mermaid\nflowchart LR\n  A-->B\n```\n');
     document.body.append(root);
     const host = root.querySelector('[data-node="mermaid"]');
     expect(host).toBeTruthy();
-    expect(root.querySelector('svg')).toBeNull();
 
-    await hydrateMermaidBlocks(root);
+    hydrateMermaidBlocks(root);
 
-    expect(render).toHaveBeenCalledWith(expect.any(String), expect.stringContaining('flowchart'));
-    expect(root.querySelector('iframe')).toBeNull();
     const svg = root.querySelector('svg[data-node="mermaid"]');
     expect(svg).toBeInstanceOf(SVGElement);
     expect(svg?.getAttribute('data-ocm-mermaid-ready')).toBe('1');
     expect(host?.getAttribute('data-ocm-mermaid-ready')).toBe('1');
+    expect(host?.hasAttribute('data-ocm-mermaid-error')).toBe(false);
+    expect(svg?.querySelector('path, rect, text')).toBeTruthy();
+    expect(svg?.querySelector('marker')?.getAttribute('markerWidth')).toBeTruthy();
+    expect(svg?.querySelector('path[marker-end]')).toBeTruthy();
+    expect(svg?.outerHTML ?? '').not.toContain('<style');
     root.remove();
   });
 
-  it('skips re-render when data-source hash unchanged', async () => {
+  it('skips re-render when hash unchanged', () => {
     const root = document.createElement('div');
     root.innerHTML = renderMarkdownPreviewHtml('```mermaid\nflowchart LR\n  A-->B\n```\n');
     document.body.append(root);
-    await hydrateMermaidBlocks(root);
-    expect(render).toHaveBeenCalledTimes(1);
+    hydrateMermaidBlocks(root);
+    const svgBefore = root.querySelector('svg')?.outerHTML;
     const host = root.querySelector<HTMLElement>('[data-node="mermaid"]');
     host?.removeAttribute('data-ocm-mermaid-ready');
-    await hydrateMermaidBlocks(root);
-    expect(render).toHaveBeenCalledTimes(1);
+    hydrateMermaidBlocks(root);
+    expect(root.querySelector('svg')?.outerHTML).toBe(svgBefore);
     root.remove();
   });
 
-  it('parseSafeSvg keeps foreignObject node labels', () => {
-    const svg = parseSafeSvg(FO_LABEL_SVG);
-    expect(svg?.textContent ?? '').toContain('Source');
-    expect(svg?.querySelector('foreignObject')).toBeTruthy();
-    expect(svg?.querySelector('.nodeLabel')?.textContent).toBe('Source');
-  });
-
-  it('parseSafeSvg strips script and on* handlers', () => {
-    const dirty =
-      '<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script><text onclick="evil()">A</text></svg>';
-    const svg = parseSafeSvg(dirty);
-    expect(svg?.querySelector('script')).toBeNull();
-    expect(svg?.querySelector('text')?.getAttribute('onclick')).toBeNull();
-    expect(svg?.textContent ?? '').toContain('A');
-  });
-
-  it('hydrate keeps label text from foreignObject SVG', async () => {
+  it('marks unsupported diagram with error and leaves ready unset', () => {
     const root = document.createElement('div');
-    root.innerHTML = renderMarkdownPreviewHtml('```mermaid\nflowchart LR\n  A-->B\n```\n');
+    root.innerHTML = renderMarkdownPreviewHtml('```mermaid\ngitGraph\n  commit\n```\n');
     document.body.append(root);
-    await hydrateMermaidBlocks(root);
-    const svg = root.querySelector('svg[data-node="mermaid"]');
-    expect(svg?.textContent ?? '').toContain('Source');
+    hydrateMermaidBlocks(root);
+    const host = root.querySelector<HTMLElement>('[data-node="mermaid"]');
+    expect(host?.getAttribute('data-ocm-mermaid-error')).toBe('1');
+    expect(host?.hasAttribute('data-ocm-mermaid-ready')).toBe(false);
+    expect(root.querySelector('svg')).toBeNull();
+    root.remove();
+  });
+
+  it('hydrates multiple hosts under budget', () => {
+    const root = document.createElement('div');
+    const block = renderMarkdownPreviewHtml('```mermaid\nflowchart LR\n  A-->B\n```\n');
+    root.innerHTML = block + block + block + block + block;
+    document.body.append(root);
+    const t0 = performance.now();
+    hydrateMermaidBlocks(root);
+    const ms = performance.now() - t0;
+    expect(root.querySelectorAll('svg[data-ocm-mermaid-ready="1"]')).toHaveLength(5);
+    expect(ms).toBeLessThan(100);
+    root.remove();
+  });
+
+  it('salvages and restores hydrated hosts across DOM replace', () => {
+    const root = document.createElement('div');
+    const md = '```mermaid\nflowchart LR\n  A-->B\n```\n';
+    root.innerHTML = renderMarkdownPreviewHtml(md);
+    document.body.append(root);
+    hydrateMermaidBlocks(root);
+    const svgBefore = root.querySelector('svg')?.outerHTML;
+    const salvaged = salvageMermaidHosts(root);
+    expect(salvaged.size).toBe(1);
+    root.innerHTML = renderMarkdownPreviewHtml(md);
+    restoreMermaidHosts(root, salvaged);
+    expect(root.querySelector('svg')?.outerHTML).toBe(svgBefore);
+    expect(root.querySelector('[data-ocm-mermaid-ready="1"]')).toBeTruthy();
     root.remove();
   });
 });

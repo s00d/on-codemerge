@@ -1,5 +1,5 @@
-import { createField, getDriver } from '../drivers';
-import type { FormI18n } from '../drivers';
+import { createField, getDriver } from '../drivers/registry';
+import type { FormI18n } from '../drivers/types';
 import type { FieldConfig, FieldType, FormConfig } from '../types';
 import { emptyFormConfig } from '../io/adapters';
 

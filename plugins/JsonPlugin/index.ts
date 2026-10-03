@@ -10,9 +10,8 @@ import { bindJsonViewModeActive, defaultJsonToolbar } from './chrome/defaultTool
 import { setFormatIndent } from './chrome/format';
 import { setupTreeContextMenu } from './chrome/tree';
 import type { JsonToolbarOptions } from './chrome/types';
-import { HistoryChromePlugin } from '../HistoryPlugin';
 import { bindShortcutsPopup } from '../ShortcutsPlugin';
-import { isJsonEditorDoc } from './io';
+import { isJsonEditorDoc } from './io/adapters';
 import { mountJsonWorkspace } from './surface/workspaceView';
 import type { JsonWorkspaceHandle } from './surface/workspaceView';
 import { mountJsonEmbed } from './widgets/mountJsonEmbed';
@@ -27,8 +26,9 @@ export {
   indentFromDoc,
   resolveJsonRoot,
   encodeJsonValue,
-} from './io';
-export { ParseError, parseText, serializeText, serializeDoc, type ParseTextResult } from './io';
+} from './io/adapters';
+export { parseText, serializeText, serializeDoc } from './io/text';
+export type { ParseTextResult } from './io/text';
 export {
   setValue,
   insertProperty,
@@ -52,14 +52,13 @@ export type {
   JsonToolbarMenu,
   JsonToolbarOptions,
 } from './chrome/types';
-export { HistoryChromePlugin } from '../HistoryPlugin';
 export {
   DRIVERS as JSON_VALUE_DRIVERS,
   getDriver as getJsonValueDriver,
   allJsonLeafTypes,
   typeLabel as jsonTypeLabel,
-  type JsonValueDriver,
-} from './drivers';
+} from './drivers/registry';
+export type { JsonValueDriver } from './drivers/types';
 
 const JSON_NODES = [
   { name: 'json', group: 'block' as const, attrs: { indent: 2 } },
@@ -86,11 +85,6 @@ export type JsonPluginFeatures = {
   rawPane?: boolean;
   /** Tree context menu (default true; workspace only). */
   treeChrome?: boolean;
-  /**
-   * Include `HistoryChromePlugin` in `createDefaultPlugins` (default true for workspace).
-   * Hotkeys are always seeded by the editor platform.
-   */
-  historyChrome?: boolean;
   /** Shortcuts popup + Mod-/ hotkey (default true; workspace only). */
   shortcuts?: boolean;
 };
@@ -124,7 +118,6 @@ export function JsonPlugin(options: JsonPluginOptions = {}): PluginDefinition {
     toolbar: feat('toolbar', true),
     rawPane: feat('rawPane', workspace),
     treeChrome: feat('treeChrome', workspace),
-    historyChrome: feat('historyChrome', workspace),
     shortcuts: feat('shortcuts', workspace),
   };
   // Workspace-owned capabilities never run on atom even if a caller forces features on.
@@ -290,32 +283,14 @@ export function JsonPlugin(options: JsonPluginOptions = {}): PluginDefinition {
   });
 }
 
-/** Default slim-app plugin set: HistoryChrome + workspace JsonPlugin. */
+/** Default slim-app plugin set: workspace JsonPlugin. */
 export function createDefaultPlugins(
-  opts: {
-    toolbar?: JsonToolbarOptions;
-    features?: JsonPluginFeatures;
-  } = {}
+  opts: { toolbar?: JsonToolbarOptions } = {}
 ): PluginDefinition[] {
-  const features: Required<JsonPluginFeatures> = {
-    toolbar: true,
-    rawPane: true,
-    treeChrome: true,
-    historyChrome: true,
-    shortcuts: true,
-    ...opts.features,
-  };
   return [
-    ...(features.historyChrome ? [HistoryChromePlugin()] : []),
     JsonPlugin({
       surface: 'workspace',
-      toolbar:
-        opts.toolbar ??
-        defaultJsonToolbar({
-          viewMode: features.rawPane,
-          shortcuts: features.shortcuts,
-        }),
-      features,
+      toolbar: opts.toolbar ?? defaultJsonToolbar({ viewMode: true, shortcuts: true }),
     }),
   ];
 }

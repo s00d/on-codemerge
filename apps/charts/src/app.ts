@@ -2,11 +2,11 @@ import '@ocm/wysiwyg/tailwind.css';
 import '@codemerge/sdk/ui/sdk.scss';
 
 export { Editor, type EditorOptions } from './editor/Editor';
+export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
 export {
   ChartsPlugin,
   createDefaultPlugins,
   defaultChartToolbar,
-  HistoryChromePlugin,
   emptyEditorDoc,
   emptyChartAttrs,
   isChartEditorDoc,
@@ -15,7 +15,6 @@ export {
   parseText,
   serializeText,
   serializeDoc,
-  ParseError,
   MAX_CHART_BYTES,
   type ChartsPluginOptions,
   type ChartsPluginFeatures,

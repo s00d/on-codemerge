@@ -7,8 +7,7 @@ export {
 } from './toolbar';
 export type { ToolbarConfig, ToolbarConfigItem, PluginToolbarOpts } from './toolbarConfig';
 export { applyToolbarConfig, pluginToolbarPlacement } from './toolbarConfig';
-export { KERNEL_UNDO_REDO_HOTKEYS, historyToolbarItems } from './historyToolbar';
-export type { HistoryToolbarIcons } from './historyToolbar';
+export { KERNEL_UNDO_REDO_HOTKEYS } from './historyToolbar';
 export {
   PopupService,
   type PopupHandle,
@@ -20,17 +19,13 @@ export { ContextMenuService, type MenuItem, type MenuPosition } from './context-
 export { NotifyService, type NotifyOptions, type ConfirmOptions } from './notify';
 export { placeRoot, placeSubmenu, applyPlaceRoot, applyPlaceSubmenu } from './place';
 export {
-  ui,
   h,
-  text,
-  fragment,
   foreign,
   img,
   video,
   iframe,
   canvas,
   mount,
-  patch,
   renderDetached,
   viewToHtml,
   createPortal,
@@ -40,7 +35,7 @@ export {
   type ViewSpec,
   type MountHandle,
   type PortalHandle,
-} from './view';
+} from '@codemerge/view';
 export {
   getPortalRoot,
   setPortalRoot,
@@ -51,7 +46,7 @@ export {
   type PortalTargetName,
   type PortalOptions,
   type ViewTeleportSpec,
-} from './portal';
+} from '@codemerge/view';
 export {
   toolbarTv,
   popupTv,

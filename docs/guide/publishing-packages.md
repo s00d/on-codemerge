@@ -1,6 +1,6 @@
 # Publishing `@codemerge/*` and `on-codemerge`
 
-Phase A: low-level packages are published **alongside** the product tarball. The monolith still bundles kernel/sdk/hunspell — consumers of `on-codemerge` do not need the scoped packages.
+Phase A: low-level packages are published **alongside** the product tarball. The monolith still bundles kernel/sdk/view/mermaid/hunspell — consumers of `on-codemerge` do not need the scoped packages for normal editor use.
 
 ## One command
 
@@ -10,13 +10,15 @@ From the repo root (npm logged in for `@codemerge` + `on-codemerge`):
 pnpm run release
 ```
 
-Runs `check` → product builds / export gates / publint → publishes in order:
+Runs `prepublishOnly` (packages build + check + product builds) then publishes in order:
 
 1. `@codemerge/kernel`
-2. `@codemerge/sdk`
-3. `@codemerge/hunspell`
-4. `@codemerge/collaboration-server`
-5. `on-codemerge`
+2. `@codemerge/view`
+3. `@codemerge/mermaid`
+4. `@codemerge/sdk`
+5. `@codemerge/hunspell`
+6. `@codemerge/collaboration-server`
+7. `on-codemerge`
 
 ## Workspace deps
 
@@ -30,8 +32,12 @@ Runs `check` → product builds / export gates / publint → publishes in order:
 | --------------------------------- | --------------------------------- |
 | Editor app                        | `on-codemerge` only               |
 | Headless doc/ops                  | `@codemerge/kernel`               |
-| Plugin authoring without monolith | `@codemerge/sdk` (+ kernel)       |
+| ViewSpec DOM only                 | `@codemerge/view`                 |
+| Mermaid-subset SVG only           | `@codemerge/mermaid`              |
+| Plugin authoring without monolith | `@codemerge/sdk` (+ kernel/view)  |
 | Spell without editor              | `@codemerge/hunspell`             |
 | Demo / self-hosted collab WS      | `@codemerge/collaboration-server` |
 
 **Warning:** do not install `on-codemerge` and `@codemerge/sdk` into the same application bundle (duplicate SDK/kernel instances).
+
+See also [Mermaid](/guide/mermaid) and [View runtime](/guide/view).

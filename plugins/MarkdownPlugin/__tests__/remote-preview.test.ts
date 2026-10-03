@@ -193,6 +193,69 @@ describe('MarkdownPlugin remote preview', () => {
     });
   });
 
+  it('hydrates mermaid hosts from remote projector HTML', async () => {
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(
+        new Response(
+          `<div class="ocm-md-mermaid" data-node="mermaid" data-ocm-mermaid="1"><pre><code class="language-mermaid">flowchart LR
+  A[Source] --&gt; B[Preview]
+</code></pre></div>`,
+          { status: 200, headers: { 'Content-Type': 'text/html' } }
+        )
+      )
+    );
+    const { editor } = mountRemote('```mermaid\nflowchart LR\n  A-->B\n```\n');
+    await flushPaint();
+    await vi.waitFor(() => {
+      const preview = editor.contentElement()?.querySelector('.ocm-md-pane--preview');
+      const svg = preview?.querySelector('svg[data-node="mermaid"][data-ocm-mermaid-ready="1"]');
+      expect(svg).toBeTruthy();
+      expect(preview?.querySelector('code.language-mermaid')).toBeNull();
+    });
+  });
+
+  it('re-hydrates pending mermaid for same markdown without refetch', async () => {
+    const html = `<div class="ocm-md-mermaid" data-node="mermaid" data-ocm-mermaid="1"><pre><code class="language-mermaid">flowchart LR
+  A-->B
+</code></pre></div>`;
+    fetchMock.mockImplementation(() =>
+      Promise.resolve(new Response(html, { status: 200, headers: { 'Content-Type': 'text/html' } }))
+    );
+    const md = '```mermaid\nflowchart LR\n  A-->B\n```\n';
+    const { editor } = mountRemote(md, 20);
+    await flushPaint();
+    await vi.waitFor(() => {
+      expect(
+        editor.contentElement()?.querySelector('svg[data-ocm-mermaid-ready="1"]')
+      ).toBeTruthy();
+    });
+    const callsAfterFirst = fetchMock.mock.calls.length;
+
+    const host = editor
+      .contentElement()
+      ?.querySelector<HTMLElement>('.ocm-md-pane--preview [data-node="mermaid"]');
+    expect(host).toBeTruthy();
+    host?.removeAttribute('data-ocm-mermaid-ready');
+    host?.removeAttribute('data-ocm-mermaid-hash');
+    host?.replaceChildren();
+    const pre = document.createElement('pre');
+    const code = document.createElement('code');
+    code.className = 'language-mermaid';
+    code.textContent = 'flowchart LR\n  A-->B';
+    pre.append(code);
+    host?.append(pre);
+
+    // Same markdown again — must hydrate pending hosts, not skip forever.
+    expect(editor.setText(md)).toBeNull();
+    await flushPaint();
+    await vi.waitFor(() => {
+      expect(
+        editor.contentElement()?.querySelector('svg[data-ocm-mermaid-ready="1"]')
+      ).toBeTruthy();
+    });
+    expect(fetchMock.mock.calls.length).toBe(callsAfterFirst);
+  });
+
   it('shows toolbar busy chrome while remote preview fetch is in flight', async () => {
     let release!: (value: Response) => void;
     const gate = new Promise<Response>((resolve) => {

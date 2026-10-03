@@ -11,6 +11,7 @@
     "apps/wysiwyg/src",
     "apps/json/src",
     "packages/kernel/src",
+    "packages/view/src",
     "packages/sdk/src",
     "packages/editor/src",
     "test",

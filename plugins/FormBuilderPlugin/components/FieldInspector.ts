@@ -2,7 +2,7 @@ import { h, mount } from '@codemerge/sdk';
 import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import { allFieldTypes, isFieldType } from '../types';
 import type { FieldConfig, FieldOptions, ValidationRules } from '../types';
-import { DRIVERS, getDriver } from '../drivers';
+import { DRIVERS, getDriver } from '../drivers/registry';
 import type { FormStore } from '../services/FormStore';
 
 export type FieldInspectorHooks = {

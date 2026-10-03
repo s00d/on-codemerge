@@ -46,6 +46,8 @@ const shared = {
       '@codemerge/editor': resolve(root, 'packages/editor/src'),
       '@codemerge/hunspell': resolve(root, 'packages/hunspell/src'),
       '@codemerge/kernel': resolve(root, 'packages/kernel/src'),
+      '@codemerge/view': resolve(root, 'packages/view/src'),
+      '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
       '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
       '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
       '@ocm/plugins': resolve(root, 'plugins'),
@@ -82,6 +84,7 @@ const libConfig = defineConfig({
     lib: {
       entry: {
         app: './apps/wysiwyg/src/app.ts',
+        plugins: './apps/wysiwyg/src/plugins.ts',
         json: './apps/json/src/app.ts',
         markdown: './apps/markdown/src/app.ts',
         code: './apps/code/src/app.ts',
@@ -90,6 +93,7 @@ const libConfig = defineConfig({
         calendar: './apps/calendar/src/app.ts',
         'packages/sdk/src/index': './packages/sdk/src/index.ts',
         'packages/kernel/src/index': './packages/kernel/src/index.ts',
+        'packages/view/src/index': './packages/view/src/index.ts',
       },
       fileName: (format, entryName) => `${entryName}.${format === 'es' ? 'mjs' : 'cjs'}`,
       formats: ['es', 'cjs'],

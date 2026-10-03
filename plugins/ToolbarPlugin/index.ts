@@ -53,13 +53,3 @@ export function ToolbarPlugin() {
     },
   });
 }
-
-/** @deprecated Prefer SDK separators via toolbar `group`. Kept for API compat. */
-export function ToolbarDividerPlugin() {
-  return definePlugin({
-    name: 'toolbar-divider',
-    setup() {
-      /* no-op — separators come from ToolbarPanel group boundaries */
-    },
-  });
-}

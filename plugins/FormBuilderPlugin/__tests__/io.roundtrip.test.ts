@@ -1,7 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { emptyEditorDoc, parseText, serializeDoc } from '../io';
+import { emptyEditorDoc } from '../io/adapters';
+import { parseText, serializeDoc } from '../io/text';
 import { emptyFormConfig } from '../io/adapters';
-import { createField } from '../drivers';
+import { createField } from '../drivers/registry';
 
 const stubI18n = { t: (k: string) => k };
 

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
-import { allJsonLeafTypes, getDriver } from '../drivers';
+import { allJsonLeafTypes, getDriver } from '../drivers/registry';
 import { applyTransaction, createState, runCommand } from '@codemerge/kernel';
 import { changeType } from '../commands/jsonCommands';
-import { docToValue, toEditorDoc, valueToDoc } from '../io';
+import { docToValue, toEditorDoc, valueToDoc } from '../io/adapters';
 
 describe('json drivers.coerce', () => {
   it('fromType × toType always yields a value encodable for target', () => {

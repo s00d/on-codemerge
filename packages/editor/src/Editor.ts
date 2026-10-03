@@ -50,6 +50,7 @@ import type { I18n, Params, Translations } from '@i18n-micro/runtime';
 import en from './i18n/locales/en.json';
 import { listLocales, loadLocale } from './i18n/loadLocale';
 import { PageChrome } from './PageChrome';
+import { redoIcon, undoIcon } from './historyIcons';
 import { defaultWysiwygToolbarMenus } from './toolbarMenus';
 import type { CreateView, ViewPort } from './ViewPort';
 
@@ -85,6 +86,13 @@ export interface SharedEditorOptions {
   };
   createView: CreateView;
   io?: ProseIoOverrides;
+  /**
+   * Opt-in timing hooks (Performance panel / custom sink).
+   * When set, `dispatch` reports `view.update` / `toolbar.refresh` durations.
+   */
+  diagnostics?: {
+    onMeasure?: (name: string, ms: number, ctx?: { source?: string }) => void;
+  };
 }
 
 export type TransactionSource = 'local' | 'remote';
@@ -116,6 +124,7 @@ export class Editor implements EditorAPI {
   private readonly localeOverlays = new Set<(locale: string) => Promise<void>>();
   private localeReady: Promise<void> = Promise.resolve();
   private readonly toolbarPanel: ToolbarPanel;
+  private readonly diagnostics: SharedEditorOptions['diagnostics'];
   private pageChrome: PageChrome | null = null;
   /** Marks applied to the next typed characters (e.g. track-changes insertion). */
   private storedMarks: Mark[] = [];
@@ -151,6 +160,7 @@ export class Editor implements EditorAPI {
     this.colorScheme = options.colorScheme ?? 'host';
     this.plugins = options.plugins ?? [];
     this.ioOverrides = options.io ?? {};
+    this.diagnostics = options.diagnostics;
     this.platform = createPlatform(this.plugins);
     this.i18n = createI18n({
       locale: 'en',
@@ -219,6 +229,7 @@ export class Editor implements EditorAPI {
       },
     };
     this.registerToolbarMenus(options.toolbar);
+    this.seedHistoryToolbar();
 
     const contextMenu = new ContextMenuService(host);
     const popup = new PopupService(host);
@@ -471,6 +482,26 @@ export class Editor implements EditorAPI {
     }
   }
 
+  /** Kernel undo/redo bar — always on; hotkeys already seeded in createPlatform. */
+  private seedHistoryToolbar(): void {
+    this.toolbarPanel.add({
+      id: 'undo',
+      icon: undoIcon,
+      title: () => this.t('history.undo') || 'Undo',
+      group: 'history',
+      order: 1,
+      command: 'undo',
+    });
+    this.toolbarPanel.add({
+      id: 'redo',
+      icon: redoIcon,
+      title: () => this.t('history.redo') || 'Redo',
+      group: 'history',
+      order: 2,
+      command: 'redo',
+    });
+  }
+
   notify(options: NotifyOptions | string): void {
     if (typeof options === 'string') {
       this.ui.notify.info(options);
@@ -604,6 +635,19 @@ export class Editor implements EditorAPI {
     void md;
   }
 
+  private measure(name: string, fn: () => void, ctx?: { source?: string }): void {
+    const sink = this.diagnostics?.onMeasure;
+    if (!sink || typeof performance === 'undefined') {
+      fn();
+      return;
+    }
+    const t0 = performance.now();
+    fn();
+    const ms = performance.now() - t0;
+    performance.mark?.(`ocm:${name}`);
+    sink(name, ms, ctx);
+  }
+
   dispatch(tr: Transaction, opts?: { source?: TransactionSource }): void {
     if (this.destroyed) {
       return;
@@ -617,14 +661,20 @@ export class Editor implements EditorAPI {
       this.emit('selectionChanged');
       return;
     }
-    if (source === 'remote') {
-      // Apply without touching local undo/redo stacks.
-      this.state = applyTransaction(this.state, tr, this.platform.schema).state;
-    } else {
-      this.state = this.history.apply(this.state, tr);
-    }
-    this.view.update(this.state);
-    this.toolbar.refresh();
+    this.measure(
+      'dispatch',
+      () => {
+        if (source === 'remote') {
+          // Apply without touching local undo/redo stacks.
+          this.state = applyTransaction(this.state, tr, this.platform.schema).state;
+        } else {
+          this.state = this.history.apply(this.state, tr);
+        }
+        this.measure('view.update', () => this.view.update(this.state), { source });
+        this.measure('toolbar.refresh', () => this.toolbar.refresh(), { source });
+      },
+      { source }
+    );
     this.emitTransaction(tr, source);
     this.emit('docChanged');
     this.emit('selectionChanged');

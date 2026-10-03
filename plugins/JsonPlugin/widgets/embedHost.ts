@@ -18,7 +18,8 @@ import type {
 } from '@codemerge/kernel';
 import type { EditorAPI } from '@codemerge/sdk';
 import { jsonCommandMap } from '../commands/jsonCommands';
-import { emptyEditorDoc, isJsonEditorDoc, parseText, serializeDoc } from '../io';
+import { emptyEditorDoc, isJsonEditorDoc } from '../io/adapters';
+import { parseText, serializeDoc } from '../io/text';
 import type { JsonWorkspaceHost } from '../surface/workspaceView';
 
 export type EmbedWorkspaceController = {

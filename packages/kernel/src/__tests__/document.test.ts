@@ -6,6 +6,7 @@ import {
   createText,
   docFromJSON,
   docToJSON,
+  ensureNodeIds,
 } from '../document';
 
 describe('document', () => {
@@ -39,5 +40,26 @@ describe('document', () => {
   it('rejects invalid root type on fromJSON', () => {
     expect.hasAssertions();
     expect(() => docFromJSON({ content: [], type: 'paragraph' })).toThrow(/doc/);
+  });
+
+  it('ensureNodeIds omits empty attrs instead of writing undefined', () => {
+    expect.hasAssertions();
+    const out = ensureNodeIds({
+      type: 'paragraph',
+      attrs: {},
+      content: [{ type: 'text', text: 'x' }],
+    });
+    expect(Object.hasOwn(out, 'attrs')).toBe(false);
+    expect(out.attrs).toBeUndefined();
+  });
+
+  it('ensureNodeIds preserves non-empty attrs', () => {
+    expect.hasAssertions();
+    const out = ensureNodeIds({
+      type: 'heading',
+      attrs: { level: 2 },
+      content: [],
+    });
+    expect(out.attrs).toStrictEqual({ level: 2 });
   });
 });

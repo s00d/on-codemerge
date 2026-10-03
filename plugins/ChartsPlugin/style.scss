@@ -1,7 +1,7 @@
 @reference "../../apps/wysiwyg/src/tailwind.css";
 
 .chart-type-selector {
-  @apply mb-6;
+  @apply mb-3;
 
   .grid {
     @apply grid grid-cols-2 gap-3;
@@ -32,6 +32,31 @@
 
     span {
       @apply mt-2 text-center text-sm font-medium text-ocm-text;
+    }
+  }
+}
+
+/* Half-pane studio: 2-col compact type grid that can scroll */
+.chart-ws-editor .chart-type-selector {
+  @apply mb-2;
+
+  .grid {
+    @apply grid-cols-2 gap-2;
+
+    @media (min-width: 768px) {
+      @apply grid-cols-2;
+    }
+  }
+
+  .chart-type-option {
+    @apply p-2;
+
+    svg {
+      @apply mb-1 size-8;
+    }
+
+    span {
+      @apply mt-0.5 text-xs;
     }
   }
 }
@@ -69,6 +94,20 @@
   @apply m-0 block h-auto max-h-full w-auto max-w-full object-contain;
 }
 
+/* Beat stale dist/index.css: .chart-ws-main .preview-container { max-height:42%; flex:0 0 auto } */
+.chart-ws-main > .preview-container.chart-ws-preview {
+  @apply m-0 flex min-h-0 min-w-0 w-full flex-1 self-stretch rounded-ocm-sm bg-ocm-surface p-0;
+  flex: 1 1 0%;
+  max-height: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-ws-preview.preview-container img.svg-chart,
+.chart-ws-preview.preview-container canvas {
+  @apply m-0 block h-full w-full max-h-full max-w-full object-contain;
+}
+
 .chart-canvas {
   @apply mx-auto block max-h-full max-w-full object-contain self-center rounded-[1.25rem];
 }
@@ -93,39 +132,75 @@
 
 .chart-ws-root,
 .chart-ws-host {
-  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden;
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden;
+  flex-basis: 0;
+}
+
+.chart-ws-root > .ocm-studio,
+.chart-ws-host > .ocm-studio {
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden;
+  flex-basis: 0;
 }
 
 .chart-ws {
-  @apply min-h-0 flex-1 overflow-hidden p-2;
+  @apply min-h-0 flex-1 overflow-hidden p-1.5;
+  flex-basis: 0;
 }
 
-.chart-ws-options {
-  @apply flex min-h-0 flex-col gap-3 overflow-y-auto rounded-ocm-sm border border-ocm-border bg-ocm-surface p-3;
+.chart-ws-editor {
+  @apply flex min-h-0 min-w-0 flex-col gap-2 overflow-hidden rounded-ocm-sm border border-ocm-border bg-ocm-surface p-2;
+}
+
+.chart-ws-editor__tabs-host {
+  @apply shrink-0;
+}
+
+.chart-ws-editor__tabs {
+  @apply flex gap-1 rounded-lg border border-ocm-border bg-ocm-surface-muted p-1;
+}
+
+.chart-ws-editor__tab {
+  @apply flex-1 rounded-md px-1.5 py-1.5 text-center text-[11px] font-medium text-ocm-text-muted;
+
+  &.is-active {
+    @apply bg-ocm-surface text-ocm-text shadow-sm;
+  }
+}
+
+.chart-ws-editor__title-host {
+  @apply shrink-0;
+}
+
+.chart-ws-editor__type,
+.chart-ws-editor__settings {
+  @apply flex min-h-0 flex-1 flex-col gap-2 overflow-x-hidden overflow-y-auto overscroll-contain;
+}
+
+.chart-ws-editor .data-editor-container {
+  @apply min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain p-1;
+}
+
+.chart-ws-editor[data-editor-tab='type'] .chart-ws-editor__data,
+.chart-ws-editor[data-editor-tab='type'] .chart-ws-editor__settings {
+  @apply hidden;
+}
+
+.chart-ws-editor[data-editor-tab='data'] .chart-ws-editor__type,
+.chart-ws-editor[data-editor-tab='data'] .chart-ws-editor__settings {
+  @apply hidden;
+}
+
+.chart-ws-editor[data-editor-tab='settings'] .chart-ws-editor__type,
+.chart-ws-editor[data-editor-tab='settings'] .chart-ws-editor__data {
+  @apply hidden;
 }
 
 .chart-ws-main {
-  @apply flex min-h-0 min-w-0 flex-col gap-3 overflow-hidden;
+  @apply flex min-h-0 min-w-0 flex-col overflow-hidden rounded-ocm-sm border border-ocm-border bg-ocm-surface;
 }
 
-.data-editor-container {
-  @apply rounded-xl border border-ocm-border bg-ocm-surface p-4;
-}
-
-.chart-ws-main .preview-container {
-  @apply min-h-40 max-h-[42%] shrink-0 flex-none;
-}
-
-.chart-ws-main .data-editor-container {
-  @apply min-h-0 flex-1 overflow-y-auto;
-}
-
-.chart-ws-main .export-container {
-  @apply mt-0 shrink-0;
-}
-
-.chart-ws-main .export-btn {
-  @apply px-3 py-1.5 text-sm shadow-sm;
+.chart-ws .ocm-studio__body {
+  flex-basis: 0;
 }
 
 /* Series data editor — breathing room, clear table */

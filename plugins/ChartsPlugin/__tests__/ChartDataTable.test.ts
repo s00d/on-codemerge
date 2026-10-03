@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import type { EditorAPI } from '@codemerge/sdk';
 import { ChartDataTable } from '../components/ChartDataTable';
-import { getDriver } from '../drivers';
+import { getDriver } from '../drivers/registry';
 import { validateSeriesForDriver } from '../utils/validation';
 
 function stubEditor(): EditorAPI {

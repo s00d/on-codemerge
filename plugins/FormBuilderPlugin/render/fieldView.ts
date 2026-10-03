@@ -1,6 +1,6 @@
 import type { ViewSpec } from '@codemerge/sdk';
 import type { FieldConfig } from '../types';
-import { getDriver } from '../drivers';
+import { getDriver } from '../drivers/registry';
 
 /** Thin render — all field DOM comes from FieldDriver.render. */
 export function fieldView(field: FieldConfig): ViewSpec {
