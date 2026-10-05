@@ -22,7 +22,7 @@ table.html-editor-table {
 
 /* Prose atom: bounded box; sheet scrolls inside; drag handles via Resizer. */
 .ocm-table-atom {
-  @apply relative my-2 box-border max-w-full overflow-hidden rounded-ocm-md border border-ocm-border bg-ocm-surface;
+  @apply relative my-2 box-border max-w-full overflow-hidden rounded-ocm border border-ocm-border bg-ocm-surface;
   display: flex;
   flex-direction: column;
 }

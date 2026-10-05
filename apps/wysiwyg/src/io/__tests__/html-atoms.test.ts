@@ -259,6 +259,64 @@ describe('html atom round-trip', () => {
     expect(cols?.map((c) => c.title)).toStrictEqual(['Name', 'Qty']);
   });
 
+  it('exports lazy prose-table delimiter and imports sheet theme + source', () => {
+    expect.hasAssertions();
+    const lazy = docToHTML({
+      type: 'doc',
+      content: [
+        {
+          type: 'table',
+          id: 't1',
+          attrs: {
+            lazyUrl: 'https://example.test/t.csv',
+            lazyFormat: 'csv',
+            lazyHeaders: false,
+            lazyDelimiter: ';',
+            hasHeader: true,
+            responsive: true,
+            autofit: true,
+          },
+          content: [
+            {
+              type: 'row',
+              attrs: { header: true },
+              content: [{ type: 'cell', content: [{ type: 'text', text: 'H' }] }],
+            },
+          ],
+        },
+      ],
+    });
+    expect(lazy).toContain('data-lazy-delimiter=";"');
+    expect(lazy).toContain('data-table-id="t1"');
+
+    const imported = htmlToDoc(
+      '<table class="html-editor-table html-editor-table--sheet ocm-table-grid--striped" data-lazy-url="https://example.test/t.csv" data-lazy-format="csv" data-lazy-headers="false" data-lazy-delimiter=";">' +
+        '<colgroup><col style="width: 160px"></colgroup><thead><tr><th>Name</th></tr></thead>' +
+        '<tbody><tr><td>Apples</td></tr></tbody></table>'
+    );
+    const grid = imported.content?.[0];
+    expect(grid?.type).toBe('tableGrid');
+    expect(grid?.attrs?.theme).toBe('striped');
+    expect(grid?.attrs?.source).toMatchObject({
+      url: 'https://example.test/t.csv',
+      format: 'csv',
+      headers: false,
+      delimiter: ';',
+    });
+  });
+
+  it('imports custom data-mark and empty inline as text', () => {
+    expect.hasAssertions();
+    const doc = htmlToDoc('<p><span data-mark="comment">note</span></p><p></p>');
+    const first = doc.content?.[0]?.content?.[0];
+    expect(first).toMatchObject({
+      type: 'text',
+      text: 'note',
+      marks: [{ type: 'comment' }],
+    });
+    expect(doc.content?.[1]?.type).toBe('paragraph');
+  });
+
   it('strips javascript/data link hrefs on export', () => {
     expect.hasAssertions();
     const html = docToHTML({
