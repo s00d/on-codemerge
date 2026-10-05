@@ -24,6 +24,10 @@
       <div class="preview-label">Preview HTML (<code>getHTML()</code>)</div>
       <div class="preview ocm-content" v-html="htmlContent" />
     </div>
+    <div class="preview-block">
+      <div class="preview-label">Preview Markdown (<code>getMd()</code>)</div>
+      <pre class="result md-preview">{{ mdContent }}</pre>
+    </div>
     <details class="html-source">
       <summary>HTML source</summary>
       <pre class="result">{{ htmlContent }}</pre>
@@ -56,7 +60,7 @@ export default {
     this.editor?.destroy();
   },
   data() {
-    return { textContent: '', htmlContent: '', editor: null, editorH: 420 };
+    return { textContent: '', htmlContent: '', mdContent: '', editor: null, editorH: 420 };
   },
   methods: {
     startResize(ev) {
@@ -98,6 +102,7 @@ export default {
     const sync = () => {
       this.textContent = editor.getText();
       this.htmlContent = editor.getHTML();
+      this.mdContent = editor.getMd();
     };
     editor.on('docChanged', sync);
     editor.setText(DEMO_GRID);
@@ -179,6 +184,9 @@ export default {
   overflow: hidden;
   background: var(--color-ocm-surface, #fff);
 }
+.preview-block + .preview-block {
+  margin-top: 8px;
+}
 .preview-label {
   padding: 8px 12px;
   border-bottom: 1px solid var(--color-ocm-border, #ddd);
@@ -203,6 +211,12 @@ export default {
 }
 .html-source {
   margin-top: 8px;
+}
+.md-preview {
+  margin: 0;
+  max-height: 220px;
+  border: 0;
+  border-radius: 0;
 }
 .result {
   max-height: 300px;
