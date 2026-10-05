@@ -1,8 +1,7 @@
+import { foreign, h, mount, replaceChildrenWithSafeHtml } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle } from '@codemerge/sdk';
 import type { DocNode, EditorState, JSONDoc, Operation } from '@codemerge/kernel';
-import type { EditorAPI } from '@codemerge/sdk';
-import { foreign, h, mount } from '@codemerge/sdk';
-import type { MountHandle } from '@codemerge/sdk';
-import { replaceChildrenWithSafeHtml } from '@ocm/wysiwyg/utils/safeHtml';
+
 import { defaultMdElementRegistry } from '../elements/registry';
 import type { MdElementRegistry } from '../elements/types';
 import { docToText, emptyEditorDoc } from '../io/adapters';

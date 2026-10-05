@@ -1,12 +1,12 @@
+import { definePlugin, attrString, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
-import { definePlugin, attrString, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
-import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { importHTML } from '@ocm/wysiwyg/io';
 import { TemplatesMenu } from './components/TemplatesMenu';
 import { TemplateManager } from './services/TemplateManager';
-import { templatesIcon } from '@ocm/wysiwyg/icons';
+import { templatesIcon } from '@codemerge/sdk/icons';
 import type { Template } from './types';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([

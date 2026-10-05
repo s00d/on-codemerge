@@ -1,6 +1,6 @@
 import type { Command, DocNode } from '@codemerge/kernel';
 import { createParagraph, createText, nextId } from '@codemerge/kernel';
-import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
+import { asAttr } from '@codemerge/sdk';
 
 function appendBlock(node: DocNode): Command {
   return (state) => {

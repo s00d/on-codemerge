@@ -1,11 +1,12 @@
-import { h, mount } from '@codemerge/sdk';
+import { h, mount, colorSwatchButton } from '@codemerge/sdk';
 import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
+
 import type { ChartPoint, ChartSeries, ChartType } from '../types';
 import type { ChartDriver, PointField } from '../drivers/types';
 import { getDriver } from '../drivers/registry';
 import { getRandomColor } from '../utils/colors';
-import { colorSwatchButton } from '@ocm/wysiwyg/utils/ColorWell';
-import { deleteIcon, insertIcon } from '@ocm/wysiwyg/icons';
+
+import { deleteIcon, insertIcon } from '@codemerge/sdk/icons';
 
 type SeriesDraft = { name: string; color: string; points: ChartPoint[] };
 

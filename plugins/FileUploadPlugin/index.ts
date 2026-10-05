@@ -1,6 +1,3 @@
-import { wirePluginLocales } from '@codemerge/editor';
-import pluginLocaleEn from './i18n/locales/en.json';
-
 import {
   definePlugin,
   insertAtomAfter,
@@ -9,10 +6,13 @@ import {
   pluginToolbarPlacement,
 } from '@codemerge/sdk';
 import type { PluginToolbarOpts, ViewSpec } from '@codemerge/sdk';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
 import { FileUploader } from './services/FileUploader';
 import { FileUploadMenu } from './components/FileUploadMenu';
 import type { UploadConfig } from './config/UploadConfig';
-import { uploadIcon, fileIcon } from '@ocm/wysiwyg/icons';
+import { uploadIcon, fileIcon } from '@codemerge/sdk/icons';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',

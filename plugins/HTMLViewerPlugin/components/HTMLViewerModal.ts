@@ -1,6 +1,7 @@
-import { PopupController, h } from '@codemerge/sdk';
+import { PopupController, copyText, h } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
-import { copyIcon, saveIcon } from '@ocm/wysiwyg/icons';
+
+import { copyIcon, saveIcon } from '@codemerge/sdk/icons';
 
 export class HTMLViewerModal {
   private readonly editor: EditorAPI;
@@ -27,8 +28,11 @@ export class HTMLViewerModal {
                 attrs: { type: 'button' },
                 on: {
                   click: () => {
-                    void navigator.clipboard.writeText(this.html);
-                    this.editor.notify(t('common.copied'));
+                    void (async () => {
+                      if (await copyText(this.html)) {
+                        this.editor.notify(t('common.copied'));
+                      }
+                    })();
                   },
                 },
               },

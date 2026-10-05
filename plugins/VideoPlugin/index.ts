@@ -1,6 +1,5 @@
-import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
-
 import {
+  asAttr,
   definePlugin,
   insertAtomAfter,
   attrString,
@@ -8,12 +7,13 @@ import {
   video,
   pickFile,
   pluginToolbarPlacement,
+  Resizer,
+  mediaFloatAlign,
+  removeAtomAt,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
-import { editIcon, deleteIcon, uploadIcon, videoIcon } from '@ocm/wysiwyg/icons';
-import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { mediaFloatAlign } from '@ocm/wysiwyg/utils/mediaFloatAlign';
-import { removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
+
+import { editIcon, deleteIcon, uploadIcon, videoIcon } from '@codemerge/sdk/icons';
 
 function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {

@@ -1,5 +1,6 @@
-import type { EditorAPI } from '@codemerge/sdk';
 import { convertBlockType, core } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
+
 import { plainText } from '@codemerge/kernel';
 
 /** Apply typography style id (from TypographyMenu) to the editor. */

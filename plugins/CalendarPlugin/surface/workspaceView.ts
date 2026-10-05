@@ -1,7 +1,8 @@
 import { downloadBlob, h, mount, pickFile, studioPaneTabs, syncStudioPanel } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
+
 import type { EditorState } from '@codemerge/kernel';
-import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
+import { ParseError } from '@codemerge/kernel';
 import type { CalendarDoc, CalendarView } from '../types';
 import { isCalendarView } from '../types';
 import {

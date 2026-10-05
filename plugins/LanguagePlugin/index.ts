@@ -1,8 +1,9 @@
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
+
 import { LanguageManager } from './services/LanguageManager';
 import { LanguageMenu } from './components/LanguageMenu';
-import { globeIcon } from '@ocm/wysiwyg/icons';
+import { globeIcon } from '@codemerge/sdk/icons';
 
 export function LanguagePlugin(opts?: PluginToolbarOpts) {
   const manager = new LanguageManager();

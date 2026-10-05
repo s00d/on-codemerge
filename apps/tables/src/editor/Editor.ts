@@ -9,6 +9,7 @@ import {
   serializeText,
   gridFromDoc,
   docFromGrid,
+  gridToHtml,
 } from '@ocm/table-plugin';
 import type { TableToolbarOptions, TableGridDoc } from '@ocm/table-plugin';
 
@@ -46,6 +47,10 @@ export class Editor extends ConstrainedEditor {
     }
     this.replaceDocument(result.doc);
     return null;
+  }
+
+  getHTML(): string {
+    return gridToHtml(this.getGrid());
   }
 
   getGrid(): TableGridDoc {

@@ -46,7 +46,7 @@ describe('keyboard navigation', () => {
     store.destroy();
   });
 
-  it('Tab moves across columns then wraps to next row', () => {
+  it('Tab on the last column wraps to the next row', () => {
     const store = store3x2();
     store.setActive('r1', 'b');
     expect(handleGridKeydown(store, key('Tab')).handled).toBe(true);

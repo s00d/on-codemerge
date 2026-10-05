@@ -1,6 +1,6 @@
 # Tables Editor
 
-Grid product published as **`on-codemerge/tables`**. Thin app entry uses a shell ViewPort and **`TablePlugin({ surface: 'workspace' })`**, which mounts a custom grid engine (sort / filter / search / resize / selection / virtualization / pagination / clipboard / CSV) plus optional Raw JSON into `contentTarget`. Interchange via `getText` / `setText` (pretty `TableGridDoc` JSON).
+Grid product published as **`on-codemerge/tables`**. Thin app entry uses a shell ViewPort and **`TablePlugin({ surface: 'workspace' })`**, which mounts a custom grid engine (sparse Excel-like sheet, sort / filter / search / resize / selection / virtualization / clipboard / CSV, optional remote `source`) plus optional Raw JSON into `contentTarget`. Interchange via `getText` / `setText` (pretty `TableGridDoc` JSON) and `getHTML()` (used SoT as `<table>`).
 
 WYSIWYG **Insert Table** stays a prose `table` / `tableRow` / `tableCell` tree — this product does not embed a spreadsheet atom in contenteditable.
 
@@ -63,7 +63,8 @@ Published types for `on-codemerge/tables` expect TypeScript `moduleResolution: "
 | ---------------------------- | ------------------------------------------------------------------ |
 | `getText()`                  | Pretty `TableGridDoc` JSON                                         |
 | `setText(text)`              | Replace SoT; returns `ParseError \| null` (SoT unchanged on error) |
-| `getGrid()` / `setGrid(doc)` | Typed `{ version, columns, rows, view? }`                          |
+| `getHTML()`                  | Used SoT as `<table class="html-editor-table">` (no ghost cells)   |
+| `getGrid()` / `setGrid(doc)` | Typed `{ version, columns, rows, view?, source? }`                 |
 | `getJSON()` / `setJSON(doc)` | Kernel document snapshot (`doc → tableGrid`)                       |
 | `run` / `command` / `use`    | Same as WYSIWYG                                                    |
 | `on('docChanged', …)`        | Subscriptions                                                      |
@@ -71,7 +72,7 @@ Published types for `on-codemerge/tables` expect TypeScript `moduleResolution: "
 
 ## Document shape (SoT v2)
 
-SoT is `doc` → single `tableGrid` child. Payload in flat attrs (`columns`, `rows`, `view`, `version`):
+SoT is `doc` → single `tableGrid` child. Payload in flat attrs (`columns`, `rows`, `view`, `version`, `source`):
 
 ```ts
 type TableGridDoc = {
@@ -87,25 +88,38 @@ type TableGridDoc = {
     id: string;
     cells: Record<string, string | number | boolean | null>;
     parentId?: string | null;
+    styles?: Record<
+      string,
+      {
+        align?: 'left' | 'center' | 'right';
+        background?: string;
+        color?: string;
+        border?: 'none' | 'thin' | 'medium' | 'thick';
+      }
+    >;
   }[];
   view?: {
     sort?: { colId: string; dir: 'asc' | 'desc' }[];
     filters?: Record<string, { op: string; value: unknown }>;
     quickFilter?: string;
     columnOrder?: string[];
-    pagination?: { page: number; pageSize: number };
     expandedRowIds?: string[];
     expandedGroupIds?: string[];
     groupBy?: string[];
+    fit?: 'fill' | 'content';
+    rowHeight?: number;
   };
+  source?: { url: string; format: 'json' | 'csv'; headers?: boolean; delimiter?: string };
 };
 ```
+
+JSON stores only used rows/columns. Extra columns appear only via Add column (toolbar, header `+`, or paste). Empty rows below are a visual canvas (`sheetRows`); click / F2 on an empty row materializes SoT. Scroll near the bottom grows that canvas (cap 2000) without writing empty rows.
 
 Legacy `{ columns, rows: string[][] }` is migrated on `parseText` / `normalizeTableGrid`.
 
 ## Toolbar & grid UX
 
-`defaultTableToolbar()`: Grid / Raw, add row, Table menu (+col, Import URL, Export CSV, Search). Header click sorts; column edge drag resizes; row # selects; Ctrl/Cmd+C/V copies TSV; pagination footer; Raw Apply/Discard without monkey-patching `editor.run`.
+`defaultTableToolbar()`: Grid / Raw, add row, Table menu (+col, Format cell, Import URL, Refresh data, Edit source, Export CSV, Search). One-line column header (title left, ← → pin right); header click sorts; column edge drag resizes; row # selects; Ctrl/Cmd+C/V copies TSV. Status shows used row count and source host when `source.url` is set. `Mod-Shift-u` import URL, `Mod-Alt-k` edit source. Raw Apply/Discard without monkey-patching `editor.run`.
 
 ## Local demo
 

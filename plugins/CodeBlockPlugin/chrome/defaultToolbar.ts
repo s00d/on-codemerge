@@ -7,7 +7,7 @@ import {
   listIcon,
   textIcon,
   uploadIcon,
-} from '@ocm/wysiwyg/icons';
+} from '@codemerge/sdk/icons';
 import type { CodeToolbarItem, CodeToolbarOptions } from './types';
 
 /**

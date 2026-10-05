@@ -1,11 +1,12 @@
 import { PopupController, foreign, h, mount, pickFile } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
+
 import type { FileUploader, UploadedFile } from '../services/FileUploader';
 import type { UploadConfig } from '../config/UploadConfig';
 import { defaultConfig } from '../config/UploadConfig';
 import type { MediaListItem } from '../services/mediaApi';
 import { mediaGalleryView } from './MediaGallery';
-import { uploadMessageIcon } from '@ocm/wysiwyg/icons';
+import { uploadMessageIcon } from '@codemerge/sdk/icons';
 
 type Step = 'source' | 'staged';
 

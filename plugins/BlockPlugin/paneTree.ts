@@ -1,4 +1,4 @@
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+import { readJsonAttr } from '@codemerge/sdk';
 
 /** Recursive pane tree persisted on `block_container` attrs.tree (typed object). */
 

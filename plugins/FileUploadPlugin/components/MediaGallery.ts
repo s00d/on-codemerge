@@ -1,6 +1,7 @@
 import { foreign, h, img, mount } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
-import { clearIcon, deleteIcon, fileIcon, imageIcon, uploadIcon } from '@ocm/wysiwyg/icons';
+
+import { clearIcon, deleteIcon, fileIcon, imageIcon, uploadIcon } from '@codemerge/sdk/icons';
 import type { MediaListItem } from '../services/mediaApi';
 
 export type MediaGalleryLabels = {

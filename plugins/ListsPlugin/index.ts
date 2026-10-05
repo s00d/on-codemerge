@@ -1,5 +1,5 @@
 import { definePlugin, wrapInList } from '@codemerge/sdk';
-import { listBulletIcon, listNumberedIcon } from '@ocm/wysiwyg/icons';
+import { listBulletIcon, listNumberedIcon } from '@codemerge/sdk/icons';
 
 export function ListsPlugin() {
   return definePlugin({

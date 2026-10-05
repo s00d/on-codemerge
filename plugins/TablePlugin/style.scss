@@ -65,14 +65,42 @@ table.html-editor-table {
   }
 }
 
-.ocm-table-root {
-  @apply flex min-h-0 flex-1 flex-col;
+/* Shell content is already inside .ocm-editor-root — kill prose padding + fill height. */
+.ocm-content.ocm-table-root,
+.ocm-shell-content.ocm-table-root {
+  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden p-0;
 }
 
+.ocm-table-root,
+.ocm-table-shell,
+.ocm-table-grid-host,
+.ocm-table-source-host,
 .ocm-table-grid {
-  @apply min-h-0;
+  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden;
 }
 
 .ocm-table-grid__body {
-  @apply overscroll-contain;
+  @apply min-h-0 flex-1 overscroll-contain;
+}
+
+.ocm-content.ocm-shell-content.ocm-table-root {
+  overflow: hidden;
+  height: 100%;
+}
+
+.ocm-table-grid__header-host {
+  @apply bg-ocm-surface-muted;
+}
+
+.ocm-table-grid--bordered [role='gridcell'],
+.ocm-table-grid--bordered [role='columnheader'] {
+  @apply border border-ocm-border;
+}
+
+.ocm-table-grid--modern .ocm-table-grid__header {
+  @apply bg-ocm-surface text-[11px] uppercase tracking-wide text-ocm-text-muted;
+}
+
+.ocm-table-grid--modern [role='gridcell'] {
+  @apply border-b border-ocm-border;
 }

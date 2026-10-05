@@ -1,7 +1,3 @@
-import { wirePluginLocales } from '@codemerge/editor';
-import pluginLocaleEn from './i18n/locales/en.json';
-
-import type { Command } from '@codemerge/kernel';
 import {
   applyToolbarConfig,
   definePlugin,
@@ -9,9 +5,14 @@ import {
   h,
   OCM_CONFIG_ATTR,
   OCM_RUNTIME_ATTR,
+  readJsonAttr,
 } from '@codemerge/sdk';
 import type { PluginDefinition, PluginToolbarOpts, WidgetContext } from '@codemerge/sdk';
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
+import type { Command } from '@codemerge/kernel';
+
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import type { CalendarToolbarOptions } from './chrome/types';

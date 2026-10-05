@@ -1,10 +1,10 @@
+import { applyToolbarConfig, definePlugin, foreign, h, readJsonAttr } from '@codemerge/sdk';
+import type { PluginDefinition, PluginToolbarOpts, ViewSpec, WidgetContext } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
 import type { Command } from '@codemerge/kernel';
-import { applyToolbarConfig, definePlugin, foreign, h } from '@codemerge/sdk';
-import type { PluginDefinition, PluginToolbarOpts, ViewSpec, WidgetContext } from '@codemerge/sdk';
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import { defaultFormToolbar } from './chrome/defaultToolbar';

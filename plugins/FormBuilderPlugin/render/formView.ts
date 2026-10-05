@@ -1,5 +1,6 @@
-import type { ViewSpec } from '@codemerge/sdk';
 import { h } from '@codemerge/sdk';
+import type { ViewSpec } from '@codemerge/sdk';
+
 import { getDriver } from '../drivers/registry';
 import type { FormI18n } from '../drivers/types';
 import type { FormConfig } from '../types';

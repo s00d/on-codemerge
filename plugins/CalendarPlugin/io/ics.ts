@@ -1,4 +1,4 @@
-import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
+import { ParseError } from '@codemerge/kernel';
 import type { CalendarDoc, CalendarEvent, CalendarRRule } from '../types';
 import {
   coerceCalendarDoc,

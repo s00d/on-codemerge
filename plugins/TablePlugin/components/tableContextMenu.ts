@@ -1,7 +1,6 @@
+import { copyText, core, asAttr, colorWellView } from '@codemerge/sdk';
 import type { EditorAPI, MenuItem } from '@codemerge/sdk';
-import { core } from '@codemerge/sdk';
-import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
-import { colorWellView } from '@ocm/wysiwyg/utils/ColorWell';
+
 import {
   addColumn,
   addHeaderRow,
@@ -49,7 +48,7 @@ import {
   styleIcon,
   tableIcon,
   uploadIcon,
-} from '@ocm/wysiwyg/icons';
+} from '@codemerge/sdk/icons';
 
 let cellClipboard = '';
 
@@ -291,7 +290,7 @@ export function buildTableContextMenu(
           icon: copyIcon,
           onClick: () => {
             cellClipboard = cellTextAt(editor);
-            copyCellText(editor);
+            void copyCellText(editor);
           },
         },
         {
@@ -299,7 +298,7 @@ export function buildTableContextMenu(
           icon: clearIcon,
           onClick: () => {
             cellClipboard = cellTextAt(editor);
-            copyCellText(editor);
+            void copyCellText(editor);
             editor.run(clearCell);
           },
         },
@@ -387,8 +386,10 @@ export function buildTableContextMenu(
             const html = editor.getHTML();
             const match = /<table[\s\S]*?<\/table>/i.exec(html);
             if (match) {
-              void navigator.clipboard?.writeText(match[0]);
-              editor.notify(t('Table HTML copied'));
+              void (async () => {
+                const ok = await copyText(match[0]);
+                editor.notify(ok ? t('Table HTML copied') : t('Copy failed'));
+              })();
             } else {
               editor.notify(t('No table found'));
             }

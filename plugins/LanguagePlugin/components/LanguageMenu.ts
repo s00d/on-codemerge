@@ -1,5 +1,6 @@
 import { PopupController, h } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
+
 import type { LanguageManager } from '../services/LanguageManager';
 
 const LANGUAGE_NAMES: Record<string, string> = {

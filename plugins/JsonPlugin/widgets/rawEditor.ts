@@ -1,5 +1,6 @@
 import { h, mount } from '@codemerge/sdk';
 import type { MountHandle } from '@codemerge/sdk';
+
 import { mountSourceEditor } from '@codemerge/editor';
 import type { SourceEditorHandle } from '@codemerge/editor';
 import { jsonTextPreflight } from '../io/text';

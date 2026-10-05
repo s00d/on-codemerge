@@ -1,6 +1,7 @@
-import { describe, expect, it } from 'vitest';
 import { DisposableScope } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
+import { describe, expect, it } from 'vitest';
+
 import { emptyCalendarDoc } from '../drivers/defaults';
 import { mountCalendarWorkspace } from '../surface/workspaceView';
 

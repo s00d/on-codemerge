@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { defineConfig } from 'vite';
 import type { Plugin } from 'vite';
 import dts from 'vite-plugin-dts';
+import svgLoader from 'vite-svg-loader';
 import { emitDCtsPlugin } from '../../scripts/vite-plugin-emit-d-cts.ts';
 import { scssPreprocessorOptions } from '../../scripts/scss-vite-options.ts';
 
@@ -58,6 +59,7 @@ export default defineConfig({
         index: resolve(root, 'src/index.ts'),
         'ui/index': resolve(root, 'src/ui/index.ts'),
         'ui/chrome': resolve(root, 'src/ui/chrome.ts'),
+        icons: resolve(root, 'src/icons/index.ts'),
         'sdk-css': resolve(root, 'src/ui/sdk.scss'),
       },
       formats: ['es', 'cjs'],
@@ -73,6 +75,10 @@ export default defineConfig({
     },
   },
   plugins: [
+    svgLoader({
+      defaultImport: 'raw',
+      svgoConfig: { multipass: true },
+    }),
     dts({
       entryRoot: resolve(root, 'src'),
       include: [resolve(root, 'src')],

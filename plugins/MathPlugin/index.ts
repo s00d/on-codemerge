@@ -1,11 +1,11 @@
+import { definePlugin, insertAtomAfter, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
-import { definePlugin, insertAtomAfter, foreign, pluginToolbarPlacement } from '@codemerge/sdk';
-import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
 import { MathMenu } from './components/MathMenu';
 import { mountMathWidget } from './widgets/mountMathWidget';
-import { mathIcon } from '@ocm/wysiwyg/icons';
+import { mathIcon } from '@codemerge/sdk/icons';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',

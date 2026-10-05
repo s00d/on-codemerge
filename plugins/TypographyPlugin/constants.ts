@@ -7,7 +7,7 @@ import {
   blockquoteIcon,
   preIcon,
   hrIcon,
-} from '@ocm/wysiwyg/icons';
+} from '@codemerge/sdk/icons';
 
 export type TypographyStyle = {
   value: string;

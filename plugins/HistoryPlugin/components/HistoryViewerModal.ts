@@ -1,5 +1,6 @@
 import { PopupController, STUDIO_POPUP_CLASS, h } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
+
 import type { HistoryState } from '../types';
 import { formatClock, formatTimestamp } from '../utils/formatters';
 import { computeDiff } from '../utils/diff';

@@ -8,7 +8,7 @@ import { h, renderDetached } from '@codemerge/sdk';
 export const createShellView: CreateView = (editor): ViewPort => {
   const { el: content } = renderDetached(
     h('div', {
-      class: 'ocm-content ocm-shell-content flex-1 min-h-0 overflow-auto',
+      class: 'ocm-content ocm-shell-content flex-1 min-h-0 overflow-auto p-0',
       attrs: { 'data-ocm-shell': 'true' },
     })
   );

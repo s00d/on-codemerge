@@ -1,7 +1,8 @@
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
+
 import type { Mark } from '@codemerge/kernel';
-import { trackChangesIcon } from '@ocm/wysiwyg/icons';
+import { trackChangesIcon } from '@codemerge/sdk/icons';
 
 /**
  * Live track-changes: when enabled, typed text gets an `insertion` mark and

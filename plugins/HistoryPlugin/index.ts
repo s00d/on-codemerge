@@ -4,7 +4,7 @@ import pluginLocaleEn from './i18n/locales/en.json';
 import { definePlugin } from '@codemerge/sdk';
 import { HistoryManager } from './services/HistoryManager';
 import { HistoryViewerModal } from './components/HistoryViewerModal';
-import { historyIcon } from '@ocm/wysiwyg/icons';
+import { historyIcon } from '@codemerge/sdk/icons';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',

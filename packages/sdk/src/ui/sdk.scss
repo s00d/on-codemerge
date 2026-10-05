@@ -346,6 +346,11 @@
   }
 }
 
+/* Unlayered — beats Tailwind `p-0` utilities. Shell products own the surface. */
+.ocm-content.ocm-shell-content {
+  padding: 0;
+}
+
 .ocm-editor-footer {
   @apply flex shrink-0 items-center justify-between gap-4 rounded-b-ocm-sm border-t border-ocm-border-subtle bg-ocm-surface-muted px-4 py-1.5 text-[11px] leading-none tabular-nums text-ocm-text-muted;
 }

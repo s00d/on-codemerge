@@ -72,7 +72,6 @@ describe('TablePlugin surface contract', () => {
           version: 2,
           columns: cols,
           rows,
-          view: { pagination: { page: 0, pageSize: 5000 } },
         })
       )
     ).toBeNull();

@@ -1,6 +1,7 @@
 import type { DocNode } from '@codemerge/kernel';
 import { nextId } from '@codemerge/kernel';
-import { isPlainObject, stringifyCell } from './matrix';
+import { isPlainObject, matrixToCsv, stringifyCell } from './matrix';
+import { normalizeSpans } from '../grid/spans';
 
 export type CellValue = string | number | boolean | null;
 
@@ -12,15 +13,25 @@ export type TableColumn = {
   type?: 'text' | 'number' | 'boolean';
   editable?: boolean;
   sortable?: boolean;
-  filterable?: boolean;
-  renderer?: string;
-  editor?: string;
 };
+
+export type CellAlign = 'left' | 'center' | 'right';
+export type CellBorder = 'none' | 'thin' | 'medium' | 'thick';
+export type CellStyle = {
+  align?: CellAlign;
+  background?: string;
+  color?: string;
+  border?: CellBorder;
+};
+export type TableTheme = 'default' | 'modern' | 'bordered' | 'striped';
 
 export type TableRow = {
   id: string;
   cells: Record<string, CellValue>;
   parentId?: string | null;
+  /** Origin cell → extra col/row coverage (1 = no span). */
+  spans?: Record<string, { cols?: number; rows?: number }>;
+  styles?: Record<string, CellStyle>;
 };
 
 export type TableViewState = {
@@ -28,12 +39,21 @@ export type TableViewState = {
   filters?: Record<string, { op: string; value: unknown }>;
   quickFilter?: string;
   columnOrder?: string[];
-  pagination?: { page: number; pageSize: number };
   /** Tree parent row ids that are expanded. */
   expandedRowIds?: string[];
   /** Group header ids (`__group__:…`) that are expanded. */
   expandedGroupIds?: string[];
   groupBy?: string[];
+  /** Fill remaining editor width (default) or keep stored pixel widths. */
+  fit?: 'fill' | 'content';
+  rowHeight?: number;
+};
+
+export type TableGridSource = {
+  url: string;
+  format: 'json' | 'csv';
+  headers?: boolean;
+  delimiter?: string;
 };
 
 export type TableGridDoc = {
@@ -41,10 +61,57 @@ export type TableGridDoc = {
   columns: TableColumn[];
   rows: TableRow[];
   view?: TableViewState;
+  theme?: TableTheme;
+  source?: TableGridSource;
 };
 
 const PINNED = new Set(['left', 'right']);
 const COL_TYPES = new Set(['text', 'number', 'boolean']);
+
+function normalizeCellStyle(raw: unknown): CellStyle | undefined {
+  if (!isPlainObject(raw)) {
+    return undefined;
+  }
+  const next: CellStyle = {};
+  if (raw.align === 'left' || raw.align === 'center' || raw.align === 'right') {
+    next.align = raw.align;
+  }
+  if (typeof raw.background === 'string' && raw.background.trim() !== '') {
+    next.background = raw.background.trim();
+  }
+  if (typeof raw.color === 'string' && raw.color.trim() !== '') {
+    next.color = raw.color.trim();
+  }
+  if (
+    raw.border === 'none' ||
+    raw.border === 'thin' ||
+    raw.border === 'medium' ||
+    raw.border === 'thick'
+  ) {
+    next.border = raw.border;
+  }
+  return Object.keys(next).length > 0 ? next : undefined;
+}
+
+function normalizeRowStyles(
+  styles: unknown,
+  colIds: Set<string>
+): Record<string, CellStyle> | undefined {
+  if (!isPlainObject(styles)) {
+    return undefined;
+  }
+  const out: Record<string, CellStyle> = {};
+  for (const [id, raw] of Object.entries(styles)) {
+    if (!colIds.has(id)) {
+      continue;
+    }
+    const style = normalizeCellStyle(raw);
+    if (style) {
+      out[id] = style;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
 
 export function parseTableBoolean(value: unknown): boolean {
   if (typeof value === 'boolean') {
@@ -145,15 +212,6 @@ function normalizeColumn(raw: TableColumn): TableColumn {
   if (typeof raw.sortable === 'boolean') {
     col.sortable = raw.sortable;
   }
-  if (typeof raw.filterable === 'boolean') {
-    col.filterable = raw.filterable;
-  }
-  if (typeof raw.renderer === 'string') {
-    col.renderer = raw.renderer;
-  }
-  if (typeof raw.editor === 'string') {
-    col.editor = raw.editor;
-  }
   return col;
 }
 
@@ -219,6 +277,14 @@ function normalizeRows(columns: TableColumn[], rows: unknown[]): TableRow[] {
     if (row.parentId === null || typeof row.parentId === 'string') {
       out.parentId = row.parentId ?? null;
     }
+    const spans = normalizeSpans(row.spans, new Set(columns.map((c) => c.id)));
+    if (spans) {
+      out.spans = spans;
+    }
+    const styles = normalizeRowStyles(row.styles, new Set(columns.map((c) => c.id)));
+    if (styles) {
+      out.styles = styles;
+    }
     return out;
   });
   return stripTreeCycles(mapped);
@@ -250,13 +316,6 @@ function normalizeView(raw: unknown): TableViewState | undefined {
   }
   if (Array.isArray(raw.columnOrder) && raw.columnOrder.every((c) => typeof c === 'string')) {
     view.columnOrder = raw.columnOrder;
-  }
-  if (isPlainObject(raw.pagination)) {
-    const page = Number(raw.pagination.page);
-    const pageSize = Number(raw.pagination.pageSize);
-    if (Number.isFinite(page) && Number.isFinite(pageSize) && pageSize > 0) {
-      view.pagination = { page: Math.max(0, Math.floor(page)), pageSize: Math.floor(pageSize) };
-    }
   }
   const treeIds: string[] = [];
   const groupIds: string[] = [];
@@ -294,7 +353,30 @@ function normalizeView(raw: unknown): TableViewState | undefined {
   if (Array.isArray(raw.groupBy) && raw.groupBy.every((c) => typeof c === 'string')) {
     view.groupBy = raw.groupBy;
   }
+  if (raw.fit === 'fill' || raw.fit === 'content') {
+    view.fit = raw.fit;
+  }
+  if (typeof raw.rowHeight === 'number' && Number.isFinite(raw.rowHeight)) {
+    view.rowHeight = Math.min(96, Math.max(20, Math.round(raw.rowHeight)));
+  }
   return Object.keys(view).length > 0 ? view : undefined;
+}
+
+function normalizeSource(raw: unknown): TableGridSource | undefined {
+  if (!isPlainObject(raw) || typeof raw.url !== 'string' || raw.url.trim() === '') {
+    return undefined;
+  }
+  const source: TableGridSource = {
+    url: raw.url.trim(),
+    format: raw.format === 'csv' ? 'csv' : 'json',
+  };
+  if (typeof raw.headers === 'boolean') {
+    source.headers = raw.headers;
+  }
+  if (typeof raw.delimiter === 'string' && raw.delimiter !== '') {
+    source.delimiter = raw.delimiter;
+  }
+  return source;
 }
 
 export function emptyTableGrid(): TableGridDoc {
@@ -326,6 +408,18 @@ export function normalizeTableGrid(raw: unknown): TableGridDoc {
   const view = normalizeView(raw.view);
   if (view) {
     doc.view = view;
+  }
+  if (
+    raw.theme === 'default' ||
+    raw.theme === 'modern' ||
+    raw.theme === 'bordered' ||
+    raw.theme === 'striped'
+  ) {
+    doc.theme = raw.theme;
+  }
+  const source = normalizeSource(raw.source);
+  if (source) {
+    doc.source = source;
   }
   return doc;
 }
@@ -437,6 +531,12 @@ export function attrsFromGrid(grid: TableGridDoc): Record<string, unknown> {
   if (grid.view) {
     attrs.view = grid.view;
   }
+  if (grid.theme && grid.theme !== 'default') {
+    attrs.theme = grid.theme;
+  }
+  if (grid.source) {
+    attrs.source = grid.source;
+  }
   return attrs;
 }
 
@@ -447,6 +547,8 @@ export function gridFromDoc(doc: DocNode): TableGridDoc {
     columns: node.attrs?.columns,
     rows: node.attrs?.rows,
     view: node.attrs?.view,
+    theme: node.attrs?.theme,
+    source: node.attrs?.source,
   });
 }
 
@@ -463,8 +565,7 @@ export function docFromGrid(grid: TableGridDoc): DocNode {
   return emptyEditorDoc(grid);
 }
 
-/** Flatten grid to string matrix (header + body) for CSV export. */
-export function gridToMatrix(grid: TableGridDoc): string[][] {
+function orderedColumns(grid: TableGridDoc): TableColumn[] {
   const columnOrder = grid.view?.columnOrder;
   const ordered: TableColumn[] =
     columnOrder !== undefined && columnOrder.length > 0
@@ -479,8 +580,66 @@ export function gridToMatrix(grid: TableGridDoc): string[][] {
       }
     }
   }
-  const cols = ordered.length > 0 ? ordered : grid.columns;
+  return ordered.length > 0 ? ordered : grid.columns;
+}
+
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function cellStyleAttr(style: CellStyle | undefined): string {
+  if (style === undefined) {
+    return '';
+  }
+  const parts: string[] = [];
+  if (style.background !== undefined && style.background !== '') {
+    parts.push(`background:${escapeHtml(style.background)}`);
+  }
+  if (style.color !== undefined && style.color !== '') {
+    parts.push(`color:${escapeHtml(style.color)}`);
+  }
+  if (style.align !== undefined) {
+    parts.push(`text-align:${style.align}`);
+  }
+  if (style.border !== undefined && style.border !== 'none') {
+    const width = style.border === 'thick' ? 3 : style.border === 'medium' ? 2 : 1;
+    parts.push(`border-width:${String(width)}px`);
+  }
+  return parts.length > 0 ? ` style="${parts.join(';')}"` : '';
+}
+
+/** Flatten grid to string matrix (header + body) for CSV export. */
+export function gridToMatrix(grid: TableGridDoc): string[][] {
+  const cols = orderedColumns(grid);
   const header = cols.map((c) => c.title);
   const body = grid.rows.map((row) => cols.map((c) => stringifyCell(row.cells[c.id])));
   return [header, ...body];
+}
+
+/** Used SoT as published `<table class="html-editor-table">` (no ghost sheet cells). */
+export function gridToHtml(grid: TableGridDoc): string {
+  const cols = orderedColumns(grid);
+  const theme =
+    grid.theme !== undefined && grid.theme !== 'default' ? ` ocm-table-grid--${grid.theme}` : '';
+  const th = cols.map((c) => `<th>${escapeHtml(c.title)}</th>`).join('');
+  const tr = grid.rows
+    .map((row) => {
+      const tds = cols
+        .map((c) => {
+          const text = escapeHtml(stringifyCell(row.cells[c.id]));
+          return `<td${cellStyleAttr(row.styles?.[c.id])}>${text}</td>`;
+        })
+        .join('');
+      return `<tr>${tds}</tr>`;
+    })
+    .join('');
+  return `<table class="html-editor-table not-prose${theme}"><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+}
+
+export function exportCsv(grid: TableGridDoc, delimiter = ','): string {
+  return matrixToCsv(gridToMatrix(grid), delimiter);
 }

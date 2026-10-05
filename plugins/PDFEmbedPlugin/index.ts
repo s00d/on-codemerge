@@ -5,12 +5,13 @@ import {
   h,
   iframe,
   pluginToolbarPlacement,
+  Resizer,
+  atomAlignStyle,
+  removeAtomAt,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
-import { editIcon, deleteIcon, linkIcon, pdfIcon } from '@ocm/wysiwyg/icons';
-import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
-import { removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
+
+import { editIcon, deleteIcon, linkIcon, pdfIcon } from '@codemerge/sdk/icons';
 
 function openPdfProps(
   editor: EditorAPI,

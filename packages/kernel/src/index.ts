@@ -82,3 +82,4 @@ export {
   exitListItemOps,
   textBlockLength,
 } from './structure';
+export { ParseError, parseJsonPayload, type JsonPayloadResult } from './parseJson';

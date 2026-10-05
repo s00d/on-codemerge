@@ -1,10 +1,10 @@
-import { PopupController, foreign, h, mount, renderDetached } from '@codemerge/sdk';
+import { PopupController, foreign, h, mount, renderDetached, pathFromEl } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
+
 import { MathRenderer } from '../services/MathRenderer';
 import type { MathExpression } from '../types';
 import { MATH_TEMPLATES } from '../constants/templates';
 import { mathBuildPanel, insertWithHoles } from './MathBuildPanel';
-import { pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
 
 type EditorMode = 'build' | 'source';
 

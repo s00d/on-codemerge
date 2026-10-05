@@ -12,24 +12,18 @@ export type ViewportWindow = {
   end: number;
   rowHeight: number;
   clientHeight: number;
+  clientWidth: number;
 };
 
 export type DerivedSlice = {
-  /** Visible column ids after order + pin (left, center, right). */
   columnIds: string[];
   pinnedLeft: string[];
   pinnedRight: string[];
   center: string[];
-  /** Row ids after filter/sort/tree/group/page. */
+  /** Row ids after filter/sort/tree/group. */
   rowIds: string[];
-  /** Same pipeline as rowIds but before pagination (paste / full-order consumers). */
-  orderedRowIds: string[];
-  /** Pre-page groups from the same derive pipeline as rowIds (empty when no groupBy). */
   groups: DerivedGroup[];
   totalRowCount: number;
-  page: number;
-  pageSize: number;
-  pageCount: number;
 };
 
 export type TableStoreListener = () => void;

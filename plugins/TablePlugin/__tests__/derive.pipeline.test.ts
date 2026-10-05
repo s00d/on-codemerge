@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { layoutColumns } from '../grid/derive/columns';
 import { filterRowIds } from '../grid/derive/filter';
 import { groupRowIds, isGroupRowId } from '../grid/derive/group';
-import { pageRowIds } from '../grid/derive/page';
 import { sortRowIds } from '../grid/derive/sort';
 import { flattenTreeRowIds, rowDepth } from '../grid/derive/tree';
 import type { TableGridDoc } from '../io/adapters';
@@ -160,21 +159,6 @@ describe('derive/group + page', () => {
     const { displayIds } = groupRowIds(d, ['r1', 'r2']);
     expect(displayIds).toStrictEqual(['__group__:A', '__group__:B', 'r2']);
   });
-
-  it('pageRowIds clamps page and slices', () => {
-    const d = doc({
-      columns: [{ id: 'a', title: 'A' }],
-      rows: Array.from({ length: 5 }, (_, i) => ({
-        id: `r${i}`,
-        cells: { a: String(i) },
-      })),
-      view: { pagination: { page: 9, pageSize: 2 } },
-    });
-    const page = pageRowIds(d, ['r0', 'r1', 'r2', 'r3', 'r4']);
-    expect(page.page).toBe(2);
-    expect(page.rowIds).toStrictEqual(['r4']);
-    expect(page.pageCount).toBe(3);
-  });
 });
 
 describe('coerce + store integration', () => {
@@ -210,11 +194,11 @@ describe('coerce + store integration', () => {
         expandedGroupIds: ['__group__:A', '__group__:B'],
       },
     });
-    expect(store.getDerived().orderedRowIds).toContain('c');
+    expect(store.getDerived().rowIds).toContain('c');
     store.setView({ expandedGroupIds: ['__group__:A'] });
     expect(store.getDoc().view?.expandedRowIds).toStrictEqual(['p']);
-    expect(store.getDerived().orderedRowIds).toContain('c');
-    expect(store.getDerived().orderedRowIds).not.toContain('q');
+    expect(store.getDerived().rowIds).toContain('c');
+    expect(store.getDerived().rowIds).not.toContain('q');
     store.destroy();
   });
 

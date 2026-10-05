@@ -1,5 +1,6 @@
 import { PopupController, foreign, h, mount, pickFile } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
+
 import type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
 import { defaultConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
 import {

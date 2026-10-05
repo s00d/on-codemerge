@@ -1,7 +1,8 @@
-import type { DocNode } from '@codemerge/kernel';
 import { h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
-import { moreHorizontalIcon } from '@ocm/wysiwyg/icons';
+import type { DocNode } from '@codemerge/kernel';
+
+import { moreHorizontalIcon } from '@codemerge/sdk/icons';
 import type { JsonNodeMenuTarget } from '../../components/JsonNodeMenu';
 import { isInteractiveTarget, pathsEqual, pathKey, typeLabel } from './types';
 import type { TreeHandlers } from './types';

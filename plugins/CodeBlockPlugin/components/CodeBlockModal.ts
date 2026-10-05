@@ -1,5 +1,6 @@
 import { PopupController, foreign, h } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI } from '@codemerge/sdk';
+
 import { mountSourceEditor } from '@codemerge/editor';
 import type { SourceEditorHandle } from '@codemerge/editor';
 

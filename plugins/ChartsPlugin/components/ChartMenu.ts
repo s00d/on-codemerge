@@ -8,6 +8,7 @@ import {
   syncStudioPanel,
 } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
+
 import type { ChartType, ChartSeries } from '../types';
 import type { ChartAttrs } from '../io/adapters';
 import { emptyChartAttrs } from '../io/adapters';

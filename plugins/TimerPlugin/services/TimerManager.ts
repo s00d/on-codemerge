@@ -1,10 +1,6 @@
-import type { Timer, CreateTimerData, UpdateTimerData, TimerTimeLeft } from '../types';
+import { h, parseJson, attrToHtmlValue, atomAlignStyle, cssColorToHex } from '@codemerge/sdk';
 import type { EditorAPI, ViewSpec } from '@codemerge/sdk';
-import { h } from '@codemerge/sdk';
-import { parseJson } from '@ocm/wysiwyg/utils/asAttr';
-import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
-import { cssColorToHex } from '@ocm/wysiwyg/utils/colorMath';
+import type { Timer, CreateTimerData, UpdateTimerData, TimerTimeLeft } from '../types';
 
 function pad2(n: number): string {
   return n.toString().padStart(2, '0');

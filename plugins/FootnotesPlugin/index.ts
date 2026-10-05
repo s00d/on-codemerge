@@ -1,6 +1,5 @@
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
-
 import {
+  readJsonAttr,
   definePlugin,
   withMarkTarget,
   setMarkAttrs,
@@ -8,8 +7,9 @@ import {
   pluginToolbarPlacement,
 } from '@codemerge/sdk';
 import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
+
 import { FootnoteMenu } from './components/FootnoteMenu';
-import { footnoteIcon } from '@ocm/wysiwyg/icons';
+import { footnoteIcon } from '@codemerge/sdk/icons';
 
 function optionalStringProp(value: unknown, key: string): string | undefined {
   if (typeof value !== 'object' || value === null) {

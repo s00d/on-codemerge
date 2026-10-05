@@ -76,14 +76,40 @@ describe('TableStore commands', () => {
     store.destroy();
   });
 
-  it('pagination page change keeps orderedRowIds for paste past page', () => {
-    const store = new TableStore(
-      baseDoc({
-        view: { pagination: { page: 0, pageSize: 2 } },
-      })
-    );
-    expect(store.getDerived().rowIds).toStrictEqual(['r0', 'r1']);
-    expect(store.getDerived().orderedRowIds).toHaveLength(6);
+  it('addRow before, addColumn left, cell style, clearCell', () => {
+    const store = new TableStore(baseDoc());
+    store.addRow('r0', { before: true });
+    expect(store.getDoc().rows[0]?.id).not.toBe('r0');
+    expect(store.getDoc().rows[1]?.id).toBe('r0');
+    const beforeIds = store.getDoc().columns.map((c) => c.id);
+    store.addColumn({ title: 'L' }, { beforeColId: 'a' });
+    expect(store.getDoc().columns[0]?.title).toBe('L');
+    expect(
+      store
+        .getDoc()
+        .columns.map((c) => c.id)
+        .slice(1)
+    ).toStrictEqual(beforeIds);
+    store.setCellStyle('r0', 'a', { align: 'center', background: '#abcabc' });
+    expect(store.getDoc().rows.find((r) => r.id === 'r0')?.styles?.a).toStrictEqual({
+      align: 'center',
+      background: '#abcabc',
+    });
+    store.setCell('r0', 'a', 'keep');
+    store.clearCell('r0', 'a');
+    expect(store.getDoc().rows.find((r) => r.id === 'r0')?.cells.a).toBe('');
+    store.setTheme('striped');
+    expect(store.getDoc().theme).toBe('striped');
+    store.setTheme('default');
+    expect(store.getDoc().theme).toBeUndefined();
+    store.clearTable();
+    expect(store.getDoc().rows.every((r) => r.cells.a === '' && r.cells.n === '')).toBe(true);
+    store.destroy();
+  });
+
+  it('paste past first rows uses full orderedRowIds', () => {
+    const store = new TableStore(baseDoc());
+    expect(store.getDerived().rowIds).toHaveLength(6);
     store.setSelection({ rowIds: ['r1'], active: { rowId: 'r1', colId: 'a' } });
     pasteTsv(store, 'A\nB\nC');
     expect(store.getDoc().rows[1]?.cells.a).toBe('A');
@@ -92,15 +118,13 @@ describe('TableStore commands', () => {
     store.destroy();
   });
 
-  it('setView pagination clamps and filter narrows total', () => {
+  it('quickFilter narrows total without paging the sheet', () => {
     const store = new TableStore(
       baseDoc({
-        view: { pagination: { page: 0, pageSize: 2 }, quickFilter: 'v5' },
+        view: { quickFilter: 'v5' },
       })
     );
     expect(store.getDerived().totalRowCount).toBe(1);
-    store.setView({ pagination: { page: 99, pageSize: 2 } });
-    expect(store.getDerived().page).toBe(0);
     store.destroy();
   });
 

@@ -6,11 +6,7 @@ import type { Command, DocNode } from '@codemerge/kernel';
 import { core } from '@codemerge/sdk';
 import { findTablePath } from './tableOps';
 import { stringifyCell } from './io/matrix';
-import { assertSafeLazyUrl, fetchLazyMatrix } from './io/fetchMatrix';
-import type { LazyFormat, LazyTableConfig } from './io/fetchMatrix';
-
-export type { LazyFormat, LazyTableConfig };
-export { assertSafeLazyUrl, fetchLazyMatrix };
+import type { LazyTableConfig } from './io/fetchMatrix';
 
 function emptyCell(text = ''): DocNode {
   return { content: [core.createParagraph([core.createText(text)])], type: 'tableCell' };

@@ -2,7 +2,7 @@
  * Table structural operations on JSON doc (legacy UX parity, kernel SoT).
  */
 import type { Command, DocNode, Operation } from '@codemerge/kernel';
-import { core, insertBlockNearSelection } from '@codemerge/sdk';
+import { copyText, core, insertBlockNearSelection } from '@codemerge/sdk';
 
 function emptyCell(): DocNode {
   return { content: [core.createParagraph([core.createText('')])], type: 'tableCell' };
@@ -301,11 +301,11 @@ export function mergeCellsHorizontal(): Command {
   };
 }
 
-export function copyCellText(editor: {
+export async function copyCellText(editor: {
   getJSON: () => { doc: DocNode };
   getSelection: () => { anchor: { path: number[] } };
   notify: (m: string) => void;
-}): void {
+}): Promise<void> {
   const path = editor.getSelection().anchor.path;
   if (path.length < 3) {
     return;
@@ -315,8 +315,8 @@ export function copyCellText(editor: {
     const text = (cell.content ?? [])
       .map((p) => (p.content ?? []).map((c) => c.text ?? '').join(''))
       .join('\n');
-    void navigator.clipboard?.writeText(text);
-    editor.notify('Cell copied');
+    const ok = await copyText(text);
+    editor.notify(ok ? 'Cell copied' : 'Copy failed');
   } catch {
     editor.notify('Copy failed');
   }

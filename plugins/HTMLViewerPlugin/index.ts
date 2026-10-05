@@ -1,7 +1,8 @@
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
+
 import { HTMLViewerModal } from './components/HTMLViewerModal';
-import { htmlIcon } from '@ocm/wysiwyg/icons';
+import { htmlIcon } from '@codemerge/sdk/icons';
 
 export function HTMLViewerPlugin(opts?: PluginToolbarOpts) {
   return definePlugin({

@@ -1,8 +1,9 @@
 import { definePlugin, withMarkTarget, setMarkAttrs, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
+
 import { MentionsMenu } from './components/MentionsMenu';
 import type { Mention } from './components/MentionsMenu';
-import { mentionsIcon } from '@ocm/wysiwyg/icons';
+import { mentionsIcon } from '@codemerge/sdk/icons';
 
 const DEFAULT_MENTIONS: Mention[] = [
   { id: '1', label: 'Alice' },

@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/sdk",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "Plugin API and UI primitives for CodeMerge editors",
   "license": "MIT",
   "author": "Pavel Kuzmin",
@@ -57,6 +57,16 @@
     },
     "./ui/sdk.scss": "./src/ui/sdk.scss",
     "./sdk.css": "./dist/sdk.css",
+    "./icons": {
+      "import": {
+        "types": "./dist/icons/index.d.ts",
+        "default": "./dist/icons.mjs"
+      },
+      "require": {
+        "types": "./dist/icons/index.d.cts",
+        "default": "./dist/icons.cjs"
+      }
+    },
     "./package.json": "./package.json"
   },
   "publishConfig": {

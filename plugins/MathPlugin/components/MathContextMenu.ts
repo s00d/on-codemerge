@@ -1,7 +1,8 @@
-import { copyIcon, editIcon, deleteIcon } from '@ocm/wysiwyg/icons';
+import { copyText, pathFromEl, removeAtomAt } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
+import { copyIcon, editIcon, deleteIcon } from '@codemerge/sdk/icons';
+
 import type { MathMenu } from './MathMenu';
-import { pathFromEl, removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
 
 export class MathContextMenu {
   private atomHost: HTMLElement | null = null;
@@ -41,11 +42,8 @@ export class MathContextMenu {
               return;
             }
             void (async () => {
-              try {
-                await navigator.clipboard.writeText(expr);
+              if (await copyText(expr)) {
                 this.editor.notify(t('common.copied'));
-              } catch {
-                /* clipboard unavailable */
               }
             })();
           },

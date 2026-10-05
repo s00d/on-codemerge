@@ -4,23 +4,27 @@ import { isGroupRowId } from './derive/group';
 export type KeyNavResult = { handled: boolean };
 
 function moveActive(store: TableStore, nr: number, nc: number): void {
-  const derived = store.getDerived();
-  const rowIds = derived.rowIds.filter((id) => !isGroupRowId(id));
-  const colIds = derived.columnIds;
-  const nextRow = rowIds[Math.max(0, Math.min(rowIds.length - 1, nr))];
-  const nextCol = colIds[Math.max(0, Math.min(colIds.length - 1, nc))];
-  if (nextRow === undefined || nextCol === undefined) {
+  const rowIds = store.getSheetRowIds().filter((id) => !isGroupRowId(id));
+  if (nr >= rowIds.length - 4) {
+    store.growSheetRows();
+  }
+  const nextRows = store.getSheetRowIds().filter((id) => !isGroupRowId(id));
+  const nextCols = store.getSheetColumnIds();
+  const ri = Math.max(0, Math.min(nextRows.length - 1, nr));
+  const ci = Math.max(0, Math.min(nextCols.length - 1, nc));
+  const rowId = nextRows[ri];
+  const colId = nextCols[ci];
+  if (rowId === undefined || colId === undefined) {
     return;
   }
-  store.setActive(nextRow, nextCol);
+  store.setActive(rowId, colId);
 }
 
 /** After committing a cell editor, move down one row without re-entering edit. */
 export function moveActiveDown(store: TableStore): void {
   const sel = store.getSelection();
-  const derived = store.getDerived();
-  const rowIds = derived.rowIds.filter((id) => !isGroupRowId(id));
-  const colIds = derived.columnIds;
+  const rowIds = store.getSheetRowIds().filter((id) => !isGroupRowId(id));
+  const colIds = store.getSheetColumnIds();
   const rowId = sel.active?.rowId ?? rowIds[0];
   const colId = sel.active?.colId ?? colIds[0];
   if (rowId === undefined || colId === undefined) {
@@ -37,9 +41,8 @@ export function moveActiveDown(store: TableStore): void {
 /** Arrow/Tab/Enter/Escape navigation over derived grid. */
 export function handleGridKeydown(store: TableStore, ev: KeyboardEvent): KeyNavResult {
   const sel = store.getSelection();
-  const derived = store.getDerived();
-  const rowIds = derived.rowIds.filter((id) => !isGroupRowId(id));
-  const colIds = derived.columnIds;
+  const rowIds = store.getSheetRowIds().filter((id) => !isGroupRowId(id));
+  const colIds = store.getSheetColumnIds();
   const firstRow = rowIds[0];
   const firstCol = colIds[0];
   if (firstRow === undefined || firstCol === undefined) {
@@ -100,6 +103,12 @@ export function handleGridKeydown(store: TableStore, ev: KeyboardEvent): KeyNavR
         moveActive(store, ri + 1, ci);
         return { handled: true };
       }
+      store.ensureCell(ri, colIds[ci] ?? colId);
+      store.setEditing(true);
+      return { handled: true };
+    case 'F2':
+      ev.preventDefault();
+      store.ensureCell(ri, colIds[ci] ?? colId);
       store.setEditing(true);
       return { handled: true };
     case 'Escape':

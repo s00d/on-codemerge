@@ -1,7 +1,7 @@
+import { copyText, foreign, h, mount, downloadBlob, pickFile } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle } from '@codemerge/sdk';
 import type { DocNode, EditorState, JSONDoc } from '@codemerge/kernel';
-import type { EditorAPI } from '@codemerge/sdk';
-import { foreign, h, mount, downloadBlob, pickFile } from '@codemerge/sdk';
-import type { MountHandle } from '@codemerge/sdk';
+
 import { mountSourceEditor } from '@codemerge/editor';
 import type { SourceEditorHandle } from '@codemerge/editor';
 import { languageFromDoc, textFromDoc } from '../io/adapters';
@@ -242,9 +242,7 @@ export function mountCodeWorkspace(
     copyAll() {
       const text = source?.getText() ?? '';
       void (async () => {
-        try {
-          await navigator.clipboard.writeText(text);
-        } catch {
+        if (!(await copyText(text))) {
           editor.notify('Clipboard unavailable');
         }
       })();

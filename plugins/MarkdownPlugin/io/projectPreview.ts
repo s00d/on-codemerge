@@ -1,7 +1,7 @@
 import type { DocNode } from '@codemerge/kernel';
 import { docToHTML } from '@ocm/wysiwyg/io/html';
 import { sanitizeHTML } from '@ocm/wysiwyg/io/sanitize';
-import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
+import { asAttr } from '@codemerge/sdk';
 import { safeHref } from '../elements/builtins';
 import type { MdElementRegistry } from '../elements/types';
 import { defaultMdElementRegistry } from '../elements/registry';

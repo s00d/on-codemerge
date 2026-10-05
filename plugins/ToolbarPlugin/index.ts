@@ -1,5 +1,5 @@
 import { definePlugin, withMarkTarget, core } from '@codemerge/sdk';
-import { boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '@ocm/wysiwyg/icons';
+import { boldIcon, italicIcon, underlineIcon, strikethroughIcon } from '@codemerge/sdk/icons';
 
 /** Default mark buttons (B/I/U/S) on the SDK toolbar panel — not chrome owner. */
 export function ToolbarPlugin() {

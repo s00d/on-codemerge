@@ -1,6 +1,7 @@
-import type { DocNode } from '@codemerge/kernel';
 import { h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
+import type { DocNode } from '@codemerge/kernel';
+
 import type { TreeHandlers } from '../surface/tree/types';
 
 const fieldBase =

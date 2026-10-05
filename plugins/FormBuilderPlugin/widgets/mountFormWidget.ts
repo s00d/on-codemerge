@@ -1,10 +1,9 @@
+import { attrString, mount, h, atomAlignStyle, readJsonAttr } from '@codemerge/sdk';
 import type { EditorAPI, DisposableScope } from '@codemerge/sdk';
-import { attrString, mount, h } from '@codemerge/sdk';
+
 import type { FormConfig } from '../types';
 import { isFormConfig } from '../types';
 import { formView } from '../render/formView';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
 
 /** Mount form atom; teardown via `scope`. */
 export function mountFormWidget(

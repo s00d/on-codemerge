@@ -1,4 +1,4 @@
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+import { readJsonAttr } from '@codemerge/sdk';
 import type { ChartPoint, ChartSeries, ChartType } from '../types';
 import type { ChartDriver, PointField } from '../drivers/types';
 import { pointHasFields } from '../drivers/types';

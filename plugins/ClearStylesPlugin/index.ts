@@ -1,5 +1,5 @@
 import { clearStyles, definePlugin } from '@codemerge/sdk';
-import { clearIcon } from '@ocm/wysiwyg/icons';
+import { clearIcon } from '@codemerge/sdk/icons';
 
 /**
  * Clear visual styles (marks + block style/align/lineHeight).

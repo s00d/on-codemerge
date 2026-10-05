@@ -1,9 +1,10 @@
+import { applyToolbarConfig, definePlugin, foreign } from '@codemerge/sdk';
+import type { PluginDefinition, PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
 import type { Command } from '@codemerge/kernel';
-import { applyToolbarConfig, definePlugin, foreign } from '@codemerge/sdk';
-import type { PluginDefinition, PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';
+
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import { defaultChartToolbar } from './chrome/defaultToolbar';

@@ -1,6 +1,5 @@
-import { downloadBlob, pickFile, h, mount, renderDetached } from '@codemerge/sdk';
+import { downloadBlob, pickFile, h, mount, renderDetached, atomAlignStyle } from '@codemerge/sdk';
 import type { DisposableScope, ViewSpec } from '@codemerge/sdk';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
 
 export function downloadJson(filename: string, data: string): void {
   downloadBlob(data, filename, 'application/json');

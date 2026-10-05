@@ -1,10 +1,11 @@
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
+
 import type { DocNode, Operation } from '@codemerge/kernel';
 import { plainText, textLength } from '@codemerge/kernel';
 import { createDictionary } from '@codemerge/hunspell';
 import type { HunspellDictionary } from '@codemerge/hunspell';
-import { spellCheckIcon } from '@ocm/wysiwyg/icons';
+import { spellCheckIcon } from '@codemerge/sdk/icons';
 
 const WORD_RE = /[A-Za-zА-Яа-яЁё'\u2019]{2,}/g;
 

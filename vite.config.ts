@@ -53,6 +53,7 @@ const shared = {
       // More specific than `@codemerge/sdk` → src (package-index imports built css).
       '@codemerge/sdk/sdk.css': resolve(root, 'packages/sdk/dist/sdk.css'),
       '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
+      '@codemerge/sdk/icons': resolve(root, 'packages/sdk/src/icons/index.ts'),
       '@codemerge/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
       '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
       ...ocmPluginAliases(root),

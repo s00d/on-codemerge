@@ -1,5 +1,6 @@
 import { h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
+
 import type { CalendarDoc, CalendarI18n, Occurrence } from '../types';
 import { addDays, civilDate, formatEventWhen, startOfWeek } from './defaults';
 import { agendaRange, dayRange, monthRange, occurrences, weekRange } from './occurrences';

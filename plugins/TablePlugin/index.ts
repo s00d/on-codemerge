@@ -1,10 +1,11 @@
+import { applyToolbarConfig, definePlugin, core, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { EditorAPI, PluginDefinition, PluginToolbarOpts } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
 import type { Command } from '@codemerge/kernel';
-import { tableIcon, lazyTableIcon } from '@ocm/wysiwyg/icons';
-import { applyToolbarConfig, definePlugin, core, pluginToolbarPlacement } from '@codemerge/sdk';
-import type { EditorAPI, PluginDefinition, PluginToolbarOpts } from '@codemerge/sdk';
+import { tableIcon, lazyTableIcon } from '@codemerge/sdk/icons';
+
 import { TablePopup } from './components/TablePopup';
 import { buildTableContextMenu } from './components/tableContextMenu';
 import {
@@ -24,13 +25,9 @@ import {
   setTableAttr,
   splitCellHorizontal,
 } from './tableOps';
-import type { LazyTableConfig } from './lazyTable';
-import {
-  fetchLazyMatrix,
-  fillTableFromMatrix,
-  insertLazyTableShell,
-  readLazyConfigFromTable,
-} from './lazyTable';
+import type { LazyTableConfig } from './io/fetchMatrix';
+import { fetchLazyMatrix } from './io/fetchMatrix';
+import { fillTableFromMatrix, insertLazyTableShell, readLazyConfigFromTable } from './lazyTable';
 import { bindTableViewModeActive, defaultTableToolbar } from './chrome/defaultToolbar';
 import { openMatrixImportPopup } from './chrome/importPopup';
 import type { TableToolbarOptions } from './chrome/types';
@@ -54,11 +51,20 @@ export {
   docFromGrid,
   toEditorDoc,
   normalizeTableGrid,
+  exportCsv,
+  gridToHtml,
 } from './io/adapters';
-export type { TableGridDoc, TableColumn, TableRow, TableViewState, CellValue } from './io/adapters';
+export type {
+  TableGridDoc,
+  TableColumn,
+  TableRow,
+  TableViewState,
+  TableGridSource,
+  CellValue,
+  CellStyle,
+} from './io/adapters';
 export { parseText, serializeText, serializeDoc, MAX_TABLE_BYTES } from './io/text';
 export type { ParseTextResult } from './io/text';
-export { exportCsv } from './io/csv';
 export { defaultTableToolbar } from './chrome/defaultToolbar';
 export type {
   TableToolbarActionApi,
@@ -66,22 +72,16 @@ export type {
   TableToolbarMenu,
   TableToolbarOptions,
 } from './chrome/types';
-export { mountTableWorkspace } from './surface/workspaceView';
-export type { TableWorkspaceHandle } from './surface/workspaceView';
-export { TableStore } from './grid/TableStore';
-export type { TableStoreOptions } from './grid/TableStore';
-export { registerCellDriver, getCellDriver } from './grid/drivers/registry';
-export type { CellDriver, CellRenderCtx } from './grid/drivers/registry';
-
-export type TablePluginFeatures = {
-  toolbar?: boolean;
-};
 
 export type TablePluginOptions = PluginToolbarOpts & {
   surface?: 'workspace' | 'atom';
-  features?: TablePluginFeatures;
+  /** @deprecated ignored — toolbar always on when surface provides one */
+  features?: { toolbar?: boolean };
   toolbar?: TableToolbarOptions;
 };
+
+/** @deprecated use TablePluginOptions — features flag removed */
+export type TablePluginFeatures = { toolbar?: boolean };
 
 const ATOM_NODES = [
   {
@@ -108,7 +108,7 @@ const WORKSPACE_NODES = [
     name: 'tableGrid',
     group: 'atom' as const,
     atom: true as const,
-    attrs: { version: 2, columns: [], rows: [], view: undefined },
+    attrs: { version: 2, columns: [], rows: [], view: undefined, source: undefined },
   },
 ];
 
@@ -139,13 +139,6 @@ async function applyLazyLoad(editor: EditorAPI, config: LazyTableConfig): Promis
 export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition {
   const surface = options.surface ?? 'atom';
   const workspace = surface === 'workspace';
-  const feat = (key: keyof TablePluginFeatures, defaultOn: boolean): boolean => {
-    const v = options.features?.[key];
-    return v === undefined ? defaultOn : v;
-  };
-  const features: Required<TablePluginFeatures> = {
-    toolbar: feat('toolbar', true),
-  };
   const toolbarConfig: TableToolbarOptions | undefined = workspace
     ? (options.toolbar ?? defaultTableToolbar())
     : undefined;
@@ -204,6 +197,14 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
       workspaceRef.current?.openImport();
       return null;
     },
+    'table.refreshSource': () => {
+      workspaceRef.current?.refreshSource();
+      return null;
+    },
+    'table.editSource': () => {
+      workspaceRef.current?.editSource();
+      return null;
+    },
     'table.exportCsv': () => {
       workspaceRef.current?.exportCsv();
       return null;
@@ -211,7 +212,10 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
   };
 
   const hotkeys = workspace
-    ? []
+    ? [
+        { keys: 'Mod-Shift-u', command: 'table.importUrl', description: 'Import table from URL' },
+        { keys: 'Mod-Alt-k', command: 'table.editSource', description: 'Edit table source URL' },
+      ]
     : [
         { keys: 'Mod-Shift-t', command: 'insertTable', description: 'Insert table' },
         { keys: 'Mod-Shift-u', command: 'insertLazyTable', description: 'Insert lazy table' },
@@ -255,7 +259,7 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
         ctx.on('docChanged', () => {
           handle.update(ctx.editor.getState());
         });
-        if (toolbarConfig && features.toolbar) {
+        if (toolbarConfig) {
           const bound = bindTableViewModeActive(toolbarConfig, () => workspaceRef.current);
           applyToolbarConfig(ctx, bound, () => ({
             editor: ctx.editor,
@@ -335,30 +339,26 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
         })();
       };
 
-      if (features.toolbar) {
-        ctx.toolbar.add({
-          id: 'table',
-          icon: tableIcon,
-          title: () => editor.t('table.insert'),
-          ...pluginToolbarPlacement({ menu: 'insert', order: 40 }, options),
-          onClick: () => {
-            popup.show((insertOpts) => {
-              editor.run(
-                insertTableCommand(insertOpts.rows, insertOpts.cols, insertOpts.hasHeader)
-              );
-            });
-          },
-        });
-        ctx.toolbar.add({
-          id: 'lazy-table',
-          icon: lazyTableIcon,
-          title: () => editor.t('table.lazyTable'),
-          ...pluginToolbarPlacement({ menu: 'insert', order: 41 }, options),
-          onClick: () => {
-            openInsertLazy?.();
-          },
-        });
-      }
+      ctx.toolbar.add({
+        id: 'table',
+        icon: tableIcon,
+        title: () => editor.t('table.insert'),
+        ...pluginToolbarPlacement({ menu: 'insert', order: 40 }, options),
+        onClick: () => {
+          popup.show((insertOpts) => {
+            editor.run(insertTableCommand(insertOpts.rows, insertOpts.cols, insertOpts.hasHeader));
+          });
+        },
+      });
+      ctx.toolbar.add({
+        id: 'lazy-table',
+        icon: lazyTableIcon,
+        title: () => editor.t('table.lazyTable'),
+        ...pluginToolbarPlacement({ menu: 'insert', order: 41 }, options),
+        onClick: () => {
+          openInsertLazy?.();
+        },
+      });
 
       ctx.onDom('host', 'contextmenu', (e) => {
         const target = e.target;

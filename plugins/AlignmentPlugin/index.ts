@@ -1,11 +1,12 @@
 import { definePlugin, setBlockAttr, core, findAncestorPath } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
+
 import {
   alignLeftIcon,
   alignCenterIcon,
   alignRightIcon,
   alignJustifyIcon,
-} from '@ocm/wysiwyg/icons';
+} from '@codemerge/sdk/icons';
 
 function attrStr(v: unknown, fallback = ''): string {
   return typeof v === 'string' ? v : fallback;

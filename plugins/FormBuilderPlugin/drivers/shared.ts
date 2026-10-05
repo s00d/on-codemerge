@@ -1,6 +1,6 @@
+import { h, attrToHtmlValue } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
-import { h } from '@codemerge/sdk';
-import { attrToHtmlValue } from '@ocm/wysiwyg/utils/attrJson';
+
 import type { FieldConfig, FieldOptions } from '../types';
 
 export function fieldName(field: FieldConfig): string {

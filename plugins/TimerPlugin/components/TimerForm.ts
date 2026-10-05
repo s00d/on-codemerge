@@ -1,6 +1,6 @@
-import type { EditorAPI, ViewSpec } from '@codemerge/sdk';
 import { h, mount } from '@codemerge/sdk';
-import type { MountHandle } from '@codemerge/sdk';
+import type { EditorAPI, ViewSpec, MountHandle } from '@codemerge/sdk';
+
 import type { Timer, CreateTimerData } from '../types';
 
 /** Timer form — ViewSpec only (no helpers / getElement). */

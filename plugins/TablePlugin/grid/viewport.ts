@@ -13,5 +13,5 @@ export function visibleWindow(
   const start = Math.max(0, Math.floor(scrollTop / rh) - overscan);
   const visible = Math.ceil(clientHeight / rh) + overscan * 2;
   const end = Math.min(totalRows, start + visible);
-  return { start, end, rowHeight: rh, clientHeight };
+  return { start, end, rowHeight: rh, clientHeight, clientWidth: 0 };
 }

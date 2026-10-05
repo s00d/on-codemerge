@@ -1,7 +1,8 @@
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
+
 import { ShortcutsMenu } from './components/ShortcutsMenu';
-import { shortcutsIcon } from '@ocm/wysiwyg/icons';
+import { shortcutsIcon } from '@codemerge/sdk/icons';
 
 /**
  * Shared opener for hosts that register their own toolbar/hotkey (e.g. Json workspace).

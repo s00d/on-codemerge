@@ -1,9 +1,9 @@
+import { definePlugin, withMarkTarget, setMarkAttrs, setBlockAttr, core } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
-import { definePlugin, withMarkTarget, setMarkAttrs, setBlockAttr, core } from '@codemerge/sdk';
-import type { EditorAPI } from '@codemerge/sdk';
-import { fontSizeIcon } from '@ocm/wysiwyg/icons';
+import { fontSizeIcon } from '@codemerge/sdk/icons';
 import { defaultDraft } from './constants';
 import type { FontDraft } from './constants';
 import { fontSettingsPanel } from './components/FontSettingsPanel';

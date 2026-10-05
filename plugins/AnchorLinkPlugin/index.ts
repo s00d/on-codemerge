@@ -1,6 +1,7 @@
 import { definePlugin, setBlockAttr, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
-import { anchorAddIcon } from '@ocm/wysiwyg/icons';
+
+import { anchorAddIcon } from '@codemerge/sdk/icons';
 
 export function AnchorLinkPlugin(opts?: PluginToolbarOpts) {
   return definePlugin({

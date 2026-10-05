@@ -1,5 +1,5 @@
 import type { DocNode } from '@codemerge/kernel';
-import { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
+import { ParseError } from '@codemerge/kernel';
 import { docToValue, indentFromDoc, toEditorDoc, valueToDoc } from './adapters';
 
 export type ParseTextResult =

@@ -1,6 +1,7 @@
 import { h, mount } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle } from '@codemerge/sdk';
-import { bracesIcon, listIcon } from '@ocm/wysiwyg/icons';
+
+import { bracesIcon, listIcon } from '@codemerge/sdk/icons';
 import { mountJsonWorkspace } from '../surface/workspaceView';
 import type { JsonWorkspaceHandle } from '../surface/workspaceView';
 import { createEmbedWorkspaceHost } from './embedHost';

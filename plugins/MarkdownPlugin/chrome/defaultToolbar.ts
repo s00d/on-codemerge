@@ -15,7 +15,7 @@ import {
   listNumberedIcon,
   preIcon,
   strikethroughIcon,
-} from '@ocm/wysiwyg/icons';
+} from '@codemerge/sdk/icons';
 import {
   applyBullet,
   applyCallout,

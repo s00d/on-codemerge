@@ -147,7 +147,7 @@ describe('tableOps', () => {
     expect(runCommand(state, setCellAttr('a', 1))).toBeNull();
   });
 
-  it('merges vertically, splits, sorts header, and copies', () => {
+  it('merges vertically, splits, sorts header, and copies', async () => {
     expect.hasAssertions();
     let state = tableDoc(3, 2, true);
     const tableIdx = state.doc.content!.findIndex((n) => n.type === 'table');
@@ -163,14 +163,18 @@ describe('tableOps', () => {
     const deleted = apply(doomed, deleteColumn);
     expect(deleted.doc.content?.some((n) => n.type === 'table')).toBe(false);
 
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText: () => Promise.resolve() },
+    });
     const copied: string[] = [];
-    copyCellText({
+    await copyCellText({
       getJSON: () => ({ doc: state.doc }),
       getSelection: () => state.selection,
       notify: (m) => copied.push(m),
     });
     expect(copied[0]).toBe('Cell copied');
-    copyCellText({
+    await copyCellText({
       getJSON: () => ({ doc: state.doc }),
       getSelection: () => ({ anchor: { path: [0] } }),
       notify: (m) => copied.push(m),

@@ -1,5 +1,6 @@
 import { h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
+
 import type { FieldOptions } from '../types';
 import { coerceWithChoices } from './coerce';
 import { ensureChoices, fieldCommonAttrs, fieldName, labelNode, wrapClass } from './shared';

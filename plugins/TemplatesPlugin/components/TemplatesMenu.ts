@@ -1,9 +1,10 @@
 import { PopupController, h } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
+
 import type { TemplateManager } from '../services/TemplateManager';
 import type { Template } from '../types';
 import { formatDate } from '../utils/formatters';
-import { deleteIcon, editIcon } from '@ocm/wysiwyg/icons';
+import { deleteIcon, editIcon } from '@codemerge/sdk/icons';
 
 /** Templates chrome — PopupController + ViewSpec (no destroy/hide). */
 export class TemplatesMenu {

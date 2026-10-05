@@ -56,6 +56,11 @@ export {
   downloadUrl,
   downloadBlob,
   pickFile,
+  copyText,
+  readClipboardText,
+  replaceChildrenWithHtml,
+  asAttr,
+  parseJson,
   type ViewSpec,
   type ViewElementSpec,
   type ViewForeignSpec,
@@ -88,6 +93,56 @@ export {
   wrapInList,
 } from './commands';
 export { PUBLISHED_CONTENT_CLASS, editorChromeTv } from './ui/chrome';
+export {
+  JSON_ATTR_KEYS,
+  attrToHtmlValue,
+  readJsonAttr,
+  writeJsonAttr,
+  coerceHtmlJsonAttr,
+} from './platform/attrJson';
+export { pathFromEl, nodeAtPath, queryAtomHosts, removeAtomAt } from './platform/atomPath';
+export { atomAlignStyle } from './platform/atomAlign';
+export { mediaFloatAlign } from './platform/mediaFloatAlign';
+export { Resizer, type ResizerAspect, type ResizerOptions } from './platform/Resizer';
+export {
+  computeResize,
+  effectiveAspectLock,
+  type ResizeHandle,
+  type ComputeResizeInput,
+  type ComputeResizeResult,
+} from './platform/resizeMath';
+export {
+  clamp,
+  hexToHsv,
+  hsvToHex,
+  hexToRgb,
+  rgbToHex,
+  hsvToRgb,
+  rgbToHsv,
+  cssColorToHex,
+  hueStrip,
+  neutrals,
+  quickSwatches,
+  type Hsv,
+  type Rgb,
+} from './platform/colorMath';
+export {
+  ColorWell,
+  colorWellView,
+  openColorWell,
+  pickColor,
+  colorSwatchButton,
+  colorChip,
+  type ColorWellOptions,
+} from './platform/ColorWell';
+export {
+  sanitizeHTML,
+  parseSafeHtml,
+  parseSafeSvg,
+  serializeFragment,
+  replaceChildrenWithSafeHtml,
+  mountTrustedSvg,
+} from './platform/safeHtml';
 export {
   definePublishRuntime,
   registerPublishRuntime,

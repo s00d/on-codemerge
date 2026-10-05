@@ -1,11 +1,11 @@
+import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
-import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
-import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { ViewportManager } from './services/ViewportManager';
 import { ResponsiveMenu } from './components/ResponsiveMenu';
-import { responsiveIcon } from '@ocm/wysiwyg/icons';
+import { responsiveIcon } from '@codemerge/sdk/icons';
 import type { Viewport } from './types';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([

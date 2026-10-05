@@ -3,6 +3,7 @@ import { resetIdCounter } from '@codemerge/kernel';
 import {
   emptyTableGrid,
   gridFromMatrix,
+  gridToHtml,
   gridToMatrix,
   isTableEditorDoc,
   isTableGridDoc,
@@ -78,6 +79,58 @@ describe('TablePlugin io/adapters v2', () => {
     expect(g.rows[0]?.cells.c).toBe(42);
   });
 
+  it('roundtrips theme and cell styles', () => {
+    const doc = emptyEditorDoc({
+      version: 2,
+      theme: 'striped',
+      columns: [{ id: 'c', title: 'C' }],
+      rows: [
+        {
+          id: 'r',
+          cells: { c: 'x' },
+          styles: {
+            c: { align: 'center', background: '#ff0000', color: '#111111', border: 'thick' },
+          },
+        },
+      ],
+    });
+    const g = gridFromDoc(doc);
+    expect(g.theme).toBe('striped');
+    expect(g.rows[0]?.styles?.c).toStrictEqual({
+      align: 'center',
+      background: '#ff0000',
+      color: '#111111',
+      border: 'thick',
+    });
+  });
+
+  it('roundtrips source url', () => {
+    const g = normalizeTableGrid({
+      version: 2,
+      columns: [{ id: 'c', title: 'C' }],
+      rows: [{ id: 'r', cells: { c: 'x' } }],
+      source: { url: 'https://example.com/data.json', format: 'json', headers: true },
+    });
+    expect(g.source).toStrictEqual({
+      url: 'https://example.com/data.json',
+      format: 'json',
+      headers: true,
+    });
+    const round = gridFromDoc(emptyEditorDoc(g));
+    expect(round.source?.url).toBe('https://example.com/data.json');
+  });
+
+  it('roundtrips view.fit and rowHeight', () => {
+    const g = normalizeTableGrid({
+      version: 2,
+      columns: [{ id: 'c', title: 'C' }],
+      rows: [{ id: 'r', cells: { c: 'x' } }],
+      view: { fit: 'content', rowHeight: 40 },
+    });
+    expect(g.view?.fit).toBe('content');
+    expect(g.view?.rowHeight).toBe(40);
+  });
+
   it('gridToMatrix appends columns missing from stale columnOrder', () => {
     const g = normalizeTableGrid({
       version: 2,
@@ -91,6 +144,30 @@ describe('TablePlugin io/adapters v2', () => {
     });
     expect(gridToMatrix(g)[0]).toStrictEqual(['B', 'A', 'C']);
     expect(gridToMatrix(g)[1]).toStrictEqual(['2', '1', '3']);
+  });
+
+  it('gridToHtml emits used cells and escapes markup', () => {
+    const g = normalizeTableGrid({
+      version: 2,
+      columns: [
+        { id: 'a', title: 'A <x>' },
+        { id: 'b', title: 'B' },
+      ],
+      rows: [
+        {
+          id: 'r1',
+          cells: { a: '<script>', b: 2 },
+          styles: { b: { background: '#fee2e2', align: 'right' } },
+        },
+      ],
+    });
+    const html = gridToHtml(g);
+    expect(html).toContain('html-editor-table');
+    expect(html).toContain('<th>A &lt;x&gt;</th>');
+    expect(html).toContain('&lt;script&gt;');
+    expect(html).toContain('background:#fee2e2');
+    expect(html).toContain('text-align:right');
+    expect(html).not.toContain('<script>');
   });
 
   it('strips self/cyclic parentId edges', () => {

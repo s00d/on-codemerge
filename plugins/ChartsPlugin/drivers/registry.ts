@@ -7,7 +7,7 @@ import {
   pieIcon,
   radarIcon,
   scatterIcon,
-} from '@ocm/wysiwyg/icons';
+} from '@codemerge/sdk/icons';
 import type { ChartType } from '../types';
 import type { ChartDriver, PointField } from './types';
 import {

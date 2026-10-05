@@ -1,5 +1,6 @@
 import { h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
+
 import type {
   CalendarDoc,
   CalendarEvent,

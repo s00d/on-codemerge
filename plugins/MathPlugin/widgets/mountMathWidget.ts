@@ -1,11 +1,10 @@
+import { attrString, h, renderDetached, Resizer, pathFromEl, atomAlignStyle } from '@codemerge/sdk';
 import type { EditorAPI, DisposableScope } from '@codemerge/sdk';
-import { attrString, h, renderDetached } from '@codemerge/sdk';
+
 import type { MathMenu } from '../components/MathMenu';
 import { MathContextMenu } from '../components/MathContextMenu';
-import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
+
 import { MathRenderer } from '../services/MathRenderer';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
 
 function sizeStyle(width: number, height: number): Record<string, string> {
   if (width > 0 && height > 0) {

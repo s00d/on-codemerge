@@ -118,7 +118,7 @@ describe('lazyTable commands', () => {
 
   it('assertSafeLazyUrl rejects private hosts', async () => {
     expect.hasAssertions();
-    const { assertSafeLazyUrl, fetchLazyMatrix } = await import('../lazyTable');
+    const { assertSafeLazyUrl, fetchLazyMatrix } = await import('../io/fetchMatrix');
     expect(() => assertSafeLazyUrl('file:///etc/passwd')).toThrow(/http/);
     expect(() => assertSafeLazyUrl('http://127.0.0.1/x')).toThrow(/private/);
     expect(() => assertSafeLazyUrl('http://192.168.0.1/x')).toThrow(/private/);

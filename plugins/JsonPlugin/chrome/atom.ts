@@ -1,6 +1,7 @@
 import { insertAtomAfter, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
-import { bracesIcon } from '@ocm/wysiwyg/icons';
+
+import { bracesIcon } from '@codemerge/sdk/icons';
 
 const DEFAULT_TEXT = '{\n  "key": "value"\n}\n';
 

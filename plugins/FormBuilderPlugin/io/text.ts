@@ -1,5 +1,5 @@
 import type { DocNode } from '@codemerge/kernel';
-import { ParseError, parseJsonPayload } from '@ocm/wysiwyg/utils/parseSoT';
+import { ParseError, parseJsonPayload } from '@codemerge/kernel';
 import type { FormConfig } from '../types';
 import { isFormConfig } from '../types';
 import { configFromDoc, docFromConfig, emptyFormConfig } from './adapters';

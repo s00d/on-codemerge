@@ -1,8 +1,7 @@
-import { asAttr } from '@ocm/wysiwyg/utils/asAttr';
-
-import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
+import { asAttr, definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { EditorAPI, PopupItem, PopupOptions, PluginToolbarOpts } from '@codemerge/sdk';
-import { aiAssistantIcon } from '@ocm/wysiwyg/icons';
+
+import { aiAssistantIcon } from '@codemerge/sdk/icons';
 import type { DriverOptions, OptionDescription, OptionsDescription } from './drivers/AIDriver';
 import { createDrivers, getDriver } from './drivers/registry';
 

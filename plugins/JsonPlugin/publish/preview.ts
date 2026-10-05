@@ -1,5 +1,6 @@
 import { attrString, h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
+
 import { highlightHtml } from '@codemerge/editor';
 
 /** Pretty-print when valid JSON; otherwise return trimmed raw. */

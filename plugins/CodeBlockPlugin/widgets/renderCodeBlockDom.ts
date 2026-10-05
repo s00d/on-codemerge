@@ -1,4 +1,4 @@
-import { h, renderDetached } from '@codemerge/sdk';
+import { copyText, h, renderDetached } from '@codemerge/sdk';
 import { safeLangToken } from '../io/text';
 
 export function renderCodeBlockDom(
@@ -36,11 +36,14 @@ export function renderCodeBlockDom(
                 if (!codeElement) {
                   return;
                 }
-                void navigator.clipboard.writeText(codeElement.textContent || '');
-                btn.textContent = copied;
-                globalThis.setTimeout(() => {
-                  btn.textContent = copyLabel;
-                }, 2000);
+                void (async () => {
+                  if (await copyText(codeElement.textContent || '')) {
+                    btn.textContent = copied;
+                    globalThis.setTimeout(() => {
+                      btn.textContent = copyLabel;
+                    }, 2000);
+                  }
+                })();
               },
             },
           },

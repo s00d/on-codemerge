@@ -1,4 +1,4 @@
-import { bracesIcon, listIcon, shortcutsIcon } from '@ocm/wysiwyg/icons';
+import { bracesIcon, listIcon, shortcutsIcon } from '@codemerge/sdk/icons';
 import {
   changeTypeCommand,
   deleteNodeCommand,

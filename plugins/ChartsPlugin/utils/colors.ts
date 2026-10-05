@@ -1,4 +1,4 @@
-import { hueStrip, hexToRgb, cssColorToHex } from '@ocm/wysiwyg/utils/colorMath';
+import { hueStrip, hexToRgb, cssColorToHex } from '@codemerge/sdk';
 
 /** Procedural default series palette (no hardcoded product swatches). */
 export const CHART_COLORS = hueStrip(10);

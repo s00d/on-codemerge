@@ -1,10 +1,10 @@
+import { definePlugin, h, pluginToolbarPlacement } from '@codemerge/sdk';
+import type { PluginToolbarOpts } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
-import { definePlugin, h, pluginToolbarPlacement } from '@codemerge/sdk';
-import type { PluginToolbarOpts } from '@codemerge/sdk';
 import type { Operation } from '@codemerge/kernel';
-import { collaborationIcon } from '@ocm/wysiwyg/icons';
+import { collaborationIcon } from '@codemerge/sdk/icons';
 import { createCollabClient, type CollabClient } from './client.ts';
 import type { CollabStatus, PresencePeer } from './protocol.ts';
 import { renderPresenceOverlay } from './presence-ui.ts';

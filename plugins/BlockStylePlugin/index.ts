@@ -3,7 +3,7 @@ import pluginLocaleEn from './i18n/locales/en.json';
 
 import type { DocNode } from '@codemerge/kernel';
 import { definePlugin, setBlockAttr, core } from '@codemerge/sdk';
-import { styleIcon } from '@ocm/wysiwyg/icons';
+import { styleIcon } from '@codemerge/sdk/icons';
 import { blockStylePanel } from './components/BlockStylePanel';
 import { draftToStyleJson, emptyDraft, parseStyleAttr } from './constants';
 import type { StyleDraft } from './constants';

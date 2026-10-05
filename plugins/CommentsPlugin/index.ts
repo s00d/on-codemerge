@@ -1,7 +1,8 @@
 import { definePlugin, withMarkTarget, setMarkAttrs, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
+
 import { CommentMenu } from './components/CommentMenu';
-import { commentIcon } from '@ocm/wysiwyg/icons';
+import { commentIcon } from '@codemerge/sdk/icons';
 
 export function CommentsPlugin(opts?: PluginToolbarOpts) {
   let openComment: (() => void) | null = null;

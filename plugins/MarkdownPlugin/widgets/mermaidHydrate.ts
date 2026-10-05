@@ -1,5 +1,5 @@
 import { render as renderMermaidSvg } from '@codemerge/mermaid';
-import { mountTrustedSvg } from '@ocm/wysiwyg/utils/safeHtml';
+import { mountTrustedSvg } from '@codemerge/sdk';
 
 export const MERMAID_HOST_SEL = 'div[data-node="mermaid"], .ocm-md-mermaid';
 export const MERMAID_PENDING_SEL =

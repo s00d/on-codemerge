@@ -1,5 +1,6 @@
 import { attrString, h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
+
 import { compactMarkdownText, prettyMarkdownText, renderMarkdownPreviewHtml } from '../io/preview';
 
 /** Static published / preview markup. */

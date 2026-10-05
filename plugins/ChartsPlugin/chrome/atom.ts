@@ -4,10 +4,13 @@ import {
   foreign,
   insertAtomAfter,
   pluginToolbarPlacement,
+  nodeAtPath,
+  pathFromEl,
 } from '@codemerge/sdk';
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
-import { barIcon } from '@ocm/wysiwyg/icons';
-import { nodeAtPath, pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
+
+import { barIcon } from '@codemerge/sdk/icons';
+
 import type { ChartAttrs } from '../io/adapters';
 import { emptyChartAttrs, normalizeChartAttrs } from '../io/adapters';
 import { mountChartWorkspace } from '../surface/workspaceView';

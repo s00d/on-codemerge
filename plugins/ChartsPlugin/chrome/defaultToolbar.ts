@@ -1,4 +1,4 @@
-import { exportIcon } from '@ocm/wysiwyg/icons';
+import { exportIcon } from '@codemerge/sdk/icons';
 import type { ChartToolbarItem, ChartToolbarOptions } from './types';
 
 export type DefaultChartToolbarOptions = {

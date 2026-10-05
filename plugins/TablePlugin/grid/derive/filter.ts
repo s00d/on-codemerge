@@ -27,7 +27,7 @@ function cellMatches(value: CellValue, op: string, expected: unknown): boolean {
 }
 
 export function filterRowIds(doc: TableGridDoc, rowIds: string[]): string[] {
-  const byId = new Map(doc.rows.map((r) => [r.id, r]));
+  const byId = rowLookup(doc);
   const filters = doc.view?.filters;
   const quick = doc.view?.quickFilter?.trim().toLowerCase() ?? '';
 

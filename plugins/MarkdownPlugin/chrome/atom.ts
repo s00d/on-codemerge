@@ -1,6 +1,7 @@
 import { insertAtomAfter, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
-import { markdownIcon } from '@ocm/wysiwyg/icons';
+
+import { markdownIcon } from '@codemerge/sdk/icons';
 
 const DEFAULT_TEXT = '# Markdown\n\nHello **world**.\n';
 

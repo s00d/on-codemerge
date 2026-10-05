@@ -1,12 +1,28 @@
 import { foreign, h, mount } from '@codemerge/sdk';
 import type { MountHandle, ViewSpec } from '@codemerge/sdk';
+
 import type { TableStore } from '../TableStore';
 import { isGroupRowId } from '../derive/group';
 import { rowDepth } from '../derive/tree';
-import { getCellDriver } from '../drivers/registry';
+import { renderCell } from '../drivers/registry';
 import { stringifyCell } from '../../io/matrix';
 import { handleGridKeydown, moveActiveDown } from '../keyboard';
+import { DEFAULT_ROW_HEIGHT, visibleWindow } from '../viewport';
+import type { ViewportWindow } from '../types';
 import { copySelection, pasteFromClipboard } from '../clipboard';
+import { isCovered, spanSize } from '../spans';
+import { colLetter, isGhostColId, isGhostRowId } from '../sheet';
+
+function sheetLayout(store: TableStore): {
+  fill: boolean;
+  widthOf: (id: string) => number;
+} {
+  const widths = store.getColumnWidths();
+  return {
+    fill: store.getDoc().view?.fit !== 'content',
+    widthOf: (id) => widths.get(id) ?? 128,
+  };
+}
 
 function pinLeftOffset(
   pinnedLeft: string[],
@@ -26,14 +42,15 @@ function pinLeftOffset(
 function headerSpec(store: TableStore): ViewSpec {
   const doc = store.getDoc();
   const derived = store.getDerived();
+  const { fill, widthOf } = sheetLayout(store);
   const byCol = new Map(doc.columns.map((c) => [c.id, c]));
-  const widthOf = (id: string): number => byCol.get(id)?.width ?? 128;
+  const sheetCols = store.getSheetColumnIds();
 
   return h(
     'div',
     {
       class:
-        'ocm-table-grid__header sticky top-0 z-10 flex border-b border-ocm-border bg-ocm-surface-muted',
+        'ocm-table-grid__header sticky top-0 z-10 flex h-8 min-w-full items-stretch border-b border-ocm-border bg-ocm-surface-muted',
       attrs: { role: 'row' },
     },
     h(
@@ -44,21 +61,19 @@ function headerSpec(store: TableStore): ViewSpec {
       },
       '#'
     ),
-    ...derived.columnIds.map((colId) => {
+    ...sheetCols.map((colId, visualIndex) => {
       const col = byCol.get(colId);
-      if (!col) {
-        return null;
-      }
+      const ghost = isGhostColId(colId) || !col;
       const sort = doc.view?.sort?.find((s) => s.colId === colId);
       const width = widthOf(colId);
-      const title = `${col.title}${sort ? (sort.dir === 'asc' ? ' ↑' : ' ↓') : ''}${
-        col.pinned === 'left' ? ' ⌞' : ''
-      }`;
+      const renaming = !ghost && store.getEditingHeader() === colId;
+      const label = ghost ? colLetter(visualIndex) : (col?.title ?? colLetter(visualIndex));
+      const pinMark = !ghost && col?.pinned === 'left' ? ' ⌞' : '';
       const headerStyle: Record<string, string | number> = {
         width: `${width}px`,
         minWidth: `${width}px`,
       };
-      if (col.pinned === 'left') {
+      if (col?.pinned === 'left') {
         headerStyle.position = 'sticky';
         headerStyle.left = `${pinLeftOffset(derived.pinnedLeft, colId, widthOf)}px`;
         headerStyle.zIndex = 3;
@@ -67,106 +82,180 @@ function headerSpec(store: TableStore): ViewSpec {
       return h(
         'div',
         {
-          class: 'relative flex shrink-0 flex-col border-r border-ocm-border px-1 py-0.5',
+          class: 'relative flex h-8 shrink-0 items-center gap-0.5 border-r border-ocm-border px-1',
           style: headerStyle,
-          attrs: { role: 'columnheader' },
+          attrs: { role: 'columnheader', 'data-ocm-col': colId },
         },
         [
-          h(
-            'button',
-            {
-              class:
-                'truncate text-left font-mono text-[12px] font-semibold text-ocm-text hover:text-sky-700',
-              attrs: { type: 'button', title: 'Sort' },
-              on: {
-                click: (ev) => {
-                  ev.preventDefault();
-                  if (col.sortable !== false) {
-                    store.toggleSort(colId);
-                  }
+          renaming
+            ? h('input', {
+                class:
+                  'h-6 min-w-0 flex-1 rounded-ocm-sm border border-sky-500 bg-ocm-surface px-1 font-mono text-[12px] font-semibold outline-none',
+                attrs: {
+                  type: 'text',
+                  'aria-label': 'Column title',
+                  'data-ocm-header-edit': colId,
+                  autofocus: true,
                 },
-              },
-            },
-            title
-          ),
-          h('div', { class: 'mt-0.5 flex gap-0.5' }, [
-            h(
-              'button',
-              {
-                class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
-                attrs: { type: 'button', title: 'Move left' },
+                props: { value: col?.title ?? '' },
                 on: {
+                  pointerdown: (ev) => {
+                    ev.stopPropagation();
+                  },
                   click: (ev) => {
-                    ev.preventDefault();
-                    const order = [...derived.columnIds];
-                    const i = order.indexOf(colId);
-                    const prev = i > 0 ? order[i - 1] : undefined;
-                    if (i > 0 && prev !== undefined) {
-                      order[i - 1] = colId;
-                      order[i] = prev;
-                      store.reorderColumns(order);
+                    ev.stopPropagation();
+                  },
+                  change: (ev) => {
+                    const t = ev.target;
+                    if (t instanceof HTMLInputElement) {
+                      store.setColumnMeta(colId, { title: t.value });
+                    }
+                  },
+                  blur: () => {
+                    store.setEditingHeader(null);
+                  },
+                  keydown: (ev) => {
+                    if (ev.key === 'Enter') {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      const t = ev.target;
+                      if (t instanceof HTMLInputElement) {
+                        t.blur();
+                      }
+                      return;
+                    }
+                    if (ev.key === 'Escape') {
+                      ev.preventDefault();
+                      ev.stopPropagation();
+                      store.setEditingHeader(null);
                     }
                   },
                 },
-              },
-              '←'
-            ),
-            h(
-              'button',
-              {
-                class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
-                attrs: { type: 'button', title: 'Move right' },
-                on: {
-                  click: (ev) => {
-                    ev.preventDefault();
-                    const order = [...derived.columnIds];
-                    const i = order.indexOf(colId);
-                    const next = i >= 0 && i < order.length - 1 ? order[i + 1] : undefined;
-                    if (i >= 0 && next !== undefined) {
-                      order[i + 1] = colId;
-                      order[i] = next;
-                      store.reorderColumns(order);
-                    }
+              })
+            : h(
+                'button',
+                {
+                  class:
+                    'min-w-0 flex-1 truncate text-left font-mono text-[12px] font-semibold text-ocm-text hover:text-sky-700',
+                  attrs: { type: 'button', title: ghost ? 'Column' : 'Rename column' },
+                  on: {
+                    click: (ev) => {
+                      ev.preventDefault();
+                      if (!ghost) {
+                        store.setEditingHeader(colId);
+                      }
+                    },
+                    dblclick: (ev) => {
+                      ev.preventDefault();
+                      if (!ghost) {
+                        store.setEditingHeader(colId);
+                      }
+                    },
                   },
                 },
-              },
-              '→'
-            ),
-            h(
-              'button',
-              {
-                class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
-                attrs: { type: 'button', title: 'Toggle pin left' },
-                on: {
-                  click: (ev) => {
-                    ev.preventDefault();
-                    store.setColumnMeta(colId, {
-                      pinned: col.pinned === 'left' ? null : 'left',
-                    });
+                `${label}${pinMark}`
+              ),
+          ghost || renaming
+            ? null
+            : h('div', { class: 'flex shrink-0 items-center gap-0.5' }, [
+                h(
+                  'button',
+                  {
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    attrs: {
+                      type: 'button',
+                      title: 'Sort',
+                      disabled: col?.sortable === false ? true : undefined,
+                    },
+                    on: {
+                      click: (ev) => {
+                        ev.preventDefault();
+                        if (col?.sortable !== false) {
+                          store.toggleSort(colId);
+                        }
+                      },
+                    },
                   },
-                },
-              },
-              'pin'
-            ),
-          ]),
+                  sort ? (sort.dir === 'asc' ? '↑' : '↓') : '⇅'
+                ),
+                h(
+                  'button',
+                  {
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    attrs: { type: 'button', title: 'Move left' },
+                    on: {
+                      click: (ev) => {
+                        ev.preventDefault();
+                        const order = [...derived.columnIds];
+                        const i = order.indexOf(colId);
+                        const prev = i > 0 ? order[i - 1] : undefined;
+                        if (i > 0 && prev !== undefined) {
+                          order[i - 1] = colId;
+                          order[i] = prev;
+                          store.reorderColumns(order);
+                        }
+                      },
+                    },
+                  },
+                  '←'
+                ),
+                h(
+                  'button',
+                  {
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    attrs: { type: 'button', title: 'Move right' },
+                    on: {
+                      click: (ev) => {
+                        ev.preventDefault();
+                        const order = [...derived.columnIds];
+                        const i = order.indexOf(colId);
+                        const next = i >= 0 && i < order.length - 1 ? order[i + 1] : undefined;
+                        if (i >= 0 && next !== undefined) {
+                          order[i + 1] = colId;
+                          order[i] = next;
+                          store.reorderColumns(order);
+                        }
+                      },
+                    },
+                  },
+                  '→'
+                ),
+                h(
+                  'button',
+                  {
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    attrs: { type: 'button', title: 'Toggle pin left' },
+                    on: {
+                      click: (ev) => {
+                        ev.preventDefault();
+                        store.setColumnMeta(colId, {
+                          pinned: col?.pinned === 'left' ? null : 'left',
+                        });
+                      },
+                    },
+                  },
+                  'pin'
+                ),
+              ]),
           h('div', {
-            class: 'absolute top-0 right-0 h-full w-1 cursor-col-resize hover:bg-sky-400',
+            class: 'absolute top-0 -right-1 z-10 h-full w-2 cursor-col-resize hover:bg-sky-400/80',
+            attrs: { title: 'Resize column' },
             on: {
               pointerdown: (ev) => {
                 ev.preventDefault();
+                ev.stopPropagation();
                 const startX = ev.clientX;
                 const startW = width;
                 const onMove = (e: PointerEvent): void => {
-                  store.setColumnMeta(
-                    colId,
-                    { width: Math.max(64, startW + (e.clientX - startX)) },
-                    { commit: false }
-                  );
+                  store.setColResize(colId, startW + (e.clientX - startX));
                 };
                 const onUp = (): void => {
                   window.removeEventListener('pointermove', onMove);
                   window.removeEventListener('pointerup', onUp);
-                  store.flushCommit();
+                  if (isGhostColId(colId)) {
+                    store.ensureCell(0, colId);
+                  }
+                  store.commitColResize();
                 };
                 window.addEventListener('pointermove', onMove);
                 window.addEventListener('pointerup', onUp);
@@ -175,24 +264,45 @@ function headerSpec(store: TableStore): ViewSpec {
           }),
         ]
       );
-    })
+    }),
+    h(
+      'button',
+      {
+        class:
+          'flex w-8 shrink-0 items-center justify-center border-r border-ocm-border font-mono text-[16px] leading-none text-ocm-text-muted hover:bg-ocm-surface-hover hover:text-sky-700',
+        attrs: { type: 'button', title: 'Add column' },
+        on: {
+          click: (ev) => {
+            ev.preventDefault();
+            store.addColumn();
+          },
+        },
+      },
+      '+'
+    ),
+    fill
+      ? null
+      : h('div', {
+          class: 'min-w-[2rem] flex-1 border-r border-ocm-border bg-ocm-surface-muted',
+          attrs: { 'aria-hidden': 'true' },
+        })
   );
 }
 
-function bodyRowsSpec(store: TableStore): ViewSpec {
+function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
   const doc = store.getDoc();
   const derived = store.getDerived();
   const sel = store.getSelection();
-  const vp = store.getViewport();
+  const { fill, widthOf } = sheetLayout(store);
   const byCol = new Map(doc.columns.map((c) => [c.id, c]));
   const byRow = new Map(doc.rows.map((r) => [r.id, r]));
-  const visibleIds = store.getVisibleRowIds();
-  const widthOf = (id: string): number => byCol.get(id)?.width ?? 128;
+  const visibleIds = store.getSheetRowIds().slice(vp.start, vp.end);
+  const sheetCols = store.getSheetColumnIds();
   const groupByAgg = new Map(derived.groups.map((g) => [g.key, g]));
 
   return h(
     'div',
-    null,
+    { class: 'flex w-max min-w-full flex-col' },
     visibleIds.map((rowId, i) => {
       const absIndex = vp.start + i;
       if (isGroupRowId(rowId)) {
@@ -231,17 +341,19 @@ function bodyRowsSpec(store: TableStore): ViewSpec {
           `${open ? '▾' : '▸'} ${String(key)}${aggLabel}`
         );
       }
+      const ghostRow = isGhostRowId(rowId);
       const row = byRow.get(rowId);
-      if (!row) {
-        return null;
-      }
-      const selected = sel.rowIds.includes(rowId);
-      const depth = rowDepth(doc, rowId);
+      const selected = !ghostRow && sel.rowIds.includes(rowId);
+      const depth = row ? rowDepth(doc, rowId) : 0;
+      const stripe = doc.theme === 'striped' && absIndex % 2 === 1;
       return h(
         'div',
         {
           key: rowId,
-          class: `flex border-b border-ocm-border ${selected ? 'bg-sky-50/80' : 'bg-ocm-surface'}`,
+          class: [
+            'flex w-max min-w-full shrink-0 overflow-hidden border-b border-ocm-border',
+            selected ? 'bg-sky-50/80' : stripe ? 'bg-ocm-surface-muted/50' : 'bg-ocm-surface',
+          ].join(' '),
           style: { height: `${vp.rowHeight}px` },
           attrs: { role: 'row', 'aria-selected': selected ? 'true' : 'false' },
         },
@@ -254,6 +366,10 @@ function bodyRowsSpec(store: TableStore): ViewSpec {
               attrs: { type: 'button', title: 'Select row' },
               on: {
                 click: (ev) => {
+                  if (ghostRow) {
+                    store.ensureCell(absIndex, sheetCols[0] ?? '');
+                    return;
+                  }
                   store.selectRow(rowId, {
                     additive: ev.metaKey || ev.ctrlKey,
                     range: ev.shiftKey,
@@ -263,55 +379,111 @@ function bodyRowsSpec(store: TableStore): ViewSpec {
             },
             String(absIndex + 1)
           ),
-          ...derived.columnIds.map((colId) => {
+          ...sheetCols.map((colId, colIndex) => {
             const col = byCol.get(colId);
-            if (!col) {
-              return null;
+            const fakeCol = col ?? { id: colId, title: colLetter(colIndex), type: 'text' as const };
+            if (row && colIndex < derived.columnIds.length) {
+              const rowIndex = doc.rows.findIndex((r) => r.id === rowId);
+              if (rowIndex >= 0 && isCovered(doc.rows, derived.columnIds, rowIndex, colIndex)) {
+                return null;
+              }
             }
             const active = sel.active?.rowId === rowId && sel.active?.colId === colId;
-            const editing = active && store.isEditing();
-            const driver = getCellDriver(col);
-            const width = widthOf(colId);
-            const padLeft = colId === derived.columnIds[0] ? depth * 12 : 0;
+            const editing = Boolean(row) && active && store.isEditing();
+            const span = row ? spanSize(row.spans?.[colId]) : { cols: 1, rows: 1 };
+            let width = widthOf(colId);
+            if (span.cols > 1) {
+              width = sheetCols
+                .slice(colIndex, colIndex + span.cols)
+                .reduce((sum, id) => sum + widthOf(id), 0);
+            }
+            const padLeft = colIndex === 0 ? depth * 12 : 0;
+            const cs = row?.styles?.[colId];
+            const align = cs?.align ?? 'left';
+            const justify =
+              align === 'center'
+                ? 'justify-center'
+                : align === 'right'
+                  ? 'justify-end'
+                  : 'justify-start';
             const cellStyle: Record<string, string | number> = {
               width: `${width}px`,
               minWidth: `${width}px`,
             };
+            if (span.rows > 1) {
+              cellStyle.height = `${vp.rowHeight * span.rows}px`;
+              cellStyle.zIndex = 2;
+            }
             if (padLeft > 0) {
               cellStyle.paddingLeft = `${padLeft}px`;
             }
-            if (col.pinned === 'left') {
+            if (cs?.border) {
+              const w =
+                cs.border === 'none'
+                  ? 0
+                  : cs.border === 'thick'
+                    ? 3
+                    : cs.border === 'medium'
+                      ? 2
+                      : 1;
+              cellStyle.borderWidth = `${w}px`;
+              cellStyle.borderStyle = w > 0 ? 'solid' : 'none';
+            }
+            if (cs?.color) {
+              cellStyle.color = cs.color;
+            }
+            if (col?.pinned === 'left') {
               cellStyle.position = 'sticky';
               cellStyle.left = `${pinLeftOffset(derived.pinnedLeft, colId, widthOf)}px`;
               cellStyle.zIndex = 1;
               cellStyle.background = selected
                 ? 'rgb(240 249 255 / 0.95)'
-                : 'var(--ocm-surface, #fff)';
+                : (cs?.background ?? 'var(--ocm-surface, #fff)');
+            } else if (cs?.background) {
+              cellStyle.background = cs.background;
             }
+            const activate = (edit: boolean): void => {
+              const got = store.ensureCell(absIndex, colId);
+              if (got && edit) {
+                store.setEditing(true);
+              }
+            };
             return h(
               'div',
               {
-                class: 'flex shrink-0 items-center border-r border-ocm-border px-0.5',
+                class: `flex min-w-0 shrink-0 items-center ${justify} border-r border-ocm-border px-0.5`,
                 style: cellStyle,
-                attrs: { role: 'gridcell' },
+                attrs: {
+                  role: 'gridcell',
+                  'data-ocm-row': rowId,
+                  'data-ocm-col': colId,
+                  'data-ocm-row-index': String(absIndex),
+                },
                 on: {
-                  mousedown: () => {
-                    store.setActive(rowId, colId);
+                  click: () => {
+                    activate(true);
+                  },
+                  dblclick: () => {
+                    activate(true);
                   },
                 },
               },
-              driver.render({
-                value: row.cells[colId] ?? null,
-                column: col,
+              renderCell({
+                value: row?.cells[colId] ?? null,
+                column: fakeCol,
                 rowId,
                 selected: active,
                 editing,
+                align,
+                color: cs?.color,
                 onChange: (v) => {
-                  store.setCell(rowId, colId, v);
+                  const got = store.ensureCell(absIndex, colId);
+                  if (got) {
+                    store.setCell(got.rowId, got.colId, v);
+                  }
                 },
                 onStartEdit: () => {
-                  store.setActive(rowId, colId);
-                  store.setEditing(true);
+                  activate(true);
                 },
                 onEndEdit: () => {
                   store.setEditing(false);
@@ -320,68 +492,19 @@ function bodyRowsSpec(store: TableStore): ViewSpec {
               })
             );
           }),
+          h('div', {
+            class: 'w-8 shrink-0 border-r border-ocm-border',
+            attrs: { 'aria-hidden': 'true' },
+          }),
+          fill
+            ? null
+            : h('div', {
+                class: 'min-w-[2rem] flex-1 border-r border-ocm-border',
+                attrs: { 'aria-hidden': 'true' },
+              }),
         ]
       );
     })
-  );
-}
-
-function footerSpec(store: TableStore): ViewSpec {
-  const derived = store.getDerived();
-  const sel = store.getSelection();
-  return h(
-    'div',
-    {
-      class:
-        'ocm-table-grid__footer flex shrink-0 items-center gap-2 border-t border-ocm-border px-2 py-1 text-[11px] text-ocm-text-muted',
-    },
-    [
-      h(
-        'span',
-        null,
-        `${derived.totalRowCount} rows · page ${derived.page + 1}/${derived.pageCount}`
-      ),
-      h(
-        'button',
-        {
-          class: 'rounded border border-ocm-border px-1.5 py-0.5 hover:bg-ocm-surface-hover',
-          attrs: { type: 'button', disabled: derived.page <= 0 ? true : undefined },
-          on: {
-            click: () => {
-              store.setView({
-                pagination: {
-                  page: Math.max(0, derived.page - 1),
-                  pageSize: derived.pageSize,
-                },
-              });
-            },
-          },
-        },
-        'Prev'
-      ),
-      h(
-        'button',
-        {
-          class: 'rounded border border-ocm-border px-1.5 py-0.5 hover:bg-ocm-surface-hover',
-          attrs: {
-            type: 'button',
-            disabled: derived.page >= derived.pageCount - 1 ? true : undefined,
-          },
-          on: {
-            click: () => {
-              store.setView({
-                pagination: {
-                  page: Math.min(derived.pageCount - 1, derived.page + 1),
-                  pageSize: derived.pageSize,
-                },
-              });
-            },
-          },
-        },
-        'Next'
-      ),
-      sel.active ? h('span', { class: 'ml-auto font-mono' }, sel.active.colId) : null,
-    ]
   );
 }
 
@@ -389,16 +512,50 @@ function isFormControl(t: EventTarget | null): t is HTMLInputElement | HTMLTextA
   return t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement;
 }
 
-/** Stable grid shell: header/footer remount; scroll body is foreign and never remounted. */
-export function tableGridView(store: TableStore): ViewSpec {
+function gridRootClass(store: TableStore): string {
+  const theme = store.getDoc().theme ?? 'default';
+  return `ocm-table-grid ocm-table-grid--${theme} flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden outline-none`;
+}
+
+export function tableGridView(
+  store: TableStore,
+  opts?: { onContextMenu?: (ev: MouseEvent) => void }
+): ViewSpec {
   return h(
     'div',
     {
-      class: 'ocm-table-grid flex h-full min-h-0 flex-1 flex-col outline-none',
+      class: gridRootClass(store),
       attrs: { role: 'grid', tabindex: 0 },
       on: {
+        contextmenu: (ev) => {
+          const el = ev.target;
+          if (!(el instanceof Element)) {
+            return;
+          }
+          const cell = el.closest('[data-ocm-row][data-ocm-col]');
+          if (cell instanceof HTMLElement) {
+            const colId = cell.dataset.ocmCol;
+            const idx = Number(cell.dataset.ocmRowIndex);
+            if (colId && Number.isFinite(idx)) {
+              store.ensureCell(idx, colId);
+            }
+          } else {
+            const head = el.closest('[data-ocm-col]');
+            const colId = head instanceof HTMLElement ? head.dataset.ocmCol : undefined;
+            const rowId = store.getDerived().rowIds[0];
+            if (colId && rowId) {
+              store.setActive(rowId, colId);
+            }
+          }
+          ev.preventDefault();
+          ev.stopPropagation();
+          opts?.onContextMenu?.(ev);
+        },
         keydown: (ev) => {
           if (isFormControl(ev.target)) {
+            if (ev.target.dataset.ocmHeaderEdit) {
+              return;
+            }
             if (ev.key === 'Enter') {
               ev.preventDefault();
               ev.target.blur();
@@ -433,43 +590,80 @@ export function tableGridView(store: TableStore): ViewSpec {
       },
     },
     [
-      h('div', { ref: 'header', class: 'shrink-0 overflow-x-auto' }),
       foreign(
         (host, scope) => {
           host.className =
             'ocm-table-grid__body relative min-h-0 flex-1 overflow-auto overscroll-contain';
           host.setAttribute('role', 'rowgroup');
 
-          const spacerHandle = mount(
+          const sheetHandle = mount(
             host,
-            h('div', { class: 'relative w-max min-w-full', style: { height: '0px' } }, [
-              h('div', { ref: 'window', class: 'absolute left-0 right-0' }),
+            h('div', { class: 'relative w-max min-w-full' }, [
+              h('div', {
+                ref: 'header',
+                class: 'ocm-table-grid__header-host sticky top-0 z-20',
+                attrs: { 'data-ocm-table-header': 'true' },
+              }),
+              h('div', { ref: 'canvas', class: 'relative min-w-full bg-ocm-surface' }, [
+                h('div', { ref: 'window', class: 'absolute right-0 left-0' }),
+              ]),
             ])
           );
+          let headerHandle: MountHandle | null = null;
           let windowHandle: MountHandle | null = null;
 
-          const paintWindow = (): void => {
-            const derived = store.getDerived();
-            const vp = store.getViewport();
-            const totalHeight = Math.max(vp.rowHeight, derived.rowIds.length * vp.rowHeight);
-            const spacer = spacerHandle.el.firstElementChild;
-            if (spacer instanceof HTMLElement) {
-              spacer.style.height = `${totalHeight}px`;
+          const headerH = (): number => {
+            const slot = sheetHandle.refs.header;
+            return slot instanceof HTMLElement ? slot.offsetHeight : 0;
+          };
+
+          const syncViewport = (): void => {
+            store.setLayoutWidth(host.clientWidth);
+            const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
+            const total = store.getSheetRowCount();
+            const clientH = Math.max(1, host.clientHeight - headerH());
+            const vp = visibleWindow(host.scrollTop, clientH, total, rh);
+            if (vp.end >= total - 8) {
+              store.growSheetRows();
             }
-            const win = spacerHandle.refs.window;
-            if (!(win instanceof HTMLElement)) {
+            paintWindow();
+          };
+
+          const paintWindow = (): void => {
+            const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
+            const vp = visibleWindow(
+              host.scrollTop,
+              Math.max(1, host.clientHeight - headerH()),
+              store.getSheetRowCount(),
+              rh
+            );
+            const canvasHeight = Math.max(rh, store.getSheetRowCount() * rh);
+            const canvas = sheetHandle.refs.canvas;
+            const win = sheetHandle.refs.window;
+            if (!(canvas instanceof HTMLElement) || !(win instanceof HTMLElement)) {
               return;
             }
-            // Keep spacer/top metrics current; skip row remount while a live editor exists
-            // (mount.update is full replaceChildren and would wipe uncommitted input).
+            canvas.style.height = `${canvasHeight}px`;
+            canvas.style.backgroundColor = 'var(--color-ocm-surface, #fff)';
+
+            const headerSlot = sheetHandle.refs.header;
+            if (store.getEditingHeader() && headerSlot instanceof HTMLElement) {
+              const liveHeader = headerSlot.querySelector('input[data-ocm-header-edit]');
+              if (liveHeader instanceof HTMLInputElement) {
+                return;
+              }
+            }
+
             if (store.isEditing() && windowHandle) {
-              const live = win.querySelector('input');
+              const live = [...win.querySelectorAll('input')].find(
+                (el) => el instanceof HTMLInputElement && el.dataset.ocmHeaderEdit === undefined
+              );
               if (live instanceof HTMLInputElement) {
                 return;
               }
             }
-            win.style.top = `${vp.start * vp.rowHeight}px`;
-            const spec = bodyRowsSpec(store);
+            win.style.top = `${vp.start * rh}px`;
+            const spec = bodyRowsSpec(store, vp);
             if (windowHandle) {
               windowHandle.update(spec);
             } else {
@@ -477,66 +671,64 @@ export function tableGridView(store: TableStore): ViewSpec {
             }
             if (store.isEditing()) {
               queueMicrotask(() => {
-                const input = win.querySelector('input');
-                input?.focus();
+                const live = [...win.querySelectorAll('input')].find(
+                  (el) => el instanceof HTMLInputElement && el.dataset.ocmHeaderEdit === undefined
+                );
+                live?.focus();
               });
+            }
+
+            const headerHost = sheetHandle.refs.header;
+            if (headerHost instanceof HTMLElement) {
+              const specH = headerSpec(store);
+              if (headerHandle) {
+                headerHandle.update(specH);
+              } else {
+                headerHandle = mount(headerHost, specH);
+              }
+              if (store.getEditingHeader()) {
+                queueMicrotask(() => {
+                  const live = headerHost.querySelector('input');
+                  if (live instanceof HTMLInputElement) {
+                    live.focus();
+                  }
+                });
+              }
             }
           };
 
-          const onScroll = (): void => {
-            store.setScroll(host.scrollTop, host.clientHeight);
-          };
-          host.addEventListener('scroll', onScroll);
+          host.addEventListener('scroll', syncViewport);
           const unsub = store.subscribe(paintWindow);
           paintWindow();
+          queueMicrotask(syncViewport);
+          let ro: ResizeObserver | null = null;
+          if (typeof ResizeObserver !== 'undefined') {
+            ro = new ResizeObserver(syncViewport);
+            ro.observe(host);
+          }
           scope.disposable(() => {
-            host.removeEventListener('scroll', onScroll);
+            host.removeEventListener('scroll', syncViewport);
+            ro?.disconnect();
             unsub();
             windowHandle?.destroy();
             windowHandle = null;
-            spacerHandle.destroy();
+            headerHandle?.destroy();
+            headerHandle = null;
+            sheetHandle.destroy();
           });
         },
         { key: 'table-grid-body', class: 'ocm-table-grid__body-host flex min-h-0 flex-1 flex-col' }
       ),
-      h('div', { ref: 'footer', class: 'shrink-0' }),
     ]
   );
 }
 
-const chromeHandles = new WeakMap<HTMLElement, MountHandle>();
-
 export function paintGridChrome(shell: MountHandle, store: TableStore): void {
-  const header = shell.refs.header;
-  const footer = shell.refs.footer;
-  if (header instanceof HTMLElement) {
-    const prev = chromeHandles.get(header);
-    const spec = headerSpec(store);
-    if (prev) {
-      prev.update(spec);
-    } else {
-      chromeHandles.set(header, mount(header, spec));
-    }
-  }
-  if (footer instanceof HTMLElement) {
-    const prev = chromeHandles.get(footer);
-    const spec = footerSpec(store);
-    if (prev) {
-      prev.update(spec);
-    } else {
-      chromeHandles.set(footer, mount(footer, spec));
-    }
+  if (shell.el instanceof HTMLElement) {
+    shell.el.className = gridRootClass(store);
   }
 }
 
 export function chromeSignature(store: TableStore): string {
-  const d = store.getDerived();
-  return JSON.stringify({
-    doc: store.getDoc(),
-    sel: store.getSelection(),
-    page: d.page,
-    pageCount: d.pageCount,
-    total: d.totalRowCount,
-    cols: d.columnIds,
-  });
+  return store.getDoc().theme ?? 'default';
 }

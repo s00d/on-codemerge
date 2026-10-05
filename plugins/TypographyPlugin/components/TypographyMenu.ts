@@ -1,8 +1,9 @@
 import { PopupController, h } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
+
 import { TYPOGRAPHY_STYLES } from '../constants';
 import type { TypographyStyle } from '../constants';
-import { clearIcon } from '@ocm/wysiwyg/icons';
+import { clearIcon } from '@codemerge/sdk/icons';
 
 export class TypographyMenu {
   private readonly editor: EditorAPI;

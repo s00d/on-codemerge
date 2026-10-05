@@ -5,13 +5,14 @@ import {
   h,
   iframe,
   pluginToolbarPlacement,
+  Resizer,
+  mediaFloatAlign,
+  removeAtomAt,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
+
 import { YouTubeVideoMenu, extractYouTubeVideoId } from './components/YouTubeVideoMenu';
-import { editIcon, deleteIcon, linkIcon, youtubeIcon } from '@ocm/wysiwyg/icons';
-import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { mediaFloatAlign } from '@ocm/wysiwyg/utils/mediaFloatAlign';
-import { removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
+import { editIcon, deleteIcon, linkIcon, youtubeIcon } from '@codemerge/sdk/icons';
 
 function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpec {
   const videoId = attrString(attrs.videoId, '');

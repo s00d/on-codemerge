@@ -1,6 +1,6 @@
 {
   "name": "@ocm/anchor-link-plugin",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "private": true,
   "license": "MIT",
   "type": "module",

@@ -1,4 +1,4 @@
-import { clearIcon, desktopIcon, mobileIcon } from '@ocm/wysiwyg/icons';
+import { clearIcon, desktopIcon, mobileIcon } from '@codemerge/sdk/icons';
 import type { FormToolbarItem, FormToolbarOptions } from './types';
 
 export type DefaultFormToolbarOptions = {

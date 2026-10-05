@@ -4,7 +4,7 @@ import pluginLocaleEn from './i18n/locales/en.json';
 import { definePlugin, convertBlockType, insertAtomAfter } from '@codemerge/sdk';
 import { TypographyMenu } from './components/TypographyMenu';
 import { applyTypographyStyle } from './applyStyle';
-import { typographyIcon } from '@ocm/wysiwyg/icons';
+import { typographyIcon } from '@codemerge/sdk/icons';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',

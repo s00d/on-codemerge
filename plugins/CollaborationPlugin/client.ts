@@ -1,7 +1,8 @@
+import { core } from '@codemerge/sdk';
+import type { EditorAPI } from '@codemerge/sdk';
 import type { Operation, DocNode, Transaction } from '@codemerge/kernel';
 import { transaction } from '@codemerge/kernel';
-import type { EditorAPI } from '@codemerge/sdk';
-import { core } from '@codemerge/sdk';
+
 import type { ClientWire, CollabStatus, PresencePeer, ServerWire } from './protocol.ts';
 import { PROTOCOL_VERSION, parseServerWire } from './protocol.ts';
 import { clearPending, enqueuePending, listPending, removePending } from './offline.ts';

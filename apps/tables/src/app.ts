@@ -1,5 +1,5 @@
 export { Editor, type EditorOptions } from './editor/Editor';
-export { ParseError } from '@ocm/wysiwyg/utils/parseSoT';
+export { ParseError } from '@codemerge/kernel';
 export {
   TablePlugin,
   createDefaultPlugins,
@@ -15,6 +15,8 @@ export {
   serializeText,
   serializeDoc,
   MAX_TABLE_BYTES,
+  exportCsv,
+  gridToHtml,
   type TablePluginOptions,
   type TablePluginFeatures,
   type TableToolbarOptions,
@@ -26,13 +28,5 @@ export {
   type TableRow,
   type TableViewState,
   type CellValue,
-  type CellDriver,
-  type CellRenderCtx,
-  type TableWorkspaceHandle,
   type ParseTextResult,
-  exportCsv,
-  registerCellDriver,
-  getCellDriver,
-  TableStore,
-  mountTableWorkspace,
 } from '@ocm/table-plugin';

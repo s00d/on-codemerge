@@ -4,11 +4,14 @@ import {
   foreign,
   insertAtomAfter,
   pluginToolbarPlacement,
+  readJsonAttr,
+  nodeAtPath,
+  pathFromEl,
 } from '@codemerge/sdk';
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
-import { deleteIcon, duplicateIcon, editIcon, formIcon } from '@ocm/wysiwyg/icons';
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
-import { nodeAtPath, pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
+
+import { deleteIcon, duplicateIcon, editIcon, formIcon } from '@codemerge/sdk/icons';
+
 import type { FormConfig } from '../types';
 import { isFormConfig } from '../types';
 import { emptyFormConfig } from '../io/adapters';

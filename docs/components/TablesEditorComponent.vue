@@ -9,6 +9,15 @@
     <div ref="editorContainer" class="editorBlock" />
     <hr />
     <div>
+      Preview HTML (<code>getHTML()</code>):
+      <div class="preview ocm-content prose prose-zinc max-w-none" v-html="htmlContent" />
+    </div>
+    <details class="html-source">
+      <summary>HTML source</summary>
+      <pre class="result">{{ htmlContent }}</pre>
+    </details>
+    <hr />
+    <div>
       TableGridDoc JSON (<code>getText()</code>):
       <pre class="result">{{ textContent }}</pre>
     </div>
@@ -27,8 +36,7 @@ const DEMO_GRID = `{
   "rows": [
     { "id": "r1", "cells": { "name": "Apples", "qty": 3 } },
     { "id": "r2", "cells": { "name": "Oranges", "qty": 2 } }
-  ],
-  "view": { "pagination": { "page": 0, "pageSize": 50 } }
+  ]
 }`;
 
 export default {
@@ -36,7 +44,7 @@ export default {
     this.editor?.destroy();
   },
   data() {
-    return { textContent: '', editor: null };
+    return { textContent: '', htmlContent: '', editor: null };
   },
   mounted() {
     if (!this.$refs.editorContainer) {
@@ -48,6 +56,7 @@ export default {
     });
     const sync = () => {
       this.textContent = editor.getText();
+      this.htmlContent = editor.getHTML();
     };
     editor.on('docChanged', sync);
     editor.setText(DEMO_GRID);
@@ -71,6 +80,17 @@ export default {
   border: 1px solid var(--color-ocm-border, #ddd);
   border-radius: 8px;
   overflow: hidden;
+}
+.preview {
+  min-height: 80px;
+  padding: 12px;
+  border: 1px solid var(--color-ocm-border, #ddd);
+  border-radius: 8px;
+  background: var(--color-ocm-surface, #fff);
+  overflow: auto;
+}
+.html-source {
+  margin-top: 8px;
 }
 .result {
   max-height: 300px;

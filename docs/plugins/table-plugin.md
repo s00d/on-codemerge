@@ -36,7 +36,7 @@ TablePlugin({
 });
 ```
 
-`createDefaultPlugins()` (from `on-codemerge/tables`) = `TablePlugin({ surface: 'workspace' })` — grid JSON SoT (`doc → tableGrid`), not a prose `table` tree. Workspace requires a `doc → tableGrid` seed: pass `emptyEditorDoc()` from `on-codemerge/tables` (the tables `Editor` defaults this); bare `TablePlugin({ surface: 'workspace' })` on a prose/default doc throws. Workspace runs a **custom grid engine** (`grid/TableStore` + derive + ViewSpec): stable row/column ids, typed cells, sort/filter/search, column resize, selection, keyboard, virtualization, pagination, TSV clipboard, CSV export, URL import, tree `parentId`, grouping, cell drivers. See [Tables Editor](/guide/tables-editor).
+`createDefaultPlugins()` (from `on-codemerge/tables`) = `TablePlugin({ surface: 'workspace' })` — grid JSON SoT (`doc → tableGrid`), not a prose `table` tree. Workspace requires a `doc → tableGrid` seed: pass `emptyEditorDoc()` from `on-codemerge/tables` (the tables `Editor` defaults this); bare `TablePlugin({ surface: 'workspace' })` on a prose/default doc throws. Workspace runs a **custom grid engine** (`grid/TableStore` + derive + ViewSpec): sparse sheet (ghost **rows** until click/F2; columns only as in SoT + Add column), stable row/column ids, typed cells, per-cell style, sort/filter/search, column resize, selection, keyboard, virtualization, TSV clipboard, CSV export, persisted `source` URL (import / autoload / refresh), tree `parentId`, grouping. See [Tables Editor](/guide/tables-editor).
 
 Legacy `rows: string[][]` documents migrate to `{ id, cells }` on parse.
 
@@ -88,6 +88,22 @@ editor.command('fillTable');
 ```
 
 Toolbar: **Insert → Lazy Table**. Context menu → **More → Lazy Table… / Edit Lazy Table… / Refresh Lazy Data**.
+
+### Workspace sheet source
+
+On `tableGrid` (tables editor), the same fetch path (`fetchLazyMatrix`) is stored as `source`:
+
+```ts
+source?: { url: string; format: 'json' | 'csv'; headers?: boolean; delimiter?: string }
+```
+
+| Command               | Behavior                                 |
+| --------------------- | ---------------------------------------- |
+| `table.importUrl`     | Import JSON/CSV from URL (`Mod-Shift-u`) |
+| `table.editSource`    | Edit source URL and reload (`Mod-Alt-k`) |
+| `table.refreshSource` | Re-fetch current `source.url`            |
+
+Toolbar Table menu: **Import URL / Refresh data / Edit source…**. Context menu repeats those items. Autoload runs once per URL on mount/`update`. Atom lazy tables are unchanged (`lazyUrl` on `table`).
 
 ### Lazy attrs (JSON model)
 

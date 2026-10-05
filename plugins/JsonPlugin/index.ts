@@ -1,6 +1,7 @@
-import type { Command } from '@codemerge/kernel';
 import { applyToolbarConfig, definePlugin, foreign, attrString } from '@codemerge/sdk';
 import type { PluginDefinition, PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';
+import type { Command } from '@codemerge/kernel';
+
 import { jsonCommandMap } from './commands/jsonCommands';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';

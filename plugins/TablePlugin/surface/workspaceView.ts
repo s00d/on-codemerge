@@ -1,13 +1,17 @@
+import { downloadBlob, h, mount } from '@codemerge/sdk';
+import type { EditorAPI, MountHandle } from '@codemerge/sdk';
 import type { DocNode, EditorState, JSONDoc } from '@codemerge/kernel';
-import type { EditorAPI } from '@codemerge/sdk';
-import { h, mount, renderDetached } from '@codemerge/sdk';
-import type { MountHandle } from '@codemerge/sdk';
+
 import { mountSourceEditor } from '@codemerge/editor';
 import type { SourceEditorHandle } from '@codemerge/editor';
 import { openMatrixImportPopup } from '../chrome/importPopup';
+import { buildGridContextMenu, openFormatCell } from '../chrome/gridContextMenu';
+import type { TableGridSource } from '../io/adapters';
 import { attrsFromGrid, gridFromDoc, gridFromMatrix } from '../io/adapters';
-import { exportCsv as toCsv } from '../io/csv';
-import { parseText, serializeDoc } from '../io/text';
+import { fetchLazyMatrix } from '../io/fetchMatrix';
+import type { LazyTableConfig } from '../io/fetchMatrix';
+import { exportCsv as toCsv } from '../io/adapters';
+import { parseText, serializeText } from '../io/text';
 import { TableStore } from '../grid/TableStore';
 import { chromeSignature, paintGridChrome, tableGridView } from '../grid/view/gridView';
 
@@ -22,7 +26,13 @@ export type TableWorkspaceHandle = {
   setMode(next: 'grid' | 'raw'): void;
   addRow(): void;
   addColumn(): void;
+  mergeHorizontal(): void;
+  mergeVertical(): void;
+  splitCell(): void;
   openImport(): void;
+  refreshSource(): void;
+  editSource(): void;
+  formatCell(): void;
   exportCsv(): void;
   applyRaw(): boolean;
   discardRaw(): void;
@@ -49,6 +59,15 @@ function isEditingInside(host: HTMLElement): boolean {
 
 function gridSig(grid: ReturnType<typeof gridFromDoc>): string {
   return JSON.stringify(attrsFromGrid(grid));
+}
+
+function sourceFromConfig(config: LazyTableConfig): TableGridSource {
+  return {
+    url: config.url,
+    format: config.format === 'csv' ? 'csv' : 'json',
+    headers: config.headers,
+    delimiter: config.delimiter,
+  };
 }
 
 export function mountTableWorkspace(
@@ -97,6 +116,37 @@ export function mountTableWorkspace(
     },
   });
 
+  let loadedSourceUrl: string | null = null;
+
+  const applyRemote = async (config: LazyTableConfig): Promise<boolean> => {
+    try {
+      const { matrix, hasHeader } = await fetchLazyMatrix(config);
+      const grid = gridFromMatrix(matrix, hasHeader);
+      grid.source = sourceFromConfig(config);
+      store.setDoc(grid, { commit: true });
+      loadedSourceUrl = config.url;
+      editor.toolbar.refresh();
+      return true;
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : String(error);
+      editor.notify(msg);
+      return false;
+    }
+  };
+
+  const tryAutoload = (): void => {
+    const src = store.getDoc().source;
+    if (!src?.url || rawDirty || src.url === loadedSourceUrl) {
+      return;
+    }
+    void applyRemote({
+      url: src.url,
+      format: src.format,
+      headers: src.headers,
+      delimiter: src.delimiter,
+    });
+  };
+
   const origUndo = editor.undo.bind(editor);
   const origRedo = editor.redo.bind(editor);
   const blockWhileCellEdit = (): boolean => store.isEditing() || isEditingInside(contentHost);
@@ -141,6 +191,38 @@ export function mountTableWorkspace(
       : rawDirty
         ? 'text-amber-600'
         : 'text-ocm-text-muted';
+    const derived = store.getDerived();
+    const active = store.getSelection().active;
+    const source = store.getDoc().source;
+    let sourceLabel: string | null = null;
+    if (source?.url) {
+      try {
+        sourceLabel = new URL(source.url).host;
+      } catch {
+        sourceLabel = source.url;
+      }
+    }
+    const left =
+      mode === 'grid'
+        ? [
+            h(
+              'span',
+              { class: 'tabular-nums text-ocm-text-muted' },
+              `${derived.totalRowCount} rows`
+            ),
+            active ? h('span', { class: 'font-mono text-ocm-text' }, active.colId) : null,
+            sourceLabel
+              ? h(
+                  'span',
+                  {
+                    class: 'truncate font-mono text-ocm-text-muted',
+                    attrs: { title: source?.url },
+                  },
+                  sourceLabel
+                )
+              : null,
+          ]
+        : [];
     const actions =
       mode === 'raw'
         ? [
@@ -176,15 +258,16 @@ export function mountTableWorkspace(
             ),
           ]
         : [];
-    statusHandle?.destroy();
-    statusHandle = mount(
-      slot,
-      h('div', { class: 'flex items-center justify-between gap-2 text-[11px]' }, [
-        h('span', { class: 'font-mono text-ocm-text-muted' }, '$'),
-        h('span', { class: `ml-auto ${syncClass}` }, sync),
-        ...actions,
-      ])
+    const spec = h(
+      'div',
+      { class: 'flex min-h-7 items-center gap-2 px-2 py-1 text-[11px] text-ocm-text-muted' },
+      [...left, h('span', { class: `ml-auto shrink-0 ${syncClass}` }, sync), ...actions]
     );
+    if (statusHandle) {
+      statusHandle.update(spec);
+    } else {
+      statusHandle = mount(slot, spec);
+    }
   };
 
   const paintGrid = (): void => {
@@ -193,7 +276,28 @@ export function mountTableWorkspace(
       return;
     }
     if (!gridHandle) {
-      gridHandle = mount(slot, tableGridView(store));
+      gridHandle = mount(
+        slot,
+        tableGridView(store, {
+          onContextMenu: (ev) => {
+            editor.ui.menu.open(
+              buildGridContextMenu(editor, store, {
+                onImport: () => {
+                  handle.openImport();
+                },
+                onRefresh: () => {
+                  handle.refreshSource();
+                },
+                onEditSource: () => {
+                  handle.editSource();
+                },
+              }),
+              ev.clientX,
+              ev.clientY
+            );
+          },
+        })
+      );
       chromeSig = '';
     }
     const sig = chromeSignature(store);
@@ -215,7 +319,7 @@ export function mountTableWorkspace(
     }
     destroyRaw();
     rawHandle = mountSourceEditor(slot, {
-      initialText: serializeDoc(editor.getState().doc),
+      initialText: serializeText(editor.getState().doc),
       onDocChanged: () => {
         rawDirty = true;
         parseError = null;
@@ -263,7 +367,7 @@ export function mountTableWorkspace(
     parseError = null;
     store.setDoc(gridFromDoc(editor.getState().doc));
     if (rawHandle) {
-      rawHandle.setText(serializeDoc(editor.getState().doc), { caret: 'end' });
+      rawHandle.setText(serializeText(editor.getState().doc), { caret: 'end' });
     }
     paintStatus();
     editor.toolbar.refresh();
@@ -282,7 +386,7 @@ export function mountTableWorkspace(
       if (!rawHandle) {
         mountRaw();
       } else if (!rawDirty) {
-        rawHandle.setText(serializeDoc(editor.getState().doc), { caret: 'preserve' });
+        rawHandle.setText(serializeText(editor.getState().doc), { caret: 'preserve' });
       }
     } else {
       destroyRaw();
@@ -302,10 +406,10 @@ export function mountTableWorkspace(
 
   shellHandle = mount(
     contentHost,
-    h('div', { class: 'ocm-table-shell flex h-full min-h-0 flex-1 flex-col' }, [
+    h('div', { class: 'ocm-table-shell flex h-full min-h-0 flex-1 flex-col overflow-hidden' }, [
       h('div', {
         ref: 'grid',
-        class: 'ocm-table-grid-host min-h-0 flex-1 overflow-hidden',
+        class: 'ocm-table-grid-host flex min-h-0 flex-1 flex-col overflow-hidden',
       }),
       h('div', {
         ref: 'raw',
@@ -314,8 +418,7 @@ export function mountTableWorkspace(
       }),
       h('div', {
         ref: 'status',
-        class:
-          'ocm-table-status shrink-0 border-t border-ocm-border bg-ocm-surface-muted/30 px-2 py-1',
+        class: 'ocm-table-status',
       }),
     ])
   );
@@ -324,6 +427,7 @@ export function mountTableWorkspace(
     if (mode === 'grid') {
       paintGrid();
     }
+    paintStatus();
   });
 
   paintGrid();
@@ -349,6 +453,7 @@ export function mountTableWorkspace(
         return;
       }
       store.setDoc(next);
+      tryAutoload();
       paintStatus();
     },
     destroy() {
@@ -394,27 +499,94 @@ export function mountTableWorkspace(
       }
       store.addColumn();
     },
+    mergeHorizontal() {
+      if (blockIfRawDirty()) {
+        return;
+      }
+      store.mergeHorizontal();
+    },
+    mergeVertical() {
+      if (blockIfRawDirty()) {
+        return;
+      }
+      store.mergeVertical();
+    },
+    splitCell() {
+      if (blockIfRawDirty()) {
+        return;
+      }
+      store.splitActive();
+    },
     openImport() {
       if (blockIfRawDirty()) {
         return;
       }
+      const src = store.getDoc().source;
       openMatrixImportPopup(editor, {
         mode: 'workspace',
-        onMatrix: (matrix, hasHeader) => {
-          store.replaceDoc(gridFromMatrix(matrix, hasHeader));
+        initial: src
+          ? {
+              url: src.url,
+              format: src.format,
+              headers: src.headers,
+              delimiter: src.delimiter,
+            }
+          : undefined,
+        onMatrix: (matrix, hasHeader, config) => {
+          const grid = gridFromMatrix(matrix, hasHeader);
+          grid.source = sourceFromConfig(config);
+          store.setDoc(grid, { commit: true });
+          loadedSourceUrl = config.url;
         },
       });
     },
-    exportCsv() {
-      const csv = toCsv(store.getDoc());
-      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-      const url = URL.createObjectURL(blob);
-      try {
-        const { el } = renderDetached(h('a', { attrs: { href: url, download: 'table.csv' } }));
-        el.click();
-      } finally {
-        URL.revokeObjectURL(url);
+    refreshSource() {
+      if (blockIfRawDirty()) {
+        return;
       }
+      const src = store.getDoc().source;
+      if (!src?.url) {
+        editor.notify(editor.t('common.dataUrlIsRequired') || 'Set a data URL first');
+        return;
+      }
+      void applyRemote({
+        url: src.url,
+        format: src.format,
+        headers: src.headers,
+        delimiter: src.delimiter,
+      });
+    },
+    editSource() {
+      if (blockIfRawDirty()) {
+        return;
+      }
+      const src = store.getDoc().source;
+      openMatrixImportPopup(editor, {
+        mode: 'edit',
+        initial: src
+          ? {
+              url: src.url,
+              format: src.format,
+              headers: src.headers,
+              delimiter: src.delimiter,
+            }
+          : undefined,
+        onMatrix: (matrix, hasHeader, config) => {
+          const grid = gridFromMatrix(matrix, hasHeader);
+          grid.source = sourceFromConfig(config);
+          store.setDoc(grid, { commit: true });
+          loadedSourceUrl = config.url;
+        },
+      });
+    },
+    formatCell() {
+      if (blockIfRawDirty()) {
+        return;
+      }
+      openFormatCell(editor, store);
+    },
+    exportCsv() {
+      downloadBlob(toCsv(store.getDoc()), 'table.csv', 'text/csv;charset=utf-8');
     },
     applyRaw: applyDraft,
     discardRaw: discardDraft,
@@ -422,5 +594,6 @@ export function mountTableWorkspace(
     getStore: () => store,
   };
 
+  tryAutoload();
   return handle;
 }

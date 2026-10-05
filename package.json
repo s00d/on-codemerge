@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "2.6.0",
+  "version": "2.7.0",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
   "keywords": [
     "JavaScript",
@@ -197,11 +197,11 @@
     "build:tables": "vite build --config apps/tables/vite.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
-    "lint": "oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs",
+    "lint": "oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/ban-plugin-wysiwyg-utils.mjs && node ./scripts/check-sass-modern.mjs",
     "lint:fix": "oxlint --type-aware --fix .",
     "format": "oxfmt .",
     "format:check": "oxfmt --check .",
-    "check": "oxfmt --check . && pnpm run build:packages && oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs && node ./scripts/check-locales.js && node ./scripts/check-hunspell-license.mjs && pnpm run typecheck && pnpm run publint:packages && pnpm run test:collab",
+    "check": "oxfmt --check . && pnpm run build:packages && oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/ban-plugin-wysiwyg-utils.mjs && node ./scripts/check-sass-modern.mjs && node ./scripts/check-locales.js && node ./scripts/check-hunspell-license.mjs && pnpm run typecheck && pnpm run publint:packages && pnpm run test:collab",
     "test:collab": "pnpm --filter '@codemerge/collaboration-server' test && pnpm exec vitest run packages/kernel/src/__tests__/transform.test.ts",
     "check:locales": "node ./scripts/check-locales.js",
     "publint": "pnpm run build:packages && pnpm run build && pnpm run publint:packages && publint --strict",

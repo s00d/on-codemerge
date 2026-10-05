@@ -1,5 +1,6 @@
 import { PopupController, foreign, h, mount } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
+
 import type { FormTemplate } from '../types';
 import { FORM_CATEGORIES, FORM_CATEGORY_NAMES, FORM_STARTERS } from '../templates/starters';
 

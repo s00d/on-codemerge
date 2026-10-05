@@ -1,4 +1,4 @@
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+import { readJsonAttr } from '@codemerge/sdk';
 
 /** Curated options for the block style panel (no raw CSS junk). */
 

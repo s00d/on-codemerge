@@ -1,7 +1,9 @@
+import { copyText, readClipboardText } from '@codemerge/sdk';
 import { MAX_TABLE_BYTES } from '../io/constants';
 import { stringifyCell } from '../io/matrix';
 import type { TableStore } from './TableStore';
 import { isGroupRowId } from './derive/group';
+import { isGhostColId, isGhostRowId } from './sheet';
 
 export function selectionToTsv(store: TableStore): string {
   const sel = store.getSelection();
@@ -27,62 +29,64 @@ export function pasteTsv(store: TableStore, text: string): void {
   if (text.length > MAX_TABLE_BYTES) {
     return;
   }
-  const lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
+  const lines = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
   if (lines.length === 1 && lines[0] === '') {
     return;
   }
   const matrix = lines.map((line) => line.split('\t'));
   const sel = store.getSelection();
   const derived = store.getDerived();
-  const ordered = derived.orderedRowIds.filter((id) => !isGroupRowId(id));
-  const startRow = sel.active?.rowId ?? ordered[0];
-  const startCol = sel.active?.colId ?? derived.columnIds[0];
+  const ordered = derived.rowIds.filter((id) => !isGroupRowId(id));
+  let startRow = sel.active?.rowId ?? ordered[0];
+  let startCol = sel.active?.colId ?? derived.columnIds[0];
   if (startRow === undefined || startCol === undefined) {
     return;
   }
-  const rowIds = ordered;
-  const colIds = derived.columnIds;
-  const ri0 = rowIds.indexOf(startRow);
-  const ci0 = colIds.indexOf(startCol);
+  if (isGhostRowId(startRow) || isGhostColId(startCol)) {
+    const ri = store.getSheetRowIds().indexOf(startRow);
+    const got = store.ensureCell(ri >= 0 ? ri : 0, startCol);
+    if (!got) {
+      return;
+    }
+    startRow = got.rowId;
+    startCol = got.colId;
+  }
+  const ri0 = store
+    .getDerived()
+    .rowIds.filter((id) => !isGroupRowId(id))
+    .indexOf(startRow);
+  const ci0 = store.getDerived().columnIds.indexOf(startCol);
   if (ri0 < 0 || ci0 < 0) {
     return;
   }
   for (const [dr, row] of matrix.entries()) {
-    const rid = rowIds[ri0 + dr];
-    if (rid === undefined) {
+    const origin = store.ensureCell(ri0 + dr, startCol);
+    if (!origin) {
       break;
     }
     for (const [dc, cell] of row.entries()) {
-      const cid = colIds[ci0 + dc];
+      let cid = store.getDerived().columnIds[ci0 + dc];
+      if (cid === undefined) {
+        store.addColumn();
+        cid = store.getDerived().columnIds[ci0 + dc];
+      }
       if (cid === undefined) {
         break;
       }
-      store.setCell(rid, cid, cell);
+      store.setCell(origin.rowId, cid, cell);
     }
   }
   store.flushCommit();
 }
 
 export async function copySelection(store: TableStore): Promise<void> {
-  const tsv = selectionToTsv(store);
-  if (typeof navigator === 'undefined') {
-    return;
-  }
-  const clipboard = navigator.clipboard;
-  if (clipboard === undefined || typeof clipboard.writeText !== 'function') {
-    return;
-  }
-  await clipboard.writeText(tsv);
+  await copyText(selectionToTsv(store));
 }
 
 export async function pasteFromClipboard(store: TableStore): Promise<void> {
-  if (typeof navigator === 'undefined') {
+  const text = await readClipboardText();
+  if (text === null) {
     return;
   }
-  const clipboard = navigator.clipboard;
-  if (clipboard === undefined || typeof clipboard.readText !== 'function') {
-    return;
-  }
-  const text = await clipboard.readText();
   pasteTsv(store, text);
 }

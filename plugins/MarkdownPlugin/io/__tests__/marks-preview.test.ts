@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { markdownToDoc } from '@ocm/wysiwyg/io/markdown';
-import { sanitizeHTML } from '@ocm/wysiwyg/utils/safeHtml';
+import { sanitizeHTML } from '@codemerge/sdk';
 import { projectPreviewHtml } from '../projectPreview';
 
 /** Every mark variant must keep visible text through parse → project → sanitize. */

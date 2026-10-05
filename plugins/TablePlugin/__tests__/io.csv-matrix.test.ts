@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { exportCsv } from '../io/csv';
 import {
+  exportCsv,
   gridFromMatrix,
   gridToMatrix,
   normalizeTableGrid,

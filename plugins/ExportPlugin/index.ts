@@ -1,7 +1,8 @@
 import { definePlugin, pluginToolbarPlacement } from '@codemerge/sdk';
 import type { PluginToolbarOpts } from '@codemerge/sdk';
+
 import { ExportMenu } from './components/ExportMenu';
-import { exportIcon } from '@ocm/wysiwyg/icons';
+import { exportIcon } from '@codemerge/sdk/icons';
 
 export function ExportPlugin(opts?: PluginToolbarOpts) {
   let openExport: (() => void) | null = null;

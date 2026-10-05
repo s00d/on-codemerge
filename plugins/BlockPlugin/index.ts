@@ -1,6 +1,3 @@
-import { wirePluginLocales } from '@codemerge/editor';
-import pluginLocaleEn from './i18n/locales/en.json';
-
 import {
   definePlugin,
   insertAtomAfter,
@@ -9,11 +6,15 @@ import {
   h,
   mount,
   pluginToolbarPlacement,
+  Resizer,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
 import { BlockContextMenu } from './components/BlockContextMenu';
-import { blockIcon } from '@ocm/wysiwyg/icons';
-import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
+import { blockIcon } from '@codemerge/sdk/icons';
+
 import type { BlockTree } from './paneTree';
 import { layoutFromTree, leaf, serializeTree, treeFromAttrs } from './paneTree';
 

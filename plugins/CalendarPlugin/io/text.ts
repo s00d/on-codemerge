@@ -1,5 +1,5 @@
 import type { DocNode } from '@codemerge/kernel';
-import { ParseError, parseJsonPayload } from '@ocm/wysiwyg/utils/parseSoT';
+import { ParseError, parseJsonPayload } from '@codemerge/kernel';
 import type { CalendarDoc } from '../types';
 import { isCalendarDoc } from '../types';
 import { coerceCalendarDoc, emptyCalendarDoc } from '../drivers/defaults';

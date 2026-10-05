@@ -1,6 +1,6 @@
-import { copyIcon, editIcon, deleteIcon } from '@ocm/wysiwyg/icons';
+import { copyText, pathFromEl, removeAtomAt } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
-import { pathFromEl, removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
+import { copyIcon, editIcon, deleteIcon } from '@codemerge/sdk/icons';
 
 export class CodeBlockContextMenu {
   private activeBlock: HTMLElement | null = null;
@@ -35,11 +35,8 @@ export class CodeBlockContextMenu {
             const code = this.activeBlock?.querySelector('code');
             if (code) {
               void (async () => {
-                try {
-                  await navigator.clipboard.writeText(code.textContent || '');
+                if (await copyText(code.textContent || '')) {
                   this.editor.notify(t('common.copied'));
-                } catch {
-                  /* clipboard unavailable */
                 }
               })();
             }

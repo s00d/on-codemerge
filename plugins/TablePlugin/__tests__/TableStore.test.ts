@@ -27,6 +27,25 @@ describe('TableStore', () => {
     store.destroy();
   });
 
+  it('mergeHorizontal spans next column and split restores', () => {
+    const store = new TableStore({
+      version: 2,
+      columns: [
+        { id: 'a', title: 'A' },
+        { id: 'b', title: 'B' },
+      ],
+      rows: [{ id: 'r1', cells: { a: 'Ap', b: 'ples' } }],
+    });
+    store.setActive('r1', 'a');
+    store.mergeHorizontal();
+    const row = store.getDoc().rows[0];
+    expect(row?.cells.a).toBe('Apples');
+    expect(row?.spans?.a?.cols).toBe(2);
+    store.splitActive();
+    expect(store.getDoc().rows[0]?.spans?.a).toBeUndefined();
+    store.destroy();
+  });
+
   it('sort and quickFilter derive', () => {
     const a = 'ca';
     const b = 'cb';
@@ -89,6 +108,20 @@ describe('TableStore', () => {
     store.destroy();
   });
 
+  it('pasteTsv adds columns only for extra TSV fields', () => {
+    const store = new TableStore({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows: [{ id: 'r1', cells: { a: '1' } }],
+    });
+    store.setSelection({ rowIds: ['r1'], active: { rowId: 'r1', colId: 'a' } });
+    pasteTsv(store, 'x\ty');
+    expect(store.getDoc().columns).toHaveLength(2);
+    expect(store.getSheetColumnIds()).toHaveLength(2);
+    expect(store.getDoc().rows[0]?.cells.a).toBe('x');
+    store.destroy();
+  });
+
   it('pasteTsv coerces boolean false string', () => {
     const store = new TableStore({
       version: 2,
@@ -101,7 +134,7 @@ describe('TableStore', () => {
     store.destroy();
   });
 
-  it('pasteTsv writes past current page via orderedRowIds', () => {
+  it('pasteTsv writes past visible window via orderedRowIds', () => {
     const rows = Array.from({ length: 5 }, (_, i) => ({
       id: `r${i}`,
       cells: { a: String(i) },
@@ -110,7 +143,6 @@ describe('TableStore', () => {
       version: 2,
       columns: [{ id: 'a', title: 'A' }],
       rows,
-      view: { pagination: { page: 0, pageSize: 2 } },
     });
     store.setSelection({ rowIds: ['r0'], active: { rowId: 'r0', colId: 'a' } });
     pasteTsv(store, 'x\ny\nz');
@@ -148,7 +180,7 @@ describe('TableStore', () => {
     store.destroy();
   });
 
-  it('clamps page after deleteRow / replaceDoc', () => {
+  it('sheet extent stays after deleteRow / replaceDoc', () => {
     const rows = Array.from({ length: 25 }, (_, i) => ({
       id: `r${i}`,
       cells: { a: String(i) },
@@ -157,20 +189,20 @@ describe('TableStore', () => {
       version: 2,
       columns: [{ id: 'a', title: 'A' }],
       rows,
-      view: { pagination: { page: 2, pageSize: 10 } },
     });
-    expect(store.getDerived().page).toBe(2);
+    expect(store.getDerived().totalRowCount).toBe(25);
+    expect(store.getSheetRowCount()).toBeGreaterThanOrEqual(25);
     for (const id of ['r20', 'r21', 'r22', 'r23', 'r24']) {
       store.deleteRow(id);
     }
-    expect(store.getDerived().page).toBe(1);
-    store.replaceDoc({
+    expect(store.getDerived().totalRowCount).toBe(20);
+    store.setDoc({
       version: 2,
       columns: [{ id: 'a', title: 'A' }],
       rows: [{ id: 'only', cells: { a: '1' } }],
-      view: { pagination: { page: 9, pageSize: 10 } },
     });
-    expect(store.getDerived().page).toBe(0);
+    expect(store.getDerived().totalRowCount).toBe(1);
+    expect(store.getSheetRowCount()).toBeGreaterThanOrEqual(40);
     store.destroy();
   });
 

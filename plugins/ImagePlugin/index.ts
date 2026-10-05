@@ -1,21 +1,22 @@
-import { wirePluginLocales } from '@codemerge/editor';
-import pluginLocaleEn from './i18n/locales/en.json';
-
 import {
+  copyText,
   definePlugin,
   insertAtomAfter,
   attrString,
   h,
   img,
   pluginToolbarPlacement,
+  Resizer,
+  atomAlignStyle,
+  removeAtomAt,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
 import type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
 import { ImageInsertModal } from './components/ImageInsertModal';
-import { copyIcon, editIcon, deleteIcon, imageIcon, uploadIcon } from '@ocm/wysiwyg/icons';
-import { Resizer } from '@ocm/wysiwyg/utils/Resizer';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
-import { removeAtomAt } from '@ocm/wysiwyg/utils/atomPath';
+import { copyIcon, editIcon, deleteIcon, imageIcon, uploadIcon } from '@codemerge/sdk/icons';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',
@@ -88,11 +89,8 @@ function renderImage(
               return;
             }
             void (async () => {
-              try {
-                await navigator.clipboard.writeText(src);
+              if (await copyText(src)) {
                 wctx.editor.notify(t('common.copied'));
-              } catch {
-                /* clipboard unavailable */
               }
             })();
           },

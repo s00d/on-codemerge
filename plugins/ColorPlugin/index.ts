@@ -1,8 +1,8 @@
-import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@codemerge/sdk';
+import { definePlugin, withMarkTarget, setMarkAttrs, core, ColorWell } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
+
 import type { Command, EditorState } from '@codemerge/kernel';
-import { textColorIcon, backgroundColorIcon } from '@ocm/wysiwyg/icons';
-import { ColorWell } from '@ocm/wysiwyg/utils/ColorWell';
+import { textColorIcon, backgroundColorIcon } from '@codemerge/sdk/icons';
 
 function markColorAtSelection(editor: EditorAPI, markType: string): string | null {
   const state = editor.getState();

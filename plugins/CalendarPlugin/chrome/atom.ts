@@ -4,11 +4,14 @@ import {
   foreign,
   insertAtomAfter,
   pluginToolbarPlacement,
+  readJsonAttr,
+  nodeAtPath,
+  pathFromEl,
 } from '@codemerge/sdk';
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
-import { calendarIcon, deleteIcon, editIcon } from '@ocm/wysiwyg/icons';
-import { readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
-import { nodeAtPath, pathFromEl } from '@ocm/wysiwyg/utils/atomPath';
+
+import { calendarIcon, deleteIcon, editIcon } from '@codemerge/sdk/icons';
+
 import type { CalendarDoc } from '../types';
 import { coerceCalendarDoc, emptyCalendarDoc } from '../drivers/defaults';
 import { isCalendarDoc } from '../types';

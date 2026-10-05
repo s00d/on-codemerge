@@ -1,6 +1,6 @@
+import { canvas, renderDetached, cssColorToHex } from '@codemerge/sdk';
 import { render as renderMermaid } from '@codemerge/mermaid';
-import { canvas, renderDetached } from '@codemerge/sdk';
-import { cssColorToHex } from '@ocm/wysiwyg/utils/colorMath';
+
 import type { ChartPoint, ChartSeries, ChartType } from '../types';
 import type { ChartOptions } from '../types/ChartOptions';
 import { CHART_COLORS } from '../utils/colors';

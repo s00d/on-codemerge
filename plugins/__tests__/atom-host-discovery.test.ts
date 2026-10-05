@@ -4,7 +4,7 @@
 import { describe, expect, it, afterEach, beforeEach } from 'vitest';
 import { createDoc, createParagraph, createText } from '@codemerge/kernel';
 import { Editor } from '@ocm/wysiwyg/editor/Editor';
-import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
+import { pathFromEl, queryAtomHosts } from '@codemerge/sdk';
 import { CalendarPlugin } from '@ocm/calendar-plugin';
 import { TimerPlugin } from '@ocm/timer-plugin';
 

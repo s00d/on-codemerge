@@ -1,5 +1,6 @@
 import { definePlugin, h, mount, renderDetached } from '@codemerge/sdk';
 import type { MountHandle, ViewSpec } from '@codemerge/sdk';
+
 import { StatisticsCalculator } from './services/StatisticsCalculator';
 import type { Statistics } from './services/StatisticsCalculator';
 

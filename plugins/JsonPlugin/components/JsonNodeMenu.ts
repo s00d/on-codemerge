@@ -1,6 +1,8 @@
-import { getNodeAt } from '@codemerge/kernel';
+import { copyText } from '@codemerge/sdk';
 import type { EditorAPI, MenuItem } from '@codemerge/sdk';
-import { copyIcon, deleteIcon, duplicateIcon, insertIcon, moveIcon } from '@ocm/wysiwyg/icons';
+import { getNodeAt } from '@codemerge/kernel';
+
+import { copyIcon, deleteIcon, duplicateIcon, insertIcon, moveIcon } from '@codemerge/sdk/icons';
 import type { JsonLeafType } from '../commands/jsonCommands';
 import {
   changeType,
@@ -27,15 +29,6 @@ const TYPE_OPTIONS: { type: JsonLeafType; label: string }[] = allJsonLeafTypes()
   type,
   label: getDriver(type).label,
 }));
-
-async function writeClipboard(text: string): Promise<boolean> {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 function uniquePropertyKey(editor: EditorAPI, objectPath: number[]): string | null {
   let objectNode;
@@ -174,7 +167,7 @@ export class JsonNodeMenu {
           const dot = pathToDot(doc, target.path);
           const pointer = pathToJsonPointer(doc, target.path);
           void (async () => {
-            const ok = await writeClipboard(pointer || dot);
+            const ok = await copyText(pointer || dot);
             this.editor.notify(ok ? 'Path copied' : 'Clipboard unavailable');
           })();
         },
@@ -185,7 +178,7 @@ export class JsonNodeMenu {
         onClick: () => {
           const value = valueAtDocPath(doc, target.valuePath);
           void (async () => {
-            const ok = await writeClipboard(JSON.stringify(value, null, 2));
+            const ok = await copyText(JSON.stringify(value, null, 2));
             this.editor.notify(ok ? 'Value copied' : 'Clipboard unavailable');
           })();
         },

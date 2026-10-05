@@ -27,7 +27,14 @@ import { NotifyService } from '../ui/notify';
 import { ContextMenuService } from '../ui/context-menu';
 import { PopupController, PopupService } from '../ui/popup';
 import { clearPortalRoot, getPortalRoot, setPortalRoot } from '@codemerge/view';
-import { downloadBlob, downloadUrl, h, pickFile } from '@codemerge/view';
+import {
+  copyText,
+  downloadBlob,
+  downloadUrl,
+  h,
+  pickFile,
+  readClipboardText,
+} from '@codemerge/view';
 import { ToolbarPanel } from '../ui/toolbar';
 import { createI18n } from '@i18n-micro/runtime';
 
@@ -346,6 +353,19 @@ describe('sdk gaps', () => {
     downloadBlob('hi', 'b.txt', 'text/plain');
     expect(createUrl).toHaveBeenCalledWith(expect.any(Blob));
     vi.unstubAllGlobals();
+    const writeText = vi.fn(() => Promise.resolve());
+    const readText = vi.fn(() => Promise.resolve('from-clip'));
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText, readText },
+    });
+    expect(await copyText('hello')).toBe(true);
+    expect(writeText).toHaveBeenCalledWith('hello');
+    expect(await readClipboardText()).toBe('from-clip');
+    Object.defineProperty(navigator, 'clipboard', {
+      configurable: true,
+      value: undefined,
+    });
     const picked = pickFile({ accept: '.txt', multiple: true });
     document.querySelector('input[type="file"]')?.dispatchEvent(new Event('change'));
     await picked;

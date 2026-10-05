@@ -1,4 +1,3 @@
-import type { Command } from '@codemerge/kernel';
 import {
   applyToolbarConfig,
   definePlugin,
@@ -6,14 +5,17 @@ import {
   attrString,
   foreign,
   pluginToolbarPlacement,
+  replaceChildrenWithHtml,
 } from '@codemerge/sdk';
 import type { PluginDefinition, WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
+import type { Command } from '@codemerge/kernel';
+
 import { highlightHtml } from '@codemerge/editor';
 import { CodeBlockModal } from './components/CodeBlockModal';
 import { CodeBlockContextMenu } from './components/CodeBlockContextMenu';
 import { renderCodeBlockDom } from './widgets/renderCodeBlockDom';
-import { replaceChildrenWithHtml } from '@ocm/wysiwyg/utils/domHtml';
-import { insertIcon } from '@ocm/wysiwyg/icons';
+
+import { insertIcon } from '@codemerge/sdk/icons';
 import { isCodeEditorDoc } from './io/adapters';
 import { mountCodeWorkspace } from './surface/workspaceView';
 import type { CodeWorkspaceHandle } from './surface/workspaceView';

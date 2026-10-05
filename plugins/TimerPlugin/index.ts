@@ -1,6 +1,3 @@
-import { wirePluginLocales } from '@codemerge/editor';
-import pluginLocaleEn from './i18n/locales/en.json';
-
 import {
   definePlugin,
   insertAtomAfter,
@@ -8,16 +5,21 @@ import {
   foreign,
   h,
   pluginToolbarPlacement,
+  pathFromEl,
+  queryAtomHosts,
+  attrToHtmlValue,
+  readJsonAttr,
 } from '@codemerge/sdk';
-import type { ViewSpec, PluginToolbarOpts } from '@codemerge/sdk';
-import type { EditorAPI } from '@codemerge/sdk';
+import type { ViewSpec, PluginToolbarOpts, EditorAPI } from '@codemerge/sdk';
+import { wirePluginLocales } from '@codemerge/editor';
+import pluginLocaleEn from './i18n/locales/en.json';
+
 import { TimerMenu } from './components/TimerMenu';
 import { TimerManager } from './services/TimerManager';
-import { timerIcon } from '@ocm/wysiwyg/icons';
+import { timerIcon } from '@codemerge/sdk/icons';
 import type { Timer } from './types';
 import { TimerContextMenu } from './components/TimerContextMenu';
-import { pathFromEl, queryAtomHosts } from '@ocm/wysiwyg/utils/atomPath';
-import { attrToHtmlValue, readJsonAttr } from '@ocm/wysiwyg/utils/attrJson';
+
 import { downloadJson, pickJsonFile, mountTimerView, tickTimerWidget } from './widgets/domOps';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([

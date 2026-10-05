@@ -53,10 +53,6 @@ const SURFACES = {
       'gridFromDoc',
       'normalizeTableGrid',
       'exportCsv',
-      'registerCellDriver',
-      'getCellDriver',
-      'TableStore',
-      'mountTableWorkspace',
     ],
   },
 };

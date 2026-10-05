@@ -1,9 +1,10 @@
 import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
+
 import type { Command } from '@codemerge/kernel';
 import { LinkMenu } from './components/LinkMenu';
 import type { LinkData } from './components/LinkMenu';
-import { linkIcon, editIcon, deleteIcon } from '@ocm/wysiwyg/icons';
+import { linkIcon, editIcon, deleteIcon } from '@codemerge/sdk/icons';
 
 function applyLink(editor: EditorAPI, data: LinkData): void {
   withMarkTarget(editor, () => {

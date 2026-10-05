@@ -1,10 +1,10 @@
-import { h, mount } from '@codemerge/sdk';
+import { h, mount, atomAlignStyle } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle } from '@codemerge/sdk';
+
 import type { CalendarDoc } from '../types';
 import { coerceCalendarDoc, emptyCalendarDoc } from '../drivers/defaults';
 import { renderView } from '../drivers/views';
 import { isCalendarDoc } from '../types';
-import { atomAlignStyle } from '@ocm/wysiwyg/utils/atomAlign';
 
 export type MountCalendarWidgetOptions = {
   payload: unknown;
