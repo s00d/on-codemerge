@@ -89,6 +89,10 @@ export default {
   background: var(--color-ocm-surface, #fff);
   overflow: auto;
 }
+.preview :deep(table.html-editor-table--sheet) {
+  width: max-content;
+  max-width: none;
+}
 .html-source {
   margin-top: 8px;
 }

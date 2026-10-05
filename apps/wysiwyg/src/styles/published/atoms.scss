@@ -8,6 +8,11 @@
 table.html-editor-table {
   @apply table my-4 w-full table-fixed border-collapse border border-ocm-border bg-ocm-surface shadow-sm;
 
+  /* Tables Editor getHTML: pixel col widths, do not eat leftover host width. */
+  &.html-editor-table--sheet {
+    @apply w-max max-w-none;
+  }
+
   html.dark & {
     @apply border-zinc-700 bg-zinc-800 shadow-md;
   }

@@ -8,7 +8,8 @@ import { ListsPlugin } from '@ocm/lists-plugin';
 import { BlockPlugin } from '@ocm/block-plugin';
 import { ToolbarPlugin } from '@ocm/toolbar-plugin';
 import { createDoc, createParagraph, createText, insertText, splitBlock } from '@codemerge/kernel';
-import { insertTableCommand, addRow, deleteRow, deleteTable } from '@ocm/table-plugin/tableOps';
+import { insertAtomAfter } from '@codemerge/sdk';
+import { sizedEmptyGrid, attrsFromGrid } from '@ocm/table-plugin';
 
 describe('wave1 lists/block', () => {
   it('wraps paragraph in list and Enter splits item', () => {
@@ -52,24 +53,14 @@ describe('wave1 lists/block', () => {
   });
 });
 
-describe('wave2 table ops', () => {
-  it('insert/add row/delete row/delete table', () => {
+describe('wave2 table grid atom', () => {
+  it('inserts tableGrid sheet', () => {
     expect.hasAssertions();
     const host = document.createElement('div');
     document.body.append(host);
     const editor = new Editor(host, { plugins: [TablePlugin()] });
-    editor.run(insertTableCommand(2, 2));
-    expect(editor.getJSON().doc.content?.[1]?.type).toBe('table');
-    editor.setSelection({
-      anchor: { offset: 0, path: [1, 0, 0, 0] },
-      focus: { offset: 0, path: [1, 0, 0, 0] },
-    });
-    editor.run(addRow('below'));
-    expect(editor.getJSON().doc.content?.[1]?.content?.length).toBe(3);
-    editor.run(deleteRow);
-    expect(editor.getJSON().doc.content?.[1]?.content?.length).toBe(2);
-    editor.run(deleteTable);
-    expect(editor.getJSON().doc.content?.some((n) => n.type === 'table')).toBe(false);
+    editor.run(insertAtomAfter('tableGrid', attrsFromGrid(sizedEmptyGrid(2, 2, false))));
+    expect(editor.getJSON().doc.content?.some((n) => n.type === 'tableGrid')).toBe(true);
     editor.destroy();
     host.remove();
   });

@@ -81,7 +81,7 @@ describe('io html', () => {
     const doc = importHTML(html);
     expect(doc.content?.[0]?.type).toBe('heading');
     expect(doc.content?.[1]?.type).toBe('bulletList');
-    expect(doc.content?.[2]?.type).toBe('table');
+    expect(doc.content?.[2]?.type).toBe('tableGrid');
     const out = exportHTML(doc);
     expect(out).toContain('<h2>');
     expect(out).toContain('<ul>');

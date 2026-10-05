@@ -1,5 +1,18 @@
-import { applyToolbarConfig, definePlugin, core, pluginToolbarPlacement } from '@codemerge/sdk';
-import type { EditorAPI, PluginDefinition, PluginToolbarOpts } from '@codemerge/sdk';
+import {
+  applyToolbarConfig,
+  definePlugin,
+  core,
+  pluginToolbarPlacement,
+  insertAtomAfter,
+  foreign,
+} from '@codemerge/sdk';
+import type {
+  EditorAPI,
+  PluginDefinition,
+  PluginToolbarOpts,
+  WidgetContext,
+  ViewSpec,
+} from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
@@ -7,33 +20,22 @@ import type { Command } from '@codemerge/kernel';
 import { tableIcon, lazyTableIcon } from '@codemerge/sdk/icons';
 
 import { TablePopup } from './components/TablePopup';
-import { buildTableContextMenu } from './components/tableContextMenu';
-import {
-  addColumn,
-  addHeaderRow,
-  addRow,
-  clearCell,
-  clearTable,
-  deleteColumn,
-  deleteRow,
-  deleteTable,
-  findTablePath,
-  insertTableCommand,
-  mergeCellsHorizontal,
-  mergeCellsVertical,
-  removeHeaderRow,
-  setTableAttr,
-  splitCellHorizontal,
-} from './tableOps';
 import type { LazyTableConfig } from './io/fetchMatrix';
 import { fetchLazyMatrix } from './io/fetchMatrix';
-import { fillTableFromMatrix, insertLazyTableShell, readLazyConfigFromTable } from './lazyTable';
 import { bindTableViewModeActive, defaultTableToolbar } from './chrome/defaultToolbar';
 import { openMatrixImportPopup } from './chrome/importPopup';
 import type { TableToolbarOptions } from './chrome/types';
-import { isTableEditorDoc } from './io/adapters';
+import {
+  isTableEditorDoc,
+  attrsFromGrid,
+  gridFromMatrix,
+  normalizeTableGrid,
+  sizedEmptyGrid,
+} from './io/adapters';
+import type { TableGridSource } from './io/adapters';
 import { mountTableWorkspace } from './surface/workspaceView';
 import type { TableWorkspaceHandle } from './surface/workspaceView';
+import { mountTableGridWidget, TABLE_ATOM_DEFAULT_H } from './widgets/mountTableGridWidget';
 
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',
@@ -42,9 +44,19 @@ const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> 
 
 const lazyKey = (id: string | undefined, url: string, index: number) => `${id ?? index}:${url}`;
 
+function findTableGridPath(doc: { content?: { type: string }[] }, path: number[]): number[] | null {
+  const i = path[0];
+  if (i !== undefined && doc.content?.[i]?.type === 'tableGrid') {
+    return [i];
+  }
+  const found = (doc.content ?? []).findIndex((n) => n.type === 'tableGrid');
+  return found >= 0 ? [found] : null;
+}
+
 export {
   emptyEditorDoc,
   emptyTableGrid,
+  sizedEmptyGrid,
   isTableEditorDoc,
   gridFromDoc,
   gridFromMatrix,
@@ -53,6 +65,8 @@ export {
   normalizeTableGrid,
   exportCsv,
   gridToHtml,
+  gridToMatrix,
+  attrsFromGrid,
 } from './io/adapters';
 export type {
   TableGridDoc,
@@ -83,26 +97,6 @@ export type TablePluginOptions = PluginToolbarOpts & {
 /** @deprecated use TablePluginOptions — features flag removed */
 export type TablePluginFeatures = { toolbar?: boolean };
 
-const ATOM_NODES = [
-  {
-    name: 'table',
-    group: 'block' as const,
-    attrs: {
-      cols: 2,
-      hasHeader: false,
-      tableStyle: 'default',
-      responsive: false,
-      autofit: false,
-      lazyUrl: '',
-      lazyFormat: 'json',
-      lazyHeaders: true,
-      lazyDelimiter: ',',
-    },
-  },
-  { name: 'tableRow', group: 'block' as const },
-  { name: 'tableCell', group: 'block' as const },
-];
-
 const WORKSPACE_NODES = [
   {
     name: 'tableGrid',
@@ -112,28 +106,33 @@ const WORKSPACE_NODES = [
   },
 ];
 
-async function applyLazyLoad(editor: EditorAPI, config: LazyTableConfig): Promise<boolean> {
-  try {
-    const doc = editor.getJSON().doc;
-    const tp = findTablePath(doc, editor.getSelection().anchor.path);
-    const tableId = tp ? core.getNodeAt(doc, tp)?.id : undefined;
-    const { matrix, hasHeader } = await fetchLazyMatrix(config);
-    const ok = editor.run(fillTableFromMatrix(matrix, hasHeader, tableId));
-    if (!ok) {
-      editor.notify(editor.t('table.noTableSelected'));
-      return false;
-    }
-    editor.run(setTableAttr('lazyUrl', config.url));
-    editor.run(setTableAttr('lazyFormat', config.format === 'csv' ? 'csv' : 'json'));
-    editor.run(setTableAttr('lazyHeaders', config.headers !== false));
-    editor.run(setTableAttr('lazyDelimiter', config.delimiter ?? ','));
-    editor.notify(editor.t('table.lazyTableLoaded'));
-    return true;
-  } catch (error) {
-    const msg = error instanceof Error ? error.message : String(error);
-    editor.notify(msg);
-    return false;
-  }
+function lazyConfigFromSource(src: TableGridSource): LazyTableConfig {
+  return {
+    url: src.url,
+    format: src.format,
+    headers: src.headers !== false,
+    delimiter: src.delimiter ?? ',',
+  };
+}
+
+function sourceFromLazy(config: LazyTableConfig): TableGridSource {
+  return {
+    url: config.url,
+    format: config.format === 'csv' ? 'csv' : 'json',
+    headers: config.headers,
+    delimiter: config.delimiter,
+  };
+}
+
+async function applyGridSource(
+  editor: EditorAPI,
+  path: number[],
+  src: TableGridSource
+): Promise<boolean> {
+  const { matrix, hasHeader } = await fetchLazyMatrix(lazyConfigFromSource(src));
+  const next = gridFromMatrix(matrix, hasHeader);
+  next.source = src;
+  return editor.run(() => [{ type: 'set_attrs', path, attrs: attrsFromGrid(next) }]);
 }
 
 export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition {
@@ -147,23 +146,13 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
   let openInsertLazy: (() => void) | null = null;
   let openEditLazy: (() => void) | null = null;
   let refreshLazy: (() => void) | null = null;
+  let openInsertTable: (() => void) | null = null;
 
   const atomCommands: Record<string, Command> = {
-    insertTable: insertTableCommand(3, 3),
-    deleteTable,
-    addRowBelow: addRow('below'),
-    addRowAbove: addRow('above'),
-    addColumnLeft: addColumn('left'),
-    addColumnRight: addColumn('right'),
-    deleteRow,
-    deleteColumn,
-    clearCell,
-    clearTable,
-    addHeaderRow,
-    removeHeaderRow,
-    mergeCellsHorizontal: mergeCellsHorizontal(),
-    mergeCellsVertical: mergeCellsVertical(),
-    splitCell: splitCellHorizontal(),
+    insertTable: () => {
+      openInsertTable?.();
+      return null;
+    },
     insertLazyTable: () => {
       openInsertLazy?.();
       return null;
@@ -224,9 +213,40 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
 
   return definePlugin({
     name: 'table',
-    nodes: workspace ? WORKSPACE_NODES : ATOM_NODES,
+    nodes: WORKSPACE_NODES,
     commands: workspace ? workspaceCommands : atomCommands,
     hotkeys,
+    widgets: workspace
+      ? undefined
+      : {
+          tableGrid: {
+            render(attrs, wctx: WidgetContext): ViewSpec {
+              return foreign((host, scope) => {
+                mountTableGridWidget(
+                  host,
+                  {
+                    grid: normalizeTableGrid(attrs),
+                    path: wctx.path,
+                    editor: wctx.editor,
+                    width: attrs.width,
+                    height: attrs.height,
+                    onCommit: (grid, box) => {
+                      wctx.updateAttrs({
+                        ...attrsFromGrid(grid),
+                        width: box.width,
+                        height: box.height,
+                      });
+                    },
+                    onResize: (box) => {
+                      wctx.updateAttrs({ width: box.width, height: box.height });
+                    },
+                  },
+                  scope
+                );
+              });
+            },
+          },
+        },
     setup(ctx) {
       ctx.disposable(
         wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')
@@ -274,11 +294,25 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
       const loadedKeys = new Set<string>();
       const inFlight = new Set<string>();
 
+      const insertGrid = (grid: ReturnType<typeof sizedEmptyGrid>) => {
+        editor.run(
+          insertAtomAfter('tableGrid', { ...attrsFromGrid(grid), height: TABLE_ATOM_DEFAULT_H })
+        );
+      };
+
+      openInsertTable = () => {
+        popup.show((insertOpts) => {
+          insertGrid(sizedEmptyGrid(insertOpts.rows, insertOpts.cols, insertOpts.hasHeader));
+        });
+      };
+
       openInsertLazy = () => {
         openMatrixImportPopup(editor, {
           mode: 'insert',
           onInsertShell: (config) => {
-            editor.run(insertLazyTableShell(config));
+            const grid = sizedEmptyGrid(2, 2, true);
+            grid.source = sourceFromLazy(config);
+            insertGrid(grid);
           },
           onMatrix: () => {
             /* insert shell path only */
@@ -286,55 +320,53 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
         });
       };
       openEditLazy = () => {
-        const tp = findTablePath(editor.getJSON().doc, editor.getSelection().anchor.path);
-        if (!tp) {
+        const doc = editor.getJSON().doc;
+        const gp = findTableGridPath(doc, editor.getSelection().anchor.path);
+        if (!gp) {
           editor.notify(editor.t('table.noTableSelected'));
           return;
         }
-        const table = core.getNodeAt(editor.getJSON().doc, tp);
-        const cfg = readLazyConfigFromTable(table) ?? {
-          url: '',
-          format: 'json' as const,
-          headers: true,
-          delimiter: ',',
-        };
+        const node = core.getNodeAt(doc, gp);
+        const src = normalizeTableGrid(node?.attrs).source;
         openMatrixImportPopup(editor, {
           mode: 'edit',
-          initial: cfg,
+          initial: src
+            ? lazyConfigFromSource(src)
+            : { url: '', format: 'json', headers: true, delimiter: ',' },
           onMatrix: (matrix, hasHeader, config) => {
-            const doc = editor.getJSON().doc;
-            const editPath = findTablePath(doc, editor.getSelection().anchor.path);
-            const tableId = editPath ? core.getNodeAt(doc, editPath)?.id : undefined;
-            const ok = editor.run(fillTableFromMatrix(matrix, hasHeader, tableId));
-            if (!ok) {
-              editor.notify(editor.t('table.noTableSelected'));
-              return;
-            }
-            editor.run(setTableAttr('lazyUrl', config.url));
-            editor.run(setTableAttr('lazyFormat', config.format === 'csv' ? 'csv' : 'json'));
-            editor.run(setTableAttr('lazyHeaders', config.headers !== false));
-            editor.run(setTableAttr('lazyDelimiter', config.delimiter ?? ','));
+            const next = gridFromMatrix(matrix, hasHeader);
+            next.source = sourceFromLazy(config);
+            editor.run(() => [{ type: 'set_attrs', path: gp, attrs: attrsFromGrid(next) }]);
           },
         });
       };
       refreshLazy = () => {
-        const tp = findTablePath(editor.getJSON().doc, editor.getSelection().anchor.path);
-        if (!tp) {
+        const doc = editor.getJSON().doc;
+        const gp = findTableGridPath(doc, editor.getSelection().anchor.path);
+        if (!gp) {
           editor.notify(editor.t('table.noTableSelected'));
           return;
         }
-        const table = core.getNodeAt(editor.getJSON().doc, tp);
-        const cfg = readLazyConfigFromTable(table);
-        if (!cfg) {
+        const node = core.getNodeAt(doc, gp);
+        const src = normalizeTableGrid(node?.attrs).source;
+        if (!src) {
           openEditLazy?.();
           return;
         }
-        const key = lazyKey(table.id, cfg.url, tp[0] ?? 0);
+        const key = lazyKey(node?.id, src.url, gp[0] ?? 0);
         loadedKeys.delete(key);
+        inFlight.delete(key);
         void (async () => {
-          const ok = await applyLazyLoad(editor, cfg);
-          if (ok) {
-            loadedKeys.add(key);
+          inFlight.add(key);
+          try {
+            if (await applyGridSource(editor, gp, src)) {
+              loadedKeys.add(key);
+            }
+          } catch (error) {
+            const msg = error instanceof Error ? error.message : String(error);
+            editor.notify(msg);
+          } finally {
+            inFlight.delete(key);
           }
         })();
       };
@@ -345,9 +377,7 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
         title: () => editor.t('table.insert'),
         ...pluginToolbarPlacement({ menu: 'insert', order: 40 }, options),
         onClick: () => {
-          popup.show((insertOpts) => {
-            editor.run(insertTableCommand(insertOpts.rows, insertOpts.cols, insertOpts.hasHeader));
-          });
+          openInsertTable?.();
         },
       });
       ctx.toolbar.add({
@@ -360,62 +390,28 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
         },
       });
 
-      ctx.onDom('host', 'contextmenu', (e) => {
-        const target = e.target;
-        if (!(target instanceof Element)) {
-          return;
-        }
-        if (
-          !target.closest('[data-ocm-type="table"]') &&
-          !target.closest('table.html-editor-table') &&
-          !target.closest('.html-editor-table')
-        ) {
-          return;
-        }
-        e.preventDefault();
-        editor.ui.menu.open(
-          buildTableContextMenu(editor, {
-            onLazyInsert: () => openInsertLazy?.(),
-            onLazyEdit: () => openEditLazy?.(),
-            onLazyRefresh: () => refreshLazy?.(),
-          }),
-          e.clientX,
-          e.clientY
-        );
-      });
-
       const tryAutoload = () => {
         const doc = editor.getJSON().doc;
         for (const [i, block] of (doc.content ?? []).entries()) {
-          if (block.type !== 'table') {
+          if (block.type !== 'tableGrid') {
             continue;
           }
-          const cfg = readLazyConfigFromTable(block);
-          if (!cfg) {
+          const src = normalizeTableGrid(block.attrs).source;
+          if (!src) {
             continue;
           }
-          const key = lazyKey(block.id, cfg.url, i);
+          const key = lazyKey(block.id, src.url, i);
           if (loadedKeys.has(key) || inFlight.has(key)) {
             continue;
           }
           inFlight.add(key);
-          let tableId = block.id;
-          if (!tableId) {
-            tableId = `table_${Date.now()}_${i}`;
-            const stamped = { ...core.cloneNode(block), id: tableId };
-            editor.run(() => [
-              { type: 'remove_node', path: [], index: i },
-              { type: 'insert_node', path: [], index: i, node: stamped },
-            ]);
-          }
           void (async () => {
             try {
-              const { matrix, hasHeader } = await fetchLazyMatrix(cfg);
-              if (editor.run(fillTableFromMatrix(matrix, hasHeader, tableId))) {
+              if (await applyGridSource(editor, [i], src)) {
                 loadedKeys.add(key);
               }
             } catch {
-              /* leave placeholder; user can Edit Lazy Table */
+              /* leave placeholder */
             } finally {
               inFlight.delete(key);
             }

@@ -228,54 +228,35 @@ describe('html atom round-trip', () => {
     });
   });
 
-  it('round-trips table header th and spans', () => {
+  it('imports HTML tables as tableGrid and round-trips used cells', () => {
     expect.hasAssertions();
     const html = docToHTML({
       type: 'doc',
       content: [
         {
-          type: 'table',
-          id: 'table_t1',
-          attrs: { cols: 2, hasHeader: true, responsive: true },
-          content: [
-            {
-              type: 'tableRow',
-              attrs: { header: true },
-              content: [
-                {
-                  type: 'tableCell',
-                  attrs: { colspan: 2 },
-                  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'H' }] }],
-                },
-              ],
-            },
-            {
-              type: 'tableRow',
-              content: [
-                {
-                  type: 'tableCell',
-                  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'a' }] }],
-                },
-                {
-                  type: 'tableCell',
-                  content: [{ type: 'paragraph', content: [{ type: 'text', text: 'b' }] }],
-                },
-              ],
-            },
-          ],
+          type: 'tableGrid',
+          attrs: {
+            version: 2,
+            columns: [
+              { id: 'name', title: 'Name', width: 160 },
+              { id: 'qty', title: 'Qty', width: 96 },
+            ],
+            rows: [
+              { id: 'r1', cells: { name: 'Apples', qty: 3 } },
+              { id: 'r2', cells: { name: 'Oranges', qty: 2 } },
+            ],
+          },
         },
       ],
     });
-    expect(html).toContain('<th');
-    expect(html).toContain('colspan="2"');
-    expect(html).toContain('data-has-header="true"');
-    expect(html).toContain('data-responsive="true"');
+    expect(html).toContain('html-editor-table--sheet');
+    expect(html).toContain('<th>Name</th>');
+    expect(html).toContain('Apples');
     const doc = htmlToDoc(html);
     const table = doc.content?.[0];
-    expect(table?.type).toBe('table');
-    expect(table?.attrs).toMatchObject({ hasHeader: true, responsive: true, cols: 2 });
-    expect(table?.id).toBe('table_t1');
-    expect(table?.content?.[0]?.content?.[0]?.attrs).toMatchObject({ colspan: 2 });
+    expect(table?.type).toBe('tableGrid');
+    const cols = table?.attrs?.columns as { title: string }[] | undefined;
+    expect(cols?.map((c) => c.title)).toStrictEqual(['Name', 'Qty']);
   });
 
   it('strips javascript/data link hrefs on export', () => {

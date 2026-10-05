@@ -380,19 +380,36 @@ function normalizeSource(raw: unknown): TableGridSource | undefined {
 }
 
 export function emptyTableGrid(): TableGridDoc {
-  const a = nextId('col');
-  const b = nextId('col');
-  return {
-    version: 2,
-    columns: [
-      { id: a, title: 'A', type: 'text' },
-      { id: b, title: 'B', type: 'text' },
-    ],
-    rows: [
-      { id: nextId('row'), cells: { [a]: '', [b]: '' } },
-      { id: nextId('row'), cells: { [a]: '', [b]: '' } },
-    ],
-  };
+  return sizedEmptyGrid(2, 2, false);
+}
+
+/** Empty sheet for WYSIWYG insert (column titles A, B… unless `hasHeader`). */
+export function sizedEmptyGrid(rows: number, cols: number, hasHeader: boolean): TableGridDoc {
+  const nCols = Math.max(1, Math.min(64, Math.floor(cols)));
+  const nRows = Math.max(1, Math.min(200, Math.floor(rows)));
+  const columns = Array.from({ length: nCols }, (_, i) => ({
+    id: nextId('col'),
+    title: hasHeader ? `Col ${i + 1}` : colLetterTitle(i),
+    type: 'text' as const,
+  }));
+  const rowList = Array.from({ length: nRows }, () => {
+    const cells: Record<string, CellValue> = {};
+    for (const c of columns) {
+      cells[c.id] = '';
+    }
+    return { id: nextId('row'), cells };
+  });
+  return { version: 2, columns, rows: rowList };
+}
+
+function colLetterTitle(index: number): string {
+  let n = index;
+  let out = '';
+  do {
+    out = String.fromCharCode(65 + (n % 26)) + out;
+    n = Math.floor(n / 26) - 1;
+  } while (n >= 0);
+  return out;
 }
 
 export function normalizeTableGrid(raw: unknown): TableGridDoc {
@@ -620,11 +637,21 @@ export function gridToMatrix(grid: TableGridDoc): string[][] {
   return [header, ...body];
 }
 
-/** Used SoT as published `<table class="html-editor-table">` (no ghost sheet cells). */
+const HTML_COL_WIDTH = 128;
+
+function columnHtmlWidth(col: TableColumn): number {
+  const w = col.width;
+  return typeof w === 'number' && Number.isFinite(w) && w > 0 ? Math.round(w) : HTML_COL_WIDTH;
+}
+
+/** Used SoT as published `<table>` — stored column widths, no stretch-to-host. */
 export function gridToHtml(grid: TableGridDoc): string {
   const cols = orderedColumns(grid);
   const theme =
     grid.theme !== undefined && grid.theme !== 'default' ? ` ocm-table-grid--${grid.theme}` : '';
+  const widths = cols.map(columnHtmlWidth);
+  const tableW = widths.reduce((a, b) => a + b, 0);
+  const colgroup = widths.map((w) => `<col style="width:${String(w)}px">`).join('');
   const th = cols.map((c) => `<th>${escapeHtml(c.title)}</th>`).join('');
   const tr = grid.rows
     .map((row) => {
@@ -637,7 +664,7 @@ export function gridToHtml(grid: TableGridDoc): string {
       return `<tr>${tds}</tr>`;
     })
     .join('');
-  return `<table class="html-editor-table not-prose${theme}"><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+  return `<table class="html-editor-table html-editor-table--sheet not-prose${theme}" style="width:${String(tableW)}px"><colgroup>${colgroup}</colgroup><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
 }
 
 export function exportCsv(grid: TableGridDoc, delimiter = ','): string {

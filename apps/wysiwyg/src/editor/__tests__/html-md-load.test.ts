@@ -460,9 +460,7 @@ describe('HTML covers all existing elements', () => {
     expect(types.has('listItem')).toBe(true);
     expect(types.has('blockquote')).toBe(true);
     expect(types.has('code_block')).toBe(true);
-    expect(types.has('table')).toBe(true);
-    expect(types.has('tableRow')).toBe(true);
-    expect(types.has('tableCell')).toBe(true);
+    expect(types.has('tableGrid')).toBe(true);
     expect(types.has('horizontalRule')).toBe(true);
     expect(types.has('image')).toBe(true);
     for (const atom of ALL_ATOM_TYPES) {
@@ -515,7 +513,7 @@ describe('HTML covers all existing elements', () => {
     expect(types.has('orderedList')).toBe(true);
     expect(types.has('blockquote')).toBe(true);
     expect(types.has('code_block')).toBe(true);
-    expect(types.has('table')).toBe(true);
+    expect(types.has('tableGrid')).toBe(true);
     expect(types.has('horizontalRule')).toBe(true);
     expect(types.has('image')).toBe(true);
     for (const atom of ALL_ATOM_TYPES) {

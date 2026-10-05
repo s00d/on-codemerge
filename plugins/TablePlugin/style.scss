@@ -6,6 +6,10 @@ table.html-editor-table {
   /* display:table — beat host rules like VitePress `.vp-doc table { display:block }` */
   @apply table my-4 w-full table-fixed border-collapse;
 
+  &.html-editor-table--sheet {
+    @apply w-max max-w-none;
+  }
+
   td,
   th {
     @apply relative h-6 min-w-0 cursor-text border border-ocm-border p-2 align-top;
@@ -14,6 +18,25 @@ table.html-editor-table {
   th {
     @apply bg-ocm-surface-muted font-semibold;
   }
+}
+
+/* Prose atom: bounded box; sheet scrolls inside; drag handles via Resizer. */
+.ocm-table-atom {
+  @apply relative my-2 box-border max-w-full overflow-hidden rounded-ocm-md border border-ocm-border bg-ocm-surface;
+  display: flex;
+  flex-direction: column;
+}
+
+.ocm-table-atom.ocm-resize--selected {
+  overflow: visible;
+}
+
+.ocm-table-atom__inner {
+  @apply flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden;
+}
+
+.ocm-table-atom .ocm-table-grid {
+  @apply flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden;
 }
 
 /* Table insert — body only; chrome/size from `.ocm-popup--sm`. */

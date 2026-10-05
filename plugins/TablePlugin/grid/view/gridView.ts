@@ -351,7 +351,7 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
         {
           key: rowId,
           class: [
-            'flex w-max min-w-full shrink-0 overflow-hidden border-b border-ocm-border',
+            'flex w-max min-w-full shrink-0 border-b border-ocm-border',
             selected ? 'bg-sky-50/80' : stripe ? 'bg-ocm-surface-muted/50' : 'bg-ocm-surface',
           ].join(' '),
           style: { height: `${vp.rowHeight}px` },
@@ -512,6 +512,13 @@ function isFormControl(t: EventTarget | null): t is HTMLInputElement | HTMLTextA
   return t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement;
 }
 
+function liveCellInput(root: HTMLElement): HTMLInputElement | null {
+  const live = [...root.querySelectorAll('input')].find(
+    (el) => el instanceof HTMLInputElement && el.dataset.ocmHeaderEdit === undefined
+  );
+  return live instanceof HTMLInputElement ? live : null;
+}
+
 function gridRootClass(store: TableStore): string {
   const theme = store.getDoc().theme ?? 'default';
   return `ocm-table-grid ocm-table-grid--${theme} flex h-full min-h-0 w-full flex-1 flex-col overflow-hidden outline-none`;
@@ -605,7 +612,10 @@ export function tableGridView(
                 attrs: { 'data-ocm-table-header': 'true' },
               }),
               h('div', { ref: 'canvas', class: 'relative min-w-full bg-ocm-surface' }, [
-                h('div', { ref: 'window', class: 'absolute right-0 left-0' }),
+                h('div', {
+                  ref: 'window',
+                  class: 'ocm-table-grid__window absolute top-0 left-0 w-max min-w-full',
+                }),
               ]),
             ])
           );
@@ -617,16 +627,28 @@ export function tableGridView(
             return slot instanceof HTMLElement ? slot.offsetHeight : 0;
           };
 
+          const clampScroll = (): void => {
+            const maxX = Math.max(0, host.scrollWidth - host.clientWidth);
+            const maxY = Math.max(0, host.scrollHeight - host.clientHeight);
+            if (host.scrollLeft > maxX) {
+              host.scrollLeft = maxX;
+            }
+            if (host.scrollTop > maxY) {
+              host.scrollTop = maxY;
+            }
+          };
+
           const syncViewport = (): void => {
             store.setLayoutWidth(host.clientWidth);
             const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
             const total = store.getSheetRowCount();
             const clientH = Math.max(1, host.clientHeight - headerH());
             const vp = visibleWindow(host.scrollTop, clientH, total, rh);
-            if (vp.end >= total - 8) {
+            if (vp.end >= total - 8 && host.clientHeight + 1 < total * rh) {
               store.growSheetRows();
             }
             paintWindow();
+            clampScroll();
           };
 
           const paintWindow = (): void => {
@@ -647,21 +669,16 @@ export function tableGridView(
             canvas.style.backgroundColor = 'var(--color-ocm-surface, #fff)';
 
             const headerSlot = sheetHandle.refs.header;
+            let headerDraft: string | null = null;
             if (store.getEditingHeader() && headerSlot instanceof HTMLElement) {
               const liveHeader = headerSlot.querySelector('input[data-ocm-header-edit]');
               if (liveHeader instanceof HTMLInputElement) {
-                return;
+                headerDraft = liveHeader.value;
               }
             }
 
-            if (store.isEditing() && windowHandle) {
-              const live = [...win.querySelectorAll('input')].find(
-                (el) => el instanceof HTMLInputElement && el.dataset.ocmHeaderEdit === undefined
-              );
-              if (live instanceof HTMLInputElement) {
-                return;
-              }
-            }
+            const cellDraft = liveCellInput(win)?.value ?? null;
+
             win.style.top = `${vp.start * rh}px`;
             const spec = bodyRowsSpec(store, vp);
             if (windowHandle) {
@@ -671,28 +688,39 @@ export function tableGridView(
             }
             if (store.isEditing()) {
               queueMicrotask(() => {
-                const live = [...win.querySelectorAll('input')].find(
-                  (el) => el instanceof HTMLInputElement && el.dataset.ocmHeaderEdit === undefined
-                );
-                live?.focus();
+                const live = liveCellInput(win);
+                if (live) {
+                  if (cellDraft !== null) {
+                    live.value = cellDraft;
+                  }
+                  live.focus();
+                }
               });
             }
 
             const headerHost = sheetHandle.refs.header;
             if (headerHost instanceof HTMLElement) {
-              const specH = headerSpec(store);
-              if (headerHandle) {
-                headerHandle.update(specH);
-              } else {
-                headerHandle = mount(headerHost, specH);
-              }
-              if (store.getEditingHeader()) {
-                queueMicrotask(() => {
-                  const live = headerHost.querySelector('input');
-                  if (live instanceof HTMLInputElement) {
-                    live.focus();
-                  }
-                });
+              const liveHeader = headerHost.querySelector('input[data-ocm-header-edit]');
+              const keepHeader =
+                Boolean(store.getEditingHeader()) && liveHeader instanceof HTMLInputElement;
+              if (!keepHeader) {
+                const specH = headerSpec(store);
+                if (headerHandle) {
+                  headerHandle.update(specH);
+                } else {
+                  headerHandle = mount(headerHost, specH);
+                }
+                if (store.getEditingHeader()) {
+                  queueMicrotask(() => {
+                    const live = headerHost.querySelector('input[data-ocm-header-edit]');
+                    if (live instanceof HTMLInputElement) {
+                      if (headerDraft !== null) {
+                        live.value = headerDraft;
+                      }
+                      live.focus();
+                    }
+                  });
+                }
               }
             }
           };

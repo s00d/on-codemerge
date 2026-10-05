@@ -36,7 +36,9 @@ TablePlugin({
 });
 ```
 
-`createDefaultPlugins()` (from `on-codemerge/tables`) = `TablePlugin({ surface: 'workspace' })` — grid JSON SoT (`doc → tableGrid`), not a prose `table` tree. Workspace requires a `doc → tableGrid` seed: pass `emptyEditorDoc()` from `on-codemerge/tables` (the tables `Editor` defaults this); bare `TablePlugin({ surface: 'workspace' })` on a prose/default doc throws. Workspace runs a **custom grid engine** (`grid/TableStore` + derive + ViewSpec): sparse sheet (ghost **rows** until click/F2; columns only as in SoT + Add column), stable row/column ids, typed cells, per-cell style, sort/filter/search, column resize, selection, keyboard, virtualization, TSV clipboard, CSV export, persisted `source` URL (import / autoload / refresh), tree `parentId`, grouping. See [Tables Editor](/guide/tables-editor).
+`createDefaultPlugins()` (from `on-codemerge/tables`) = `TablePlugin({ surface: 'workspace' })` — grid JSON SoT (`doc → tableGrid`), not a prose tree. Workspace requires a `doc → tableGrid` seed: pass `emptyEditorDoc()` from `on-codemerge/tables` (the tables `Editor` defaults this); bare `TablePlugin({ surface: 'workspace' })` on a prose/default doc throws.
+
+`surface: 'atom'` (WYSIWYG default) inserts the **same sheet** as a `tableGrid` atom widget. HTML/Markdown `<table>` imports as `tableGrid`.
 
 Legacy `rows: string[][]` documents migrate to `{ id, cells }` on parse.
 
@@ -54,40 +56,23 @@ import EditorComponent from '../components/EditorComponent.vue';
 
 ## API Reference
 
-### Structural commands
+### Atom commands (WYSIWYG)
 
-| Command                                       | Behavior                         |
-| --------------------------------------------- | -------------------------------- |
-| `insertTable`                                 | Insert 3×3 table (`Mod-Shift-t`) |
-| `deleteTable`                                 | Remove table                     |
-| `addRowBelow` / `addRowAbove`                 | Insert row                       |
-| `addColumnLeft` / `addColumnRight`            | Insert column                    |
-| `deleteRow` / `deleteColumn`                  | Remove row/column                |
-| `clearCell` / `clearTable`                    | Clear contents                   |
-| `addHeaderRow` / `removeHeaderRow`            | Header row                       |
-| `mergeCellsHorizontal` / `mergeCellsVertical` | Merge                            |
-| `splitCell`                                   | Split horizontally               |
+| Command           | Behavior                                                    |
+| ----------------- | ----------------------------------------------------------- |
+| `insertTable`     | Size picker → `tableGrid` atom (`Mod-Shift-t`)              |
+| `insertLazyTable` | URL popup, empty sheet + `source`, autoload (`Mod-Shift-u`) |
+| `editLazyTable`   | Edit `source` on the selected sheet (`Mod-Alt-k`)           |
+| `fillTable`       | Re-fetch `source`                                           |
+
+Row/column/cell edits run inside the sheet (click cells, header `+`, context menu) — not as prose `tableRow` commands.
 
 ```javascript
 editor.command('insertTable');
-editor.command('addRowBelow');
-```
-
-### Lazy table commands
-
-| Command           | Behavior                                                                 |
-| ----------------- | ------------------------------------------------------------------------ |
-| `insertLazyTable` | Opens URL/format popup, inserts table, fetches and fills (`Mod-Shift-u`) |
-| `editLazyTable`   | Edit URL/format on the selected lazy table and reload (`Mod-Alt-k`)      |
-| `fillTable`       | Re-fetch using current `lazyUrl` / `lazyFormat` attrs                    |
-
-```javascript
 editor.command('insertLazyTable');
-editor.command('editLazyTable');
-editor.command('fillTable');
 ```
 
-Toolbar: **Insert → Lazy Table**. Context menu → **More → Lazy Table… / Edit Lazy Table… / Refresh Lazy Data**.
+Toolbar: **Insert → Table** / **Lazy Table**. Sheet context menu: add/delete column, format, source.
 
 ### Workspace sheet source
 
@@ -126,21 +111,28 @@ Stored on the `table` node:
 
 ### HTML round-trip
 
-Export writes `data-lazy-url`, `data-lazy-format`, `data-lazy-headers`, optional `data-lazy-delimiter`. Import restores those attrs. On load, tables with `lazyUrl` auto-fetch once.
+Export is `gridToHtml` (`<table class="html-editor-table--sheet">` + column widths). Import maps any HTML `<table>` (and GFM tables) onto `tableGrid`. Persisted remote fetch lives on `source: { url, format, headers?, delimiter? }` and autoloads once.
 
 ```html
-<table
-  class="html-editor-table"
-  data-lazy-url="https://api.example.com/data.json"
-  data-lazy-format="json"
-  data-lazy-headers="true"
->
-  …
+<table class="html-editor-table html-editor-table--sheet">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Qty</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Apples</td>
+      <td>3</td>
+    </tr>
+  </tbody>
 </table>
 ```
+
+Insert a sheet: `editor.run(insertAtomAfter('tableGrid', attrsFromGrid(sizedEmptyGrid(3, 3, true))))`.
 
 ## Notes
 
 - Fetch uses `credentials: 'omit'` and only allows `http:` / `https:` URLs.
 - CORS must allow the editor origin for remote APIs.
-- Prefer custom sizes via `editor.run(insertTableCommand(rows, cols, hasHeader))` from table helpers.

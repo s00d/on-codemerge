@@ -1,5 +1,6 @@
 import type { DocNode, Mark } from '@codemerge/kernel';
 import { createDoc, createParagraph, createText } from '@codemerge/kernel';
+import { attrsFromGrid, gridFromMatrix, gridToMatrix, normalizeTableGrid } from '@ocm/table-plugin';
 import { asAttr } from '../utils/asAttr';
 
 /** Serialize document JSON tree to CommonMark/GFM-ish Markdown. */
@@ -252,6 +253,9 @@ function blockToMarkdown(node: DocNode): string {
     case 'table': {
       return tableToMarkdown(node);
     }
+    case 'tableGrid': {
+      return gridDocToMarkdown(node);
+    }
     case 'text': {
       return inlinesToMarkdown([node]);
     }
@@ -353,6 +357,41 @@ function cellsOf(row: DocNode): string[] {
   });
 }
 
+function gridDocToMarkdown(node: DocNode): string {
+  const matrix = gridToMatrix(
+    normalizeTableGrid({
+      version: node.attrs?.version,
+      columns: node.attrs?.columns,
+      rows: node.attrs?.rows,
+      view: node.attrs?.view,
+      theme: node.attrs?.theme,
+      source: node.attrs?.source,
+    })
+  );
+  if (matrix.length === 0) {
+    return '';
+  }
+  const header = matrix[0] ?? [];
+  const width = Math.max(1, ...matrix.map((r) => r.length));
+  const pad = (cells: string[]) => {
+    const out = cells.map((c) => c.replaceAll('|', String.raw`\|`) || ' ');
+    while (out.length < width) {
+      out.push(' ');
+    }
+    return out.slice(0, width);
+  };
+  const lines = [
+    `| ${pad(header).join(' | ')} |`,
+    `| ${pad(header)
+      .map(() => '---')
+      .join(' | ')} |`,
+  ];
+  for (let r = 1; r < matrix.length; r++) {
+    lines.push(`| ${pad(matrix[r] ?? []).join(' | ')} |`);
+  }
+  return `${lines.join('\n')}\n\n`;
+}
+
 function tableToMarkdown(table: DocNode): string {
   const rows = table.content ?? [];
   if (rows.length === 0) {
@@ -396,20 +435,6 @@ function parseMdRow(line: string): string[] {
   return s.split('|').map((c) => c.trim());
 }
 
-function mdTextToTableCell(text: string): DocNode {
-  return {
-    type: 'tableCell',
-    content: [createParagraph(parseInline(text))],
-  };
-}
-
-function mdCellsToTableRow(cells: string[]): DocNode {
-  return {
-    type: 'tableRow',
-    content: cells.map(mdTextToTableCell),
-  };
-}
-
 function parseTable(lines: string[], start: number): { node: DocNode; next: number } {
   const header = parseMdRow(lines[start] ?? '');
   let i = start + 2;
@@ -420,9 +445,8 @@ function parseTable(lines: string[], start: number): { node: DocNode; next: numb
   }
   return {
     node: {
-      type: 'table',
-      attrs: { cols: header.length },
-      content: [mdCellsToTableRow(header), ...body.map(mdCellsToTableRow)],
+      type: 'tableGrid',
+      attrs: attrsFromGrid(gridFromMatrix([header, ...body], true)),
     },
     next: i,
   };

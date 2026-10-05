@@ -149,16 +149,22 @@ const DEMO_HTML = `
   <li>Ordered one</li>
   <li>Ordered two</li>
 </ol>
-<p>Sample table (right-click cells for row/col/merge/sort):</p>
-<table class="html-editor-table not-prose">
+<p>Sample table (same grid engine as Tables — edit cells, headers, columns):</p>
+<table class="html-editor-table html-editor-table--sheet not-prose">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Qty</th>
+    </tr>
+  </thead>
   <tbody>
     <tr>
-      <td>Cell 1 - 1</td>
-      <td>Cell 1 - 2</td>
+      <td>Apples</td>
+      <td>3</td>
     </tr>
     <tr>
-      <td>Cell 2 - 1</td>
-      <td>Cell 2 - 2</td>
+      <td>Oranges</td>
+      <td>2</td>
     </tr>
   </tbody>
 </table>
@@ -290,10 +296,12 @@ const DEMO_HTML_BY_PLUGIN = {
 
   TablePlugin: `
 <h2>Table</h2>
-<p>Right-click cells for row / column / merge / sort.</p>
-<table class="html-editor-table not-prose">
+<p>Same sheet as Tables Editor — click cells to edit, header titles, + to add a column.</p>
+<table class="html-editor-table html-editor-table--sheet not-prose">
+  <thead>
+    <tr><th>Name</th><th>Role</th></tr>
+  </thead>
   <tbody>
-    <tr><td>Name</td><td>Role</td></tr>
     <tr><td>Ada</td><td>Engineer</td></tr>
     <tr><td>Grace</td><td>Lead</td></tr>
   </tbody>

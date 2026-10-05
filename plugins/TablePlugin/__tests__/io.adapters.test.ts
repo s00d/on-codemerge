@@ -162,12 +162,29 @@ describe('TablePlugin io/adapters v2', () => {
       ],
     });
     const html = gridToHtml(g);
-    expect(html).toContain('html-editor-table');
+    expect(html).toContain('html-editor-table--sheet');
+    expect(html).toContain('style="width:256px"');
+    expect(html).toContain('<col style="width:128px">');
     expect(html).toContain('<th>A &lt;x&gt;</th>');
     expect(html).toContain('&lt;script&gt;');
     expect(html).toContain('background:#fee2e2');
     expect(html).toContain('text-align:right');
     expect(html).not.toContain('<script>');
+  });
+
+  it('gridToHtml keeps stored column widths (no host stretch)', () => {
+    const g = normalizeTableGrid({
+      version: 2,
+      columns: [
+        { id: 'name', title: 'Name', width: 160 },
+        { id: 'qty', title: 'Qty', width: 96 },
+      ],
+      rows: [{ id: 'r1', cells: { name: 'Apples', qty: 3 } }],
+    });
+    const html = gridToHtml(g);
+    expect(html).toContain('style="width:256px"');
+    expect(html).toContain('<col style="width:160px">');
+    expect(html).toContain('<col style="width:96px">');
   });
 
   it('strips self/cyclic parentId edges', () => {

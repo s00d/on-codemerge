@@ -12,12 +12,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **Tables Editor** sparse Excel-like sheet (`TableGridDoc` v2): used SoT only, `getHTML()`, rename column headers, add columns on demand (`+` / toolbar / paste)
+- WYSIWYG **Insert Table** mounts the same `tableGrid` sheet as a sized, scrollable, resizable prose atom (`Resizer`); HTML/Markdown interchange as `<table>` / GFM
 - Shared platform helpers on `@codemerge/sdk` (icons, ColorWell, Resizer, `safeHtml`, `atomPath`) and `@codemerge/view` (`asAttr`, clipboard, `domHtml`); `ParseError` / `parseJsonPayload` on `@codemerge/kernel`
 
 ### Changed
 
 - TablePlugin store is a thin cache: mutations in `grid/ops.ts`, viewport window in the view, no ghost columns on the right
 - Plugins import platform from `@codemerge/sdk` / `@codemerge/kernel` / `@codemerge/view` (not `@ocm/wysiwyg/utils`)
+
+### Fixed
+
+- Sheet viewport still paints while a cell is being edited, so scroll/resize cannot hide columns behind the row-index gutter
 
 ## [2.6.0] - 2026-10-03
 

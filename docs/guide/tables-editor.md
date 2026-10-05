@@ -2,7 +2,7 @@
 
 Grid product published as **`on-codemerge/tables`**. Thin app entry uses a shell ViewPort and **`TablePlugin({ surface: 'workspace' })`**, which mounts a custom grid engine (sparse Excel-like sheet, sort / filter / search / resize / selection / virtualization / clipboard / CSV, optional remote `source`) plus optional Raw JSON into `contentTarget`. Interchange via `getText` / `setText` (pretty `TableGridDoc` JSON) and `getHTML()` (used SoT as `<table>`).
 
-WYSIWYG **Insert Table** stays a prose `table` / `tableRow` / `tableCell` tree — this product does not embed a spreadsheet atom in contenteditable.
+WYSIWYG **Insert Table** mounts the same `tableGrid` sheet as an in-document atom (`TablePlugin({ surface: 'atom' })`). HTML/Markdown still interchange as `<table>` / GFM. A constrained Tables product (`on-codemerge/tables`) uses the sheet as the whole document.
 
 <script setup>
 import TablesEditorComponent from '../components/TablesEditorComponent.vue';

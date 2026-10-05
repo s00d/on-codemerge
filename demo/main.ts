@@ -478,9 +478,11 @@ document.addEventListener('DOMContentLoaded', () => {
         <h1>Sample</h1>
         <p>Hello with <strong>bold</strong> and <em>italic</em>.</p>
         <ul><li>One</li><li>Two</li></ul>
-        <table class="html-editor-table"><tbody>
-          <tr><td>A1</td><td>A2</td></tr>
-          <tr><td>B1</td><td>B2</td></tr>
+        <table class="html-editor-table html-editor-table--sheet"><thead>
+          <tr><th>Name</th><th>Qty</th></tr>
+        </thead><tbody>
+          <tr><td>Apples</td><td>3</td></tr>
+          <tr><td>Oranges</td><td>2</td></tr>
         </tbody></table>
       `);
   });

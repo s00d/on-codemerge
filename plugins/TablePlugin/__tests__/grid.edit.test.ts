@@ -98,4 +98,56 @@ describe('grid cell edit', () => {
     handle.destroy();
     store.destroy();
   });
+
+  it('scrolls back to the first rows while a cell is being edited', async () => {
+    const store = new TableStore({
+      version: 2,
+      columns: [
+        { id: 'a', title: 'Name' },
+        { id: 'b', title: 'Qty' },
+      ],
+      rows: [{ id: 'r1', cells: { a: 'Apples', b: 3 } }],
+    });
+    const host = document.createElement('div');
+    stubBox(host, 640, 200);
+    document.body.append(host);
+    hosts.push(host);
+    const handle = mount(host, tableGridView(store));
+    const body = host.querySelector('.ocm-table-grid__body');
+    if (body instanceof HTMLElement) {
+      stubBox(body, 640, 200);
+    }
+    await Promise.resolve();
+    await Promise.resolve();
+    store.setLayoutWidth(640);
+
+    const cell = host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]');
+    expect(cell).toBeInstanceOf(HTMLElement);
+    (cell as HTMLElement).dispatchEvent(
+      new MouseEvent('click', { bubbles: true, cancelable: true })
+    );
+    expect(store.isEditing()).toBe(true);
+
+    expect(body).toBeInstanceOf(HTMLElement);
+    const scroller = body as HTMLElement;
+    scroller.scrollTop = 400;
+    scroller.dispatchEvent(new Event('scroll'));
+    const mid = host.querySelector('.ocm-table-grid__window');
+    expect(mid instanceof HTMLElement ? mid.style.top : '').not.toBe('0px');
+    scroller.scrollTop = 0;
+    scroller.dispatchEvent(new Event('scroll'));
+    await Promise.resolve();
+
+    const windowEl = host.querySelector('.ocm-table-grid__window');
+    expect(windowEl instanceof HTMLElement ? windowEl.style.top : '').toBe('0px');
+    const headers = [...host.querySelectorAll('[role="columnheader"]')].map((el) =>
+      (el.textContent ?? '').replace(/\s+/g, ' ').trim()
+    );
+    expect(headers.some((t) => t.startsWith('Name'))).toBe(true);
+    expect(headers.some((t) => t.startsWith('Qty'))).toBe(true);
+    expect(host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]')).toBeInstanceOf(HTMLElement);
+    expect(host.querySelector('input')).toBeInstanceOf(HTMLInputElement);
+    handle.destroy();
+    store.destroy();
+  });
 });

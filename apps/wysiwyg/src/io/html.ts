@@ -7,6 +7,7 @@ import { attrToHtmlValue, coerceHtmlJsonAttr } from '../utils/attrJson';
 import { cssColorToHex } from '../utils/colorMath';
 import { parseMath } from '@ocm/math-plugin/utils/parse';
 import { astToMathML } from '@ocm/math-plugin/utils/mathml';
+import { attrsFromGrid, gridFromMatrix, gridToHtml, normalizeTableGrid } from '@ocm/table-plugin';
 
 const MARK_TAG: Record<string, string> = {
   bold: 'strong',
@@ -127,6 +128,18 @@ function docToHTMLInner(
         'cols',
       ]
     )}><tbody>${rows}</tbody></table>`;
+  }
+  if (doc.type === 'tableGrid') {
+    return gridToHtml(
+      normalizeTableGrid({
+        version: doc.attrs?.version,
+        columns: doc.attrs?.columns,
+        rows: doc.attrs?.rows,
+        view: doc.attrs?.view,
+        theme: doc.attrs?.theme,
+        source: doc.attrs?.source,
+      })
+    );
   }
   if (doc.type === 'codeBlock' || doc.type === 'code_block') {
     const lang = escapeAttr(asAttr(doc.attrs?.language));
@@ -564,14 +577,14 @@ function parseBlock(node: ChildNode): DocNode | null {
     };
   }
   if (tag === 'table') {
-    const rawRows = [...el.querySelectorAll(':scope > tbody > tr, :scope > tr')];
+    const rawRows = [
+      ...el.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tr'),
+    ];
     const hasHeaderAttr = el.dataset.hasHeader === 'true';
-    const hasTh = Boolean(el.querySelector(':scope th'));
+    const hasTh = Boolean(el.querySelector('th'));
     const hasHeader = hasHeaderAttr || hasTh;
-    const rows = rawRows.map((tr, ri) => {
-      const isHeaderRow =
-        hasHeader && (ri === 0 || (tr instanceof HTMLElement && tr.dataset.header === 'true'));
-      const cells = [...tr.children]
+    const matrix = rawRows.map((tr) =>
+      [...tr.children]
         .filter((c): c is HTMLElement => {
           if (!(c instanceof HTMLElement)) {
             return false;
@@ -579,98 +592,38 @@ function parseBlock(node: ChildNode): DocNode | null {
           const t = c.tagName.toLowerCase();
           return t === 'td' || t === 'th';
         })
-        .map((cellEl) => {
-          const cellAttrs: Record<string, unknown> = { ...parseDataAttrs(cellEl) };
-          const cs = Number(cellEl.getAttribute('colspan') || cellEl.dataset.colspan || 1);
-          const rs = Number(cellEl.getAttribute('rowspan') || cellEl.dataset.rowspan || 1);
-          if (cs > 1) {
-            cellAttrs.colspan = cs;
-          }
-          if (rs > 1) {
-            cellAttrs.rowspan = rs;
-          }
-          return {
-            attrs: Object.keys(cellAttrs).length > 0 ? cellAttrs : undefined,
-            content: [
-              {
-                content: parseInline(cellEl),
-                type: 'paragraph',
-              },
-            ],
-            type: 'tableCell',
-          };
-        });
-      const rowBase: Record<string, unknown> = isHeaderRow ? { header: true } : {};
-      return {
-        attrs:
-          tr instanceof HTMLElement
-            ? mergeElAttrs(tr, rowBase)
-            : Object.keys(rowBase).length > 0
-              ? rowBase
-              : undefined,
-        content: cells,
-        type: 'tableRow',
-      };
-    });
-    const cols = Math.max(
-      2,
-      ...rows.map((row) =>
-        (row.content ?? []).reduce(
-          (n, cell) => n + Math.max(1, Number(cell.attrs?.colspan ?? 1)),
-          0
-        )
-      )
+        .map((cellEl) => (cellEl.textContent ?? '').trim())
     );
+    const grid = gridFromMatrix(matrix, hasHeader);
+    const colEls = [...el.querySelectorAll(':scope > colgroup > col, :scope > col')];
+    if (colEls.length === grid.columns.length) {
+      grid.columns = grid.columns.map((c, i) => {
+        const raw = colEls[i] instanceof HTMLElement ? colEls[i].style.width : '';
+        const w = Math.trunc(Number(raw.replace(/px$/i, '')));
+        return Number.isFinite(w) && w > 0 ? { ...c, width: w } : c;
+      });
+    }
+    const themeMatch = /\bocm-table-grid--(\w+)\b/.exec(el.className);
+    if (
+      themeMatch?.[1] === 'modern' ||
+      themeMatch?.[1] === 'bordered' ||
+      themeMatch?.[1] === 'striped'
+    ) {
+      grid.theme = themeMatch[1];
+    }
     const lazyUrl = el.dataset.lazyUrl ?? '';
-    const attrs: Record<string, unknown> = { cols };
-    if (hasHeader) {
-      attrs.hasHeader = true;
-    }
-    if (el.dataset.responsive === 'true') {
-      attrs.responsive = true;
-    }
-    if (el.dataset.autofit === 'true') {
-      attrs.autofit = true;
-    }
     if (lazyUrl) {
-      attrs.lazyUrl = lazyUrl;
-      attrs.lazyFormat = el.dataset.lazyFormat === 'csv' ? 'csv' : 'json';
-      attrs.lazyHeaders = el.dataset.lazyHeaders !== 'false';
-      attrs.lazyDelimiter = el.dataset.lazyDelimiter || ',';
-    }
-    const style = /\btable-(\w+)\b/.exec(el.className)?.[1];
-    if (style && style !== 'default') {
-      attrs.tableStyle = style;
-    }
-    const tableId = el.dataset.tableId || `table_${Date.now()}`;
-    const extraTableAttrs = parseDataAttrs(el);
-    for (const [k, v] of Object.entries(extraTableAttrs)) {
-      if (!(k in attrs)) {
-        attrs[k] = v;
-      }
+      grid.source = {
+        url: lazyUrl,
+        format: el.dataset.lazyFormat === 'csv' ? 'csv' : 'json',
+        headers: el.dataset.lazyHeaders !== 'false',
+        delimiter: el.dataset.lazyDelimiter || ',',
+      };
     }
     return {
-      attrs,
-      content:
-        rows.length > 0
-          ? rows
-          : [
-              {
-                content: [
-                  {
-                    content: [{ content: [{ type: 'text', text: '' }], type: 'paragraph' }],
-                    type: 'tableCell',
-                  },
-                  {
-                    content: [{ content: [{ type: 'text', text: '' }], type: 'paragraph' }],
-                    type: 'tableCell',
-                  },
-                ],
-                type: 'tableRow',
-              },
-            ],
-      id: tableId,
-      type: 'table',
+      type: 'tableGrid',
+      id: el.dataset.tableId,
+      attrs: attrsFromGrid(grid),
     };
   }
   if (tag === 'br') {
