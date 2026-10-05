@@ -1,5 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { columnWidths, MIN_COL_WIDTH, ROW_INDEX_GUTTER } from '../grid/derive/widths';
+import {
+  columnWidths,
+  MIN_COL_WIDTH,
+  ROW_INDEX_GUTTER,
+  ADD_COL_GUTTER,
+} from '../grid/derive/widths';
 import type { TableGridDoc } from '../io/adapters';
 
 function doc(widths: number[], fit?: 'fill' | 'content'): TableGridDoc {
@@ -18,7 +23,7 @@ function doc(widths: number[], fit?: 'fill' | 'content'): TableGridDoc {
 describe('columnWidths', () => {
   it('fills remaining viewport by default', () => {
     const ids = ['c0', 'c1'];
-    const client = ROW_INDEX_GUTTER + 800;
+    const client = ROW_INDEX_GUTTER + ADD_COL_GUTTER + 800;
     const map = columnWidths(doc([160, 96]), ids, client);
     expect(map.get('c0')! + map.get('c1')!).toBe(800);
     expect(map.get('c0')!).toBeGreaterThan(map.get('c1')!);
@@ -37,10 +42,15 @@ describe('columnWidths', () => {
   });
 
   it('freeze pins one column and fills the rest', () => {
-    const map = columnWidths(doc([160, 96, 96]), ['c0', 'c1', 'c2'], ROW_INDEX_GUTTER + 600, {
-      id: 'c0',
-      width: 200,
-    });
+    const map = columnWidths(
+      doc([160, 96, 96]),
+      ['c0', 'c1', 'c2'],
+      ROW_INDEX_GUTTER + ADD_COL_GUTTER + 600,
+      {
+        id: 'c0',
+        width: 200,
+      }
+    );
     expect(map.get('c0')).toBe(200);
     expect(map.get('c1')! + map.get('c2')!).toBe(400);
     expect(map.get('c1')!).toBeGreaterThanOrEqual(MIN_COL_WIDTH);

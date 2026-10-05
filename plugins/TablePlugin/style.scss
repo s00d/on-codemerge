@@ -7,10 +7,51 @@ table.html-editor-table {
   @apply table my-4 w-full table-fixed border-collapse;
 
   &.html-editor-table--sheet {
-    @apply w-max max-w-none;
+    @apply my-0 w-max max-w-none;
+
+    td,
+    th {
+      @apply border-0 border-b border-r border-ocm-border px-2 py-1.5 text-[13px] leading-5;
+    }
+
+    th {
+      @apply bg-ocm-surface-muted font-mono text-[12px] font-semibold;
+    }
+
+    &.html-editor-table--fill {
+      @apply w-full max-w-full;
+    }
+
+    &.table-modern,
+    &.ocm-table-grid--modern {
+      @apply border-0;
+
+      th {
+        @apply bg-ocm-surface text-[11px] uppercase tracking-wide text-ocm-text-muted;
+      }
+
+      td {
+        @apply border-r-0;
+      }
+    }
+
+    &.table-bordered,
+    &.ocm-table-grid--bordered {
+      td,
+      th {
+        @apply border border-ocm-border;
+      }
+    }
+
+    &.table-striped,
+    &.ocm-table-grid--striped {
+      tbody tr:nth-child(even) {
+        @apply bg-ocm-surface-muted/50;
+      }
+    }
   }
 
-  &.html-editor-table--fill {
+  &.html-editor-table--fill:not(.html-editor-table--sheet) {
     @apply w-full max-w-full;
   }
 
@@ -113,7 +154,8 @@ table.html-editor-table {
 }
 
 .ocm-table-grid__body {
-  @apply min-h-0 flex-1 overflow-auto overscroll-contain;
+  @apply min-h-0 flex-1 overscroll-contain;
+  scrollbar-gutter: stable;
 }
 
 .ocm-content.ocm-shell-content.ocm-table-root {
@@ -124,6 +166,7 @@ table.html-editor-table {
 
 .ocm-table-grid__header-host {
   @apply bg-ocm-surface-muted;
+  box-shadow: 0 1px 0 var(--color-ocm-border, #e4e4e7);
 }
 
 .ocm-table-grid--bordered [role='gridcell'],
@@ -137,4 +180,8 @@ table.html-editor-table {
 
 .ocm-table-grid--modern [role='gridcell'] {
   @apply border-b border-ocm-border;
+}
+
+.ocm-table-grid--striped [role='row']:nth-child(even) {
+  @apply bg-ocm-surface-muted/50;
 }

@@ -8,9 +8,9 @@
     <hr />
     <div ref="editorContainer" class="editorBlock" />
     <hr />
-    <div>
-      Preview HTML (<code>getHTML()</code>):
-      <div class="preview ocm-content prose prose-zinc max-w-none" v-html="htmlContent" />
+    <div class="preview-block">
+      <div class="preview-label">Preview HTML (<code>getHTML()</code>)</div>
+      <div class="preview ocm-content" v-html="htmlContent" />
     </div>
     <details class="html-source">
       <summary>HTML source</summary>
@@ -98,14 +98,25 @@ export default {
   min-height: 0;
   overflow: hidden;
 }
-.preview {
-  max-height: 280px;
-  min-height: 80px;
-  padding: 12px;
+.preview-block {
   border: 1px solid var(--color-ocm-border, #ddd);
   border-radius: 8px;
+  overflow: hidden;
   background: var(--color-ocm-surface, #fff);
-  overflow: auto;
+}
+.preview-label {
+  padding: 8px 12px;
+  border-bottom: 1px solid var(--color-ocm-border, #ddd);
+  background: var(--color-ocm-surface-muted, #f8fafc);
+  font-size: 12px;
+  color: var(--color-ocm-text-muted, #71717a);
+}
+.preview {
+  padding: 0;
+  overflow: visible;
+}
+.preview :deep(table.html-editor-table) {
+  margin: 0;
 }
 .preview :deep(table.html-editor-table--sheet.html-editor-table--content) {
   width: max-content;

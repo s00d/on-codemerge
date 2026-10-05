@@ -603,7 +603,9 @@ function parseBlock(node: ChildNode): DocNode | null {
         return Number.isFinite(w) && w > 0 ? { ...c, width: w } : c;
       });
     }
-    const themeMatch = /\bocm-table-grid--(\w+)\b/.exec(el.className);
+    const themeMatch =
+      /\bocm-table-grid--(\w+)\b/.exec(el.className) ??
+      /\btable-(modern|bordered|striped)\b/.exec(el.className);
     if (
       themeMatch?.[1] === 'modern' ||
       themeMatch?.[1] === 'bordered' ||

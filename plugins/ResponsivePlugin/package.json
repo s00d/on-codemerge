@@ -1,6 +1,6 @@
 {
   "name": "@ocm/responsive-plugin",
-  "version": "2.7.1",
+  "version": "2.7.2",
   "private": true,
   "license": "MIT",
   "type": "module",

@@ -56,6 +56,23 @@ describe('Excel sheet extent', () => {
     store.destroy();
   });
 
+  it('large SoT is fully scrollable — sheet extent is never shorter than used rows', () => {
+    const rows = Array.from({ length: 3500 }, (_, i) => ({
+      id: `r${i}`,
+      cells: { a: String(i) },
+    }));
+    const store = new TableStore({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows,
+    });
+    expect(store.getSheetRowCount()).toBeGreaterThanOrEqual(3500);
+    expect(store.getSheetRowIds()).toHaveLength(store.getSheetRowCount());
+    expect(store.getSheetRowIds()[0]).toBe('r0');
+    expect(store.getSheetRowIds()[3499]).toBe('r3499');
+    store.destroy();
+  });
+
   it('format ghost cell persists style', () => {
     const store = new TableStore({
       version: 2,

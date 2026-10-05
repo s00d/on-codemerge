@@ -118,7 +118,8 @@ export class TableStore {
 
   private syncSheetExtent(): void {
     const next = extentAfterDoc(this.doc, this.sheetRows);
-    this.sheetRows = next.sheetRows;
+    const used = deriveGrid(this.doc).rowIds.length;
+    this.sheetRows = Math.max(next.sheetRows, used);
     this.sheetCols = next.sheetCols;
   }
 
@@ -216,7 +217,7 @@ export class TableStore {
   }
 
   getSheetRowCount(): number {
-    return this.sheetRows;
+    return Math.max(this.sheetRows, this.getDerived().rowIds.length);
   }
 
   getSheetColumnIds(): string[] {
@@ -251,7 +252,9 @@ export class TableStore {
   }
 
   growSheetRows(): void {
-    const next = growExtent(this.sheetRows, SHEET_ROW_CAP, 20);
+    const used = this.getDerived().rowIds.length;
+    const cap = Math.max(SHEET_ROW_CAP, used);
+    const next = growExtent(this.sheetRows, cap, 20);
     if (next === this.sheetRows) {
       return;
     }

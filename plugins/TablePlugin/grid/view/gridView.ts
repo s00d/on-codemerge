@@ -599,8 +599,12 @@ export function tableGridView(
     [
       foreign(
         (host, scope) => {
-          host.className =
-            'ocm-table-grid__body relative min-h-0 flex-1 overflow-auto overscroll-contain';
+          host.className = [
+            'ocm-table-grid__body relative min-h-0 flex-1 overscroll-contain',
+            store.getDoc().view?.fit === 'content'
+              ? 'overflow-auto'
+              : 'overflow-x-hidden overflow-y-auto',
+          ].join(' ');
           host.setAttribute('role', 'rowgroup');
 
           const sheetHandle = mount(
@@ -627,7 +631,18 @@ export function tableGridView(
             return slot instanceof HTMLElement ? slot.offsetHeight : 0;
           };
 
+          const applyBodyOverflow = (): void => {
+            const fill = store.getDoc().view?.fit !== 'content';
+            host.classList.toggle('overflow-x-hidden', fill);
+            host.classList.toggle('overflow-y-auto', true);
+            host.classList.toggle('overflow-auto', !fill);
+          };
+
           const clampScroll = (): void => {
+            const fill = store.getDoc().view?.fit !== 'content';
+            if (fill) {
+              host.scrollLeft = 0;
+            }
             const maxX = Math.max(0, host.scrollWidth - host.clientWidth);
             const maxY = Math.max(0, host.scrollHeight - host.clientHeight);
             if (host.scrollLeft > maxX) {
@@ -639,6 +654,7 @@ export function tableGridView(
           };
 
           const syncViewport = (): void => {
+            applyBodyOverflow();
             store.setLayoutWidth(host.clientWidth);
             const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
             const total = store.getSheetRowCount();
@@ -726,7 +742,11 @@ export function tableGridView(
           };
 
           host.addEventListener('scroll', syncViewport);
-          const unsub = store.subscribe(paintWindow);
+          const unsub = store.subscribe(() => {
+            applyBodyOverflow();
+            paintWindow();
+            clampScroll();
+          });
           paintWindow();
           queueMicrotask(syncViewport);
           let ro: ResizeObserver | null = null;

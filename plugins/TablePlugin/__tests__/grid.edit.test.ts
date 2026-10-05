@@ -99,6 +99,46 @@ describe('grid cell edit', () => {
     store.destroy();
   });
 
+  it('scrolls through a large sheet to the last used row', async () => {
+    const rows = Array.from({ length: 2500 }, (_, i) => ({
+      id: `r${i}`,
+      cells: { a: `v${i}` },
+    }));
+    const store = new TableStore({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows,
+    });
+    const host = document.createElement('div');
+    stubBox(host, 640, 240);
+    document.body.append(host);
+    hosts.push(host);
+    const handle = mount(host, tableGridView(store));
+    const body = host.querySelector('.ocm-table-grid__body');
+    expect(body).toBeInstanceOf(HTMLElement);
+    const scroller = body as HTMLElement;
+    stubBox(scroller, 640, 240);
+    Object.defineProperty(scroller, 'scrollHeight', {
+      configurable: true,
+      get: () => store.getSheetRowCount() * 32 + 32,
+    });
+    await Promise.resolve();
+    await Promise.resolve();
+    store.setLayoutWidth(640);
+
+    const total = store.getSheetRowCount();
+    expect(total).toBeGreaterThanOrEqual(2500);
+    scroller.scrollTop = Math.max(0, total * 32 - 200);
+    scroller.dispatchEvent(new Event('scroll'));
+    await Promise.resolve();
+
+    const last = host.querySelector('[data-ocm-row="r2499"][data-ocm-col="a"]');
+    expect(last).toBeInstanceOf(HTMLElement);
+    expect(host.querySelectorAll('[role="row"]').length).toBeLessThan(80);
+    handle.destroy();
+    store.destroy();
+  });
+
   it('scrolls back to the first rows while a cell is being edited', async () => {
     const store = new TableStore({
       version: 2,

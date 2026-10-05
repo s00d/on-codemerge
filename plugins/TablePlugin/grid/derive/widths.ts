@@ -1,6 +1,7 @@
 import type { TableColumn, TableGridDoc } from '../../io/adapters';
 
 export const ROW_INDEX_GUTTER = 40;
+export const ADD_COL_GUTTER = 32;
 export const MIN_COL_WIDTH = 64;
 export const DEFAULT_COL_WIDTH = 128;
 
@@ -32,7 +33,7 @@ export function columnWidths(
     return columnWeight(byCol.get(id));
   };
 
-  const avail = Math.max(0, Math.floor(clientWidth) - ROW_INDEX_GUTTER);
+  const avail = Math.max(0, Math.floor(clientWidth) - ROW_INDEX_GUTTER - ADD_COL_GUTTER);
   const canFill = fill && avail >= MIN_COL_WIDTH * n;
 
   if (!canFill) {

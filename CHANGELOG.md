@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.2] - 2026-10-05
+
+### Fixed
+
+- Stretch fit no longer overflows horizontally (account for row-index + add-column gutters)
+- Sheet HTML themes (`table-modern` / `bordered` / `striped`) match the grid look in published CSS + docs preview
+- Large tables: sheet extent no longer capped below SoT row count (bottom rows were unreachable)
+
 ## [2.7.1] - 2026-10-05
 
 ### Added

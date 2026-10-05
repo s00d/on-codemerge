@@ -37,8 +37,12 @@ export function colLetter(index: number): string {
   return out;
 }
 
+/** Visual row count: always ≥ used SoT/derived rows. CAP only limits empty ghost padding. */
 export function defaultSheetRows(used: number): number {
-  return Math.min(SHEET_ROW_CAP, Math.max(SHEET_ROW_MIN, used + SHEET_ROW_PAD));
+  if (used >= SHEET_ROW_CAP) {
+    return used;
+  }
+  return Math.max(SHEET_ROW_MIN, Math.min(SHEET_ROW_CAP, used + SHEET_ROW_PAD));
 }
 
 export function defaultSheetCols(used: number): number {

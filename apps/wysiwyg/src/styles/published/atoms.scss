@@ -10,10 +10,60 @@ table.html-editor-table {
 
   /* Tables Editor getHTML: content = stored px; fill = stretch to host. */
   &.html-editor-table--sheet {
-    @apply w-max max-w-none;
+    @apply my-0 w-max max-w-none shadow-none;
+
+    /* Match grid chrome — no default zebra (striped theme opts in). */
+    tbody tr:nth-child(even) {
+      background: transparent;
+    }
+
+    tbody tr:hover {
+      background: transparent;
+    }
+
+    td,
+    th {
+      @apply border-0 border-b border-r border-ocm-border px-2 py-1.5 text-[13px] leading-5;
+    }
+
+    th {
+      @apply border-b bg-ocm-surface-muted font-mono text-[12px] font-semibold text-ocm-text;
+    }
+
+    &.html-editor-table--fill {
+      @apply w-full max-w-full;
+    }
+
+    &.table-modern,
+    &.ocm-table-grid--modern {
+      @apply border-0;
+
+      th {
+        @apply bg-ocm-surface text-[11px] uppercase tracking-wide text-ocm-text-muted;
+      }
+
+      td {
+        @apply border-r-0;
+      }
+    }
+
+    &.table-bordered,
+    &.ocm-table-grid--bordered {
+      td,
+      th {
+        @apply border border-ocm-border;
+      }
+    }
+
+    &.table-striped,
+    &.ocm-table-grid--striped {
+      tbody tr:nth-child(even) {
+        @apply bg-ocm-surface-muted/50;
+      }
+    }
   }
 
-  &.html-editor-table--fill {
+  &.html-editor-table--fill:not(.html-editor-table--sheet) {
     @apply w-full max-w-full;
   }
 
@@ -42,7 +92,7 @@ table.html-editor-table {
     }
   }
 
-  tbody tr:nth-child(even) {
+  &:not(.html-editor-table--sheet) tbody tr:nth-child(even) {
     @apply bg-ocm-surface-muted;
 
     html.dark & {
@@ -50,7 +100,7 @@ table.html-editor-table {
     }
   }
 
-  tbody tr:hover {
+  &:not(.html-editor-table--sheet) tbody tr:hover {
     @apply bg-zinc-100;
 
     html.dark & {
@@ -65,7 +115,7 @@ table.html-editor-table {
   }
 }
 
-.html-editor-table.table-modern {
+.html-editor-table.table-modern:not(.html-editor-table--sheet) {
   @apply overflow-hidden rounded border-0 shadow-sm;
 
   html.dark & {
@@ -86,7 +136,7 @@ table.html-editor-table {
   }
 }
 
-.html-editor-table.table-bordered {
+.html-editor-table.table-bordered:not(.html-editor-table--sheet) {
   td,
   th {
     @apply border-2 border-ocm-border;
@@ -97,7 +147,7 @@ table.html-editor-table {
   }
 }
 
-.html-editor-table.table-striped {
+.html-editor-table.table-striped:not(.html-editor-table--sheet) {
   tbody tr:nth-child(even) {
     @apply bg-sky-50;
 

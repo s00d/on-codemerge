@@ -644,11 +644,18 @@ function columnHtmlWidth(col: TableColumn): number {
   return typeof w === 'number' && Number.isFinite(w) && w > 0 ? Math.round(w) : HTML_COL_WIDTH;
 }
 
+/** Theme classes: `table-*` for published CSS, `ocm-table-grid--*` for HTML↔grid round-trip. */
+function themeHtmlClass(theme: TableGridDoc['theme']): string {
+  if (theme === undefined || theme === 'default') {
+    return '';
+  }
+  return ` table-${theme} ocm-table-grid--${theme}`;
+}
+
 /** Used SoT as published `<table>`. `view.fit: fill` (default) → 100% host; `content` → stored px. */
 export function gridToHtml(grid: TableGridDoc): string {
   const cols = orderedColumns(grid);
-  const theme =
-    grid.theme !== undefined && grid.theme !== 'default' ? ` ocm-table-grid--${grid.theme}` : '';
+  const theme = themeHtmlClass(grid.theme);
   const fill = grid.view?.fit !== 'content';
   const widths = cols.map(columnHtmlWidth);
   const tableW = widths.reduce((a, b) => a + b, 0);

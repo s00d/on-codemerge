@@ -206,6 +206,18 @@ describe('TablePlugin io/adapters v2', () => {
     expect(html).toContain('<col style="width:96px">');
   });
 
+  it('gridToHtml emits published theme classes', () => {
+    const g = normalizeTableGrid({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows: [{ id: 'r1', cells: { a: '1' } }],
+      theme: 'striped',
+    });
+    const html = gridToHtml(g);
+    expect(html).toContain('table-striped');
+    expect(html).toContain('ocm-table-grid--striped');
+  });
+
   it('strips self/cyclic parentId edges', () => {
     const g = normalizeTableGrid({
       version: 2,
