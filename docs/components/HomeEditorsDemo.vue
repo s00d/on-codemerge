@@ -21,7 +21,6 @@
         :key="active"
         :chrome="active === 'wysiwyg-page' ? 'page' : 'bar'"
         :showDescription="false"
-        :showResults="false"
       />
       <JsonEditorComponent v-else-if="active === 'json'" :key="'json'" :showDescription="false" />
       <MarkdownEditorComponent

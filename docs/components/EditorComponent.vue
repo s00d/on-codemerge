@@ -10,7 +10,7 @@
       class="editorBlock"
       :class="{ 'editorBlock--page': chrome === 'page' }"
     />
-    <template v-if="showResults && chrome !== 'page'">
+    <template v-if="showResults">
       <hr />
       <div>
         Result (JSON):
