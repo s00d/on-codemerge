@@ -15,7 +15,7 @@
       </button>
     </div>
 
-    <div class="home-editors__panel">
+    <div v-if="panelReady" class="home-editors__panel">
       <EditorComponent
         v-if="active === 'wysiwyg' || active === 'wysiwyg-page'"
         :key="active"
@@ -115,14 +115,14 @@ export default {
   data() {
     return {
       tabs,
-      active: parseDemoHash(typeof location !== 'undefined' ? location.hash : ''),
+      active: 'wysiwyg',
+      panelReady: false,
       editorsHref: withBase('/guide/editors'),
     };
   },
   mounted() {
-    if (location.hash) {
-      this.syncFromHash();
-    }
+    this.syncFromHash();
+    this.panelReady = true;
     this.onHashChange = () => {
       this.syncFromHash();
     };
