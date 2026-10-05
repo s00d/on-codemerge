@@ -10,6 +10,10 @@ function stubBox(el: HTMLElement, width: number, height: number): void {
   Object.defineProperty(el, 'offsetWidth', { configurable: true, get: () => width });
 }
 
+function styleHeightPx(el: HTMLElement): number {
+  return Number(el.style.height.replace('px', ''));
+}
+
 describe('grid cell edit', () => {
   const hosts: HTMLElement[] = [];
 
@@ -261,8 +265,8 @@ describe('grid cell edit', () => {
       ?.closest('[role="row"]');
     expect(tall).toBeInstanceOf(HTMLElement);
     expect(short).toBeInstanceOf(HTMLElement);
-    const tallH = Number((tall as HTMLElement).style.height);
-    const shortH = Number((short as HTMLElement).style.height);
+    const tallH = styleHeightPx(tall as HTMLElement);
+    const shortH = styleHeightPx(short as HTMLElement);
     expect(shortH).toBe(32);
     expect(tallH).toBeGreaterThan(shortH);
     handle.destroy();
