@@ -13,6 +13,6 @@ describe('toolbar menus', () => {
     await toolbarClick(page, 'table');
     const dialog = await expectPopup(page);
     await dialog.locator('.table-picker__cell').nth(0).click();
-    await expect(content(page).locator('table').first()).toBeVisible();
+    await expect(content(page).locator('.ocm-table-atom').first()).toBeVisible();
   });
 });

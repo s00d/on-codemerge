@@ -1,5 +1,5 @@
 import { describe, test, expect } from 'untestutils/vitest';
-import { content, expectPopup, gotoEditor, toolbarClick } from './helpers/editor';
+import { expectPopup, gotoEditor, sheetCell, toolbarClick } from './helpers/editor';
 
 describe('context menu', () => {
   test.override({ harness: 'editor' });
@@ -12,7 +12,7 @@ describe('context menu', () => {
     await dialog.locator('.table-picker__cell').nth(9).hover();
     await dialog.locator('.table-picker__cell').nth(9).click();
 
-    const cell = content(page).locator('table td p, table th p, table td, table th').first();
+    const cell = sheetCell(page);
     await expect(cell).toBeVisible();
     const box = await cell.boundingBox();
     expect(box).toBeTruthy();

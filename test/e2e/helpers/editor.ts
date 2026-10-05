@@ -105,3 +105,24 @@ export async function clickPopupButton(page: Page, name: string | RegExp) {
   const dialog = popupDialog(page);
   await dialog.getByRole('button', { name }).click();
 }
+
+export function sheetAtom(page: Page) {
+  return content(page).locator('.ocm-table-atom').first();
+}
+
+export function sheetCell(page: Page) {
+  return sheetAtom(page).locator('[role="gridcell"]').first();
+}
+
+export function usedSheetRowCount(page: Page): Promise<number> {
+  return page.evaluate(() => {
+    const ids = new Set<string>();
+    for (const el of document.querySelectorAll('.ocm-table-atom [data-ocm-row]')) {
+      const id = el.getAttribute('data-ocm-row');
+      if (id && !id.includes('__ghostrow__')) {
+        ids.add(id);
+      }
+    }
+    return ids.size;
+  });
+}

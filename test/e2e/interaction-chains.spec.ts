@@ -6,8 +6,11 @@ import {
   fillPopupInput,
   gotoEditor,
   selectAllInEditor,
+  sheetAtom,
+  sheetCell,
   toolbarClick,
   typeInEditor,
+  usedSheetRowCount,
 } from './helpers/editor';
 
 /**
@@ -39,12 +42,11 @@ describe('interaction chains', () => {
     // Same picker cell as table/context-menu specs (2×2 in 8-col grid → index 9)
     await dialog.locator('.table-picker__cell').nth(9).click();
 
-    const table = content(page).locator('table').first();
-    await expect(table).toBeVisible({ timeout: 10_000 });
-    const rowsBefore = await table.locator('tr').count();
+    await expect(sheetAtom(page)).toBeVisible({ timeout: 10_000 });
+    const rowsBefore = await usedSheetRowCount(page);
     expect(rowsBefore).toBeGreaterThanOrEqual(1);
 
-    const cell = table.locator('td p, th p, td, th').first();
+    const cell = sheetCell(page);
     const box = await cell.boundingBox();
     expect(box).toBeTruthy();
     await page.mouse.click((box?.x ?? 0) + 4, (box?.y ?? 0) + 4, { button: 'right' });
@@ -58,7 +60,7 @@ describe('interaction chains', () => {
       .first()
       .click();
 
-    await expect(table.locator('tr')).toHaveCount(rowsBefore + 1, { timeout: 10_000 });
+    await expect.poll(() => usedSheetRowCount(page), { timeout: 10_000 }).toBe(rowsBefore + 1);
   });
 
   test('list: toolbar bullet → Enter splits into two items', async ({ page, goto }) => {
