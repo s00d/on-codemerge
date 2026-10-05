@@ -11,6 +11,7 @@ const CTS_ENTRIES = [
   'dist/forms.d.ts',
   'dist/charts.d.ts',
   'dist/calendar.d.ts',
+  'dist/tables.d.ts',
   'dist/packages/sdk/src/index.d.ts',
   'dist/packages/kernel/src/index.d.ts',
   'dist/packages/view/src/index.d.ts',

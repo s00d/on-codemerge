@@ -42,6 +42,7 @@ import { ResponsivePlugin } from '@ocm/responsive-plugin';
 import { ShortcutsPlugin } from '@ocm/shortcuts-plugin';
 import { SpellCheckerPlugin } from '@ocm/spell-checker-plugin';
 import { TablePlugin } from '@ocm/table-plugin';
+import type { TablePluginOptions, TablePluginFeatures } from '@ocm/table-plugin';
 import { TemplatesPlugin } from '@ocm/templates-plugin';
 import { TimerPlugin } from '@ocm/timer-plugin';
 import { ToolbarPlugin } from '@ocm/toolbar-plugin';
@@ -98,6 +99,7 @@ export {
 export type { JsonPluginOptions, JsonPluginFeatures };
 export type { MarkdownPluginOptions, MarkdownPluginFeatures };
 export type { CodeBlockPluginOptions, CodeBlockPluginFeatures };
+export type { TablePluginOptions, TablePluginFeatures };
 export type { SpellCheckerOptions, SpellDictionaryFiles } from '@ocm/spell-checker-plugin';
 export type { ImagePluginOptions } from '@ocm/image-plugin';
 export type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';

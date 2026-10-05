@@ -1,16 +1,16 @@
 # Editors
 
-On-Codemerge ships **seven Editor products** on the same kernel + SDK. Pick by document shape.
+On-Codemerge ships **eight Editor products** on the same kernel + SDK. Pick by document shape.
 
 Live demos: [Home](/).
 
-|             | **WYSIWYG** (`on-codemerge`)                             | **JSON** (`on-codemerge/json`)         | **Markdown** (`on-codemerge/markdown`)                | **Code** (`on-codemerge/code`)              | **Forms** (`on-codemerge/forms`)              | **Charts** (`on-codemerge/charts`)       | **Calendar** (`on-codemerge/calendar`)     |
-| ----------- | -------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------- | ------------------------------------------- | --------------------------------------------- | ---------------------------------------- | ------------------------------------------ |
-| Package     | `on-codemerge`                                           | `on-codemerge/json`                    | `on-codemerge/markdown`                               | `on-codemerge/code`                         | `on-codemerge/forms`                          | `on-codemerge/charts`                    | `on-codemerge/calendar`                    |
-| Document    | Prose JSON SoT (paragraphs, marks, atoms)                | Plain JSON tree SoT (`json` root)      | Prose JSON SoT (MD block subset: callout, mermaid, …) | Plain text SoT (`code_source`)              | FormConfig SoT (`form` root)                  | Chart attrs SoT (`chart` root)           | CalendarDoc SoT (`calendar` root)          |
-| View        | ContentEditable + widgets                                | Shell + Tree / Raw                     | Shell + dual-pane (source + preview)                  | Shell + source editor                       | Shell + form studio                           | Shell + chart studio                     | Shell + calendar studio                    |
-| Interchange | `getHTML` / `setHTML`, Markdown, publish                 | `getText` / `setText`                  | `getJSON` / `getText` / `getHTML` (+ set*)            | `getText` / `setText`                       | `getText` / `setText`                         | `getText` / `setText`                    | `getText` / `setText` (+ thin ICS)         |
-| Plugin      | atom embeds (JSON / MD / Code / Form / Chart / Calendar) | `JsonPlugin({ surface: 'workspace' })` | `MarkdownPlugin({ surface: 'workspace' })`            | `CodeBlockPlugin({ surface: 'workspace' })` | `FormBuilderPlugin({ surface: 'workspace' })` | `ChartsPlugin({ surface: 'workspace' })` | `CalendarPlugin({ surface: 'workspace' })` |
+|             | **WYSIWYG** (`on-codemerge`)                             | **JSON** (`on-codemerge/json`)         | **Markdown** (`on-codemerge/markdown`)                | **Code** (`on-codemerge/code`)              | **Forms** (`on-codemerge/forms`)              | **Charts** (`on-codemerge/charts`)       | **Calendar** (`on-codemerge/calendar`)     | **Tables** (`on-codemerge/tables`)      |
+| ----------- | -------------------------------------------------------- | -------------------------------------- | ----------------------------------------------------- | ------------------------------------------- | --------------------------------------------- | ---------------------------------------- | ------------------------------------------ | --------------------------------------- |
+| Package     | `on-codemerge`                                           | `on-codemerge/json`                    | `on-codemerge/markdown`                               | `on-codemerge/code`                         | `on-codemerge/forms`                          | `on-codemerge/charts`                    | `on-codemerge/calendar`                    | `on-codemerge/tables`                   |
+| Document    | Prose JSON SoT (paragraphs, marks, atoms)                | Plain JSON tree SoT (`json` root)      | Prose JSON SoT (MD block subset: callout, mermaid, …) | Plain text SoT (`code_source`)              | FormConfig SoT (`form` root)                  | Chart attrs SoT (`chart` root)           | CalendarDoc SoT (`calendar` root)          | TableGridDoc SoT (`tableGrid` root)     |
+| View        | ContentEditable + widgets                                | Shell + Tree / Raw                     | Shell + dual-pane (source + preview)                  | Shell + source editor                       | Shell + form studio                           | Shell + chart studio                     | Shell + calendar studio                    | Shell + grid / Raw                      |
+| Interchange | `getHTML` / `setHTML`, Markdown, publish                 | `getText` / `setText`                  | `getJSON` / `getText` / `getHTML` (+ set*)            | `getText` / `setText`                       | `getText` / `setText`                         | `getText` / `setText`                    | `getText` / `setText` (+ thin ICS)         | `getText` / `setText`                   |
+| Plugin      | atom embeds (JSON / MD / Code / Form / Chart / Calendar) | `JsonPlugin({ surface: 'workspace' })` | `MarkdownPlugin({ surface: 'workspace' })`            | `CodeBlockPlugin({ surface: 'workspace' })` | `FormBuilderPlugin({ surface: 'workspace' })` | `ChartsPlugin({ surface: 'workspace' })` | `CalendarPlugin({ surface: 'workspace' })` | `TablePlugin({ surface: 'workspace' })` |
 
 ## WYSIWYG
 
@@ -137,3 +137,22 @@ editor.setText(
 ```
 
 See [Calendar Editor](/guide/calendar-editor) and [Calendar Plugin](/plugins/calendar-plugin).
+
+## Tables Editor
+
+Standalone grid — column titles + string cells. SoT is `doc → tableGrid` with `attrs.columns` / `attrs.rows`. WYSIWYG Insert Table remains a prose table.
+
+```ts
+import { Editor, createDefaultPlugins } from 'on-codemerge/tables';
+
+const editor = new Editor(document.getElementById('tables-editor')!, {
+  chrome: 'bar',
+  plugins: createDefaultPlugins(),
+});
+
+editor.setText(
+  '{"version":2,"columns":[{"id":"a","title":"A"}],"rows":[{"id":"r1","cells":{"a":"x"}}]}'
+);
+```
+
+See [Tables Editor](/guide/tables-editor) and [Table Plugin](/plugins/table-plugin).

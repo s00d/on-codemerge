@@ -45,6 +45,11 @@
         :key="'calendar'"
         :showDescription="false"
       />
+      <TablesEditorComponent
+        v-else-if="active === 'tables'"
+        :key="'tables'"
+        :showDescription="false"
+      />
     </div>
 
     <p class="home-editors__hint">
@@ -63,6 +68,7 @@ import CodeEditorComponent from './CodeEditorComponent.vue';
 import FormsEditorComponent from './FormsEditorComponent.vue';
 import ChartsEditorComponent from './ChartsEditorComponent.vue';
 import CalendarEditorComponent from './CalendarEditorComponent.vue';
+import TablesEditorComponent from './TablesEditorComponent.vue';
 
 const tabs = [
   { id: 'wysiwyg', label: 'WYSIWYG' },
@@ -73,6 +79,7 @@ const tabs = [
   { id: 'forms', label: 'Forms' },
   { id: 'charts', label: 'Charts' },
   { id: 'calendar', label: 'Calendar' },
+  { id: 'tables', label: 'Tables' },
 ];
 
 const TAB_IDS = new Set(tabs.map((t) => t.id));
@@ -103,6 +110,7 @@ export default {
     FormsEditorComponent,
     ChartsEditorComponent,
     CalendarEditorComponent,
+    TablesEditorComponent,
   },
   data() {
     return {

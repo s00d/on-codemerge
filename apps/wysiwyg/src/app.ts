@@ -28,6 +28,7 @@ export type { SpellCheckerOptions, SpellDictionaryFiles } from '@ocm/plugins';
 export type { JsonPluginOptions, JsonPluginFeatures } from '@ocm/plugins';
 export type { MarkdownPluginOptions, MarkdownPluginFeatures } from '@ocm/plugins';
 export type { CodeBlockPluginOptions, CodeBlockPluginFeatures } from '@ocm/plugins';
+export type { TablePluginOptions, TablePluginFeatures } from '@ocm/plugins';
 
 export {
   createDoc,

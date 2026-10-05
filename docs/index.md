@@ -22,7 +22,7 @@ import HomeEditorsDemo from './components/HomeEditorsDemo.vue';
 
 # Introduction
 
-**On-Codemerge** v2 is a family of editors on one JSON document kernel and SDK. Toolbar, modals, and menus live in the core; plugins register via `XPlugin()` factories. Seven products share the same mount pattern — pick by document shape in [Editors](/guide/editors).
+**On-Codemerge** v2 is a family of editors on one JSON document kernel and SDK. Toolbar, modals, and menus live in the core; plugins register via `XPlugin()` factories. Eight products share the same mount pattern — pick by document shape in [Editors](/guide/editors).
 
 ## Live demos
 

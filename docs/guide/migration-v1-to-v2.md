@@ -18,7 +18,7 @@ See this migration guide for the v1 → v2 delta.
 
 ## Product surfaces (v2)
 
-Seven Editor entries share kernel + SDK — pick by document shape in [Editors](/guide/editors):
+Eight Editor entries share kernel + SDK — pick by document shape in [Editors](/guide/editors):
 
 | Package                 | Role               |
 | ----------------------- | ------------------ |
@@ -29,6 +29,7 @@ Seven Editor entries share kernel + SDK — pick by document shape in [Editors](
 | `on-codemerge/forms`    | Form studio        |
 | `on-codemerge/charts`   | Chart studio       |
 | `on-codemerge/calendar` | Calendar studio    |
+| `on-codemerge/tables`   | Grid JSON studio   |
 
 Scoped packages also published: `@codemerge/kernel`, `@codemerge/view`, `@codemerge/mermaid` (Mermaid **subset** — [Mermaid](/guide/mermaid)), `@codemerge/sdk`, `@codemerge/hunspell`, `@codemerge/collaboration-server`.
 

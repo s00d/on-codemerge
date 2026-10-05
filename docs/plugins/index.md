@@ -34,12 +34,12 @@ Toolbar overflow menus (`insert` / `review` / `tools`) are registered by **`Edit
 
 ### Content
 
-| Plugin              | Description                                     | Docs                             |
-| ------------------- | ----------------------------------------------- | -------------------------------- |
-| **BlockPlugin**     | Resizable pane-tree containers (split / stack). | [Details](./block-plugin.md)     |
-| **ListsPlugin**     | Ordered and unordered lists.                    | [Details](./lists-plugin.md)     |
-| **TablePlugin**     | Tables.                                         | [Details](./table-plugin.md)     |
-| **TemplatesPlugin** | Document templates.                             | [Details](./templates-plugin.md) |
+| Plugin              | Description                                                        | Docs                             |
+| ------------------- | ------------------------------------------------------------------ | -------------------------------- |
+| **BlockPlugin**     | Resizable pane-tree containers (split / stack).                    | [Details](./block-plugin.md)     |
+| **ListsPlugin**     | Ordered and unordered lists.                                       | [Details](./lists-plugin.md)     |
+| **TablePlugin**     | Prose tables (atom) / grid JSON workspace (`on-codemerge/tables`). | [Details](./table-plugin.md)     |
+| **TemplatesPlugin** | Document templates.                                                | [Details](./templates-plugin.md) |
 
 ### Media
 
@@ -109,14 +109,8 @@ Toolbar overflow menus (`insert` / `review` / `tools`) are registered by **`Edit
 ## Usage
 
 ```ts
-import {
-  Editor,
-  ToolbarPlugin,
-  AlignmentPlugin,
-  createDefaultPlugins,
-  createCorePlugins,
-  TablePlugin,
-} from 'on-codemerge';
+import { Editor, createDefaultPlugins, createCorePlugins } from 'on-codemerge';
+import { ToolbarPlugin, AlignmentPlugin, TablePlugin } from 'on-codemerge/plugins';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 

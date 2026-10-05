@@ -16,7 +16,8 @@ Structural tables plus **lazy tables** that fetch JSON/CSV from a URL and fill t
 ## Basic Usage
 
 ```javascript
-import { Editor, TablePlugin } from 'on-codemerge';
+import { Editor } from 'on-codemerge';
+import { TablePlugin } from 'on-codemerge/plugins';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
 
@@ -24,6 +25,20 @@ const editor = new Editor(container, {
   plugins: [TablePlugin()],
 });
 ```
+
+### Surfaces
+
+```ts
+TablePlugin({
+  surface: 'workspace' | 'atom', // default 'atom'
+  toolbar?: TableToolbarOptions, // workspace bar; omit → defaultTableToolbar()
+  menu?: string | null,          // atom Insert placement
+});
+```
+
+`createDefaultPlugins()` (from `on-codemerge/tables`) = `TablePlugin({ surface: 'workspace' })` — grid JSON SoT (`doc → tableGrid`), not a prose `table` tree. Workspace requires a `doc → tableGrid` seed: pass `emptyEditorDoc()` from `on-codemerge/tables` (the tables `Editor` defaults this); bare `TablePlugin({ surface: 'workspace' })` on a prose/default doc throws. Workspace runs a **custom grid engine** (`grid/TableStore` + derive + ViewSpec): stable row/column ids, typed cells, sort/filter/search, column resize, selection, keyboard, virtualization, pagination, TSV clipboard, CSV export, URL import, tree `parentId`, grouping, cell drivers. See [Tables Editor](/guide/tables-editor).
+
+Legacy `rows: string[][]` documents migrate to `{ id, cells }` on parse.
 
 ## Demo
 

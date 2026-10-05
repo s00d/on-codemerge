@@ -98,6 +98,7 @@ const libConfig = defineConfig({
         forms: './apps/forms/src/app.ts',
         charts: './apps/charts/src/app.ts',
         calendar: './apps/calendar/src/app.ts',
+        tables: './apps/tables/src/app.ts',
         'packages/sdk/src/index': './packages/sdk/src/index.ts',
         'packages/kernel/src/index': './packages/kernel/src/index.ts',
         'packages/view/src/index': './packages/view/src/index.ts',

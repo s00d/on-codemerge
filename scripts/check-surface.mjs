@@ -42,6 +42,23 @@ const SURFACES = {
       'renderView',
     ],
   },
+  tables: {
+    plugin: 'TablePlugin',
+    extras: [
+      'ParseError',
+      'parseText',
+      'createDefaultPlugins',
+      'emptyEditorDoc',
+      'isTableEditorDoc',
+      'gridFromDoc',
+      'normalizeTableGrid',
+      'exportCsv',
+      'registerCellDriver',
+      'getCellDriver',
+      'TableStore',
+      'mountTableWorkspace',
+    ],
+  },
 };
 
 const root = resolve(import.meta.dirname, '..');

@@ -1,0 +1,23 @@
+{
+  "name": "@codemerge/tables",
+  "version": "2.6.0",
+  "private": true,
+  "license": "MIT",
+  "type": "module",
+  "sideEffects": [
+    "**/*.scss",
+    "**/*.css"
+  ],
+  "main": "./src/app.ts",
+  "types": "./src/app.ts",
+  "exports": {
+    ".": "./src/app.ts"
+  },
+  "dependencies": {
+    "@codemerge/editor": "workspace:^",
+    "@codemerge/kernel": "workspace:^",
+    "@codemerge/sdk": "workspace:^",
+    "@i18n-micro/runtime": "catalog:",
+    "@ocm/table-plugin": "workspace:^"
+  }
+}

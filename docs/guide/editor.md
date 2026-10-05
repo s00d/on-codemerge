@@ -130,7 +130,8 @@ const html = exportHTML(doc);
 Plugins are **factory functions** that return a sealed plugin descriptor (`definePlugin`). Pass them in the constructor:
 
 ```ts
-import { Editor, TablePlugin, ImagePlugin } from 'on-codemerge';
+import { Editor } from 'on-codemerge';
+import { TablePlugin, ImagePlugin } from 'on-codemerge/plugins';
 
 const editor = new Editor(host, {
   plugins: [TablePlugin(), ImagePlugin()],

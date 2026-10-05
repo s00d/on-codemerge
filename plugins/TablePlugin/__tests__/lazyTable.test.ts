@@ -7,13 +7,8 @@ import {
   applyTransaction,
   transaction,
 } from '@codemerge/kernel';
-import {
-  fillTableFromMatrix,
-  insertLazyTableShell,
-  parseCsv,
-  parseJsonToMatrix,
-  readLazyConfigFromTable,
-} from '../lazyTable';
+import { fillTableFromMatrix, insertLazyTableShell, readLazyConfigFromTable } from '../lazyTable';
+import { parseCsv, parseJsonToMatrix } from '../io/matrix';
 import { findTablePath } from '../tableOps';
 
 describe('lazyTable parsers', () => {
@@ -130,12 +125,16 @@ describe('lazyTable commands', () => {
     expect(() => assertSafeLazyUrl('http://[::ffff:127.0.0.1]/x')).toThrow(/private/);
     expect(() => assertSafeLazyUrl('http://localtest.me/x')).toThrow(/private/);
     expect(() => assertSafeLazyUrl('https://example.com/ok.json')).not.toThrow();
+    const body = new TextEncoder().encode('[["a"]]');
     vi.stubGlobal(
       'fetch',
       vi.fn(() =>
         Promise.resolve({
           ok: true,
-          text: () => Promise.resolve('[["a"]]'),
+          headers: { get: () => null },
+          body: null,
+          arrayBuffer: () =>
+            Promise.resolve(body.buffer.slice(body.byteOffset, body.byteOffset + body.byteLength)),
         })
       )
     );

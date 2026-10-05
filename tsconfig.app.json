@@ -41,6 +41,7 @@
     "apps/forms/src",
     "apps/charts/src",
     "apps/calendar/src",
+    "apps/tables/src",
     "plugins",
     "packages/kernel/src",
     "packages/view/src",
@@ -61,6 +62,7 @@
     "apps/code/src/main.ts",
     "apps/forms/src/main.ts",
     "apps/charts/src/main.ts",
-    "apps/calendar/src/main.ts"
+    "apps/calendar/src/main.ts",
+    "apps/tables/src/main.ts"
   ]
 }

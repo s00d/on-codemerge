@@ -156,6 +156,16 @@
         "default": "./dist/calendar.cjs"
       }
     },
+    "./tables": {
+      "import": {
+        "types": "./dist/tables.d.ts",
+        "default": "./dist/tables.mjs"
+      },
+      "require": {
+        "types": "./dist/tables.d.cts",
+        "default": "./dist/tables.cjs"
+      }
+    },
     "./index.css": "./dist/index.css",
     "./public.css": "./dist/public.css",
     "./public.js": "./dist/public.js",
@@ -165,7 +175,7 @@
   "scripts": {
     "release": "pnpm run prepublishOnly && pnpm publish -r --filter './packages/kernel' --filter './packages/view' --filter './packages/mermaid' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter '.' --access public --no-git-checks --ignore-scripts",
     "build:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/view' --filter '@codemerge/mermaid' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run build",
-    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:public-bundle && pnpm run check:dist-package && pnpm run check:surfaces && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run publint",
+    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:public-bundle && pnpm run check:dist-package && pnpm run check:surfaces && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run build:tables && pnpm run publint",
     "check:public-bundle": "node ./scripts/check-public-bundle.mjs",
     "check:dist-package": "node ./scripts/check-dist-package.mjs",
     "check:surfaces": "node ./scripts/check-surface.mjs all",
@@ -176,6 +186,7 @@
     "dev:forms": "vite --config apps/forms/vite.config.ts",
     "dev:charts": "vite --config apps/charts/vite.config.ts",
     "dev:calendar": "vite --config apps/calendar/vite.config.ts",
+    "dev:tables": "vite --config apps/tables/vite.config.ts",
     "build": "pnpm --filter @codemerge/sdk build && vite build && vite build --config vite.styles.config.ts && vite build --config apps/wysiwyg/vite.public.config.ts",
     "build:json": "vite build --config apps/json/vite.config.ts",
     "build:markdown": "vite build --config apps/markdown/vite.config.ts",
@@ -183,6 +194,7 @@
     "build:forms": "vite build --config apps/forms/vite.config.ts",
     "build:charts": "vite build --config apps/charts/vite.config.ts",
     "build:calendar": "vite build --config apps/calendar/vite.config.ts",
+    "build:tables": "vite build --config apps/tables/vite.config.ts",
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.app.json --noEmit && tsc -p tsconfig.node.json --noEmit",
     "lint": "oxlint --type-aware --deny-warnings . && node ./scripts/ban-plugin-dom.mjs && node ./scripts/check-sass-modern.mjs",
@@ -195,9 +207,9 @@
     "publint": "pnpm run build:packages && pnpm run build && pnpm run publint:packages && publint --strict",
     "publint:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/view' --filter '@codemerge/mermaid' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' run publint",
     "test": "vitest run --config vitest.unit.config.ts && vitest run --config vitest.e2e.config.ts",
-    "docs:dev": "vitepress dev docs",
+    "docs:dev": "node ./scripts/ensure-dist-css.mjs && vitepress dev docs",
     "collab:dev": "pnpm --filter '@codemerge/collaboration-server' run build && COLLAB_TOKEN=dev pnpm --filter '@codemerge/collaboration-server' exec node ./dist/cli.cjs serve --port 8787 --store memory",
-    "docs:build": "vitepress build docs",
+    "docs:build": "node ./scripts/ensure-dist-css.mjs && vitepress build docs",
     "docs:preview": "vitepress preview docs",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:e2e": "node --import tsx ./node_modules/vitest/vitest.mjs run --config vitest.e2e.config.ts",

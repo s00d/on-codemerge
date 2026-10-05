@@ -460,6 +460,24 @@ importers:
         specifier: workspace:^
         version: link:../../plugins/MarkdownPlugin
 
+  apps/tables:
+    dependencies:
+      '@codemerge/editor':
+        specifier: workspace:^
+        version: link:../../packages/editor
+      '@codemerge/kernel':
+        specifier: workspace:^
+        version: link:../../packages/kernel
+      '@codemerge/sdk':
+        specifier: workspace:^
+        version: link:../../packages/sdk
+      '@i18n-micro/runtime':
+        specifier: 'catalog:'
+        version: 1.0.0
+      '@ocm/table-plugin':
+        specifier: workspace:^
+        version: link:../../plugins/TablePlugin
+
   apps/wysiwyg:
     dependencies:
       '@codemerge/editor':

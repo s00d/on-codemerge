@@ -64,3 +64,15 @@ table.html-editor-table {
     @apply max-h-[80vh] max-w-[600px] overflow-y-auto;
   }
 }
+
+.ocm-table-root {
+  @apply flex min-h-0 flex-1 flex-col;
+}
+
+.ocm-table-grid {
+  @apply min-h-0;
+}
+
+.ocm-table-grid__body {
+  @apply overscroll-contain;
+}

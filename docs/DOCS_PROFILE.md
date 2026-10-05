@@ -23,6 +23,7 @@ Product documentation profile for **on-codemerge** (VitePress site).
 - `apps/forms` — thin shell + `FormBuilderPlugin({ surface: 'workspace' })` (`on-codemerge/forms`)
 - `apps/charts` — thin shell + `ChartsPlugin({ surface: 'workspace' })` (`on-codemerge/charts`)
 - `apps/calendar` — thin shell + `CalendarPlugin({ surface: 'workspace' })` (`on-codemerge/calendar`)
+- `apps/tables` — thin shell + `TablePlugin({ surface: 'workspace' })` (`on-codemerge/tables`)
 - `packages/collaboration-server` — authoritative collaboration server (`@codemerge/collaboration-server`)
 
 ## Entry points
@@ -38,6 +39,7 @@ Product documentation profile for **on-codemerge** (VitePress site).
 | Forms Editor      | `docs/guide/forms-editor.md`          |
 | Charts Editor     | `docs/guide/charts-editor.md`         |
 | Calendar Editor   | `docs/guide/calendar-editor.md`       |
+| Tables Editor     | `docs/guide/tables-editor.md`         |
 | Mermaid subset    | `docs/guide/mermaid.md`               |
 | Document model    | `docs/guide/document-model.md`        |
 | Write a plugin    | `docs/guide/authoring-plugins.md`     |
