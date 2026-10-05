@@ -4,10 +4,16 @@ import type { MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { TableStore } from '../TableStore';
 import { isGroupRowId } from '../derive/group';
 import { rowDepth } from '../derive/tree';
-import { renderCell } from '../drivers/registry';
+import { renderCell, runCellPaint } from '../drivers/registry';
 import { stringifyCell } from '../../io/matrix';
-import { handleGridKeydown, moveActiveDown } from '../keyboard';
-import { DEFAULT_ROW_HEIGHT, visibleWindow } from '../viewport';
+import { handleGridKeydown, moveActiveDownAndEdit } from '../keyboard';
+import {
+  DEFAULT_ROW_HEIGHT,
+  heightForLineCount,
+  lineCountInText,
+  offsetsFromHeights,
+  visibleRangeFromOffsets,
+} from '../viewport';
 import type { ViewportWindow } from '../types';
 import { copySelection, pasteFromClipboard } from '../clipboard';
 import { isCovered, spanSize } from '../spans';
@@ -289,7 +295,42 @@ function headerSpec(store: TableStore): ViewSpec {
   );
 }
 
-function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
+function sheetRowHeights(store: TableStore, base: number): number[] {
+  const ids = store.getSheetRowIds();
+  const doc = store.getDoc();
+  const byRow = new Map(doc.rows.map((r) => [r.id, r]));
+  const colIds = doc.columns.map((c) => c.id);
+  const heights: number[] = Array.from({ length: ids.length });
+  for (let i = 0; i < ids.length; i++) {
+    const id = ids[i];
+    if (id === undefined || isGroupRowId(id) || isGhostRowId(id)) {
+      heights[i] = base;
+      continue;
+    }
+    const row = byRow.get(id);
+    let lines = 1;
+    if (row) {
+      for (const colId of colIds) {
+        const n = lineCountInText(stringifyCell(row.cells[colId] ?? ''));
+        if (n > lines) {
+          lines = n;
+        }
+      }
+    }
+    heights[i] = heightForLineCount(lines, base);
+  }
+  return heights;
+}
+
+function spanBlockHeight(heights: number[], from: number, rows: number, fallback: number): number {
+  let sum = 0;
+  for (let i = 0; i < rows; i++) {
+    sum += heights[from + i] ?? fallback;
+  }
+  return sum;
+}
+
+function bodyRowsSpec(store: TableStore, vp: ViewportWindow, heights: number[]): ViewSpec {
   const doc = store.getDoc();
   const derived = store.getDerived();
   const sel = store.getSelection();
@@ -324,7 +365,7 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
             key: rowId,
             class:
               'flex items-center border-b border-ocm-border bg-ocm-surface-muted/60 px-2 font-mono text-[12px] font-semibold',
-            style: { height: `${vp.rowHeight}px` },
+            style: { height: `${heights[absIndex] ?? vp.rowHeight}px` },
             on: {
               click: () => {
                 const allKeys = derived.groups.map((g) => g.key);
@@ -352,9 +393,9 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
           key: rowId,
           class: [
             'flex w-max min-w-full shrink-0 border-b border-ocm-border',
-            selected ? 'bg-sky-50/80' : stripe ? 'bg-ocm-surface-muted/50' : 'bg-ocm-surface',
+            selected ? 'bg-ocm-accent-soft' : stripe ? 'bg-ocm-surface-muted/50' : 'bg-ocm-surface',
           ].join(' '),
-          style: { height: `${vp.rowHeight}px` },
+          style: { height: `${heights[absIndex] ?? vp.rowHeight}px` },
           attrs: { role: 'row', 'aria-selected': selected ? 'true' : 'false' },
         },
         [
@@ -411,7 +452,7 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
               minWidth: `${width}px`,
             };
             if (span.rows > 1) {
-              cellStyle.height = `${vp.rowHeight * span.rows}px`;
+              cellStyle.height = `${spanBlockHeight(heights, absIndex, span.rows, vp.rowHeight)}px`;
               cellStyle.zIndex = 2;
             }
             if (padLeft > 0) {
@@ -437,8 +478,8 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
               cellStyle.left = `${pinLeftOffset(derived.pinnedLeft, colId, widthOf)}px`;
               cellStyle.zIndex = 1;
               cellStyle.background = selected
-                ? 'rgb(240 249 255 / 0.95)'
-                : (cs?.background ?? 'var(--ocm-surface, #fff)');
+                ? 'var(--color-ocm-accent-soft, rgb(14 165 233 / 0.18))'
+                : (cs?.background ?? 'var(--color-ocm-surface, #fff)');
             } else if (cs?.background) {
               cellStyle.background = cs.background;
             }
@@ -451,7 +492,9 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
             return h(
               'div',
               {
-                class: `flex min-w-0 shrink-0 items-center ${justify} border-r border-ocm-border px-0.5`,
+                class: `relative flex min-w-0 shrink-0 items-stretch ${justify} border-r border-ocm-border px-0.5${
+                  editing ? ' z-10 overflow-visible' : ''
+                }`,
                 style: cellStyle,
                 attrs: {
                   role: 'gridcell',
@@ -460,10 +503,14 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
                   'data-ocm-row-index': String(absIndex),
                 },
                 on: {
-                  click: () => {
-                    activate(true);
-                  },
-                  dblclick: () => {
+                  pointerdown: (ev) => {
+                    if (
+                      ev.target instanceof HTMLInputElement ||
+                      ev.target instanceof HTMLTextAreaElement
+                    ) {
+                      return;
+                    }
+                    ev.preventDefault();
                     activate(true);
                   },
                 },
@@ -489,6 +536,9 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow): ViewSpec {
                   store.setEditing(false);
                   store.flushCommit();
                 },
+                onCommitEnter: () => {
+                  moveActiveDownAndEdit(store);
+                },
               })
             );
           }),
@@ -512,11 +562,9 @@ function isFormControl(t: EventTarget | null): t is HTMLInputElement | HTMLTextA
   return t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement;
 }
 
-function liveCellInput(root: HTMLElement): HTMLInputElement | null {
-  const live = [...root.querySelectorAll('input')].find(
-    (el) => el instanceof HTMLInputElement && el.dataset.ocmHeaderEdit === undefined
-  );
-  return live instanceof HTMLInputElement ? live : null;
+function liveCellInput(root: HTMLElement): HTMLInputElement | HTMLTextAreaElement | null {
+  const live = root.querySelector('textarea[data-ocm-cell-edit], input[data-ocm-cell-edit]');
+  return live instanceof HTMLInputElement || live instanceof HTMLTextAreaElement ? live : null;
 }
 
 function gridRootClass(store: TableStore): string {
@@ -563,11 +611,11 @@ export function tableGridView(
             if (ev.target.dataset.ocmHeaderEdit) {
               return;
             }
-            if (ev.key === 'Enter') {
+            if (ev.key === 'Enter' && !(ev.shiftKey && ev.target instanceof HTMLTextAreaElement)) {
               ev.preventDefault();
+              ev.stopPropagation();
               ev.target.blur();
-              store.setEditing(false);
-              moveActiveDown(store);
+              moveActiveDownAndEdit(store);
               return;
             }
             if (ev.key === 'Escape') {
@@ -653,14 +701,39 @@ export function tableGridView(
             }
           };
 
+          const layoutRows = (): {
+            rh: number;
+            heights: number[];
+            offsets: number[];
+            start: number;
+            end: number;
+            canvasHeight: number;
+          } => {
+            const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
+            const heights = sheetRowHeights(store, rh);
+            const offsets = offsetsFromHeights(heights);
+            const clientH = Math.max(1, host.clientHeight - headerH());
+            const range = visibleRangeFromOffsets(host.scrollTop, clientH, offsets);
+            return {
+              rh,
+              heights,
+              offsets,
+              start: range.start,
+              end: range.end,
+              canvasHeight: Math.max(rh, offsets[heights.length] ?? rh),
+            };
+          };
+
           const syncViewport = (): void => {
             applyBodyOverflow();
             store.setLayoutWidth(host.clientWidth);
-            const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
-            const total = store.getSheetRowCount();
+            const layout = layoutRows();
             const clientH = Math.max(1, host.clientHeight - headerH());
-            const vp = visibleWindow(host.scrollTop, clientH, total, rh);
-            if (clientH >= rh * 3 && vp.end >= total - 8 && clientH + 1 < total * rh) {
+            if (
+              clientH >= layout.rh * 3 &&
+              layout.end >= layout.heights.length - 8 &&
+              clientH + 1 < layout.canvasHeight
+            ) {
               store.growSheetRows();
             }
             paintWindow();
@@ -668,20 +741,20 @@ export function tableGridView(
           };
 
           const paintWindow = (): void => {
-            const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
-            const vp = visibleWindow(
-              host.scrollTop,
-              Math.max(1, host.clientHeight - headerH()),
-              store.getSheetRowCount(),
-              rh
-            );
-            const canvasHeight = Math.max(rh, store.getSheetRowCount() * rh);
+            const layout = layoutRows();
+            const vp: ViewportWindow = {
+              start: layout.start,
+              end: layout.end,
+              rowHeight: layout.rh,
+              clientHeight: Math.max(1, host.clientHeight - headerH()),
+              clientWidth: 0,
+            };
             const canvas = sheetHandle.refs.canvas;
             const win = sheetHandle.refs.window;
             if (!(canvas instanceof HTMLElement) || !(win instanceof HTMLElement)) {
               return;
             }
-            canvas.style.height = `${canvasHeight}px`;
+            canvas.style.height = `${layout.canvasHeight}px`;
             canvas.style.backgroundColor = 'var(--color-ocm-surface, #fff)';
 
             const headerSlot = sheetHandle.refs.header;
@@ -693,25 +766,54 @@ export function tableGridView(
               }
             }
 
-            const cellDraft = liveCellInput(win)?.value ?? null;
+            const liveBefore = liveCellInput(win);
+            const draftHost =
+              liveBefore instanceof HTMLElement
+                ? liveBefore.closest('[data-ocm-row][data-ocm-col]')
+                : null;
+            const cellDraft = liveBefore?.value ?? null;
+            const draftKey =
+              draftHost instanceof HTMLElement
+                ? `${draftHost.dataset.ocmRow}:${draftHost.dataset.ocmCol}`
+                : null;
 
-            win.style.top = `${vp.start * rh}px`;
-            const spec = bodyRowsSpec(store, vp);
-            if (windowHandle) {
-              windowHandle.update(spec);
-            } else {
-              windowHandle = mount(win, spec);
-            }
+            const draftSel =
+              liveBefore instanceof HTMLInputElement || liveBefore instanceof HTMLTextAreaElement
+                ? { start: liveBefore.selectionStart, end: liveBefore.selectionEnd }
+                : null;
+
+            win.style.top = `${layout.offsets[vp.start] ?? 0}px`;
+            const spec = bodyRowsSpec(store, vp, layout.heights);
+            runCellPaint(() => {
+              if (windowHandle) {
+                windowHandle.update(spec);
+              } else {
+                windowHandle = mount(win, spec);
+              }
+            });
             if (store.isEditing()) {
-              queueMicrotask(() => {
-                const live = liveCellInput(win);
-                if (live) {
-                  if (cellDraft !== null) {
-                    live.value = cellDraft;
-                  }
-                  live.focus();
+              const focusCell = (): void => {
+                if (!store.isEditing()) {
+                  return;
                 }
-              });
+                const live = liveCellInput(win);
+                if (!live) {
+                  return;
+                }
+                const active = store.getSelection().active;
+                const sameCell = active ? draftKey === `${active.rowId}:${active.colId}` : false;
+                if (sameCell && cellDraft !== null && live.value !== cellDraft) {
+                  live.value = cellDraft;
+                }
+                live.focus({ preventScroll: true });
+                if (sameCell && draftSel) {
+                  const a = draftSel.start ?? live.value.length;
+                  const b = draftSel.end ?? live.value.length;
+                  live.setSelectionRange(a, b);
+                }
+              };
+              queueMicrotask(focusCell);
+              requestAnimationFrame(focusCell);
             }
 
             const headerHost = sheetHandle.refs.header;

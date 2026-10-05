@@ -652,6 +652,175 @@ function themeHtmlClass(theme: TableGridDoc['theme']): string {
   return ` table-${theme} ocm-table-grid--${theme}`;
 }
 
+const GFM_SEP = /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$/;
+
+function htmlFromCellText(text: string): string {
+  return escapeHtml(text).replaceAll('\n', '<br>');
+}
+
+function textFromTableCell(el: HTMLElement): string {
+  const html = el.innerHTML;
+  if (/<br/i.test(html)) {
+    return html
+      .replace(/<br\s*\/?>/gi, '\n')
+      .replace(/<[^>]+>/g, '')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&amp;', '&')
+      .replaceAll('&lt;', '<')
+      .replaceAll('&gt;', '>')
+      .replaceAll('&quot;', '"');
+  }
+  return (el.textContent ?? '').replaceAll('\r\n', '\n');
+}
+
+function mdFromCellText(text: string): string {
+  return text.replaceAll('|', String.raw`\|`).replaceAll('\n', '<br>') || ' ';
+}
+
+function mdToCellText(raw: string): string {
+  return raw.replace(/<br\s*\/?>/gi, '\n');
+}
+
+function parseGfmRow(line: string): string[] {
+  let s = line.trim();
+  if (s.startsWith('|')) {
+    s = s.slice(1);
+  }
+  if (s.endsWith('|')) {
+    s = s.slice(0, -1);
+  }
+  return s.split('|').map((c) => mdToCellText(c.trim().replaceAll(String.raw`\|`, '|')));
+}
+
+export function isGfmTableStart(lines: string[], i: number): boolean {
+  const a = lines[i] ?? '';
+  const b = lines[i + 1] ?? '';
+  return /^\s*\|/.test(a) && GFM_SEP.test(b);
+}
+
+/** First GFM table in `md`, or empty grid. */
+export function markdownToGrid(md: string): TableGridDoc {
+  const lines = md.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const parsed = parseGfmTable(lines, i);
+    if (parsed) {
+      return parsed.grid;
+    }
+  }
+  return emptyTableGrid();
+}
+
+export function parseGfmTable(
+  lines: string[],
+  start: number
+): { grid: TableGridDoc; next: number } | null {
+  if (!isGfmTableStart(lines, start)) {
+    return null;
+  }
+  const header = parseGfmRow(lines[start] ?? '');
+  let i = start + 2;
+  const body: string[][] = [];
+  while (i < lines.length && /^\s*\|/.test(lines[i] ?? '')) {
+    body.push(parseGfmRow(lines[i] ?? ''));
+    i += 1;
+  }
+  return { grid: gridFromMatrix([header, ...body], true), next: i };
+}
+
+/** GFM pipe table (header + separator + body). */
+export function gridToMarkdown(grid: TableGridDoc): string {
+  const matrix = gridToMatrix(grid);
+  if (matrix.length === 0) {
+    return '';
+  }
+  const header = matrix[0] ?? [];
+  const width = Math.max(1, ...matrix.map((r) => r.length));
+  const pad = (cells: string[]): string[] => {
+    const out = cells.map((c) => mdFromCellText(c));
+    while (out.length < width) {
+      out.push(' ');
+    }
+    return out.slice(0, width);
+  };
+  const lines = [
+    `| ${pad(header).join(' | ')} |`,
+    `| ${pad(header)
+      .map(() => '---')
+      .join(' | ')} |`,
+  ];
+  for (let r = 1; r < matrix.length; r++) {
+    lines.push(`| ${pad(matrix[r] ?? []).join(' | ')} |`);
+  }
+  return `${lines.join('\n')}\n`;
+}
+
+/** HTML `<table>` → grid (theme, fit, col widths, lazy `source`). */
+export function gridFromTableElement(el: HTMLElement): TableGridDoc {
+  const rawRows = [...el.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tr')];
+  const hasHeaderAttr = el.dataset.hasHeader === 'true';
+  const hasTh = Boolean(el.querySelector('th'));
+  const hasHeader = hasHeaderAttr || hasTh;
+  const matrix = rawRows.map((tr) =>
+    [...tr.children]
+      .filter((c): c is HTMLElement => {
+        if (!(c instanceof HTMLElement)) {
+          return false;
+        }
+        const t = c.tagName.toLowerCase();
+        return t === 'td' || t === 'th';
+      })
+      .map((cellEl) => textFromTableCell(cellEl).trimEnd())
+  );
+  const grid = gridFromMatrix(matrix, hasHeader);
+  const colEls = [...el.querySelectorAll(':scope > colgroup > col, :scope > col')];
+  if (colEls.length === grid.columns.length) {
+    grid.columns = grid.columns.map((c, i) => {
+      const raw = colEls[i] instanceof HTMLElement ? colEls[i].style.width : '';
+      const w = Math.trunc(Number(raw.replace(/px$/i, '')));
+      return Number.isFinite(w) && w > 0 ? { ...c, width: w } : c;
+    });
+  }
+  const themeMatch =
+    /\bocm-table-grid--(\w+)\b/.exec(el.className) ??
+    /\btable-(modern|bordered|striped)\b/.exec(el.className);
+  if (
+    themeMatch?.[1] === 'modern' ||
+    themeMatch?.[1] === 'bordered' ||
+    themeMatch?.[1] === 'striped'
+  ) {
+    grid.theme = themeMatch[1];
+  }
+  if (el.classList.contains('html-editor-table--content')) {
+    grid.view = { ...grid.view, fit: 'content' };
+  } else if (el.classList.contains('html-editor-table--fill')) {
+    grid.view = { ...grid.view, fit: 'fill' };
+  }
+  const lazyUrl = el.dataset.lazyUrl ?? '';
+  if (lazyUrl) {
+    grid.source = {
+      url: lazyUrl,
+      format: el.dataset.lazyFormat === 'csv' ? 'csv' : 'json',
+      headers: el.dataset.lazyHeaders !== 'false',
+      delimiter: el.dataset.lazyDelimiter || ',',
+    };
+  }
+  return grid;
+}
+
+/** First `<table>` in an HTML string, or empty grid. */
+export function htmlToGrid(html: string): TableGridDoc {
+  const trimmed = html.trim();
+  if (trimmed === '') {
+    return emptyTableGrid();
+  }
+  const parsed = new DOMParser().parseFromString(trimmed, 'text/html');
+  const table = parsed.querySelector('table');
+  if (!(table instanceof HTMLElement)) {
+    return emptyTableGrid();
+  }
+  return gridFromTableElement(table);
+}
+
 /** Used SoT as published `<table>`. `view.fit: fill` (default) → 100% host; `content` → stored px. */
 export function gridToHtml(grid: TableGridDoc): string {
   const cols = orderedColumns(grid);
@@ -667,7 +836,7 @@ export function gridToHtml(grid: TableGridDoc): string {
     .map((row) => {
       const tds = cols
         .map((c) => {
-          const text = escapeHtml(stringifyCell(row.cells[c.id]));
+          const text = htmlFromCellText(stringifyCell(row.cells[c.id]));
           return `<td${cellStyleAttr(row.styles?.[c.id])}>${text}</td>`;
         })
         .join('');

@@ -73,7 +73,7 @@ table.html-editor-table {
 
   td,
   th {
-    @apply relative h-6 min-w-0 cursor-text border border-ocm-border p-2 align-top;
+    @apply relative min-h-6 min-w-0 cursor-text border border-ocm-border p-2 align-top;
 
     html.dark & {
       @apply border-zinc-600;

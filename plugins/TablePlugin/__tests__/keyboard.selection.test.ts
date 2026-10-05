@@ -1,8 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import { TableStore } from '../grid/TableStore';
-import { handleGridKeydown, moveActiveDown } from '../grid/keyboard';
+import { handleGridKeydown } from '../grid/keyboard';
 import { toggleRowSelection } from '../grid/selection';
-import { visibleWindow } from '../grid/viewport';
+import {
+  heightForLineCount,
+  offsetsFromHeights,
+  visibleRangeFromOffsets,
+  visibleWindow,
+} from '../grid/viewport';
 import { selectionToTsv, pasteTsv } from '../grid/clipboard';
 
 function store3x2(): TableStore {
@@ -54,11 +59,13 @@ describe('keyboard navigation', () => {
     store.destroy();
   });
 
-  it('Enter moves down via moveActiveDown', () => {
+  it('Enter while editing moves down and starts edit on the next row', () => {
     const store = store3x2();
     store.setActive('r1', 'a');
-    moveActiveDown(store);
+    store.setEditing(true);
+    expect(handleGridKeydown(store, key('Enter')).handled).toBe(true);
     expect(store.getSelection().active).toStrictEqual({ rowId: 'r2', colId: 'a' });
+    expect(store.isEditing()).toBe(true);
     store.destroy();
   });
 
@@ -101,6 +108,20 @@ describe('selection + clipboard', () => {
     expect(store.getDoc().rows[2]?.cells).toStrictEqual({ a: 'P', b: 'Q' });
     store.destroy();
   });
+
+  it('quoted TSV keeps newlines inside one cell', () => {
+    const store = store3x2();
+    store.setSelection({ rowIds: ['r1'], active: { rowId: 'r1', colId: 'a' } });
+    pasteTsv(store, '"hello\nworld"\tX');
+    expect(store.getDoc().rows[0]?.cells.a).toBe('hello\nworld');
+    expect(store.getDoc().rows[0]?.cells.b).toBe('X');
+    store.setSelection({
+      rowIds: ['r1'],
+      active: { rowId: 'r1', colId: 'a' },
+    });
+    expect(selectionToTsv(store)).toContain('hello\nworld');
+    store.destroy();
+  });
 });
 
 describe('viewport', () => {
@@ -109,5 +130,14 @@ describe('viewport', () => {
     expect(w.start).toBeGreaterThanOrEqual(0);
     expect(w.end).toBeLessThanOrEqual(50);
     expect(w.end - w.start).toBeGreaterThan(10);
+  });
+
+  it('grows height with line count and windows from offsets', () => {
+    expect(heightForLineCount(1)).toBe(32);
+    expect(heightForLineCount(3)).toBeGreaterThan(32);
+    const offsets = offsetsFromHeights([70, 32, 32, 32]);
+    const range = visibleRangeFromOffsets(0, 80, offsets, 0);
+    expect(range.start).toBe(0);
+    expect(range.end).toBeGreaterThanOrEqual(2);
   });
 });

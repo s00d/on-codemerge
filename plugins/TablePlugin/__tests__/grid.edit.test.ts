@@ -20,7 +20,7 @@ describe('grid cell edit', () => {
     hosts.length = 0;
   });
 
-  it('mousedown then click on the same cell opens the editor', async () => {
+  it('pointerdown on a cell opens the editor', async () => {
     const store = new TableStore({
       version: 2,
       columns: [
@@ -53,12 +53,10 @@ describe('grid cell edit', () => {
     const cell = host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]');
     expect(cell).toBeInstanceOf(HTMLElement);
     const target = cell as HTMLElement;
-    target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, cancelable: true }));
-    target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, cancelable: true }));
-    target.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+    target.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true }));
 
     expect(store.isEditing()).toBe(true);
-    expect(host.querySelector('input')).toBeInstanceOf(HTMLInputElement);
+    expect(host.querySelector('[data-ocm-cell-edit]')).toBeInstanceOf(HTMLTextAreaElement);
     handle.destroy();
     store.destroy();
   });
@@ -164,7 +162,7 @@ describe('grid cell edit', () => {
     const cell = host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]');
     expect(cell).toBeInstanceOf(HTMLElement);
     (cell as HTMLElement).dispatchEvent(
-      new MouseEvent('click', { bubbles: true, cancelable: true })
+      new MouseEvent('pointerdown', { bubbles: true, cancelable: true })
     );
     expect(store.isEditing()).toBe(true);
 
@@ -186,7 +184,87 @@ describe('grid cell edit', () => {
     expect(headers.some((t) => t.startsWith('Name'))).toBe(true);
     expect(headers.some((t) => t.startsWith('Qty'))).toBe(true);
     expect(host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]')).toBeInstanceOf(HTMLElement);
-    expect(host.querySelector('input')).toBeInstanceOf(HTMLInputElement);
+    expect(host.querySelector('[data-ocm-cell-edit]')).toBeInstanceOf(HTMLTextAreaElement);
+    handle.destroy();
+    store.destroy();
+  });
+
+  it('Enter commits the cell and starts edit on the next row', async () => {
+    const store = new TableStore({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows: [
+        { id: 'r1', cells: { a: 'Apples' } },
+        { id: 'r2', cells: { a: 'Oranges' } },
+      ],
+    });
+    const host = document.createElement('div');
+    stubBox(host, 640, 320);
+    document.body.append(host);
+    hosts.push(host);
+    const handle = mount(host, tableGridView(store));
+    const body = host.querySelector('.ocm-table-grid__body');
+    if (body instanceof HTMLElement) {
+      stubBox(body, 640, 320);
+    }
+    await Promise.resolve();
+    await Promise.resolve();
+    store.setLayoutWidth(640);
+
+    const cell = host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]');
+    expect(cell).toBeInstanceOf(HTMLElement);
+    (cell as HTMLElement).dispatchEvent(
+      new MouseEvent('pointerdown', { bubbles: true, cancelable: true })
+    );
+    const input = host.querySelector('[data-ocm-cell-edit]');
+    expect(input).toBeInstanceOf(HTMLTextAreaElement);
+    const field = input as HTMLTextAreaElement;
+    field.value = 'Pears';
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(store.getDoc().rows[0]?.cells.a).toBe('Pears');
+    expect(store.getSelection().active).toStrictEqual({ rowId: 'r2', colId: 'a' });
+    expect(store.isEditing()).toBe(true);
+    const next = host.querySelector('[data-ocm-row="r2"][data-ocm-col="a"] [data-ocm-cell-edit]');
+    expect(next).toBeInstanceOf(HTMLTextAreaElement);
+    expect((next as HTMLTextAreaElement).value).toBe('Oranges');
+    handle.destroy();
+    store.destroy();
+  });
+
+  it('grows the sheet row when a cell has multiple lines', async () => {
+    const store = new TableStore({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows: [
+        { id: 'r1', cells: { a: 'one\ntwo\nthree' } },
+        { id: 'r2', cells: { a: 'single' } },
+      ],
+    });
+    const host = document.createElement('div');
+    stubBox(host, 640, 320);
+    document.body.append(host);
+    hosts.push(host);
+    const handle = mount(host, tableGridView(store));
+    const body = host.querySelector('.ocm-table-grid__body');
+    if (body instanceof HTMLElement) {
+      stubBox(body, 640, 320);
+    }
+    await Promise.resolve();
+    await Promise.resolve();
+    store.setLayoutWidth(640);
+
+    const tall = host
+      .querySelector('[data-ocm-row="r1"][data-ocm-col="a"]')
+      ?.closest('[role="row"]');
+    const short = host
+      .querySelector('[data-ocm-row="r2"][data-ocm-col="a"]')
+      ?.closest('[role="row"]');
+    expect(tall).toBeInstanceOf(HTMLElement);
+    expect(short).toBeInstanceOf(HTMLElement);
+    const tallH = Number((tall as HTMLElement).style.height);
+    const shortH = Number((short as HTMLElement).style.height);
+    expect(shortH).toBe(32);
+    expect(tallH).toBeGreaterThan(shortH);
     handle.destroy();
     store.destroy();
   });

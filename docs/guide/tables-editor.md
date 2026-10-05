@@ -1,6 +1,6 @@
 # Tables Editor
 
-Grid product published as **`on-codemerge/tables`**. Thin app entry uses a shell ViewPort and **`TablePlugin({ surface: 'workspace' })`**, which mounts a custom grid engine (sparse Excel-like sheet, sort / filter / search / resize / selection / virtualization / clipboard / CSV, optional remote `source`) plus optional Raw JSON into `contentTarget`. Interchange via `getText` / `setText` (pretty `TableGridDoc` JSON) and `getHTML()` (used SoT as `<table>`).
+Grid product published as **`on-codemerge/tables`**. Thin app entry uses a shell ViewPort and **`TablePlugin({ surface: 'workspace' })`**, which mounts a custom grid engine (sparse Excel-like sheet, sort / filter / search / resize / selection / virtualization / clipboard / CSV, optional remote `source`) plus optional Raw JSON into `contentTarget`. Interchange via `getText` / `setText` (pretty `TableGridDoc` JSON), `getHTML()` / `setHTML()` (`<table>`), and `getMd()` / `setMd()` (GFM pipe table). `setHtml` is an alias of `setHTML`; `getMarkdown` / `setMarkdown` match the shared Editor API.
 
 WYSIWYG **Insert Table** mounts the same `tableGrid` sheet as an in-document atom (`TablePlugin({ surface: 'atom' })`). HTML/Markdown still interchange as `<table>` / GFM. A constrained Tables product (`on-codemerge/tables`) uses the sheet as the whole document.
 
@@ -61,16 +61,17 @@ Published types for `on-codemerge/tables` expect TypeScript `moduleResolution: "
 
 ## Document API
 
-| Method                       | Role                                                               |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `getText()`                  | Pretty `TableGridDoc` JSON                                         |
-| `setText(text)`              | Replace SoT; returns `ParseError \| null` (SoT unchanged on error) |
-| `getHTML()`                  | Used SoT as `<table class="html-editor-table">` (no ghost cells)   |
-| `getGrid()` / `setGrid(doc)` | Typed `{ version, columns, rows, view?, source? }`                 |
-| `getJSON()` / `setJSON(doc)` | Kernel document snapshot (`doc → tableGrid`)                       |
-| `run` / `command` / `use`    | Same as WYSIWYG                                                    |
-| `on('docChanged', …)`        | Subscriptions                                                      |
-| `destroy()`                  | Tear down                                                          |
+| Method                                                        | Role                                                                              |
+| ------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| `getText()`                                                   | Pretty `TableGridDoc` JSON                                                        |
+| `setText(text)`                                               | Replace SoT; returns `ParseError \| null` (SoT unchanged on error)                |
+| `getHTML()` / `setHTML(html)` / `setHtml(html)`               | Used SoT as `<table class="html-editor-table">`; load from HTML (first `<table>`) |
+| `getMd()` / `setMd(md)` / `getMarkdown()` / `setMarkdown(md)` | GFM pipe table of used SoT                                                        |
+| `getGrid()` / `setGrid(doc)`                                  | Typed `{ version, columns, rows, view?, source? }`                                |
+| `getJSON()` / `setJSON(doc)`                                  | Kernel document snapshot (`doc → tableGrid`)                                      |
+| `run` / `command` / `use`                                     | Same as WYSIWYG                                                                   |
+| `on('docChanged', …)`                                         | Subscriptions                                                                     |
+| `destroy()`                                                   | Tear down                                                                         |
 
 ## Document shape (SoT v2)
 

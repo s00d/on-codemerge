@@ -57,7 +57,7 @@ table.html-editor-table {
 
   td,
   th {
-    @apply relative h-6 min-w-0 cursor-text border border-ocm-border p-2 align-top;
+    @apply relative min-h-6 min-w-0 cursor-text border border-ocm-border p-2 align-top;
   }
 
   th {
@@ -135,14 +135,12 @@ table.html-editor-table {
 
 /* Shell content is already inside .ocm-editor-root — kill prose padding + fill height. */
 .ocm-editor-root:has(.ocm-table-root) {
-  @apply flex min-h-0 flex-col overflow-hidden;
+  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden;
 }
 
 .ocm-content.ocm-table-root,
 .ocm-shell-content.ocm-table-root {
-  @apply flex min-h-0 flex-1 flex-col overflow-hidden p-0;
-  min-height: 0;
-  height: auto;
+  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden p-0;
 }
 
 .ocm-table-root,
@@ -151,6 +149,15 @@ table.html-editor-table {
 .ocm-table-source-host,
 .ocm-table-grid {
   @apply flex min-h-0 flex-1 flex-col overflow-hidden;
+  color-scheme: inherit;
+}
+
+.ocm-table-grid input[type='text'],
+.ocm-table-grid input[type='number'],
+.ocm-table-grid textarea {
+  background: var(--color-ocm-input, var(--color-ocm-surface, #fff));
+  color: var(--color-ocm-text, inherit);
+  color-scheme: inherit;
 }
 
 .ocm-table-grid__body {

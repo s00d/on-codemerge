@@ -1,6 +1,6 @@
 import { copyText, readClipboardText } from '@codemerge/sdk';
 import { MAX_TABLE_BYTES } from '../io/constants';
-import { stringifyCell } from '../io/matrix';
+import { escapeCsvField, parseCsv, stringifyCell } from '../io/matrix';
 import type { TableStore } from './TableStore';
 import { isGroupRowId } from './derive/group';
 import { isGhostColId, isGhostRowId } from './sheet';
@@ -20,7 +20,9 @@ export function selectionToTsv(store: TableStore): string {
   return rowIds
     .map((rid) => {
       const row = byId.get(rid);
-      return colIds.map((cid) => stringifyCell(row?.cells[cid] ?? '')).join('\t');
+      return colIds
+        .map((cid) => escapeCsvField(stringifyCell(row?.cells[cid] ?? ''), '\t'))
+        .join('\t');
     })
     .join('\n');
 }
@@ -29,11 +31,10 @@ export function pasteTsv(store: TableStore, text: string): void {
   if (text.length > MAX_TABLE_BYTES) {
     return;
   }
-  const lines = text.replaceAll('\r\n', '\n').replaceAll('\r', '\n').split('\n');
-  if (lines.length === 1 && lines[0] === '') {
+  const matrix = parseCsv(text, '\t');
+  if (matrix.length === 0) {
     return;
   }
-  const matrix = lines.map((line) => line.split('\t'));
   const sel = store.getSelection();
   const derived = store.getDerived();
   const ordered = derived.rowIds.filter((id) => !isGroupRowId(id));

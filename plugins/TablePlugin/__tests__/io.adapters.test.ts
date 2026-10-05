@@ -4,6 +4,9 @@ import {
   emptyTableGrid,
   gridFromMatrix,
   gridToHtml,
+  htmlToGrid,
+  gridToMarkdown,
+  markdownToGrid,
   gridToMatrix,
   isTableEditorDoc,
   isTableGridDoc,
@@ -216,6 +219,60 @@ describe('TablePlugin io/adapters v2', () => {
     const html = gridToHtml(g);
     expect(html).toContain('table-striped');
     expect(html).toContain('ocm-table-grid--striped');
+  });
+
+  it('htmlToGrid / gridToHtml round-trip used cells, fit and theme', () => {
+    const g = normalizeTableGrid({
+      version: 2,
+      columns: [
+        { id: 'name', title: 'Name', width: 160 },
+        { id: 'qty', title: 'Qty', width: 96 },
+      ],
+      rows: [{ id: 'r1', cells: { name: 'Apples', qty: 3 } }],
+      theme: 'striped',
+      view: { fit: 'content' },
+    });
+    const back = htmlToGrid(gridToHtml(g));
+    expect(back.columns.map((c) => c.title)).toStrictEqual(['Name', 'Qty']);
+    expect(back.rows[0]?.cells[back.columns[0]!.id]).toBe('Apples');
+    expect(back.theme).toBe('striped');
+    expect(back.view?.fit).toBe('content');
+    expect(back.columns[0]?.width).toBe(160);
+  });
+
+  it('gridToMarkdown / markdownToGrid round-trip GFM', () => {
+    const g = gridFromMatrix(
+      [
+        ['Name', 'Qty'],
+        ['Apples', '3'],
+        ['Oranges', '2'],
+      ],
+      true
+    );
+    const md = gridToMarkdown(g);
+    expect(md).toContain('| Name | Qty |');
+    expect(md).toContain('| --- | --- |');
+    const back = markdownToGrid(`# ignore\n\n${md}\n\ntext`);
+    expect(back.columns.map((c) => c.title)).toStrictEqual(['Name', 'Qty']);
+    expect(Object.values(back.rows[0]!.cells)).toStrictEqual(['Apples', '3']);
+    expect(Object.values(back.rows[1]!.cells)).toStrictEqual(['Oranges', '2']);
+  });
+
+  it('round-trips multiline cells through HTML and GFM <br>', () => {
+    const g = gridFromMatrix([['Note'], ['line1\nline2']], true);
+    const html = gridToHtml(g);
+    expect(html).toContain('line1<br>line2');
+    const fromHtml = htmlToGrid(html);
+    expect(Object.values(fromHtml.rows[0]!.cells)[0]).toBe('line1\nline2');
+    const md = gridToMarkdown(g);
+    expect(md).toContain('line1<br>line2');
+    const fromMd = markdownToGrid(md);
+    expect(Object.values(fromMd.rows[0]!.cells)[0]).toBe('line1\nline2');
+  });
+
+  it('htmlToGrid and markdownToGrid empty payloads seed empty grid', () => {
+    expect(htmlToGrid('').columns.length).toBeGreaterThan(0);
+    expect(markdownToGrid('no table here').columns.length).toBeGreaterThan(0);
   });
 
   it('strips self/cyclic parentId edges', () => {

@@ -52,6 +52,24 @@ describe('Tables Editor IO surface', () => {
     expect(out.rows).toHaveLength(2);
   });
 
+  it('setHTML / getHTML and getMd / setMd round-trip', () => {
+    const editor = mount();
+    editor.setHTML(
+      '<table><thead><tr><th>Name</th><th>Qty</th></tr></thead><tbody><tr><td>Apples</td><td>3</td></tr></tbody></table>'
+    );
+    expect(editor.getGrid().columns.map((c) => c.title)).toStrictEqual(['Name', 'Qty']);
+    expect(editor.getHTML()).toContain('Apples');
+    editor.setHtml(editor.getHTML());
+    expect(editor.getHTML()).toContain('Apples');
+    const md = editor.getMd();
+    expect(md).toContain('| Name | Qty |');
+    editor.setMd('| A | B |\n| --- | --- |\n| 1 | 2 |\n');
+    expect(editor.getGrid().columns.map((c) => c.title)).toStrictEqual(['A', 'B']);
+    expect(Object.values(editor.getGrid().rows[0]!.cells)).toStrictEqual(['1', '2']);
+    editor.setMarkdown(editor.getMarkdown());
+    expect(editor.getMarkdown()).toContain('| A | B |');
+  });
+
   it('empty setText keeps valid empty grid', () => {
     const editor = mount();
     expect(editor.setText('')).toBeNull();

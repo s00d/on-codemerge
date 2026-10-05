@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/hunspell",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "In-house Hunspell .aff/.dic engine (check / suggest) for CodeMerge",
   "license": "MIT AND BSD-3-Clause",
   "author": "Pavel Kuzmin",

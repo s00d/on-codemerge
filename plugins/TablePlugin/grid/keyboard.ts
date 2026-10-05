@@ -38,6 +38,23 @@ export function moveActiveDown(store: TableStore): void {
   moveActive(store, ri + 1, ci);
 }
 
+/** Commit-path Enter: next row, then open its editor. */
+export function moveActiveDownAndEdit(store: TableStore): void {
+  store.setEditing(false);
+  moveActiveDown(store);
+  const sel = store.getSelection().active;
+  if (!sel) {
+    return;
+  }
+  const rowIds = store.getSheetRowIds().filter((id) => !isGroupRowId(id));
+  const ri = rowIds.indexOf(sel.rowId);
+  if (ri < 0) {
+    return;
+  }
+  store.ensureCell(ri, sel.colId);
+  store.setEditing(true);
+}
+
 /** Arrow/Tab/Enter/Escape navigation over derived grid. */
 export function handleGridKeydown(store: TableStore, ev: KeyboardEvent): KeyNavResult {
   const sel = store.getSelection();
@@ -99,8 +116,7 @@ export function handleGridKeydown(store: TableStore, ev: KeyboardEvent): KeyNavR
     case 'Enter':
       ev.preventDefault();
       if (store.isEditing()) {
-        store.setEditing(false);
-        moveActive(store, ri + 1, ci);
+        moveActiveDownAndEdit(store);
         return { handled: true };
       }
       store.ensureCell(ri, colIds[ci] ?? colId);

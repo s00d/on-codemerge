@@ -8,7 +8,7 @@ This folder is pnpm-only (`pnpm install` / `pnpm dev` / `pnpm test:e2e`). Do not
 
 ```bash
 cd demo
-pnpm add on-codemerge@2.7.2
+pnpm add on-codemerge@2.7.3
 pnpm exec playwright install chromium   # once
 pnpm dev                                # http://localhost:3001
 ```

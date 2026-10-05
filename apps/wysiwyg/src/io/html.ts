@@ -7,7 +7,12 @@ import { attrToHtmlValue, coerceHtmlJsonAttr } from '../utils/attrJson';
 import { cssColorToHex } from '../utils/colorMath';
 import { parseMath } from '@ocm/math-plugin/utils/parse';
 import { astToMathML } from '@ocm/math-plugin/utils/mathml';
-import { attrsFromGrid, gridFromMatrix, gridToHtml, normalizeTableGrid } from '@ocm/table-plugin';
+import {
+  attrsFromGrid,
+  gridFromTableElement,
+  gridToHtml,
+  normalizeTableGrid,
+} from '@ocm/table-plugin';
 
 const MARK_TAG: Record<string, string> = {
   bold: 'strong',
@@ -577,56 +582,7 @@ function parseBlock(node: ChildNode): DocNode | null {
     };
   }
   if (tag === 'table') {
-    const rawRows = [
-      ...el.querySelectorAll(':scope > thead > tr, :scope > tbody > tr, :scope > tr'),
-    ];
-    const hasHeaderAttr = el.dataset.hasHeader === 'true';
-    const hasTh = Boolean(el.querySelector('th'));
-    const hasHeader = hasHeaderAttr || hasTh;
-    const matrix = rawRows.map((tr) =>
-      [...tr.children]
-        .filter((c): c is HTMLElement => {
-          if (!(c instanceof HTMLElement)) {
-            return false;
-          }
-          const t = c.tagName.toLowerCase();
-          return t === 'td' || t === 'th';
-        })
-        .map((cellEl) => (cellEl.textContent ?? '').trim())
-    );
-    const grid = gridFromMatrix(matrix, hasHeader);
-    const colEls = [...el.querySelectorAll(':scope > colgroup > col, :scope > col')];
-    if (colEls.length === grid.columns.length) {
-      grid.columns = grid.columns.map((c, i) => {
-        const raw = colEls[i] instanceof HTMLElement ? colEls[i].style.width : '';
-        const w = Math.trunc(Number(raw.replace(/px$/i, '')));
-        return Number.isFinite(w) && w > 0 ? { ...c, width: w } : c;
-      });
-    }
-    const themeMatch =
-      /\bocm-table-grid--(\w+)\b/.exec(el.className) ??
-      /\btable-(modern|bordered|striped)\b/.exec(el.className);
-    if (
-      themeMatch?.[1] === 'modern' ||
-      themeMatch?.[1] === 'bordered' ||
-      themeMatch?.[1] === 'striped'
-    ) {
-      grid.theme = themeMatch[1];
-    }
-    if (el.classList.contains('html-editor-table--content')) {
-      grid.view = { ...grid.view, fit: 'content' };
-    } else if (el.classList.contains('html-editor-table--fill')) {
-      grid.view = { ...grid.view, fit: 'fill' };
-    }
-    const lazyUrl = el.dataset.lazyUrl ?? '';
-    if (lazyUrl) {
-      grid.source = {
-        url: lazyUrl,
-        format: el.dataset.lazyFormat === 'csv' ? 'csv' : 'json',
-        headers: el.dataset.lazyHeaders !== 'false',
-        delimiter: el.dataset.lazyDelimiter || ',',
-      };
-    }
+    const grid = gridFromTableElement(el);
     return {
       type: 'tableGrid',
       id: el.dataset.tableId,

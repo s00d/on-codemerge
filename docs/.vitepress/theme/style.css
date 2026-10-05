@@ -150,8 +150,9 @@
   max-width: 100%;
 }
 
-/* Tables workspace host is the editor root — keep a bounded box so the sheet scrolls inside. */
+/* Sheet scrolls inside the docs host; host size is the editor shell, not this node. */
 .vp-doc .ocm-editor-root:has(.ocm-table-root) {
-  max-height: 70vh;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
 }

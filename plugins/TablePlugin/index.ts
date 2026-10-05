@@ -65,6 +65,12 @@ export {
   normalizeTableGrid,
   exportCsv,
   gridToHtml,
+  htmlToGrid,
+  gridFromTableElement,
+  gridToMarkdown,
+  markdownToGrid,
+  parseGfmTable,
+  isGfmTableStart,
   gridToMatrix,
   attrsFromGrid,
 } from './io/adapters';

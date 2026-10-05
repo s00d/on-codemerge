@@ -10,6 +10,9 @@ import {
   gridFromDoc,
   docFromGrid,
   gridToHtml,
+  htmlToGrid,
+  gridToMarkdown,
+  markdownToGrid,
 } from '@ocm/table-plugin';
 import type { TableToolbarOptions, TableGridDoc } from '@ocm/table-plugin';
 
@@ -49,8 +52,32 @@ export class Editor extends ConstrainedEditor {
     return null;
   }
 
-  getHTML(): string {
+  override getHTML(): string {
     return gridToHtml(this.getGrid());
+  }
+
+  override setHTML(html: string): void {
+    this.setGrid(htmlToGrid(html));
+  }
+
+  setHtml(html: string): void {
+    this.setHTML(html);
+  }
+
+  override getMarkdown(): string {
+    return gridToMarkdown(this.getGrid());
+  }
+
+  override setMarkdown(md: string): void {
+    this.setGrid(markdownToGrid(md));
+  }
+
+  getMd(): string {
+    return this.getMarkdown();
+  }
+
+  setMd(md: string): void {
+    this.setMarkdown(md);
   }
 
   getGrid(): TableGridDoc {

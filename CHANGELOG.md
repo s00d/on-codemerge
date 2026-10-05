@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.3] - 2026-10-05
+
+### Added
+
+- Tables cell edit: multiline textarea (`Shift+Enter` newline); HTML/GFM emit `<br>`; `getMarkdown` / `setMarkdown` (`getMd` / `setMd`) on the tables editor
+- Sheet rows grow with wrapped cell lines; HTML preview cells are `min-height` so `<br>` is not clipped
+
+### Fixed
+
+- Docs tables host: bottom-right resize grip (native SE ticks, translucent)
+- Cell click starts edit and focuses the field (dark theme uses accent/input tokens, not sky-50)
+- Enter commits and opens the next row for typing; quoted TSV paste keeps newlines inside a cell
+
 ## [2.7.2] - 2026-10-05
 
 ### Fixed

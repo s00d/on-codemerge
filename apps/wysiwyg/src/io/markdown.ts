@@ -1,6 +1,12 @@
 import type { DocNode, Mark } from '@codemerge/kernel';
 import { createDoc, createParagraph, createText } from '@codemerge/kernel';
-import { attrsFromGrid, gridFromMatrix, gridToMatrix, normalizeTableGrid } from '@ocm/table-plugin';
+import {
+  attrsFromGrid,
+  gridToMarkdown,
+  isGfmTableStart,
+  normalizeTableGrid,
+  parseGfmTable,
+} from '@ocm/table-plugin';
 import { asAttr } from '../utils/asAttr';
 
 /** Serialize document JSON tree to CommonMark/GFM-ish Markdown. */
@@ -130,7 +136,7 @@ export function markdownToDoc(md: string): DocNode {
     }
 
     // GFM table
-    if (isTableStart(lines, i)) {
+    if (isGfmTableStart(lines, i)) {
       const { node, next } = parseTable(lines, i);
       content.push(node);
       i = next;
@@ -170,7 +176,7 @@ export function markdownToDoc(md: string): DocNode {
       if (/^\s*([-*+]|\d+[.)])\s+/.test(cur)) {
         break;
       }
-      if (isTableStart(lines, i)) {
+      if (isGfmTableStart(lines, i)) {
         break;
       }
       paraLines.push(cur);
@@ -358,7 +364,7 @@ function cellsOf(row: DocNode): string[] {
 }
 
 function gridDocToMarkdown(node: DocNode): string {
-  const matrix = gridToMatrix(
+  return `${gridToMarkdown(
     normalizeTableGrid({
       version: node.attrs?.version,
       columns: node.attrs?.columns,
@@ -367,29 +373,7 @@ function gridDocToMarkdown(node: DocNode): string {
       theme: node.attrs?.theme,
       source: node.attrs?.source,
     })
-  );
-  if (matrix.length === 0) {
-    return '';
-  }
-  const header = matrix[0] ?? [];
-  const width = Math.max(1, ...matrix.map((r) => r.length));
-  const pad = (cells: string[]) => {
-    const out = cells.map((c) => c.replaceAll('|', String.raw`\|`) || ' ');
-    while (out.length < width) {
-      out.push(' ');
-    }
-    return out.slice(0, width);
-  };
-  const lines = [
-    `| ${pad(header).join(' | ')} |`,
-    `| ${pad(header)
-      .map(() => '---')
-      .join(' | ')} |`,
-  ];
-  for (let r = 1; r < matrix.length; r++) {
-    lines.push(`| ${pad(matrix[r] ?? []).join(' | ')} |`);
-  }
-  return `${lines.join('\n')}\n\n`;
+  ).trimEnd()}\n\n`;
 }
 
 function tableToMarkdown(table: DocNode): string {
@@ -418,37 +402,20 @@ function tableToMarkdown(table: DocNode): string {
   return `${lines.join('\n')}\n\n`;
 }
 
-function isTableStart(lines: string[], i: number): boolean {
-  const a = lines[i] ?? '';
-  const b = lines[i + 1] ?? '';
-  return /^\s*\|/.test(a) && /^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)+\|?\s*$/.test(b);
-}
-
-function parseMdRow(line: string): string[] {
-  let s = line.trim();
-  if (s.startsWith('|')) {
-    s = s.slice(1);
-  }
-  if (s.endsWith('|')) {
-    s = s.slice(0, -1);
-  }
-  return s.split('|').map((c) => c.trim());
-}
-
 function parseTable(lines: string[], start: number): { node: DocNode; next: number } {
-  const header = parseMdRow(lines[start] ?? '');
-  let i = start + 2;
-  const body: string[][] = [];
-  while (i < lines.length && /^\s*\|/.test(lines[i] ?? '')) {
-    body.push(parseMdRow(lines[i] ?? ''));
-    i += 1;
+  const parsed = parseGfmTable(lines, start);
+  if (!parsed) {
+    return {
+      node: { type: 'tableGrid', attrs: attrsFromGrid(normalizeTableGrid({})) },
+      next: start + 1,
+    };
   }
   return {
     node: {
       type: 'tableGrid',
-      attrs: attrsFromGrid(gridFromMatrix([header, ...body], true)),
+      attrs: attrsFromGrid(parsed.grid),
     },
-    next: i,
+    next: parsed.next,
   };
 }
 

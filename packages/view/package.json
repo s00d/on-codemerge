@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/view",
-  "version": "2.7.2",
+  "version": "2.7.3",
   "description": "Tiny ViewSpec DOM runtime — hyperscript mount/patch/portal without the editor",
   "keywords": [
     "dom",

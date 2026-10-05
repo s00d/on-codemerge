@@ -4,6 +4,7 @@ import type { ViewSpec } from '@codemerge/sdk';
 import type { CellValue, TableColumn } from '../../io/adapters';
 import { parseTableBoolean } from '../../io/adapters';
 import { stringifyCell } from '../../io/matrix';
+import { lineCountInText, ROW_LINE_CAP } from '../viewport';
 
 export type CellRenderCtx = {
   value: CellValue;
@@ -16,10 +17,37 @@ export type CellRenderCtx = {
   onChange: (value: CellValue) => void;
   onStartEdit: () => void;
   onEndEdit: () => void;
+  onCommitEnter?: () => void;
 };
 
-const INPUT =
-  'h-7 w-full min-w-0 rounded-ocm-sm border border-sky-500 bg-ocm-surface px-1.5 font-mono text-[13px] outline-none';
+let cellPaintDepth = 0;
+
+/** While the grid remounts cells, ignore input blur so edit mode is not cancelled. */
+export function runCellPaint(fn: () => void): void {
+  cellPaintDepth++;
+  try {
+    fn();
+  } finally {
+    cellPaintDepth--;
+  }
+}
+
+function commitField(
+  ctx: CellRenderCtx,
+  isNumber: boolean,
+  el: HTMLInputElement | HTMLTextAreaElement
+): void {
+  if (isNumber && el instanceof HTMLInputElement) {
+    const n = el.valueAsNumber;
+    ctx.onChange(Number.isFinite(n) ? n : el.value);
+    return;
+  }
+  ctx.onChange(el.value);
+}
+
+const FIELD =
+  'w-full min-w-0 rounded-ocm-sm border border-ocm-accent bg-ocm-input px-1.5 font-mono text-[13px] text-ocm-text outline-none';
+const INPUT = `h-7 ${FIELD}`;
 
 function alignClass(align: CellRenderCtx['align']): string {
   if (align === 'center') {
@@ -33,62 +61,120 @@ function alignClass(align: CellRenderCtx['align']): string {
 
 function displayButton(ctx: CellRenderCtx, extraClass = ''): ViewSpec {
   const colorStyle = ctx.color ? { color: ctx.color } : undefined;
+  const text = stringifyCell(ctx.value);
+  const multiline = text.includes('\n');
   return h(
     'button',
     {
-      class: `flex h-7 w-full min-w-0 items-center truncate rounded-ocm-sm border px-1.5 font-mono text-[13px] ${alignClass(
-        ctx.align
-      )} ${
-        ctx.selected ? 'border-sky-500 bg-sky-50' : 'border-transparent hover:border-ocm-border'
+      class: `flex w-full min-w-0 overflow-hidden whitespace-pre-wrap rounded-ocm-sm border px-1.5 font-mono text-[13px] ${
+        multiline ? 'h-full min-h-7 items-start py-1 leading-5' : 'h-7 items-center'
+      } ${alignClass(ctx.align)} ${
+        ctx.selected
+          ? 'border-ocm-accent bg-ocm-accent-soft text-ocm-text'
+          : 'border-transparent hover:border-ocm-border'
       } ${extraClass}`,
       style: colorStyle,
-      attrs: { type: 'button' },
+      attrs: { type: 'button', title: multiline ? text : undefined },
       on: {
-        click: () => {
-          ctx.onStartEdit();
-        },
-        dblclick: () => {
+        pointerdown: (ev) => {
+          ev.preventDefault();
+          ev.stopPropagation();
           ctx.onStartEdit();
         },
       },
     },
-    stringifyCell(ctx.value)
+    text
   );
 }
 
 function renderTextLike(ctx: CellRenderCtx, isNumber: boolean): ViewSpec {
   if (ctx.editing && ctx.column.editable !== false) {
-    return h('input', {
-      class: `${isNumber ? `${INPUT} tabular-nums` : INPUT} ${
-        ctx.align === 'center' ? 'text-center' : ctx.align === 'right' ? 'text-right' : 'text-left'
-      }`,
+    const text = stringifyCell(ctx.value);
+    const align =
+      ctx.align === 'center' ? 'text-center' : ctx.align === 'right' ? 'text-right' : 'text-left';
+    if (isNumber) {
+      return h('input', {
+        class: `${INPUT} tabular-nums ${align}`,
+        style: ctx.color ? { color: ctx.color } : undefined,
+        attrs: {
+          type: 'number',
+          'aria-label': `${ctx.column.title} cell`,
+          'data-ocm-cell-edit': 'true',
+        },
+        props: { value: text },
+        on: cellEditEvents(ctx, true),
+      });
+    }
+    const lines = Math.min(ROW_LINE_CAP, Math.max(1, lineCountInText(text)));
+    return h('textarea', {
+      class: `${FIELD} h-full min-h-7 resize-none overflow-auto py-1 leading-5 ${align}`,
       style: ctx.color ? { color: ctx.color } : undefined,
       attrs: {
-        type: isNumber ? 'number' : 'text',
+        rows: lines,
         'aria-label': `${ctx.column.title} cell`,
-        autofocus: true,
+        'data-ocm-cell-edit': 'true',
       },
-      props: { value: stringifyCell(ctx.value) },
-      on: {
-        change: (ev) => {
-          const t = ev.target;
-          if (!(t instanceof HTMLInputElement)) {
-            return;
-          }
-          if (isNumber) {
-            const n = t.valueAsNumber;
-            ctx.onChange(Number.isFinite(n) ? n : t.value);
-          } else {
-            ctx.onChange(t.value);
-          }
-        },
-        blur: () => {
-          ctx.onEndEdit();
-        },
-      },
+      props: { value: text },
+      on: cellEditEvents(ctx, false),
     });
   }
   return displayButton(ctx);
+}
+
+function cellEditEvents(
+  ctx: CellRenderCtx,
+  isNumber: boolean
+): Record<string, (ev: Event) => void> {
+  return {
+    change: (ev) => {
+      const t = ev.target;
+      if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) {
+        commitField(ctx, isNumber, t);
+      }
+    },
+    input: (ev) => {
+      if (isNumber) {
+        return;
+      }
+      const t = ev.target;
+      if (!(t instanceof HTMLTextAreaElement)) {
+        return;
+      }
+      if (lineCountInText(t.value) !== lineCountInText(stringifyCell(ctx.value))) {
+        commitField(ctx, false, t);
+      }
+    },
+    keydown: (ev) => {
+      if (!(ev instanceof KeyboardEvent)) {
+        return;
+      }
+      if (ev.key === 'Enter' && ev.shiftKey && !isNumber) {
+        ev.stopPropagation();
+        return;
+      }
+      if (ev.key === 'Enter') {
+        ev.preventDefault();
+        ev.stopPropagation();
+        const t = ev.target;
+        if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) {
+          commitField(ctx, isNumber, t);
+        }
+        ctx.onEndEdit();
+        ctx.onCommitEnter?.();
+        return;
+      }
+      if (ev.key === 'Escape') {
+        ev.preventDefault();
+        ev.stopPropagation();
+      }
+    },
+    blur: () => {
+      if (cellPaintDepth > 0) {
+        return;
+      }
+      ctx.onEndEdit();
+    },
+  };
 }
 
 function renderBoolean(ctx: CellRenderCtx): ViewSpec {
