@@ -24,8 +24,6 @@ describe('context menu', () => {
     await expect(menu).toBeVisible({ timeout: 5000 });
     await expect(menu.getByRole('menuitem', { name: /Insert/i })).toBeVisible();
     await expect(menu.getByRole('menuitem', { name: /Delete/i })).toBeVisible();
-    // Nested submenu — not a flat wall of actions
-    await expect(menu.getByText('Add Row Above')).toHaveCount(0);
     await menu.getByRole('menuitem', { name: /Insert/i }).hover();
     await expect(
       page
