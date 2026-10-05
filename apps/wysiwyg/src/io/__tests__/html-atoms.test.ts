@@ -250,6 +250,8 @@ describe('html atom round-trip', () => {
       ],
     });
     expect(html).toContain('html-editor-table--sheet');
+    expect(html).toContain('html-editor-table--fill');
+    expect(html).toContain('style="width:100%"');
     expect(html).toContain('<th>Name</th>');
     expect(html).toContain('Apples');
     const doc = htmlToDoc(html);
@@ -257,6 +259,7 @@ describe('html atom round-trip', () => {
     expect(table?.type).toBe('tableGrid');
     const cols = table?.attrs?.columns as { title: string }[] | undefined;
     expect(cols?.map((c) => c.title)).toStrictEqual(['Name', 'Qty']);
+    expect((table?.attrs?.view as { fit?: string } | undefined)?.fit).toBe('fill');
   });
 
   it('exports lazy prose-table delimiter and imports sheet theme + source', () => {

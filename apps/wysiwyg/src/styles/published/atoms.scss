@@ -8,9 +8,13 @@
 table.html-editor-table {
   @apply table my-4 w-full table-fixed border-collapse border border-ocm-border bg-ocm-surface shadow-sm;
 
-  /* Tables Editor getHTML: pixel col widths, do not eat leftover host width. */
+  /* Tables Editor getHTML: content = stored px; fill = stretch to host. */
   &.html-editor-table--sheet {
     @apply w-max max-w-none;
+  }
+
+  &.html-editor-table--fill {
+    @apply w-full max-w-full;
   }
 
   html.dark & {

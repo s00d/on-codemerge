@@ -10,6 +10,10 @@ table.html-editor-table {
     @apply w-max max-w-none;
   }
 
+  &.html-editor-table--fill {
+    @apply w-full max-w-full;
+  }
+
   td,
   th {
     @apply relative h-6 min-w-0 cursor-text border border-ocm-border p-2 align-top;
@@ -89,9 +93,15 @@ table.html-editor-table {
 }
 
 /* Shell content is already inside .ocm-editor-root — kill prose padding + fill height. */
+.ocm-editor-root:has(.ocm-table-root) {
+  @apply flex min-h-0 flex-col overflow-hidden;
+}
+
 .ocm-content.ocm-table-root,
 .ocm-shell-content.ocm-table-root {
-  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden p-0;
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden p-0;
+  min-height: 0;
+  height: auto;
 }
 
 .ocm-table-root,
@@ -99,16 +109,17 @@ table.html-editor-table {
 .ocm-table-grid-host,
 .ocm-table-source-host,
 .ocm-table-grid {
-  @apply flex h-full min-h-0 flex-1 flex-col overflow-hidden;
+  @apply flex min-h-0 flex-1 flex-col overflow-hidden;
 }
 
 .ocm-table-grid__body {
-  @apply min-h-0 flex-1 overscroll-contain;
+  @apply min-h-0 flex-1 overflow-auto overscroll-contain;
 }
 
 .ocm-content.ocm-shell-content.ocm-table-root {
   overflow: hidden;
-  height: 100%;
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .ocm-table-grid__header-host {

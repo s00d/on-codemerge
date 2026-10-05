@@ -191,6 +191,7 @@ export default {
 
 .home-editors__panel {
   min-height: 12rem;
+  min-width: 0;
 }
 
 .home-editors__hint {

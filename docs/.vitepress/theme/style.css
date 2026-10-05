@@ -144,3 +144,14 @@
   width: max-content;
   max-width: none;
 }
+
+.vp-doc table.html-editor-table.html-editor-table--fill {
+  width: 100%;
+  max-width: 100%;
+}
+
+/* Tables workspace host is the editor root — keep a bounded box so the sheet scrolls inside. */
+.vp-doc .ocm-editor-root:has(.ocm-table-root) {
+  max-height: 70vh;
+  overflow: hidden;
+}

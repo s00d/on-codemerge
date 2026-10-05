@@ -644,7 +644,7 @@ export function tableGridView(
             const total = store.getSheetRowCount();
             const clientH = Math.max(1, host.clientHeight - headerH());
             const vp = visibleWindow(host.scrollTop, clientH, total, rh);
-            if (vp.end >= total - 8 && host.clientHeight + 1 < total * rh) {
+            if (clientH >= rh * 3 && vp.end >= total - 8 && clientH + 1 < total * rh) {
               store.growSheetRows();
             }
             paintWindow();

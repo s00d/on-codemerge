@@ -26,6 +26,10 @@ import {
   createDefaultPlugins as createCalendarPlugins,
   Editor as CalendarEditor,
 } from 'on-codemerge/calendar';
+import {
+  createDefaultPlugins as createTablesPlugins,
+  Editor as TablesEditor,
+} from 'on-codemerge/tables';
 import 'on-codemerge/index.css';
 import 'on-codemerge/tailwind.css';
 import 'on-codemerge/public.css';
@@ -41,6 +45,7 @@ const MODES = [
   'forms',
   'charts',
   'calendar',
+  'tables',
 ] as const;
 type Mode = (typeof MODES)[number];
 type AnyEditor =
@@ -50,7 +55,8 @@ type AnyEditor =
   | CodeEditor
   | FormsEditor
   | ChartsEditor
-  | CalendarEditor;
+  | CalendarEditor
+  | TablesEditor;
 
 const PUBLISH_MODES = new Set<Mode>(['wysiwyg', 'wysiwyg-page', 'markdown']);
 
@@ -238,6 +244,25 @@ function sampleCalendar(): string {
 }`;
 }
 
+const SAMPLE_TABLES = `{
+  "version": 2,
+  "columns": [
+    { "id": "name", "title": "Name", "type": "text", "width": 160 },
+    { "id": "qty", "title": "Qty", "type": "number", "width": 96 }
+  ],
+  "rows": [
+    { "id": "r1", "cells": { "name": "Apples", "qty": 3 } },
+    { "id": "r2", "cells": { "name": "Oranges", "qty": 2 } },
+    { "id": "r3", "cells": { "name": "Bananas", "qty": 5 } }
+  ]
+}`;
+
+const EMPTY_TABLES = `{
+  "version": 2,
+  "columns": [{ "id": "a", "title": "A", "type": "text" }],
+  "rows": [{ "id": "r1", "cells": { "a": "" } }]
+}`;
+
 document.addEventListener('DOMContentLoaded', () => {
   const apiOk =
     typeof WysiwygEditor === 'function' &&
@@ -247,13 +272,15 @@ document.addEventListener('DOMContentLoaded', () => {
     typeof FormsEditor === 'function' &&
     typeof ChartsEditor === 'function' &&
     typeof CalendarEditor === 'function' &&
+    typeof TablesEditor === 'function' &&
     typeof createWysiwygPlugins === 'function' &&
     typeof createJsonPlugins === 'function' &&
     typeof createMdPlugins === 'function' &&
     typeof createCodePlugins === 'function' &&
     typeof createFormsPlugins === 'function' &&
     typeof createChartsPlugins === 'function' &&
-    typeof createCalendarPlugins === 'function';
+    typeof createCalendarPlugins === 'function' &&
+    typeof createTablesPlugins === 'function';
   setText(exportsOkEl, apiOk ? 'exports: Editor/plugins OK (all modes)' : 'exports: BROKEN');
   setText(versionEl, 'version: on-codemerge');
   probeCss();
@@ -344,6 +371,10 @@ document.addEventListener('DOMContentLoaded', () => {
       show('Text (Calendar)', editor.getText());
       return;
     }
+    if (editor instanceof TablesEditor) {
+      show('Text (Tables)', editor.getText());
+      return;
+    }
     show('Text (Markdown)', editor.getText());
     refreshPublish();
   };
@@ -370,8 +401,8 @@ document.addEventListener('DOMContentLoaded', () => {
         ed.run(
           insertText(
             mode === 'wysiwyg-page'
-              ? 'on-codemerge npm stand — WYSIWYG (page)'
-              : 'on-codemerge npm stand — WYSIWYG'
+              ? 'on-codemerge demo stand — WYSIWYG (page)'
+              : 'on-codemerge demo stand — WYSIWYG'
           )
         );
         editor = ed;
@@ -414,13 +445,21 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         applySample(ed, SAMPLE_CHARTS);
         editor = ed;
-      } else {
+      } else if (mode === 'calendar') {
         const ed = new CalendarEditor(host, {
           chrome: 'bar',
           history,
           plugins: createCalendarPlugins(),
         });
         applySample(ed, sampleCalendar());
+        editor = ed;
+      } else {
+        const ed = new TablesEditor(host, {
+          chrome: 'bar',
+          history,
+          plugins: createTablesPlugins(),
+        });
+        applySample(ed, SAMPLE_TABLES);
         editor = ed;
       }
     } catch (err) {
@@ -584,6 +623,21 @@ document.addEventListener('DOMContentLoaded', () => {
   document.querySelector('#btn-clear-calendar')?.addEventListener('click', () => {
     if (editor instanceof CalendarEditor) {
       editor.setText('{"title":"","calendars":[],"events":[]}');
+    }
+  });
+  document.querySelector('#btn-tables-text')?.addEventListener('click', () => {
+    if (editor instanceof TablesEditor) {
+      show('Text (Tables)', editor.getText());
+    }
+  });
+  document.querySelector('#btn-tables-sample')?.addEventListener('click', () => {
+    if (editor instanceof TablesEditor) {
+      applySample(editor, SAMPLE_TABLES);
+    }
+  });
+  document.querySelector('#btn-clear-tables')?.addEventListener('click', () => {
+    if (editor instanceof TablesEditor) {
+      editor.setText(EMPTY_TABLES);
     }
   });
 

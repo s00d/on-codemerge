@@ -27,7 +27,7 @@ export function MyPlugin() {
 
 `setup` receives a **`PluginContext`** (`ctx`), not the raw editor. Use `ctx.editor`, `ctx.toolbar`, `ctx.popup`, `ctx.menu`, `ctx.notify`, `ctx.on` / `ctx.onDom`, `ctx.own`, `ctx.scope`.
 
-## Workspaces / npm
+## Workspaces / packages
 
 | Package                                     | Role                                                                   |
 | ------------------------------------------- | ---------------------------------------------------------------------- |

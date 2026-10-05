@@ -76,12 +76,30 @@ export default {
   flex-direction: column;
   height: 420px;
   max-height: 70vh;
-  min-height: 280px;
+  min-height: 240px;
   border: 1px solid var(--color-ocm-border, #ddd);
   border-radius: 8px;
   overflow: hidden;
+  resize: vertical;
+}
+.editorBlock :deep(.ocm-editor-root) {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  height: 100%;
+}
+.editorBlock :deep(.ocm-toolbar-host) {
+  flex-shrink: 0;
+}
+.editorBlock :deep(.ocm-shell-content),
+.editorBlock :deep(.ocm-table-root) {
+  flex: 1 1 0;
+  min-height: 0;
+  overflow: hidden;
 }
 .preview {
+  max-height: 280px;
   min-height: 80px;
   padding: 12px;
   border: 1px solid var(--color-ocm-border, #ddd);
@@ -89,9 +107,13 @@ export default {
   background: var(--color-ocm-surface, #fff);
   overflow: auto;
 }
-.preview :deep(table.html-editor-table--sheet) {
+.preview :deep(table.html-editor-table--sheet.html-editor-table--content) {
   width: max-content;
   max-width: none;
+}
+.preview :deep(table.html-editor-table--fill) {
+  width: 100%;
+  max-width: 100%;
 }
 .html-source {
   margin-top: 8px;

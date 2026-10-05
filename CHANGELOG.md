@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.1] - 2026-10-05
+
+### Added
+
+- Demo stand mode for **Tables** (`on-codemerge/tables`)
+
+### Changed
+
+- Repo tooling docs: install, scripts, and publish are **pnpm-only** (`pnpm run release` does not bump versions)
+
+### Fixed
+
+- Tables HTML preview follows `view.fit`: Stretch fills host width, Fixed keeps stored column widths; toolbar + status chip to switch
+- Tables workspace sheet stays in a bounded host (internal scroll); docs demo can be resized vertically
+
 ## [2.7.0] - 2026-10-05
 
 ### Added

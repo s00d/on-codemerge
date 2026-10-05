@@ -4,6 +4,8 @@ Grid product published as **`on-codemerge/tables`**. Thin app entry uses a shell
 
 WYSIWYG **Insert Table** mounts the same `tableGrid` sheet as an in-document atom (`TablePlugin({ surface: 'atom' })`). HTML/Markdown still interchange as `<table>` / GFM. A constrained Tables product (`on-codemerge/tables`) uses the sheet as the whole document.
 
+**Stretch** (default) fills the editor width and `getHTML()` uses `width:100%`. **Fixed** keeps stored column widths in both the grid and the HTML preview. Toggle on the toolbar or the status chip.
+
 <script setup>
 import TablesEditorComponent from '../components/TablesEditorComponent.vue';
 </script>

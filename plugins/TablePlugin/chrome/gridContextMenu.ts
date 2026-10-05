@@ -153,9 +153,9 @@ function openProperties(editor: EditorAPI, store: TableStore): void {
       {
         type: 'list',
         id: 'fit',
-        label: 'Column fit',
-        options: ['fill', 'content'],
-        value: doc.view?.fit ?? 'fill',
+        label: 'Table width',
+        options: ['stretch', 'fixed'],
+        value: doc.view?.fit === 'content' ? 'fixed' : 'stretch',
       },
       {
         type: 'number',
@@ -183,7 +183,7 @@ function openProperties(editor: EditorAPI, store: TableStore): void {
               : 'default';
           store.setTheme(theme);
           const fit = String(v.fit);
-          store.setView({ fit: fit === 'content' ? 'content' : 'fill' });
+          store.setView({ fit: fit === 'fixed' || fit === 'content' ? 'content' : 'fill' });
           const rowHeight = Number(v.rowHeight);
           if (Number.isFinite(rowHeight) && rowHeight > 0) {
             store.setView({ rowHeight: Math.min(96, Math.max(20, Math.round(rowHeight))) });

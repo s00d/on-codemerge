@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>on-codemerge — npm demo stand</title>
+    <title>on-codemerge — demo stand</title>
     <style>
       :root {
         color-scheme: light;
@@ -100,6 +100,7 @@
       }
       #editor .ocm-editor,
       #editor .ocm-shell-content,
+      #editor .ocm-table-root,
       #editor .ocm-content.ocm-md-root,
       #editor .ocm-studio {
         flex: 1 1 auto;
@@ -173,9 +174,8 @@
         <p>
           Smoke-tests package entry points:
           <code>on-codemerge</code>, <code>/json</code>, <code>/markdown</code>, <code>/code</code>,
-          <code>/forms</code>, <code>/charts</code>,
-          <code>/calendar</code>
-          (+ WYSIWYG <code>chrome: 'page'</code>).
+          <code>/forms</code>, <code>/charts</code>, <code>/calendar</code>, <code>/tables</code> (+
+          WYSIWYG <code>chrome: 'page'</code>).
         </p>
         <div class="meta">
           <span id="pkg-version">version: …</span>
@@ -198,6 +198,7 @@
         <button type="button" data-mode="forms" data-testid="mode-forms">Forms</button>
         <button type="button" data-mode="charts" data-testid="mode-charts">Charts</button>
         <button type="button" data-mode="calendar" data-testid="mode-calendar">Calendar</button>
+        <button type="button" data-mode="tables" data-testid="mode-tables">Tables</button>
       </div>
 
       <div class="card">
@@ -288,6 +289,16 @@
           <button type="button" id="btn-clear-calendar" data-testid="btn-clear-calendar">
             Clear
           </button>
+        </div>
+
+        <div class="actions" data-actions="tables" data-testid="actions-tables" hidden>
+          <button type="button" class="primary" id="btn-tables-text" data-testid="btn-tables-text">
+            Show text
+          </button>
+          <button type="button" id="btn-tables-sample" data-testid="btn-tables-sample">
+            Load sample table
+          </button>
+          <button type="button" id="btn-clear-tables" data-testid="btn-clear-tables">Clear</button>
         </div>
       </div>
 

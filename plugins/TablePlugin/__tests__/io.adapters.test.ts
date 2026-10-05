@@ -163,7 +163,8 @@ describe('TablePlugin io/adapters v2', () => {
     });
     const html = gridToHtml(g);
     expect(html).toContain('html-editor-table--sheet');
-    expect(html).toContain('style="width:256px"');
+    expect(html).toContain('html-editor-table--fill');
+    expect(html).toContain('style="width:100%"');
     expect(html).toContain('<col style="width:128px">');
     expect(html).toContain('<th>A &lt;x&gt;</th>');
     expect(html).toContain('&lt;script&gt;');
@@ -172,7 +173,24 @@ describe('TablePlugin io/adapters v2', () => {
     expect(html).not.toContain('<script>');
   });
 
-  it('gridToHtml keeps stored column widths (no host stretch)', () => {
+  it('gridToHtml keeps stored column widths when fit is content', () => {
+    const g = normalizeTableGrid({
+      version: 2,
+      columns: [
+        { id: 'name', title: 'Name', width: 160 },
+        { id: 'qty', title: 'Qty', width: 96 },
+      ],
+      rows: [{ id: 'r1', cells: { name: 'Apples', qty: 3 } }],
+      view: { fit: 'content' },
+    });
+    const html = gridToHtml(g);
+    expect(html).toContain('html-editor-table--content');
+    expect(html).toContain('style="width:256px"');
+    expect(html).toContain('<col style="width:160px">');
+    expect(html).toContain('<col style="width:96px">');
+  });
+
+  it('gridToHtml stretches to host when fit is fill', () => {
     const g = normalizeTableGrid({
       version: 2,
       columns: [
@@ -182,7 +200,8 @@ describe('TablePlugin io/adapters v2', () => {
       rows: [{ id: 'r1', cells: { name: 'Apples', qty: 3 } }],
     });
     const html = gridToHtml(g);
-    expect(html).toContain('style="width:256px"');
+    expect(html).toContain('html-editor-table--fill');
+    expect(html).toContain('style="width:100%"');
     expect(html).toContain('<col style="width:160px">');
     expect(html).toContain('<col style="width:96px">');
   });

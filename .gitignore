@@ -15,6 +15,7 @@ dist
 dist-forms
 dist-charts
 dist-calendar
+dist-tables
 dist-json
 dist-markdown
 dist-code

@@ -611,6 +611,11 @@ function parseBlock(node: ChildNode): DocNode | null {
     ) {
       grid.theme = themeMatch[1];
     }
+    if (el.classList.contains('html-editor-table--content')) {
+      grid.view = { ...grid.view, fit: 'content' };
+    } else if (el.classList.contains('html-editor-table--fill')) {
+      grid.view = { ...grid.view, fit: 'fill' };
+    }
     const lazyUrl = el.dataset.lazyUrl ?? '';
     if (lazyUrl) {
       grid.source = {

@@ -3,11 +3,13 @@ import {
   alignLeftIcon,
   alignRightIcon,
   bracesIcon,
+  desktopIcon,
   formatIcon,
   insertIcon,
   listIcon,
   splitHorizontalIcon,
   splitVerticalIcon,
+  tabletIcon,
 } from '@codemerge/sdk/icons';
 import type { CellAlign } from '../io/adapters';
 import { DEFAULT_ROW_HEIGHT } from '../grid/viewport';
@@ -52,6 +54,30 @@ export function defaultTableToolbar(): TableToolbarOptions {
       order: 5,
       run: ({ editor, workspace }) => {
         workspace?.setMode('raw');
+        editor.toolbar.refresh();
+      },
+    },
+    {
+      id: 'table-fit-fill',
+      icon: desktopIcon,
+      label: () => 'Stretch',
+      title: () => 'Stretch columns to the editor width (and HTML preview)',
+      group: 'history',
+      order: 6,
+      run: ({ editor, workspace }) => {
+        workspace?.getStore()?.setView({ fit: 'fill' });
+        editor.toolbar.refresh();
+      },
+    },
+    {
+      id: 'table-fit-content',
+      icon: tabletIcon,
+      label: () => 'Fixed',
+      title: () => 'Keep stored column widths — do not stretch',
+      group: 'history',
+      order: 7,
+      run: ({ editor, workspace }) => {
+        workspace?.getStore()?.setView({ fit: 'content' });
         editor.toolbar.refresh();
       },
     },
@@ -152,26 +178,6 @@ export function defaultTableToolbar(): TableToolbarOptions {
       order: 17.5,
       run: ({ workspace }) => {
         workspace?.formatCell();
-      },
-    },
-    {
-      id: 'table-fit-fill',
-      label: () => 'Fit to window',
-      title: () => 'Stretch columns to editor width',
-      menu: 'table',
-      order: 18,
-      run: ({ workspace }) => {
-        workspace?.getStore()?.setView({ fit: 'fill' });
-      },
-    },
-    {
-      id: 'table-fit-content',
-      label: () => 'Content width',
-      title: () => 'Use stored column widths',
-      menu: 'table',
-      order: 19,
-      run: ({ workspace }) => {
-        workspace?.getStore()?.setView({ fit: 'content' });
       },
     },
     {

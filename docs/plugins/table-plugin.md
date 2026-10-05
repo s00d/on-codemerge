@@ -111,7 +111,7 @@ Stored on the `table` node:
 
 ### HTML round-trip
 
-Export is `gridToHtml` (`<table class="html-editor-table--sheet">` + column widths). Import maps any HTML `<table>` (and GFM tables) onto `tableGrid`. Persisted remote fetch lives on `source: { url, format, headers?, delimiter? }` and autoloads once.
+Export is `gridToHtml`. Default **stretch** (`view.fit: fill`) emits `html-editor-table--fill` and `width:100%`. **Fixed** (`content`) emits stored px widths as `html-editor-table--content`. Import maps any HTML `<table>` (and GFM tables) onto `tableGrid` and restores fill/content from those classes.
 
 ```html
 <table class="html-editor-table html-editor-table--sheet">

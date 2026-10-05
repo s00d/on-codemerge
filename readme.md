@@ -24,7 +24,7 @@
 
 [Documentation](https://s00d.github.io/on-codemerge/) · [Editors](https://s00d.github.io/on-codemerge/guide/editors.html) · [Plugins](https://s00d.github.io/on-codemerge/plugins/) · [Integrate](https://s00d.github.io/on-codemerge/integrate/) · [npm](https://www.npmjs.com/package/on-codemerge)
 
-Low-level packages (optional — most apps only need `on-codemerge`): `@codemerge/kernel`, `@codemerge/sdk`, `@codemerge/hunspell`, `@codemerge/collaboration-server`. See [Publishing packages](https://s00d.github.io/on-codemerge/guide/publishing-packages.html). Do not mix standalone `@codemerge/sdk` with `on-codemerge` in one app bundle.
+Low-level packages (optional — most apps only need `on-codemerge`): `@codemerge/kernel`, `@codemerge/sdk`, `@codemerge/hunspell`, `@codemerge/collaboration-server`. See [Publishing packages](https://s00d.github.io/on-codemerge/guide/publishing-packages.html). This repo is **pnpm-only** (install, scripts, release). Do not mix standalone `@codemerge/sdk` with `on-codemerge` in one app bundle.
 
 <p align="center">
   <img src="https://github.com/s00d/on-codemerge/blob/main/branding/Screenshot-v2-editor.png?raw=true" alt="Editor demo — toolbar, lists, table" width="900">
@@ -146,14 +146,14 @@ Full comparison: [Editors guide](https://s00d.github.io/on-codemerge/guide/edito
 
 ## Docs & demos
 
-|                     |                                                                                        |
-| ------------------- | -------------------------------------------------------------------------------------- |
-| **Docs site**       | https://s00d.github.io/on-codemerge/                                                   |
-| **Editors**         | [guide/editors](https://s00d.github.io/on-codemerge/guide/editors.html)                |
-| **Editor API**      | [guide/editor](https://s00d.github.io/on-codemerge/guide/editor.html)                  |
-| **SDK**             | [guide/sdk](https://s00d.github.io/on-codemerge/guide/sdk.html)                        |
-| **Migrate v1 → v2** | [guide/migration](https://s00d.github.io/on-codemerge/guide/migration-v1-to-v2.html)   |
-| **npm demo stand**  | [`demo/`](./demo) — WYSIWYG / JSON / Markdown / Code — `cd demo && pnpm i && pnpm dev` |
+|                     |                                                                                                                             |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| **Docs site**       | https://s00d.github.io/on-codemerge/                                                                                        |
+| **Editors**         | [guide/editors](https://s00d.github.io/on-codemerge/guide/editors.html)                                                     |
+| **Editor API**      | [guide/editor](https://s00d.github.io/on-codemerge/guide/editor.html)                                                       |
+| **SDK**             | [guide/sdk](https://s00d.github.io/on-codemerge/guide/sdk.html)                                                             |
+| **Migrate v1 → v2** | [guide/migration](https://s00d.github.io/on-codemerge/guide/migration-v1-to-v2.html)                                        |
+| **demo stand**      | [`demo/`](./demo) — WYSIWYG / JSON / Markdown / Code / Forms / Charts / Calendar / Tables — `cd demo && pnpm i && pnpm dev` |
 
 Plugins use `core.*` and `editor.toolbar` / `ctx.popup` — do not deep-import the kernel from app code.
 

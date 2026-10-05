@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test';
 
-test.describe('npm demo stand', () => {
+test.describe('demo stand', () => {
   test('wysiwyg boots, CSS, APIs, and live published preview', async ({ page }) => {
     const pageErrors: string[] = [];
     page.on('pageerror', (err) => pageErrors.push(String(err)));
@@ -99,6 +99,14 @@ test.describe('npm demo stand', () => {
     await expect(page.getByTestId('actions-calendar')).toBeVisible();
     await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
     await expect(page.getByTestId('output')).toContainText('Team calendar');
+
+    await page.getByTestId('mode-tables').click();
+    await expect(page.locator('#mode-label')).toContainText('tables');
+    await expect(page.getByTestId('actions-tables')).toBeVisible();
+    await expect(page.locator('.ocm-toolbar').first()).toBeVisible({ timeout: 15_000 });
+    await expect(page.getByTestId('output')).toContainText('Apples');
+    await page.getByTestId('btn-tables-sample').click();
+    await expect(page.getByTestId('output')).toContainText('Bananas');
 
     expect(pageErrors, `page errors: ${pageErrors.join('\n')}`).toEqual([]);
     await expect(page.locator('#errors')).toBeEmpty();

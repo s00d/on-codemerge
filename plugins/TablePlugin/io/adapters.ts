@@ -644,13 +644,16 @@ function columnHtmlWidth(col: TableColumn): number {
   return typeof w === 'number' && Number.isFinite(w) && w > 0 ? Math.round(w) : HTML_COL_WIDTH;
 }
 
-/** Used SoT as published `<table>` — stored column widths, no stretch-to-host. */
+/** Used SoT as published `<table>`. `view.fit: fill` (default) → 100% host; `content` → stored px. */
 export function gridToHtml(grid: TableGridDoc): string {
   const cols = orderedColumns(grid);
   const theme =
     grid.theme !== undefined && grid.theme !== 'default' ? ` ocm-table-grid--${grid.theme}` : '';
+  const fill = grid.view?.fit !== 'content';
   const widths = cols.map(columnHtmlWidth);
   const tableW = widths.reduce((a, b) => a + b, 0);
+  const tableStyle = fill ? 'width:100%' : `width:${String(tableW)}px`;
+  const fitClass = fill ? ' html-editor-table--fill' : ' html-editor-table--content';
   const colgroup = widths.map((w) => `<col style="width:${String(w)}px">`).join('');
   const th = cols.map((c) => `<th>${escapeHtml(c.title)}</th>`).join('');
   const tr = grid.rows
@@ -664,7 +667,7 @@ export function gridToHtml(grid: TableGridDoc): string {
       return `<tr>${tds}</tr>`;
     })
     .join('');
-  return `<table class="html-editor-table html-editor-table--sheet not-prose${theme}" style="width:${String(tableW)}px"><colgroup>${colgroup}</colgroup><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
+  return `<table class="html-editor-table html-editor-table--sheet${fitClass} not-prose${theme}" style="${tableStyle}"><colgroup>${colgroup}</colgroup><thead><tr>${th}</tr></thead><tbody>${tr}</tbody></table>`;
 }
 
 export function exportCsv(grid: TableGridDoc, delimiter = ','): string {

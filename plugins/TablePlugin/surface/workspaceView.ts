@@ -193,6 +193,7 @@ export function mountTableWorkspace(
         : 'text-ocm-text-muted';
     const derived = store.getDerived();
     const active = store.getSelection().active;
+    const fill = store.getDoc().view?.fit !== 'content';
     const source = store.getDoc().source;
     let sourceLabel: string | null = null;
     if (source?.url) {
@@ -211,6 +212,26 @@ export function mountTableWorkspace(
               `${derived.totalRowCount} rows`
             ),
             active ? h('span', { class: 'font-mono text-ocm-text' }, active.colId) : null,
+            h(
+              'button',
+              {
+                class: fill
+                  ? 'rounded-ocm-sm border border-ocm-accent bg-ocm-accent/10 px-2 py-0.5 text-[11px] font-medium text-ocm-text'
+                  : 'rounded-ocm-sm border border-ocm-border px-2 py-0.5 text-[11px] font-medium text-ocm-text hover:bg-ocm-surface-hover',
+                attrs: {
+                  type: 'button',
+                  title: fill ? 'Columns stretch to the editor width' : 'Columns use stored widths',
+                },
+                on: {
+                  click: (ev) => {
+                    ev.preventDefault();
+                    store.setView({ fit: fill ? 'content' : 'fill' });
+                    editor.toolbar.refresh();
+                  },
+                },
+              },
+              fill ? 'Stretch' : 'Fixed width'
+            ),
             sourceLabel
               ? h(
                   'span',

@@ -58,8 +58,9 @@ pnpm run check
 ## Rules of thumb
 
 - Integrations and per-plugin pages keep their substance; prefer restructuring and fixing drift over deleting recipes.
-- Shared install/CSS lives in Guide — plugin pages link there instead of repeating `npm install`.
+- Shared install/CSS lives in Guide — plugin pages link there instead of repeating install snippets.
+- This repo is pnpm-only (`pnpm install` / `pnpm run …` / `pnpm run release`). Do not document npm CLI for maintainers.
 - Do not document unwired APIs (`EditorOptions.mode` was removed for this reason).
 - Live demos mount once on the home page tabs (`HomeEditorsDemo`); `guide/editors.md` is the matrix + launch recipes only.
 - JSON / Markdown / Code product surfaces are `guide/{json,markdown,code}-editor.md` — not separate design/phases trees.
-- `packages/editor` is a **private** workspace package (shared Editor facade + source contour). Public docs cite product entries (`on-codemerge`, `on-codemerge/code`, …), not `@codemerge/editor` as an npm import.
+- `packages/editor` is a **private** workspace package (shared Editor facade + source contour). Public docs cite product entries (`on-codemerge`, `on-codemerge/code`, …), not `@codemerge/editor` as a published import.
