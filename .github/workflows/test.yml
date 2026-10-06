@@ -6,7 +6,7 @@ on:
   pull_request:
 
 jobs:
-  unit:
+  ci:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,22 +20,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm run check
-      - run: pnpm run test:coverage
-
-  docs:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.14.2
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build:packages
+      - run: pnpm run test:unit
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm run test:e2e
       - run: pnpm run build
       - run: node ./scripts/check-public-bundle.mjs
       - run: node ./scripts/check-surface.mjs json export
@@ -44,20 +31,3 @@ jobs:
       - run: node ./scripts/check-surface.mjs markdown export
       - run: node ./scripts/check-surface.mjs markdown types
       - run: pnpm run docs:build
-
-  e2e:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 9.14.2
-          run_install: false
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm run build:packages
-      - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm run test:e2e

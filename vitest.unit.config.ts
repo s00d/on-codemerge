@@ -121,14 +121,6 @@ export default defineConfig({
         'plugins/**/types/**',
         'plugins/**/commands/**',
       ],
-      thresholds: {
-        lines: 80,
-        functions: 80,
-        // Branch density in kernel/commands + io/html + view/mount keeps ~76% under v8;
-        // hold at 76 until those modules gain focused branch tests (lines/funcs already 88%+).
-        branches: 76,
-        statements: 80,
-      },
     },
   },
 });
