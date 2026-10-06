@@ -39,4 +39,15 @@ describe('FieldInspector', () => {
     inspector.destroy();
     host.remove();
   });
+
+  it('subscribe fires on addField', () => {
+    const store = new FormStore(stubEditor());
+    let n = 0;
+    const off = store.subscribe(() => {
+      n += 1;
+    });
+    store.addField('text');
+    expect(n).toBe(1);
+    off();
+  });
 });

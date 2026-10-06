@@ -107,6 +107,7 @@ export function rowShell(
       ]
         .filter(Boolean)
         .join(' '),
+      key: pathKey(path),
       attrs: {
         role: 'treeitem',
         tabindex: '0',

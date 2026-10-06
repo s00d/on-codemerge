@@ -279,15 +279,6 @@
       }
     },
     {
-      "files": [
-        "plugins/JsonPlugin/widgets/embedHost.ts",
-        "plugins/MarkdownPlugin/widgets/embedHost.ts"
-      ],
-      "rules": {
-        "typescript/no-unsafe-type-assertion": "off"
-      }
-    },
-    {
       "files": ["packages/editor/src/Editor.ts"],
       "rules": {
         "typescript/no-unsafe-type-assertion": "off"

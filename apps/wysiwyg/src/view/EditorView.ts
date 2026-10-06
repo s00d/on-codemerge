@@ -27,7 +27,10 @@ export class EditorView {
   private readonly options: Required<ViewOptions>;
   private viewportStart = 0;
   private readonly widgets: Map<string, WidgetDefinition>;
-  private readonly widgetCleanups: (() => void)[] = [];
+  private readonly atomSlots = new Map<
+    string,
+    { el: HTMLElement; cleanup: () => void; sig: string; live: boolean }
+  >();
   private lastFingerprint = '';
   /** True while rewriting DOM / restoring caret — InputBridge must ignore selectionchange. */
   private projecting = false;
@@ -83,6 +86,9 @@ export class EditorView {
   /** Bind editor API for declarative widgets (updateAttrs / openMenu). */
   setEditorAccessor(getEditor: () => EditorAPI | null): void {
     this.getEditor = getEditor;
+    if (this.widgets.size > 0) {
+      this.render(true);
+    }
   }
 
   get isProjecting(): boolean {
@@ -113,7 +119,10 @@ export class EditorView {
   }
 
   destroy(): void {
-    this.clearWidgets();
+    for (const slot of this.atomSlots.values()) {
+      slot.cleanup();
+    }
+    this.atomSlots.clear();
     this.chromeMount.destroy();
   }
 
@@ -162,12 +171,6 @@ export class EditorView {
     }
   }
 
-  private clearWidgets(): void {
-    for (const c of this.widgetCleanups.splice(0)) {
-      c();
-    }
-  }
-
   private fingerprint(start: number, end: number): string {
     const blocks = this.state.doc.content ?? [];
     // Intentionally omit selection — caret moves must not wipe/remount the DOM.
@@ -176,6 +179,26 @@ export class EditorView {
       slice: blocks.slice(start, end),
       start,
     });
+  }
+
+  private atomKey(node: DocNode, index: number): string {
+    const id = asAttr(node.attrs?.id);
+    if (id !== '') {
+      return `id:${id}`;
+    }
+    return `i:${index}:${node.type}`;
+  }
+
+  private isAtomNode(node: DocNode): boolean {
+    return (
+      node.type !== 'paragraph' &&
+      node.type !== 'heading' &&
+      node.type !== 'blockquote' &&
+      node.type !== 'codeBlock' &&
+      node.type !== 'bulletList' &&
+      node.type !== 'orderedList' &&
+      node.type !== 'table'
+    );
   }
 
   private render(force: boolean): void {
@@ -190,19 +213,110 @@ export class EditorView {
         return;
       }
       this.lastFingerprint = fp;
-      this.clearWidgets();
       const slice = blocks.slice(start, end);
       this.content.dataset.range = `${start}:${end}`;
-      replaceChildrenWithHtml(
-        this.content,
-        slice.map((b, i) => this.renderBlock(b, start + i)).join('') ||
-          '<p data-ocm-block="0"><br></p>'
-      );
-      this.mountWidgets();
+      const keep = new Set<string>();
+      const frag = document.createDocumentFragment();
+      if (slice.length === 0) {
+        const empty = document.createElement('p');
+        empty.setAttribute('data-ocm-block', '0');
+        empty.innerHTML = '<br>';
+        frag.append(empty);
+      }
+      for (let i = 0; i < slice.length; i++) {
+        const node = slice[i];
+        if (node === undefined) {
+          continue;
+        }
+        const index = start + i;
+        if (this.isAtomNode(node)) {
+          const key = this.atomKey(node, index);
+          keep.add(key);
+          const sig = JSON.stringify(node.attrs ?? {});
+          const prev = this.atomSlots.get(key);
+          const canLive = Boolean(this.getEditor?.());
+          if (prev && prev.sig === sig && (prev.live || !canLive)) {
+            prev.el.dataset.ocmBlock = String(index);
+            prev.el.dataset.ocmPath = String(index);
+            frag.append(prev.el);
+            continue;
+          }
+          prev?.cleanup();
+          const atomWrap = document.createElement('div');
+          replaceChildrenWithHtml(atomWrap, this.renderBlock(node, index));
+          const atomEl = atomWrap.firstElementChild;
+          if (!(atomEl instanceof HTMLElement)) {
+            continue;
+          }
+          const cleanup = this.mountAtom(atomEl);
+          this.atomSlots.set(key, {
+            el: atomEl,
+            sig,
+            cleanup,
+            live: canLive,
+          });
+          frag.append(atomEl);
+          continue;
+        }
+        const wrap = document.createElement('div');
+        replaceChildrenWithHtml(wrap, this.renderBlock(node, index));
+        const el = wrap.firstElementChild;
+        if (el) {
+          frag.append(el);
+        }
+      }
+      for (const [key, slot] of this.atomSlots) {
+        if (!keep.has(key)) {
+          slot.cleanup();
+          this.atomSlots.delete(key);
+        }
+      }
+      this.content.replaceChildren(frag);
       this.applyDomSelection();
     } finally {
       this.projecting = false;
     }
+  }
+
+  private mountAtom(el: HTMLElement): () => void {
+    const type = el.dataset.type ?? '';
+    const def = this.widgets.get(type);
+    if (!def) {
+      el.textContent = `[${type}]`;
+      return () => undefined;
+    }
+    let attrs: Record<string, unknown> = {};
+    try {
+      const parsed: unknown = JSON.parse(decodeURIComponent(el.dataset.attrs ?? '%7B%7D'));
+      attrs = isPlainObject(parsed) ? parsed : {};
+    } catch {
+      attrs = {};
+    }
+    const pathRaw = el.dataset.ocmPath ?? el.dataset.ocmBlock ?? '';
+    const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw || 0)];
+    const editor = this.getEditor?.() ?? null;
+    if (!editor) {
+      el.textContent = `[${type}]`;
+      return () => undefined;
+    }
+    const scope = new DisposableScope();
+    const ctx: WidgetContext = {
+      attrs,
+      path,
+      editor,
+      scope,
+      updateAttrs: (partial) => {
+        editor.run(() => [{ type: 'set_attrs', path, attrs: partial }]);
+      },
+      openMenu: (items, x, y) => {
+        editor.ui.menu.open(items, x, y);
+      },
+    };
+    const handle = mountView(el, def.render(attrs, ctx));
+    return () => {
+      handle.destroy();
+      scope.dispose();
+    };
   }
 
   private renderBlock(node: DocNode, index: number): string {
@@ -280,51 +394,6 @@ export class EditorView {
     const attrs = encodeURIComponent(JSON.stringify(node.attrs ?? {}));
     const type = escapeAttr(node.type);
     return `<div data-ocm-block="${index}" ${pathAttr([index])} data-type="${type}" data-ocm-type="${type}" data-attrs="${attrs}" contenteditable="false" data-ocm-atom="1"></div>`;
-  }
-
-  private mountWidgets(): void {
-    const atoms = this.content.querySelectorAll<HTMLElement>('[data-ocm-atom="1"]');
-    for (const el of atoms) {
-      const type = el.dataset.type ?? '',
-        def = this.widgets.get(type);
-      if (!def) {
-        el.textContent = `[${type}]`;
-        continue;
-      }
-      let attrs: Record<string, unknown> = {};
-      try {
-        const parsed: unknown = JSON.parse(decodeURIComponent(el.dataset.attrs ?? '%7B%7D'));
-        attrs = isPlainObject(parsed) ? parsed : {};
-      } catch {
-        attrs = {};
-      }
-      const pathRaw = el.dataset.ocmPath ?? el.dataset.ocmBlock ?? '';
-      const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw || 0)];
-
-      const editor = this.getEditor?.() ?? null;
-      if (!editor) {
-        el.textContent = `[${type}]`;
-        continue;
-      }
-      const scope = new DisposableScope();
-      const ctx: WidgetContext = {
-        attrs,
-        path,
-        editor,
-        scope,
-        updateAttrs: (partial) => {
-          editor.run(() => [{ type: 'set_attrs', path, attrs: partial }]);
-        },
-        openMenu: (items, x, y) => {
-          editor.ui.menu.open(items, x, y);
-        },
-      };
-      const handle = mountView(el, def.render(attrs, ctx));
-      this.widgetCleanups.push(() => {
-        handle.destroy();
-        scope.dispose();
-      });
-    }
   }
 }
 

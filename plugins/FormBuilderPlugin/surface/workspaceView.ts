@@ -1,7 +1,7 @@
 import { foreign, h, mount, studioPaneTabs, syncStudioPanel } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 
-import type { EditorState } from '@codemerge/kernel';
+import type { DocNode, EditorState } from '@codemerge/kernel';
 import type { FieldType, FormConfig } from '../types';
 import { parseFormHttpMethod } from '../types';
 import { FormStore } from '../services/FormStore';
@@ -41,6 +41,7 @@ export function mountFormWorkspace(
   opts: MountFormWorkspaceOptions
 ): FormWorkspaceHandle {
   const store = new FormStore(editor);
+  let lastSyncedDoc: DocNode | null = null;
   const templatesModal = new TemplatesModal(editor, opts.scope);
   let selectedFieldId: string | null = null;
   let suppressDocSync = false;
@@ -128,7 +129,6 @@ export function mountFormWorkspace(
                         const src = store.getFields()[dragFrom];
                         if (src !== undefined) {
                           store.moveField(src.id, index);
-                          refreshAll();
                           emitChange();
                         }
                       }
@@ -195,7 +195,6 @@ export function mountFormWorkspace(
   const ensureInspector = (): FieldInspector => {
     fieldInspector ??= new FieldInspector(editor, store, {
       onChange: () => {
-        refreshAll();
         emitChange();
       },
       onRemove: (fieldId) => {
@@ -499,6 +498,11 @@ export function mountFormWorkspace(
   };
 
   remount();
+  opts.scope.disposable(
+    store.subscribe(() => {
+      refreshAll();
+    })
+  );
 
   return {
     destroy: () => {
@@ -516,12 +520,11 @@ export function mountFormWorkspace(
       if (suppressDocSync || opts.mode !== 'workspace') {
         return;
       }
-      const next = configFromDoc(state.doc);
-      const cur = store.getConfig();
-      if (JSON.stringify(next) === JSON.stringify(cur)) {
+      if (state.doc === lastSyncedDoc) {
         return;
       }
-      setConfig(next);
+      lastSyncedDoc = state.doc;
+      setConfig(configFromDoc(state.doc));
     },
     getConfig: () => store.getConfig(),
     setConfig,

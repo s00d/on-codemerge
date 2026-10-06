@@ -7,10 +7,24 @@ import { emptyFormConfig } from '../io/adapters';
 export class FormStore {
   private config: FormConfig;
   private readonly i18n: FormI18n;
+  private readonly listeners = new Set<() => void>();
 
   constructor(i18n: FormI18n, initial?: FormConfig) {
     this.i18n = i18n;
     this.config = initial ? structuredClone(initial) : emptyFormConfig();
+  }
+
+  subscribe(fn: () => void): () => void {
+    this.listeners.add(fn);
+    return () => {
+      this.listeners.delete(fn);
+    };
+  }
+
+  private emit(): void {
+    for (const fn of this.listeners) {
+      fn();
+    }
   }
 
   getConfig(): FormConfig {
@@ -19,6 +33,7 @@ export class FormStore {
 
   setConfig(config: FormConfig): void {
     this.config = structuredClone(config);
+    this.emit();
   }
 
   getFields(): FieldConfig[] {
@@ -35,6 +50,7 @@ export class FormStore {
       ? getDriver(type).coerce({ ...base, ...override, type, id: override.id ?? base.id })
       : base;
     this.config.fields.push(field);
+    this.emit();
     return field;
   }
 
@@ -60,6 +76,7 @@ export class FormStore {
     };
     this.config.fields[index] =
       updates.type && updates.type !== current.type ? getDriver(nextType).coerce(merged) : merged;
+    this.emit();
     return true;
   }
 
@@ -77,6 +94,7 @@ export class FormStore {
       return false;
     }
     this.config.fields.splice(index, 1);
+    this.emit();
     return true;
   }
 
@@ -91,11 +109,13 @@ export class FormStore {
       return false;
     }
     this.config.fields.splice(newPosition, 0, field);
+    this.emit();
     return true;
   }
 
   clearFields(): void {
     this.config.fields = [];
+    this.emit();
   }
 
   getMethod(): FormConfig['method'] {
@@ -104,6 +124,7 @@ export class FormStore {
 
   setMethod(method: FormConfig['method']): void {
     this.config.method = method;
+    this.emit();
   }
 
   getAction(): string {
@@ -112,5 +133,6 @@ export class FormStore {
 
   setAction(action: string): void {
     this.config.action = action;
+    this.emit();
   }
 }

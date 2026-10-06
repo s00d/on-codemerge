@@ -1,27 +1,18 @@
-import { h, mount } from '@codemerge/sdk';
+import { createEmbedSessionStore, createEmbedWorkspaceHost, h, mount } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle } from '@codemerge/sdk';
 
+import { emptyEditorDoc, isMarkdownEditorDoc } from '../io/adapters';
+import { parseText, serializeDoc } from '../io/text';
 import { mountMdWorkspace } from '../surface/workspaceView';
 import type { MdWorkspaceHandle } from '../surface/workspaceView';
-import { createEmbedWorkspaceHost } from './embedHost';
-import type { EmbedWorkspaceController } from './embedHost';
 
 type EmbedSession = {
-  ctrl: EmbedWorkspaceController;
+  ctrl: ReturnType<typeof createEmbedWorkspaceHost>;
   lastSynced: string;
 };
 
 /** Survive CE widget remounts; keyed per parent editor instance. */
-const sessionsByEditor = new WeakMap<EditorAPI, Map<string, EmbedSession>>();
-
-function sessionsFor(editor: EditorAPI): Map<string, EmbedSession> {
-  let map = sessionsByEditor.get(editor);
-  if (!map) {
-    map = new Map();
-    sessionsByEditor.set(editor, map);
-  }
-  return map;
-}
+const sessionsByEditor = createEmbedSessionStore<EmbedSession>();
 
 export type MountMdEmbedOptions = {
   text: string;
@@ -42,11 +33,22 @@ export function mountMdEmbed(
 ): void {
   host.className = 'ocm-atom ocm-md-embed';
   const key = opts.path.join('.');
-  const sessions = sessionsFor(opts.editor);
+  const sessions = sessionsByEditor.forEditor(opts.editor);
   let session = sessions.get(key);
   if (!session) {
+    const seed = parseText(opts.text);
     session = {
-      ctrl: createEmbedWorkspaceHost(opts.editor, opts.text),
+      ctrl: createEmbedWorkspaceHost({
+        parent: opts.editor,
+        seed: seed.ok ? seed.doc : emptyEditorDoc(''),
+        isValidDoc: isMarkdownEditorDoc,
+        serialize: serializeDoc,
+        parse: (text) => {
+          const result = parseText(text);
+          return result.ok ? { ok: true, doc: result.doc } : { ok: false };
+        },
+        invalidMessage: 'embed Markdown document must be a prose Markdown SoT',
+      }),
       lastSynced: opts.text,
     };
     sessions.set(key, session);

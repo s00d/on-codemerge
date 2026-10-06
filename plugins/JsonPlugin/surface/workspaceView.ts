@@ -1,4 +1,4 @@
-import { foreign, h, mount } from '@codemerge/sdk';
+import { foreign, h, isEditingInside, mount } from '@codemerge/sdk';
 import type { EditorAPI, MountHandle, ViewSpec } from '@codemerge/sdk';
 import type { Command, DocNode, EditorState, JSONDoc } from '@codemerge/kernel';
 import { collapsedAt, getNodeAt } from '@codemerge/kernel';
@@ -47,18 +47,6 @@ export type JsonWorkspaceHandle = {
   discardRaw(): void;
   isRawDirty(): boolean;
 };
-
-function isEditingInside(host: HTMLElement): boolean {
-  const ae = document.activeElement;
-  if (!(ae instanceof HTMLElement) || !host.contains(ae)) {
-    return false;
-  }
-  const tag = ae.tagName;
-  if (tag === 'SELECT' || tag === 'INPUT' || tag === 'TEXTAREA' || ae.isContentEditable) {
-    return true;
-  }
-  return Boolean(ae.closest('.ocm-source-editor'));
-}
 
 function replaceDoc(editor: JsonWorkspaceHost, doc: DocNode | JSONDoc): void {
   if (typeof editor.replaceDocument === 'function') {
@@ -456,14 +444,9 @@ export function mountJsonWorkspace(
   };
   contentHost.addEventListener('focusout', onFocusOut);
 
-  let menuWasOpen = false;
-  const menuPoll = window.setInterval(() => {
-    const open = editor.ui.menu.isOpen;
-    if (menuWasOpen && !open) {
-      flushIfIdle();
-    }
-    menuWasOpen = open;
-  }, 120);
+  const offMenu = editor.ui.menu.onHide(() => {
+    flushIfIdle();
+  });
 
   const off = editor.on('docChanged', () => {
     const next = serializeDoc(editor.getState().doc);
@@ -523,7 +506,7 @@ export function mountJsonWorkspace(
     },
     destroy() {
       off();
-      window.clearInterval(menuPoll);
+      offMenu();
       contentHost.removeEventListener('focusout', onFocusOut);
       contentHost.removeEventListener('keydown', onKeyDown);
       editor.run = origRun;

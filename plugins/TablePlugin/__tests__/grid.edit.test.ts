@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { mount } from '@codemerge/sdk';
 import { TableStore } from '../grid/TableStore';
-import { tableGridView } from '../grid/view/gridView';
+import { sheetRowLayoutBuilds, tableGridView } from '../grid/view/gridView';
 
 function stubBox(el: HTMLElement, width: number, height: number): void {
   Object.defineProperty(el, 'clientWidth', { configurable: true, get: () => width });
@@ -12,6 +12,14 @@ function stubBox(el: HTMLElement, width: number, height: number): void {
 
 function styleHeightPx(el: HTMLElement): number {
   return Number(el.style.height.replace('px', ''));
+}
+
+function flushGrid(): Promise<void> {
+  return new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => resolve());
+    });
+  });
 }
 
 describe('grid cell edit', () => {
@@ -42,9 +50,7 @@ describe('grid cell edit', () => {
     if (body instanceof HTMLElement) {
       stubBox(body, 640, 320);
     }
-    await Promise.resolve();
-    await Promise.resolve();
-    store.setLayoutWidth(640);
+    await flushGrid();
 
     const headers = [...host.querySelectorAll('[role="columnheader"]')].map((el) =>
       (el.textContent ?? '').replace(/\s+/g, ' ').trim()
@@ -58,6 +64,7 @@ describe('grid cell edit', () => {
     expect(cell).toBeInstanceOf(HTMLElement);
     const target = cell as HTMLElement;
     target.dispatchEvent(new MouseEvent('pointerdown', { bubbles: true, cancelable: true }));
+    await flushGrid();
 
     expect(store.isEditing()).toBe(true);
     expect(host.querySelector('[data-ocm-cell-edit]')).toBeInstanceOf(HTMLTextAreaElement);
@@ -80,15 +87,14 @@ describe('grid cell edit', () => {
     if (body instanceof HTMLElement) {
       stubBox(body, 640, 320);
     }
-    await Promise.resolve();
-    await Promise.resolve();
-    store.setLayoutWidth(640);
+    await flushGrid();
 
     const rename = host.querySelector('button[title="Rename column"]');
     expect(rename).toBeInstanceOf(HTMLButtonElement);
     (rename as HTMLButtonElement).dispatchEvent(
       new MouseEvent('click', { bubbles: true, cancelable: true })
     );
+    await flushGrid();
     const input = host.querySelector('input[data-ocm-header-edit]');
     expect(input).toBeInstanceOf(HTMLInputElement);
     const field = input as HTMLInputElement;
@@ -124,15 +130,13 @@ describe('grid cell edit', () => {
       configurable: true,
       get: () => store.getSheetRowCount() * 32 + 32,
     });
-    await Promise.resolve();
-    await Promise.resolve();
-    store.setLayoutWidth(640);
+    await flushGrid();
 
     const total = store.getSheetRowCount();
     expect(total).toBeGreaterThanOrEqual(2500);
     scroller.scrollTop = Math.max(0, total * 32 - 200);
     scroller.dispatchEvent(new Event('scroll'));
-    await Promise.resolve();
+    await flushGrid();
 
     const last = host.querySelector('[data-ocm-row="r2499"][data-ocm-col="a"]');
     expect(last).toBeInstanceOf(HTMLElement);
@@ -159,26 +163,26 @@ describe('grid cell edit', () => {
     if (body instanceof HTMLElement) {
       stubBox(body, 640, 200);
     }
-    await Promise.resolve();
-    await Promise.resolve();
-    store.setLayoutWidth(640);
+    await flushGrid();
 
     const cell = host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]');
     expect(cell).toBeInstanceOf(HTMLElement);
     (cell as HTMLElement).dispatchEvent(
       new MouseEvent('pointerdown', { bubbles: true, cancelable: true })
     );
+    await flushGrid();
     expect(store.isEditing()).toBe(true);
 
     expect(body).toBeInstanceOf(HTMLElement);
     const scroller = body as HTMLElement;
     scroller.scrollTop = 400;
     scroller.dispatchEvent(new Event('scroll'));
+    await flushGrid();
     const mid = host.querySelector('.ocm-table-grid__window');
     expect(mid instanceof HTMLElement ? mid.style.top : '').not.toBe('0px');
     scroller.scrollTop = 0;
     scroller.dispatchEvent(new Event('scroll'));
-    await Promise.resolve();
+    await flushGrid();
 
     const windowEl = host.querySelector('.ocm-table-grid__window');
     expect(windowEl instanceof HTMLElement ? windowEl.style.top : '').toBe('0px');
@@ -211,20 +215,20 @@ describe('grid cell edit', () => {
     if (body instanceof HTMLElement) {
       stubBox(body, 640, 320);
     }
-    await Promise.resolve();
-    await Promise.resolve();
-    store.setLayoutWidth(640);
+    await flushGrid();
 
     const cell = host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]');
     expect(cell).toBeInstanceOf(HTMLElement);
     (cell as HTMLElement).dispatchEvent(
       new MouseEvent('pointerdown', { bubbles: true, cancelable: true })
     );
+    await flushGrid();
     const input = host.querySelector('[data-ocm-cell-edit]');
     expect(input).toBeInstanceOf(HTMLTextAreaElement);
     const field = input as HTMLTextAreaElement;
     field.value = 'Pears';
     field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await flushGrid();
     expect(store.getDoc().rows[0]?.cells.a).toBe('Pears');
     expect(store.getSelection().active).toStrictEqual({ rowId: 'r2', colId: 'a' });
     expect(store.isEditing()).toBe(true);
@@ -253,9 +257,7 @@ describe('grid cell edit', () => {
     if (body instanceof HTMLElement) {
       stubBox(body, 640, 320);
     }
-    await Promise.resolve();
-    await Promise.resolve();
-    store.setLayoutWidth(640);
+    await flushGrid();
 
     const tall = host
       .querySelector('[data-ocm-row="r1"][data-ocm-col="a"]')
@@ -270,6 +272,100 @@ describe('grid cell edit', () => {
     expect(shortH).toBe(32);
     expect(tallH).toBeGreaterThan(shortH);
     handle.destroy();
+    store.destroy();
+  });
+
+  it('does not rebuild row heights on a pure scroll', async () => {
+    const rows = Array.from({ length: 80 }, (_, i) => ({
+      id: `r${i}`,
+      cells: { a: `v${i}` },
+    }));
+    const store = new TableStore({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows,
+    });
+    const host = document.createElement('div');
+    stubBox(host, 640, 240);
+    document.body.append(host);
+    hosts.push(host);
+    const handle = mount(host, tableGridView(store));
+    const body = host.querySelector('.ocm-table-grid__body');
+    expect(body).toBeInstanceOf(HTMLElement);
+    const scroller = body as HTMLElement;
+    stubBox(scroller, 640, 240);
+    await flushGrid();
+
+    const before = sheetRowLayoutBuilds;
+    expect(before).toBeGreaterThan(0);
+    scroller.scrollTop = 160;
+    scroller.dispatchEvent(new Event('scroll'));
+    await flushGrid();
+    expect(sheetRowLayoutBuilds).toBe(before);
+    handle.destroy();
+    store.destroy();
+  });
+
+  it('keeps the same cell textarea after setCell without a viewport change', async () => {
+    const store = new TableStore({
+      version: 2,
+      columns: [
+        { id: 'a', title: 'A' },
+        { id: 'b', title: 'B' },
+      ],
+      rows: [{ id: 'r1', cells: { a: 'Apples', b: 'x' } }],
+    });
+    const host = document.createElement('div');
+    stubBox(host, 640, 320);
+    document.body.append(host);
+    hosts.push(host);
+    const handle = mount(host, tableGridView(store));
+    const body = host.querySelector('.ocm-table-grid__body');
+    if (body instanceof HTMLElement) {
+      stubBox(body, 640, 320);
+    }
+    await flushGrid();
+    const cell = host.querySelector('[data-ocm-row="r1"][data-ocm-col="a"]');
+    expect(cell).toBeInstanceOf(HTMLElement);
+    (cell as HTMLElement).dispatchEvent(
+      new MouseEvent('pointerdown', { bubbles: true, cancelable: true })
+    );
+    await flushGrid();
+    const first = host.querySelector('[data-ocm-cell-edit]');
+    expect(first).toBeInstanceOf(HTMLTextAreaElement);
+    store.setCell('r1', 'b', 'y');
+    await flushGrid();
+    const second = host.querySelector('[data-ocm-cell-edit]');
+    expect(first?.isSameNode(second ?? null)).toBe(true);
+    handle.destroy();
+    store.destroy();
+  });
+
+  it('drops window pointermove listeners when the grid is destroyed mid-resize', async () => {
+    const store = new TableStore({
+      version: 2,
+      columns: [{ id: 'a', title: 'A' }],
+      rows: [{ id: 'r1', cells: { a: 'x' } }],
+    });
+    const host = document.createElement('div');
+    stubBox(host, 640, 320);
+    document.body.append(host);
+    hosts.push(host);
+    const handle = mount(host, tableGridView(store));
+    const body = host.querySelector('.ocm-table-grid__body');
+    if (body instanceof HTMLElement) {
+      stubBox(body, 640, 320);
+    }
+    await flushGrid();
+    const grip = host.querySelector('[title="Resize column"]');
+    expect(grip).toBeInstanceOf(HTMLElement);
+    (grip as HTMLElement).dispatchEvent(
+      new PointerEvent('pointerdown', { bubbles: true, cancelable: true, clientX: 40 })
+    );
+    const before = store.getColumnWidths().get('a');
+    handle.destroy();
+    window.dispatchEvent(new PointerEvent('pointermove', { bubbles: true, clientX: 200 }));
+    expect(store.getColumnWidths().get('a')).toBe(before);
     store.destroy();
   });
 });

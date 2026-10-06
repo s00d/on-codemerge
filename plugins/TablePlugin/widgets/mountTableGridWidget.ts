@@ -1,4 +1,4 @@
-import { h, mount, Resizer } from '@codemerge/sdk';
+import { createEmbedSessionStore, h, mount, Resizer } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle } from '@codemerge/sdk';
 
 import { buildGridContextMenu } from '../chrome/gridContextMenu';
@@ -17,16 +17,7 @@ type EmbedSession = {
 };
 
 /** Survive contenteditable widget remounts; keyed per parent editor. */
-const sessionsByEditor = new WeakMap<EditorAPI, Map<string, EmbedSession>>();
-
-function sessionsFor(editor: EditorAPI): Map<string, EmbedSession> {
-  let map = sessionsByEditor.get(editor);
-  if (!map) {
-    map = new Map();
-    sessionsByEditor.set(editor, map);
-  }
-  return map;
-}
+const sessionsByEditor = createEmbedSessionStore<EmbedSession>();
 
 function sigOf(grid: TableGridDoc): string {
   return JSON.stringify(attrsFromGrid(grid));
@@ -78,7 +69,7 @@ export function mountTableGridWidget(
   applyAtomBox(host, boxW, boxH, fillWidth);
 
   const key = opts.path.join('.');
-  const sessions = sessionsFor(opts.editor);
+  const sessions = sessionsByEditor.forEditor(opts.editor);
   let session = sessions.get(key);
   const incoming = normalizeTableGrid(opts.grid);
   const incomingSig = sigOf(incoming);

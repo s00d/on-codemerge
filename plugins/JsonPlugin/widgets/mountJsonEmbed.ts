@@ -1,14 +1,15 @@
-import { h, mount } from '@codemerge/sdk';
+import { createEmbedSessionStore, createEmbedWorkspaceHost, h, mount } from '@codemerge/sdk';
 import type { DisposableScope, EditorAPI, MountHandle } from '@codemerge/sdk';
 
 import { bracesIcon, listIcon } from '@codemerge/sdk/icons';
+import { jsonCommandMap } from '../commands/jsonCommands';
+import { emptyEditorDoc, isJsonEditorDoc } from '../io/adapters';
+import { parseText, serializeDoc } from '../io/text';
 import { mountJsonWorkspace } from '../surface/workspaceView';
 import type { JsonWorkspaceHandle } from '../surface/workspaceView';
-import { createEmbedWorkspaceHost } from './embedHost';
-import type { EmbedWorkspaceController } from './embedHost';
 
 type EmbedSession = {
-  ctrl: EmbedWorkspaceController;
+  ctrl: ReturnType<typeof createEmbedWorkspaceHost>;
   collapsed: Set<string>;
   mode: 'tree' | 'raw';
   lastSynced: string;
@@ -16,16 +17,7 @@ type EmbedSession = {
 };
 
 /** Survive CE widget remounts; keyed per parent editor instance. */
-const sessionsByEditor = new WeakMap<EditorAPI, Map<string, EmbedSession>>();
-
-function sessionsFor(editor: EditorAPI): Map<string, EmbedSession> {
-  let map = sessionsByEditor.get(editor);
-  if (!map) {
-    map = new Map();
-    sessionsByEditor.set(editor, map);
-  }
-  return map;
-}
+const sessionsByEditor = createEmbedSessionStore<EmbedSession>();
 
 export type MountJsonEmbedOptions = {
   text: string;
@@ -43,11 +35,23 @@ export function mountJsonEmbed(
 ): void {
   host.className = 'ocm-atom ocm-json-embed';
   const key = opts.path.join('.');
-  const sessions = sessionsFor(opts.editor);
+  const sessions = sessionsByEditor.forEditor(opts.editor);
   let session = sessions.get(key);
   if (!session) {
+    const seed = parseText(opts.text.trim() || 'null');
     session = {
-      ctrl: createEmbedWorkspaceHost(opts.editor, opts.text),
+      ctrl: createEmbedWorkspaceHost({
+        parent: opts.editor,
+        seed: seed.ok ? seed.doc : emptyEditorDoc({ key: 'value' }),
+        isValidDoc: isJsonEditorDoc,
+        serialize: serializeDoc,
+        parse: (text) => {
+          const result = parseText(text.trim() || 'null');
+          return result.ok ? { ok: true, doc: result.doc } : { ok: false };
+        },
+        invalidMessage: 'embed JSON document must be doc with a single json child',
+        commands: jsonCommandMap(),
+      }),
       collapsed: new Set<string>(),
       mode: 'tree',
       lastSynced: opts.text,
@@ -205,16 +209,10 @@ export function mountJsonEmbed(
 
 /** Drop cached embed sessions for an editor (tests). */
 export function clearJsonEmbedSessions(editor: EditorAPI): void {
-  const map = sessionsByEditor.get(editor);
-  if (!map) {
-    return;
-  }
-  for (const s of map.values()) {
+  sessionsByEditor.clear(editor, (s) => {
     if (s.syncTimer) {
       clearTimeout(s.syncTimer);
     }
     s.ctrl.destroy();
-  }
-  map.clear();
-  sessionsByEditor.delete(editor);
+  });
 }

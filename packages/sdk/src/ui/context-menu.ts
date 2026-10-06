@@ -25,6 +25,7 @@ export class ContextMenuService {
     portal: PortalHandle;
     scope: DisposableScope;
   } | null = null;
+  private readonly hideListeners = new Set<() => void>();
   private readonly ui = menuTv();
   private readonly portalTo: 'menu' | HTMLElement;
 
@@ -213,12 +214,22 @@ export class ContextMenuService {
     this.active = { portal, scope };
   }
 
+  onHide(fn: () => void): () => void {
+    this.hideListeners.add(fn);
+    return () => {
+      this.hideListeners.delete(fn);
+    };
+  }
+
   hide(): void {
     if (!this.active) {
       return;
     }
     this.active.scope.dispose();
     this.active = null;
+    for (const fn of this.hideListeners) {
+      fn();
+    }
   }
 
   destroy(): void {

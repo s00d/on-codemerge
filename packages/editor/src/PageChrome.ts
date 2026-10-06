@@ -1,4 +1,4 @@
-import { DisposableScope, getPortalRoot } from '@codemerge/sdk';
+import { createFrameScheduler, DisposableScope, getPortalRoot } from '@codemerge/sdk';
 import type { ToolbarAction, ToolbarPanel } from '@codemerge/sdk';
 
 const PAD = 8;
@@ -14,6 +14,7 @@ export class PageChrome {
   private openScope: DisposableScope | null = null;
   private readonly toolbarHost: HTMLElement;
   private readonly toolbar: ToolbarPanel;
+  private readonly frames = createFrameScheduler();
   private open = false;
   private unsubToolbar: (() => void) | null = null;
 
@@ -46,6 +47,7 @@ export class PageChrome {
   }
 
   destroy(): void {
+    this.frames.cancel();
     this.hide();
     this.unsubToolbar?.();
     this.unsubToolbar = null;
@@ -177,7 +179,7 @@ export class PageChrome {
     el.style.left = `${Math.round(left)}px`;
     el.style.top = `${Math.round(top)}px`;
 
-    requestAnimationFrame(() => {
+    this.frames.schedule(() => {
       if (!this.open) {
         return;
       }
@@ -196,6 +198,7 @@ export class PageChrome {
   }
 
   hide(): void {
+    this.frames.cancel();
     if (this.openScope) {
       this.openScope.dispose();
       this.openScope = null;

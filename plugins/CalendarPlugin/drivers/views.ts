@@ -1,4 +1,4 @@
-import { h } from '@codemerge/sdk';
+import { bindWindowDrag, h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
 
 import type { CalendarDoc, CalendarI18n, Occurrence } from '../types';
@@ -295,28 +295,21 @@ export function renderTimed(doc: CalendarDoc, ctx: ViewRenderCtx, cols: 1 | 7): 
                       }
                       e.preventDefault();
                       e.stopPropagation();
-                      const el = e.currentTarget;
-                      if (!(el instanceof HTMLElement)) {
-                        return;
-                      }
                       const startY = e.clientY;
                       const startEnd = minutesFromMidnight(o.end);
-                      const onMove = (ev: PointerEvent) => {
-                        const dy = ev.clientY - startY;
-                        const deltaMin = snap15((dy / 48) * 60);
-                        ctx.onResizeTimed?.(
-                          o.eventId,
-                          Math.max(startEnd + deltaMin, minutesFromMidnight(o.start) + 15)
-                        );
-                      };
-                      const onUp = () => {
-                        el.releasePointerCapture(e.pointerId);
-                        el.removeEventListener('pointermove', onMove);
-                        el.removeEventListener('pointerup', onUp);
-                      };
-                      el.setPointerCapture(e.pointerId);
-                      el.addEventListener('pointermove', onMove);
-                      el.addEventListener('pointerup', onUp);
+                      bindWindowDrag({
+                        onMove: (ev: PointerEvent) => {
+                          const dy = ev.clientY - startY;
+                          const deltaMin = snap15((dy / 48) * 60);
+                          ctx.onResizeTimed?.(
+                            o.eventId,
+                            Math.max(startEnd + deltaMin, minutesFromMidnight(o.start) + 15)
+                          );
+                        },
+                        onUp: () => {
+                          /* window listeners aborted by bindWindowDrag */
+                        },
+                      });
                     },
                   },
                 },

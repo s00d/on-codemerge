@@ -1,4 +1,4 @@
-import { foreign, h, mount } from '@codemerge/sdk';
+import { bindWindowDrag, createFrameScheduler, foreign, h, mount } from '@codemerge/sdk';
 import type { MountHandle, ViewSpec } from '@codemerge/sdk';
 
 import type { TableStore } from '../TableStore';
@@ -18,6 +18,20 @@ import type { ViewportWindow } from '../types';
 import { copySelection, pasteFromClipboard } from '../clipboard';
 import { isCovered, spanSize } from '../spans';
 import { colLetter, isGhostColId, isGhostRowId } from '../sheet';
+
+export let sheetRowLayoutBuilds = 0;
+
+const colDrags = new WeakMap<TableStore, AbortController>();
+
+function startColDrag(store: TableStore, handlers: Parameters<typeof bindWindowDrag>[0]): void {
+  colDrags.get(store)?.abort();
+  colDrags.set(store, bindWindowDrag(handlers));
+}
+
+function abortColDrag(store: TableStore): void {
+  colDrags.get(store)?.abort();
+  colDrags.delete(store);
+}
 
 function sheetLayout(store: TableStore): {
   fill: boolean;
@@ -256,15 +270,12 @@ function headerSpec(store: TableStore): ViewSpec {
                   store.setColResize(colId, startW + (e.clientX - startX));
                 };
                 const onUp = (): void => {
-                  window.removeEventListener('pointermove', onMove);
-                  window.removeEventListener('pointerup', onUp);
                   if (isGhostColId(colId)) {
                     store.ensureCell(0, colId);
                   }
                   store.commitColResize();
                 };
-                window.addEventListener('pointermove', onMove);
-                window.addEventListener('pointerup', onUp);
+                startColDrag(store, { onMove, onUp });
               },
             },
           }),
@@ -492,6 +503,7 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow, heights: number[]):
             return h(
               'div',
               {
+                key: `${rowId}:${colId}`,
                 class: `relative flex min-w-0 shrink-0 items-stretch ${justify} border-r border-ocm-border px-0.5${
                   editing ? ' z-10 overflow-visible' : ''
                 }`,
@@ -501,18 +513,6 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow, heights: number[]):
                   'data-ocm-row': rowId,
                   'data-ocm-col': colId,
                   'data-ocm-row-index': String(absIndex),
-                },
-                on: {
-                  pointerdown: (ev) => {
-                    if (
-                      ev.target instanceof HTMLInputElement ||
-                      ev.target instanceof HTMLTextAreaElement
-                    ) {
-                      return;
-                    }
-                    ev.preventDefault();
-                    activate(true);
-                  },
                 },
               },
               renderCell({
@@ -673,11 +673,16 @@ export function tableGridView(
           );
           let headerHandle: MountHandle | null = null;
           let windowHandle: MountHandle | null = null;
-
-          const headerH = (): number => {
-            const slot = sheetHandle.refs.header;
-            return slot instanceof HTMLElement ? slot.offsetHeight : 0;
-          };
+          const frames = createFrameScheduler();
+          let inFrame = false;
+          let heightsDirty = true;
+          let storeGen = 0;
+          let paintedGen = -1;
+          let paintedStart = -1;
+          let paintedEnd = -1;
+          let paintedChrome = '';
+          let heights: number[] = [];
+          let offsets = offsetsFromHeights([DEFAULT_ROW_HEIGHT]);
 
           const applyBodyOverflow = (): void => {
             const fill = store.getDoc().view?.fit !== 'content';
@@ -686,141 +691,139 @@ export function tableGridView(
             host.classList.toggle('overflow-auto', !fill);
           };
 
-          const clampScroll = (): void => {
-            const fill = store.getDoc().view?.fit !== 'content';
-            if (fill) {
-              host.scrollLeft = 0;
-            }
-            const maxX = Math.max(0, host.scrollWidth - host.clientWidth);
-            const maxY = Math.max(0, host.scrollHeight - host.clientHeight);
-            if (host.scrollLeft > maxX) {
-              host.scrollLeft = maxX;
-            }
-            if (host.scrollTop > maxY) {
-              host.scrollTop = maxY;
-            }
-          };
-
-          const layoutRows = (): {
-            rh: number;
-            heights: number[];
-            offsets: number[];
-            start: number;
-            end: number;
-            canvasHeight: number;
-          } => {
+          const rebuildHeights = (): void => {
+            sheetRowLayoutBuilds += 1;
             const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
-            const heights = sheetRowHeights(store, rh);
-            const offsets = offsetsFromHeights(heights);
-            const clientH = Math.max(1, host.clientHeight - headerH());
-            const range = visibleRangeFromOffsets(host.scrollTop, clientH, offsets);
-            return {
-              rh,
-              heights,
-              offsets,
-              start: range.start,
-              end: range.end,
-              canvasHeight: Math.max(rh, offsets[heights.length] ?? rh),
-            };
+            heights = sheetRowHeights(store, rh);
+            offsets = offsetsFromHeights(heights);
+            heightsDirty = false;
           };
 
-          const syncViewport = (): void => {
-            applyBodyOverflow();
-            store.setLayoutWidth(host.clientWidth);
-            const layout = layoutRows();
-            const clientH = Math.max(1, host.clientHeight - headerH());
+          const chromePaintSig = (): string => {
+            const doc = store.getDoc();
+            const widths = store.getColumnWidths();
+            let w = '';
+            for (const [id, px] of widths) {
+              w += `${id}:${px},`;
+            }
+            return `${doc.theme ?? 'default'}|${doc.view?.fit ?? 'fill'}|${w}`;
+          };
+
+          let scrollPaint = false;
+          const frame = (): void => {
+            inFrame = true;
+            const headerEl = sheetHandle.refs.header;
+            const clientW = host.clientWidth;
+            const hostH = host.clientHeight;
+            const scrollTop = host.scrollTop;
+            const headH = headerEl instanceof HTMLElement ? headerEl.offsetHeight : 0;
+            const clientH = Math.max(1, hostH - headH);
+
+            store.setLayoutWidth(clientW);
+            if (heightsDirty && !scrollPaint) {
+              rebuildHeights();
+            }
+
+            const rh = store.getDoc().view?.rowHeight ?? DEFAULT_ROW_HEIGHT;
+            let range = visibleRangeFromOffsets(scrollTop, clientH, offsets);
+            const canvasHeight = Math.max(rh, offsets[heights.length] ?? rh);
             if (
-              clientH >= layout.rh * 3 &&
-              layout.end >= layout.heights.length - 8 &&
-              clientH + 1 < layout.canvasHeight
+              clientH >= rh * 3 &&
+              range.end >= heights.length - 8 &&
+              clientH + 1 < canvasHeight
             ) {
               store.growSheetRows();
+              if (heightsDirty && !scrollPaint) {
+                rebuildHeights();
+                range = visibleRangeFromOffsets(scrollTop, clientH, offsets);
+              }
             }
-            paintWindow();
-            clampScroll();
-          };
 
-          const paintWindow = (): void => {
-            const layout = layoutRows();
-            const vp: ViewportWindow = {
-              start: layout.start,
-              end: layout.end,
-              rowHeight: layout.rh,
-              clientHeight: Math.max(1, host.clientHeight - headerH()),
-              clientWidth: 0,
-            };
             const canvas = sheetHandle.refs.canvas;
             const win = sheetHandle.refs.window;
             if (!(canvas instanceof HTMLElement) || !(win instanceof HTMLElement)) {
+              inFrame = false;
               return;
             }
-            canvas.style.height = `${layout.canvasHeight}px`;
+            applyBodyOverflow();
+            const nextCanvasH = Math.max(rh, offsets[heights.length] ?? rh);
+            canvas.style.height = `${nextCanvasH}px`;
             canvas.style.backgroundColor = 'var(--color-ocm-surface, #fff)';
+            win.style.top = `${offsets[range.start] ?? 0}px`;
 
-            const headerSlot = sheetHandle.refs.header;
-            let headerDraft: string | null = null;
-            if (store.getEditingHeader() && headerSlot instanceof HTMLElement) {
-              const liveHeader = headerSlot.querySelector('input[data-ocm-header-edit]');
-              if (liveHeader instanceof HTMLInputElement) {
-                headerDraft = liveHeader.value;
+            const vp: ViewportWindow = {
+              start: range.start,
+              end: range.end,
+              rowHeight: rh,
+              clientHeight: clientH,
+              clientWidth: 0,
+            };
+            const chrome = chromePaintSig();
+            const rangeChanged = paintedStart !== range.start || paintedEnd !== range.end;
+            const genChanged = paintedGen !== storeGen;
+            const chromeChanged = chrome !== paintedChrome;
+            if (genChanged || rangeChanged || chromeChanged || !windowHandle) {
+              const liveBefore = liveCellInput(win);
+              const draftHost =
+                liveBefore instanceof HTMLElement
+                  ? liveBefore.closest('[data-ocm-row][data-ocm-col]')
+                  : null;
+              const cellDraft = liveBefore?.value ?? null;
+              const draftKey =
+                draftHost instanceof HTMLElement
+                  ? `${draftHost.dataset.ocmRow}:${draftHost.dataset.ocmCol}`
+                  : null;
+              const draftSel =
+                liveBefore instanceof HTMLInputElement || liveBefore instanceof HTMLTextAreaElement
+                  ? { start: liveBefore.selectionStart, end: liveBefore.selectionEnd }
+                  : null;
+
+              const spec = bodyRowsSpec(store, vp, heights);
+              runCellPaint(() => {
+                if (windowHandle) {
+                  windowHandle.update(spec);
+                } else {
+                  windowHandle = mount(win, spec);
+                }
+              });
+              if (store.isEditing()) {
+                const focusCell = (): void => {
+                  if (!store.isEditing()) {
+                    return;
+                  }
+                  const live = liveCellInput(win);
+                  if (!live) {
+                    return;
+                  }
+                  const active = store.getSelection().active;
+                  const sameCell = active ? draftKey === `${active.rowId}:${active.colId}` : false;
+                  if (sameCell && cellDraft !== null && live.value !== cellDraft) {
+                    live.value = cellDraft;
+                  }
+                  live.focus({ preventScroll: true });
+                  if (sameCell && draftSel) {
+                    const a = draftSel.start ?? live.value.length;
+                    const b = draftSel.end ?? live.value.length;
+                    live.setSelectionRange(a, b);
+                  }
+                };
+                queueMicrotask(focusCell);
+                requestAnimationFrame(focusCell);
               }
-            }
-
-            const liveBefore = liveCellInput(win);
-            const draftHost =
-              liveBefore instanceof HTMLElement
-                ? liveBefore.closest('[data-ocm-row][data-ocm-col]')
-                : null;
-            const cellDraft = liveBefore?.value ?? null;
-            const draftKey =
-              draftHost instanceof HTMLElement
-                ? `${draftHost.dataset.ocmRow}:${draftHost.dataset.ocmCol}`
-                : null;
-
-            const draftSel =
-              liveBefore instanceof HTMLInputElement || liveBefore instanceof HTMLTextAreaElement
-                ? { start: liveBefore.selectionStart, end: liveBefore.selectionEnd }
-                : null;
-
-            win.style.top = `${layout.offsets[vp.start] ?? 0}px`;
-            const spec = bodyRowsSpec(store, vp, layout.heights);
-            runCellPaint(() => {
-              if (windowHandle) {
-                windowHandle.update(spec);
-              } else {
-                windowHandle = mount(win, spec);
-              }
-            });
-            if (store.isEditing()) {
-              const focusCell = (): void => {
-                if (!store.isEditing()) {
-                  return;
-                }
-                const live = liveCellInput(win);
-                if (!live) {
-                  return;
-                }
-                const active = store.getSelection().active;
-                const sameCell = active ? draftKey === `${active.rowId}:${active.colId}` : false;
-                if (sameCell && cellDraft !== null && live.value !== cellDraft) {
-                  live.value = cellDraft;
-                }
-                live.focus({ preventScroll: true });
-                if (sameCell && draftSel) {
-                  const a = draftSel.start ?? live.value.length;
-                  const b = draftSel.end ?? live.value.length;
-                  live.setSelectionRange(a, b);
-                }
-              };
-              queueMicrotask(focusCell);
-              requestAnimationFrame(focusCell);
+              paintedStart = range.start;
+              paintedEnd = range.end;
+              paintedChrome = chrome;
             }
 
             const headerHost = sheetHandle.refs.header;
-            if (headerHost instanceof HTMLElement) {
+            if (headerHost instanceof HTMLElement && (genChanged || !headerHandle)) {
+              let headerDraft: string | null = null;
               const liveHeader = headerHost.querySelector('input[data-ocm-header-edit]');
               const keepHeader =
                 Boolean(store.getEditingHeader()) && liveHeader instanceof HTMLInputElement;
+              if (liveHeader instanceof HTMLInputElement) {
+                headerDraft = liveHeader.value;
+              }
               if (!keepHeader) {
                 const specH = headerSpec(store);
                 if (headerHandle) {
@@ -841,23 +844,78 @@ export function tableGridView(
                 }
               }
             }
+            paintedGen = storeGen;
+
+            const fill = store.getDoc().view?.fit !== 'content';
+            if (fill) {
+              host.scrollLeft = 0;
+            }
+            const maxX = Math.max(0, host.scrollWidth - clientW);
+            const maxY = Math.max(0, host.scrollHeight - hostH);
+            if (host.scrollLeft > maxX) {
+              host.scrollLeft = maxX;
+            }
+            if (host.scrollTop > maxY) {
+              host.scrollTop = maxY;
+            }
+            heightsDirty = false;
+            inFrame = false;
           };
 
-          host.addEventListener('scroll', syncViewport);
+          const onScroll = (): void => {
+            frames.schedule(() => {
+              scrollPaint = true;
+              frame();
+              scrollPaint = false;
+            });
+          };
+
+          const onResize = (): void => {
+            frames.schedule(frame);
+          };
+
+          const onBodyPointerDown = (ev: PointerEvent): void => {
+            const t = ev.target;
+            if (
+              t instanceof HTMLInputElement ||
+              t instanceof HTMLTextAreaElement ||
+              !(t instanceof Element)
+            ) {
+              return;
+            }
+            const cell = t.closest('[data-ocm-row][data-ocm-col]');
+            if (!(cell instanceof HTMLElement) || !host.contains(cell)) {
+              return;
+            }
+            ev.preventDefault();
+            const rowIndex = Number(cell.dataset.ocmRowIndex ?? '0');
+            const colId = cell.dataset.ocmCol ?? '';
+            const got = store.ensureCell(rowIndex, colId);
+            if (got) {
+              store.setEditing(true);
+            }
+          };
+
+          host.addEventListener('pointerdown', onBodyPointerDown);
+          host.addEventListener('scroll', onScroll);
           const unsub = store.subscribe(() => {
-            applyBodyOverflow();
-            paintWindow();
-            clampScroll();
+            heightsDirty = true;
+            storeGen += 1;
+            if (!inFrame) {
+              frame();
+            }
           });
-          paintWindow();
-          queueMicrotask(syncViewport);
+          frame();
           let ro: ResizeObserver | null = null;
           if (typeof ResizeObserver !== 'undefined') {
-            ro = new ResizeObserver(syncViewport);
+            ro = new ResizeObserver(onResize);
             ro.observe(host);
           }
           scope.disposable(() => {
-            host.removeEventListener('scroll', syncViewport);
+            host.removeEventListener('scroll', onScroll);
+            host.removeEventListener('pointerdown', onBodyPointerDown);
+            frames.cancel();
+            abortColDrag(store);
             ro?.disconnect();
             unsub();
             windowHandle?.destroy();

@@ -1,4 +1,4 @@
-import { h, mount } from '@codemerge/sdk';
+import { createFrameScheduler, h, mount } from '@codemerge/sdk';
 import type { MountHandle } from '@codemerge/sdk';
 import { highlightHtml } from '../highlight';
 
@@ -192,7 +192,7 @@ export function mountSourceEditor(
   host.replaceChildren();
 
   let suppress = false;
-  let raf = 0;
+  const frames = createFrameScheduler();
   let destroyed = false;
   let lineCount = lineCountOf(options.initialText);
 
@@ -376,11 +376,7 @@ export function mountSourceEditor(
   };
 
   const schedulePaint = (): void => {
-    if (raf) {
-      cancelAnimationFrame(raf);
-    }
-    raf = requestAnimationFrame(() => {
-      raf = 0;
+    frames.schedule(() => {
       if (destroyed || !textarea || !codeEl) {
         return;
       }
@@ -392,7 +388,7 @@ export function mountSourceEditor(
         syncScrollExtents();
       }
       syncScroll();
-    });
+    }, 'replace');
   };
 
   const notify = (): void => {
@@ -782,10 +778,7 @@ export function mountSourceEditor(
     destroy() {
       destroyed = true;
       clearHistory();
-      if (raf) {
-        cancelAnimationFrame(raf);
-        raf = 0;
-      }
+      frames.cancel();
       resizeObserver?.disconnect();
       resizeObserver = null;
       gutterLinesHandle?.destroy();

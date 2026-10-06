@@ -162,3 +162,12 @@ export {
   type PublishNodeDefinition,
   type ComposePublishedDocumentOptions,
 } from './publish';
+export { createFrameScheduler, type FrameScheduler } from './platform/scheduleFrame';
+export { bindWindowDrag, type WindowDragHandlers } from './platform/bindWindowDrag';
+export { isEditingInside } from './platform/isEditingInside';
+export { createEmbedSessionStore, type EmbedSessionStore } from './platform/embedSessions';
+export {
+  createEmbedWorkspaceHost,
+  type EmbedWorkspaceController,
+  type EmbedWorkspaceHostOptions,
+} from './platform/createEmbedWorkspaceHost';

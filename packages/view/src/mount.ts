@@ -117,15 +117,119 @@ function isElementEventType(type: string): type is keyof ViewEventMap {
   return prop in elementEventProbe;
 }
 
+type NodeKind = 'text' | 'element' | 'foreign' | 'fragment' | 'teleport';
+
 type InternalNode = {
   dom: Node;
   scope: DisposableScope;
+  children: InternalNode[];
   key?: string;
-  foreign?: boolean;
+  kind: NodeKind;
+  tag?: string;
+  attrKeys: string[];
+  styleKeys: string[];
+  refName?: string;
 };
 
+function specKey(spec: ViewSpec): string | undefined {
+  if (spec !== null && typeof spec === 'object' && !Array.isArray(spec) && 'key' in spec) {
+    return spec.key;
+  }
+  return undefined;
+}
+
+function attrKeyList(attrs: ViewElementSpec['attrs']): string[] {
+  return attrs ? Object.keys(attrs) : [];
+}
+
+function styleKeyList(style: ViewElementSpec['style']): string[] {
+  return style ? Object.keys(style) : [];
+}
+
+function patchAttrs(el: HTMLElement, prevKeys: string[], next: ViewElementSpec['attrs']): string[] {
+  const nextKeys = attrKeyList(next);
+  for (const k of prevKeys) {
+    if (!nextKeys.includes(k)) {
+      el.removeAttribute(k);
+    }
+  }
+  applyAttrs(el, next);
+  return nextKeys;
+}
+
+function patchStyle(el: HTMLElement, prevKeys: string[], next: ViewElementSpec['style']): string[] {
+  const nextKeys = styleKeyList(next);
+  for (const k of prevKeys) {
+    if (!nextKeys.includes(k)) {
+      if (k.startsWith('--')) {
+        el.style.removeProperty(k);
+      } else {
+        Reflect.set(el.style, k, '');
+      }
+    }
+  }
+  applyStyle(el, next);
+  return nextKeys;
+}
+
+function moveDom(parent: ParentNode, node: Node, before: Node | null): void {
+  if (node.parentNode === parent && node === before) {
+    return;
+  }
+  const host = parent as ParentNode & {
+    moveBefore?: (n: Node, b: Node | null) => void;
+  };
+  if (typeof host.moveBefore === 'function' && node instanceof Element) {
+    try {
+      host.moveBefore(node, before);
+      return;
+    } catch {
+      /* insertBefore fallback */
+    }
+  }
+  if (before instanceof Element || before instanceof CharacterData) {
+    before.before(node);
+  } else {
+    parent.append(node);
+  }
+}
+
+function destroyNode(node: InternalNode): void {
+  for (const child of node.children) {
+    destroyNode(child);
+  }
+  node.scope.dispose();
+  node.dom.parentNode?.removeChild(node.dom);
+}
+
+function compatible(old: InternalNode, spec: ViewSpec): boolean {
+  if (typeof spec === 'string' || typeof spec === 'number') {
+    return old.kind === 'text';
+  }
+  if (isForeign(spec)) {
+    return old.kind === 'foreign';
+  }
+  if (isTeleport(spec)) {
+    return old.kind === 'teleport';
+  }
+  if (isElement(spec)) {
+    if (spec.tag === 'fragment') {
+      return old.kind === 'fragment';
+    }
+    return old.kind === 'element' && old.tag === spec.tag;
+  }
+  return false;
+}
+
 function createText(value: string): InternalNode {
-  return { dom: document.createTextNode(value), scope: new DisposableScope() };
+  return {
+    dom: document.createTextNode(value),
+    scope: new DisposableScope(),
+    children: [],
+    kind: 'text',
+    attrKeys: [],
+    styleKeys: [],
+  };
 }
 
 function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): InternalNode | null {
@@ -135,19 +239,26 @@ function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): Inte
   if (typeof spec === 'string' || typeof spec === 'number') {
     return createText(String(spec));
   }
-  if (Array.isArray(spec)) {
+  if (Array.isArray(spec) || (isElement(spec) && spec.tag === 'fragment')) {
+    const kids = flatten(Array.isArray(spec) ? spec : spec.children);
+    const children: InternalNode[] = [];
     const frag = document.createDocumentFragment();
-    const scope = new DisposableScope();
-    for (const child of flatten(spec)) {
+    for (const child of kids) {
       const node = createFromSpec(child, refs);
       if (node) {
         frag.append(node.dom);
-        scope.disposable(() => {
-          node.scope.dispose();
-        });
+        children.push(node);
       }
     }
-    return { dom: frag, scope };
+    return {
+      dom: frag,
+      scope: new DisposableScope(),
+      children,
+      kind: 'fragment',
+      key: Array.isArray(spec) ? undefined : spec.key,
+      attrKeys: [],
+      styleKeys: [],
+    };
   }
   if (isForeign(spec)) {
     const host = document.createElement('div');
@@ -158,7 +269,15 @@ function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): Inte
     } catch (error) {
       console.error('ViewSpec foreign mount failed', error);
     }
-    return { dom: host, scope, key: spec.key, foreign: true };
+    return {
+      dom: host,
+      scope,
+      children: [],
+      key: spec.key,
+      kind: 'foreign',
+      attrKeys: [],
+      styleKeys: [],
+    };
   }
   if (isTeleport(spec)) {
     const scope = new DisposableScope();
@@ -168,26 +287,19 @@ function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): Inte
       className: spec.className,
     });
     scope.own(portal);
-    // Vue-style anchor in the local tree; real DOM lives in the portal root.
     const marker = document.createComment('ocm-teleport');
-    return { dom: marker, scope, key: spec.key };
+    return {
+      dom: marker,
+      scope,
+      children: [],
+      key: spec.key,
+      kind: 'teleport',
+      attrKeys: [],
+      styleKeys: [],
+    };
   }
   if (!isElement(spec)) {
     return null;
-  }
-  if (spec.tag === 'fragment') {
-    const frag = document.createDocumentFragment();
-    const scope = new DisposableScope();
-    for (const child of flatten(spec.children)) {
-      const node = createFromSpec(child, refs);
-      if (node) {
-        frag.append(node.dom);
-        scope.disposable(() => {
-          node.scope.dispose();
-        });
-      }
-    }
-    return { dom: frag, scope, key: spec.key };
   }
   const el = document.createElement(spec.tag);
   el.className = className(spec.class);
@@ -199,16 +311,171 @@ function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): Inte
   if (spec.ref) {
     refs[spec.ref] = el;
   }
+  const children: InternalNode[] = [];
   for (const child of flatten(spec.children)) {
     const node = createFromSpec(child, refs);
     if (node) {
-      el.append(node.dom);
-      scope.disposable(() => {
-        node.scope.dispose();
-      });
+      if (node.kind === 'fragment') {
+        el.append(node.dom);
+        children.push(...node.children);
+      } else {
+        el.append(node.dom);
+        children.push(node);
+      }
     }
   }
-  return { dom: el, scope, key: spec.key };
+  return {
+    dom: el,
+    scope,
+    children,
+    key: spec.key,
+    kind: 'element',
+    tag: spec.tag,
+    attrKeys: attrKeyList(spec.attrs),
+    styleKeys: styleKeyList(spec.style),
+    refName: spec.ref,
+  };
+}
+
+function patchNode(
+  old: InternalNode,
+  spec: ViewSpec,
+  refs: Record<string, HTMLElement>
+): InternalNode {
+  if (typeof spec === 'string' || typeof spec === 'number') {
+    const next = String(spec);
+    if (old.dom.textContent !== next) {
+      old.dom.textContent = next;
+    }
+    return old;
+  }
+  if (isForeign(spec) && old.kind === 'foreign' && old.dom instanceof HTMLElement) {
+    old.dom.className = className(spec.class) || 'ocm-foreign';
+    return old;
+  }
+  if (isTeleport(spec) && old.kind === 'teleport') {
+    return old;
+  }
+  if (isElement(spec) && spec.tag !== 'fragment' && old.kind === 'element') {
+    if (!(old.dom instanceof HTMLElement)) {
+      const created = createFromSpec(spec, refs);
+      if (!created) {
+        destroyNode(old);
+        return old;
+      }
+      old.dom.parentNode?.replaceChild(created.dom, old.dom);
+      destroyNode(old);
+      return created;
+    }
+    const el = old.dom;
+    el.className = className(spec.class);
+    old.attrKeys = patchAttrs(el, old.attrKeys, spec.attrs);
+    old.styleKeys = patchStyle(el, old.styleKeys, spec.style);
+    applyProps(el, spec.props);
+    old.scope.dispose();
+    old.scope = new DisposableScope();
+    bindEvents(el, spec.on, old.scope);
+    if (old.refName && old.refName !== spec.ref) {
+      delete refs[old.refName];
+    }
+    if (spec.ref) {
+      refs[spec.ref] = el;
+    }
+    old.refName = spec.ref;
+    old.key = spec.key;
+    old.children = setChildren(el, old.children, flatten(spec.children), refs);
+    return old;
+  }
+  const created = createFromSpec(spec, refs);
+  if (!created) {
+    destroyNode(old);
+    return old;
+  }
+  old.dom.parentNode?.replaceChild(created.dom, old.dom);
+  destroyNode(old);
+  return created;
+}
+
+function setChildren(
+  parent: HTMLElement,
+  oldKids: InternalNode[],
+  nextSpecs: ViewSpec[],
+  refs: Record<string, HTMLElement>
+): InternalNode[] {
+  const oldByKey = new Map<string, InternalNode>();
+  for (const kid of oldKids) {
+    if (kid.key) {
+      oldByKey.set(kid.key, kid);
+    }
+  }
+  const used = new Set<InternalNode>();
+  const unkeyed = oldKids.filter((k) => !k.key);
+  let unkeyedAt = 0;
+  const result: InternalNode[] = [];
+
+  for (const spec of nextSpecs) {
+    const key = specKey(spec);
+    let prev: InternalNode | undefined;
+    if (key) {
+      prev = oldByKey.get(key);
+    } else {
+      while (unkeyedAt < unkeyed.length) {
+        const cand = unkeyed[unkeyedAt];
+        unkeyedAt += 1;
+        if (cand !== undefined && !used.has(cand) && compatible(cand, spec)) {
+          prev = cand;
+          break;
+        }
+      }
+    }
+    if (prev && compatible(prev, spec) && !used.has(prev)) {
+      used.add(prev);
+      result.push(patchNode(prev, spec, refs));
+    } else {
+      const created = createFromSpec(spec, refs);
+      if (created) {
+        if (created.kind === 'fragment') {
+          result.push(...created.children);
+        } else {
+          result.push(created);
+        }
+      }
+    }
+  }
+
+  for (const kid of oldKids) {
+    if (!used.has(kid)) {
+      destroyNode(kid);
+    }
+  }
+
+  let before: Node | null = parent.firstChild;
+  for (const node of result) {
+    if (node.dom.parentNode !== parent || node.dom !== before) {
+      moveDom(parent, node.dom, before);
+    }
+    before = node.dom.nextSibling;
+  }
+  return result;
+}
+
+function rootsFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): InternalNode[] {
+  const list = flatten(
+    isElement(spec) && spec.tag === 'fragment' ? spec.children : Array.isArray(spec) ? spec : spec
+  );
+  const roots: InternalNode[] = [];
+  for (const item of list) {
+    const node = createFromSpec(item, refs);
+    if (!node) {
+      continue;
+    }
+    if (node.kind === 'fragment') {
+      roots.push(...node.children);
+    } else {
+      roots.push(node);
+    }
+  }
+  return roots;
 }
 
 /**
@@ -217,40 +484,44 @@ function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): Inte
  */
 export function mount(parent: HTMLElement, spec: ViewSpec): MountHandle {
   const refs: Record<string, HTMLElement> = {};
-  let rootScope = new DisposableScope();
   let current = spec;
+  let roots: InternalNode[] = [];
 
-  const paint = (next: ViewSpec) => {
-    rootScope.dispose();
-    rootScope = new DisposableScope();
+  const paint = (next: ViewSpec, first: boolean) => {
     for (const k of Object.keys(refs)) {
       delete refs[k];
     }
-    parent.replaceChildren();
-    const node = createFromSpec(next, refs);
-    if (node) {
-      parent.append(node.dom);
-      rootScope.disposable(() => {
-        node.scope.dispose();
-      });
+    const list = flatten(
+      isElement(next) && next.tag === 'fragment' ? next.children : Array.isArray(next) ? next : next
+    );
+    if (first) {
+      parent.replaceChildren();
+      roots = rootsFromSpec(next, refs);
+      for (const node of roots) {
+        parent.append(node.dom);
+      }
+    } else {
+      roots = setChildren(parent, roots, list, refs);
     }
     current = next;
   };
 
-  paint(spec);
+  paint(spec, true);
 
   return {
     el: parent,
     refs,
     update(next: ViewSpec) {
-      // Simple replace strategy (keyed patch can be layered later).
       if (next === current) {
         return;
       }
-      paint(next);
+      paint(next, false);
     },
     destroy() {
-      rootScope.dispose();
+      for (const node of roots) {
+        destroyNode(node);
+      }
+      roots = [];
       parent.replaceChildren();
     },
   };

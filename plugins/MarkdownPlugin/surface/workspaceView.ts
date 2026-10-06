@@ -1,4 +1,10 @@
-import { foreign, h, mount, replaceChildrenWithSafeHtml } from '@codemerge/sdk';
+import {
+  createFrameScheduler,
+  foreign,
+  h,
+  mount,
+  replaceChildrenWithSafeHtml,
+} from '@codemerge/sdk';
 import type { EditorAPI, MountHandle } from '@codemerge/sdk';
 import type { DocNode, EditorState, JSONDoc, Operation } from '@codemerge/kernel';
 
@@ -468,7 +474,7 @@ export function mountMdWorkspace(
   let lastSoTMd = docToText(editor.getState().doc);
   let sotTimer: ReturnType<typeof setTimeout> | null = null;
   let previewTimer: ReturnType<typeof setTimeout> | null = null;
-  let previewRaf = 0;
+  const previewFrames = createFrameScheduler();
   let pendingPreviewDoc: DocNode | null = null;
   let shellHandle: MountHandle | null = null;
   let mdHandle: SourceEditorHandle | null = null;
@@ -559,19 +565,14 @@ export function mountMdWorkspace(
     if (!(slot instanceof HTMLElement) || !doc) {
       return;
     }
-    if (previewRaf) {
-      cancelAnimationFrame(previewRaf);
-      previewRaf = 0;
-    }
-    previewRaf = requestAnimationFrame(() => {
-      previewRaf = 0;
+    previewFrames.schedule(() => {
       if (remotePreview) {
         setRemoteBusy(remoteCtl, true);
         void paintPreviewRemote(slot, docToText(doc), remotePreview, remoteCtl, scrollSync);
         return;
       }
       paintPreviewFromDoc(slot, doc, elements, scrollSync, hydrateCtl);
-    });
+    }, 'replace');
   };
 
   /** Coalesce expensive preview paints; `immediate` for mount / Apply / external setText. */
@@ -808,10 +809,7 @@ export function mountMdWorkspace(
         clearTimeout(previewTimer);
         previewTimer = null;
       }
-      if (previewRaf) {
-        cancelAnimationFrame(previewRaf);
-        previewRaf = 0;
-      }
+      previewFrames.cancel();
       pendingPreviewDoc = null;
       if (sotTimer) {
         clearTimeout(sotTimer);

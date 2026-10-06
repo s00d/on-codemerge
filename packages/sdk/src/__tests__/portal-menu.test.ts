@@ -119,6 +119,20 @@ describe('contextMenuService', () => {
     expect(clicked).toBe(1);
     menu.hide();
   });
+
+  it('onHide runs when the menu closes', () => {
+    expect.hasAssertions();
+    let n = 0;
+    const off = menu.onHide(() => {
+      n += 1;
+    });
+    menu.open([{ label: 'One', onClick: () => {} }], 10, 10);
+    menu.hide();
+    expect(n).toBe(1);
+    menu.hide();
+    expect(n).toBe(1);
+    off();
+  });
 });
 
 describe('notifyService', () => {

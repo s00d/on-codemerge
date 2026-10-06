@@ -10,6 +10,8 @@ import {
   createText,
   transaction,
 } from '@codemerge/kernel';
+import type { EditorAPI } from '@codemerge/sdk';
+import { h } from '@codemerge/sdk';
 import { EditorView } from '../EditorView';
 import { InputBridge } from '../InputBridge';
 
@@ -40,6 +42,47 @@ describe('editorView', () => {
     const view = new EditorView(host, state, { overscan: 5, viewportSize: 50 });
     expect(view.mountedBlockCount()).toBeLessThanOrEqual(60);
     expect(view.mountedBlockCount()).toBeLessThan(500);
+    view.destroy();
+    host.remove();
+  });
+
+  it('does not remount a table atom when a sibling paragraph is edited', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    let renders = 0;
+    const widgets = new Map([
+      [
+        'tableGrid',
+        {
+          render: () => {
+            renders += 1;
+            return h('div', { class: 'tbl' }, 'grid');
+          },
+        },
+      ],
+    ]);
+    let state = createState(
+      createDoc([
+        createParagraph([createText('Hi')]),
+        { type: 'tableGrid', attrs: { id: 'g1' } },
+        createParagraph([createText('Lo')]),
+      ])
+    );
+    const view = new EditorView(host, state, {}, widgets);
+    const fakeEditor = {
+      run: () => true,
+      ui: { menu: { open: () => undefined } },
+    } as unknown as EditorAPI;
+    view.setEditorAccessor(() => fakeEditor);
+    expect(renders).toBe(1);
+    state = applyTransaction(
+      state,
+      transaction({ offset: 2, path: [0], text: '!', type: 'insert_text' })
+    ).state;
+    view.update(state);
+    expect(view.content.textContent).toContain('Hi!');
+    expect(renders).toBe(1);
     view.destroy();
     host.remove();
   });

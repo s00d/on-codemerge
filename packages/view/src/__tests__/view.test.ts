@@ -2,7 +2,7 @@
  * @jest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest';
-import { clearPortalRoot, h, mount, teleport, viewToHtml } from '../index';
+import { clearPortalRoot, foreign, h, mount, teleport, viewToHtml } from '../index';
 
 describe('@codemerge/view', () => {
   afterEach(() => {
@@ -53,5 +53,63 @@ describe('@codemerge/view', () => {
     const html = viewToHtml(h('p', { class: 'x' }, 'hello'));
     expect(html).toContain('hello');
     expect(html).toContain('class="x"');
+  });
+
+  it('keeps the same DOM node when the key is unchanged', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = mount(host, h('button', { key: 'go', attrs: { type: 'button' } }, 'Go'));
+    const first = host.querySelector('button');
+    handle.update(h('button', { key: 'go', attrs: { type: 'button' } }, 'Next'));
+    const second = host.querySelector('button');
+    expect(first?.isSameNode(second ?? null)).toBe(true);
+    expect(second?.textContent).toBe('Next');
+    handle.destroy();
+  });
+
+  it('does not remount foreign when the key is unchanged', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    let mounts = 0;
+    let disposed = 0;
+    const spec = (label: string) =>
+      foreign(
+        (_el, scope) => {
+          mounts += 1;
+          scope.disposable(() => {
+            disposed += 1;
+          });
+        },
+        { key: 'box', class: label }
+      );
+    const handle = mount(host, spec('a'));
+    handle.update(spec('b'));
+    expect(mounts).toBe(1);
+    expect(disposed).toBe(0);
+    handle.destroy();
+    expect(disposed).toBe(1);
+  });
+
+  it('disposes foreign when the key changes', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    let disposed = 0;
+    const spec = (key: string) =>
+      foreign(
+        (_el, scope) => {
+          scope.disposable(() => {
+            disposed += 1;
+          });
+        },
+        { key }
+      );
+    const handle = mount(host, spec('a'));
+    handle.update(spec('b'));
+    expect(disposed).toBe(1);
+    handle.destroy();
+    expect(disposed).toBe(2);
   });
 });

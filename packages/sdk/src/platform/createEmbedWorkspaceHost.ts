@@ -16,31 +16,32 @@ import type {
   Selection,
   Transaction,
 } from '@codemerge/kernel';
-import type { EditorAPI } from '@codemerge/sdk';
-import { jsonCommandMap } from '../commands/jsonCommands';
-import { emptyEditorDoc, isJsonEditorDoc } from '../io/adapters';
-import { parseText, serializeDoc } from '../io/text';
-import type { JsonWorkspaceHost } from '../surface/workspaceView';
+import type { EditorAPI } from '../types';
 
 export type EmbedWorkspaceController = {
-  host: JsonWorkspaceHost;
+  host: EditorAPI;
   getText(): string;
   setText(text: string): boolean;
   destroy(): void;
 };
 
-/**
- * Isolated JSON SoT + history for a CE `json_embed` atom.
- * Proxies `ui` / `t` / `notify` from the parent WYSIWYG editor so Tree menus work.
- */
+export type EmbedWorkspaceHostOptions = {
+  parent: EditorAPI;
+  seed: DocNode;
+  isValidDoc: (doc: DocNode) => boolean;
+  serialize: (doc: DocNode) => string;
+  parse: (text: string) => { ok: true; doc: DocNode } | { ok: false };
+  invalidMessage: string;
+  commands?: Record<string, Command>;
+};
+
+/** Isolated SoT + history for CE embed atoms (JSON / Markdown). */
 export function createEmbedWorkspaceHost(
-  parent: EditorAPI,
-  initialText: string
+  opts: EmbedWorkspaceHostOptions
 ): EmbedWorkspaceController {
-  const seed = parseText(initialText.trim() || 'null');
-  let state = createState(seed.ok ? seed.doc : emptyEditorDoc({ key: 'value' }));
+  const { parent, isValidDoc, serialize, parse, invalidMessage, commands } = opts;
+  let state = createState(opts.seed);
   const history = createHistory({ schema: parent.schema });
-  const commands = jsonCommandMap();
   const listeners = {
     docChanged: new Set<(s: EditorState) => void>(),
     selectionChanged: new Set<(s: EditorState) => void>(),
@@ -53,8 +54,8 @@ export function createEmbedWorkspaceHost(
   };
 
   const replaceState = (doc: DocNode): void => {
-    if (!isJsonEditorDoc(doc)) {
-      throw new TypeError('embed JSON document must be doc with a single json child');
+    if (!isValidDoc(doc)) {
+      throw new TypeError(invalidMessage);
     }
     state = createState(doc, collapsedAt([0], 0));
     history.clear();
@@ -70,7 +71,7 @@ export function createEmbedWorkspaceHost(
       return;
     }
     const probe = applyTransaction(state, tr, parent.schema).state;
-    if (!isJsonEditorDoc(probe.doc)) {
+    if (!isValidDoc(probe.doc)) {
       return;
     }
     state = history.apply(state, tr);
@@ -88,11 +89,11 @@ export function createEmbedWorkspaceHost(
     return state.doc !== before.doc || state.selection !== before.selection;
   };
 
-  const host: JsonWorkspaceHost = {
+  const host = {
     host: parent.host,
     chrome: parent.chrome,
     schema: parent.schema,
-    contentElement: () => null,
+    contentElement: (): HTMLElement | null => null,
     getState: () => state,
     getJSON: () => docToJSON(state.doc),
     setJSON: (json: JSONDoc | DocNode) => {
@@ -120,7 +121,7 @@ export function createEmbedWorkspaceHost(
     setSoftDeleteMark: () => {},
     run: runLocal,
     command: (name: string) => {
-      const cmd = commands[name];
+      const cmd = commands?.[name];
       if (cmd === undefined) {
         return false;
       }
@@ -145,6 +146,7 @@ export function createEmbedWorkspaceHost(
     on: (...args: Parameters<EditorAPI['on']>) => {
       const [event, cb] = args;
       if (event === 'docChanged' || event === 'selectionChanged') {
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- EditorAPI.on overload
         const fn = cb as (s: EditorState) => void;
         listeners[event].add(fn);
         return () => {
@@ -166,13 +168,13 @@ export function createEmbedWorkspaceHost(
     use: () => {},
     notify: parent.notify.bind(parent),
     listShortcuts: () => [],
-  };
+  } satisfies EditorAPI & { replaceDocument: (json: JSONDoc | DocNode) => void };
 
   return {
     host,
-    getText: () => serializeDoc(state.doc),
+    getText: () => serialize(state.doc),
     setText: (text: string) => {
-      const result = parseText(text.trim() || 'null');
+      const result = parse(text);
       if (!result.ok) {
         return false;
       }

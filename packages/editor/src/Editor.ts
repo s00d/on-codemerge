@@ -331,50 +331,51 @@ export class Editor implements EditorAPI {
   }
 
   private bindShortcuts(): void {
-    this.host.addEventListener('keydown', (e) => {
-      if (e.defaultPrevented) {
-        return;
-      }
-      const mod = e.metaKey || e.ctrlKey;
-      if (!mod) {
-        return;
-      }
-      const key = e.key.toLowerCase(),
-        parts = ['Mod'];
-      if (e.altKey) {
-        parts.push('Alt');
-      }
-      if (e.shiftKey) {
-        parts.push('Shift');
-      }
-      parts.push(key.length === 1 ? key : e.key);
-      const combo = parts.join('-'),
-        hit = this.platform.shortcuts.find((s) => s.keys.toLowerCase() === combo.toLowerCase());
-      if (!hit) {
-        return;
-      }
-      const target = e.target;
-      const inSource = target instanceof Element && target.closest('.ocm-source-editor') !== null;
-      if (inSource && (hit.command === 'undo' || hit.command === 'redo')) {
-        // Source editor owns undo/redo (local stack + Mod-z/y on the textarea).
-        return;
-      }
-      if (hit.command === 'undo') {
-        if (this.undo()) {
-          e.preventDefault();
-        }
-        return;
-      }
-      if (hit.command === 'redo') {
-        if (this.redo()) {
-          e.preventDefault();
-        }
-        return;
-      }
-      e.preventDefault();
-      this.command(hit.command);
-    });
+    this.host.addEventListener('keydown', this.onHostKeydown);
   }
+
+  private readonly onHostKeydown = (e: KeyboardEvent): void => {
+    if (e.defaultPrevented) {
+      return;
+    }
+    const mod = e.metaKey || e.ctrlKey;
+    if (!mod) {
+      return;
+    }
+    const key = e.key.toLowerCase(),
+      parts = ['Mod'];
+    if (e.altKey) {
+      parts.push('Alt');
+    }
+    if (e.shiftKey) {
+      parts.push('Shift');
+    }
+    parts.push(key.length === 1 ? key : e.key);
+    const combo = parts.join('-'),
+      hit = this.platform.shortcuts.find((s) => s.keys.toLowerCase() === combo.toLowerCase());
+    if (!hit) {
+      return;
+    }
+    const target = e.target;
+    const inSource = target instanceof Element && target.closest('.ocm-source-editor') !== null;
+    if (inSource && (hit.command === 'undo' || hit.command === 'redo')) {
+      return;
+    }
+    if (hit.command === 'undo') {
+      if (this.undo()) {
+        e.preventDefault();
+      }
+      return;
+    }
+    if (hit.command === 'redo') {
+      if (this.redo()) {
+        e.preventDefault();
+      }
+      return;
+    }
+    e.preventDefault();
+    this.command(hit.command);
+  };
 
   private resolveDomTarget(target: DomTarget): EventTarget {
     if (target === 'content') {
@@ -837,6 +838,7 @@ export class Editor implements EditorAPI {
       return;
     }
     this.destroyed = true;
+    this.host.removeEventListener('keydown', this.onHostKeydown);
     this.teardownColorScheme();
     this.pageChrome?.destroy();
     this.pageChrome = null;

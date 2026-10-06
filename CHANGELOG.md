@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.7.4] - 2026-10-06
+
+### Changed
+
+- ViewSpec `mount.update` patches keyed nodes instead of wiping the tree; CE atom hosts stay alive across sibling edits; table cells reuse DOM (`rowId`/`colId`)
+- Shared SDK helpers: frame scheduler, window-drag AbortSignal, embed session store, `isEditingInside`, one embed workspace host
+
+### Fixed
+
+- Editor host `keydown` is unbound on destroy; table column-resize listeners abort with the grid; Json tree no longer polls the context menu
+
 ## [2.7.3] - 2026-10-05
 
 ### Added

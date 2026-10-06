@@ -1,4 +1,4 @@
-import { downloadBlob, h, mount } from '@codemerge/sdk';
+import { downloadBlob, h, isEditingInside, mount } from '@codemerge/sdk';
 import type { EditorAPI, MountHandle } from '@codemerge/sdk';
 import type { DocNode, EditorState, JSONDoc } from '@codemerge/kernel';
 
@@ -46,15 +46,6 @@ function replaceDoc(editor: TableWorkspaceHost, doc: DocNode | JSONDoc): void {
     return;
   }
   editor.setJSON(doc);
-}
-
-function isEditingInside(host: HTMLElement): boolean {
-  const ae = document.activeElement;
-  if (!(ae instanceof HTMLElement) || !host.contains(ae)) {
-    return false;
-  }
-  const tag = ae.tagName;
-  return tag === 'INPUT' || tag === 'TEXTAREA' || ae.isContentEditable;
 }
 
 function gridSig(grid: ReturnType<typeof gridFromDoc>): string {
