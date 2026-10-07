@@ -1,35 +1,35 @@
-# Kotlin Spring Boot
+# Kotlin Spring
 
-Same as [Spring Boot](./spring.md): editor in the browser, store **HTML** / Markdown.
+Family: **[Server + Vite](./server-vite.md)** + **[Persistence](./persistence.md)**.
 
-## Editor
+Same as Spring Boot.
 
-```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-
-const editor = new Editor(document.getElementById('editor'), {
-  plugins: createCorePlugins(),
-});
-editor.setHTML('<p>Hello from Kotlin Spring</p>');
-editor.on('docChanged', () => {
-  const html = editor.getHTML();
-  // PUT { html } to your API
-});
-```
-
-### Extract
+Custom URL + CSRF if secured.
 
 ```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
+import '@codemerge/integrate/element';
+import { bindPersistence, restPersistence } from '@codemerge/integrate/protocol';
 
-Kotlin `@RestController` only needs to accept/return that string field.
+const el = document.querySelector('ocm-editor');
+
+function wire() {
+  bindPersistence(
+    el,
+    restPersistence({
+      url: '/your-endpoint', // change me
+      headers: () => ({/* stack auth / CSRF */}),
+      parse: (d) => d.content,
+      serialize: (value) => ({ content: value }),
+    })
+  );
+}
+
+// `<ocm-editor>` may upgrade sync on import — `ready` can fire before listeners attach.
+if (el?.host) wire();
+else el?.addEventListener('ready', wire, { once: true });
+```
 
 ## Related
 
-- [Spring Boot](./spring.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+- [Server + Vite](./server-vite.md)
+- [Persistence](./persistence.md)

@@ -1,53 +1,30 @@
 # Qwik
 
-Lazy-load the editor on the client. Load / save with **HTML** (or Markdown).
+`@codemerge/integrate/qwik` is an alias of `/mount`. Mount only in the browser (`useVisibleTask$`).
 
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Minimal example
+## Value + changes
 
 ```tsx
-import { component$, useVisibleTask$, useSignal } from '@builder.io/qwik';
+import { component$, useSignal, useVisibleTask$ } from '@builder.io/qwik';
+import { mountCodeMergeEditor } from '@codemerge/integrate/qwik';
 
-export const MyEditor = component$(() => {
-  const hostRef = useSignal<HTMLDivElement>();
+export const PageEditor = component$(() => {
+  const el = useSignal<HTMLElement>();
+  const html = useSignal('<p></p>');
 
-  // eslint-disable-next-line qwik/no-use-visible-task
-  useVisibleTask$(async ({ cleanup }) => {
-    const [{ Editor, createCorePlugins }] = await Promise.all([
-      import('on-codemerge'),
-      import('on-codemerge/index.css'),
-      import('on-codemerge/public.css'),
-    ]);
-    const el = hostRef.value;
-    if (!el) return;
-    const editor = new Editor(el, { plugins: createCorePlugins() });
-    editor.setHTML('<p>Hello from Qwik</p>');
-    cleanup(() => editor.destroy());
+  useVisibleTask$(({ cleanup }) => {
+    if (!el.value) return;
+    const host = mountCodeMergeEditor(el.value, {
+      value: html.value,
+      onChange: (v) => {
+        html.value = v;
+      },
+    });
+    cleanup(() => host.destroy());
   });
 
-  return <div ref={hostRef} style={{ minHeight: 300 }} />;
+  return <div ref={el} style={{ minHeight: '300px' }} />;
 });
 ```
 
-### Extract
-
-```ts
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Gotchas
-
-- Only construct `Editor` inside `useVisibleTask$` / browser code.
-- CSS side-effect imports must run in the browser bundle.
-
-## Related
-
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

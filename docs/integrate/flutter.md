@@ -1,63 +1,18 @@
 # Flutter
 
-Host the Vite-built editor in a WebView and bridge **HTML** (or Markdown). Use **`flutter_inappwebview`**.
+Flutter WebView — load HTML that mounts the editor, then [Native bridge](./native-bridge.md).
 
-## Install
+```ts
+import { bindHostBridge } from '@codemerge/integrate/protocol';
 
-```bash
-flutter pub add flutter_inappwebview
-npm install on-codemerge
-```
-
-Ship `assets/editor/` (`index.html`, `editor.js`, `editor.css`) with Vite `base: './'`.
-
-## Web shell
-
-```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-
-const editor = new Editor(document.getElementById('editor'), {
-  plugins: createCorePlugins(),
-});
-
-window.ocmLoadHtml = (html) => editor.setHTML(html);
-window.ocmLoadMarkdown = (md) => editor.setMarkdown(md);
-
-editor.on('docChanged', () => {
-  window.flutter_inappwebview?.callHandler('ocm-save', {
-    html: editor.getHTML(),
-    md: editor.getMarkdown(),
-  });
+bindHostBridge(document.getElementById('editor')!, {
+  targetOrigin: '*', // tighten in production
 });
 ```
 
-## Dart
-
-```dart
-InAppWebView(
-  initialFile: 'assets/editor/index.html',
-  onWebViewCreated: (controller) {
-    controller.addJavaScriptHandler(
-      handlerName: 'ocm-save',
-      callback: (args) {
-        final map = Map<String, dynamic>.from(args.first as Map);
-        // persist map['html'] or map['md']
-        return null;
-      },
-    );
-  },
-  onLoadStop: (controller, url) async {
-    await controller.evaluateJavascript(
-      source: "window.ocmLoadHtml(${jsonEncode(savedHtml)});",
-    );
-  },
-);
-```
+Dart shell: `postMessage({ type: 'ocm-load', value })`, listen for `ocm-change` / `ocm-ready`, send `ocm-destroy` on teardown.
 
 ## Related
 
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+- [Native bridge](./native-bridge.md)
+- [Persistence](./persistence.md)

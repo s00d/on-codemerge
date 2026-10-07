@@ -1,51 +1,35 @@
-# HTMX host
+# HTMX
 
-On-Codemerge in the browser; your HTMX app stores **HTML** (or Markdown).
+Family: **[Server + Vite](./server-vite.md)** + **[Persistence](./persistence.md)**.
 
-HTMX owns navigation; On-Codemerge owns the rich-text island.
+HTMX can swap the host node; editor JS still owns Persistence (avoid full swap of the editor root while mounted).
 
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Editor
+Save via `restPersistence` or HTMX forms separately.
 
 ```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import '@codemerge/integrate/element';
+import { bindPersistence, restPersistence } from '@codemerge/integrate/protocol';
 
-async function main() {
-  const editor = new Editor(document.getElementById('editor'), {
-    plugins: createCorePlugins(),
-  });
-  const { html } = await fetch('/api/doc').then((r) => r.json());
-  editor.setHTML(html ?? '<p>Hello from your HTMX app</p>');
-  editor.on('docChanged', () => {
-    fetch('/api/doc', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ html: editor.getHTML() }),
-    });
-  });
+const el = document.querySelector('ocm-editor');
+
+function wire() {
+  bindPersistence(
+    el,
+    restPersistence({
+      url: '/your-endpoint', // change me
+      headers: () => ({/* stack auth / CSRF */}),
+      parse: (d) => d.content,
+      serialize: (value) => ({ content: value }),
+    })
+  );
 }
-main();
+
+// `<ocm-editor>` may upgrade sync on import — `ready` can fire before listeners attach.
+if (el?.host) wire();
+else el?.addEventListener('ready', wire, { once: true });
 ```
-
-### Extract
-
-```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-Keep the editor in a full page or boosted fragment that loads the Vite bundle once; save with `fetch`/`hx-post` of `{ html }` (avoid swapping the editor DOM on every keystroke).
 
 ## Related
 
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
-- [Integrate overview](/integrate/)
+- [Server + Vite](./server-vite.md)
+- [Persistence](./persistence.md)

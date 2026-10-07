@@ -1,60 +1,37 @@
 # Preact
 
-Same pattern as React with Preact hooks. Load / save with **HTML** (or Markdown).
+`@codemerge/integrate/preact` is an alias of `/mount` (`mountCodeMergeEditor` + CSS). No Preact-specific component.
 
-## Install
-
-```bash
-npm install on-codemerge preact
-```
-
-## Minimal example
+## Value + changes
 
 ```tsx
-import { useEffect, useRef } from 'preact/hooks';
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import { useEffect, useRef, useState } from 'preact/hooks';
+import { mountCodeMergeEditor } from '@codemerge/integrate/preact';
+import type { EditorHostHandle } from '@codemerge/integrate/preact';
 
-export function MyEditor({
-  value = '<p>Hello from Preact</p>',
-  onChange,
-}: {
-  value?: string;
-  onChange?: (html: string) => void;
-}) {
-  const hostRef = useRef<HTMLDivElement>(null);
-  const editorRef = useRef<Editor | null>(null);
-  const onChangeRef = useRef(onChange);
-  onChangeRef.current = onChange;
+export function PageEditor() {
+  const el = useRef<HTMLDivElement>(null);
+  const hostRef = useRef<EditorHostHandle | null>(null);
+  const [html, setHtml] = useState('<p></p>');
 
   useEffect(() => {
-    const el = hostRef.current;
-    if (!el) return;
-    const editor = new Editor(el, { plugins: createCorePlugins() });
-    editor.setHTML(value);
-    editor.on('docChanged', () => onChangeRef.current?.(editor.getHTML()));
-    editorRef.current = editor;
+    if (!el.current) return;
+    hostRef.current = mountCodeMergeEditor(el.current, {
+      value: html,
+      onChange: setHtml,
+    });
     return () => {
-      editor.destroy();
-      editorRef.current = null;
+      hostRef.current?.destroy();
+      hostRef.current = null;
     };
   }, []);
 
-  return <div ref={hostRef} style={{ minHeight: 300 }} />;
+  useEffect(() => {
+    hostRef.current?.setValue(html);
+  }, [html]);
+
+  return <div ref={el} style={{ minHeight: 300 }} />;
 }
 ```
 
-### Extract
-
-```ts
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Related
-
-- [React](./react.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Or `@codemerge/integrate/react` under `preact/compat`. Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

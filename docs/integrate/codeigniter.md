@@ -1,49 +1,35 @@
-# CodeIgniter
+# Codeigniter
 
-On-Codemerge in the browser; CodeIgniter stores **HTML** (or Markdown).
+Family: **[Server + Vite](./server-vite.md)** + **[Persistence](./persistence.md)**.
 
-## Install
+Public JS entry + view partial with `<ocm-editor>`.
 
-```bash
-npm install on-codemerge
-```
-
-## Editor
+Custom URL + headers for CI CSRF filter.
 
 ```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import '@codemerge/integrate/element';
+import { bindPersistence, restPersistence } from '@codemerge/integrate/protocol';
 
-async function main() {
-  const editor = new Editor(document.getElementById('editor'), {
-    plugins: createCorePlugins(),
-  });
-  const { html } = await fetch('/api/doc').then((r) => r.json());
-  editor.setHTML(html ?? '<p>Hello from CodeIgniter</p>');
-  editor.on('docChanged', () => {
-    fetch('/api/doc', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ html: editor.getHTML() }),
-    });
-  });
+const el = document.querySelector('ocm-editor');
+
+function wire() {
+  bindPersistence(
+    el,
+    restPersistence({
+      url: '/your-endpoint', // change me
+      headers: () => ({/* stack auth / CSRF */}),
+      parse: (d) => d.content,
+      serialize: (value) => ({ content: value }),
+    })
+  );
 }
-main();
+
+// `<ocm-editor>` may upgrade sync on import — `ready` can fire before listeners attach.
+if (el?.host) wire();
+else el?.addEventListener('ready', wire, { once: true });
 ```
-
-### Extract
-
-```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-Serve from `public/`; simple controller for `{ html }`.
 
 ## Related
 
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
-- [Integrate overview](/integrate/)
+- [Server + Vite](./server-vite.md)
+- [Persistence](./persistence.md)

@@ -1,61 +1,24 @@
 # Astro
 
-Client island for the editor. Load / save with **HTML** (or Markdown).
+Client-only island — [Meta SSR](./meta-ssr.md). `/astro` is an alias of `/element` (`<ocm-editor>`), not an SSR helper. Prefer a React/Vue island with `client:only`.
 
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Minimal example
-
-`src/components/EditorIsland.tsx` (React island — or use Svelte/Solid islands the same way):
+`src/components/PageEditor.tsx`:
 
 ```tsx
-import { useEffect, useRef } from 'react';
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import { useState } from 'react';
+import { CodeMergeEditor } from '@codemerge/integrate/react';
 
-export default function EditorIsland() {
-  const hostRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const el = hostRef.current;
-    if (!el) return;
-    const editor = new Editor(el, { plugins: createCorePlugins() });
-    editor.setHTML('<p>Hello from Astro</p>');
-    return () => editor.destroy();
-  }, []);
-  return <div ref={hostRef} style={{ minHeight: 300 }} />;
+export function PageEditor() {
+  const [html, setHtml] = useState('<p></p>');
+  return <CodeMergeEditor value={html} format="html" onChange={setHtml} />;
 }
 ```
 
-`src/pages/index.astro`:
-
 ```astro
 ---
-import EditorIsland from '../components/EditorIsland';
+import { PageEditor } from '../components/PageEditor';
 ---
-<EditorIsland client:only="react" />
+<PageEditor client:only="react" />
 ```
 
-### Extract
-
-```ts
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Gotchas
-
-- Use `client:only` (not `client:load`) so SSR never touches the editor DOM.
-- Import CSS from the island module or the page frontmatter.
-
-## Related
-
-- [React](./react.md)
-- [Svelte](./svelte.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Or `<ocm-editor>` + [Server + Vite](./server-vite.md) / [Persistence](./persistence.md).

@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/mermaid",
-  "version": "2.7.4",
+  "version": "2.8.0",
   "description": "Sync Mermaid-subset SVG renderer — typed IR, presentation attrs, no CSS/CDN",
   "keywords": [
     "diagram",

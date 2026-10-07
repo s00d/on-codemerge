@@ -22,7 +22,8 @@ Runs `prepublishOnly` (packages build + check + product builds) then publishes w
 4. `@codemerge/sdk`
 5. `@codemerge/hunspell`
 6. `@codemerge/collaboration-server`
-7. `on-codemerge`
+7. `@codemerge/integrate`
+8. `on-codemerge`
 
 ## Workspace deps
 
@@ -32,15 +33,16 @@ Runs `prepublishOnly` (packages build + check + product builds) then publishes w
 
 ## Consumer guidance
 
-| Need                              | Install                           |
-| --------------------------------- | --------------------------------- |
-| Editor app                        | `on-codemerge` only               |
-| Headless doc/ops                  | `@codemerge/kernel`               |
-| ViewSpec DOM only                 | `@codemerge/view`                 |
-| Mermaid-subset SVG only           | `@codemerge/mermaid`              |
-| Plugin authoring without monolith | `@codemerge/sdk` (+ kernel/view)  |
-| Spell without editor              | `@codemerge/hunspell`             |
-| Demo / self-hosted collab WS      | `@codemerge/collaboration-server` |
+| Need                              | Install                                        |
+| --------------------------------- | ---------------------------------------------- |
+| Editor app                        | `on-codemerge` only                            |
+| Headless doc/ops                  | `@codemerge/kernel`                            |
+| ViewSpec DOM only                 | `@codemerge/view`                              |
+| Mermaid-subset SVG only           | `@codemerge/mermaid`                           |
+| Plugin authoring without monolith | `@codemerge/sdk` (+ kernel/view)               |
+| Spell without editor              | `@codemerge/hunspell`                          |
+| Demo / self-hosted collab WS      | `@codemerge/collaboration-server`              |
+| Host adapters / `<ocm-editor>`    | `@codemerge/integrate` (+ peer `on-codemerge`) |
 
 **Warning:** do not install `on-codemerge` and `@codemerge/sdk` into the same application bundle (duplicate SDK/kernel instances).
 

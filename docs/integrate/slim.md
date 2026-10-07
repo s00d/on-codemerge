@@ -1,49 +1,40 @@
 # Slim
 
-On-Codemerge in the browser; Slim stores **HTML** (or Markdown).
+Family: **[Server + Vite](./server-vite.md)** + **[Persistence](./persistence.md)** + **[Host config](./host-config.md)**.
 
-## Install
+## Delta
 
-```bash
-npm install on-codemerge
-composer require slim/slim slim/psr7
-```
-
-## Editor
+- Bundle a JS entry (Vite/Webpack) that imports `/element` + Persistence.
+- Twig/PHP view outputs `<ocm-editor>`.
+- Point document + media routes at your Slim handlers.
 
 ```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import '@codemerge/integrate/element';
+import { bindPersistence, restPersistence } from '@codemerge/integrate/protocol';
 
-async function main() {
-  const editor = new Editor(document.getElementById('editor'), {
-    plugins: createCorePlugins(),
-  });
-  const { html } = await fetch('/api/doc').then((r) => r.json());
-  editor.setHTML(html ?? '<p>Hello from Slim</p>');
-  editor.on('docChanged', () => {
-    fetch('/api/doc', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ html: editor.getHTML() }),
-    });
-  });
+const el = document.querySelector('ocm-editor');
+
+function wire() {
+  bindPersistence(
+    el,
+    restPersistence({
+      url: '/notes/1',
+      parse: (data) => data.body,
+      serialize: (value) => ({ body: value }),
+    })
+  );
 }
-main();
-```
 
-Avoid top-level `await` unless you raise the Vite target. API body: `{ html }` (or `{ md }`).
-
-### Extract
-
-```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
+el?.addEventListener('ready', wire, { once: true });
+el?.configure({
+  pack: 'default',
+  image: { endpoints: { upload: '/media' } },
+  fileUpload: { endpoints: { upload: '/files', download: '/files' } },
+});
 ```
 
 ## Related
 
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+- [Host config](./host-config.md)
+- [Server + Vite](./server-vite.md)
+- [Persistence](./persistence.md)

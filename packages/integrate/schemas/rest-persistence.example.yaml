@@ -1,0 +1,36 @@
+# Example only — not a required contract.
+# Use restPersistence({ url, parse, serialize }) with ANY path and JSON shape.
+openapi: 3.0.3
+info:
+  title: Example REST persistence (customizable)
+  version: 2.7.4
+  description: >
+    Illustrative endpoints. Replace paths and property names to match your API.
+paths:
+  /your-endpoint:
+    get:
+      summary: Load document (example)
+      responses:
+        '200':
+          description: Any JSON your parse() understands
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+                example:
+                  content: '<p>Hello</p>'
+    put:
+      summary: Save document (example)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              example:
+                content: '<p>Hello</p>'
+      responses:
+        '200':
+          description: Saved

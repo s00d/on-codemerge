@@ -1,61 +1,35 @@
-# NestJS
+# Nestjs
 
-Use On-Codemerge in the browser; NestJS only stores the HTML (or Markdown) string you extract.
+Family: **[Server + Vite](./server-vite.md)** + **[Persistence](./persistence.md)**.
 
-## Install
+Serve frontend assets; Nest controller for your document route.
 
-```bash
-npm install on-codemerge @nestjs/core @nestjs/common @nestjs/platform-express @nestjs/serve-static
-```
-
-## Editor (what matters)
+Inject auth headers in `headers: () => …`.
 
 ```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import '@codemerge/integrate/element';
+import { bindPersistence, restPersistence } from '@codemerge/integrate/protocol';
 
-const editor = new Editor(document.getElementById('editor'), {
-  plugins: createCorePlugins(),
-});
+const el = document.querySelector('ocm-editor');
 
-const { html } = await fetch('/api/doc').then((r) => r.json());
-editor.setHTML(html ?? '<p>Hello from NestJS</p>');
-
-editor.on('docChanged', () => {
-  fetch('/api/doc', {
-    method: 'PUT',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ html: editor.getHTML() }),
-  });
-});
-```
-
-## Tiny API shape (server is secondary)
-
-```ts
-@Controller('api')
-export class DocController {
-  private html = '<p>Hello from NestJS</p>';
-
-  @Get('doc')
-  get() {
-    return { html: this.html };
-  }
-
-  @Put('doc')
-  put(@Body() body: { html: string }) {
-    this.html = body.html;
-    return { html: this.html };
-  }
+function wire() {
+  bindPersistence(
+    el,
+    restPersistence({
+      url: '/your-endpoint', // change me
+      headers: () => ({/* stack auth / CSRF */}),
+      parse: (d) => d.content,
+      serialize: (value) => ({ content: value }),
+    })
+  );
 }
-```
 
-Serve the Vite `dist/` with `ServeStaticModule`. Keep the focus on `setHTML` / `getHTML`.
+// `<ocm-editor>` may upgrade sync on import — `ready` can fire before listeners attach.
+if (el?.host) wire();
+else el?.addEventListener('ready', wire, { once: true });
+```
 
 ## Related
 
-- [Express.js](./express.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+- [Server + Vite](./server-vite.md)
+- [Persistence](./persistence.md)

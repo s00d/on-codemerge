@@ -1,55 +1,33 @@
 # SvelteKit
 
-Client-only editor island. Load / save with **HTML** (or Markdown).
-
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Minimal example
-
-`src/lib/Editor.svelte` — same as [Svelte](./svelte.md).
-
-`+page.svelte`:
+Client-only editor — [Meta SSR](./meta-ssr.md). Prefer SFC from [Svelte](./svelte.md), or `browser` + `mountCodeMergeEditor` from `@codemerge/integrate/sveltekit` (returns `null` on SSR).
 
 ```svelte
-<script>
-  import Editor from '$lib/Editor.svelte';
-</script>
+<script lang="ts">
+  import { onDestroy, onMount } from 'svelte';
+  import { browser, mountCodeMergeEditor } from '@codemerge/integrate/sveltekit';
+  import type { EditorHostHandle } from '@codemerge/integrate';
 
-<Editor value="<p>Hello from SvelteKit</p>" />
-```
+  let el: HTMLDivElement;
+  let html = '<p></p>';
+  let host: EditorHostHandle | null = null;
 
-Keep the editor out of SSR path: import the component only from pages that run in the browser, or wrap with `browser` checks / dynamic import:
+  onMount(() => {
+    if (!browser) return;
+    host = mountCodeMergeEditor(el, {
+      value: html,
+      onChange: (v) => {
+        html = v;
+      },
+    });
+  });
 
-```svelte
-<script>
-  import { browser } from '$app/environment';
-  import Editor from '$lib/Editor.svelte';
+  onDestroy(() => host?.destroy());
 </script>
 
 {#if browser}
-  <Editor />
+  <div bind:this={el} style="min-height:300px"></div>
 {/if}
 ```
 
-### Extract
-
-```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Gotchas
-
-- DOM APIs only in the browser — guard with `browser` or `onMount`.
-- Destroy on navigate away (`onDestroy` in the component).
-
-## Related
-
-- [Svelte](./svelte.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

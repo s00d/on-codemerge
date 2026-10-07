@@ -2,16 +2,20 @@
 
 How the editor presents chrome and how to host it. Day-to-day load/save uses **HTML** or **Markdown**; JSON is the internal model if you need it.
 
+Prefer `@codemerge/integrate` adapters / `<ocm-editor>` for app hosts — see [Integrate overview](/integrate/). This page covers chrome modes and raw `Editor` hosting.
+
 ## Install & CSS
 
 ```bash
-npm install on-codemerge
+npm install on-codemerge @codemerge/integrate
 ```
 
 ```ts
+import { Editor, createCorePlugins } from 'on-codemerge';
 import 'on-codemerge/index.css';
 import 'on-codemerge/public.css';
-import { Editor, createCorePlugins } from 'on-codemerge';
+// Integrate UI entries auto-import those CSS files.
+// or: import { createEditorHost } from '@codemerge/integrate';
 ```
 
 ## Chrome (`bar` / `page`)
@@ -67,18 +71,18 @@ Portals default to `document.body` — override with `setPortalRoot` from `on-co
 
 ### Iframe
 
-Prefer posting HTML or Markdown across the frame (or JSON if you already sync the kernel):
+Prefer [`bindHostBridge`](./native-bridge.md) (`ocm-load` / `ocm-change` with `value`). Raw `Editor` sketch:
 
 ```ts
-// Parent → child
-iframe.contentWindow?.postMessage({ type: 'ocm-load', html: savedHtml }, origin);
+// Parent → child (protocol shape)
+iframe.contentWindow?.postMessage({ type: 'ocm-load', value: savedHtml }, origin);
 
 // Child
 window.addEventListener('message', (ev) => {
-  if (ev.data?.type === 'ocm-load') editor.setHTML(ev.data.html);
+  if (ev.data?.type === 'ocm-load') editor.setHTML(ev.data.value);
 });
 editor.on('docChanged', () => {
-  parent.postMessage({ type: 'ocm-save', html: editor.getHTML() }, parentOrigin);
+  parent.postMessage({ type: 'ocm-change', value: editor.getHTML(), format: 'html' }, parentOrigin);
 });
 ```
 
@@ -92,7 +96,7 @@ editor.getJSON(); // optional kernel snapshot
 
 ## Gotchas
 
-- Import both CSS entry points.
+- Raw `Editor`: import both CSS entry points (`index.css` + `public.css`). Integrate UI entries (`/react`, `/element`, …) load them for you; or `import '@codemerge/integrate/styles'`.
 - Shadow/iframe hosts often need `setPortalRoot`.
 - Construct with `new Editor(el, options)` — no v1 `HTMLEditor` / `editor.init()`.
 

@@ -1,67 +1,24 @@
-# Nuxt 3 / 4
+# Nuxt
 
-Embed behind `<ClientOnly>`. Load / save with **HTML** (or Markdown).
-
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Minimal example
-
-`app/components/OcmEditor.client.vue` (Nuxt 4 `app/` layout — put components under `app/components/`):
+Client-only editor — [Meta SSR](./meta-ssr.md). UI: [Vue 3](./vue3.md) via `@codemerge/integrate/nuxt` (re-exports `/vue` + `clientOnlyHint()`).
 
 ```vue
-<template>
-  <div ref="host" style="min-height: 300px" />
-</template>
-
 <script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref } from 'vue';
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import { ref } from 'vue';
+import { CodeMergeEditor } from '@codemerge/integrate/nuxt';
 
-const host = ref<HTMLElement | null>(null);
-let editor: Editor | null = null;
+const html = ref('<p></p>');
 
-onMounted(() => {
-  if (!host.value) return;
-  editor = new Editor(host.value, { plugins: createCorePlugins() });
-  editor.setHTML('<p>Hello from Nuxt</p>');
-  editor.on('docChanged', () => {
-    const html = editor!.getHTML();
-    // persist html
-  });
-});
-
-onBeforeUnmount(() => {
-  editor?.destroy();
-  editor = null;
-});
+function onChange(value: string) {
+  html.value = value;
+}
 </script>
-```
 
-```vue
 <template>
   <ClientOnly>
-    <OcmEditor />
-    <template #fallback><p>Loading…</p></template>
+    <CodeMergeEditor :value="html" format="html" @change="onChange" />
   </ClientOnly>
 </template>
 ```
 
-### Extract
-
-```ts
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Related
-
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
-- [Integrate overview](/integrate/)
+Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

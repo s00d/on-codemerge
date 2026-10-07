@@ -1,64 +1,38 @@
 # Svelte
 
-Embed On-Codemerge in Svelte 4/5. Load and save with **HTML** (or Markdown).
+SFC: `@codemerge/integrate/Editor.svelte`. Or `createEditorHost` from `@codemerge/integrate/svelte`.
 
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Minimal example
+## Value + changes
 
 ```svelte
 <script>
-  import { onMount, onDestroy } from 'svelte';
-  import { Editor, createCorePlugins } from 'on-codemerge';
-  import 'on-codemerge/index.css';
-  import 'on-codemerge/public.css';
+  import Editor from '@codemerge/integrate/Editor.svelte';
 
-  export let value = '<p>Hello from Svelte</p>';
-  export let onChange = undefined;
-
-  let host;
-  /** @type {import('on-codemerge').Editor | null} */
-  let editor = null;
-
-  onMount(() => {
-    editor = new Editor(host, { plugins: createCorePlugins() });
-    editor.setHTML(value);
-    editor.on('docChanged', () => onChange?.(editor.getHTML()));
-  });
-
-  onDestroy(() => {
-    editor?.destroy();
-    editor = null;
-  });
-
-  $: if (editor && value !== undefined && editor.getHTML() !== value) {
-    editor.setHTML(value);
-  }
+  let html = '<p></p>';
 </script>
 
-<div bind:this={host} style="min-height: 300px"></div>
+<Editor value={html} format="html" on:change={(e) => (html = e.detail.value)} />
 ```
 
-### Extract
+With a plain host:
 
-```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
+```ts
+import { onDestroy, onMount } from 'svelte';
+import { createEditorHost } from '@codemerge/integrate/svelte';
+
+let el: HTMLDivElement;
+let html = '<p></p>';
+let host: ReturnType<typeof createEditorHost> | null = null;
+
+onMount(() => {
+  host = createEditorHost(el, {
+    value: html,
+    onChange: (v) => {
+      html = v;
+    },
+  });
+});
+onDestroy(() => host?.destroy());
 ```
 
-## Gotchas
-
-- Destroy in `onDestroy`.
-- Compare `getHTML()` before re-applying `value`.
-- Import both CSS entry points.
-
-## Related
-
-- [SvelteKit](./sveltekit.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md). Kit: [SvelteKit](./sveltekit.md).

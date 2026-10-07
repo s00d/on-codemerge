@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/kernel",
-  "version": "2.7.4",
+  "version": "2.8.0",
   "description": "Headless document / ops / selection model for CodeMerge editors",
   "license": "MIT",
   "author": "Pavel Kuzmin",

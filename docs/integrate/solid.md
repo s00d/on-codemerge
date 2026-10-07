@@ -1,54 +1,35 @@
-# Solid.js
+# Solid
 
-Embed On-Codemerge in Solid. Load and save with **HTML** (or Markdown).
+`@codemerge/integrate/solid` is an alias of `/mount` (`mountCodeMergeEditor` + CSS). No Solid-specific component.
 
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Minimal example
+## Value + changes
 
 ```tsx
-import { onCleanup, onMount } from 'solid-js';
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import { createEffect, createSignal, onCleanup, onMount } from 'solid-js';
+import { mountCodeMergeEditor } from '@codemerge/integrate/solid';
+import type { EditorHostHandle } from '@codemerge/integrate/solid';
 
-export function MyEditor(props: { value?: string; onChange?: (html: string) => void }) {
-  let host!: HTMLDivElement;
-  let editor: Editor | null = null;
+export function PageEditor() {
+  let el!: HTMLDivElement;
+  const [html, setHtml] = createSignal('<p></p>');
+  let host: EditorHostHandle | null = null;
 
   onMount(() => {
-    editor = new Editor(host, { plugins: createCorePlugins() });
-    editor.setHTML(props.value ?? '<p>Hello from Solid</p>');
-    editor.on('docChanged', () => props.onChange?.(editor!.getHTML()));
+    host = mountCodeMergeEditor(el, {
+      value: html(),
+      onChange: setHtml,
+    });
   });
 
-  onCleanup(() => {
-    editor?.destroy();
-    editor = null;
+  createEffect(() => {
+    const next = html();
+    host?.setValue(next);
   });
 
-  return <div ref={host!} style={{ 'min-height': '300px' }} />;
+  onCleanup(() => host?.destroy());
+
+  return <div ref={el} style={{ 'min-height': '300px' }} />;
 }
 ```
 
-### Extract
-
-```ts
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Gotchas
-
-- Destroy in `onCleanup`.
-- Prefer a prop signal + explicit `setHTML` when syncing from outside.
-
-## Related
-
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

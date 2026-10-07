@@ -25,6 +25,8 @@ export interface EditorOptions {
   chrome?: 'bar' | 'page';
   /** See SharedEditorOptions.toolbar — `{ menus: [] }` for a flat bar (no Insert ▾). */
   toolbar?: SharedEditorOptions['toolbar'];
+  /** Opt-in timing hooks — see SharedEditorOptions.diagnostics. */
+  diagnostics?: SharedEditorOptions['diagnostics'];
 }
 
 function pluginsFrom(editor: object): PluginDefinition[] {

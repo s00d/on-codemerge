@@ -26,6 +26,20 @@ export default defineConfig({
       'on-codemerge/tables': resolve(root, 'apps/tables/src/app.ts'),
       'on-codemerge/app': resolve(root, 'apps/wysiwyg/src/app.ts'),
       'on-codemerge/plugins': resolve(root, 'apps/wysiwyg/src/plugins.ts'),
+      // Must beat bare `on-codemerge` file alias (otherwise `/index.css` dies).
+      'on-codemerge/index.css': resolve(root, 'packages/integrate/src/__tests__/helpers/empty.css'),
+      'on-codemerge/public.css': resolve(
+        root,
+        'packages/integrate/src/__tests__/helpers/empty.css'
+      ),
+      'on-codemerge': resolve(root, 'apps/wysiwyg/src/app.ts'),
+      '@codemerge/integrate/styles': resolve(root, 'packages/integrate/src/styles.ts'),
+      '@codemerge/integrate/vue': resolve(root, 'packages/integrate/src/vue.ts'),
+      '@codemerge/integrate/react': resolve(root, 'packages/integrate/src/react.ts'),
+      '@codemerge/integrate/element': resolve(root, 'packages/integrate/src/element.ts'),
+      '@codemerge/integrate/protocol': resolve(root, 'packages/integrate/src/protocol.ts'),
+      '@codemerge/integrate/mount': resolve(root, 'packages/integrate/src/mount.ts'),
+      '@codemerge/integrate': resolve(root, 'packages/integrate/src/index.ts'),
     },
   },
   css: {
@@ -35,7 +49,16 @@ export default defineConfig({
     {
       name: 'mock-assets',
       enforce: 'pre',
+      resolveId(id) {
+        if (id === 'on-codemerge/index.css' || id === 'on-codemerge/public.css') {
+          return `\0virtual:empty-css:${id}`;
+        }
+        return null;
+      },
       load(id) {
+        if (id.startsWith('\0virtual:empty-css:')) {
+          return 'export default {}';
+        }
         if (id.endsWith('.svg') || id.includes('.svg?')) {
           return 'export default "<svg></svg>"';
         }
@@ -83,6 +106,7 @@ export default defineConfig({
         'packages/view/src/**/*.ts',
         'packages/sdk/src/**/*.ts',
         'packages/editor/src/**/*.ts',
+        'packages/integrate/src/**/*.ts',
         'apps/wysiwyg/src/editor/**/*.ts',
         'apps/wysiwyg/src/view/**/*.ts',
         'apps/wysiwyg/src/io/**/*.ts',
@@ -95,6 +119,7 @@ export default defineConfig({
         '**/__tests__/**',
         '**/__mocks__/**',
         '**/*.d.ts',
+        'packages/integrate/src/shims/**',
         '**/ui/sdk.scss',
         'packages/sdk/src/icons/**',
         'apps/wysiwyg/src/icons/**',

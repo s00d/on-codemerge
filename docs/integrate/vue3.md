@@ -1,76 +1,30 @@
 # Vue 3
 
-Embed On-Codemerge in Vue 3. Load / save with **HTML** (or Markdown).
+`CodeMergeEditor` from `@codemerge/integrate/vue` (CSS auto).
 
 ## Install
 
 ```bash
-npm install on-codemerge
+npm install on-codemerge @codemerge/integrate
 ```
 
-## Minimal example
-
-```vue
-<template>
-  <div ref="host" style="min-height: 300px" />
-</template>
-
-<script setup lang="ts">
-import { onBeforeUnmount, onMounted, ref, watch } from 'vue';
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-
-const props = defineProps<{ modelValue?: string }>();
-const emit = defineEmits<{ 'update:modelValue': [string] }>();
-
-const host = ref<HTMLElement | null>(null);
-let editor: Editor | null = null;
-
-onMounted(() => {
-  if (!host.value) return;
-  editor = new Editor(host.value, { plugins: createCorePlugins() });
-  editor.setHTML(props.modelValue ?? '<p>Hello from Vue 3</p>');
-  editor.on('docChanged', () => emit('update:modelValue', editor!.getHTML()));
-});
-
-onBeforeUnmount(() => {
-  editor?.destroy();
-  editor = null;
-});
-
-watch(
-  () => props.modelValue,
-  (next) => {
-    if (!editor || next === undefined) return;
-    if (editor.getHTML() === next) return;
-    editor.setHTML(next);
-  }
-);
-</script>
-```
+## Value + changes
 
 ```vue
 <script setup lang="ts">
 import { ref } from 'vue';
-import MyEditor from './MyEditor.vue';
-const html = ref('<p>Initial</p>');
+import { CodeMergeEditor } from '@codemerge/integrate/vue';
+
+const html = ref('<p></p>');
+
+function onChange(value: string) {
+  html.value = value;
+}
 </script>
+
 <template>
-  <MyEditor v-model="html" />
+  <CodeMergeEditor :value="html" format="html" @change="onChange" />
 </template>
 ```
 
-### Extract
-
-```ts
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Related
-
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
-- [Integrate overview](/integrate/)
+`@change` → `(value, format)`. Extra construct options via `:host-options` — [Host config](./host-config.md). Load/save: [Persistence](./persistence.md). Options API: [Vue 2](./vue2.md).

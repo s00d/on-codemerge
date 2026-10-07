@@ -1,42 +1,43 @@
 # Integrate
 
-Embed On-Codemerge in a host page. Day-to-day apps load and save **HTML** (`setHTML` / `getHTML`) or **Markdown** (`setMarkdown` / `getMarkdown`).
+Embed On-Codemerge with **`@codemerge/integrate`** (+ peer `on-codemerge`).
 
-JSON (`getJSON` / `setJSON`) is the internal document model — useful for sync / tooling, not the default path.
-
-Install and CSS: [Editor API — Getting Started](/guide/editor#getting-started). Published pages: `getPublishedDocument()`. SDK: [SDK reference](/guide/sdk). Upgrading from 1.x: [Migration v1 → v2](/guide/migration-v1-to-v2).
-
-## Pattern
-
-Every host follows the same lifecycle:
-
-1. Mount a DOM node.
-2. `new Editor(el, { plugins: createCorePlugins() })` (or a surface editor).
-3. `setHTML` / `setMarkdown` / `setText` to load.
-4. Listen for `docChanged` (or poll getters) to save.
-5. Call `editor.destroy()` on unmount.
-
-```ts
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-
-const editor = new Editor(host, { plugins: createCorePlugins() });
-editor.setHTML(initialHtml);
-editor.on('docChanged', () => save(editor.getHTML()));
-// later:
-editor.destroy();
+```bash
+npm install on-codemerge @codemerge/integrate
 ```
 
-## Guides
+**UI guides** show framework state → `value` / `onChange` only. Packs, upload, and document IO live in shared pages below.
 
-Start here, then pick a stack from the left sidebar (Frontend, Meta-frameworks, Backend, Hosts).
+CSS loads with UI entries (`/react`, `/element`, `/mount`, …). Root import is host API only. Explicit: `import '@codemerge/integrate/styles'`. Not pulled by `/protocol`.
 
-| Guide                                 | Topic                                       |
-| ------------------------------------- | ------------------------------------------- |
-| [Chrome & host](./chrome-and-host.md) | `chrome: 'bar' \| 'page'`, portals, hosting |
-| [React](./react.md)                   | React                                       |
-| [Vue 3](./vue3.md)                    | Vue 3                                       |
-| [Next.js](./next.md)                  | Next.js                                     |
+**Aliases (same runtime as the target):** `/preact` `/angular` `/solid` `/qwik` `/backbone` → `/mount`; `/lit` `/astro` → `/element`; `/remix` → `/react`; `/vanilla` → root.
 
-Every other stack guide uses the same mount / unmount pattern above — wrap the host lifecycle in the framework’s effect or component teardown.
+## Start here
+
+| Guide                                    | When                                      |
+| ---------------------------------------- | ----------------------------------------- |
+| [React](./react.md) / [Vue 3](./vue3.md) | pass value + watch changes                |
+| [Host config](./host-config.md)          | plugins pack, upload, locale, collab      |
+| [Persistence](./persistence.md)          | document load/save (`bindPersistence`)    |
+| [Server + Vite](./server-vite.md)        | Laravel / Slim / Express / … + WC         |
+| [Meta SSR](./meta-ssr.md)                | Next / Nuxt / SvelteKit / … (client only) |
+| [Native bridge](./native-bridge.md)      | iframe / Flutter / Tauri postMessage      |
+| [Chrome & host](./chrome-and-host.md)    | `chrome`, portals, raw `Editor`           |
+
+Per-stack pages are **short deltas** — they link back to the family guides above.
+
+## Quick React example
+
+```tsx
+import { useState } from 'react';
+import { CodeMergeEditor } from '@codemerge/integrate/react';
+
+export function App() {
+  const [html, setHtml] = useState('<p></p>');
+  return <CodeMergeEditor value={html} onChange={setHtml} />;
+}
+```
+
+## Advanced
+
+Raw `new Editor` + `createCorePlugins()` — [Chrome & host](./chrome-and-host.md), [Editor API](/guide/editor).

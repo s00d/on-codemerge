@@ -1,41 +1,14 @@
 # Tauri
 
-Desktop shell (Rust) + webview renderer. Load / save with **HTML** (or Markdown).
+WebView host — same as Electron: [Server + Vite](./server-vite.md) + [Persistence](./persistence.md), or [Native bridge](./native-bridge.md) for `postMessage`:
 
-## Install
+```ts
+import { bindHostBridge } from '@codemerge/integrate/protocol';
 
-```bash
-npm install on-codemerge
-```
-
-## Editor (webview)
-
-Same Vite + browser editor as [Electron](./electron.md):
-
-```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
-
-const editor = new Editor(document.getElementById('editor'), {
-  plugins: createCorePlugins(),
-});
-editor.setHTML('<p>Hello from Tauri</p>');
-```
-
-Persist via Tauri commands / filesystem plugins — send `editor.getHTML()` (or Markdown) to Rust, not the kernel JSON, unless you need advanced sync.
-
-### Extract
-
-```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
+bindHostBridge(document.getElementById('editor')!, { targetOrigin: '*' });
 ```
 
 ## Related
 
-- [Electron](./electron.md)
-- [Rust Axum](./rust-axum.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+- [Native bridge](./native-bridge.md)
+- [Persistence](./persistence.md)

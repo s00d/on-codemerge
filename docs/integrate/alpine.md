@@ -1,61 +1,36 @@
-# Alpine.js
+# Alpine
 
-Alpine for UI chrome; On-Codemerge for the rich-text island. Load / save with **HTML** (or Markdown).
+`registerAlpine(Alpine)` from `@codemerge/integrate/alpine` — data component `ocmEditor`.
 
-## Install
-
-```bash
-npm install on-codemerge alpinejs
-```
-
-## Minimal example
+## Value + changes
 
 ```html
-<div x-data="ocmEditor()" x-init="init()" x-on:beforeunload.window="destroy()">
-  <div x-ref="host" style="min-height: 300px"></div>
-  <button type="button" @click="save">Save</button>
-</div>
-
 <script type="module">
   import Alpine from 'alpinejs';
-  import { Editor, createCorePlugins } from 'on-codemerge';
-  import 'on-codemerge/index.css';
-  import 'on-codemerge/public.css';
-
-  Alpine.data('ocmEditor', () => ({
-    editor: null,
-    init() {
-      this.editor = new Editor(this.$refs.host, { plugins: createCorePlugins() });
-      this.editor.setHTML('<p>Hello from Alpine</p>');
-    },
-    save() {
-      const html = this.editor.getHTML();
-      fetch('/api/doc', {
-        method: 'PUT',
-        headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ html }),
-      });
-    },
-    destroy() {
-      this.editor?.destroy();
-      this.editor = null;
-    },
-  }));
-
+  import { registerAlpine } from '@codemerge/integrate/alpine';
+  registerAlpine(Alpine);
   Alpine.start();
 </script>
+
+<div
+  x-data="ocmEditor({ value: '<p></p>' })"
+  x-init="init()"
+  @destroy="destroy()"
+  style="min-height:300px"
+></div>
 ```
 
-### Extract
+`ocmEditor` keeps `value` in Alpine state and updates it on change. Or mount manually:
 
 ```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
+import { mountCodeMergeEditor } from '@codemerge/integrate/alpine';
+
+const host = mountCodeMergeEditor(el, {
+  value: '<p></p>',
+  onChange: (v) => {
+    /* your Alpine / store */
+  },
+});
 ```
 
-## Related
-
-- [HTMX host](./htmx.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

@@ -1,55 +1,15 @@
-# Remix / React Router
+# Remix
 
-Client-only editor route. Load / save with **HTML** (or Markdown).
-
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Minimal example
-
-Same React component as [React](./react.md) / [Next.js](./next.md). In Remix (or React Router 7 framework mode), keep it out of the server render:
+Client-only editor — [Meta SSR](./meta-ssr.md). `@codemerge/integrate/remix` is an alias of `/react` (`CodeMergeEditor`).
 
 ```tsx
-import { ClientOnly } from 'remix-utils/client-only'; // or your own fallback
-import { MyEditor } from './MyEditor';
+import { useState } from 'react';
+import { CodeMergeEditor } from '@codemerge/integrate/remix';
 
-export default function EditorRoute() {
-  return (
-    <ClientOnly fallback={<p>Loading editor…</p>}>
-      {() => <MyEditor value="<p>Hello from Remix</p>" />}
-    </ClientOnly>
-  );
+export default function PageEditor() {
+  const [html, setHtml] = useState('<p></p>');
+  return <CodeMergeEditor value={html} format="html" onChange={setHtml} />;
 }
 ```
 
-Or load HTML in a `loader` and pass it as a prop — still mount the editor only on the client:
-
-```ts
-// loader returns { html }
-export async function loader() {
-  return Response.json({ html: '<p>…</p>' });
-}
-```
-
-### Extract
-
-```ts
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-## Gotchas
-
-- Do not instantiate `Editor` during SSR.
-- Destroy in effect cleanup on route transitions.
-
-## Related
-
-- [React](./react.md)
-- [Next.js](./next.md)
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Integrate overview](/integrate/)
+Mount only in a client route / `ClientOnly` boundary — same rules as [React](./react.md). Packs / upload: [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

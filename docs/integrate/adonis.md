@@ -1,51 +1,35 @@
-# AdonisJS
+# Adonis
 
-On-Codemerge in the browser; AdonisJS stores **HTML** (or Markdown).
+Family: **[Server + Vite](./server-vite.md)** + **[Persistence](./persistence.md)**.
 
-Full-stack Node framework.
+Adonis Vite + Edge: render `<ocm-editor>`; CSRF token from Adonis helpers.
 
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-## Editor
+URL = your Adonis route.
 
 ```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import '@codemerge/integrate/element';
+import { bindPersistence, restPersistence } from '@codemerge/integrate/protocol';
 
-async function main() {
-  const editor = new Editor(document.getElementById('editor'), {
-    plugins: createCorePlugins(),
-  });
-  const { html } = await fetch('/api/doc').then((r) => r.json());
-  editor.setHTML(html ?? '<p>Hello from AdonisJS</p>');
-  editor.on('docChanged', () => {
-    fetch('/api/doc', {
-      method: 'PUT',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ html: editor.getHTML() }),
-    });
-  });
+const el = document.querySelector('ocm-editor');
+
+function wire() {
+  bindPersistence(
+    el,
+    restPersistence({
+      url: '/your-endpoint', // change me
+      headers: () => ({/* stack auth / CSRF */}),
+      parse: (d) => d.content,
+      serialize: (value) => ({ content: value }),
+    })
+  );
 }
-main();
+
+// `<ocm-editor>` may upgrade sync on import — `ready` can fire before listeners attach.
+if (el?.host) wire();
+else el?.addEventListener('ready', wire, { once: true });
 ```
-
-### Extract
-
-```js
-const html = editor.getHTML();
-const md = editor.getMarkdown();
-```
-
-Put the Vite build under `public/` and add an Adonis route for `{ html }`.
 
 ## Related
 
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
-- [Integrate overview](/integrate/)
+- [Server + Vite](./server-vite.md)
+- [Persistence](./persistence.md)

@@ -55,6 +55,11 @@ const pluginSidebar = [
 
 const integrateSidebar = [
   { text: 'Overview', link: '/integrate/' },
+  { text: 'Persistence (load/save)', link: '/integrate/persistence' },
+  { text: 'Host config (upload/plugins)', link: '/integrate/host-config' },
+  { text: 'Server + Vite', link: '/integrate/server-vite' },
+  { text: 'Meta SSR', link: '/integrate/meta-ssr' },
+  { text: 'Native / iframe', link: '/integrate/native-bridge' },
   {
     text: 'Chrome & host',
     link: '/integrate/chrome-and-host',

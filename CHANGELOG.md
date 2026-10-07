@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.8.0] - 2026-10-07
+
+### Added
+
+- First publish of `@codemerge/integrate`: host adapters (React/Vue/Vue2/Svelte/jQuery/Alpine), `<ocm-editor>`, `/mount` aliases, persistence + native `postMessage` bridge, Next/Nuxt/SvelteKit helpers
+- Integrate docs family guides: host config, persistence, server+Vite, meta SSR, native bridge
+
+### Changed
+
+- Integrate package surface flattened (no scaffold CLI); docs examples match real exports and `ready`/CSS side-effect rules
+
 ## [2.7.4] - 2026-10-06
 
 ### Changed

@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.packages.json",
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "rootDir": "src",
+    "paths": {
+      "on-codemerge": ["./src/shims/on-codemerge.d.ts"],
+      "@codemerge/integrate": ["./src/index.ts"],
+      "@codemerge/integrate/styles": ["./src/styles.ts"],
+      "@codemerge/integrate/vue": ["./src/vue.ts"],
+      "@codemerge/integrate/react": ["./src/react.ts"],
+      "@codemerge/integrate/element": ["./src/element.ts"],
+      "@codemerge/integrate/protocol": ["./src/protocol.ts"],
+      "@codemerge/integrate/mount": ["./src/mount.ts"]
+    }
+  },
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+  "exclude": ["src/**/__tests__/**", "src/**/*.test.ts", "src/**/*.svelte"]
+}

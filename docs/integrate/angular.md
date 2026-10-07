@@ -1,72 +1,36 @@
 # Angular
 
-Embed On-Codemerge in an Angular standalone component. Load / save with **HTML** (or Markdown).
+`@codemerge/integrate/angular` is an alias of `/mount` (`mountCodeMergeEditor` + CSS). No Angular component — mount into a host `div`.
 
-## Install
-
-```bash
-npm install on-codemerge
-```
-
-```css
-/* styles.css */
-@import 'on-codemerge/index.css';
-@import 'on-codemerge/public.css';
-```
-
-## Minimal example
+## Value + changes
 
 ```ts
-import {
-  AfterViewInit,
-  Component,
-  ElementRef,
-  EventEmitter,
-  Input,
-  OnDestroy,
-  Output,
-  ViewChild,
-} from '@angular/core';
-import { Editor, createCorePlugins } from 'on-codemerge';
+import { AfterViewInit, Component, ElementRef, OnDestroy, ViewChild } from '@angular/core';
+import { mountCodeMergeEditor } from '@codemerge/integrate/angular';
+import type { EditorHostHandle } from '@codemerge/integrate/angular';
 
 @Component({
   selector: 'app-editor',
-  standalone: true,
-  template: `<div #host style="min-height: 300px"></div>`,
+  template: `<div #host style="min-height:300px"></div>`,
 })
 export class EditorComponent implements AfterViewInit, OnDestroy {
-  @ViewChild('host', { static: true }) host!: ElementRef<HTMLDivElement>;
-  @Input() value = '<p>Hello from Angular</p>';
-  @Output() valueChange = new EventEmitter<string>();
-  private editor: Editor | null = null;
+  @ViewChild('host', { static: true }) hostEl!: ElementRef<HTMLDivElement>;
+  html = '<p></p>';
+  private handle: EditorHostHandle | null = null;
 
-  ngAfterViewInit(): void {
-    this.editor = new Editor(this.host.nativeElement, {
-      plugins: createCorePlugins(),
-    });
-    this.editor.setHTML(this.value);
-    this.editor.on('docChanged', () => {
-      this.valueChange.emit(this.editor!.getHTML());
+  ngAfterViewInit() {
+    this.handle = mountCodeMergeEditor(this.hostEl.nativeElement, {
+      value: this.html,
+      onChange: (value) => {
+        this.html = value;
+      },
     });
   }
 
-  ngOnDestroy(): void {
-    this.editor?.destroy();
-    this.editor = null;
+  ngOnDestroy() {
+    this.handle?.destroy();
   }
 }
 ```
 
-### Extract
-
-```ts
-const html = this.editor!.getHTML();
-const md = this.editor!.getMarkdown();
-```
-
-## Related
-
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
-- [Integrate overview](/integrate/)
+Packs / upload via mount options — [Host config](./host-config.md). Load/save: [Persistence](./persistence.md).

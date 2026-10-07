@@ -1,67 +1,35 @@
 # Go Gin
 
-Use On-Codemerge in the browser; Gin only stores the HTML (or Markdown) string you extract.
+Family: **[Server + Vite](./server-vite.md)** + **[Persistence](./persistence.md)**.
 
-## Install
+`r.Static` + HTML; Gin JSON handlers.
 
-```bash
-npm install on-codemerge
-```
-
-## Editor (what matters)
+Browser `url` matches your Gin route.
 
 ```js
-import { Editor, createCorePlugins } from 'on-codemerge';
-import 'on-codemerge/index.css';
-import 'on-codemerge/public.css';
+import '@codemerge/integrate/element';
+import { bindPersistence, restPersistence } from '@codemerge/integrate/protocol';
 
-const editor = new Editor(document.getElementById('editor'), {
-  plugins: createCorePlugins(),
-});
+const el = document.querySelector('ocm-editor');
 
-// Load from your API (HTML is the usual path)
-const { html } = await fetch('/api/doc').then((r) => r.json());
-editor.setHTML(html ?? '<p>Hello from Gin</p>');
+function wire() {
+  bindPersistence(
+    el,
+    restPersistence({
+      url: '/your-endpoint', // change me
+      headers: () => ({/* stack auth / CSRF */}),
+      parse: (d) => d.content,
+      serialize: (value) => ({ content: value }),
+    })
+  );
+}
 
-// Extract + save
-editor.on('docChanged', () => {
-  const html = editor.getHTML();
-  // or: const md = editor.getMarkdown();
-  fetch('/api/doc', {
-    method: 'PUT',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ html }),
-  });
-});
+// `<ocm-editor>` may upgrade sync on import — `ready` can fire before listeners attach.
+if (el?.host) wire();
+else el?.addEventListener('ready', wire, { once: true });
 ```
-
-Bundle with Vite (or any bundler) and serve `index.html` + assets from Gin like any static SPA.
-
-### Markdown
-
-```js
-editor.setMarkdown(md);
-const md = editor.getMarkdown();
-```
-
-### Optional kernel
-
-```js
-const json = editor.getJSON(); // advanced / internal model
-```
-
-## Tiny API shape (server is secondary)
-
-```go
-// GET  /api/doc  →  { "html": "<p>…</p>" }
-// PUT  /api/doc  ←  { "html": "<p>…</p>" }
-```
-
-Same idea for `"md"` if you store Markdown. Gin static file serving is ordinary — keep the focus on `setHTML` / `getHTML`.
 
 ## Related
 
-- [Chrome & host](./chrome-and-host.md)
-- [Editor API](/guide/editor)
-- [Plugins overview](/plugins/)
-- [Integrate overview](/integrate/)
+- [Server + Vite](./server-vite.md)
+- [Persistence](./persistence.md)

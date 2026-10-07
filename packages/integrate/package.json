@@ -1,0 +1,350 @@
+{
+  "name": "@codemerge/integrate",
+  "version": "2.8.0",
+  "description": "Universal host adapters for on-codemerge (UI frameworks, Web Component)",
+  "keywords": [
+    "codemerge",
+    "editor",
+    "integrate",
+    "on-codemerge",
+    "react",
+    "svelte",
+    "vue",
+    "web-component",
+    "wysiwyg"
+  ],
+  "homepage": "https://s00d.github.io/on-codemerge/integrate/",
+  "bugs": {
+    "url": "https://github.com/s00d/on-codemerge/issues"
+  },
+  "license": "MIT",
+  "author": "Pavel Kuzmin",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/s00d/on-codemerge.git",
+    "directory": "packages/integrate"
+  },
+  "files": [
+    "dist",
+    "schemas",
+    "src/Editor.svelte",
+    "README.md",
+    "LICENSE"
+  ],
+  "type": "module",
+  "sideEffects": [
+    "./dist/styles.mjs",
+    "./dist/styles.cjs",
+    "./dist/element.mjs",
+    "./dist/element.cjs",
+    "./dist/mount.mjs",
+    "./dist/mount.cjs",
+    "./dist/react.mjs",
+    "./dist/react.cjs",
+    "./dist/vue.mjs",
+    "./dist/vue.cjs",
+    "./dist/vue2.mjs",
+    "./dist/vue2.cjs",
+    "./dist/svelte.mjs",
+    "./dist/svelte.cjs",
+    "./dist/jquery.mjs",
+    "./dist/jquery.cjs",
+    "./dist/alpine.mjs",
+    "./dist/alpine.cjs",
+    "./dist/sveltekit.mjs",
+    "./dist/sveltekit.cjs"
+  ],
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "svelte": "./src/Editor.svelte",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./styles": {
+      "import": {
+        "types": "./dist/styles.d.ts",
+        "default": "./dist/styles.mjs"
+      },
+      "require": {
+        "types": "./dist/styles.d.cts",
+        "default": "./dist/styles.cjs"
+      }
+    },
+    "./vanilla": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./element": {
+      "import": {
+        "types": "./dist/element.d.ts",
+        "default": "./dist/element.mjs"
+      },
+      "require": {
+        "types": "./dist/element.d.cts",
+        "default": "./dist/element.cjs"
+      }
+    },
+    "./lit": {
+      "import": {
+        "types": "./dist/element.d.ts",
+        "default": "./dist/element.mjs"
+      },
+      "require": {
+        "types": "./dist/element.d.cts",
+        "default": "./dist/element.cjs"
+      }
+    },
+    "./astro": {
+      "import": {
+        "types": "./dist/element.d.ts",
+        "default": "./dist/element.mjs"
+      },
+      "require": {
+        "types": "./dist/element.d.cts",
+        "default": "./dist/element.cjs"
+      }
+    },
+    "./protocol": {
+      "import": {
+        "types": "./dist/protocol.d.ts",
+        "default": "./dist/protocol.mjs"
+      },
+      "require": {
+        "types": "./dist/protocol.d.cts",
+        "default": "./dist/protocol.cjs"
+      }
+    },
+    "./mount": {
+      "import": {
+        "types": "./dist/mount.d.ts",
+        "default": "./dist/mount.mjs"
+      },
+      "require": {
+        "types": "./dist/mount.d.cts",
+        "default": "./dist/mount.cjs"
+      }
+    },
+    "./angular": {
+      "import": {
+        "types": "./dist/mount.d.ts",
+        "default": "./dist/mount.mjs"
+      },
+      "require": {
+        "types": "./dist/mount.d.cts",
+        "default": "./dist/mount.cjs"
+      }
+    },
+    "./preact": {
+      "import": {
+        "types": "./dist/mount.d.ts",
+        "default": "./dist/mount.mjs"
+      },
+      "require": {
+        "types": "./dist/mount.d.cts",
+        "default": "./dist/mount.cjs"
+      }
+    },
+    "./qwik": {
+      "import": {
+        "types": "./dist/mount.d.ts",
+        "default": "./dist/mount.mjs"
+      },
+      "require": {
+        "types": "./dist/mount.d.cts",
+        "default": "./dist/mount.cjs"
+      }
+    },
+    "./solid": {
+      "import": {
+        "types": "./dist/mount.d.ts",
+        "default": "./dist/mount.mjs"
+      },
+      "require": {
+        "types": "./dist/mount.d.cts",
+        "default": "./dist/mount.cjs"
+      }
+    },
+    "./backbone": {
+      "import": {
+        "types": "./dist/mount.d.ts",
+        "default": "./dist/mount.mjs"
+      },
+      "require": {
+        "types": "./dist/mount.d.cts",
+        "default": "./dist/mount.cjs"
+      }
+    },
+    "./react": {
+      "import": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.mjs"
+      },
+      "require": {
+        "types": "./dist/react.d.cts",
+        "default": "./dist/react.cjs"
+      }
+    },
+    "./remix": {
+      "import": {
+        "types": "./dist/react.d.ts",
+        "default": "./dist/react.mjs"
+      },
+      "require": {
+        "types": "./dist/react.d.cts",
+        "default": "./dist/react.cjs"
+      }
+    },
+    "./vue": {
+      "import": {
+        "types": "./dist/vue.d.ts",
+        "default": "./dist/vue.mjs"
+      },
+      "require": {
+        "types": "./dist/vue.d.cts",
+        "default": "./dist/vue.cjs"
+      }
+    },
+    "./vue2": {
+      "import": {
+        "types": "./dist/vue2.d.ts",
+        "default": "./dist/vue2.mjs"
+      },
+      "require": {
+        "types": "./dist/vue2.d.cts",
+        "default": "./dist/vue2.cjs"
+      }
+    },
+    "./svelte": {
+      "import": {
+        "types": "./dist/svelte.d.ts",
+        "default": "./dist/svelte.mjs"
+      },
+      "require": {
+        "types": "./dist/svelte.d.cts",
+        "default": "./dist/svelte.cjs"
+      }
+    },
+    "./jquery": {
+      "import": {
+        "types": "./dist/jquery.d.ts",
+        "default": "./dist/jquery.mjs"
+      },
+      "require": {
+        "types": "./dist/jquery.d.cts",
+        "default": "./dist/jquery.cjs"
+      }
+    },
+    "./alpine": {
+      "import": {
+        "types": "./dist/alpine.d.ts",
+        "default": "./dist/alpine.mjs"
+      },
+      "require": {
+        "types": "./dist/alpine.d.cts",
+        "default": "./dist/alpine.cjs"
+      }
+    },
+    "./next": {
+      "import": {
+        "types": "./dist/next.d.ts",
+        "default": "./dist/next.mjs"
+      },
+      "require": {
+        "types": "./dist/next.d.cts",
+        "default": "./dist/next.cjs"
+      }
+    },
+    "./nuxt": {
+      "import": {
+        "types": "./dist/nuxt.d.ts",
+        "default": "./dist/nuxt.mjs"
+      },
+      "require": {
+        "types": "./dist/nuxt.d.cts",
+        "default": "./dist/nuxt.cjs"
+      }
+    },
+    "./sveltekit": {
+      "import": {
+        "types": "./dist/sveltekit.d.ts",
+        "default": "./dist/sveltekit.mjs"
+      },
+      "require": {
+        "types": "./dist/sveltekit.d.cts",
+        "default": "./dist/sveltekit.cjs"
+      }
+    },
+    "./Editor.svelte": "./src/Editor.svelte",
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vite build",
+    "publint": "publint --strict",
+    "prepublishOnly": "pnpm run build && pnpm run publint"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "on-codemerge": "workspace:^",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vue": "catalog:"
+  },
+  "peerDependencies": {
+    "alpinejs": ">=2",
+    "jquery": ">=2.2",
+    "next": ">=12",
+    "nuxt": ">=3",
+    "on-codemerge": "workspace:^",
+    "react": ">=16.8",
+    "react-dom": ">=16.8",
+    "svelte": ">=3",
+    "vue": ">=2.7"
+  },
+  "peerDependenciesMeta": {
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    },
+    "svelte": {
+      "optional": true
+    },
+    "jquery": {
+      "optional": true
+    },
+    "alpinejs": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "nuxt": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
