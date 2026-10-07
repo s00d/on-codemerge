@@ -30,6 +30,8 @@ editor.destroy();
 
 ## Guides
 
+Start here, then pick a stack from the left sidebar (Frontend, Meta-frameworks, Backend, Hosts).
+
 | Guide                                 | Topic                                       |
 | ------------------------------------- | ------------------------------------------- |
 | [Chrome & host](./chrome-and-host.md) | `chrome: 'bar' \| 'page'`, portals, hosting |
@@ -37,4 +39,4 @@ editor.destroy();
 | [Vue 3](./vue3.md)                    | Vue 3                                       |
 | [Next.js](./next.md)                  | Next.js                                     |
 
-Other stacks (Vue 2, Svelte, Angular, Express, …) use the same mount/unmount pattern above — wrap the host lifecycle in the framework’s effect / component teardown.
+Every other stack guide uses the same mount / unmount pattern above — wrap the host lifecycle in the framework’s effect or component teardown.
