@@ -165,10 +165,17 @@ const integrateSidebar = [
   },
 ];
 
+const base = process.env.NODE_ENV === 'production' ? '/on-codemerge/' : '/';
+
 export default defineConfig({
-  base: process.env.NODE_ENV === 'production' ? '/on-codemerge/' : '/',
+  base,
   cleanUrls: true,
   description: 'Virtual document WYSIWYG editor',
+  head: [
+    ['link', { rel: 'icon', href: `${base}favicon.svg`, type: 'image/svg+xml' }],
+    ['link', { rel: 'icon', href: `${base}favicon.ico`, sizes: 'any' }],
+    ['link', { rel: 'apple-touch-icon', href: `${base}apple-touch-icon.png` }],
+  ],
   lang: 'en-US',
   lastUpdated: true,
   themeConfig: {
@@ -179,6 +186,7 @@ export default defineConfig({
     footer: {
       message: 'Released under the MIT License.',
     },
+    logo: { src: '/favicon.svg', alt: 'on-CodeMerge' },
     nav: [
       { text: 'Home', link: '/' },
       {

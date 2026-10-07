@@ -86,7 +86,9 @@ const e2eAppConfig = defineConfig({
 
 const libConfig = defineConfig({
   ...shared,
+  // Favicons in root `public/` for `pnpm dev`; keep them out of npm `dist/`.
   build: {
+    copyPublicDir: false,
     assetsInlineLimit: 0,
     cssCodeSplit: true,
     lib: {
