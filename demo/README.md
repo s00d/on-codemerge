@@ -1,6 +1,9 @@
 # on-codemerge demo
 
-pnpm stand against the **published package**: WYSIWYG, JSON, Markdown, Code, Forms, Charts, Calendar, Tables.
+pnpm stand against the **published packages**:
+
+- `/` — WYSIWYG, JSON, Markdown, Code, Forms, Charts, Calendar, Tables
+- `/integrate.html` — `@codemerge/integrate` adapters (React, Vue 3, element, mount, jQuery; no Angular)
 
 This folder is pnpm-only (`pnpm install` / `pnpm dev` / `pnpm test:e2e`). Do not use the npm CLI.
 
@@ -8,9 +11,10 @@ This folder is pnpm-only (`pnpm install` / `pnpm dev` / `pnpm test:e2e`). Do not
 
 ```bash
 cd demo
-pnpm add on-codemerge@2.8.0
+pnpm install
 pnpm exec playwright install chromium   # once
-pnpm dev                                # http://localhost:3001
+pnpm dev                                # http://localhost:3001/integrate.html
+pnpm build && pnpm test:e2e:integrate   # preview + adapter e2e
 ```
 
 ## From monorepo (local `dist` only)

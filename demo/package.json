@@ -9,13 +9,22 @@
     "build": "vite build",
     "preview": "vite preview --host 127.0.0.1 --port 4177",
     "test:e2e": "playwright test",
-    "test:e2e:ui": "playwright test --ui"
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:integrate": "playwright test e2e/integrate.spec.ts"
   },
   "dependencies": {
-    "on-codemerge": "2.7.4"
+    "@codemerge/integrate": "2.8.0",
+    "jquery": "^3.7.1",
+    "on-codemerge": "2.8.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "vue": "^3.5.0"
   },
   "devDependencies": {
     "@playwright/test": "^1.63.0",
+    "@types/jquery": "^3.5.32",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
     "typescript": "^5.8.3",
     "vite": "^6.3.5"
   }

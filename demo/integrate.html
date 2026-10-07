@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <title>@codemerge/integrate — stand</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f4f5;
+        --card: #fff;
+        --border: #e4e4e7;
+        --text: #18181b;
+        --muted: #71717a;
+        --accent: #0284c7;
+        --ok: #15803d;
+        --bad: #b91c1c;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family:
+          ui-sans-serif,
+          system-ui,
+          -apple-system,
+          Segoe UI,
+          sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 48px;
+      }
+      header h1 {
+        margin: 0 0 4px;
+        font-size: 1.35rem;
+      }
+      header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.9rem;
+      }
+      .meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px 16px;
+        margin: 16px 0;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .meta strong {
+        color: var(--text);
+      }
+      .tabs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .tabs button {
+        border: 1px solid var(--border);
+        background: var(--card);
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+        font: inherit;
+      }
+      .tabs button[aria-selected='true'] {
+        border-color: var(--accent);
+        color: var(--accent);
+        font-weight: 600;
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 12px;
+      }
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+      .toolbar button,
+      .toolbar input {
+        font: inherit;
+      }
+      .toolbar button {
+        border: 1px solid var(--border);
+        background: #fafafa;
+        border-radius: 8px;
+        padding: 8px 12px;
+        cursor: pointer;
+      }
+      .toolbar button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #fff;
+      }
+      .toolbar input {
+        flex: 1;
+        min-width: 180px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 8px 10px;
+      }
+      #host {
+        min-height: 280px;
+        border: 1px dashed var(--border);
+        border-radius: 8px;
+        overflow: hidden;
+      }
+      .state {
+        display: grid;
+        gap: 8px;
+      }
+      .state label {
+        font-size: 0.8rem;
+        color: var(--muted);
+      }
+      .state pre {
+        margin: 0;
+        padding: 10px 12px;
+        background: #fafafa;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 0.8rem;
+        white-space: pre-wrap;
+        word-break: break-word;
+        max-height: 160px;
+        overflow: auto;
+      }
+      #errors {
+        color: var(--bad);
+        white-space: pre-wrap;
+        font-size: 0.85rem;
+      }
+      #status.ok {
+        color: var(--ok);
+      }
+      #status.bad {
+        color: var(--bad);
+      }
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>@codemerge/integrate stand</h1>
+        <p>
+          Published npm packages — no Angular. Switch adapters, push external value, confirm
+          <code>onChange</code>.
+          <a href="/">← main demo</a>
+        </p>
+      </header>
+
+      <div class="meta">
+        <span>on-codemerge: <strong id="ocm-version">…</strong></span>
+        <span>integrate: <strong id="int-version">…</strong></span>
+        <span>adapter: <strong id="adapter-label">react</strong></span>
+        <span id="status">booting…</span>
+      </div>
+
+      <div class="tabs" role="tablist" id="tabs">
+        <button type="button" data-adapter="react" aria-selected="true">React</button>
+        <button type="button" data-adapter="vue" aria-selected="false">Vue 3</button>
+        <button type="button" data-adapter="element" aria-selected="false">element</button>
+        <button type="button" data-adapter="mount" aria-selected="false">mount</button>
+        <button type="button" data-adapter="jquery" aria-selected="false">jQuery</button>
+      </div>
+
+      <div class="card">
+        <div class="toolbar">
+          <button type="button" class="primary" id="btn-set-a">Set value A</button>
+          <button type="button" id="btn-set-b">Set value B</button>
+          <button type="button" id="btn-clear">Clear</button>
+          <input id="custom-value" placeholder="custom HTML → Apply" />
+          <button type="button" id="btn-apply">Apply</button>
+        </div>
+        <div id="host"></div>
+      </div>
+
+      <div class="card state">
+        <label>External state (updated via onChange / change)</label>
+        <pre id="external-value"></pre>
+        <label>Last event</label>
+        <pre id="last-event">—</pre>
+        <div id="errors"></div>
+      </div>
+    </div>
+    <script type="module" src="/integrate.ts"></script>
+  </body>
+</html>
