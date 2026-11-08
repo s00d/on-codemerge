@@ -23,7 +23,9 @@ export default defineNuxtConfig({
 
   // Prebuilt editor CSS (Tailwind-scanned at package build). Processing the
   // editor SCSS through the docs pipeline would miss ViewSpec classes.
-  css: ['~/assets/css/main.css', resolve(root, 'dist/index.css'), resolve(root, 'dist/public.css')],
+  // Order matters: both are Tailwind v4 `@layer utilities`, and inside one layer the later
+  // rule wins — editor CSS last would let its `.flex` beat the site's `lg:grid`.
+  css: [resolve(root, 'dist/index.css'), resolve(root, 'dist/public.css'), '~/assets/css/main.css'],
 
   app: {
     baseURL,
