@@ -166,6 +166,12 @@ function cellEditEvents(
       if (ev.key === 'Escape') {
         ev.preventDefault();
         ev.stopPropagation();
+        // Grid root never sees this key (propagation stopped): revert the draft and leave edit here.
+        const t = ev.target;
+        if (t instanceof HTMLInputElement || t instanceof HTMLTextAreaElement) {
+          t.value = stringifyCell(ctx.value);
+        }
+        ctx.onEndEdit();
       }
     },
     blur: () => {

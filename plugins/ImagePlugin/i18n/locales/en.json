@@ -31,6 +31,7 @@
     "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
     "galleryDeleting": "Deleting…",
     "galleryDeleteFailed": "Failed to delete image",
-    "browse": "browse"
+    "browse": "browse",
+    "copyFailed": "Could not copy image"
   }
 }

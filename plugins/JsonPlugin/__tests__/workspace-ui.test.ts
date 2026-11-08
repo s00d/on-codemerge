@@ -8,7 +8,8 @@ import {
   emptyEditorDoc,
   docToValue,
 } from 'on-codemerge/json';
-import { changeType, duplicateNode, pathToDot, pathToJsonPointer } from '../commands/jsonCommands';
+import { changeType, duplicateNode } from '../commands/mutate';
+import { pathToDot, pathToJsonPointer } from '../commands/path';
 import { applyTransaction, createState, runCommand } from '@codemerge/kernel';
 import { toEditorDoc, valueToDoc } from '../io/adapters';
 

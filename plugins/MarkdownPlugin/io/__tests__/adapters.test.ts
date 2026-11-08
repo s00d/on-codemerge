@@ -55,4 +55,10 @@ describe('MarkdownPlugin io adapters', () => {
     expect(doc.content?.[0]?.type).toBe('callout');
     expect(doc.content?.[0]?.attrs?.variant).toBe('info');
   });
+
+  it('GFM table / image docs are valid Markdown SoT', () => {
+    const doc = emptyEditorDoc('| a | b |\n|---|---|\n| 1 | 2 |\n\n![x](https://a/b.png)\n');
+    expect(doc.content?.map((n) => n.type)).toStrictEqual(['tableGrid', 'image']);
+    expect(isMarkdownEditorDoc(doc)).toBe(true);
+  });
 });

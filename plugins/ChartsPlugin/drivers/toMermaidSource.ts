@@ -7,8 +7,14 @@ export function isMermaidChartType(type: ChartType): boolean {
   return MERMAID_TYPES.has(type);
 }
 
+/** One mermaid line: a newline would start a new statement. */
+function oneLine(s: string): string {
+  return s.replaceAll(/[\r\n]+/g, ' ').trim();
+}
+
+/** Mermaid quoted strings have no escape — the first `"` closes — so swap `"` for `'`. */
 function q(s: string): string {
-  return `"${s.replaceAll('\\', '\\\\').replaceAll('"', '\\"')}"`;
+  return `"${oneLine(s).replaceAll('"', "'")}"`;
 }
 
 function categoriesFrom(series: ChartSeries[]): string[] {
@@ -47,6 +53,7 @@ function xyChartSource(
   const cats = categoriesFrom(series);
   const kind = type;
   let max = 0;
+  let min = 0;
   const mode = options.mode ?? 'default';
   const lines: string[] = ['xychart-beta'];
   if (options.title !== undefined && options.title !== '') {
@@ -66,20 +73,18 @@ function xyChartSource(
     }
     for (const v of vals) {
       max = Math.max(max, v);
+      min = Math.min(min, v);
     }
     const name = s.name.trim() !== '' ? ` ${q(s.name)}` : '';
     seriesBlocks.push(`  ${kind}${name} [${vals.join(', ')}]`);
   }
-  if (max <= 0) {
+  if (max <= 0 && min === 0) {
     max = 1;
   }
+  // Axis spans min(0, data) → max(0, data) so negative values are not clipped.
   const yTitle = options.yAxis?.title;
-  if (yTitle !== undefined && yTitle !== '') {
-    lines.push(`  y-axis ${q(yTitle)} 0 --> ${max}`);
-  } else {
-    lines.push(`  y-axis 0 --> ${max}`);
-  }
-  lines.push(...seriesBlocks);
+  const yName = yTitle !== undefined && yTitle !== '' ? `${q(yTitle)} ` : '';
+  lines.push(`  y-axis ${yName}${min} --> ${max}`, ...seriesBlocks);
   return `${lines.join('\n')}\n`;
 }
 
@@ -88,7 +93,7 @@ function pieSource(donut: boolean, series: ChartSeries[], options: ChartOptions)
   const header = donut ? 'pie showData donut' : 'pie showData';
   const lines: string[] = [header];
   if (options.title !== undefined && options.title !== '') {
-    lines.push(`  title ${options.title}`);
+    lines.push(`  title ${oneLine(options.title)}`);
   }
   for (const p of data) {
     lines.push(`  ${q(p.label)} : ${p.value}`);
@@ -100,7 +105,7 @@ function radarSource(series: ChartSeries[], options: ChartOptions): string {
   const cats = categoriesFrom(series);
   const lines: string[] = ['radar-beta'];
   if (options.title !== undefined && options.title !== '') {
-    lines.push(`  title ${options.title}`);
+    lines.push(`  title ${oneLine(options.title)}`);
   }
   if (cats.length > 0) {
     lines.push(`  axis ${cats.map((c, i) => `a${i}[${q(c)}]`).join(', ')}`);

@@ -21,15 +21,14 @@ export class TemplateManager {
   private readonly storageKey = 'html-editor-templates';
 
   public getTemplates(): Template[] {
-    const stored = localStorage.getItem(this.storageKey);
-    if (stored === null || stored === '') {
+    let parsed: unknown;
+    try {
+      // Corrupt JSON / blocked storage must not crash the templates popup.
+      parsed = JSON.parse(localStorage.getItem(this.storageKey) || '[]');
+    } catch {
       return [];
     }
-    const parsed: unknown = JSON.parse(stored);
-    if (!Array.isArray(parsed)) {
-      return [];
-    }
-    return parsed.filter(isTemplate);
+    return Array.isArray(parsed) ? parsed.filter(isTemplate) : [];
   }
 
   public saveTemplate(data: CreateTemplateData): Template {

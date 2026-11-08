@@ -15,8 +15,10 @@ const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> 
  * Markdown snapshot timeline + viewer (WYSIWYG).
  * Kernel undo/redo stack and toolbar buttons live on `@codemerge/editor` (not here).
  */
+/** Snapshot debounce: `getMarkdown()` serializes the whole doc. */
+export const HISTORY_SNAPSHOT_DEBOUNCE_MS = 500;
+
 export function HistoryPlugin() {
-  const historyManager = new HistoryManager();
   let openHistory: (() => void) | null = null;
 
   return definePlugin({
@@ -34,16 +36,41 @@ export function HistoryPlugin() {
       );
       const editor = ctx.editor;
       const viewer = new HistoryViewerModal(editor, ctx.scope);
+      // Per setup: a re-setup (destroy + new editor) must not inherit old snapshots.
+      const historyManager = new HistoryManager();
       historyManager.addState(editor.getMarkdown());
 
+      let timer: ReturnType<typeof setTimeout> | null = null;
+      const flush = () => {
+        if (timer !== null) {
+          clearTimeout(timer);
+          timer = null;
+          historyManager.addState(editor.getMarkdown());
+        }
+      };
+
       openHistory = () => {
+        flush();
         viewer.show(historyManager.getStates(), historyManager.getCurrentIndex(), (md) => {
           editor.setMarkdown(md);
         });
       };
 
       ctx.on('docChanged', () => {
-        historyManager.addState(editor.getMarkdown());
+        if (timer !== null) {
+          clearTimeout(timer);
+        }
+        timer = setTimeout(() => {
+          timer = null;
+          historyManager.addState(editor.getMarkdown());
+        }, HISTORY_SNAPSHOT_DEBOUNCE_MS);
+      });
+      ctx.disposable(() => {
+        if (timer !== null) {
+          clearTimeout(timer);
+          timer = null;
+        }
+        openHistory = null;
       });
 
       ctx.toolbar.add({

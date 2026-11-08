@@ -2,7 +2,15 @@
  * @jest-environment jsdom
  */
 import { afterEach, describe, expect, it } from 'vitest';
-import { clearPortalRoot, foreign, h, mount, teleport, viewToHtml } from '../index';
+import {
+  DisposableScope,
+  clearPortalRoot,
+  foreign,
+  h,
+  mount,
+  teleport,
+  viewToHtml,
+} from '../index';
 
 describe('@codemerge/view', () => {
   afterEach(() => {
@@ -46,6 +54,60 @@ describe('@codemerge/view', () => {
     const portal = document.querySelector('[data-ocm-portal="popup"] .modal');
     expect(portal?.textContent).toBe('Hi');
     handle.destroy();
+  });
+
+  it('binds events without an on* element property (focusout / composition)', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const seen: string[] = [];
+    mount(
+      host,
+      h('input', {
+        ref: 'i',
+        on: {
+          focusout: () => seen.push('focusout'),
+          compositionstart: () => seen.push('compositionstart'),
+        },
+      })
+    );
+    const input = host.querySelector('input');
+    input?.dispatchEvent(new FocusEvent('focusout'));
+    input?.dispatchEvent(new CompositionEvent('compositionstart'));
+    expect(seen).toStrictEqual(['focusout', 'compositionstart']);
+  });
+
+  it('teleport children update on patch', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const handle = mount(host, h('div', null, teleport('popup', h('span', { class: 't' }, 'A'))));
+    handle.update(h('div', null, teleport('popup', h('span', { class: 't' }, 'B'))));
+    const spans = document.querySelectorAll('[data-ocm-portal="popup"] .t');
+    expect(spans).toHaveLength(1);
+    expect(spans[0]?.textContent).toBe('B');
+    handle.destroy();
+    expect(document.querySelectorAll('[data-ocm-portal="popup"] .t')).toHaveLength(0);
+  });
+
+  it('dispose survives unregister during teardown; disposed child leaves parent', () => {
+    expect.hasAssertions();
+    const scope = new DisposableScope();
+    const ran: string[] = [];
+    const offA = scope.disposable(() => ran.push('a'));
+    scope.disposable(() => {
+      ran.push('b');
+      offA();
+    });
+    scope.disposable(() => ran.push('c'));
+    scope.dispose();
+    expect(ran).toStrictEqual(['c', 'b', 'a']);
+
+    const parent = new DisposableScope();
+    const child = parent.child();
+    child.dispose();
+    expect(Reflect.get(parent, 'stack')).toHaveLength(0);
+    parent.dispose();
   });
 
   it('viewToHtml serializes a detached tree', () => {

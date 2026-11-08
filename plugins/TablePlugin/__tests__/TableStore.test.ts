@@ -2,7 +2,6 @@ import { describe, expect, it } from 'vitest';
 import { TableStore } from '../grid/TableStore';
 import { emptyTableGrid } from '../io/adapters';
 import { selectionToTsv, pasteTsv } from '../grid/clipboard';
-import { visibleWindow } from '../grid/viewport';
 
 describe('TableStore', () => {
   it('setCell / addRow / deleteColumn', () => {
@@ -65,12 +64,6 @@ describe('TableStore', () => {
     store.setView({ quickFilter: 'ban', sort: [] });
     expect(store.getDerived().rowIds).toStrictEqual(['r1']);
     store.destroy();
-  });
-
-  it('viewport windows rows', () => {
-    const w = visibleWindow(320, 100, 5000, 32, 2);
-    expect(w.end - w.start).toBeLessThan(20);
-    expect(w.start).toBeGreaterThan(0);
   });
 
   it('setEditing notifies subscribers', () => {

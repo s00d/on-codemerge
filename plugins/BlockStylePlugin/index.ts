@@ -2,7 +2,7 @@ import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
 
 import type { DocNode } from '@codemerge/kernel';
-import { definePlugin, setBlockAttr, core } from '@codemerge/sdk';
+import { definePlugin, setBlockAttr, core, blockAttrTargetPath } from '@codemerge/sdk';
 import { styleIcon } from '@codemerge/sdk/icons';
 import { blockStylePanel } from './components/BlockStylePanel';
 import { draftToStyleJson, emptyDraft, parseStyleAttr } from './constants';
@@ -22,7 +22,8 @@ function readSelectedBlockStyle(editor: {
     return emptyDraft();
   }
   try {
-    const node = core.getNodeAt(editor.getJSON().doc, [path[0]]);
+    const doc = editor.getJSON().doc;
+    const node = core.getNodeAt(doc, blockAttrTargetPath(doc, path));
     return parseStyleAttr(node.attrs?.style);
   } catch {
     return emptyDraft();

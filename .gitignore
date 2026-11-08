@@ -41,8 +41,6 @@ dist-ssr
 *.sln
 *.sw?
 
-docs/.vitepress/dist
-docs/.vitepress/cache
 
 coverage
 test/.untestutils
@@ -57,5 +55,5 @@ blob-report
 package-lock.json
 
 # Docs DEV media store — keep sample-* committed, ignore user uploads
-docs/.vitepress/dev-api/uploads/*
-!docs/.vitepress/dev-api/uploads/sample-*
+docs/dev-api/uploads/*
+!docs/dev-api/uploads/sample-*

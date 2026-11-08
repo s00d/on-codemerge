@@ -9,8 +9,6 @@ import {
 } from './adapters';
 import { MAX_TABLE_BYTES } from './constants';
 
-export { MAX_TABLE_BYTES };
-
 export type ParseTextResult = { ok: true; doc: DocNode } | { ok: false; error: ParseError };
 
 export function parseText(text: string): ParseTextResult {

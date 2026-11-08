@@ -13,7 +13,6 @@ export default defineConfig({
       '@codemerge/view': resolve(root, 'packages/view/src'),
       '@codemerge/mermaid': resolve(root, 'packages/mermaid/src'),
       '@codemerge/sdk': resolve(root, 'packages/sdk/src'),
-      '@codemerge/sdk/icons': resolve(root, 'packages/sdk/src/icons/index.ts'),
       '@ocm/wysiwyg': resolve(root, 'apps/wysiwyg/src'),
       ...ocmPluginAliases(root),
       // Public import paths resolve to source in unit tests.
@@ -110,7 +109,6 @@ export default defineConfig({
         'apps/wysiwyg/src/editor/**/*.ts',
         'apps/wysiwyg/src/view/**/*.ts',
         'apps/wysiwyg/src/io/**/*.ts',
-        'apps/wysiwyg/src/platform/**/*.ts',
         'plugins/index.ts',
         'apps/wysiwyg/src/app.ts',
       ],

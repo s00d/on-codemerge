@@ -36,7 +36,7 @@ export function safeHref(href: string): string | null {
   return null;
 }
 
-function calloutHtml(variant: string, block: MdElementBlock, bodyHtml: string): string {
+export function calloutHtml(variant: string, block: MdElementBlock, bodyHtml: string): string {
   const title = block.title.trim()
     ? `<div class="ocm-md-callout__title">${escapeHtml(block.title.trim())}</div>`
     : '';

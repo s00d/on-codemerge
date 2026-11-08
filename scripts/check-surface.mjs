@@ -124,15 +124,10 @@ async function checkExport(name) {
   }
 
   const appDts = resolve(root, `dist/apps/${name}/src/app.d.ts`);
-  const parseDts = resolve(root, 'dist/apps/wysiwyg/src/utils/parseSoT.d.ts');
   const entryDts = resolve(root, `dist/${name}.d.ts`);
   const entryDcts = resolve(root, `dist/${name}.d.cts`);
   if (!existsSync(appDts)) {
     console.error(tag, 'missing nested app d.ts', appDts);
-    process.exit(1);
-  }
-  if (!existsSync(parseDts)) {
-    console.error(tag, 'missing parseSoT.d.ts', parseDts);
     process.exit(1);
   }
   if (!existsSync(entryDts)) {

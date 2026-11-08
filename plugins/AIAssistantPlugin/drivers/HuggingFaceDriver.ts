@@ -1,114 +1,37 @@
-import type { AIDriver, DriverOptions, OptionsDescription } from './AIDriver';
+import { BearerCompletionsDriver } from './BearerCompletionsDriver';
 
-export interface HuggingFaceOptions extends DriverOptions {
-  topK?: number; // Top-k sampling
-  repetitionPenalty?: number; // Штраф за повторения
-  maxLength?: number; // Штраф за повторения
-}
-
-export class HuggingFaceDriver implements AIDriver<HuggingFaceOptions> {
-  private readonly apiKey: string;
-
+/** HF Inference Providers router, OpenAI-compatible (api-inference.huggingface.co is retired). */
+export class HuggingFaceDriver extends BearerCompletionsDriver {
   constructor(apiKey: string) {
-    this.apiKey = apiKey;
-  }
-
-  getOptionsDescription(): OptionsDescription {
-    return {
-      model: {
-        type: 'list',
-        label: 'Model',
-        options: [
-          'gpt2',
-          'gpt-neo-125M',
-          'gpt-neo-1.3B',
-          'gpt-neo-2.7B',
-          'gpt-j-6B',
-          'EleutherAI/gpt-neox-20b',
-          'bigscience/bloom-560m',
-          'bigscience/bloom-1b7',
-          'bigscience/bloom-3b',
-          'bigscience/bloom-7b1',
-          'bigscience/bloom',
-          't5-small',
-          't5-base',
-          't5-large',
-          't5-3b',
-          't5-11b',
-          'facebook/bart-base',
-          'facebook/bart-large',
-          'facebook/bart-large-cnn',
-          'google/pegasus-xsum',
-          'google/pegasus-large',
-        ],
-        default: 'gpt2',
-      },
-      maxLength: {
-        type: 'number',
-        label: 'Max Length',
-        default: 100,
-      },
-      temperature: {
-        type: 'number',
-        label: 'Temperature',
-        default: 0.7,
-      },
-      topP: {
-        type: 'number',
-        label: 'Top P',
-        default: 1,
-      },
-      topK: {
-        type: 'number',
-        label: 'Top K',
-        default: 50,
-      },
-      repetitionPenalty: {
-        type: 'number',
-        label: 'Repetition Penalty',
-        default: 1,
-      },
-    };
-  }
-
-  async generateText(prompt: string, options?: HuggingFaceOptions): Promise<string> {
-    const response = await fetch(
-      `https://api-inference.huggingface.co/models/${options?.model ?? 'gpt2'}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${this.apiKey}`,
+    super(apiKey, {
+      label: 'Hugging Face',
+      url: 'https://router.huggingface.co/v1/chat/completions',
+      description: {
+        model: {
+          type: 'list',
+          label: 'Model',
+          options: [
+            'meta-llama/Llama-3.1-8B-Instruct',
+            'meta-llama/Llama-3.3-70B-Instruct',
+            'Qwen/Qwen2.5-7B-Instruct',
+            'Qwen/Qwen2.5-Coder-32B-Instruct',
+            'mistralai/Mistral-7B-Instruct-v0.3',
+            'google/gemma-2-9b-it',
+            'deepseek-ai/DeepSeek-V3',
+          ],
+          default: 'meta-llama/Llama-3.1-8B-Instruct',
         },
-        body: JSON.stringify({
-          inputs: prompt,
-          parameters: {
-            max_length: options?.maxLength ?? 100,
-            temperature: options?.temperature ?? 0.7,
-            top_p: options?.topP ?? 1,
-            top_k: options?.topK ?? 50,
-            repetition_penalty: options?.repetitionPenalty ?? 1,
-          },
-        }),
-      }
-    );
-
-    if (!response.ok) {
-      throw new Error('Failed to generate text with Hugging Face');
-    }
-
-    const data: unknown = await response.json();
-    if (!Array.isArray(data) || data.length === 0) {
-      throw new Error('Invalid AI response');
-    }
-    const first: unknown = data[0];
-    if (first === null || typeof first !== 'object' || !('generated_text' in first)) {
-      throw new TypeError('Invalid AI response');
-    }
-    const generated: unknown = Reflect.get(first, 'generated_text');
-    if (typeof generated !== 'string') {
-      throw new TypeError('Invalid AI response');
-    }
-    return generated;
+        maxTokens: { type: 'number', label: 'Max Tokens', default: 100 },
+        temperature: { type: 'number', label: 'Temperature', default: 0.7 },
+        topP: { type: 'number', label: 'Top P', default: 1 },
+      },
+      buildBody: (prompt, options) => ({
+        model: options?.model || 'meta-llama/Llama-3.1-8B-Instruct',
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: options?.maxTokens ?? 100,
+        temperature: options?.temperature ?? 0.7,
+        top_p: options?.topP ?? 1,
+      }),
+    });
   }
 }

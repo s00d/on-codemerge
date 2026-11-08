@@ -162,6 +162,7 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
       let peers: PresencePeer[] = [];
       let client: CollabClient | null = null;
       let disposePresence: (() => void) | null = null;
+      let disposed = false;
 
       // Drop legacy ?userId= from the address bar so copy-paste can't clone identity.
       if (urlParams.has('userId') && globalThis.location && globalThis.history) {
@@ -175,6 +176,20 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
           return rest.getToken();
         }
         return rest.token ?? '';
+      };
+
+      // `read` / `comment` roles: the client reports `readonly` and reverts doc edits; also stop
+      // the content surface from accepting typing. Restores the previous value afterwards.
+      let lockedEditable: { el: HTMLElement; prev: string } | null = null;
+      const syncEditable = () => {
+        const el = editor.contentElement();
+        if (status === 'readonly' && el && !lockedEditable) {
+          lockedEditable = { el, prev: el.contentEditable };
+          el.contentEditable = 'false';
+        } else if (status !== 'readonly' && lockedEditable) {
+          lockedEditable.el.contentEditable = lockedEditable.prev;
+          lockedEditable = null;
+        }
       };
 
       const refreshPresenceUi = () => {
@@ -344,6 +359,10 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
       const start = () => {
         void (async () => {
           const token = await getToken();
+          // Editor destroyed while the token was pending: don't leak a live socket.
+          if (disposed) {
+            return;
+          }
           if (!token) {
             editor.notify(editor.t('common.collaborationRequiresATokenMatchingCollabToken'));
             return;
@@ -364,6 +383,7 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
             onBroadcast: rest.onBroadcast,
             onStatus: (s) => {
               status = s;
+              syncEditable();
               rest.onStatus?.(s);
               refreshChrome();
             },
@@ -393,6 +413,7 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
         disposePresence?.();
         disposePresence = null;
         status = 'idle';
+        syncEditable();
         peers = [];
         refreshChrome();
       };
@@ -420,6 +441,7 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
       });
 
       ctx.disposable(() => {
+        disposed = true;
         stop();
         handles.delete(editor);
       });

@@ -7,14 +7,13 @@ export function renderCodeBlockDom(
   t: (k: string) => string,
   onEdit?: () => void
 ): HTMLElement {
-  const uniqueId = `code-block-${Math.random().toString(36).slice(2, 11)}`;
   const copyLabel = t('common.copy');
   const copied = t('common.copied');
 
   const tok = safeLangToken(language);
   const langClass = language.trim() ? `language-${tok}` : undefined;
   const { el } = renderDetached(
-    h('div', { class: 'code-block', attrs: { id: uniqueId } }, [
+    h('div', { class: 'code-block' }, [
       h('div', { class: 'code-header' }, [
         h('span', { class: 'code-language' }, language),
         h(
@@ -32,7 +31,8 @@ export function renderCodeBlockDom(
                 if (!(btn instanceof HTMLButtonElement)) {
                   return;
                 }
-                const codeElement = document.querySelector(`#${uniqueId}`)?.querySelector('code');
+                // Own block, not a document-wide id lookup (fails when detached / in a shadow root).
+                const codeElement = btn.closest('.code-block')?.querySelector('code');
                 if (!codeElement) {
                   return;
                 }

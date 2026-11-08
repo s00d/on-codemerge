@@ -46,11 +46,8 @@ const lazyKey = (id: string | undefined, url: string, index: number) => `${id ??
 
 function findTableGridPath(doc: { content?: { type: string }[] }, path: number[]): number[] | null {
   const i = path[0];
-  if (i !== undefined && doc.content?.[i]?.type === 'tableGrid') {
-    return [i];
-  }
-  const found = (doc.content ?? []).findIndex((n) => n.type === 'tableGrid');
-  return found >= 0 ? [found] : null;
+  // Selection only — never guess another table in the doc.
+  return i !== undefined && doc.content?.[i]?.type === 'tableGrid' ? [i] : null;
 }
 
 export {
@@ -83,7 +80,8 @@ export type {
   CellValue,
   CellStyle,
 } from './io/adapters';
-export { parseText, serializeText, serializeDoc, MAX_TABLE_BYTES } from './io/text';
+export { parseText, serializeText, serializeDoc } from './io/text';
+export { MAX_TABLE_BYTES } from './io/constants';
 export type { ParseTextResult } from './io/text';
 export { defaultTableToolbar } from './chrome/defaultToolbar';
 export type {
@@ -133,12 +131,20 @@ function sourceFromLazy(config: LazyTableConfig): TableGridSource {
 async function applyGridSource(
   editor: EditorAPI,
   path: number[],
-  src: TableGridSource
+  src: TableGridSource,
+  id: string | undefined
 ): Promise<boolean> {
   const { matrix, hasHeader } = await fetchLazyMatrix(lazyConfigFromSource(src));
+  // The doc may have changed during the fetch — re-resolve so we never overwrite another block.
+  const blocks = editor.getJSON().doc.content ?? [];
+  const at = id === undefined ? (path[0] ?? -1) : blocks.findIndex((n) => n.id === id);
+  const node = blocks[at];
+  if (node?.type !== 'tableGrid' || normalizeTableGrid(node.attrs).source?.url !== src.url) {
+    return false;
+  }
   const next = gridFromMatrix(matrix, hasHeader);
   next.source = src;
-  return editor.run(() => [{ type: 'set_attrs', path, attrs: attrsFromGrid(next) }]);
+  return editor.run(() => [{ type: 'set_attrs', path: [at], attrs: attrsFromGrid(next) }]);
 }
 
 export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition {
@@ -365,7 +371,7 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
         void (async () => {
           inFlight.add(key);
           try {
-            if (await applyGridSource(editor, gp, src)) {
+            if (await applyGridSource(editor, gp, src, node?.id)) {
               loadedKeys.add(key);
             }
           } catch (error) {
@@ -413,13 +419,14 @@ export function TablePlugin(options: TablePluginOptions = {}): PluginDefinition 
           inFlight.add(key);
           void (async () => {
             try {
-              if (await applyGridSource(editor, [i], src)) {
-                loadedKeys.add(key);
-              }
+              await applyGridSource(editor, [i], src, block.id);
             } catch {
               /* leave placeholder */
             } finally {
               inFlight.delete(key);
+              // Attempted counts as loaded: a failing URL must not refetch on every docChanged.
+              // fillTable (refreshLazy) clears the key for an explicit retry.
+              loadedKeys.add(key);
             }
           })();
         }

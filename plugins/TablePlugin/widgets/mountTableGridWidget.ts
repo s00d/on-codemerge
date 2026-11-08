@@ -14,6 +14,9 @@ export const TABLE_ATOM_DEFAULT_H = 240;
 type EmbedSession = {
   store: TableStore;
   lastSig: string;
+  /** Latest mount — the store outlives widget remounts, so commits must not close over a stale host. */
+  host: HTMLElement;
+  onCommit: MountTableGridWidgetOptions['onCommit'];
 };
 
 /** Survive contenteditable widget remounts; keyed per parent editor. */
@@ -64,8 +67,8 @@ export function mountTableGridWidget(
 ): void {
   host.className = 'ocm-atom ocm-table-atom';
   const fillWidth = !(typeof opts.width === 'number' && opts.width > 0);
-  let boxW = pxSize(opts.width, host.clientWidth || 640, TABLE_ATOM_MIN_W);
-  let boxH = pxSize(opts.height, TABLE_ATOM_DEFAULT_H, TABLE_ATOM_MIN_H);
+  const boxW = pxSize(opts.width, host.clientWidth || 640, TABLE_ATOM_MIN_W);
+  const boxH = pxSize(opts.height, TABLE_ATOM_DEFAULT_H, TABLE_ATOM_MIN_H);
   applyAtomBox(host, boxW, boxH, fillWidth);
 
   const key = opts.path.join('.');
@@ -86,19 +89,23 @@ export function mountTableGridWidget(
             return;
           }
           live.lastSig = next;
-          opts.onCommit(doc, {
-            width: Math.max(TABLE_ATOM_MIN_W, host.offsetWidth),
-            height: Math.max(TABLE_ATOM_MIN_H, host.offsetHeight),
+          live.onCommit(doc, {
+            width: Math.max(TABLE_ATOM_MIN_W, live.host.offsetWidth),
+            height: Math.max(TABLE_ATOM_MIN_H, live.host.offsetHeight),
           });
         },
       }),
       lastSig: incomingSig,
+      host,
+      onCommit: opts.onCommit,
     };
     sessions.set(key, session);
   } else if (incomingSig !== session.lastSig && incomingSig !== sigOf(session.store.getDoc())) {
     session.store.setDoc(incoming);
     session.lastSig = incomingSig;
   }
+  session.host = host;
+  session.onCommit = opts.onCommit;
   const sessionRef = session;
 
   const handle: MountHandle = mount(
@@ -146,8 +153,6 @@ export function mountTableGridWidget(
           applyAtomBox(host, width, height, false);
         },
         onResizeEnd: (width, height) => {
-          boxW = width;
-          boxH = height;
           applyAtomBox(host, width, height, false);
           opts.onResize({ width, height });
         },

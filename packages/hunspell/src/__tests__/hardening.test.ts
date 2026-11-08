@@ -30,4 +30,11 @@ describe('hunspell hardening bounds', () => {
     const dict = createDictionary('SET UTF-8\n', '1\ncat\n');
     expect(dict.suggest('x'.repeat(65))).toStrictEqual([]);
   });
+
+  it('suggest does not trip over Object.prototype keys', () => {
+    const dict = createDictionary('SET UTF-8\nTRY abc\n', '1\ncat\n');
+    for (const word of ['constructor', '__proto__', 'toString', 'hasOwnProperty']) {
+      expect(Array.isArray(dict.suggest(word))).toBe(true);
+    }
+  });
 });

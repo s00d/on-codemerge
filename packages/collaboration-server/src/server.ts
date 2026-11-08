@@ -1,10 +1,11 @@
 import http from 'node:http';
+import { randomUUID } from 'node:crypto';
 import type { IncomingMessage, Server as HttpServer, ServerResponse } from 'node:http';
 import { WebSocketServer, type WebSocket } from 'ws';
 import type { AuthAdapter, AuthSession } from './auth';
 import { PROTOCOL_VERSION, parseClientMessage, type ServerMessage } from './protocol';
 import { PresenceHub } from './presence';
-import { RoomManager, type ClientConn } from './room';
+import { RoomManager, canEditDoc, type ClientConn } from './room';
 import type { CollabStore } from './store/types';
 import { createWebhookEmitter, type WebhookConfig } from './webhooks';
 import type { RedisFanout } from './redis';
@@ -44,6 +45,34 @@ export type CollaborationServer = {
 
 const CAPS = ['presence', 'oplog', 'versions', 'rest', 'webhooks', 'comments'] as const;
 
+/** Comment channel limits (threads live in memory per live room). */
+const MAX_COMMENT_THREADS = 2000;
+const MAX_COMMENT_BODY = 10_000;
+
+/** Cap for REST bodies and single WS messages. */
+const MAX_REST_BODY_BYTES = 8 * 1024 * 1024;
+
+class BodyTooLargeError extends Error {}
+
+async function readBody(req: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  let size = 0;
+  for await (const c of req) {
+    const chunk = c as Buffer;
+    size += chunk.byteLength;
+    if (size > MAX_REST_BODY_BYTES) {
+      throw new BodyTooLargeError();
+    }
+    chunks.push(chunk);
+  }
+  return Buffer.concat(chunks).toString('utf8');
+}
+
+function sendJson(res: ServerResponse, status: number, body: unknown): void {
+  res.writeHead(status, { 'content-type': 'application/json' });
+  res.end(JSON.stringify(body));
+}
+
 export async function createCollaborationServer(
   opts: CollaborationServerOptions
 ): Promise<CollaborationServer> {
@@ -67,6 +96,8 @@ export async function createCollaborationServer(
   let wss: WebSocketServer | null = null;
   let ownedServer: HttpServer | null = null;
   let redisUnsub: (() => void) | Promise<void> | null = null;
+  /** Tags our Redis publishes so we don't re-deliver our own acks to local clients. */
+  const instanceId = randomUUID();
 
   const fanoutLocal = (docId: string, msg: ServerMessage, except?: WebSocket) => {
     const set = rooms.clients(docId);
@@ -81,17 +112,24 @@ export async function createCollaborationServer(
   const fanout = (docId: string, msg: ServerMessage, except?: WebSocket) => {
     fanoutLocal(docId, msg, except);
     if (opts.redis && msg.type === 'ack') {
-      void opts.redis.publish(`room:${docId}`, JSON.stringify(msg));
+      void opts.redis
+        .publish(`room:${docId}`, JSON.stringify({ ...msg, origin: instanceId }))
+        .catch(() => {
+          /* fanout is best-effort */
+        });
     }
   };
 
-  const rooms = new RoomManager(opts.store, presence, fanout, webhook);
+  // Comment threads are ephemeral (in-memory): drop them when the room unloads.
+  const rooms = new RoomManager(opts.store, presence, fanout, webhook, (docId) => {
+    commentThreads.delete(docId);
+  });
 
   if (opts.redis) {
     redisUnsub = await opts.redis.subscribe('room:*', (message) => {
       try {
-        const msg = JSON.parse(message) as ServerMessage;
-        if (msg.type === 'ack' && 'docId' in msg) {
+        const { origin, ...msg } = JSON.parse(message) as ServerMessage & { origin?: string };
+        if (origin !== instanceId && msg.type === 'ack' && 'docId' in msg) {
           fanoutLocal(msg.docId, msg);
         }
       } catch {
@@ -174,8 +212,7 @@ export async function createCollaborationServer(
     }
 
     if (msg.type === 'join') {
-      const init = await rooms.join(conn, msg.docId, msg.snapshot);
-      send(ws, init);
+      await rooms.join(conn, msg.docId, msg.snapshot, msg.sinceVersion, msg.clientId);
       return;
     }
 
@@ -194,7 +231,7 @@ export async function createCollaborationServer(
         });
         return;
       }
-      await rooms.submit(conn, msg.docId, msg.baseVersion, msg.ops, msg.clientSeq);
+      await rooms.submit(conn, msg.docId, msg.baseVersion, msg.ops, msg.clientSeq, msg.clientId);
       return;
     }
 
@@ -208,23 +245,55 @@ export async function createCollaborationServer(
     }
 
     if (msg.type === 'comment') {
-      if (!conn.session || conn.docId !== msg.docId) {
+      const session = conn.session;
+      if (!session || conn.docId !== msg.docId) {
         return;
       }
-      if (conn.session.role === 'read' && msg.action === 'add') {
+      if (session.role === 'read') {
         send(ws, { type: 'error', reason: 'readonly' });
         return;
       }
-      let list = commentThreads.get(msg.docId) ?? [];
+      const list = commentThreads.get(msg.docId) ?? [];
+      const existing = list.find((t) => t.id === msg.thread.id);
+      const isAuthor = existing?.authorId === session.userId;
+      let next = list;
       if (msg.action === 'add') {
-        list = [...list.filter((t) => t.id !== msg.thread.id), msg.thread];
-      } else if (msg.action === 'resolve') {
-        list = list.map((t) => (t.id === msg.thread.id ? { ...t, resolved: true } : t));
-      } else if (msg.action === 'remove') {
-        list = list.filter((t) => t.id !== msg.thread.id);
+        const { body, anchor } = msg.thread;
+        if (typeof body !== 'string' || typeof anchor !== 'object' || anchor === null) {
+          send(ws, { type: 'error', reason: 'comment_invalid' });
+          return;
+        }
+        if (body.length > MAX_COMMENT_BODY) {
+          send(ws, { type: 'error', reason: 'comment_too_large' });
+          return;
+        }
+        if (existing && !isAuthor) {
+          send(ws, { type: 'error', reason: 'comment_forbidden' });
+          return;
+        }
+        if (!existing && list.length >= MAX_COMMENT_THREADS) {
+          send(ws, { type: 'error', reason: 'comment_limit' });
+          return;
+        }
+        // authorId comes from the session, never from the client payload.
+        const thread = { ...msg.thread, authorId: session.userId };
+        next = [...list.filter((t) => t.id !== thread.id), thread];
+      } else if (existing) {
+        // resolve: author or a doc editor; remove: author only (no admin/owner roles exist).
+        const allowed = isAuthor || (msg.action === 'resolve' && canEditDoc(session));
+        if (!allowed) {
+          send(ws, { type: 'error', reason: 'comment_forbidden' });
+          return;
+        }
+        next =
+          msg.action === 'resolve'
+            ? list.map((t) => (t.id === existing.id ? { ...t, resolved: true } : t))
+            : list.filter((t) => t.id !== existing.id);
+      } else {
+        return;
       }
-      commentThreads.set(msg.docId, list);
-      fanout(msg.docId, { type: 'comment', docId: msg.docId, threads: list });
+      commentThreads.set(msg.docId, next);
+      fanout(msg.docId, { type: 'comment', docId: msg.docId, threads: next });
       webhook('comment.changed', { docId: msg.docId, action: msg.action });
     }
   }
@@ -239,7 +308,10 @@ export async function createCollaborationServer(
     };
     conns.set(ws, conn);
     ws.on('message', (data) => {
-      void onMessage(ws, data as Buffer);
+      // A throwing auth adapter / store must not become an unhandled rejection (process crash).
+      onMessage(ws, data as Buffer).catch(() => {
+        send(ws, { type: 'error', reason: 'internal_error' });
+      });
     });
     ws.on('close', () => {
       rooms.leave(conn);
@@ -275,16 +347,20 @@ export async function createCollaborationServer(
     if (!roomMatch) {
       return false;
     }
-    const docId = decodeURIComponent(roomMatch[1]!);
+    let docId: string;
+    try {
+      docId = decodeURIComponent(roomMatch[1]!);
+    } catch {
+      sendJson(res, 400, { error: 'bad_doc_id' });
+      return true;
+    }
     const isVersions = Boolean(roomMatch[2]);
 
+    // REST takes the token from `Authorization: Bearer` only: query strings leak into
+    // access logs, proxies and Referer. (WS auth is the in-band `auth` message.)
     const authHeader = req.headers.authorization;
     const token =
-      typeof authHeader === 'string' && authHeader.startsWith('Bearer ')
-        ? authHeader.slice(7)
-        : typeof url.searchParams.get('token') === 'string'
-          ? url.searchParams.get('token')!
-          : '';
+      typeof authHeader === 'string' && authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
     const session = await opts.auth.verify(token, { docId });
     if (!session) {
       res.writeHead(401, { 'content-type': 'application/json' });
@@ -317,15 +393,17 @@ export async function createCollaborationServer(
       return true;
     }
 
+    if (req.method === 'POST' && !canEditDoc(session)) {
+      sendJson(res, 403, { error: 'readonly' });
+      return true;
+    }
+
     if (req.method === 'POST' && isVersions) {
-      const chunks: Buffer[] = [];
-      for await (const c of req) {
-        chunks.push(c as Buffer);
-      }
+      const raw = await readBody(req);
       let name = 'snapshot';
       try {
-        const body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as { name?: string };
-        if (typeof body.name === 'string') {
+        const body = JSON.parse(raw) as { name?: unknown } | null;
+        if (typeof body?.name === 'string') {
           name = body.name;
         }
       } catch {
@@ -343,31 +421,30 @@ export async function createCollaborationServer(
     }
 
     if (req.method === 'POST' && !isVersions) {
-      if (session.role === 'read') {
-        res.writeHead(403, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ error: 'readonly' }));
+      let body: { ops?: unknown; baseVersion?: number } | null;
+      try {
+        body = JSON.parse(await readBody(req)) as { ops?: unknown; baseVersion?: number } | null;
+      } catch (err) {
+        if (err instanceof BodyTooLargeError) {
+          throw err;
+        }
+        sendJson(res, 400, { error: 'bad_json' });
         return true;
       }
-      const chunks: Buffer[] = [];
-      for await (const c of req) {
-        chunks.push(c as Buffer);
+      const ops = body?.ops ?? [];
+      if (!Array.isArray(ops)) {
+        sendJson(res, 400, { error: 'bad_ops' });
+        return true;
       }
-      let body: { ops?: unknown[]; baseVersion?: number };
-      try {
-        body = JSON.parse(Buffer.concat(chunks).toString('utf8')) as {
-          ops?: unknown[];
-          baseVersion?: number;
-        };
-      } catch {
-        res.writeHead(400, { 'content-type': 'application/json' });
-        res.end(JSON.stringify({ error: 'bad_json' }));
+      if (ops.length > maxOpsPerSubmit) {
+        sendJson(res, 413, { error: 'too_many_ops' });
         return true;
       }
       const result = await injectOpsInternal(
         docId,
-        (body.ops ?? []) as Operation[],
+        ops as Operation[],
         session.userId,
-        body.baseVersion
+        body?.baseVersion
       );
       if ('error' in result) {
         res.writeHead(409, { 'content-type': 'application/json' });
@@ -388,30 +465,32 @@ export async function createCollaborationServer(
     authorId: string,
     baseVersion?: number
   ): Promise<{ version: number } | { error: string }> {
-    const room = (await opts.store.loadRoom(docId)) ?? emptyRoom(docId);
-    const result = acceptSubmit(room, baseVersion ?? room.version, ops);
-    if (!result.ok) {
-      return { error: result.reason };
-    }
-    await opts.store.appendOps(docId, result.ops, result.snapshot, result.version);
-    fanout(docId, {
-      type: 'ack',
-      docId,
-      version: result.version,
-      ops: result.ops,
-      authorId,
+    return rooms.withDocLock(docId, async () => {
+      const room = (await opts.store.loadRoom(docId)) ?? emptyRoom(docId);
+      const result = acceptSubmit(room, baseVersion ?? room.version, ops);
+      if (!result.ok) {
+        return { error: result.reason };
+      }
+      await opts.store.appendOps(docId, result.ops, result.snapshot, result.version);
+      fanout(docId, {
+        type: 'ack',
+        docId,
+        version: result.version,
+        ops: result.ops,
+        authorId,
+      });
+      webhook('doc.changed', {
+        docId,
+        version: result.version,
+        authorId,
+        opCount: result.ops.length,
+      });
+      return { version: result.version };
     });
-    webhook('doc.changed', {
-      docId,
-      version: result.version,
-      authorId,
-      opCount: result.ops.length,
-    });
-    return { version: result.version };
   }
 
   function attach(server: HttpServer): void {
-    wss = new WebSocketServer({ noServer: true });
+    wss = new WebSocketServer({ noServer: true, maxPayload: MAX_REST_BODY_BYTES });
     wss.on('connection', handleConnection);
     server.on('upgrade', (req, socket, head) => {
       const url = new URL(req.url ?? '/', 'http://localhost');
@@ -426,7 +505,20 @@ export async function createCollaborationServer(
     server.removeAllListeners('request');
     server.on('request', (req, res) => {
       void (async () => {
-        const handled = await handleRest(req, res);
+        let handled: boolean;
+        try {
+          handled = await handleRest(req, res);
+        } catch (err) {
+          // Unhandled rejections here would crash the process (malformed body, store failure).
+          if (!res.headersSent) {
+            sendJson(res, err instanceof BodyTooLargeError ? 413 : 500, {
+              error: err instanceof BodyTooLargeError ? 'body_too_large' : 'internal_error',
+            });
+          } else {
+            res.destroy();
+          }
+          return;
+        }
         if (handled) {
           return;
         }
@@ -457,6 +549,10 @@ export async function createCollaborationServer(
         await redisUnsub();
       } else if (redisUnsub) {
         await redisUnsub;
+      }
+      // ws v8 `close()` leaves client sockets open, which keeps `ownedServer.close` pending.
+      for (const client of wss?.clients ?? []) {
+        client.terminate();
       }
       await new Promise<void>((resolve) => {
         wss?.close(() => resolve());

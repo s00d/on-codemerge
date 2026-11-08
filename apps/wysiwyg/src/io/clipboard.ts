@@ -1,4 +1,4 @@
-import { sanitizeHTML } from './sanitize';
+import { sanitizeHTML } from '@codemerge/sdk';
 import { htmlToDoc, docToHTML } from './html';
 import type { DocNode } from '@codemerge/kernel';
 

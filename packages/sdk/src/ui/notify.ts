@@ -113,6 +113,10 @@ export class NotifyService {
         title: opts.title,
         className: 'ocm-confirm',
         closeOnClickOutside: true,
+        // ×, Escape, overlay or a replacing popup must settle the promise too.
+        onClose: () => {
+          resolve(false);
+        },
         items: [{ type: 'text', id: 'confirm-msg', value: opts.message }],
         buttons: [
           {

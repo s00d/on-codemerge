@@ -13,9 +13,6 @@ export function normalize(doc: DocNode): DocNode {
     return next;
   }
   next.content = next.content.map(normalizeBlock);
-  if (next.content.length === 0) {
-    next.content = [{ content: [createText('')], id: 'p_empty', type: 'paragraph' }];
-  }
   return next;
 }
 

@@ -60,6 +60,8 @@ export function FooterPlugin() {
         footerMount?.update(view());
       };
       ctx.on('docChanged', update);
+      // Labels are translated at render — repaint on locale switch.
+      ctx.scope.disposable(editor.onLocaleChange(update));
       update();
     },
   });

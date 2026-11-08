@@ -37,6 +37,16 @@ function studioFieldWrap(fieldId: string, highlighted: boolean, child: ViewSpec)
   );
 }
 
+/**
+ * Drop script-scheme actions (`javascript:` would run on submit in published HTML;
+ * forms bypass sanitizeHTML). Mirrors sdk safeHtml's private isSafeUrl.
+ */
+function safeAction(action: string): string {
+  // oxlint-disable-next-line no-control-regex -- browsers strip C0/space before scheme parsing
+  const v = action.replaceAll(/[\u0000- ]/g, '').toLowerCase();
+  return /^(?:javascript|vbscript|data):/.test(v) ? '' : action;
+}
+
 /** Form shell ViewSpec — fields via drivers; optional default submit. */
 export function formView(config: FormConfig, opts: FormViewOpts = {}): ViewSpec {
   const { id, method, action, className, fields } = config;
@@ -61,7 +71,7 @@ export function formView(config: FormConfig, opts: FormViewOpts = {}): ViewSpec 
     'form',
     {
       class: `${className ?? 'generated-form'} not-prose`,
-      attrs: { id, method, action },
+      attrs: { id, method, action: safeAction(action) },
       ...(opts.preventSubmit
         ? {
             on: {

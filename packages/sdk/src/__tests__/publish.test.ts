@@ -96,6 +96,29 @@ describe('publish registry', () => {
     registry.unboot(document);
   });
 
+  it('boot keeps mounting other hosts when one runtime throws', () => {
+    expect.hasAssertions();
+    const errSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const registry = new PublishRuntimeRegistry();
+    registry.register({
+      id: 'boom',
+      mount() {
+        throw new Error('boom');
+      },
+    });
+    registry.register({ id: 'ok', mount() {} });
+    const bad = document.createElement('div');
+    bad.dataset.ocmRuntime = 'boom';
+    const good = document.createElement('div');
+    good.dataset.ocmRuntime = 'ok';
+    document.body.append(bad, good);
+    registry.boot(document);
+    expect(bad.dataset.ocmBooted).toBeUndefined();
+    expect(good.dataset.ocmBooted).toBe('1');
+    expect(errSpy).toHaveBeenCalledOnce();
+    errSpy.mockRestore();
+  });
+
   it('boot mounts once and cleanup unboots', () => {
     expect.hasAssertions();
     const mounts: HTMLElement[] = [];

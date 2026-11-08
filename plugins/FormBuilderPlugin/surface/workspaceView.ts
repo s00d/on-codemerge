@@ -498,14 +498,15 @@ export function mountFormWorkspace(
   };
 
   remount();
-  opts.scope.disposable(
-    store.subscribe(() => {
-      refreshAll();
-    })
-  );
+  // Atom popups pass the plugin-lifetime scope; unsubscribe on destroy too so each open doesn't leak.
+  const unsubscribe = store.subscribe(() => {
+    refreshAll();
+  });
+  opts.scope.disposable(unsubscribe);
 
   return {
     destroy: () => {
+      unsubscribe();
       tabsMount?.destroy();
       tabsMount = null;
       rootMount?.destroy();

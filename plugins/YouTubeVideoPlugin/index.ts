@@ -14,8 +14,14 @@ import type { WidgetContext, ViewSpec, PluginToolbarOpts } from '@codemerge/sdk'
 import { YouTubeVideoMenu, extractYouTubeVideoId } from './components/YouTubeVideoMenu';
 import { editIcon, deleteIcon, linkIcon, youtubeIcon } from '@codemerge/sdk/icons';
 
+/** Doc attrs come from paste/import — never splice an unchecked id into the embed path. */
+function safeVideoId(raw: unknown): string {
+  const id = attrString(raw, '');
+  return /^[\w-]{11}$/.test(id) ? id : '';
+}
+
 function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpec {
-  const videoId = attrString(attrs.videoId, '');
+  const videoId = safeVideoId(attrs.videoId);
   const resizer = wctx.scope.slot<Resizer>();
 
   return h(
@@ -72,10 +78,10 @@ function renderYouTube(attrs: Record<string, unknown>, wctx: WidgetContext): Vie
                           const id = extractYouTubeVideoId(String(values['youtube-url'] ?? ''));
                           if (!id) {
                             wctx.editor.notify(t('youtube.invalidYoutubeUrl'));
-                            return false;
+                            return true;
                           }
                           wctx.updateAttrs({ videoId: id });
-                          return true;
+                          return false;
                         },
                       },
                     ],
@@ -169,7 +175,7 @@ export function YouTubeVideoPlugin(opts?: PluginToolbarOpts) {
     publish: {
       node: 'youtube',
       render: (attrs) => {
-        const videoId = attrString(attrs.videoId, '');
+        const videoId = safeVideoId(attrs.videoId);
         if (!videoId) {
           return h('div', { attrs: { 'data-node': 'youtube' } }, 'YouTube');
         }

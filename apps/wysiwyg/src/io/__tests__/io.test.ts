@@ -4,7 +4,7 @@ import { describe, expect, it } from 'vitest';
  */
 import { exportHTML, importHTML, exportMarkdown, importMarkdown } from '../index';
 import { parseJSON, serializeJSON } from '../json';
-import { sanitizeHTML } from '../sanitize';
+import { sanitizeHTML } from '@codemerge/sdk';
 import { createDoc, createParagraph, createText, docToJSON } from '@codemerge/kernel';
 
 describe('io html', () => {
@@ -150,6 +150,42 @@ describe('io html', () => {
     const clean = sanitizeHTML('<p>ok</p><script>alert(1)</script>');
     expect(clean).not.toContain('<script');
   });
+
+  it('drops attr keys that would inject HTML attributes', () => {
+    const html = exportHTML({
+      type: 'doc',
+      content: [
+        {
+          type: 'paragraph',
+          attrs: { 'x onmouseover=alert(1) y': 'v', align: 'center' },
+          content: [createText('t')],
+        },
+      ],
+    });
+    expect(html).toBe('<p data-align="center">t</p>');
+  });
+
+  it('rejects javascript: hrefs hidden by tab/newline', () => {
+    const cases: [string, string][] = [
+      ['java\tscript:alert(1)', ''],
+      ['\u0001javascript:alert(1)', ''],
+      ['https://ok.example/a b', 'https://ok.example/a b'],
+      ['/rel/path', '/rel/path'],
+    ];
+    for (const [href, out] of cases) {
+      const mark = { type: 'link', attrs: { href } };
+      const html = exportHTML(createDoc([createParagraph([createText('x', [mark])])]));
+      expect(html).toContain(`href="${out}"`);
+    }
+  });
+
+  it('clamps a non-numeric heading level', () => {
+    const html = exportHTML({
+      type: 'doc',
+      content: [{ type: 'heading', attrs: { level: 'x' }, content: [createText('H')] }],
+    });
+    expect(html.startsWith('<h1')).toBe(true);
+  });
 });
 
 describe('io json', () => {
@@ -163,6 +199,26 @@ describe('io json', () => {
 });
 
 describe('io markdown', () => {
+  it('keeps nested lists on round-trip (md and html)', () => {
+    const md = '- a\n  - b\n    1. c\n- d\n\n1. x\n   - y\n';
+    const doc = importMarkdown(md);
+    expect(exportMarkdown(doc)).toBe(md);
+    expect(exportMarkdown(importHTML(exportHTML(doc)))).toBe(md);
+  });
+
+  it('drops unsafe link hrefs on export', () => {
+    const md = exportMarkdown(
+      createDoc([
+        createParagraph([
+          createText('bad', [{ type: 'link', attrs: { href: 'java\nscript:alert(1)' } }]),
+          createText(' '),
+          createText('ok', [{ type: 'link', attrs: { href: 'https://a.example' } }]),
+        ]),
+      ])
+    );
+    expect(md).toBe('bad [ok](https://a.example)\n');
+  });
+
   it('exports headings, lists, code and marks from JSON', () => {
     expect.hasAssertions();
     const doc = createDoc([

@@ -16,7 +16,7 @@ import {
 } from '../viewport';
 import type { ViewportWindow } from '../types';
 import { copySelection, pasteFromClipboard } from '../clipboard';
-import { isCovered, spanSize } from '../spans';
+import { isCovered, spanSize, spansVisible } from '../spans';
 import { colLetter, isGhostColId, isGhostRowId } from '../sheet';
 
 export let sheetRowLayoutBuilds = 0;
@@ -348,6 +348,10 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow, heights: number[]):
   const { fill, widthOf } = sheetLayout(store);
   const byCol = new Map(doc.columns.map((c) => [c.id, c]));
   const byRow = new Map(doc.rows.map((r) => [r.id, r]));
+  // Span coverage scan is O(rows × cols) per cell — skip it entirely when nothing is merged.
+  // Merges are kept in the doc but drawn unmerged while sort/filter/group reorders rows.
+  const spansOn = doc.rows.some((r) => r.spans) && spansVisible(doc.rows, derived.rowIds);
+  const rowIndexById = spansOn ? new Map(doc.rows.map((r, i) => [r.id, i])) : null;
   const visibleIds = store.getSheetRowIds().slice(vp.start, vp.end);
   const sheetCols = store.getSheetColumnIds();
   const groupByAgg = new Map(derived.groups.map((g) => [g.key, g]));
@@ -434,15 +438,15 @@ function bodyRowsSpec(store: TableStore, vp: ViewportWindow, heights: number[]):
           ...sheetCols.map((colId, colIndex) => {
             const col = byCol.get(colId);
             const fakeCol = col ?? { id: colId, title: colLetter(colIndex), type: 'text' as const };
-            if (row && colIndex < derived.columnIds.length) {
-              const rowIndex = doc.rows.findIndex((r) => r.id === rowId);
+            if (rowIndexById && row && colIndex < derived.columnIds.length) {
+              const rowIndex = rowIndexById.get(rowId) ?? -1;
               if (rowIndex >= 0 && isCovered(doc.rows, derived.columnIds, rowIndex, colIndex)) {
                 return null;
               }
             }
             const active = sel.active?.rowId === rowId && sel.active?.colId === colId;
             const editing = Boolean(row) && active && store.isEditing();
-            const span = row ? spanSize(row.spans?.[colId]) : { cols: 1, rows: 1 };
+            const span = spansOn && row ? spanSize(row.spans?.[colId]) : { cols: 1, rows: 1 };
             let width = widthOf(colId);
             if (span.cols > 1) {
               width = sheetCols

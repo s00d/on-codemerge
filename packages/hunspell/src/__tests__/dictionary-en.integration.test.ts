@@ -1,5 +1,5 @@
 import { beforeAll, describe, expect, it } from 'vitest';
-import type { HunspellDictionary } from '../../index';
+import type { HunspellDictionary } from '../types';
 import { getDictionaryEn } from './fixtures/dictionaries';
 import { EN_CHECK_CORPUS, EN_SUGGEST_CORPUS } from './fixtures/en.integration.corpus';
 

@@ -2,7 +2,6 @@ import { h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
 
 import { BUILD_GROUPS } from '../constants/symbols';
-import { insertWithHoles } from '../utils/insertTemplate';
 
 type InsertFn = (template: string) => void;
 
@@ -42,5 +41,3 @@ export function mathBuildPanel(onInsert: InsertFn, t: (k: string) => string): Vi
     )
   );
 }
-
-export { insertWithHoles };

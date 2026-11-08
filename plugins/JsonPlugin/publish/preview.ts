@@ -23,10 +23,7 @@ export function compactJsonText(raw: string): string {
   }
 }
 
-/**
- * Static JSON highlight via universal structural engine.
- */
-/** Static published / preview markup — no Tree UI. */
+/** Static published / preview markup (highlighted JSON) — no Tree UI. */
 export function renderJsonEmbedPublish(attrs: Record<string, unknown>): ViewSpec {
   const raw = attrString(attrs.text, 'null');
   const compact = compactJsonText(raw);

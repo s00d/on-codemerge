@@ -31,6 +31,7 @@
     "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
     "galleryDeleting": "Deleting…",
     "galleryDeleteFailed": "Failed to delete image",
-    "browse": "찾아보기"
+    "browse": "찾아보기",
+    "copyFailed": "이미지를 복사할 수 없습니다"
   }
 }

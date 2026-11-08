@@ -13,11 +13,9 @@ export {
   type Extension,
   type EditorHost,
 } from './platform/Extension';
+export { highlightHtml, escapeHtml, tokensToHtml } from './highlight/render';
+export { lex } from './highlight/lex';
 export {
-  highlightHtml,
-  escapeHtml,
-  tokensToHtml,
-  lex,
   HIGHLIGHT_MAX_CHARS,
   HIGHLIGHT_MAX_STEPS,
   HIGHLIGHT_MAX_TOKENS,
@@ -26,7 +24,7 @@ export {
   type TokenType,
   type UniversalRule,
   type UniversalRules,
-} from './highlight';
+} from './highlight/types';
 export {
   mountSourceEditor,
   sourceContentHeight,

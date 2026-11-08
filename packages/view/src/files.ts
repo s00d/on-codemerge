@@ -24,7 +24,8 @@ export function downloadBlob(content: BlobPart, filename: string, mimeType: stri
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   downloadUrl(url, filename);
-  URL.revokeObjectURL(url);
+  // Firefox / Safari may still be reading the blob right after click.
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 /** Hidden file picker via portal. */
@@ -36,6 +37,12 @@ export function pickFile(
 ): Promise<FileList | null> {
   return new Promise((resolve) => {
     const portal = createPortal(null, { to: 'body', className: 'ocm-portal-host--transient' });
+    const settle = (files: FileList | null): void => {
+      resolve(files);
+      el.remove();
+      destroy();
+      portal.destroy();
+    };
     const { el, destroy } = renderDetached(
       h('input', {
         attrs: {
@@ -47,10 +54,11 @@ export function pickFile(
         on: {
           change: (e) => {
             const t = e.target;
-            resolve(t instanceof HTMLInputElement ? t.files : null);
-            el.remove();
-            destroy();
-            portal.destroy();
+            settle(t instanceof HTMLInputElement ? t.files : null);
+          },
+          // Dialog dismissed: resolve null instead of hanging forever and leaking the portal.
+          cancel: () => {
+            settle(null);
           },
         },
       })

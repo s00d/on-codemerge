@@ -43,17 +43,18 @@ jobs:
           cache: 'pnpm'
 
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      - name: Build with VitePress
+      - name: Build docs (nuxt generate)
+        env:
+          NUXT_APP_BASE_URL: /on-codemerge/
         run: |
           pnpm run build:packages
           pnpm run build
           pnpm run docs:build
 
       - name: Add nojekyll
-        run: |-
-          > docs/.vitepress/dist/.nojekyll
+        run: touch docs/.output/public/.nojekyll
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
@@ -61,8 +62,7 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          # Upload the VitePress build output
-          path: './docs/.vitepress/dist'
+          path: './docs/.output/public'
 
       - name: Deploy to GitHub Pages
         id: deployment

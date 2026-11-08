@@ -39,6 +39,23 @@ function shiftPath(path: number[], parentPath: number[], index: number, delta: n
   return next;
 }
 
+/** Sibling insert/remove under `parentPath` at index >= `from` moves by `delta`. */
+function shiftSiblingIndex(
+  op: Operation,
+  parentPath: number[],
+  from: number,
+  delta: number
+): Operation {
+  if (
+    (op.type === 'insert_node' || op.type === 'remove_node') &&
+    pathsEqual(op.path, parentPath) &&
+    op.index >= from
+  ) {
+    return { ...op, index: op.index + delta };
+  }
+  return op;
+}
+
 function mapPath(op: Operation, map: (path: number[]) => number[]): Operation {
   switch (op.type) {
     case 'set_selection':
@@ -97,9 +114,12 @@ function mapOffset(op: Operation, path: number[], map: (offset: number) => numbe
 /**
  * Transform `op` so it can be applied after `against` was already applied
  * (ProseMirror-style: rebase client op against server op).
+ * `priority`: on an insert-vs-insert tie (same text offset / same node index) `op` stays
+ * before `against` instead of shifting after it. The server side of an OT pair passes `true`
+ * so both sides order concurrent inserts the same way.
  * Returns null if `op` becomes a no-op.
  */
-export function transformOp(op: Operation, against: Operation): Operation | null {
+export function transformOp(op: Operation, against: Operation, priority = false): Operation | null {
   if (op.type === 'set_selection' || against.type === 'set_selection') {
     return op.type === 'set_selection' ? null : op;
   }
@@ -110,7 +130,8 @@ export function transformOp(op: Operation, against: Operation): Operation | null
     if (
       (next.type === 'insert_node' || next.type === 'remove_node') &&
       pathsEqual(next.path, against.path) &&
-      next.index >= against.index
+      (next.index > against.index ||
+        (next.index === against.index && !(priority && next.type === 'insert_node')))
     ) {
       next = { ...next, index: next.index + 1 };
     }
@@ -192,7 +213,12 @@ export function transformOp(op: Operation, against: Operation): Operation | null
         };
       }
     }
-    return mapPath(op, (p) => shiftPath(p, parentPath, index + 1, 1));
+    return shiftSiblingIndex(
+      mapPath(op, (p) => shiftPath(p, parentPath, index + 1, 1)),
+      parentPath,
+      index + 1,
+      1
+    );
   }
 
   if (against.type === 'merge_paragraph') {
@@ -208,12 +234,24 @@ export function transformOp(op: Operation, against: Operation): Operation | null
       // Without join length we cannot fix offsets perfectly; shift path to left and leave offsets
       return mapPath(op, () => leftPath);
     }
-    return mapPath(op, (p) => shiftPath(p, parentPath, index, -1));
+    if (op.type === 'remove_node' && pathsEqual(op.path, parentPath) && op.index === index) {
+      // Right block already merged into left — removing "it" would hit the next sibling.
+      return null;
+    }
+    return shiftSiblingIndex(
+      mapPath(op, (p) => shiftPath(p, parentPath, index, -1)),
+      parentPath,
+      index + 1,
+      -1
+    );
   }
 
   // Text insert/delete on same path
   if (against.type === 'insert_text' && 'path' in op && pathsEqual(op.path, against.path)) {
-    return mapOffset(op, against.path, (o) => (o >= against.offset ? o + against.text.length : o));
+    const stays = priority && op.type === 'insert_text';
+    return mapOffset(op, against.path, (o) =>
+      o > against.offset || (o === against.offset && !stays) ? o + against.text.length : o
+    );
   }
   if (against.type === 'delete_text' && 'path' in op && pathsEqual(op.path, against.path)) {
     const delStart = against.offset;
@@ -260,16 +298,40 @@ export function transformOps(ops: Operation[], against: Operation): Operation[] 
 }
 
 /**
+ * OT transform of two concurrent op sequences that start from the same document.
+ * Returns `[a', b']`: `a'` applies after `b`, `b'` applies after `a`, and
+ * `doc + a + b' == doc + b + a'`. `b` wins insert ties (it is the side already applied
+ * on the server). Each op is transformed against the *transformed* ops of the other side,
+ * so later ops in a sequence see the effect of earlier ones.
+ */
+export function transformPair(a: Operation[], b: Operation[]): [Operation[], Operation[]] {
+  let rest: Operation[] = b.filter((o) => o.type !== 'set_selection');
+  const aOut: Operation[] = [];
+  for (const first of a) {
+    if (first.type === 'set_selection') {
+      continue;
+    }
+    let op: Operation | null = first;
+    const nextRest: Operation[] = [];
+    for (const s of rest) {
+      const sNext: Operation | null = op ? transformOp(s, op, true) : s;
+      op = op ? transformOp(op, s) : null;
+      if (sNext) {
+        nextRest.push(sNext);
+      }
+    }
+    rest = nextRest;
+    if (op) {
+      aOut.push(op);
+    }
+  }
+  return [aOut, rest];
+}
+
+/**
  * Rebase client ops that were based on `baseVersion` against server ops
  * that landed since (in order). Returns ops safe to apply on the new tip.
  */
 export function rebaseOps(clientOps: Operation[], serverOps: Operation[]): Operation[] {
-  let pending: Operation[] = clientOps.filter((o) => o.type !== 'set_selection');
-  for (const serverOp of serverOps) {
-    if (serverOp.type === 'set_selection') {
-      continue;
-    }
-    pending = transformOps(pending, serverOp);
-  }
-  return pending;
+  return transformPair(clientOps, serverOps)[0];
 }

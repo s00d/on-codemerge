@@ -15,15 +15,48 @@ export function isOcmHostMessage(data: unknown): data is OcmHostMessage {
     return false;
   }
   const type: unknown = Reflect.get(data, 'type');
-  return (
-    type === 'ocm-load' || type === 'ocm-change' || type === 'ocm-destroy' || type === 'ocm-ready'
-  );
+  if (type === 'ocm-load' || type === 'ocm-change') {
+    const format: unknown = Reflect.get(data, 'format');
+    return (
+      typeof Reflect.get(data, 'value') === 'string' &&
+      (format === 'html' ||
+        format === 'markdown' ||
+        format === 'text' ||
+        (type === 'ocm-load' && format === undefined))
+    );
+  }
+  return type === 'ocm-destroy' || type === 'ocm-ready';
 }
 
 export interface HostBridgeOptions {
+  /**
+   * `postMessage` target origin. Default: the embedding parent's origin when framed
+   * (`location.ancestorOrigins[0]`, else `document.referrer`), `'*'` when it cannot be read.
+   */
   targetOrigin?: string;
+  /**
+   * Origins whose `ocm-load` / `ocm-destroy` are obeyed (`'*'` = any).
+   * Default: `[targetOrigin]` when that is a concrete origin, else any.
+   */
+  allowedOrigins?: string[];
   messageSource?: Window;
   messageTarget?: Window | null;
+}
+
+/** Origin of the embedding parent, or null when not framed / unreadable. */
+function parentOrigin(): string | null {
+  if (window.parent === window) {
+    return null;
+  }
+  const ancestor = window.location.ancestorOrigins?.[0];
+  if (ancestor && ancestor !== 'null') {
+    return ancestor;
+  }
+  try {
+    return document.referrer ? new URL(document.referrer).origin : null;
+  } catch {
+    return null;
+  }
 }
 
 /** Wire EditorHost to the iframe/WebView postMessage protocol. */
@@ -31,9 +64,12 @@ export function bindHostBridge(
   el: HTMLElement,
   options: HostBridgeOptions = {}
 ): { host: EditorHostHandle; dispose: () => void } {
-  const origin = options.targetOrigin ?? '*';
   const source = options.messageSource ?? window;
   const target = options.messageTarget === undefined ? window.parent : options.messageTarget;
+  // Framed with the default target: only the real parent window may drive the editor.
+  const framedParent = target !== null && target === window.parent && target !== window;
+  const origin = options.targetOrigin ?? (framedParent ? parentOrigin() : null) ?? '*';
+  const allowed = options.allowedOrigins ?? (origin === '*' ? ['*'] : [origin]);
 
   const host = createEditorHost(el, {
     onChange: (value, format) => {
@@ -45,18 +81,17 @@ export function bindHostBridge(
   });
 
   const onMessage = (ev: MessageEvent) => {
-    if (
-      options.targetOrigin &&
-      options.targetOrigin !== '*' &&
-      ev.origin !== options.targetOrigin
-    ) {
+    if (framedParent && ev.source !== target) {
+      return;
+    }
+    if (!allowed.includes('*') && !allowed.includes(ev.origin)) {
       return;
     }
     if (!isOcmHostMessage(ev.data)) {
       return;
     }
     if (ev.data.type === 'ocm-load') {
-      host.setValue(ev.data.value);
+      host.setValue(ev.data.value, ev.data.format);
     }
     if (ev.data.type === 'ocm-destroy') {
       host.destroy();
@@ -162,6 +197,8 @@ export function bindPersistence(
   };
 
   let host: EditorHostHandle;
+  /** `<ocm-editor>` replaces its host on attribute/configure remount — always read the live one. */
+  let currentHost = (): EditorHostHandle => host;
   let ownsHost: boolean;
   let offChange: () => void;
 
@@ -181,6 +218,7 @@ export function bindPersistence(
       );
     }
     host = existing;
+    currentHost = () => ocmHost(target) ?? existing;
     ownsHost = false;
     const off = asEditorLike(host.getEditor()).on('docChanged', emitChange);
     const onDom = (): void => {
@@ -218,7 +256,8 @@ export function bindPersistence(
       return;
     }
     try {
-      await options.save(host.getValue(), host.format);
+      const live = currentHost();
+      await options.save(live.getValue(), live.format);
     } catch (error) {
       options.onError?.(error, 'save');
     }
@@ -244,7 +283,8 @@ export function bindPersistence(
       return;
     }
     try {
-      host.setValue(normalizeLoaded(await options.load(), format).value);
+      const loaded = normalizeLoaded(await options.load(), format);
+      currentHost().setValue(loaded.value, loaded.format);
     } catch (error) {
       options.onError?.(error, 'load');
     }
@@ -261,7 +301,9 @@ export function bindPersistence(
   void reload();
 
   return {
-    host,
+    get host() {
+      return currentHost();
+    },
     reload,
     flush,
     dispose: () => {

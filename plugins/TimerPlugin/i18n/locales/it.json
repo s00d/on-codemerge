@@ -7,6 +7,7 @@
     "timeExpired": "Tempo scaduto",
     "editTimer": "Modifica timer",
     "copyTimer": "Copia timer",
+    "copySuffix": "(Copia)",
     "exportTimer": "Esporta timer",
     "importTimer": "Importa timer",
     "deleteTimer": "Elimina timer",

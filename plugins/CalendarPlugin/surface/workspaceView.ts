@@ -7,10 +7,12 @@ import type { CalendarDoc, CalendarView } from '../types';
 import { isCalendarView } from '../types';
 import {
   addDays,
+  addMonths,
   addEvent,
   addLayer,
   emptyCalendarDoc,
   emptyEvent,
+  moveTimedEvent,
   patchEvent,
   patchLayer,
   removeEvent,
@@ -143,13 +145,14 @@ export function mountCalendarWorkspace(
         commit(patchEvent(doc, eventId, { start: day, end }));
         return;
       }
-      const time = ev.start.includes('T') ? ev.start.slice(11, 16) : '09:00';
-      const endTime = ev.end.includes('T') ? ev.end.slice(11, 16) : '10:00';
+      const startMin =
+        (Number(ev.start.slice(11, 13)) || 0) * 60 + (Number(ev.start.slice(14, 16)) || 0);
       commit(
-        patchEvent(doc, eventId, {
-          start: `${day}T${time}`,
-          end: `${day}T${endTime}`,
-        })
+        patchEvent(
+          doc,
+          eventId,
+          moveTimedEvent(ev, day, ev.start.includes('T') ? startMin : 9 * 60)
+        )
       );
     },
     onMoveTimed: (eventId: string, day: string, startMinutes: number) => {
@@ -157,25 +160,20 @@ export function mountCalendarWorkspace(
       if (!ev || ev.allDay) {
         return;
       }
-      const startMin =
-        (Number(ev.start.slice(11, 13)) || 0) * 60 + (Number(ev.start.slice(14, 16)) || 0);
-      const endMin = (Number(ev.end.slice(11, 13)) || 0) * 60 + (Number(ev.end.slice(14, 16)) || 0);
-      const dur = endMin - startMin || 60;
-      const endMinutes = startMinutes + Math.max(15, dur);
-      commit(
-        patchEvent(doc, eventId, {
-          start: `${day}T${fmtMinutes(startMinutes)}`,
-          end: `${day}T${fmtMinutes(Math.min(endMinutes, 23 * 60 + 45))}`,
-        })
-      );
+      // Keep the full duration — an event may run past midnight.
+      commit(patchEvent(doc, eventId, moveTimedEvent(ev, day, startMinutes)));
     },
-    onResizeTimed: (eventId: string, endMinutes: number) => {
+    onResizeTimed: (eventId: string, endMinutes: number, endDay?: string) => {
       const ev = doc.events.find((e) => e.id === eventId);
       if (!ev || ev.allDay) {
         return;
       }
-      const day = ev.start.slice(0, 10);
-      commit(patchEvent(doc, eventId, { end: `${day}T${fmtMinutes(endMinutes)}` }));
+      const day = endDay ?? ev.start.slice(0, 10);
+      commit(
+        patchEvent(doc, eventId, {
+          end: `${day}T${fmtMinutes(Math.min(endMinutes, 23 * 60 + 45))}`,
+        })
+      );
     },
   });
 
@@ -398,15 +396,15 @@ export function mountCalendarWorkspace(
   };
 
   const shiftCursor = (dir: -1 | 1): void => {
-    let days = 30 * dir;
+    let cursor: string;
     if (doc.view === 'week') {
-      days = 7 * dir;
+      cursor = addDays(doc.cursor, 7 * dir);
     } else if (doc.view === 'day' || doc.view === 'agenda') {
-      days = dir;
-    } else if (doc.view === 'year') {
-      days = 365 * dir;
+      cursor = addDays(doc.cursor, dir);
+    } else {
+      cursor = addMonths(doc.cursor, (doc.view === 'year' ? 12 : 1) * dir);
     }
-    commit({ ...doc, cursor: addDays(doc.cursor, days) });
+    commit({ ...doc, cursor });
   };
 
   const refreshHeader = (headerHost: HTMLElement): void => {

@@ -117,5 +117,3 @@ export function drawLegend(
     x += ctx.measureText(name).width + 40;
   });
 }
-
-export { colorWithOpacity };

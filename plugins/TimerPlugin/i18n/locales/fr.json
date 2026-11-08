@@ -7,6 +7,7 @@
     "timeExpired": "Temps écoulé",
     "editTimer": "Modifier le minuteur",
     "copyTimer": "Copier le minuteur",
+    "copySuffix": "(Copie)",
     "exportTimer": "Exporter le minuteur",
     "importTimer": "Importer le minuteur",
     "deleteTimer": "Supprimer le minuteur",

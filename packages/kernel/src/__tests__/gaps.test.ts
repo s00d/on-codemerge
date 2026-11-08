@@ -35,7 +35,7 @@ import {
   assertMark,
   assertNodeType,
 } from '../index';
-import { ensureParagraphPath, selectionTextRange } from '../operations';
+import { selectionTextRange } from '../operations';
 
 function stateWith(blocks: Parameters<typeof createDoc>[0]) {
   return createState(createDoc(blocks));
@@ -268,8 +268,6 @@ describe('kernel gaps', () => {
         focus: { path: [1], offset: 0 },
       })
     ).toBeNull();
-    expect(ensureParagraphPath(createDoc(), [])).toStrictEqual([0]);
-    expect(ensureParagraphPath({ type: 'doc', content: [] }, [])).toStrictEqual([0]);
 
     const image = stateWith([{ type: 'image', attrs: { src: 'a' } }]);
     expect(runCommand(image, splitBlock)).toBeNull();

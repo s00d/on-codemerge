@@ -1,7 +1,7 @@
 import type { DocNode } from '@codemerge/kernel';
 import { ParseError } from '@codemerge/kernel';
-import { docToMarkdown, markdownToDoc } from '@ocm/wysiwyg/io/markdown';
-import { docToText, emptyEditorDoc } from './adapters';
+import { markdownToDoc } from '@ocm/wysiwyg/io/markdown';
+import { docToText } from './adapters';
 
 export type ParseTextResult =
   | { ok: true; doc: DocNode; value: string }
@@ -25,10 +25,3 @@ export function serializeText(text: string): string {
 export function serializeDoc(doc: DocNode): string {
   return serializeText(docToText(doc));
 }
-
-/** Rebuild SoT from a plain string (caller already size-checked). */
-export function textToEditorDoc(text: string): DocNode {
-  return emptyEditorDoc(text);
-}
-
-export { docToMarkdown, markdownToDoc };

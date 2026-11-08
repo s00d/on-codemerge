@@ -1,8 +1,5 @@
 export type ResizeHandle = 'nw' | 'ne' | 'se' | 'sw' | 'n' | 'e' | 's' | 'w';
 
-/** @deprecated Use ResizeHandle — kept for existing call sites. */
-export type ResizeCorner = ResizeHandle;
-
 export type ResizeStart = {
   width: number;
   height: number;

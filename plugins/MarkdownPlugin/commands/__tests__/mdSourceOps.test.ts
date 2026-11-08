@@ -75,4 +75,16 @@ describe('mdSourceOps', () => {
     const md = '**out**\n```\n**in**\n```\n';
     expect(clearMdStyles(md, 0, 0).text).toBe('out\n```\n**in**\n```\n');
   });
+
+  it('applyHeading at offset 0 with a leading blank line keeps line 0', () => {
+    expect(applyHeading('\nfoo', 0, 0, 2).text).toBe('## Heading\nfoo');
+  });
+
+  it('applyCodeFence / applyMermaid open the fence on its own line', () => {
+    const code = applyCodeFence('see foo here', 4, 7, 'js');
+    expect(code.text).toBe('see \n```js\nfoo\n```\n here');
+    const mer = applyMermaid('x A-->B', 2, 7);
+    expect(mer.text).toBe('x \n```mermaid\nA-->B\n```\n');
+    expect(applyCodeFence('foo', 0, 3).text).toBe('```plaintext\nfoo\n```\n');
+  });
 });

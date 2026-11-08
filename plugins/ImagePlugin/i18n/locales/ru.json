@@ -31,6 +31,7 @@
     "galleryDeleteConfirm": "Удалить «{name}» из галереи?",
     "galleryDeleting": "Удаление…",
     "galleryDeleteFailed": "Не удалось удалить изображение",
-    "browse": "выберите"
+    "browse": "выберите",
+    "copyFailed": "Не удалось скопировать изображение"
   }
 }

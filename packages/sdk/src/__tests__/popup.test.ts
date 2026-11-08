@@ -35,6 +35,27 @@ describe('popupService ViewSpec', () => {
     expect(portal.querySelector('.ocm-popup')).toBeNull();
   });
 
+  it('stale handle update reopens once, then re-binds to the new popup', () => {
+    expect.hasAssertions();
+    const stale = popup.open({ title: 'A', items: [] });
+    popup.open({ title: 'B', items: [] });
+    stale.update({ title: 'C', items: [{ type: 'input', id: 'n', value: 'c' }] });
+    const overlay = portal.querySelector('.ocm-popup-overlay');
+    expect(stale.getValues()).toStrictEqual({ n: 'c' });
+    stale.update({ title: 'D', items: [{ type: 'input', id: 'n', value: 'd' }] });
+    // Patched in place — same overlay node, not a fresh open.
+    expect(portal.querySelector('.ocm-popup-overlay')).toBe(overlay);
+    expect(portal.querySelector('.ocm-popup__header')?.textContent).toContain('D');
+    stale.hide();
+    expect(portal.querySelector('.ocm-popup')).toBeNull();
+  });
+
+  it('password item renders input type=password', () => {
+    expect.hasAssertions();
+    popup.open({ items: [{ type: 'password', id: 'key', value: 's' }] });
+    expect(portal.querySelector('#key')?.getAttribute('type')).toBe('password');
+  });
+
   it('closes on overlay pointerdown', () => {
     expect.hasAssertions();
     popup.open({ title: 'Overlay', items: [] });

@@ -17,6 +17,7 @@ import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import type { CalendarToolbarOptions } from './chrome/types';
 import { coerceCalendarDoc } from './drivers/defaults';
+import { remindersConfig } from './drivers/occurrences';
 import { isCalendarDoc } from './types';
 import { isCalendarEditorDoc } from './io/adapters';
 import { mountCalendarWorkspace } from './surface/workspaceView';
@@ -87,29 +88,6 @@ export type CalendarPluginOptions = PluginToolbarOpts & {
   features?: CalendarPluginFeatures;
   toolbar?: CalendarToolbarOptions;
 };
-
-function remindersConfig(payload: ReturnType<typeof coerceCalendarDoc>): {
-  reminders: Array<{ id: string; triggerTime: number; message: string; title: string }>;
-} | null {
-  const reminders = payload.events
-    .filter((e) => typeof e.reminder === 'number' && e.reminder > 0)
-    .map((e) => {
-      const start = e.allDay
-        ? Date.parse(`${e.start.slice(0, 10)}T09:00`)
-        : Date.parse(e.start.length === 16 ? `${e.start}:00` : e.start);
-      return {
-        id: e.id,
-        triggerTime: start - (e.reminder ?? 0) * 60_000,
-        message: e.title,
-        title: payload.title,
-      };
-    })
-    .filter((r) => Number.isFinite(r.triggerTime));
-  if (reminders.length === 0) {
-    return null;
-  }
-  return { reminders };
-}
 
 export function CalendarPlugin(options: CalendarPluginOptions = {}): PluginDefinition {
   const surface = options.surface ?? 'atom';

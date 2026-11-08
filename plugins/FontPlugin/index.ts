@@ -1,4 +1,11 @@
-import { definePlugin, withMarkTarget, setMarkAttrs, setBlockAttr, core } from '@codemerge/sdk';
+import {
+  definePlugin,
+  withMarkTarget,
+  setMarkAttrs,
+  setBlockAttr,
+  core,
+  blockAttrTargetPath,
+} from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
 import { wirePluginLocales } from '@codemerge/editor';
 import pluginLocaleEn from './i18n/locales/en.json';
@@ -48,7 +55,8 @@ function blockLineHeight(editor: EditorAPI): string | null {
     return null;
   }
   try {
-    const node = core.getNodeAt(editor.getJSON().doc, [path[0]]);
+    const doc = editor.getJSON().doc;
+    const node = core.getNodeAt(doc, blockAttrTargetPath(doc, path));
     const lh = node.attrs?.lineHeight;
     return typeof lh === 'string' && lh ? lh : null;
   } catch {

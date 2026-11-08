@@ -1,8 +1,8 @@
 import type { EditorState } from './transaction';
 import { transaction } from './transaction';
 import type { Operation } from './operations';
-import { offsetHasMark, rangeHasMark, selectionTextRange } from './operations';
-import { createParagraph, createText, getNodeAt, textLength } from './document';
+import { applyOps, offsetHasMark, rangeHasMark, selectionTextRange } from './operations';
+import { createParagraph, createText, getNodeAt, nextId, textLength } from './document';
 import { collapsedAt, orderedRange } from './selection';
 import type { DocNode, Mark, Point, Selection } from './types';
 import {
@@ -569,6 +569,57 @@ export const deleteForward: Command = (state) => {
   return null;
 };
 
+/**
+ * Enter in a text block that is a child of a listItem — ProseMirror `splitListItem`:
+ * text after the caret plus every block after it (nested lists) move into a new
+ * sibling item. Empty first paragraph → lift the item out (blocks after it kept).
+ */
+function splitBlockFormItemOps(
+  state: EditorState,
+  path: number[],
+  node: DocNode,
+  offset: number
+): Operation[] | null {
+  if (path.length < 3 || !isTextBlock(node.type) || node.type === 'listItem') {
+    return null;
+  }
+  const liPath = path.slice(0, -1);
+  const listPath = liPath.slice(0, -1);
+  let item: DocNode;
+  try {
+    item = getNodeAt(state.doc, liPath);
+    if (item.type !== 'listItem' || !isListType(getNodeAt(state.doc, listPath).type)) {
+      return null;
+    }
+  } catch {
+    return null;
+  }
+  const childIndex = path.at(-1) ?? 0;
+  const itemIndex = liPath.at(-1) ?? 0;
+  if (childIndex === 0 && plainText(node).length === 0) {
+    const { ops, selectionPath } = exitListItemOps(state.doc, listPath, itemIndex);
+    return [...ops, { type: 'set_selection', selection: collapsedAt(selectionPath, 0) }];
+  }
+  const split: Operation = { type: 'split_paragraph', path, offset };
+  const splitItem = getNodeAt(applyOps(state.doc, [split], state.selection).doc, liPath);
+  const moved = (splitItem.content ?? []).slice(childIndex + 1);
+  const ops: Operation[] = [split];
+  ops.push(
+    ...moved.map((): Operation => ({ type: 'remove_node', path: liPath, index: childIndex + 1 }))
+  );
+  const newIndex = itemIndex + 1;
+  ops.push(
+    {
+      type: 'insert_node',
+      path: listPath,
+      index: newIndex,
+      node: { type: 'listItem', id: nextId('li'), content: moved },
+    },
+    { type: 'set_selection', selection: collapsedAt([...listPath, newIndex, 0], 0) }
+  );
+  return ops;
+}
+
 export const splitBlock: Command = (state) => {
   const path = textPath(state);
   const offset = state.selection.anchor.offset;
@@ -596,6 +647,12 @@ export const splitBlock: Command = (state) => {
     } catch {
       parentIsList = false;
     }
+  }
+
+  // Block-form item (`listItem > [paragraph, nested list…]`): split the item itself.
+  const blockItemSplit = splitBlockFormItemOps(state, path, node, offset);
+  if (blockItemSplit) {
+    return blockItemSplit;
   }
 
   // listItem, or text block nested under a list (e.g. after a bad split)

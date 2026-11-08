@@ -6,7 +6,7 @@ import {
   insertItemCommand,
   insertPropertyCommand,
   moveItemCommand,
-} from '../commands/jsonCommands';
+} from '../commands/selection';
 import type { JsonWorkspaceHandle } from '../surface/workspaceView';
 import type { JsonToolbarItem, JsonToolbarOptions } from './types';
 

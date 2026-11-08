@@ -1,10 +1,14 @@
 import type { DocNode, Mark } from '@codemerge/kernel';
 import { highlightHtml } from '@codemerge/editor';
-import { viewToHtml } from '@codemerge/sdk';
+import {
+  asAttr,
+  attrToHtmlValue,
+  coerceHtmlJsonAttr,
+  cssColorToHex,
+  readJsonAttr,
+  viewToHtml,
+} from '@codemerge/sdk';
 import type { PublishNodeDefinition } from '@codemerge/sdk';
-import { asAttr } from '../utils/asAttr';
-import { attrToHtmlValue, coerceHtmlJsonAttr } from '../utils/attrJson';
-import { cssColorToHex } from '../utils/colorMath';
 import { parseMath } from '@ocm/math-plugin/utils/parse';
 import { astToMathML } from '@ocm/math-plugin/utils/mathml';
 import {
@@ -49,7 +53,7 @@ function docToHTMLInner(
     return `<p${serializeDataAttrs(doc.attrs)}>${inner}</p>`;
   }
   if (doc.type === 'heading') {
-    const level = Math.min(6, Math.max(1, Number(doc.attrs?.level ?? 1)));
+    const level = Math.min(6, Math.max(1, Number(doc.attrs?.level) || 1));
     const inner = (doc.content ?? []).map((n) => docToHTMLInner(n, publishers)).join('') || '<br>';
     // level lives in the tag; other SoT attrs (align/style/…) ride as data-*.
     return `<h${level}${serializeDataAttrs(doc.attrs, ['level'])}>${inner}</h${level}>`;
@@ -240,12 +244,39 @@ function escapeAttr(text: string): string {
   return escapeHTML(text).replaceAll("'", '&#39;');
 }
 
-function allowedLinkHref(raw: string): string {
+export type CalloutAction = { label: string; href: string };
+
+/** Callout `@btn` actions from untrusted attrs: labelled entries only, hrefs via {@link allowedLinkHref}. */
+export function calloutActions(raw: unknown): CalloutAction[] {
+  const list = readJsonAttr(raw, []);
+  if (!Array.isArray(list)) {
+    return [];
+  }
+  const out: CalloutAction[] = [];
+  for (const item of list) {
+    if (item === null || typeof item !== 'object') {
+      continue;
+    }
+    const label: unknown = Reflect.get(item, 'label');
+    const href: unknown = Reflect.get(item, 'href');
+    if (typeof label === 'string' && typeof href === 'string' && label.trim()) {
+      out.push({ label: label.trim(), href: allowedLinkHref(href) });
+    }
+  }
+  return out;
+}
+
+/** Keep http(s)/mailto/relative URLs; drop every other scheme (javascript:, data:, …). */
+export function allowedLinkHref(raw: string): string {
   const href = raw.trim();
   if (!href) {
     return '';
   }
-  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(href)?.[1]?.toLowerCase();
+  // Browsers drop ASCII tab/newline and leading C0/space before reading the scheme
+  // (`java\tscript:` runs as `javascript:`) — detect on the same normalized string.
+  // oxlint-disable-next-line no-control-regex
+  const bare = href.replaceAll(/[\u0000-\u0020]/g, '');
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(bare)?.[1]?.toLowerCase();
   if (!scheme) {
     return href;
   }
@@ -398,6 +429,9 @@ const SKIP_IMPORT_DATA_KEYS = new Set([
 /** Only these keys may be coerced from data-* strings to numbers. */
 const NUMERIC_ATTR_KEYS = new Set(['width', 'height', 'level', 'cols', 'colspan', 'rowspan']);
 
+/** Attr keys that make a valid `data-*` name — anything else (space, `=`, `>`) could inject attributes. */
+const SAFE_ATTR_KEY = /^[\w.-]+$/;
+
 /** Serialize SoT attrs as data-* (objects/arrays → JSON at HTML boundary). */
 function serializeDataAttrs(
   attrs: Record<string, unknown> | undefined,
@@ -408,7 +442,7 @@ function serializeDataAttrs(
   }
   const skip = new Set(omit);
   return Object.entries(attrs)
-    .filter(([k, v]) => !skip.has(k) && v !== undefined && v !== null)
+    .filter(([k, v]) => !skip.has(k) && v !== undefined && v !== null && SAFE_ATTR_KEY.test(k))
     .map(([k, v]) => ` data-${escapeAttr(camelToKebab(k))}="${escapeAttr(attrToHtmlValue(v))}"`)
     .join('');
 }
@@ -521,17 +555,19 @@ function parseBlock(node: ChildNode): DocNode | null {
           content.push(block);
         }
       }
-      const actions = [
+      const domActions = [
         ...el.querySelectorAll('.ocm-md-callout__actions a, .ocm-md-callout__btn'),
       ].flatMap((a) => {
         const label = a.textContent?.trim() ?? '';
         const href = a.getAttribute('href') ?? '';
         return label && href ? [{ label, href }] : [];
       });
+      const actions = calloutActions(domActions.length > 0 ? domActions : attrs.actions);
+      const { actions: _rawActions, ...rest } = attrs;
       return {
         type: 'callout',
         attrs: {
-          ...attrs,
+          ...rest,
           title: titleFromDom || (typeof attrs.title === 'string' ? attrs.title : ''),
           ...(actions.length > 0 ? { actions } : {}),
         },
@@ -572,7 +608,7 @@ function parseBlock(node: ChildNode): DocNode | null {
       .map((li) => ({
         type: 'listItem',
         attrs: mergeElAttrs(li),
-        content: parseInline(li),
+        content: parseListItemContent(li),
       }));
     return {
       type: tag === 'ul' ? 'bulletList' : 'orderedList',
@@ -623,6 +659,25 @@ function parseBlock(node: ChildNode): DocNode | null {
   }
   // Fallback: treat as paragraph
   return { type: 'paragraph', attrs: mergeElAttrs(el), content: parseInline(el) };
+}
+
+const isListEl = (n: Element) => n.tagName === 'UL' || n.tagName === 'OL';
+
+/** Flat inline item, or block form `[paragraph, nested list…]` when the `<li>` holds `<ul>`/`<ol>`. */
+function parseListItemContent(li: HTMLElement): DocNode[] {
+  const nested = [...li.children].filter(isListEl);
+  if (nested.length === 0) {
+    return parseInline(li);
+  }
+  const head = li.cloneNode(true);
+  if (!(head instanceof HTMLElement)) {
+    return parseInline(li);
+  }
+  for (const child of [...head.children].filter(isListEl)) {
+    child.remove();
+  }
+  const lists = nested.map((n) => parseBlock(n)).filter((b): b is DocNode => b !== null);
+  return [{ type: 'paragraph', content: parseInline(head) }, ...lists];
 }
 
 function parseInline(el: HTMLElement): DocNode[] {

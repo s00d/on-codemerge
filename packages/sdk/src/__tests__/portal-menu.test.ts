@@ -8,6 +8,7 @@ import {
 } from '@codemerge/view';
 import { ContextMenuService } from '../ui/context-menu';
 import { NotifyService } from '../ui/notify';
+import { PopupService } from '../ui/popup';
 import { h } from '@codemerge/view';
 
 describe('portal roots', () => {
@@ -149,5 +150,17 @@ describe('notifyService', () => {
     expect(toast!.textContent).toContain('Hi');
     notify.destroy();
     expect(document.querySelector('.ocm-notify')).toBeNull();
+  });
+
+  it('confirm resolves false when dismissed without a button (Escape)', async () => {
+    expect.hasAssertions();
+    const popup = new PopupService();
+    const notify = new NotifyService(undefined, popup);
+    const pending = notify.confirm('sure?');
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    await expect(pending).resolves.toBe(false);
+    expect(popup.isOpen).toBe(false);
+    notify.destroy();
+    popup.destroy();
   });
 });

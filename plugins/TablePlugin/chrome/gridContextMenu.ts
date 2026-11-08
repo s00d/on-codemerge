@@ -21,10 +21,15 @@ import {
 } from '@codemerge/sdk/icons';
 
 import { copySelection, pasteFromClipboard } from '../grid/clipboard';
+import {
+  setColumnMeta as setColumnMetaOp,
+  setTheme as setThemeOp,
+  setView as setViewOp,
+} from '../grid/ops';
 import { spanSize } from '../grid/spans';
 import type { TableStore } from '../grid/TableStore';
 import { DEFAULT_ROW_HEIGHT } from '../grid/viewport';
-import type { CellAlign, CellBorder, CellStyle, TableTheme } from '../io/adapters';
+import type { CellAlign, CellBorder, CellStyle, TableTheme, TableViewState } from '../io/adapters';
 
 const THEMES: TableTheme[] = ['default', 'modern', 'bordered', 'striped'];
 
@@ -181,18 +186,22 @@ function openProperties(editor: EditorAPI, store: TableStore): void {
             v.theme === 'modern' || v.theme === 'bordered' || v.theme === 'striped'
               ? v.theme
               : 'default';
-          store.setTheme(theme);
           const fit = String(v.fit);
-          store.setView({ fit: fit === 'fixed' || fit === 'content' ? 'content' : 'fill' });
+          const view: Partial<TableViewState> = {
+            fit: fit === 'fixed' || fit === 'content' ? 'content' : 'fill',
+          };
           const rowHeight = Number(v.rowHeight);
           if (Number.isFinite(rowHeight) && rowHeight > 0) {
-            store.setView({ rowHeight: Math.min(96, Math.max(20, Math.round(rowHeight))) });
+            view.rowHeight = Math.min(96, Math.max(20, Math.round(rowHeight)));
           }
+          // One Apply = one commit (one undo step).
+          let next = setViewOp(setThemeOp(store.getDoc(), theme), view);
           const colWidth = Number(v.colWidth);
           const colId = store.getSelection().active?.colId;
           if (colId && Number.isFinite(colWidth) && colWidth > 0) {
-            store.setColumnMeta(colId, { width: Math.max(64, Math.round(colWidth)) });
+            next = setColumnMetaOp(next, colId, { width: Math.max(64, Math.round(colWidth)) });
           }
+          store.setDoc(next, { commit: true });
           return true;
         },
       },

@@ -2,7 +2,7 @@ import { bindWindowDrag, h } from '@codemerge/sdk';
 import type { ViewSpec } from '@codemerge/sdk';
 
 import type { CalendarDoc, CalendarI18n, Occurrence } from '../types';
-import { addDays, civilDate, formatEventWhen, startOfWeek } from './defaults';
+import { addDays, addMonths, civilDate, formatEventWhen, startOfWeek } from './defaults';
 import { agendaRange, dayRange, monthRange, occurrences, weekRange } from './occurrences';
 
 export type ViewRenderCtx = {
@@ -12,7 +12,8 @@ export type ViewRenderCtx = {
   onSelectDay: (cursor: string) => void;
   onChangeView: (view: CalendarDoc['view'], cursor?: string) => void;
   onMoveTimed?: (eventId: string, day: string, startMinutes: number) => void;
-  onResizeTimed?: (eventId: string, endMinutes: number) => void;
+  /** `endDay` = civil day of the dragged (last) segment of an event that crosses midnight. */
+  onResizeTimed?: (eventId: string, endMinutes: number, endDay: string) => void;
   onMoveDay?: (eventId: string, day: string) => void;
 };
 
@@ -69,10 +70,14 @@ export function renderMonth(doc: CalendarDoc, ctx: ViewRenderCtx): ViewSpec {
   const occs = occurrences(doc, range);
   const byDay = new Map<string, Occurrence[]>();
   for (const o of occs) {
-    const d = civilDate(o.start);
-    const list = byDay.get(d) ?? [];
-    list.push(o);
-    byDay.set(d, list);
+    // Multi-day all-day events appear on every covered day (end is inclusive).
+    const last = o.allDay ? civilDate(o.end) : civilDate(o.start);
+    const first = civilDate(o.start) < range.start ? range.start : civilDate(o.start);
+    for (let d = first; d <= last && d < range.end; d = addDays(d, 1)) {
+      const list = byDay.get(d) ?? [];
+      list.push(o);
+      byDay.set(d, list);
+    }
   }
   const parts = doc.cursor.split('-');
   const y = Number(parts[0]) || 0;
@@ -211,7 +216,14 @@ export function renderTimed(doc: CalendarDoc, ctx: ViewRenderCtx, cols: 1 | 7): 
           )
         ),
         ...days.map((day) => {
-          const dayOccs = occs.filter((x) => civilDate(x.start) === day);
+          // Timed events crossing midnight draw one segment per day they touch.
+          const dayOccs = occs.filter(
+            (x) =>
+              civilDate(x.start) <= day &&
+              (civilDate(x.end) > day ||
+                (civilDate(x.end) === day &&
+                  (minutesFromMidnight(x.end) > 0 || civilDate(x.start) === day)))
+          );
           return h(
             'div',
             {
@@ -254,11 +266,15 @@ export function renderTimed(doc: CalendarDoc, ctx: ViewRenderCtx, cols: 1 | 7): 
               })
             ),
             ...dayOccs.map((o) => {
-              const top = (minutesFromMidnight(o.start) / 60) * 48;
-              const height = Math.max(
-                24,
-                ((minutesFromMidnight(o.end) - minutesFromMidnight(o.start)) / 60) * 48
-              );
+              const segStart = civilDate(o.start) === day ? minutesFromMidnight(o.start) : 0;
+              const endsToday = civilDate(o.end) === day;
+              const segEnd = endsToday ? minutesFromMidnight(o.end) : 24 * 60;
+              // Resize handle on the final segment (an event ending at 00:00 ends on this one).
+              const lastSeg =
+                endsToday ||
+                (civilDate(o.end) === addDays(day, 1) && minutesFromMidnight(o.end) === 0);
+              const top = (segStart / 60) * 48;
+              const height = Math.max(24, ((segEnd - segStart) / 60) * 48);
               const color = layerColor(doc, o.calendarId, o.color);
               const selected = ctx.selectedEventId === o.eventId;
               return h(
@@ -296,14 +312,15 @@ export function renderTimed(doc: CalendarDoc, ctx: ViewRenderCtx, cols: 1 | 7): 
                       e.preventDefault();
                       e.stopPropagation();
                       const startY = e.clientY;
-                      const startEnd = minutesFromMidnight(o.end);
+                      const startEnd = segEnd;
                       bindWindowDrag({
                         onMove: (ev: PointerEvent) => {
                           const dy = ev.clientY - startY;
                           const deltaMin = snap15((dy / 48) * 60);
                           ctx.onResizeTimed?.(
                             o.eventId,
-                            Math.max(startEnd + deltaMin, minutesFromMidnight(o.start) + 15)
+                            Math.max(startEnd + deltaMin, segStart + 15),
+                            day
                           );
                         },
                         onUp: () => {
@@ -314,7 +331,7 @@ export function renderTimed(doc: CalendarDoc, ctx: ViewRenderCtx, cols: 1 | 7): 
                   },
                 },
                 h('div', { class: 'cal-timed__event-title' }, o.title),
-                h('div', { class: 'cal-timed__resize' })
+                lastSeg ? h('div', { class: 'cal-timed__resize' }) : null
               );
             })
           );
@@ -329,7 +346,8 @@ export function renderYear(doc: CalendarDoc, ctx: ViewRenderCtx): ViewSpec {
   const months: ViewSpec[] = [];
   for (let m = 1; m <= 12; m++) {
     const cursor = `${y}-${String(m).padStart(2, '0')}-01`;
-    const count = occurrences(doc, monthRange(cursor)).length;
+    // Calendar month only — monthRange() is the 6-week grid incl. neighbour days.
+    const count = occurrences(doc, { start: cursor, end: addMonths(cursor, 1) }).length;
     months.push(
       h(
         'button',

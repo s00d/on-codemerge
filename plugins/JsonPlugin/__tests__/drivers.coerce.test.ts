@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { allJsonLeafTypes, getDriver } from '../drivers/registry';
 import { applyTransaction, createState, runCommand } from '@codemerge/kernel';
-import { changeType } from '../commands/jsonCommands';
+import { changeType } from '../commands/mutate';
 import { docToValue, toEditorDoc, valueToDoc } from '../io/adapters';
 
 describe('json drivers.coerce', () => {

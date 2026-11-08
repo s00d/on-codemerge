@@ -28,7 +28,7 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
       model: {
         type: 'input',
         label: 'Model',
-        default: 'llama2',
+        default: 'llama3.2',
       },
       apiUrl: {
         type: 'input',
@@ -79,18 +79,22 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
    */
   async generateText(prompt: string, options?: OllamaOptions): Promise<string> {
     const baseUrl = options?.apiUrl || 'http://localhost:11434';
+    const stream = options?.stream ?? false;
+    // Sampling params live under `options` (top-level max_tokens/temperature are ignored).
     const requestBody = {
-      model: options?.model || 'llama2',
+      model: options?.model || 'llama3.2',
       prompt,
-      max_tokens: options?.maxTokens ?? 100,
-      temperature: options?.temperature ?? 0.7,
-      top_p: options?.topP ?? 1,
-      frequency_penalty: options?.frequencyPenalty ?? 0,
-      presence_penalty: options?.presencePenalty ?? 0,
-      stream: options?.stream ?? false,
+      stream,
+      options: {
+        num_predict: options?.maxTokens ?? 100,
+        temperature: options?.temperature ?? 0.7,
+        top_p: options?.topP ?? 1,
+        frequency_penalty: options?.frequencyPenalty ?? 0,
+        presence_penalty: options?.presencePenalty ?? 0,
+      },
     };
 
-    const response = await fetch(`${baseUrl}/api/generate`, {
+    const response = await fetch(`${baseUrl.replace(/\/$/, '')}/api/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -102,10 +106,17 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
       throw new Error('Failed to generate text with Ollama');
     }
 
-    if (requestBody.stream) {
-      // Обработка потокового ответа
+    if (stream) {
+      // NDJSON: a read() chunk may hold several lines or a partial one.
       const reader = response.body?.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
       let result = '';
+      const take = (line: string) => {
+        if (line.trim()) {
+          result += readOllamaResponse(JSON.parse(line));
+        }
+      };
 
       if (reader) {
         while (true) {
@@ -113,10 +124,12 @@ export class OllamaDriver implements AIDriver<OllamaOptions> {
           if (done) {
             break;
           }
-
-          const chunk = new TextDecoder().decode(value);
-          result += readOllamaResponse(JSON.parse(chunk));
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() ?? '';
+          lines.forEach(take);
         }
+        take(buffer + decoder.decode());
       }
 
       return result;

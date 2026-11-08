@@ -7,6 +7,7 @@ import {
   readJsonAttr,
   nodeAtPath,
   pathFromEl,
+  removeAtomAt,
 } from '@codemerge/sdk';
 import type { PluginContext, PluginToolbarOpts } from '@codemerge/sdk';
 
@@ -156,11 +157,7 @@ export function setupAtomChrome(ctx: PluginContext, opts?: PluginToolbarOpts): A
           icon: deleteIcon,
           variant: 'danger',
           onClick: () => {
-            const path = pathFromEl(form);
-            if (!path) {
-              return;
-            }
-            editor.run(() => [{ type: 'remove_node', path: [], index: path[0] }]);
+            removeAtomAt(form, (cmd) => editor.run(cmd));
           },
         },
       ],

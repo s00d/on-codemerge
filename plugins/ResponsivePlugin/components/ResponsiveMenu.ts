@@ -3,7 +3,6 @@ import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 
 import type { Viewport } from '../types';
 import { responsiveIcon, mobileIcon, tabletIcon, desktopIcon } from '@codemerge/sdk/icons';
-import { SetViewportCommand } from '../commands/SetViewportCommand';
 
 interface ViewportOption {
   name: Viewport;
@@ -157,9 +156,6 @@ export class ResponsiveMenu {
     for (const handler of this.viewportChangeHandlers) {
       handler(viewport);
     }
-    const command = new SetViewportCommand(this.editor);
-    command.setViewport(viewport);
-    command.execute();
   }
 
   show(): void {

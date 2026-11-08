@@ -42,4 +42,23 @@ describe('timer publish html', () => {
     editor.destroy();
     host.remove();
   });
+
+  it('copy-timer inserts a localized copy into the doc', () => {
+    const host = document.createElement('div');
+    document.body.append(host);
+    const editor = new Editor(host, { plugins: [TimerPlugin()] });
+    editor.run(insertAtomAfter('timer', { payload: samplePayload(), title: 'Ship' }));
+    const widget = host.querySelector('.timer-widget');
+    expect(widget).toBeInstanceOf(HTMLElement);
+    editor.ui.menu.open = (items) => {
+      items.find((i) => i.label === editor.t('timer.copyTimer'))?.onClick?.();
+    };
+    widget?.dispatchEvent(new MouseEvent('contextmenu', { bubbles: true, cancelable: true }));
+    const timers = (editor.getJSON().doc.content ?? []).filter((n) => n.type === 'timer');
+    expect(timers).toHaveLength(2);
+    expect(timers[1]?.attrs?.title).toBe(`Ship ${editor.t('timer.copySuffix')}`);
+    expect(String(timers[1]?.attrs?.title)).not.toContain('Копия');
+    editor.destroy();
+    host.remove();
+  });
 });

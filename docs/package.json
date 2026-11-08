@@ -1,0 +1,29 @@
+{
+  "name": "on-codemerge-docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Documentation site for on-codemerge (https://s00d.github.io/on-codemerge/).",
+  "type": "module",
+  "scripts": {
+    "sync": "node scripts/sync.mjs",
+    "dev": "node ../scripts/ensure-dist-css.mjs && node scripts/sync.mjs && nuxt dev",
+    "generate": "node ../scripts/ensure-dist-css.mjs && node scripts/sync.mjs && nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@iconify-json/lucide": "^1.2.150",
+    "@iconify-json/simple-icons": "^1.2.101",
+    "@nuxt/content": "3.16.2",
+    "@nuxt/ui": "^4.12.0",
+    "nuxt": "^4.6.4",
+    "tailwindcss": "catalog:",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "catalog:",
+    "vite-svg-loader": "catalog:",
+    "vue-tsc": "^3.3.14"
+  }
+}

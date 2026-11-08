@@ -7,6 +7,7 @@
     "timeExpired": "时间已到",
     "editTimer": "编辑计时器",
     "copyTimer": "复制计时器",
+    "copySuffix": "(副本)",
     "exportTimer": "导出计时器",
     "importTimer": "导入计时器",
     "deleteTimer": "删除计时器",

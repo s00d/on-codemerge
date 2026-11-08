@@ -50,5 +50,5 @@ export {
 
 export { exportHTML, importHTML, exportMarkdown, importMarkdown } from './io';
 export { docToMarkdown, markdownToDoc } from './io/markdown';
-export { sanitizeHTML } from './io/sanitize';
+export { sanitizeHTML } from '@codemerge/sdk';
 export { serializeJSON, parseJSON } from './io/json';

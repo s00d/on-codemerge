@@ -111,8 +111,14 @@ export class PublishRuntimeRegistry {
       if (!runtime) {
         return;
       }
-      const config = readOcmConfig(el);
-      const cleanup = runtime.mount(el, config);
+      let cleanup: void | (() => void);
+      try {
+        cleanup = runtime.mount(el, readOcmConfig(el));
+      } catch (error) {
+        // One broken runtime must not stop the rest of the page from hydrating.
+        console.error(`[ocm-publish] runtime "${id}" failed to mount`, error);
+        return;
+      }
       el.dataset.ocmBooted = '1';
       if (typeof cleanup === 'function') {
         this.cleanups.set(el, cleanup);

@@ -144,8 +144,11 @@ export function mountCodeWorkspace(
       return;
     }
     suppress = true;
-    replaceDoc(editor, result.doc);
-    suppress = false;
+    try {
+      replaceDoc(editor, result.doc);
+    } finally {
+      suppress = false;
+    }
   };
 
   const flushPendingSoT = (): void => {

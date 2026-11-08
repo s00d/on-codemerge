@@ -1,5 +1,5 @@
 import { docToHTML, htmlToDoc, docToPublishedHTML } from './html';
-import { sanitizeHTML } from './sanitize';
+import { sanitizeHTML } from '@codemerge/sdk';
 import { docToMarkdown, markdownToDoc } from './markdown';
 import type { PublishNodeDefinition } from '@codemerge/sdk';
 
@@ -25,6 +25,3 @@ export function importMarkdown(md: string) {
 export function exportMarkdown(doc: Parameters<typeof docToMarkdown>[0]) {
   return docToMarkdown(doc);
 }
-
-export { docToHTML, docToPublishedHTML, htmlToDoc } from './html';
-export { docToMarkdown, markdownToDoc } from './markdown';

@@ -1,4 +1,4 @@
-import { attrString, Resizer, atomAlignStyle, attrToHtmlValue } from '@codemerge/sdk';
+import { attrString, Resizer, atomAlignStyle, attrToHtmlValue, pathFromEl } from '@codemerge/sdk';
 import type { EditorAPI, DisposableScope } from '@codemerge/sdk';
 
 import { ChartMenu } from '../components/ChartMenu';
@@ -88,11 +88,10 @@ export function mountChartWidget(
           const h = el.offsetHeight;
           el.style.width = `${w}px`;
           el.style.height = `${h}px`;
-          const pathRaw = el.dataset.ocmPath ?? el.dataset.ocmBlock;
-          if (pathRaw === undefined) {
+          const path = pathFromEl(el);
+          if (!path) {
             return;
           }
-          const path = pathRaw.includes('.') ? pathRaw.split('.').map(Number) : [Number(pathRaw)];
           api.run(() => [{ type: 'set_attrs', path, attrs: { width: w, height: h } }]);
         },
       })

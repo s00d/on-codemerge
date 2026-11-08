@@ -15,6 +15,23 @@ export async function copyText(text: string): Promise<boolean> {
   }
 }
 
+/** Copy a binary blob (e.g. `image/png`) to the system clipboard. Returns false if unsupported or denied. */
+export async function copyBlob(blob: Blob): Promise<boolean> {
+  if (typeof navigator === 'undefined' || typeof ClipboardItem === 'undefined') {
+    return false;
+  }
+  const clipboard = navigator.clipboard;
+  if (clipboard === undefined || typeof clipboard.write !== 'function') {
+    return false;
+  }
+  try {
+    await clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /** Read plain text from the system clipboard. Returns null if unavailable or denied. */
 export async function readClipboardText(): Promise<string | null> {
   if (typeof navigator === 'undefined') {

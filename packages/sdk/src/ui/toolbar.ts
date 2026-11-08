@@ -171,9 +171,14 @@ export class ToolbarPanel {
 
   /** Register / update a named overflow menu (idempotent). */
   defineMenu(def: ToolbarMenuDef): () => void {
-    this.menus.set(def.id, { ...this.menus.get(def.id), ...def, id: def.id });
+    const entry = { ...this.menus.get(def.id), ...def, id: def.id };
+    this.menus.set(def.id, entry);
     this.render();
     return () => {
+      // A later defineMenu() under the same id owns the slot now — leave it.
+      if (this.menus.get(def.id) !== entry) {
+        return;
+      }
       this.menus.delete(def.id);
       if (this.openMenu?.id === def.id) {
         this.hideMenu();
@@ -186,6 +191,10 @@ export class ToolbarPanel {
     this.buttons.set(btn.id, btn);
     this.render();
     return () => {
+      // A later add() under the same id owns the slot now — leave it.
+      if (this.buttons.get(btn.id) !== btn) {
+        return;
+      }
       this.buttons.delete(btn.id);
       this.render();
     };

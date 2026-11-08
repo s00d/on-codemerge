@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.0] - 2026-11-08
+
+`@codemerge/collaboration-server` 3.0.0 (breaking, see below); everything else 2.9.0.
+
+### Breaking
+
+- collaboration-server: REST reads the token only from `Authorization: Bearer`; `?token=` is ignored
+- collaboration-server: the `comment` role can no longer submit document ops (`reject readonly`, REST 403)
+- `@ocm/wysiwyg/utils/*` deep imports removed — use `@codemerge/sdk` / `@codemerge/view` / `@codemerge/kernel`
+
+### Added
+
+- Collaboration: client-side OT rebase of offline edits on reconnect (`join { sinceVersion, clientId }`, duplicate-submit guard)
+- Hotkeys: Footnotes `Mod-Alt-x`, Templates `Mod-Alt-s`
+
+### Changed
+
+- Markdown "clear styles" (`stripInlineMarkdown`) rewritten as a CommonMark block + inline parser (verified on all 652 spec examples and ~10^6 fuzzed documents against commonmark.js)
+- Table sort/filter renders merged cells unmerged while active
+- AI Assistant drivers use chat completions
+- Docs site moved from VitePress to Nuxt + Nuxt Content + Nuxt UI: new sections (Getting started, Editors, Plugins by group, Integrate by stack, Architecture, Changelog), search, live demos kept; old `/guide/*` URLs changed
+- Release gate: new `check:pack` packs every package and runs attw on the tarball
+
+### Fixed
+
+- Package types resolve under `moduleResolution: node16/nodenext`: relative imports in `.d.ts` carry `.js`, every `.d.ts` has a `.d.cts` twin, `@codemerge/sdk/icons` declares icons as `string` instead of re-exporting unshipped `.svg` files
+- Full audit pass: listener/disposer leaks (toolbar, popups, code workspace), WS payload limit, Escape no longer swallowed when nothing is dragged, PDF embed handler result, assorted plugin edge cases
+
 ## [2.8.0] - 2026-10-07
 
 ### Added

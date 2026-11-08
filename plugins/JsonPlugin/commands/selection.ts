@@ -35,7 +35,8 @@ function findAncestor(
         return { path: p, node };
       }
     } catch {
-      return null;
+      // Stale / out-of-range tail — keep walking toward the root.
+      continue;
     }
   }
   return null;

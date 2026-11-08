@@ -34,9 +34,26 @@ WS + REST base path defaults to `/collab`:
 
 - `ws://host:8080/collab`
 - `GET /collab/health`
-- `GET /collab/rooms/:docId` (Bearer token)
-- `POST /collab/rooms/:docId` body `{ "ops": [...], "baseVersion": n }`
-- `GET|POST /collab/rooms/:docId/versions`
+- `GET /collab/rooms/:docId`
+- `POST /collab/rooms/:docId` body `{ "ops": [...], "baseVersion": n }` (`write` role)
+- `GET|POST /collab/rooms/:docId/versions` (POST: `write` role)
+
+REST takes the token **only** from `Authorization: Bearer <token>`; `?token=` is ignored
+(query strings end up in access logs, proxies and `Referer`). The WebSocket never puts the
+token in the URL either: it is sent in-band as the `auth` message after `hello`, because
+browsers cannot set headers on a WS upgrade.
+
+## Roles
+
+| Role      | Document ops (`submit`, REST POST) | Comments                                |
+| --------- | ---------------------------------- | --------------------------------------- |
+| `write`   | yes                                | add / edit own, resolve any, remove own |
+| `comment` | no (`reject readonly`, REST 403)   | add / edit own, resolve own, remove own |
+| `read`    | no (`reject readonly`, REST 403)   | no (`error readonly`)                   |
+
+Comment threads are in memory per live room (dropped when its last client leaves), max
+2000 threads per doc and 10 000 chars per body. Refusals come back as
+`error { reason: 'comment_forbidden' | 'comment_too_large' | 'comment_limit' | 'comment_invalid' }`.
 
 ## Embed
 
@@ -82,6 +99,12 @@ Edits: `submit { baseVersion, ops }` → `ack | reject`
 Ephemeral: `presence`, `ping`/`pong`, `comment`
 
 Clients must not send full document snapshots on every keystroke. Ops are rebased on the server when `baseVersion` lags.
+
+Reconnect: `join { sinceVersion, clientId }` makes `init` carry `ops` (log since that version,
+if not compacted) and `acked { seq, from, to }` (the last batch applied for that `clientId`,
+in case its ack was lost). A `submit` with a `clientId` + `clientSeq` already applied is
+rejected as `duplicate`, so a resubmit never applies twice. The `CollaborationPlugin` client
+uses this to rebase offline edits onto the server instead of overwriting them.
 
 ## Peer deps (optional)
 

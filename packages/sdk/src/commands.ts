@@ -1,5 +1,5 @@
 import type { Command, DocNode, Operation, Selection } from '@codemerge/kernel';
-import { isCollapsed, plainText } from '@codemerge/kernel';
+import { isCollapsed, nextId, plainText } from '@codemerge/kernel';
 import { core } from './core';
 import type { EditorAPI } from './types';
 
@@ -83,6 +83,17 @@ export function withMarkTarget(editor: EditorAPI, then: () => void): void {
   then();
 }
 
+/** Strip `markType` from the selected text range (no-op on a caret). */
+export function removeMarkType(markType: string): Command {
+  return (state) => {
+    const range = core.selectionTextRange(state.selection);
+    if (!range || range.from === range.to) {
+      return null;
+    }
+    return [{ type: 'remove_mark', path: range.path, from: range.from, to: range.to, markType }];
+  };
+}
+
 export function setMarkAttrs(markType: string, attrs: Record<string, unknown>): Command {
   return (state) => {
     const range = core.selectionTextRange(state.selection);
@@ -157,7 +168,8 @@ function markTypesInRange(para: DocNode, from: number, to: number): string[] {
   return [...types];
 }
 
-function blockPaintPath(doc: DocNode, leafPath: number[]): number[] {
+/** Block that `setBlockAttr` writes to: tableCell (td), else listItem (li), else top-level block. */
+export function blockAttrTargetPath(doc: DocNode, leafPath: number[]): number[] {
   const cell = findAncestorPath(doc, leafPath, 'tableCell');
   if (cell !== null) {
     return cell;
@@ -259,7 +271,7 @@ export function clearStyles(): Command {
           markType,
         });
       }
-      const paint = blockPaintPath(state.doc, span.path);
+      const paint = blockAttrTargetPath(state.doc, span.path);
       paintPaths.set(paint.join('.'), paint);
     }
 
@@ -312,17 +324,8 @@ export function setBlockAttr(key: string, value: unknown): Command {
     if (selPath.length === 0) {
       return null;
     }
-    // Paint-aware host: tableCell (td), else listItem (li), else top-level block.
-    const cell = findAncestorPath(state.doc, selPath, 'tableCell');
-    if (cell !== null) {
-      return [{ attrs: { [key]: value }, path: cell, type: 'set_attrs' }];
-    }
-    const listItem = findAncestorPath(state.doc, selPath, 'listItem');
-    if (listItem !== null) {
-      return [{ attrs: { [key]: value }, path: listItem, type: 'set_attrs' }];
-    }
-    const rootIndex = selPath[0] ?? 0;
-    return [{ attrs: { [key]: value }, path: [rootIndex], type: 'set_attrs' }];
+    const path = blockAttrTargetPath(state.doc, selPath);
+    return [{ attrs: { [key]: value }, path, type: 'set_attrs' }];
   };
 }
 
@@ -363,7 +366,7 @@ export function convertBlockType(type: string, attrs: Record<string, unknown> = 
       const lifted: DocNode = {
         attrs: { ...attrs },
         content: [...(item.content ?? [core.createText('')])],
-        id: `${type}_${Date.now()}`,
+        id: nextId(`${type}_`),
         type,
       };
       const listIndex = listPath[0] ?? 0;
@@ -374,7 +377,7 @@ export function convertBlockType(type: string, attrs: Record<string, unknown> = 
           type: 'insert_node',
           path: [],
           index: insertAt,
-          node: { ...list, content: before, id: `list_${Date.now()}_a` },
+          node: { ...list, content: before, id: nextId('list_') },
         });
         insertAt += 1;
       }
@@ -386,7 +389,7 @@ export function convertBlockType(type: string, attrs: Record<string, unknown> = 
           type: 'insert_node',
           path: [],
           index: insertAt,
-          node: { ...list, content: after, id: `list_${Date.now()}_b` },
+          node: { ...list, content: after, id: nextId('list_') },
         });
       }
       ops.push({
@@ -531,7 +534,7 @@ export function insertBlockNearSelection(
 
 export function insertAtomAfter(type: string, attrs: Record<string, unknown> = {}): Command {
   return insertBlockNearSelection(
-    { attrs, content: [], id: `${type}_${Date.now()}`, type },
+    { attrs, content: [], id: nextId(`${type}_`), type },
     { trailingParagraph: true }
   );
 }
@@ -584,7 +587,7 @@ export function wrapInList(listType: 'bulletList' | 'orderedList'): Command {
     };
     const list = {
       content: [listItem],
-      id: `list_${Date.now()}`,
+      id: nextId('list_'),
       type: listType,
     };
     return [

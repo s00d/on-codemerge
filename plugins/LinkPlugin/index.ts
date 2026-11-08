@@ -1,7 +1,6 @@
-import { definePlugin, withMarkTarget, setMarkAttrs, core } from '@codemerge/sdk';
+import { definePlugin, withMarkTarget, setMarkAttrs, removeMarkType } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
 
-import type { Command } from '@codemerge/kernel';
 import { LinkMenu } from './components/LinkMenu';
 import type { LinkData } from './components/LinkMenu';
 import { linkIcon, editIcon, deleteIcon } from '@codemerge/sdk/icons';
@@ -18,24 +17,6 @@ function applyLink(editor: EditorAPI, data: LinkData): void {
       })
     );
   });
-}
-
-function removeLinkMark(): Command {
-  return (state) => {
-    const range = core.selectionTextRange(state.selection);
-    if (!range || range.from === range.to) {
-      return null;
-    }
-    return [
-      {
-        type: 'remove_mark',
-        path: range.path,
-        from: range.from,
-        to: range.to,
-        markType: 'link',
-      },
-    ];
-  };
 }
 
 export function LinkPlugin() {
@@ -114,7 +95,7 @@ export function LinkPlugin() {
               variant: 'danger',
               onClick: () => {
                 withMarkTarget(editor, () => {
-                  editor.run(removeLinkMark());
+                  editor.run(removeMarkType('link'));
                 });
               },
             },

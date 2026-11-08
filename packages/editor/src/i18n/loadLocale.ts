@@ -1,4 +1,5 @@
 import type { Translations } from '@i18n-micro/runtime';
+import { loadLocaleFromGlob } from './wirePluginLocales';
 
 /**
  * Lazy locale chunks — exclude `en.json` (statically imported in Editor.ts).
@@ -27,15 +28,6 @@ export function listLocales(): string[] {
 }
 
 /** Load a non-en locale tree. Returns null for unknown codes or `en` (already bundled). */
-export async function loadLocale(locale: string): Promise<Translations | null> {
-  if (locale === 'en') {
-    return null;
-  }
-  const path = `./locales/${locale}.json`;
-  const load = modules[path];
-  if (load === undefined) {
-    return null;
-  }
-  const mod = await load();
-  return mod.default;
+export function loadLocale(locale: string): Promise<Translations | null> {
+  return loadLocaleFromGlob(modules, locale);
 }

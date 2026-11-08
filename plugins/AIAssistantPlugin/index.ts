@@ -37,18 +37,15 @@ function defaultsFromDesc(desc: OptionsDescription): Record<string, unknown> {
   return out;
 }
 
-function toDriverOptions(merged: Record<string, unknown>): DriverOptions {
-  const model = typeof merged.model === 'string' ? merged.model : '';
-  const options: DriverOptions = { model };
-  if (typeof merged.temperature === 'number') {
-    options.temperature = merged.temperature;
+/** Scalar options pass through — driver-specific keys (Ollama `apiUrl`, HF `topK`…) included. */
+export function toDriverOptions(merged: Record<string, unknown>): DriverOptions {
+  const options: DriverOptions & Record<string, unknown> = { model: '' };
+  for (const [key, value] of Object.entries(merged)) {
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      options[key] = value;
+    }
   }
-  if (typeof merged.maxTokens === 'number') {
-    options.maxTokens = merged.maxTokens;
-  }
-  if (typeof merged.topP === 'number') {
-    options.topP = merged.topP;
-  }
+  options.model = typeof merged.model === 'string' ? merged.model : '';
   return options;
 }
 
@@ -95,13 +92,18 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
         /* ignore */
       }
 
-      const drivers = createDrivers(apiKey);
+      // Option descriptions only; generate builds keyed drivers.
+      const drivers = createDrivers();
 
       const saveSettings = () => {
-        localStorage.setItem(
-          LOCAL_STORAGE_KEY,
-          JSON.stringify({ driverName, prompt, structurePrompt, driverOptions })
-        );
+        try {
+          localStorage.setItem(
+            LOCAL_STORAGE_KEY,
+            JSON.stringify({ driverName, prompt, structurePrompt, driverOptions })
+          );
+        } catch {
+          /* storage blocked — generation must still run */
+        }
       };
 
       const popups = ctx.popup.session();
@@ -157,7 +159,7 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
             },
           },
           {
-            type: 'input',
+            type: 'password',
             id: 'api-key',
             label: editor.t('common.apiKey'),
             value: apiKey,
@@ -207,15 +209,13 @@ export function AIAssistantPlugin(opts?: PluginToolbarOpts) {
 
       const handleGenerate = async (api: EditorAPI) => {
         saveSettings();
-        const driver = getDriver(drivers, driverName);
+        // Fresh drivers carry the current key (constructors are config-only).
+        const driver = getDriver(createDrivers(apiKey), driverName);
         if (!driver) {
           api.notify(api.t('common.unsupportedDriver'));
           return;
         }
         try {
-          if ('apiKey' in driver) {
-            Reflect.set(driver, 'apiKey', apiKey);
-          }
           const fullPrompt = `${structurePrompt}\n\n${prompt}`;
           const generatedText = await driver.generateText(
             fullPrompt,

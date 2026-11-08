@@ -87,10 +87,8 @@ export const selectDriver: FieldDriver = {
         ...(field.options?.options ?? []).map((opt) =>
           h(
             'option',
-            {
-              attrs: { value: opt },
-              props: { selected: selectedValue === opt },
-            },
+            // attr (not prop) so the default survives published HTML serialization
+            { attrs: { value: opt, selected: selectedValue === opt ? true : undefined } },
             opt
           )
         )

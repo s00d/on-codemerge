@@ -1,6 +1,13 @@
 import type { DocNode } from './types';
 import type { Operation } from './operations';
-import { createParagraph, createText, deepCloneNode, getNodeAt, textLength } from './document';
+import {
+  createParagraph,
+  createText,
+  deepCloneNode,
+  getNodeAt,
+  nextId,
+  textLength,
+} from './document';
 
 const TEXT_BLOCKS = new Set(['paragraph', 'heading', 'listItem', 'blockquote', 'codeBlock']);
 const LIST_TYPES = new Set(['bulletList', 'orderedList']);
@@ -105,28 +112,31 @@ export function createListItem(content: DocNode[] = [createText('')]): DocNode {
 export function createList(listType: 'bulletList' | 'orderedList', items: DocNode[]): DocNode {
   return {
     type: listType,
-    id: `list_${Date.now()}`,
+    id: nextId('list'),
     content: items.length > 0 ? items : [createListItem()],
   };
 }
 
-/** Extract a paragraph to lift out of a list item. */
-function liftedParagraphFromItem(item: DocNode): DocNode {
+/**
+ * Split a list item into the paragraph to lift plus the blocks that follow it
+ * (nested lists, extra paragraphs) — those are lifted too, never dropped.
+ */
+function liftedBlocksFromItem(item: DocNode): { para: DocNode; rest: DocNode[] } {
   const content = item.content ?? [];
-  const first = content[0];
-  if (first !== undefined && first.type === 'paragraph') {
-    return deepCloneNode(first);
+  const blockForm = content.some((c) => isTextBlock(c.type) || isListType(c.type));
+  if (!blockForm) {
+    // Flat listItem with inline content (text / hardBreak)
+    return {
+      para: createParagraph(content.length > 0 ? content.map(deepCloneNode) : [createText('')]),
+      rest: [],
+    };
   }
-  if (
-    first !== undefined &&
-    isTextBlock(first.type) &&
-    first.type !== 'listItem' &&
-    !isListType(first.type)
-  ) {
-    return deepCloneNode(first);
+  const [first, ...others] = content;
+  if (first !== undefined && isTextBlock(first.type) && first.type !== 'listItem') {
+    return { para: deepCloneNode(first), rest: others.map(deepCloneNode) };
   }
-  // Flat listItem with inline content (text / hardBreak)
-  return createParagraph(content.length > 0 ? content.map(deepCloneNode) : [createText('')]);
+  // Item starts with a nested list — lift an empty paragraph, keep every block after it.
+  return { para: createParagraph([createText('')]), rest: content.map(deepCloneNode) };
 }
 
 /**
@@ -152,7 +162,7 @@ export function liftIntoParent(
 
   const before = items.slice(0, itemIndex);
   const after = items.slice(itemIndex + 1);
-  const para = liftedParagraphFromItem(item);
+  const { para, rest } = liftedBlocksFromItem(item);
   const ops: Operation[] = [];
 
   ops.push({ type: 'remove_node', path: parentPath, index: listIndex });
@@ -163,7 +173,7 @@ export function liftIntoParent(
       type: 'insert_node',
       path: parentPath,
       index: insertAt,
-      node: { ...list, content: before, id: `list_${Date.now()}_a` },
+      node: { ...list, content: before, id: nextId('list') },
     });
     insertAt += 1;
   }
@@ -171,12 +181,16 @@ export function liftIntoParent(
   const liftedIndex = insertAt;
   const selectionPath = [...parentPath, insertAt];
   insertAt += 1;
+  for (const node of rest) {
+    ops.push({ type: 'insert_node', path: parentPath, index: insertAt, node });
+    insertAt += 1;
+  }
   if (after.length > 0) {
     ops.push({
       type: 'insert_node',
       path: parentPath,
       index: insertAt,
-      node: { ...list, content: after, id: `list_${Date.now()}_b` },
+      node: { ...list, content: after, id: nextId('list') },
     });
   }
 

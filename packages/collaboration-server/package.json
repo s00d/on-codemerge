@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/collaboration-server",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "description": "Authoritative WebSocket collaboration server for CodeMerge (ops op-log, presence, REST)",
   "license": "MIT",
   "author": "Pavel Kuzmin",

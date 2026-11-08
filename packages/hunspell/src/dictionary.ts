@@ -69,7 +69,7 @@ export function createDictionary(affData: string, dicData: string): HunspellDict
     compoundRules,
     replacementTable,
     flags,
-    memoized: {},
+    memoized: new Map(),
     alphabet: '',
   };
 

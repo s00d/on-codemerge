@@ -14,6 +14,7 @@ export const MD_BLOCK_TYPES = new Set([
   'callout',
   'mermaid',
   'table',
+  'tableGrid',
   'tableRow',
   'tableCell',
   'image',

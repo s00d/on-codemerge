@@ -78,6 +78,9 @@ function renderXy(graph: PositionedGraph, theme: ResolvedTheme, colors: string[]
   }
   const n = Math.max(categories.length, 1);
   const groupW = plotW / n;
+  // Bars / area fill grow from 0 when the axis spans negatives.
+  const zeroY =
+    plotY + plotH - ((Math.min(yMax, Math.max(yMin, 0)) - yMin) / (yMax - yMin)) * plotH;
   const barSeries = series.filter((s) => s.kind === 'bar');
   const barCount = Math.max(barSeries.length, 1);
 
@@ -91,10 +94,11 @@ function renderXy(graph: PositionedGraph, theme: ResolvedTheme, colors: string[]
       const bi = barSeries.indexOf(s);
       for (let i = 0; i < n; i += 1) {
         const v = s.values[i] ?? 0;
-        const h = ((v - yMin) / (yMax - yMin)) * plotH;
+        const vy = plotY + plotH - ((v - yMin) / (yMax - yMin)) * plotH;
         const bw = (groupW * 0.7) / barCount;
         const x = plotX + i * groupW + groupW * 0.15 + bi * bw;
-        const y = plotY + plotH - h;
+        const y = Math.min(vy, zeroY);
+        const h = Math.abs(zeroY - vy);
         const fill =
           barCount === 1 && colors.length > 1 ? (colors[i % colors.length] ?? color) : color;
         parts.push(
@@ -117,7 +121,7 @@ function renderXy(graph: PositionedGraph, theme: ResolvedTheme, colors: string[]
         const first = xs[0] ?? plotX;
         const last = xs[xs.length - 1] ?? plotX + plotW;
         parts.push(
-          `<path d="M${first},${plotY + plotH} L${ptStrs.join(' L')} L${last},${plotY + plotH} Z" fill="${escapeXml(color)}" opacity="0.35"/>`
+          `<path d="M${first},${zeroY} L${ptStrs.join(' L')} L${last},${zeroY} Z" fill="${escapeXml(color)}" opacity="0.35"/>`
         );
       }
       if (ptStrs.length > 0) {

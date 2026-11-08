@@ -59,7 +59,8 @@ export interface EditorHostHandle {
   readonly element: HTMLElement;
   readonly format: DocFormat;
   getValue(): string;
-  setValue(value: string): void;
+  /** Load `value`; pass `format` when it differs from the host's (e.g. markdown into an html host). */
+  setValue(value: string, format?: DocFormat): void;
   getEditor(): unknown;
   destroy(): void;
 }
@@ -153,13 +154,13 @@ export function createEditorHost(el: HTMLElement, options: HostOptions = {}): Ed
     element: el,
     format,
     getValue: () => readValue(editor, format),
-    setValue(value: string) {
-      if (destroyed || readValue(editor, format) === value) {
+    setValue(value: string, valueFormat: DocFormat = format) {
+      if (destroyed || readValue(editor, valueFormat) === value) {
         return;
       }
       applying = true;
       try {
-        writeValue(editor, format, value);
+        writeValue(editor, valueFormat, value);
       } finally {
         applying = false;
       }

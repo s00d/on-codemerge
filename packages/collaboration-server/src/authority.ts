@@ -51,15 +51,17 @@ export function acceptSubmit(
       resync: { version: room.version, snapshot: room.snapshot },
     };
   }
-  if (baseVersion < 0) {
+  // `room.ops` may be compacted: ops[0] is version `firstOpVersion + 1`, not always 1.
+  const firstOpVersion = room.version - room.ops.length;
+  if (!Number.isInteger(baseVersion) || baseVersion < firstOpVersion) {
     return {
       ok: false,
-      reason: 'bad_base',
+      reason: baseVersion < 0 || !Number.isInteger(baseVersion) ? 'bad_base' : 'base_compacted',
       resync: { version: room.version, snapshot: room.snapshot },
     };
   }
 
-  const serverSince = room.ops.slice(baseVersion);
+  const serverSince = room.ops.slice(baseVersion - firstOpVersion);
   let toApply = ops;
   if (serverSince.length > 0) {
     toApply = rebaseOps(ops, serverSince);

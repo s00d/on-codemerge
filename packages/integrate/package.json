@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/integrate",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "Universal host adapters for on-codemerge (UI frameworks, Web Component)",
   "keywords": [
     "codemerge",
@@ -13,7 +13,7 @@
     "web-component",
     "wysiwyg"
   ],
-  "homepage": "https://s00d.github.io/on-codemerge/integrate/",
+  "homepage": "https://s00d.github.io/on-codemerge/integrate/overview",
   "bugs": {
     "url": "https://github.com/s00d/on-codemerge/issues"
   },

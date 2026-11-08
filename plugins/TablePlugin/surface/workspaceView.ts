@@ -130,6 +130,9 @@ export function mountTableWorkspace(
     if (!src?.url || rawDirty || src.url === loadedSourceUrl) {
       return;
     }
+    // Mark before the fetch: every docChanged calls update() → tryAutoload, so an in-flight or
+    // failed load must not refetch (and re-notify) per edit. Refresh still calls applyRemote.
+    loadedSourceUrl = src.url;
     void applyRemote({
       url: src.url,
       format: src.format,

@@ -127,7 +127,9 @@ export const runtime = definePublishRuntime({
     const dismissMs = Number.isFinite(rawDismiss)
       ? Math.min(300_000, Math.max(1_000, rawDismiss))
       : 30_000;
-    const shown = new Set<string>();
+    // Skip reminders already missed before the page opened (old events would all toast at once).
+    const staleBefore = Date.now() - pollMs;
+    const shown = new Set(reminders.filter((r) => r.triggerTime < staleBefore).map((r) => r.id));
 
     const check = () => {
       const now = Date.now();

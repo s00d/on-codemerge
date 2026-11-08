@@ -174,17 +174,21 @@ export function docFromJSON(json: JSONDoc | DocNode | object): DocNode {
     if (json.doc.type !== 'doc') {
       throw new Error('Expected root type "doc"');
     }
-    assertTreeDepth(json.doc);
+    assertMaxTreeDepth(json.doc);
     return ensureNodeIds(deepClone(json.doc));
   }
   if (isDocNode(json) && json.type === 'doc') {
-    assertTreeDepth(json);
+    assertMaxTreeDepth(json);
     return ensureNodeIds(deepClone(json));
   }
   throw new Error('Expected root type "doc"');
 }
 
-function assertTreeDepth(node: DocNode, max = 64): void {
+/** Max nesting depth for op/JSON trees (empty structural bombs). */
+export const MAX_TREE_DEPTH = 64;
+
+/** Iterative depth check — fail closed before recursive clone/walk. */
+export function assertMaxTreeDepth(node: DocNode, max = MAX_TREE_DEPTH): void {
   const stack: { n: DocNode; d: number }[] = [{ n: node, d: 0 }];
   while (stack.length > 0) {
     const { n, d } = stack.pop()!;

@@ -28,7 +28,9 @@ export function valueFromNode(node: DocNode): unknown {
     case 'jsonArray':
       return (node.content ?? []).map(valueFromNode);
     case 'jsonObject': {
+      // Null-proto + spread: a `__proto__` key stays an own property (see adapters decodeValue).
       const out: Record<string, unknown> = {};
+      Object.setPrototypeOf(out, null);
       for (const prop of node.content ?? []) {
         if (prop.type !== 'jsonProperty') {
           continue;
@@ -39,7 +41,7 @@ export function valueFromNode(node: DocNode): unknown {
         }
         out[key] = valueFromNode(prop);
       }
-      return out;
+      return { ...out };
     }
     default:
       throw new TypeError(`Not a JSON value node: ${node.type}`);
@@ -64,8 +66,6 @@ export function pathSegments(doc: DocNode, path: number[]): string[] {
       segments.push(key);
     } else if (cur.type === 'jsonArray') {
       segments.push(String(idx));
-    } else if (child.type === 'json' || child.type === 'jsonObject' || child.type === 'jsonArray') {
-      // skip wrapper labels
     }
     cur = child;
   }

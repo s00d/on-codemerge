@@ -13,6 +13,7 @@ export interface EditorState {
 
 export interface Transaction {
   ops: Operation[];
+  /** `addToHistory: false` — Editor applies without recording undo (decorations like spell marks). */
   meta?: Record<string, unknown>;
 }
 

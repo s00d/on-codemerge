@@ -88,6 +88,11 @@ function clearMisspelledOps(doc: DocNode): Operation[] {
   return ops;
 }
 
+/** Spell marks are decoration: keep them out of undo history. */
+function dispatchDecoration(api: EditorAPI, ops: Operation[]): void {
+  api.dispatch({ ops, meta: { addToHistory: false } });
+}
+
 function resolveSpellLocale(
   locale: string,
   dictionaries: Record<string, SpellDictionaryFiles>,
@@ -208,8 +213,11 @@ export function SpellCheckerPlugin(options: SpellCheckerOptions) {
         }
         applying = true;
         lastPlain = plain;
-        editor.run(() => ops);
-        applying = false;
+        try {
+          dispatchDecoration(editor, ops);
+        } finally {
+          applying = false;
+        }
       };
 
       const scheduleRescan = () => {
@@ -232,8 +240,11 @@ export function SpellCheckerPlugin(options: SpellCheckerOptions) {
           return;
         }
         applying = true;
-        api.run(() => ops);
-        applying = false;
+        try {
+          dispatchDecoration(api, ops);
+        } finally {
+          applying = false;
+        }
       };
 
       const setEnabled = (on: boolean) => {

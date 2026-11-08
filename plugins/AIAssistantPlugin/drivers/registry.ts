@@ -16,7 +16,7 @@ export type AIDriverName =
   | 'mistral'
   | 'ollama';
 
-/** Provider map — rebuilt when the session opens (apiKey applied later via Reflect). */
+/** Provider map — rebuilt per generate so the current apiKey is applied. */
 export function createDrivers(apiKey = ''): Record<AIDriverName, AIDriver<DriverOptions>> {
   return {
     openai: new OpenAIDriver(apiKey),

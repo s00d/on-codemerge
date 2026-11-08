@@ -1,5 +1,5 @@
 /**
- * Fail CI if Vite/VitePress configs omit modern Sass API, or if a smoke
+ * Fail CI if Vite/Nuxt configs omit modern Sass API, or if a smoke
  * transform still emits Deprecation [legacy-js-api].
  */
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
@@ -11,9 +11,16 @@ import { pathToFileURL } from 'node:url';
 const root = join(import.meta.dirname, '..');
 const require = createRequire(import.meta.url);
 
-const CONFIGS = ['vite.config.ts', 'demo/vite.config.ts', 'docs/.vitepress/config.ts'];
+const CONFIGS = [
+  'vite.config.ts',
+  'vite.styles.config.ts',
+  'apps/wysiwyg/vite.public.config.ts',
+  'scripts/vite-app-config.ts',
+  'demo/vite.config.ts',
+  'docs/nuxt.config.ts',
+];
 
-const IMPORT_RE = /from\s+['"][^'"]*scripts\/scss-vite-options(?:\.ts)?['"]/;
+const IMPORT_RE = /from\s+['"][^'"]*(?:scripts\/|\.\/)scss-vite-options(?:\.ts)?['"]/;
 const API_RE = /api:\s*['"]modern-compiler['"]/;
 
 const violations = [];

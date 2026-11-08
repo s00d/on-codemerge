@@ -1,5 +1,5 @@
 import type { CalendarDoc, CalendarEvent, CalendarRRule, DateRange, Occurrence } from '../types';
-import { addDays, civilDate, startOfWeek } from './defaults';
+import { addDays, civilDate, civilToEpoch, startOfWeek, todayCursor } from './defaults';
 
 const OCCURRENCE_CAP = 400;
 
@@ -100,16 +100,34 @@ function weekdayMon0(dt: Date): number {
   return (dt.getDay() + 6) % 7;
 }
 
-function advance(dt: Date, freq: CalendarRRule['freq'], interval: number): void {
+/**
+ * Candidate days of the k-th recurrence period, computed from the seed (no drift:
+ * monthly on the 31st / yearly on Feb 29 skip periods without that day, RFC 5545).
+ * Weekly + byweekday expands to every listed weekday of the period's week.
+ */
+function periodDays(
+  seed: Date,
+  freq: CalendarRRule['freq'],
+  interval: number,
+  k: number,
+  weekdays: number[] | null
+): Date[] {
+  const y = seed.getFullYear();
+  const m = seed.getMonth();
+  const d = seed.getDate();
   if (freq === 'daily') {
-    dt.setDate(dt.getDate() + interval);
-  } else if (freq === 'weekly') {
-    dt.setDate(dt.getDate() + 7 * interval);
-  } else if (freq === 'monthly') {
-    dt.setMonth(dt.getMonth() + interval);
-  } else {
-    dt.setFullYear(dt.getFullYear() + interval);
+    return [new Date(y, m, d + k * interval)];
   }
+  if (freq === 'weekly') {
+    if (!weekdays) {
+      return [new Date(y, m, d + 7 * k * interval)];
+    }
+    const monday = d - weekdayMon0(seed) + 7 * k * interval;
+    return weekdays.map((wd) => new Date(y, m, monday + wd)).filter((dt) => dt >= seed);
+  }
+  const dt =
+    freq === 'monthly' ? new Date(y, m + k * interval, d) : new Date(y + k * interval, m, d);
+  return dt.getDate() === d ? [dt] : [];
 }
 
 /** Expand visible events into occurrences in `[range.start, range.end)`. */
@@ -140,33 +158,44 @@ export function occurrences(doc: CalendarDoc, range: DateRange): Occurrence[] {
 
     const rule = event.rrule;
     const seed = parseCivil(event.start);
-    const until = rule.until !== undefined ? parseCivil(rule.until).getTime() : rangeEnd;
-    const maxCount = rule.count ?? OCCURRENCE_CAP;
+    const interval = Math.max(1, Math.floor(rule.interval) || 1);
+    const until = rule.until !== undefined ? parseCivil(rule.until).getTime() : Infinity;
+    const maxCount = rule.count ?? Infinity;
+    const weekdays =
+      rule.byweekday !== undefined && rule.byweekday.length > 0
+        ? [...new Set(rule.byweekday)].toSorted((a, b) => a - b)
+        : null;
+    const expandWeek = rule.freq === 'weekly' && weekdays !== null;
+    // An occurrence starting up to `spanDays` before the range still runs into it (overlap, not start).
+    const spanDays = Math.max(
+      0,
+      Math.round((parseCivil(civilDate(event.end)).getTime() - seed.getTime()) / 86_400_000)
+    );
+    const overlapStart = parseCivil(addDays(range.start, -spanDays)).getTime();
     let count = 0;
-    const cursor = new Date(seed.getTime());
-    let guard = 0;
-    while (count < maxCount && guard < OCCURRENCE_CAP * 4) {
-      guard += 1;
-      const civil = formatCivil(cursor);
-      const t = cursor.getTime();
-      if (t > until || t >= rangeEnd) {
-        break;
-      }
-      const byweekday = rule.byweekday;
-      const weekdayOk =
-        byweekday === undefined ||
-        byweekday.length === 0 ||
-        byweekday.includes(weekdayMon0(cursor));
-      if (weekdayOk && t >= rangeStart) {
-        out.push(occurrenceFrom(event, civil));
-        count += 1;
-        if (out.length >= OCCURRENCE_CAP) {
-          return out;
+    let done = false;
+    // ponytail: walks from the seed (COUNT needs it); ~3.6k steps per decade of daily events.
+    for (let k = 0; !done && count < maxCount && k < 100_000; k++) {
+      for (const cursor of periodDays(seed, rule.freq, interval, k, expandWeek ? weekdays : null)) {
+        const t = cursor.getTime();
+        if (t > until || t >= rangeEnd) {
+          done = true;
+          break;
         }
-      } else if (weekdayOk && t < rangeStart) {
+        if (!expandWeek && weekdays !== null && !weekdays.includes(weekdayMon0(cursor))) {
+          continue;
+        }
         count += 1;
+        if (t >= overlapStart) {
+          out.push(occurrenceFrom(event, formatCivil(cursor)));
+          if (out.length >= OCCURRENCE_CAP) {
+            return out;
+          }
+        }
+        if (count >= maxCount) {
+          break;
+        }
       }
-      advance(cursor, rule.freq, rule.interval);
     }
   }
 
@@ -217,4 +246,51 @@ export function rangeForView(doc: CalendarDoc): DateRange {
     return agendaRange(doc.cursor);
   }
   return monthRange(doc.cursor);
+}
+
+/** Recurring reminders are expanded this far ahead of publish time. */
+export const REMINDER_HORIZON_DAYS = 60;
+
+export type RemindersConfig = {
+  reminders: Array<{ id: string; triggerTime: number; message: string; title: string }>;
+};
+
+/**
+ * Published reminder schedule. One-off events keep their single reminder; recurring events get one
+ * per occurrence in `[today − 1, today + REMINDER_HORIZON_DAYS)` (ids `eventId@start`).
+ */
+export function remindersConfig(doc: CalendarDoc, now = new Date()): RemindersConfig | null {
+  const today = todayCursor(doc.tz, now);
+  const horizon: DateRange = {
+    start: addDays(today, -1),
+    end: addDays(today, REMINDER_HORIZON_DAYS),
+  };
+  const reminders: RemindersConfig['reminders'] = [];
+  const push = (id: string, event: CalendarEvent, start: string) => {
+    // Stored times are wall-clock in doc.tz, not the viewer's zone.
+    const at = civilToEpoch(event.allDay ? `${start.slice(0, 10)}T09:00` : start, doc.tz);
+    const triggerTime = at - (event.reminder ?? 0) * 60_000;
+    if (Number.isFinite(triggerTime)) {
+      reminders.push({ id, triggerTime, message: event.title, title: doc.title });
+    }
+  };
+  for (const event of doc.events) {
+    if (typeof event.reminder !== 'number' || event.reminder <= 0) {
+      continue;
+    }
+    if (!event.rrule) {
+      push(event.id, event, event.start);
+      continue;
+    }
+    // Reminders ignore layer visibility (a hidden layer still rings).
+    const single: CalendarDoc = {
+      ...doc,
+      calendars: [{ id: event.calendarId, title: '', color: '', visible: true }],
+      events: [event],
+    };
+    for (const occ of occurrences(single, horizon)) {
+      push(`${event.id}@${occ.start}`, event, occ.start);
+    }
+  }
+  return reminders.length > 0 ? { reminders } : null;
 }

@@ -11,9 +11,10 @@ import type {
 } from '../io/adapters';
 import { coerceCellForColumn } from '../io/adapters';
 import { stringifyCell } from '../io/matrix';
+import { layoutColumns } from './derive/columns';
 import { deriveGrid } from './derive/pipeline';
 import { isGroupRowId } from './derive/group';
-import { isCovered, spanSize } from './spans';
+import { isCovered, spanSize, spansVisible } from './spans';
 import type { CellSpan } from './spans';
 import {
   colLetter,
@@ -25,7 +26,6 @@ import {
   padRowIds,
   SHEET_COL_CAP,
   SHEET_ROW_CAP,
-  SHEET_ROW_PAD,
 } from './sheet';
 
 export function emptyRow(doc: TableGridDoc): TableRow {
@@ -85,6 +85,9 @@ export function ensureCell(
   const colIds = sheetColumnIds(doc, sheetCols);
   const rowIds = sheetRowIds(doc, sheetRows);
   const existingRow = rowIds[rowIndex];
+  if (existingRow !== undefined && isGroupRowId(existingRow)) {
+    return null;
+  }
   const needsCol = isGhostColId(colId) || !doc.columns.some((c) => c.id === colId);
   const needsRow = existingRow === undefined || isGhostRowId(existingRow);
   if (!needsCol && !needsRow && existingRow) {
@@ -101,10 +104,21 @@ export function ensureCell(
   if (!resolvedCol) {
     return null;
   }
-  next = materializeRows(next, rowIndex);
-  const nextRows = sheetRowIds(next, Math.max(sheetRows, next.rows.length + SHEET_ROW_PAD));
-  const rowId = nextRows[rowIndex];
-  if (rowId === undefined || isGhostRowId(rowId)) {
+  if (!needsRow) {
+    return { doc: next, rowId: existingRow, colId: resolvedCol };
+  }
+  // Sheet index counts group headers / ignores filtered-out rows, so it is not a doc.rows index:
+  // add one SoT row per ghost (or past-the-end) slot up to rowIndex, and return the last new row.
+  let missing = Math.max(0, rowIndex - rowIds.length + 1);
+  for (let i = 0; i <= rowIndex && i < rowIds.length; i++) {
+    if (isGhostRowId(rowIds[i] ?? '')) {
+      missing += 1;
+    }
+  }
+  const target = next.rows.length + missing - 1;
+  next = materializeRows(next, target);
+  const rowId = next.rows[target]?.id;
+  if (rowId === undefined) {
     return null;
   }
   return { doc: next, rowId, colId: resolvedCol };
@@ -205,23 +219,63 @@ export function addColumn(
   return { ...doc, columns, rows, view };
 }
 
+/** Shrink by one the spans that cover a deleted row/column (origin kept, axis decremented). */
+function shrinkSpans(
+  spans: Record<string, CellSpan>,
+  axisFor: (colId: string, span: CellSpan) => 'cols' | 'rows' | null
+): Record<string, CellSpan> | undefined {
+  const out: Record<string, CellSpan> = {};
+  for (const [id, span] of Object.entries(spans)) {
+    const next: CellSpan = { ...span };
+    const axis = axisFor(id, span);
+    if (axis) {
+      const n = spanSize(span)[axis] - 1;
+      if (n > 1) {
+        next[axis] = n;
+      } else {
+        delete next[axis];
+      }
+    }
+    if (next.cols !== undefined || next.rows !== undefined) {
+      out[id] = next;
+    }
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
 export function deleteRow(doc: TableGridDoc, rowId: string): TableGridDoc {
   if (isGroupRowId(rowId) || doc.rows.length <= 1) {
     return doc;
   }
-  if (!doc.rows.some((r) => r.id === rowId)) {
+  const ri = doc.rows.findIndex((r) => r.id === rowId);
+  if (ri < 0) {
     return doc;
   }
-  const rows = doc.rows
-    .filter((r) => r.id !== rowId)
-    .map((r) => (r.parentId === rowId ? { ...r, parentId: null } : r));
+  const rows: TableRow[] = [];
+  for (const [i, r] of doc.rows.entries()) {
+    if (i === ri) {
+      continue;
+    }
+    let next = r.parentId === rowId ? { ...r, parentId: null } : r;
+    if (i < ri && next.spans) {
+      next = {
+        ...next,
+        spans: shrinkSpans(next.spans, (_id, span) =>
+          i + spanSize(span).rows > ri ? 'rows' : null
+        ),
+      };
+    }
+    rows.push(next);
+  }
   return { ...doc, rows };
 }
 
 export function deleteColumn(doc: TableGridDoc, colId: string): TableGridDoc {
-  if (doc.columns.length <= 1) {
+  if (doc.columns.length <= 1 || !doc.columns.some((c) => c.id === colId)) {
     return doc;
   }
+  const columnIds = layoutColumns(doc).columnIds;
+  const ci = columnIds.indexOf(colId);
   const columns = doc.columns.filter((c) => c.id !== colId);
   const rows = doc.rows.map((r) => {
     const cells = { ...r.cells };
@@ -230,7 +284,10 @@ export function deleteColumn(doc: TableGridDoc, colId: string): TableGridDoc {
     if (next.spans) {
       const spans = { ...next.spans };
       delete spans[colId];
-      next.spans = Object.keys(spans).length > 0 ? spans : undefined;
+      next.spans = shrinkSpans(spans, (id, span) => {
+        const c = columnIds.indexOf(id);
+        return c >= 0 && c < ci && c + spanSize(span).cols > ci ? 'cols' : null;
+      });
     }
     if (next.styles) {
       const styles = { ...next.styles };
@@ -239,7 +296,25 @@ export function deleteColumn(doc: TableGridDoc, colId: string): TableGridDoc {
     }
     return next;
   });
-  return { ...doc, columns, rows };
+  // Drop view state keyed by the deleted column — a stale filter would hide every row.
+  const view = doc.view;
+  const patch: Partial<TableViewState> = {};
+  if (view?.sort) {
+    patch.sort = view.sort.filter((s) => s.colId !== colId);
+  }
+  if (view?.filters) {
+    const filters = { ...view.filters };
+    delete filters[colId];
+    patch.filters = filters;
+  }
+  if (view?.groupBy) {
+    patch.groupBy = view.groupBy.filter((id) => id !== colId);
+  }
+  if (view?.columnOrder) {
+    patch.columnOrder = view.columnOrder.filter((id) => id !== colId);
+  }
+  const next = { ...doc, columns, rows };
+  return Object.keys(patch).length > 0 ? setView(next, patch) : next;
 }
 
 export function setColumnMeta(
@@ -360,7 +435,12 @@ export function mergeHorizontal(
   doc: TableGridDoc,
   active: { rowId: string; colId: string }
 ): TableGridDoc {
-  const columnIds = deriveGrid(doc).columnIds;
+  const derived = deriveGrid(doc);
+  // Merges would be invisible (rendered unmerged) while the view reorders rows.
+  if (!spansVisible(doc.rows, derived.rowIds)) {
+    return doc;
+  }
+  const columnIds = derived.columnIds;
   const ri = doc.rows.findIndex((r) => r.id === active.rowId);
   const ci = columnIds.indexOf(active.colId);
   if (ri < 0 || ci < 0 || isCovered(doc.rows, columnIds, ri, ci)) {
@@ -408,12 +488,13 @@ export function mergeVertical(
   active: { rowId: string; colId: string }
 ): TableGridDoc {
   const derived = deriveGrid(doc);
+  if (!spansVisible(doc.rows, derived.rowIds)) {
+    return doc;
+  }
   const columnIds = derived.columnIds;
-  const ordered = derived.rowIds.filter((id) => !isGroupRowId(id));
   const ri = doc.rows.findIndex((r) => r.id === active.rowId);
   const ci = columnIds.indexOf(active.colId);
-  const vis = ordered.indexOf(active.rowId);
-  if (ri < 0 || ci < 0 || vis < 0 || isCovered(doc.rows, columnIds, ri, ci)) {
+  if (ri < 0 || ci < 0 || isCovered(doc.rows, columnIds, ri, ci)) {
     return doc;
   }
   const row = doc.rows[ri];
@@ -421,13 +502,8 @@ export function mergeVertical(
     return doc;
   }
   const origin = spanSize(row.spans?.[active.colId]);
-  const nextVis = vis + origin.rows;
-  const nextRowId = ordered[nextVis];
-  if (nextRowId === undefined) {
-    return doc;
-  }
-  const nri = doc.rows.findIndex((r) => r.id === nextRowId);
-  if (nri < 0 || isCovered(doc.rows, columnIds, nri, ci)) {
+  const nri = ri + origin.rows;
+  if (nri >= doc.rows.length || isCovered(doc.rows, columnIds, nri, ci)) {
     return doc;
   }
   const below = doc.rows[nri];

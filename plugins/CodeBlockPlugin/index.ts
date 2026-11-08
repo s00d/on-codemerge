@@ -4,6 +4,7 @@ import {
   insertAtomAfter,
   attrString,
   foreign,
+  pathFromEl,
   pluginToolbarPlacement,
   replaceChildrenWithHtml,
 } from '@codemerge/sdk';
@@ -158,15 +159,8 @@ export function CodeBlockPlugin(options: CodeBlockPluginOptions = {}): PluginDef
           const code = codeElement.textContent || '';
           const language = languageElement.textContent || '';
           openModal?.(code, language, (newCode, newLanguage) => {
-            const pathRaw =
-              block.dataset.ocmPath ??
-              block.dataset.ocmBlock ??
-              block.closest<HTMLElement>('[data-ocm-path]')?.dataset.ocmPath ??
-              block.closest<HTMLElement>('[data-ocm-block]')?.dataset.ocmBlock;
-            if (pathRaw !== undefined && pathRaw !== null) {
-              const path = pathRaw.includes('.')
-                ? pathRaw.split('.').map(Number)
-                : [Number(pathRaw)];
+            const path = pathFromEl(block);
+            if (path) {
               editor.run(() => [
                 {
                   type: 'set_attrs',

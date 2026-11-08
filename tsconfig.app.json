@@ -55,7 +55,6 @@
     "**/*.test.ts",
     "**/*.spec.ts",
     "apps/wysiwyg/src/__mocks__/**",
-    "apps/wysiwyg/src/core/**",
     "apps/wysiwyg/src/main.ts",
     "apps/json/src/main.ts",
     "apps/markdown/src/main.ts",

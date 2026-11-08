@@ -127,6 +127,76 @@ export function addDays(cursor: string, days: number): string {
   return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
 }
 
+/** Shift by whole months, clamping the day (Jan 31 + 1 → Feb 28/29). */
+export function addMonths(cursor: string, months: number): string {
+  const { y, m, d } = parseYmd(cursor);
+  const first = new Date(y, m - 1 + months, 1);
+  const day = Math.min(d, daysInMonth(first.getFullYear(), first.getMonth()));
+  return `${first.getFullYear()}-${pad2(first.getMonth() + 1)}-${pad2(day)}`;
+}
+
+/** Epoch ms of a civil `YYYY-MM-DD[THH:mm]` wall time in IANA `tz` (DST-aware via Intl). */
+export function civilToEpoch(iso: string, tz: string): number {
+  const { y, m, d } = parseYmd(iso.slice(0, 10));
+  const time = iso.includes('T') ? iso.slice(11, 16).split(':') : [];
+  const asUtc = Date.UTC(y, m - 1, d, Number(time[0]) || 0, Number(time[1]) || 0);
+  let fmt: Intl.DateTimeFormat;
+  try {
+    fmt = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz,
+      hourCycle: 'h23',
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: 'numeric',
+      minute: 'numeric',
+      second: 'numeric',
+    });
+  } catch {
+    return new Date(y, m - 1, d, Number(time[0]) || 0, Number(time[1]) || 0).getTime();
+  }
+  const offset = (at: number): number => {
+    const p: Record<string, number> = {};
+    for (const part of fmt.formatToParts(at)) {
+      p[part.type] = Number(part.value);
+    }
+    const wall = Date.UTC(
+      p.year ?? 0,
+      (p.month ?? 1) - 1,
+      p.day ?? 1,
+      p.hour ?? 0,
+      p.minute ?? 0,
+      p.second ?? 0
+    );
+    return wall - Math.floor(at / 1000) * 1000;
+  };
+  const guess = asUtc - offset(asUtc);
+  return asUtc - offset(guess);
+}
+
+function wallClock(iso: string): Date {
+  const { y, m, d } = parseYmd(iso.slice(0, 10));
+  const time = iso.includes('T') ? iso.slice(11, 16).split(':') : [];
+  return new Date(y, m - 1, d, Number(time[0]) || 0, Number(time[1]) || 0);
+}
+
+function fmtWallClock(dt: Date): string {
+  return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}T${pad2(dt.getHours())}:${pad2(dt.getMinutes())}`;
+}
+
+/** New start/end for a timed event moved to `day` at `startMinutes`, keeping its duration (may end next day). */
+export function moveTimedEvent(
+  ev: Pick<CalendarEvent, 'start' | 'end'>,
+  day: string,
+  startMinutes: number
+): { start: string; end: string } {
+  const dur = wallClock(ev.end).getTime() - wallClock(ev.start).getTime();
+  const { y, m, d } = parseYmd(day);
+  const start = new Date(y, m - 1, d, 0, startMinutes);
+  const end = new Date(start.getTime() + (dur > 0 ? dur : 60 * 60_000));
+  return { start: fmtWallClock(start), end: fmtWallClock(end) };
+}
+
 export function startOfWeek(cursor: string, weekStartsOn = 1): string {
   const { y, m, d } = parseYmd(cursor);
   const dt = new Date(y, m - 1, d);

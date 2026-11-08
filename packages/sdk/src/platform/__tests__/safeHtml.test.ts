@@ -48,6 +48,13 @@ describe('safeHtml', () => {
     expect(svg?.querySelector('a')?.getAttribute('href')).toBeNull();
   });
 
+  it('sanitizeHTML drops javascript: hrefs obfuscated with tab/newline', () => {
+    const clean = sanitizeHTML(
+      '<a href="java&#x09;script:alert(1)">a</a><a href="&#x0A; javascript:alert(2)">b</a>'
+    );
+    expect(clean).not.toMatch(/href/i);
+  });
+
   it('parseSafeSvg keeps marker sizing attrs and pattern (case-insensitive)', () => {
     const svg = parseSafeSvg(
       '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 10 10">' +

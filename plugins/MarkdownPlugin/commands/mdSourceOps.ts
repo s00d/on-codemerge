@@ -3,6 +3,8 @@
  * WYSIWYG convertBlockType — retarget the current block, do not append.
  */
 
+import { stripInlineMarkdown } from './stripInlineMarkdown';
+
 export type MdEdit = { text: string; cursor: number };
 
 const HEADING_RE = /^(#{1,6})\s+/;
@@ -23,14 +25,11 @@ export function lineRange(
   const src = normalizeNl(text);
   const a = Math.max(0, Math.min(from, to, src.length));
   const b = Math.max(a, Math.min(Math.max(from, to), src.length));
-  let start = src.lastIndexOf('\n', Math.max(0, a - 1)) + 1;
+  // a === 0: lastIndexOf('\n', 0) would match a leading newline and skip line 0.
+  const start = a === 0 ? 0 : src.lastIndexOf('\n', a - 1) + 1;
   let end = src.indexOf('\n', b);
   if (end < 0) {
     end = src.length;
-  }
-  // If caret at end of line with selection empty past newline boundary — keep line.
-  if (a === b && a > 0 && src[a - 1] === '\n' && a === start) {
-    // caret on empty line after newline — start already correct
   }
   const slice = src.slice(start, end);
   return { start, end, lines: slice.length === 0 ? [''] : slice.split('\n') };
@@ -150,32 +149,6 @@ export function applyInlineMark(
   };
 }
 
-/** Strip common inline Markdown marks (bold/italic/strike/code/links). Skips fenced blocks. */
-export function stripInlineMarkdown(chunk: string): string {
-  const parts = chunk.split(/(```[\s\S]*?```)/);
-  return parts
-    .map((part) => {
-      if (part.startsWith('```')) {
-        return part;
-      }
-      let out = part;
-      let prev = '';
-      while (out !== prev) {
-        prev = out;
-        out = out
-          .replace(/\*\*([^*\n]+)\*\*/g, '$1')
-          .replace(/__([^_\n]+)__/g, '$1')
-          .replace(/~~([^~\n]+)~~/g, '$1')
-          .replace(/`([^`\n]+)`/g, '$1')
-          .replace(/\*([^*\n]+)\*/g, '$1')
-          .replace(/_([^_\n]+)_/g, '$1')
-          .replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
-      }
-      return out;
-    })
-    .join('');
-}
-
 /**
  * Clear inline Markdown styles.
  * Collapsed caret → whole document; non-empty selection → selection only.
@@ -207,6 +180,11 @@ export function applyLink(text: string, from: number, to: number, href = 'https:
 }
 
 /** Wrap selection (or current line) in a fenced code block. */
+/** A fence must open at line start: newline when the selection begins mid-line. */
+function fenceLead(src: string, at: number): string {
+  return at > 0 && src[at - 1] !== '\n' ? '\n' : '';
+}
+
 export function applyCodeFence(
   text: string,
   from: number,
@@ -218,7 +196,7 @@ export function applyCodeFence(
   const b = Math.max(from, to);
   if (a !== b) {
     const selected = src.slice(a, b);
-    const insert = `\`\`\`${language}\n${selected}\n\`\`\`\n`;
+    const insert = `${fenceLead(src, a)}\`\`\`${language}\n${selected}\n\`\`\`\n`;
     return { text: src.slice(0, a) + insert + src.slice(b), cursor: a + insert.length };
   }
   const { start, end, lines } = lineRange(src, a, b);
@@ -235,7 +213,7 @@ export function applyMermaid(text: string, from: number, to: number): MdEdit {
   const body =
     a !== b ? src.slice(a, b).trim() || 'flowchart LR\n  A-->B' : 'flowchart LR\n  A-->B';
   if (a !== b) {
-    const insert = `\`\`\`mermaid\n${body}\n\`\`\`\n`;
+    const insert = `${fenceLead(src, a)}\`\`\`mermaid\n${body}\n\`\`\`\n`;
     return { text: src.slice(0, a) + insert + src.slice(b), cursor: a + insert.length };
   }
   const { start, end } = lineRange(src, a, b);

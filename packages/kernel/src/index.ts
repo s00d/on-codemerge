@@ -15,6 +15,8 @@ export {
   textLength,
   resetIdCounter,
   nextId,
+  MAX_TREE_DEPTH,
+  assertMaxTreeDepth,
 } from './document';
 export {
   createSelection,
@@ -33,11 +35,9 @@ export {
   offsetHasMark,
   MAX_INSERT_CHARS,
   MAX_SLICE_KEEPS,
-  MAX_TREE_DEPTH,
-  assertMaxTreeDepth,
   type Operation,
 } from './operations';
-export { transformOp, transformOps, rebaseOps } from './transform';
+export { transformOp, transformOps, transformPair, rebaseOps } from './transform';
 export { normalize, isNormalizeIdempotent } from './normalize';
 export {
   createState,
@@ -57,7 +57,13 @@ export {
   type NodeSpec,
   type MarkSpec,
 } from './schema';
-export { createHistory, emptyState, type HistoryController, type HistoryOptions } from './history';
+export {
+  createHistory,
+  emptyState,
+  type HistoryController,
+  type HistoryOptions,
+  type HistoryStep,
+} from './history';
 export {
   insertText,
   deleteBackward,

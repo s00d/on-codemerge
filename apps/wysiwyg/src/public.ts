@@ -1,5 +1,6 @@
 /** Published page JS (pair with public.css) -> dist/public.js. */
-import { ensurePublishRuntimesRegistered, publishRuntimes } from './publish/runtimes';
+import { publishRuntimes } from '@codemerge/sdk';
+import { ensurePublishRuntimesRegistered } from './publish/runtimes';
 
 ensurePublishRuntimesRegistered();
 

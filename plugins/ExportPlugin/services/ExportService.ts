@@ -1,11 +1,7 @@
-import {
-  downloadBlob,
-  composePublishedDocument,
-  neededRuntimeIds,
-  publishedCssHref,
-  publishedJsHref,
-} from '@codemerge/sdk';
+import { downloadBlob } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
+
+const PRINT_FALLBACK_MS = 3000;
 
 /**
  * Export formats from the live editor document.
@@ -48,16 +44,22 @@ export class ExportService {
 
     printWindow.document.write(content);
     printWindow.document.close();
-    printWindow.print();
-  }
-
-  /** @deprecated Prefer `editor.getPublishedDocument()` — kept for tests. */
-  formatHTML(html: string, jsHref: string | null = null): string {
-    const needsJs = jsHref === null ? neededRuntimeIds(html).length > 0 : true;
-    return composePublishedDocument({
-      bodyHtml: html,
-      cssHref: publishedCssHref(),
-      jsHref: needsJs ? (jsHref ?? publishedJsHref()) : null,
-    });
+    // Wait for external CSS / images; fallback in case `load` never fires.
+    let printed = false;
+    const print = () => {
+      if (printed) {
+        return;
+      }
+      printed = true;
+      clearTimeout(fallback);
+      printWindow.focus();
+      printWindow.print();
+    };
+    const fallback = setTimeout(print, PRINT_FALLBACK_MS);
+    if (printWindow.document.readyState === 'complete') {
+      print();
+    } else {
+      printWindow.addEventListener('load', print, { once: true });
+    }
   }
 }

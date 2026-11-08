@@ -1,0 +1,7 @@
+node_modules
+.nuxt
+.output
+.data
+dist
+# Generated from the repository root by scripts/sync.mjs
+content/9.changelog.md

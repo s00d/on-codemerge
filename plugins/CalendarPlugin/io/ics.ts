@@ -1,6 +1,8 @@
 import { ParseError } from '@codemerge/kernel';
 import type { CalendarDoc, CalendarEvent, CalendarRRule } from '../types';
 import {
+  addDays,
+  civilDate,
   coerceCalendarDoc,
   emptyCalendarDoc,
   emptyEvent,
@@ -8,6 +10,10 @@ import {
   newId,
 } from '../drivers/defaults';
 import { MAX_CALENDAR_BYTES } from './text';
+
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
 
 function foldIcs(line: string): string {
   if (line.length <= 75) {
@@ -41,6 +47,13 @@ function fromIcsDate(raw: string, allDay: boolean): string {
   const date = `${m[1]}-${m[2]}-${m[3]}`;
   if (allDay || !m[4]) {
     return date;
+  }
+  if (raw.includes('Z')) {
+    // UTC instant → local wall time (the imported doc's default tz).
+    const dt = new Date(
+      Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), Number(m[4]), Number(m[5]))
+    );
+    return `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}T${pad2(dt.getHours())}:${pad2(dt.getMinutes())}`;
   }
   return `${date}T${m[4]}:${m[5]}`;
 }
@@ -119,7 +132,8 @@ export function serializeIcs(doc: CalendarDoc): string {
     if (event.allDay) {
       vevent.push(
         `DTSTART;VALUE=DATE:${toIcsDate(event.start, true)}`,
-        `DTEND;VALUE=DATE:${toIcsDate(event.end, true)}`
+        // ICS all-day DTEND is exclusive; ours is inclusive.
+        `DTEND;VALUE=DATE:${toIcsDate(addDays(civilDate(event.end), 1), true)}`
       );
     } else {
       vevent.push(
@@ -163,7 +177,7 @@ export function parseIcs(text: string): CalendarDoc {
     }
     if (upper === 'END:VEVENT' && cur) {
       const start = cur.start ?? '';
-      const end = cur.end ?? start;
+      const end = cur.end !== undefined && cur.end >= start ? cur.end : start;
       if (start) {
         events.push(
           emptyEvent('main', {
@@ -206,6 +220,9 @@ export function parseIcs(text: string): CalendarDoc {
     } else if (key === 'DTEND') {
       const allDay = keyPart.includes('VALUE=DATE') || !value.includes('T');
       cur.end = fromIcsDate(value, allDay);
+      if (allDay) {
+        cur.end = addDays(cur.end, -1);
+      }
     } else if (key === 'RRULE') {
       cur.rrule = parseRrule(value);
     }

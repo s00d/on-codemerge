@@ -40,7 +40,8 @@ export type HunspellState = {
   compoundRules: RegExp[];
   replacementTable: ReplacementPair[];
   flags: AffFlags;
-  memoized: Record<string, SuggestMemo>;
+  /** Map, not object: words like `constructor` / `__proto__` must not hit Object.prototype. */
+  memoized: Map<string, SuggestMemo>;
   alphabet: string;
 };
 

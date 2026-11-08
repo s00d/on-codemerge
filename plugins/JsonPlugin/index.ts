@@ -2,7 +2,7 @@ import { applyToolbarConfig, definePlugin, foreign, attrString } from '@codemerg
 import type { PluginDefinition, PluginToolbarOpts, WidgetContext, ViewSpec } from '@codemerge/sdk';
 import type { Command } from '@codemerge/kernel';
 
-import { jsonCommandMap } from './commands/jsonCommands';
+import { jsonCommandMap } from './commands/selection';
 import { setupAtomChrome } from './chrome/atom';
 import type { AtomChromeHandle } from './chrome/atom';
 import { bindJsonViewModeActive, defaultJsonToolbar } from './chrome/defaultToolbar';
@@ -37,13 +37,10 @@ export {
   changeType,
   moveItem,
   duplicateNode,
-  pathToDot,
-  pathToJsonPointer,
-  valueAtDocPath,
-  valueFromNode,
-  jsonCommandMap,
-  type JsonLeafType,
-} from './commands/jsonCommands';
+} from './commands/mutate';
+export { pathToDot, pathToJsonPointer, valueAtDocPath, valueFromNode } from './commands/path';
+export { jsonCommandMap } from './commands/selection';
+export type { JsonLeafType } from './commands/types';
 export { defaultJsonToolbar } from './chrome/defaultToolbar';
 export type {
   JsonToolbarActionApi,

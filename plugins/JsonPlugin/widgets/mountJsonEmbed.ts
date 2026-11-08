@@ -2,7 +2,7 @@ import { createEmbedSessionStore, createEmbedWorkspaceHost, h, mount } from '@co
 import type { DisposableScope, EditorAPI, MountHandle } from '@codemerge/sdk';
 
 import { bracesIcon, listIcon } from '@codemerge/sdk/icons';
-import { jsonCommandMap } from '../commands/jsonCommands';
+import { jsonCommandMap } from '../commands/selection';
 import { emptyEditorDoc, isJsonEditorDoc } from '../io/adapters';
 import { parseText, serializeDoc } from '../io/text';
 import { mountJsonWorkspace } from '../surface/workspaceView';

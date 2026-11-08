@@ -85,6 +85,22 @@ describe('ConstrainedEditor', () => {
     expect(editor.getSelection().anchor.path).toStrictEqual([0]);
   });
 
+  it('dispatch forwards source: remote (no local undo entry, event tagged remote)', () => {
+    const editor = mount();
+    const sources: string[] = [];
+    editor.on('transaction', (ev) => {
+      if (typeof ev === 'object' && ev !== null && 'source' in ev) {
+        sources.push(String(ev.source));
+      }
+    });
+    editor.dispatch(
+      { ops: [{ type: 'set_attrs', path: [0], attrs: { indent: 4 } }] },
+      { source: 'remote' }
+    );
+    expect(sources).toStrictEqual(['remote']);
+    expect(editor.undo()).toBe(false);
+  });
+
   it('run returns false when command does not change state', () => {
     const editor = mount();
     expect(editor.run(() => null)).toBe(false);

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 /**
  * @jest-environment jsdom
  */
-import { createPlatform } from '../Extension';
+import { createPlatform, registerPlugin } from '../Extension';
 import { MathPlugin, createCorePlugins, createDefaultPlugins } from '@ocm/plugins';
 
 describe('platform plugins', () => {
@@ -29,6 +29,23 @@ describe('platform plugins', () => {
         { name: 'b', commands: { sharedCmd: () => null } },
       ])
     ).toThrow(/already registered/);
+  });
+
+  it('registerPlugin after seal rejects nodes / marks', () => {
+    expect.hasAssertions();
+    const platform = createPlatform([]);
+    const editor = { host: document.createElement('div') } as never;
+    expect(() => {
+      registerPlugin(
+        platform,
+        { name: 'late', nodes: [{ name: 'lateNode', group: 'block' }] },
+        editor
+      );
+    }).toThrow(/sealed/);
+    expect(() => {
+      registerPlugin(platform, { name: 'lateMark', marks: [{ name: 'lateM' }] }, editor);
+    }).toThrow(/sealed/);
+    expect(platform.plugins.has('late')).toBe(false);
   });
 
   it('default plugins include overlays and complex', () => {

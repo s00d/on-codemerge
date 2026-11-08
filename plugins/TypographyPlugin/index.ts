@@ -19,7 +19,6 @@ export function TypographyPlugin() {
     nodes: [
       { name: 'heading', group: 'block', attrs: { level: 1 } },
       { name: 'blockquote', group: 'block' },
-      { name: 'code_block_typo', group: 'block' },
       { name: 'horizontalRule', group: 'atom', atom: true },
     ],
     hotkeys: [{ keys: 'Mod-Shift-w', command: 'typographyMenu', description: 'Typography styles' }],

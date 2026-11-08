@@ -1,7 +1,7 @@
 import type { DocNode } from '@codemerge/kernel';
 import { nextId } from '@codemerge/kernel';
 import { isPlainObject, matrixToCsv, stringifyCell } from './matrix';
-import { normalizeSpans } from '../grid/spans';
+import { normalizeSpans, spanSize } from '../grid/spans';
 
 export type CellValue = string | number | boolean | null;
 
@@ -638,6 +638,8 @@ export function gridToMatrix(grid: TableGridDoc): string[][] {
 }
 
 const HTML_COL_WIDTH = 128;
+/** Upper bound for an imported colspan (HTML allows 1000; keeps a bad attr from exploding the grid). */
+const SPAN_CAP = 256;
 
 function columnHtmlWidth(col: TableColumn): number {
   const w = col.width;
@@ -659,16 +661,15 @@ function htmlFromCellText(text: string): string {
 }
 
 function textFromTableCell(el: HTMLElement): string {
-  const html = el.innerHTML;
-  if (/<br/i.test(html)) {
-    return html
-      .replace(/<br\s*\/?>/gi, '\n')
-      .replace(/<[^>]+>/g, '')
-      .replaceAll('&nbsp;', ' ')
-      .replaceAll('&amp;', '&')
-      .replaceAll('&lt;', '<')
-      .replaceAll('&gt;', '>')
-      .replaceAll('&quot;', '"');
+  if (el.querySelector('br')) {
+    // Let the DOM decode entities (regex decoding turned `&amp;lt;` into `<`).
+    const clone = el.cloneNode(true);
+    if (clone instanceof HTMLElement) {
+      for (const br of clone.querySelectorAll('br')) {
+        br.replaceWith('\n');
+      }
+      return (clone.textContent ?? '').replaceAll('\u00a0', ' ');
+    }
   }
   return (el.textContent ?? '').replaceAll('\r\n', '\n');
 }
@@ -689,7 +690,8 @@ function parseGfmRow(line: string): string[] {
   if (s.endsWith('|')) {
     s = s.slice(0, -1);
   }
-  return s.split('|').map((c) => mdToCellText(c.trim().replaceAll(String.raw`\|`, '|')));
+  // Split on unescaped pipes only — `mdFromCellText` writes literal `|` as `\|`.
+  return s.split(/(?<!\\)\|/).map((c) => mdToCellText(c.trim().replaceAll(String.raw`\|`, '|')));
 }
 
 export function isGfmTableStart(lines: string[], i: number): boolean {
@@ -760,18 +762,71 @@ export function gridFromTableElement(el: HTMLElement): TableGridDoc {
   const hasHeaderAttr = el.dataset.hasHeader === 'true';
   const hasTh = Boolean(el.querySelector('th'));
   const hasHeader = hasHeaderAttr || hasTh;
-  const matrix = rawRows.map((tr) =>
-    [...tr.children]
-      .filter((c): c is HTMLElement => {
-        if (!(c instanceof HTMLElement)) {
-          return false;
+  // HTML table placement: colspan/rowspan cells occupy slots; covered slots become ''.
+  const matrix: string[][] = rawRows.map(() => []);
+  const origins: { r: number; c: number; cols: number; rows: number }[] = [];
+  for (const [r, tr] of rawRows.entries()) {
+    const line = matrix[r] ?? [];
+    let c = 0;
+    for (const cellEl of tr.children) {
+      const tag = cellEl.tagName.toLowerCase();
+      if (!(cellEl instanceof HTMLElement) || (tag !== 'td' && tag !== 'th')) {
+        continue;
+      }
+      while (line[c] !== undefined) {
+        c += 1;
+      }
+      const cols = Math.max(
+        1,
+        Math.min(SPAN_CAP, Math.trunc(Number(cellEl.getAttribute('colspan')) || 1))
+      );
+      const rows = Math.max(
+        1,
+        Math.min(rawRows.length - r, Math.trunc(Number(cellEl.getAttribute('rowspan')) || 1))
+      );
+      for (let dr = 0; dr < rows; dr++) {
+        const target = matrix[r + dr];
+        if (target === undefined) {
+          continue;
         }
-        const t = c.tagName.toLowerCase();
-        return t === 'td' || t === 'th';
-      })
-      .map((cellEl) => textFromTableCell(cellEl).trimEnd())
-  );
+        for (let dc = 0; dc < cols; dc++) {
+          target[c + dc] = '';
+        }
+      }
+      line[c] = textFromTableCell(cellEl).trimEnd();
+      if (cols > 1 || rows > 1) {
+        origins.push({ r, c, cols, rows });
+      }
+      c += cols;
+    }
+  }
+  for (const line of matrix) {
+    for (let i = 0; i < line.length; i++) {
+      line[i] ??= '';
+    }
+  }
   const grid = gridFromMatrix(matrix, hasHeader);
+  const bodyOffset = hasHeader ? 1 : 0;
+  for (const o of origins) {
+    const row = grid.rows[o.r - bodyOffset];
+    const col = grid.columns[o.c];
+    // Header-row spans have no SoT slot (titles are per column).
+    if (o.r < bodyOffset || row === undefined || col === undefined) {
+      continue;
+    }
+    const rows = Math.min(o.rows, grid.rows.length - (o.r - bodyOffset));
+    const cols = Math.min(o.cols, grid.columns.length - o.c);
+    const span: { cols?: number; rows?: number } = {};
+    if (cols > 1) {
+      span.cols = cols;
+    }
+    if (rows > 1) {
+      span.rows = rows;
+    }
+    if (span.cols !== undefined || span.rows !== undefined) {
+      row.spans = { ...row.spans, [col.id]: span };
+    }
+  }
   const colEls = [...el.querySelectorAll(':scope > colgroup > col, :scope > col')];
   if (colEls.length === grid.columns.length) {
     grid.columns = grid.columns.map((c, i) => {
@@ -832,12 +887,37 @@ export function gridToHtml(grid: TableGridDoc): string {
   const fitClass = fill ? ' html-editor-table--fill' : ' html-editor-table--content';
   const colgroup = widths.map((w) => `<col style="width:${String(w)}px">`).join('');
   const th = cols.map((c) => `<th>${escapeHtml(c.title)}</th>`).join('');
+  const covered = new Set<string>();
+  for (const [ri, row] of grid.rows.entries()) {
+    for (const [ci, c] of cols.entries()) {
+      const { cols: cs, rows: rs } = spanSize(row.spans?.[c.id]);
+      if (covered.has(`${ri}:${ci}`) || (cs <= 1 && rs <= 1)) {
+        continue;
+      }
+      for (let dr = 0; dr < rs; dr++) {
+        for (let dc = 0; dc < cs; dc++) {
+          if (dr > 0 || dc > 0) {
+            covered.add(`${ri + dr}:${ci + dc}`);
+          }
+        }
+      }
+    }
+  }
   const tr = grid.rows
-    .map((row) => {
+    .map((row, ri) => {
       const tds = cols
-        .map((c) => {
+        .map((c, ci) => {
+          if (covered.has(`${ri}:${ci}`)) {
+            return '';
+          }
+          const { cols: cs, rows: rs } = spanSize(row.spans?.[c.id]);
+          const colspan = Math.min(cs, cols.length - ci);
+          const rowspan = Math.min(rs, grid.rows.length - ri);
+          const spanAttrs =
+            (colspan > 1 ? ` colspan="${String(colspan)}"` : '') +
+            (rowspan > 1 ? ` rowspan="${String(rowspan)}"` : '');
           const text = htmlFromCellText(stringifyCell(row.cells[c.id]));
-          return `<td${cellStyleAttr(row.styles?.[c.id])}>${text}</td>`;
+          return `<td${spanAttrs}${cellStyleAttr(row.styles?.[c.id])}>${text}</td>`;
         })
         .join('');
       return `<tr>${tds}</tr>`;

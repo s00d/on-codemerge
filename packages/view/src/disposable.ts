@@ -108,9 +108,11 @@ export class DisposableScope {
   /** Nested child scope; disposed with (or before) parent. */
   child(): DisposableScope {
     const child = new DisposableScope();
-    this.disposable(() => {
+    const unregister = this.disposable(() => {
       child.dispose();
     });
+    // Child disposed first → drop its entry so long-lived parents do not accumulate dead closures.
+    child.disposable(unregister);
     return child;
   }
 
@@ -150,14 +152,15 @@ export class DisposableScope {
       return;
     }
     this.closed = true;
-    for (let i = this.stack.length - 1; i >= 0; i--) {
+    // Detach first: a cleanup calling another entry's unregister must not shift live indices.
+    const fns = this.stack.splice(0);
+    for (let i = fns.length - 1; i >= 0; i--) {
       try {
-        this.stack[i]();
+        fns[i]();
       } catch (error) {
         console.error('DisposableScope dispose error', error);
       }
     }
-    this.stack.length = 0;
   }
 }
 

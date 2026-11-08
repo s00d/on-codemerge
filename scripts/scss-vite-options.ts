@@ -1,5 +1,5 @@
 /**
- * Shared Sass options for every Vite / VitePress config.
+ * Shared Sass options for every Vite / Nuxt config.
  * Vite 5 (and misconfigured Vite 8) defaults to the legacy JS API and spams
  * `Deprecation [legacy-js-api]` — pin modern-compiler everywhere.
  * @see https://sass-lang.com/d/legacy-js-api

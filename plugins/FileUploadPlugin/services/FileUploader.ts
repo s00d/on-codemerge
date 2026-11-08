@@ -1,4 +1,4 @@
-import { downloadBlob, downloadUrl } from '@codemerge/sdk';
+import { downloadBlob } from '@codemerge/sdk';
 import { defaultConfig } from '../config/UploadConfig';
 import type { UploadConfig } from '../config/UploadConfig';
 import { assertFileAllowed, formatFileSize, listMedia, uploadMedia, deleteMedia } from './mediaApi';
@@ -98,7 +98,8 @@ export class FileUploader {
 
   private async downloadFromServer(id: string): Promise<void> {
     const base = this.config.endpoints!.download!.replace(/\/$/, '');
-    const response = await fetch(`${base}/${id}`, {
+    // `id` comes from doc attrs (paste/import) — encode so it can't walk the path with auth headers.
+    const response = await fetch(`${base}/${encodeURIComponent(id)}`, {
       method: 'GET',
       headers: { ...this.config.headers },
     });
@@ -107,12 +108,11 @@ export class FileUploader {
     }
 
     const blob = await response.blob();
-    const url = URL.createObjectURL(blob);
     const filename =
-      response.headers.get('content-disposition')?.split('filename=')[1] ?? 'download';
+      response.headers.get('content-disposition')?.split('filename=')[1]?.split(';')[0] ??
+      'download';
 
-    downloadUrl(url, filename.replaceAll('"', ''));
-    URL.revokeObjectURL(url);
+    downloadBlob(blob, filename.replaceAll('"', '').trim() || 'download', blob.type);
   }
 
   private async emulateUpload(file: File): Promise<UploadedFile> {
@@ -126,8 +126,8 @@ export class FileUploader {
       name: file.name,
       size: file.size,
       type: file.type,
+      // No object URL: nothing reads it (download uses `data`) and it would leak until unload.
       data,
-      url: URL.createObjectURL(new Blob([data], { type: file.type })),
     };
 
     this.files.set(uploadedFile.id, uploadedFile);

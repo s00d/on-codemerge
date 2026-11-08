@@ -158,7 +158,7 @@ export class TemplatesMenu {
   }
 
   private showNewForm(): void {
-    this.openForm('New Template', { name: '', content: '' }, 'Save', (data) => {
+    this.openForm('templates.newTemplate', { name: '', content: '' }, 'common.save', (data) => {
       this.manager.saveTemplate(data);
       this.openMain();
     });
@@ -166,9 +166,9 @@ export class TemplatesMenu {
 
   private showEditForm(template: Template): void {
     this.openForm(
-      'Edit Template',
+      'common.edit',
       { name: template.name, content: template.content },
-      'Update',
+      'common.update',
       (data) => {
         this.manager.updateTemplate(template.id, data);
         this.openMain();

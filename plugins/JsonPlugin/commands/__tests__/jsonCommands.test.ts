@@ -9,15 +9,15 @@ import {
 import { emptyEditorDoc, valueToDoc, toEditorDoc, docToValue } from '../../io/adapters';
 import {
   insertProperty,
-  jsonCommandMap,
   renameKey,
   setValue,
   insertItem,
   deleteNode,
-  deleteNodeCommand,
   changeType,
   moveItem,
-} from '../jsonCommands';
+  duplicateNode,
+} from '../mutate';
+import { jsonCommandMap, deleteNodeCommand } from '../selection';
 
 function stateFrom(value: unknown) {
   return createState(toEditorDoc(valueToDoc(value)));
@@ -123,5 +123,15 @@ describe('json structural commands', () => {
       selection: state.selection,
     });
     expect(applyTransaction(state, tr).state.doc.type).toBe('doc');
+  });
+
+  it('duplicate keeps a literal "__proto__" key as data', () => {
+    const state = createState(toEditorDoc(valueToDoc(JSON.parse('{"a":{"__proto__":{"x":1}}}'))));
+    const tr = runCommand(state, duplicateNode([0, 0, 0]));
+    expect(tr).not.toBeNull();
+    const next = applyTransaction(state, tr!).state;
+    const value = docToValue(next.doc) as Record<string, Record<string, unknown>>;
+    expect(Object.hasOwn(value.a_copy, '__proto__')).toBe(true);
+    expect(JSON.stringify(value.a_copy)).toBe('{"__proto__":{"x":1}}');
   });
 });

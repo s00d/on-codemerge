@@ -38,7 +38,7 @@ export function memoryStore(): CollabStore {
       if (!room) {
         return [];
       }
-      return room.ops.slice(sinceVersion);
+      return room.ops.slice(Math.max(0, sinceVersion - (room.version - room.ops.length)));
     },
     async compactSnapshot(docId, keepLastOps = 100) {
       const room = rooms.get(docId);

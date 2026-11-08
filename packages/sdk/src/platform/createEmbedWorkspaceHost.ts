@@ -133,6 +133,7 @@ export function createEmbedWorkspaceHost(
       }
       state = history.undo(state);
       emit('docChanged');
+      emit('selectionChanged');
       return true;
     },
     redo: () => {
@@ -141,6 +142,7 @@ export function createEmbedWorkspaceHost(
       }
       state = history.redo(state);
       emit('docChanged');
+      emit('selectionChanged');
       return true;
     },
     on: (...args: Parameters<EditorAPI['on']>) => {

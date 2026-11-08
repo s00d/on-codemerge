@@ -37,10 +37,11 @@ export function pasteTsv(store: TableStore, text: string): void {
   }
   const sel = store.getSelection();
   const derived = store.getDerived();
-  const ordered = derived.rowIds.filter((id) => !isGroupRowId(id));
-  let startRow = sel.active?.rowId ?? ordered[0];
+  // Sheet order, minus group header rows: targets are data rows in what the user sees.
+  const dataRows = (): string[] => store.getSheetRowIds().filter((id) => !isGroupRowId(id));
+  let startRow = sel.active?.rowId ?? dataRows()[0];
   let startCol = sel.active?.colId ?? derived.columnIds[0];
-  if (startRow === undefined || startCol === undefined) {
+  if (startRow === undefined || startCol === undefined || isGroupRowId(startRow)) {
     return;
   }
   if (isGhostRowId(startRow) || isGhostColId(startCol)) {
@@ -52,17 +53,21 @@ export function pasteTsv(store: TableStore, text: string): void {
     startRow = got.rowId;
     startCol = got.colId;
   }
-  const ri0 = store
-    .getDerived()
-    .rowIds.filter((id) => !isGroupRowId(id))
-    .indexOf(startRow);
+  // Snapshot before writing: sort/group may reorder rows as values land.
+  const targets = dataRows();
+  const ri0 = targets.indexOf(startRow);
   const ci0 = store.getDerived().columnIds.indexOf(startCol);
   if (ri0 < 0 || ci0 < 0) {
     return;
   }
   for (const [dr, row] of matrix.entries()) {
-    const origin = store.ensureCell(ri0 + dr, startCol);
-    if (!origin) {
+    let rowId: string | undefined = targets[ri0 + dr];
+    if (rowId === undefined || isGhostRowId(rowId)) {
+      const sheet = store.getSheetRowIds();
+      const ghost = sheet.findIndex((id) => isGhostRowId(id));
+      rowId = store.ensureCell(ghost >= 0 ? ghost : sheet.length, startCol)?.rowId;
+    }
+    if (rowId === undefined) {
       break;
     }
     for (const [dc, cell] of row.entries()) {
@@ -74,7 +79,7 @@ export function pasteTsv(store: TableStore, text: string): void {
       if (cid === undefined) {
         break;
       }
-      store.setCell(origin.rowId, cid, cell);
+      store.setCell(rowId, cid, cell);
     }
   }
   store.flushCommit();

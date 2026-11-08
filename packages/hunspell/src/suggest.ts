@@ -34,6 +34,11 @@ function ensureAlphabet(state: HunspellState): string {
 
 type EditCounts = Record<string, number>;
 
+/** Own-key add: candidates like `constructor` must not read Object.prototype members. */
+function addWeight(counts: EditCounts, key: string, weight: number): void {
+  counts[key] = (Object.hasOwn(counts, key) ? (counts[key] ?? 0) : 0) + weight;
+}
+
 function edits1(
   state: HunspellState,
   words: Record<string, true | number>,
@@ -46,7 +51,7 @@ function edits1(
     if (knownOnly && !check(state, edit)) {
       return;
     }
-    rv[edit] = (rv[edit] ?? 0) + 1;
+    addWeight(rv, edit, 1);
   };
 
   for (const word of Object.keys(words)) {
@@ -113,7 +118,7 @@ function rankCorrections(state: HunspellState, word: string, limit: number): str
     const MAX_ED2_SEEDS = 64;
     for (const [candidate, weight] of Object.entries(ed1)) {
       if (check(state, candidate)) {
-        weighted[candidate] = (weighted[candidate] ?? 0) + weight;
+        addWeight(weighted, candidate, weight);
         continue;
       }
       if (seedCount >= MAX_ED2_SEEDS) {
@@ -125,7 +130,7 @@ function rankCorrections(state: HunspellState, word: string, limit: number): str
     if (Object.keys(unknownSeeds).length > 0) {
       const ed2 = edits1(state, unknownSeeds, true);
       for (const [candidate, weight] of Object.entries(ed2)) {
-        weighted[candidate] = (weighted[candidate] ?? 0) + weight;
+        addWeight(weighted, candidate, weight);
       }
     }
   }
@@ -184,7 +189,7 @@ export function suggest(state: HunspellState, word: string, limit = 5): string[]
   }
 
   const normalized = word.replaceAll('\u2019', "'");
-  const memo = state.memoized[normalized];
+  const memo = state.memoized.get(normalized);
   if (memo !== undefined && (limit <= memo.limit || memo.suggestions.length < memo.limit)) {
     return memo.suggestions.slice(0, limit);
   }
@@ -210,12 +215,11 @@ export function suggest(state: HunspellState, word: string, limit = 5): string[]
 }
 
 function remember(state: HunspellState, word: string, suggestions: string[], limit: number): void {
-  const keys = Object.keys(state.memoized);
-  if (keys.length >= MAX_SUGGEST_MEMO) {
-    const drop = keys[0];
+  if (state.memoized.size >= MAX_SUGGEST_MEMO && !state.memoized.has(word)) {
+    const drop = state.memoized.keys().next().value;
     if (drop !== undefined) {
-      delete state.memoized[drop];
+      state.memoized.delete(drop);
     }
   }
-  state.memoized[word] = { suggestions, limit };
+  state.memoized.set(word, { suggestions, limit });
 }

@@ -108,6 +108,12 @@ export function registerPlugin(
       throw new Error(`Plugin ${plugin.name} depends on missing ${dep}`);
     }
   }
+  const late = [...(plugin.nodes ?? []), ...(plugin.marks ?? [])].map((s) => s.name);
+  if (late.length > 0) {
+    throw new Error(
+      `Plugin ${plugin.name} declares nodes/marks (${late.join(', ')}) but the schema is sealed — pass it at editor creation`
+    );
+  }
   for (const [name, cmd] of Object.entries(plugin.commands ?? {})) {
     if (platform.commands.has(name)) {
       throw new Error(`Command already registered: ${name}`);

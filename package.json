@@ -1,6 +1,6 @@
 {
   "name": "on-codemerge",
-  "version": "2.8.0",
+  "version": "2.9.0",
   "description": "A WYSIWYG editor for on-codemerge is a user-friendly interface that allows users to edit and view their code in real time, exactly as it will appear in the final product",
   "keywords": [
     "JavaScript",
@@ -175,9 +175,10 @@
   "scripts": {
     "release": "pnpm run prepublishOnly && pnpm publish -r --filter './packages/kernel' --filter './packages/view' --filter './packages/mermaid' --filter './packages/sdk' --filter './packages/hunspell' --filter './packages/collaboration-server' --filter './packages/integrate' --filter '.' --access public --no-git-checks --ignore-scripts",
     "build:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/view' --filter '@codemerge/mermaid' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' --filter '@codemerge/integrate' run build",
-    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:public-bundle && pnpm run check:dist-package && pnpm run check:surfaces && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run build:tables && pnpm run publint",
+    "prepublishOnly": "pnpm run build:packages && pnpm run check && pnpm run build && pnpm run check:public-bundle && pnpm run check:dist-package && pnpm run check:surfaces && pnpm run build:json && pnpm run build:markdown && pnpm run build:code && pnpm run build:forms && pnpm run build:charts && pnpm run build:calendar && pnpm run build:tables && pnpm run publint && pnpm run check:pack",
     "check:public-bundle": "node ./scripts/check-public-bundle.mjs",
     "check:dist-package": "node ./scripts/check-dist-package.mjs",
+    "check:pack": "node ./scripts/check-pack.mjs",
     "check:surfaces": "node ./scripts/check-surface.mjs all",
     "dev": "vite",
     "dev:json": "vite --config apps/json/vite.config.ts",
@@ -207,10 +208,10 @@
     "publint": "pnpm run build:packages && pnpm run build && pnpm run publint:packages && publint --strict",
     "publint:packages": "pnpm -r --filter '@codemerge/kernel' --filter '@codemerge/view' --filter '@codemerge/mermaid' --filter '@codemerge/sdk' --filter '@codemerge/hunspell' --filter '@codemerge/collaboration-server' --filter '@codemerge/integrate' run publint",
     "test": "vitest run --config vitest.unit.config.ts && vitest run --config vitest.e2e.config.ts",
-    "docs:dev": "node ./scripts/ensure-dist-css.mjs && vitepress dev docs",
+    "docs:dev": "pnpm --filter on-codemerge-docs dev",
     "collab:dev": "pnpm --filter '@codemerge/collaboration-server' run build && COLLAB_TOKEN=dev pnpm --filter '@codemerge/collaboration-server' exec node ./dist/cli.cjs serve --port 8787 --store memory",
-    "docs:build": "node ./scripts/ensure-dist-css.mjs && vitepress build docs",
-    "docs:preview": "vitepress preview docs",
+    "docs:build": "pnpm --filter on-codemerge-docs generate",
+    "docs:preview": "pnpm --filter on-codemerge-docs preview",
     "test:unit": "vitest run --config vitest.unit.config.ts",
     "test:e2e": "node --import tsx ./node_modules/vitest/vitest.mjs run --config vitest.e2e.config.ts",
     "test:coverage": "vitest run --config vitest.unit.config.ts --coverage",
@@ -219,11 +220,11 @@
   "dependencies": {
     "@codemerge/mermaid": "workspace:^",
     "@i18n-micro/runtime": "catalog:",
-    "dompurify": "catalog:",
     "tailwind-merge": "catalog:",
     "tailwind-variants": "catalog:"
   },
   "devDependencies": {
+    "@arethetypeswrong/cli": "catalog:",
     "@codemerge/editor": "workspace:^",
     "@codemerge/hunspell": "workspace:^",
     "@codemerge/kernel": "workspace:^",
@@ -275,7 +276,6 @@
     "@tailwindcss/postcss": "catalog:",
     "@tailwindcss/typography": "catalog:",
     "@tailwindcss/vite": "catalog:",
-    "@types/dompurify": "catalog:",
     "@types/node": "catalog:",
     "@untestutils/perf": "catalog:",
     "@untestutils/vite": "catalog:",
@@ -296,12 +296,16 @@
     "vite-plugin-banner": "catalog:",
     "vite-plugin-dts": "catalog:",
     "vite-svg-loader": "catalog:",
-    "vitepress": "catalog:",
     "vitest": "catalog:",
     "vue": "catalog:"
   },
   "engines": {
     "node": ">=20"
   },
-  "packageManager": "pnpm@9.14.2"
+  "packageManager": "pnpm@9.14.2",
+  "pnpm": {
+    "overrides": {
+      "hast-util-raw>parse5": "^8.1.0"
+    }
+  }
 }

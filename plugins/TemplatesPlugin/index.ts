@@ -38,7 +38,8 @@ export function TemplatesPlugin(opts?: PluginToolbarOpts) {
         return null;
       },
     },
-    hotkeys: [{ keys: 'Mod-Alt-m', command: 'insertTemplate', description: 'Insert template' }],
+    // Unique: Mod-Alt-m = Markdown embed
+    hotkeys: [{ keys: 'Mod-Alt-s', command: 'insertTemplate', description: 'Insert template' }],
     setup(ctx) {
       ctx.disposable(
         wirePluginLocales(ctx.editor, pluginLocaleEn, pluginLocaleModules, './i18n/locales')

@@ -78,6 +78,13 @@ describe('io/csv + matrix', () => {
       ['3', '4'],
     ]);
     expect(parseJsonToMatrix([['x'], ['y']]).matrix).toStrictEqual([['x'], ['y']]);
+    expect(parseJsonToMatrix({ headers: ['x', 'y'], rows: [[1, 2]] })).toStrictEqual({
+      matrix: [
+        ['x', 'y'],
+        ['1', '2'],
+      ],
+      hasHeader: true,
+    });
   });
 
   it('stringifyCell + coerce cover null/bool/number', () => {

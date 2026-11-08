@@ -7,7 +7,9 @@ import {
   normalizeTableGrid,
   parseGfmTable,
 } from '@ocm/table-plugin';
-import { asAttr } from '../utils/asAttr';
+import { asAttr, parseJson } from '@codemerge/sdk';
+import { allowedLinkHref, calloutActions } from './html';
+import type { CalloutAction } from './html';
 
 /** Serialize document JSON tree to CommonMark/GFM-ish Markdown. */
 export function docToMarkdown(doc: DocNode): string {
@@ -17,10 +19,6 @@ export function docToMarkdown(doc: DocNode): string {
     .join('')
     .replaceAll(/\n{3,}/g, '\n\n')
     .trim()}\n`;
-}
-
-export function exportMarkdown(doc: DocNode): string {
-  return docToMarkdown(doc);
 }
 
 /** Parse Markdown into the editor document model (JSON DocNode tree). */
@@ -33,6 +31,14 @@ export function markdownToDoc(md: string): DocNode {
     const line = lines[i] ?? '';
 
     if (!line.trim()) {
+      i += 1;
+      continue;
+    }
+
+    // Rich-atom stub written by blockToMarkdown: <!-- ocm:type {json} -->
+    const stub = parseAtomStub(line.trim());
+    if (stub) {
+      content.push(stub);
       i += 1;
       continue;
     }
@@ -170,7 +176,7 @@ export function markdownToDoc(md: string): DocNode {
       if (/^(`{3,}|~{3,})/.test(cur)) {
         break;
       }
-      if (/^:::[a-z]/i.test(cur.trim())) {
+      if (/^:::[a-z]/i.test(cur.trim()) || parseAtomStub(cur.trim())) {
         break;
       }
       if (/^\s*([-*+]|\d+[.)])\s+/.test(cur)) {
@@ -196,17 +202,13 @@ export function markdownToDoc(md: string): DocNode {
   return createDoc(content);
 }
 
-export function importMarkdown(md: string): DocNode {
-  return markdownToDoc(md);
-}
-
 function blockToMarkdown(node: DocNode): string {
   switch (node.type) {
     case 'paragraph': {
       return `${inlinesToMarkdown(node.content ?? [])}\n\n`;
     }
     case 'heading': {
-      const level = Math.min(6, Math.max(1, Number(node.attrs?.level ?? 1)));
+      const level = Math.min(6, Math.max(1, Number(node.attrs?.level) || 1));
       return `${'#'.repeat(level)} ${inlinesToMarkdown(node.content ?? [])}\n\n`;
     }
     case 'blockquote': {
@@ -216,11 +218,9 @@ function blockToMarkdown(node: DocNode): string {
         .map((l) => `> ${l}`)
         .join('\n')}\n\n`;
     }
-    case 'bulletList': {
-      return `${(node.content ?? []).map((li) => `- ${listItemText(li)}`).join('\n')}\n\n`;
-    }
+    case 'bulletList':
     case 'orderedList': {
-      return `${(node.content ?? []).map((li, idx) => `${idx + 1}. ${listItemText(li)}`).join('\n')}\n\n`;
+      return `${listToMarkdown(node)}\n\n`;
     }
     case 'horizontalRule': {
       return '---\n\n';
@@ -246,7 +246,7 @@ function blockToMarkdown(node: DocNode): string {
       const title = asAttr(node.attrs?.title);
       const open = title ? `:::${variant} ${title}` : `:::${variant}`;
       const inner = (node.content ?? []).map(blockToMarkdown).join('').trimEnd();
-      const actions = parseCalloutActions(node.attrs?.actions);
+      const actions = calloutActions(node.attrs?.actions);
       const btnLines = actions.map((a) => `@btn[${a.label}](${a.href})`).join('\n');
       const body = [inner, btnLines].filter(Boolean).join('\n\n');
       return `${open}\n${body}\n:::\n\n`;
@@ -266,12 +266,15 @@ function blockToMarkdown(node: DocNode): string {
       return inlinesToMarkdown([node]);
     }
     default: {
-      // Unknown / rich atoms: emit a stable HTML data stub so round-trip via MD keeps type.
+      // Unknown / rich atoms: HTML comment stub; markdownToDoc restores type/attrs/content.
       if (node.attrs && Object.keys(node.attrs).length > 0) {
-        const attrs = Object.entries(node.attrs)
-          .map(([k, v]) => `${k}="${escapeAttr(asAttr(v))}"`)
-          .join(' ');
-        return `<!-- ocm:${node.type} ${attrs} -->\n\n`;
+        const payload = JSON.stringify(
+          (node.content?.length ?? 0) > 0
+            ? { attrs: node.attrs, content: node.content }
+            : { attrs: node.attrs }
+        );
+        // `--` only occurs inside JSON strings; escaping it keeps `-->` out of the comment.
+        return `<!-- ocm:${node.type} ${payload.replaceAll('--', '-\\u002d')} -->\n\n`;
       }
       if ((node.content?.length ?? 0) > 0) {
         return (node.content ?? []).map(blockToMarkdown).join('');
@@ -279,6 +282,23 @@ function blockToMarkdown(node: DocNode): string {
       return '';
     }
   }
+}
+
+const isListType = (type: string) => type === 'bulletList' || type === 'orderedList';
+
+/** List → lines; nested lists are indented under their item by the marker width. */
+function listToMarkdown(list: DocNode): string {
+  return (list.content ?? [])
+    .map((li, idx) => {
+      const marker = list.type === 'orderedList' ? `${idx + 1}. ` : '- ';
+      const parts = li.content ?? [];
+      const nested = parts
+        .filter((p) => isListType(p.type))
+        .map((sub) => listToMarkdown(sub).replaceAll(/^/gm, ' '.repeat(marker.length)));
+      const head = listItemText({ ...li, content: parts.filter((p) => !isListType(p.type)) });
+      return [`${marker}${head}`, ...nested].join('\n');
+    })
+    .join('\n');
 }
 
 function listItemText(li: DocNode): string {
@@ -334,10 +354,7 @@ function inlineToMarkdown(node: DocNode): string {
     text = `<u>${text}</u>`;
   }
   if (link) {
-    const raw = asAttr(link.attrs?.href).trim();
-    const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(raw)?.[1]?.toLowerCase();
-    const safe =
-      raw && (!scheme || scheme === 'http' || scheme === 'https' || scheme === 'mailto') ? raw : '';
+    const safe = allowedLinkHref(asAttr(link.attrs?.href));
     text = safe ? `[${text}](${safe})` : text;
   }
   return text;
@@ -347,8 +364,49 @@ function escapeMd(text: string): string {
   return text.replaceAll(/([\\`*_[\]])/g, String.raw`\$1`);
 }
 
-function escapeAttr(text: string): string {
-  return text.replaceAll('&', '&amp;').replaceAll('"', '&quot;').replaceAll('<', '&lt;');
+function isNodeList(v: unknown): v is DocNode[] {
+  return (
+    Array.isArray(v) &&
+    v.every(
+      (n) => n !== null && typeof n === 'object' && typeof Reflect.get(n, 'type') === 'string'
+    )
+  );
+}
+
+const ATOM_STUB_RE = /^<!-- ocm:([A-Za-z_][\w-]*) (.*) -->$/;
+
+/** Inverse of the `<!-- ocm:type … -->` stub; also reads the legacy `k="v"` form. */
+function parseAtomStub(line: string): DocNode | null {
+  const m = ATOM_STUB_RE.exec(line);
+  if (!m) {
+    return null;
+  }
+  const [, type, body] = m;
+  if (body.startsWith('{')) {
+    try {
+      const parsed: unknown = parseJson(body);
+      if (parsed === null || typeof parsed !== 'object' || Array.isArray(parsed)) {
+        return null;
+      }
+      const attrs: unknown = Reflect.get(parsed, 'attrs');
+      const content: unknown = Reflect.get(parsed, 'content');
+      if (attrs === null || typeof attrs !== 'object' || Array.isArray(attrs)) {
+        return null;
+      }
+      return {
+        type,
+        attrs: { ...attrs },
+        ...(isNodeList(content) ? { content } : {}),
+      };
+    } catch {
+      return null;
+    }
+  }
+  const attrs: Record<string, unknown> = {};
+  for (const [, k, v] of body.matchAll(/([\w-]+)="([^"]*)"/g)) {
+    attrs[k] = v.replaceAll('&lt;', '<').replaceAll('&quot;', '"').replaceAll('&amp;', '&');
+  }
+  return Object.keys(attrs).length > 0 ? { type, attrs } : null;
 }
 
 function cellsOf(row: DocNode): string[] {
@@ -419,21 +477,39 @@ function parseTable(lines: string[], start: number): { node: DocNode; next: numb
   };
 }
 
+const LIST_ITEM_RE = /^(\s*)([-*+]|\d+[.)])\s+(.*)$/;
+
+/** Parse a list at `start`; deeper-indented items become a nested list inside the previous item. */
 function parseList(lines: string[], start: number): { node: DocNode; next: number } {
-  const first = lines[start] ?? '';
-  const ordered = /^\s*\d+[.)]\s+/.test(first);
+  const first = LIST_ITEM_RE.exec(lines[start] ?? '');
+  const baseIndent = first?.[1].length ?? 0;
+  const ordered = /\d/.test(first?.[2] ?? '');
   const items: DocNode[] = [];
   let i = start;
-  const itemRe = ordered ? /^\s*\d+[.)]\s+(.*)$/ : /^\s*[-*+]\s+(.*)$/;
 
   while (i < lines.length) {
-    const m = (lines[i] ?? '').match(itemRe);
-    if (!m) {
+    const m = LIST_ITEM_RE.exec(lines[i] ?? '');
+    if (!m || m[1].length < baseIndent) {
+      break;
+    }
+    const last = items.at(-1);
+    if (m[1].length > baseIndent && last) {
+      const sub = parseList(lines, i);
+      const content = last.content ?? [];
+      // Block form: [paragraph, nested list…] (flat inline item → wrap in a paragraph first).
+      last.content =
+        content.length > 0 && content.every((c) => c.type === 'text')
+          ? [createParagraph(content), sub.node]
+          : [...content, sub.node];
+      i = sub.next;
+      continue;
+    }
+    if (/\d/.test(m[2]) !== ordered) {
       break;
     }
     items.push({
       type: 'listItem',
-      content: parseInline(m[1] ?? ''),
+      content: parseInline(m[3] ?? ''),
     });
     i += 1;
   }
@@ -593,8 +669,6 @@ function unescapeMd(text: string): string {
   return text.replaceAll(/\\([\\`*_[\]])/g, '$1');
 }
 
-type CalloutAction = { label: string; href: string };
-
 const CALLOUT_BTN_RE = /^@btn\[([^\]]*)\]\(([^)]*)\)\s*$/;
 
 function splitCalloutButtons(lines: string[]): { bodyMd: string; actions: CalloutAction[] } {
@@ -609,29 +683,11 @@ function splitCalloutButtons(lines: string[]): { bodyMd: string; actions: Callou
     const label = (m[1] ?? '').trim();
     const href = (m[2] ?? '').trim();
     if (label) {
-      actions.push({ label, href });
+      actions.push({ label, href: allowedLinkHref(href) });
     }
   }
   return {
     bodyMd: bodyLines.join('\n').replace(/^\n+/, '').replace(/\n+$/, ''),
     actions,
   };
-}
-
-function parseCalloutActions(raw: unknown): CalloutAction[] {
-  if (!Array.isArray(raw)) {
-    return [];
-  }
-  const out: CalloutAction[] = [];
-  for (const item of raw) {
-    if (item === null || item === undefined || typeof item !== 'object') {
-      continue;
-    }
-    const label: unknown = Reflect.get(item, 'label');
-    const href: unknown = Reflect.get(item, 'href');
-    if (typeof label === 'string' && typeof href === 'string' && label.trim()) {
-      out.push({ label: label.trim(), href });
-    }
-  }
-  return out;
 }

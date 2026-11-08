@@ -1,5 +1,3 @@
-import type { ViewportWindow } from './types';
-
 export const DEFAULT_ROW_HEIGHT = 32;
 export const ROW_LINE_HEIGHT = 20;
 export const ROW_LINE_PAD = 10;
@@ -63,18 +61,4 @@ export function visibleRangeFromOffsets(
     end += 1;
   }
   return { start, end: Math.min(total, Math.max(end, lo + 1) + overscan) };
-}
-
-export function visibleWindow(
-  scrollTop: number,
-  clientHeight: number,
-  totalRows: number,
-  rowHeight = DEFAULT_ROW_HEIGHT,
-  overscan = 6
-): ViewportWindow {
-  const rh = Math.max(1, rowHeight);
-  const start = Math.max(0, Math.floor(scrollTop / rh) - overscan);
-  const visible = Math.ceil(clientHeight / rh) + overscan * 2;
-  const end = Math.min(totalRows, start + visible);
-  return { start, end, rowHeight: rh, clientHeight, clientWidth: 0 };
 }

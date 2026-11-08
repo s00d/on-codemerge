@@ -49,6 +49,8 @@ export function AnchorLinkPlugin(opts?: PluginToolbarOpts) {
                     .replaceAll(/[^a-z0-9]+/g, '-')
                     .replaceAll(/^-|-$/g, '');
                 }
+                // Non-Latin text slugs to '' — never write an empty id (that clears the anchor).
+                id ||= 'section';
                 editor.run(setBlockAttr('id', id));
                 if (text) {
                   editor.notify(`${editor.t('common.anchorSet')}: #${id}`);

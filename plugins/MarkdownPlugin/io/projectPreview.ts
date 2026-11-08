@@ -1,9 +1,9 @@
 import type { DocNode } from '@codemerge/kernel';
 import { docToHTML } from '@ocm/wysiwyg/io/html';
-import { sanitizeHTML } from '@ocm/wysiwyg/io/sanitize';
+import { sanitizeHTML } from '@codemerge/sdk';
 import { asAttr } from '@codemerge/sdk';
-import { safeHref } from '../elements/builtins';
-import type { MdElementRegistry } from '../elements/types';
+import { calloutHtml } from '../elements/builtins';
+import type { MdElementButton, MdElementRegistry } from '../elements/types';
 import { defaultMdElementRegistry } from '../elements/registry';
 import { escapeHtml } from './escape';
 
@@ -16,13 +16,11 @@ export type ProjectPreviewOptions = {
   sanitize?: boolean;
 };
 
-type CalloutAction = { label: string; href: string };
-
-function readActions(raw: unknown): CalloutAction[] {
+function readActions(raw: unknown): MdElementButton[] {
   if (!Array.isArray(raw)) {
     return [];
   }
-  const out: CalloutAction[] = [];
+  const out: MdElementButton[] = [];
   for (const item of raw) {
     if (item === null || typeof item !== 'object') {
       continue;
@@ -36,48 +34,15 @@ function readActions(raw: unknown): CalloutAction[] {
   return out;
 }
 
-function buttonsHtml(actions: CalloutAction[]): string {
-  if (actions.length === 0) {
-    return '';
-  }
-  const items = actions
-    .map((b) => {
-      const href = safeHref(b.href);
-      if (!href) {
-        return '';
-      }
-      return `<a class="ocm-md-callout__btn" href="${escapeHtml(href)}">${escapeHtml(b.label)}</a>`;
-    })
-    .filter(Boolean)
-    .join('');
-  if (!items) {
-    return '';
-  }
-  return `<div class="ocm-md-callout__actions">${items}</div>`;
-}
-
 function projectBlock(node: DocNode, registry: MdElementRegistry): string {
   if (node.type === 'callout') {
     const variant = asAttr(node.attrs?.variant, 'info').toLowerCase() || 'info';
     const title = asAttr(node.attrs?.title);
     const def = registry.get(variant);
     const bodyHtml = (node.content ?? []).map((c) => projectBlock(c, registry)).join('');
-    if (def) {
-      return def.toPreviewHtml(
-        {
-          id: variant,
-          title,
-          body: '',
-          buttons: readActions(node.attrs?.actions),
-        },
-        bodyHtml
-      );
-    }
-    const titleHtml = title.trim()
-      ? `<div class="ocm-md-callout__title">${escapeHtml(title.trim())}</div>`
-      : '';
-    const body = bodyHtml.trim() ? `<div class="ocm-md-callout__body">${bodyHtml}</div>` : '';
-    return `<aside class="ocm-md-callout ocm-md-callout--${escapeHtml(variant)}" data-node="callout" data-variant="${escapeHtml(variant)}">${titleHtml}${body}${buttonsHtml(readActions(node.attrs?.actions))}</aside>`;
+    const block = { id: variant, title, body: '', buttons: readActions(node.attrs?.actions) };
+    // Unregistered variant → builtin callout markup.
+    return def ? def.toPreviewHtml(block, bodyHtml) : calloutHtml(variant, block, bodyHtml);
   }
 
   if (node.type === 'mermaid') {

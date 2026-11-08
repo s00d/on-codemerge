@@ -48,6 +48,13 @@ for (const name of ['tailwind.css', 'public.css', 'index.css']) {
   }
 }
 
+/** Root `public/` favicons are for `pnpm dev` only (every dist build sets copyPublicDir: false). */
+for (const name of ['favicon.ico', 'favicon.svg', 'favicon-32x32.png', 'apple-touch-icon.png']) {
+  if (existsSync(resolve(root, 'dist', name))) {
+    errors.push(`dist/${name} must not ship (dev favicon from public/)`);
+  }
+}
+
 for (const name of ['index.css', 'public.css', 'tailwind.css', 'public.js', 'app.mjs']) {
   if (!existsSync(resolve(root, 'dist', name))) {
     errors.push(`missing dist/${name}`);

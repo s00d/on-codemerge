@@ -49,6 +49,8 @@ export default defineConfig({
     },
   },
   build: {
+    // Favicons in root `public/` are for `pnpm dev`; keep them out of npm `dist/`.
+    copyPublicDir: false,
     emptyOutDir: false,
     outDir: resolve(root, 'dist'),
     cssCodeSplit: true,

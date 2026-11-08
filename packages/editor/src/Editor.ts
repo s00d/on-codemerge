@@ -10,6 +10,7 @@ import {
   docFromJSON,
   createDoc,
   clampSelection,
+  transaction,
 } from '@codemerge/kernel';
 import type {
   DocNode,
@@ -20,6 +21,7 @@ import type {
   HistoryController,
   Command,
   Mark,
+  Operation,
 } from '@codemerge/kernel';
 import {
   createPlatform,
@@ -44,13 +46,13 @@ import type {
   ToolbarMenuDef,
   WidgetDefinition,
 } from '@codemerge/sdk';
+import { redoIcon, undoIcon } from '@codemerge/sdk/icons';
 import { editorChromeTv } from '@codemerge/sdk/ui/chrome';
 import { createI18n } from '@i18n-micro/runtime';
 import type { I18n, Params, Translations } from '@i18n-micro/runtime';
 import en from './i18n/locales/en.json';
 import { listLocales, loadLocale } from './i18n/loadLocale';
 import { PageChrome } from './PageChrome';
-import { redoIcon, undoIcon } from './historyIcons';
 import { defaultWysiwygToolbarMenus } from './toolbarMenus';
 import type { CreateView, ViewPort } from './ViewPort';
 
@@ -123,6 +125,8 @@ export class Editor implements EditorAPI {
   private readonly localeChangeListeners = new Set<() => void>();
   private readonly localeOverlays = new Set<(locale: string) => Promise<void>>();
   private localeReady: Promise<void> = Promise.resolve();
+  /** Bumped per `setLocale` call; a slower earlier load must not win over a later switch. */
+  private localeSeq = 0;
   private readonly toolbarPanel: ToolbarPanel;
   private readonly diagnostics: SharedEditorOptions['diagnostics'];
   private pageChrome: PageChrome | null = null;
@@ -178,21 +182,8 @@ export class Editor implements EditorAPI {
     }
     const initialLocale = options.locale && options.locale !== '' ? options.locale : 'en';
 
-    const rawDoc = options.doc;
-    let doc;
-    if (rawDoc === undefined) {
-      doc = createDoc();
-    } else if (
-      typeof rawDoc === 'object' &&
-      rawDoc !== null &&
-      'version' in rawDoc &&
-      'doc' in rawDoc
-    ) {
-      doc = docFromJSON(rawDoc);
-    } else {
-      doc = rawDoc;
-    }
-    this.state = createState(doc);
+    // Same validation (root type, depth cap, ids) for JSONDoc and raw DocNode — like setJSON.
+    this.state = createState(options.doc === undefined ? createDoc() : docFromJSON(options.doc));
     this.history = createHistory({ ...options.history, schema: this.platform.schema });
 
     this.toolbarPanel = new ToolbarPanel(host, (name) => {
@@ -420,6 +411,7 @@ export class Editor implements EditorAPI {
    * Built-in packs live in package `i18n/locales/*.json` and load on demand.
    */
   async setLocale(locale: string): Promise<void> {
+    const seq = ++this.localeSeq;
     if (!this.loadedLocales.has(locale)) {
       const dict = await loadLocale(locale);
       if (dict !== null) {
@@ -427,8 +419,14 @@ export class Editor implements EditorAPI {
         this.loadedLocales.add(locale);
       }
     }
+    if (seq !== this.localeSeq || this.destroyed) {
+      return;
+    }
     this.i18n.locale = locale;
     await Promise.all([...this.localeOverlays].map((load) => load(locale)));
+    if (seq !== this.localeSeq || this.destroyed) {
+      return;
+    }
     this.toolbarPanel.refresh();
     for (const cb of this.localeChangeListeners) {
       cb();
@@ -664,8 +662,8 @@ export class Editor implements EditorAPI {
     this.measure(
       'dispatch',
       () => {
-        if (source === 'remote') {
-          // Apply without touching local undo/redo stacks.
+        if (source === 'remote' || tr.meta?.addToHistory === false) {
+          // Apply without touching local undo/redo stacks (remote ops, decorations like spell marks).
           this.state = applyTransaction(this.state, tr, this.platform.schema).state;
         } else {
           this.state = this.history.apply(this.state, tr);
@@ -703,23 +701,35 @@ export class Editor implements EditorAPI {
   }
 
   undo(): boolean {
-    if (!this.history.canUndo()) {
+    if (this.destroyed || !this.history.canUndo()) {
       return false;
     }
-    this.state = this.history.undo(this.state);
-    this.view.update(this.state);
-    this.emit('docChanged');
+    const step = this.history.undoStep(this.state);
+    this.state = step.state;
+    this.afterHistoryStep(step.ops);
     return true;
   }
 
   redo(): boolean {
-    if (!this.history.canRedo()) {
+    if (this.destroyed || !this.history.canRedo()) {
       return false;
     }
-    this.state = this.history.redo(this.state);
-    this.view.update(this.state);
-    this.emit('docChanged');
+    const step = this.history.redoStep(this.state);
+    this.state = step.state;
+    this.afterHistoryStep(step.ops);
     return true;
+  }
+
+  /**
+   * Same projection + events as `dispatch` (toolbar mark states / selection listeners went stale).
+   * Emits a local `transaction` with the applied ops so collaboration forwards undo/redo to peers.
+   */
+  private afterHistoryStep(ops: Operation[]): void {
+    this.view.update(this.state);
+    this.toolbar.refresh();
+    this.emitTransaction(transaction(...ops), 'local');
+    this.emit('docChanged');
+    this.emit('selectionChanged');
   }
 
   get schema() {

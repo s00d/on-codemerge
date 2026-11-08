@@ -1,4 +1,13 @@
+import { canvas, renderDetached } from '@codemerge/sdk';
 import type { CropRect } from '../utils/cropMath';
+
+function makeCanvas(width: number, height: number): HTMLCanvasElement {
+  const { el } = renderDetached(canvas({ width, height }));
+  if (!(el instanceof HTMLCanvasElement)) {
+    throw new Error('Canvas element expected');
+  }
+  return el;
+}
 
 function encodeMime(mime: string): string {
   if (mime === 'image/jpeg' || mime === 'image/webp' || mime === 'image/png') {
@@ -19,9 +28,7 @@ export function cropImageToBlob(
 ): Promise<Blob> {
   const w = Math.max(1, Math.round(crop.w));
   const h = Math.max(1, Math.round(crop.h));
-  const canvasEl = document.createElement('canvas');
-  canvasEl.width = w;
-  canvasEl.height = h;
+  const canvasEl = makeCanvas(w, h);
   const ctx = canvasEl.getContext('2d');
   if (!ctx) {
     return Promise.reject(new Error('Canvas unavailable'));
@@ -52,9 +59,7 @@ export function rotateImageDataUrl(src: string, degrees: 90 | -90): Promise<stri
       const swap = Math.abs(degrees) % 180 === 90;
       const nw = image.naturalWidth || image.width;
       const nh = image.naturalHeight || image.height;
-      const canvasEl = document.createElement('canvas');
-      canvasEl.width = swap ? nh : nw;
-      canvasEl.height = swap ? nw : nh;
+      const canvasEl = makeCanvas(swap ? nh : nw, swap ? nw : nh);
       const ctx = canvasEl.getContext('2d');
       if (!ctx) {
         reject(new Error('Canvas unavailable'));

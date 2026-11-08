@@ -1,14 +1,6 @@
 import type { DocNode } from '@codemerge/kernel';
 import { nextId } from '@codemerge/kernel';
-
-const VALUE_TYPES = new Set([
-  'jsonObject',
-  'jsonArray',
-  'jsonString',
-  'jsonNumber',
-  'jsonBoolean',
-  'jsonNull',
-]);
+import { VALUE_TYPES } from '../commands/types';
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
   return typeof value === 'object' && value !== null && !Array.isArray(value);

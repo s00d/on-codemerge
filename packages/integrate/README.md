@@ -67,7 +67,7 @@ el?.addEventListener(
 
 ## Docs
 
-https://s00d.github.io/on-codemerge/integrate/
+https://s00d.github.io/on-codemerge/integrate/overview
 
 ## License
 

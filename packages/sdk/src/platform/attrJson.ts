@@ -68,7 +68,10 @@ export function readJsonAttr(
   return value;
 }
 
-/** Identity for SoT writes — keep object/array, never re-stringify into attrs. */
+/**
+ * Identity for SoT writes — keep object/array, never re-stringify into attrs.
+ * @deprecated No-op; assign the value directly.
+ */
 export function writeJsonAttr<T>(value: T): T {
   return value;
 }

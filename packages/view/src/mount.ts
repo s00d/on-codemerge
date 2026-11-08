@@ -8,6 +8,7 @@ import type {
   ViewEventMap,
   ViewForeignSpec,
   ViewSpec,
+  ViewTeleportSpec,
 } from './types';
 
 function className(value: string | string[] | undefined): string {
@@ -83,10 +84,7 @@ function bindEvents(el: HTMLElement, on: ViewEventMap | undefined, scope: Dispos
     return;
   }
   for (const type in on) {
-    if (!Object.hasOwn(on, type)) {
-      continue;
-    }
-    if (!isElementEventType(type)) {
+    if (!isOwnEventKey(on, type)) {
       continue;
     }
     const handler = on[type];
@@ -106,15 +104,12 @@ function bindDomEvent<K extends keyof ViewEventMap>(
   scope.on(el, type, handler);
 }
 
-let elementEventProbe: HTMLElement | undefined;
-
-function isElementEventType(type: string): type is keyof ViewEventMap {
-  if (typeof document === 'undefined') {
-    return true;
-  }
-  elementEventProbe ??= document.createElement('div');
-  const prop = `on${type}`;
-  return prop in elementEventProbe;
+/**
+ * Keys of a typed `ViewEventMap` are event names by construction. Do not probe `on${type}` on an
+ * element: focusin/focusout/composition* have no `on*` property and were silently dropped.
+ */
+function isOwnEventKey(on: ViewEventMap, type: string): type is keyof ViewEventMap {
+  return Object.hasOwn(on, type);
 }
 
 type NodeKind = 'text' | 'element' | 'foreign' | 'fragment' | 'teleport';
@@ -129,6 +124,9 @@ type InternalNode = {
   attrKeys: string[];
   styleKeys: string[];
   refName?: string;
+  /** Teleport only: live portal + spec it was created from (to / className). */
+  portal?: PortalHandle;
+  teleport?: ViewTeleportSpec;
 };
 
 function specKey(spec: ViewSpec): string | undefined {
@@ -281,8 +279,7 @@ function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): Inte
   }
   if (isTeleport(spec)) {
     const scope = new DisposableScope();
-    const children = flatten(spec.children);
-    const portal = createPortal(children.length === 1 ? children[0] : children, {
+    const portal = createPortal(flatten(spec.children), {
       to: spec.to ?? 'body',
       className: spec.className,
     });
@@ -296,6 +293,8 @@ function createFromSpec(spec: ViewSpec, refs: Record<string, HTMLElement>): Inte
       kind: 'teleport',
       attrKeys: [],
       styleKeys: [],
+      portal,
+      teleport: spec,
     };
   }
   if (!isElement(spec)) {
@@ -353,7 +352,16 @@ function patchNode(
     old.dom.className = className(spec.class) || 'ocm-foreign';
     return old;
   }
-  if (isTeleport(spec) && old.kind === 'teleport') {
+  if (
+    isTeleport(spec) &&
+    old.portal &&
+    (spec.to ?? 'body') === (old.teleport?.to ?? 'body') &&
+    spec.className === old.teleport?.className
+  ) {
+    // Same outlet: patch teleported children (they used to stay frozen at first render).
+    old.portal.update(flatten(spec.children));
+    old.teleport = spec;
+    old.key = spec.key;
     return old;
   }
   if (isElement(spec) && spec.tag !== 'fragment' && old.kind === 'element') {

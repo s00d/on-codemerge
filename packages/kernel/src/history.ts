@@ -13,10 +13,20 @@ export interface HistoryOptions {
   schema?: Schema;
 }
 
+/** Result of one undo/redo step: the new state plus the doc ops that produced it (empty = nothing to do). */
+export interface HistoryStep {
+  state: EditorState;
+  ops: Operation[];
+}
+
 export interface HistoryController {
   apply: (state: EditorState, tr: Transaction, now?: number) => EditorState;
   undo: (state: EditorState) => EditorState;
   redo: (state: EditorState) => EditorState;
+  /** Like `undo`, also returning the applied ops (collab must broadcast them). */
+  undoStep: (state: EditorState) => HistoryStep;
+  /** Like `redo`, also returning the applied ops. */
+  redoStep: (state: EditorState) => HistoryStep;
   canUndo: () => boolean;
   canRedo: () => boolean;
   depth: () => number;
@@ -40,11 +50,14 @@ export function createHistory(options: HistoryOptions = {}): HistoryController {
     schema = options.schema,
     undoStack: Entry[] = [],
     redoStack: Entry[] = [];
+  // After undo/redo the top entry is a boundary: next typing starts a new entry.
+  let mergeBlocked = false;
 
   function push(entry: Entry): void {
     const last = undoStack.at(-1);
     if (
       last &&
+      !mergeBlocked &&
       entry.at - last.at <= mergeWindowMs &&
       isTyping(entry.redo) &&
       isTyping(last.redo) &&
@@ -58,10 +71,39 @@ export function createHistory(options: HistoryOptions = {}): HistoryController {
     } else {
       undoStack.push(entry);
     }
+    mergeBlocked = false;
     while (undoStack.length > maxDepth) {
       undoStack.shift();
     }
     redoStack.length = 0;
+  }
+
+  function undoStep(state: EditorState): HistoryStep {
+    const entry = undoStack.pop();
+    if (!entry) {
+      return { state, ops: [] };
+    }
+    const { state: next } = applyTransaction(state, transaction(...entry.inverses), schema);
+    redoStack.push(entry);
+    mergeBlocked = true;
+    return { state: next, ops: entry.inverses };
+  }
+
+  function redoStep(state: EditorState): HistoryStep {
+    const entry = redoStack.pop();
+    if (!entry) {
+      return { state, ops: [] };
+    }
+    const { state: next, inverses } = applyTransaction(state, transaction(...entry.redo), schema);
+    undoStack.push({
+      inverses,
+      redo: entry.redo,
+      selection: entry.selection,
+      at: Date.now(),
+      chars: entry.chars,
+    });
+    mergeBlocked = true;
+    return { state: { ...next, selection: entry.selection }, ops: entry.redo };
   }
 
   return {
@@ -86,30 +128,10 @@ export function createHistory(options: HistoryOptions = {}): HistoryController {
       redoStack.length = 0;
     },
     depth: () => undoStack.length,
-    redo(state) {
-      const entry = redoStack.pop();
-      if (!entry) {
-        return state;
-      }
-      const { state: next, inverses } = applyTransaction(state, transaction(...entry.redo), schema);
-      undoStack.push({
-        inverses,
-        redo: entry.redo,
-        selection: entry.selection,
-        at: Date.now(),
-        chars: entry.chars,
-      });
-      return { ...next, selection: entry.selection };
-    },
-    undo(state) {
-      const entry = undoStack.pop();
-      if (!entry) {
-        return state;
-      }
-      const { state: next } = applyTransaction(state, transaction(...entry.inverses), schema);
-      redoStack.push(entry);
-      return next;
-    },
+    redo: (state) => redoStep(state).state,
+    redoStep,
+    undo: (state) => undoStep(state).state,
+    undoStep,
   };
 }
 

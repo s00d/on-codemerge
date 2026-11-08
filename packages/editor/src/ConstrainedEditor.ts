@@ -1,6 +1,7 @@
 import { applyTransaction, docFromJSON } from '@codemerge/kernel';
 import type { Command, DocNode, JSONDoc, Transaction } from '@codemerge/kernel';
 import { Editor } from './Editor';
+import type { TransactionSource } from './Editor';
 
 /** Shell product editors: SoT shape is fixed; reject transactions that break it. */
 export abstract class ConstrainedEditor extends Editor {
@@ -23,7 +24,7 @@ export abstract class ConstrainedEditor extends Editor {
     super.replaceDocument(this.assertConstrained(json));
   }
 
-  override dispatch(tr: Transaction): void {
+  override dispatch(tr: Transaction, opts?: { source?: TransactionSource }): void {
     const onlySelection = tr.ops.length > 0 && tr.ops.every((o) => o.type === 'set_selection');
     if (!onlySelection) {
       const { state } = applyTransaction(this.getState(), tr, this.schema);
@@ -31,7 +32,7 @@ export abstract class ConstrainedEditor extends Editor {
         return;
       }
     }
-    super.dispatch(tr);
+    super.dispatch(tr, opts);
   }
 
   override command(name: string): boolean {

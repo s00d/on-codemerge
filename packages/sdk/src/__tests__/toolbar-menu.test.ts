@@ -60,7 +60,9 @@ describe('toolbarPanel menus', () => {
     bar.add({ id: 'a', label: 'A', group: 'marks', order: 99 });
     bar.add({ id: 'h', label: 'H', group: 'history', order: 1 });
 
-    const ids = [...host.querySelectorAll('.ocm-toolbar__btn')].map((el) => el.dataset.id);
+    const ids = [...host.querySelectorAll<HTMLElement>('.ocm-toolbar__btn')].map(
+      (el) => el.dataset.id
+    );
     expect(ids).toStrictEqual(['a', 'h', 'z']);
     expect(host.querySelector('[data-menu="tools"]')).toBeNull();
     expect(host.querySelectorAll('.ocm-toolbar__sep')).toHaveLength(2);
@@ -74,14 +76,15 @@ describe('toolbarPanel menus', () => {
     const host = document.createElement('div');
     document.body.append(host);
     const bar = new ToolbarPanel(host, () => {});
-    const disposeMenu = bar.defineMenu({
+    bar.defineMenu({
       id: 'insert',
       label: 'Insert',
       icon: '<svg></svg>',
       group: 'insert',
       order: 40,
     });
-    bar.defineMenu({ id: 'insert', label: 'Insert+', title: 'Add stuff' });
+    // Latest registration owns the id — its disposer removes the menu.
+    const disposeMenu = bar.defineMenu({ id: 'insert', label: 'Insert+', title: 'Add stuff' });
     bar.add({
       id: 'table',
       label: 'Table',
@@ -207,6 +210,21 @@ describe('toolbarPanel menus', () => {
     expect(document.querySelector('[data-ocm-toolbar-menu="tools"]')).toBeTruthy();
 
     bar.destroy();
+    host.remove();
+  });
+
+  it('stale defineMenu disposer leaves a re-registered menu alone', () => {
+    expect.hasAssertions();
+    const host = document.createElement('div');
+    document.body.append(host);
+    const bar = new ToolbarPanel(host, () => {});
+    const disposeOld = bar.defineMenu({ id: 'm', label: 'Old', group: 'insert' });
+    const disposeNew = bar.defineMenu({ id: 'm', label: 'New', group: 'insert' });
+    bar.add({ id: 'x', label: 'X', menu: 'm', command: 'x' });
+    disposeOld();
+    expect(host.querySelector('[data-menu="m"]')).toBeTruthy();
+    disposeNew();
+    expect(host.querySelector('[data-menu="m"]')).toBeNull();
     host.remove();
   });
 

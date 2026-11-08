@@ -7,6 +7,7 @@
     "timeExpired": "Время истекло",
     "editTimer": "Редактировать Таймер",
     "copyTimer": "Копировать Таймер",
+    "copySuffix": "(Копия)",
     "exportTimer": "Экспорт Таймера",
     "importTimer": "Импорт Таймера",
     "deleteTimer": "Удалить Таймер",

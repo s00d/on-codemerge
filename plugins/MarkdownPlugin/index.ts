@@ -87,6 +87,19 @@ const MD_WORKSPACE_NODES = [
     atom: true as const,
     attrs: { source: '' },
   },
+  // markdownToDoc emits these for GFM tables / `![alt](src)` lines.
+  {
+    name: 'tableGrid',
+    group: 'atom' as const,
+    atom: true as const,
+    attrs: { version: 2, columns: [], rows: [] },
+  },
+  {
+    name: 'image',
+    group: 'atom' as const,
+    atom: true as const,
+    attrs: { src: '', alt: '', align: '', width: 0, height: 0 },
+  },
   ...MD_ATOM_NODES,
 ];
 

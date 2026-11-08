@@ -38,16 +38,20 @@ export const textareaDriver: FieldDriver = {
     void _v;
     return h('div', { class: wrapClass(field) }, [
       labelNode(field),
-      h('textarea', {
-        attrs: {
-          id: field.id,
-          name: fieldName(field),
-          rows: field.options?.rows,
-          cols: field.options?.cols,
-          ...taAttrs,
+      // Default as text content (not a prop) so it survives published HTML serialization.
+      h(
+        'textarea',
+        {
+          attrs: {
+            id: field.id,
+            name: fieldName(field),
+            rows: field.options?.rows,
+            cols: field.options?.cols,
+            ...taAttrs,
+          },
         },
-        props: { value: field.options?.value ?? '' },
-      }),
+        field.options?.value ?? ''
+      ),
     ]);
   },
   inspector: (ctx) => {

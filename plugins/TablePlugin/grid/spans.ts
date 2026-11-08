@@ -69,3 +69,11 @@ export function isCovered(
   }
   return false;
 }
+
+/**
+ * Spans are stored in doc row order. Render (and allow merging) only while the view shows
+ * exactly that order — sort / filter / groupBy / collapsed tree would tear merges apart.
+ */
+export function spansVisible(rows: TableRow[], viewRowIds: string[]): boolean {
+  return viewRowIds.length === rows.length && rows.every((r, i) => r.id === viewRowIds[i]);
+}

@@ -1,10 +1,16 @@
 import type { DocNode, Selection, EditorState } from '@codemerge/kernel';
-import { h, renderDetached, mount as mountView, DisposableScope } from '@codemerge/sdk';
+import { isListType, isTextBlock } from '@codemerge/kernel';
+import {
+  asAttr,
+  h,
+  renderDetached,
+  mount as mountView,
+  DisposableScope,
+  replaceChildrenWithHtml,
+} from '@codemerge/sdk';
 import type { MountHandle, WidgetDefinition, WidgetContext, EditorAPI } from '@codemerge/sdk';
 import { editorChromeTv } from '@codemerge/sdk/ui/chrome';
 import { docToHTML, escapeHTML } from '../io/html';
-import { asAttr } from '../utils/asAttr';
-import { replaceChildrenWithHtml } from '../utils/domHtml';
 
 export interface ViewOptions {
   viewportSize?: number;
@@ -328,7 +334,7 @@ export class EditorView {
       return `<p data-ocm-block="${index}" ${pathAttr([index])} data-type="paragraph"${extra}>${inner || '<br>'}</p>`;
     }
     if (node.type === 'heading') {
-      const level = Number(node.attrs?.level ?? 1),
+      const level = Number(node.attrs?.level) || 1,
         tag = `h${Math.min(6, Math.max(1, level))}`,
         inner = (node.content ?? []).map((c) => docToHTML(c)).join('');
       return `<${tag} data-ocm-block="${index}" ${pathAttr([index])} data-type="heading"${extra}>${inner || '<br>'}</${tag}>`;
@@ -342,15 +348,8 @@ export class EditorView {
       const code = escapeHTML((node.content ?? []).map((c) => c.text ?? '').join(''));
       return `<pre data-ocm-block="${index}" ${pathAttr([index])} data-type="codeBlock" data-language="${lang}" class="ocm-code-block"${extra}><code>${code || '<br>'}</code></pre>`;
     }
-    if (node.type === 'bulletList' || node.type === 'orderedList') {
-      const tag = node.type === 'bulletList' ? 'ul' : 'ol',
-        items = (node.content ?? [])
-          .map((li, i) => {
-            const inner = (li.content ?? []).map((c) => docToHTML(c)).join('');
-            return `<li ${pathAttr([index, i])} data-type="listItem"${blockDomAttrs(li)}>${inner || '<br>'}</li>`;
-          })
-          .join('');
-      return `<${tag} data-ocm-block="${index}" data-type="${node.type}"${extra}>${items}</${tag}>`;
+    if (isListType(node.type)) {
+      return renderList(node, [index], ` data-ocm-block="${index}"`);
     }
     if (node.type === 'table') {
       const rows = (node.content ?? [])
@@ -395,6 +394,41 @@ export class EditorView {
     const type = escapeAttr(node.type);
     return `<div data-ocm-block="${index}" ${pathAttr([index])} data-type="${type}" data-ocm-type="${type}" data-attrs="${attrs}" contenteditable="false" data-ocm-atom="1"></div>`;
   }
+}
+
+/**
+ * List with addressable items. Block-form items (`[paragraph, nested list]`) get a path on
+ * every child so DOM caret ↔ model path stays exact inside nested lists.
+ */
+function renderList(node: DocNode, path: number[], hostAttrs = ''): string {
+  const tag = node.type === 'bulletList' ? 'ul' : 'ol';
+  const items = (node.content ?? [])
+    .map((li, i) => {
+      const liPath = [...path, i];
+      const kids = li.content ?? [];
+      const blockForm = kids.some((c) => isTextBlock(c.type) || isListType(c.type));
+      const inner = blockForm
+        ? kids.map((c, k) => renderListChild(c, [...liPath, k])).join('')
+        : kids.map((c) => docToHTML(c)).join('');
+      return `<li ${pathAttr(liPath)} data-type="listItem"${blockDomAttrs(li)}>${inner || '<br>'}</li>`;
+    })
+    .join('');
+  return `<${tag}${hostAttrs} data-type="${node.type}"${blockDomAttrs(node)}>${items}</${tag}>`;
+}
+
+function renderListChild(node: DocNode, path: number[]): string {
+  if (isListType(node.type)) {
+    return renderList(node, path);
+  }
+  if (node.type === 'paragraph' || node.type === 'heading') {
+    const tag =
+      node.type === 'heading'
+        ? `h${Math.min(6, Math.max(1, Number(node.attrs?.level) || 1))}`
+        : 'p';
+    const inner = (node.content ?? []).map((c) => docToHTML(c)).join('');
+    return `<${tag} ${pathAttr(path)} data-type="${node.type}"${blockDomAttrs(node)}>${inner || '<br>'}</${tag}>`;
+  }
+  return docToHTML(node);
 }
 
 function pathAttr(p: number[]): string {

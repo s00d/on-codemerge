@@ -1,4 +1,4 @@
-import { definePlugin, setBlockAttr, core, findAncestorPath } from '@codemerge/sdk';
+import { definePlugin, setBlockAttr, core, blockAttrTargetPath } from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
 
 import {
@@ -19,16 +19,8 @@ function selectedAlign(editor: EditorAPI): string {
     return '';
   }
   try {
-    const cell = findAncestorPath(state.doc, path, 'tableCell');
-    if (cell) {
-      return attrStr(core.getNodeAt(state.doc, cell).attrs?.align);
-    }
-    const listItem = findAncestorPath(state.doc, path, 'listItem');
-    if (listItem) {
-      return attrStr(core.getNodeAt(state.doc, listItem).attrs?.align);
-    }
-    const root = core.getNodeAt(state.doc, [path[0] ?? 0]);
-    return attrStr(root.attrs?.align);
+    const node = core.getNodeAt(state.doc, blockAttrTargetPath(state.doc, path));
+    return attrStr(node.attrs?.align);
   } catch {
     return '';
   }

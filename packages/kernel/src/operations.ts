@@ -1,5 +1,6 @@
 import type { DocNode, Mark, Selection } from './types';
 import {
+  assertMaxTreeDepth,
   cloneNode,
   copyAttrs,
   emptyAttrsRecord,
@@ -14,8 +15,6 @@ import {
 import { clampSelection, collapsedAt, orderedRange } from './selection';
 import type { Schema } from './schema';
 import { assertMark, assertNodeType } from './schema';
-
-export { textLength };
 
 export type TextRun = { text: string; marks: Mark[] };
 
@@ -59,8 +58,6 @@ export type Operation =
       attrs: Record<string, unknown>;
       replace?: boolean;
     };
-
-export type InvertibleOp = { op: Operation; inverse: Operation };
 
 type FlatKeep = { at: number; node: DocNode };
 type FlatRun = { start: number; end: number; node: DocNode };
@@ -343,22 +340,6 @@ export function mergeMarksByType(base: Mark[], extra: Mark[]): Mark[] {
 export const MAX_INSERT_CHARS = 100_000;
 /** Cap on keep nodes injected via replace_slice (hardBreak floods). */
 export const MAX_SLICE_KEEPS = 10_000;
-/** Max nesting depth for op/JSON trees (empty structural bombs). */
-export const MAX_TREE_DEPTH = 64;
-
-/** Iterative depth check — fail closed before recursive clone/walk. */
-export function assertMaxTreeDepth(node: DocNode, max = MAX_TREE_DEPTH): void {
-  const stack: { n: DocNode; d: number }[] = [{ n: node, d: 0 }];
-  while (stack.length > 0) {
-    const { n, d } = stack.pop()!;
-    if (d > max) {
-      throw new Error(`Tree exceeds MAX_TREE_DEPTH (${max})`);
-    }
-    for (const child of n.content ?? []) {
-      stack.push({ n: child, d: d + 1 });
-    }
-  }
-}
 
 export function applyOp(
   doc: DocNode,
@@ -817,15 +798,4 @@ export function selectionTextRange(
     return null;
   }
   return { path: from.path, from: from.offset, to: to.offset };
-}
-
-export function ensureParagraphPath(doc: DocNode, path: number[]): number[] {
-  if (path.length > 0) {
-    return path;
-  }
-  // default first paragraph
-  if (doc.content?.[0]) {
-    return [0];
-  }
-  return [0];
 }

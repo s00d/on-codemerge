@@ -118,9 +118,23 @@ export function eqIgnoreCase(a: string, b: string): boolean {
   return true;
 }
 
+function isDigit(c: number): boolean {
+  return c >= 48 && c <= 57;
+}
+
+/** Unsigned or `-`-signed decimal. `-` counts as a sign only when a digit (or `.digit`) follows, so `-->` stays an arrow. */
 export function takeNumber(s: string, i: number): { value: number; next: number } | null {
   i = skipWs(s, i);
   let j = i;
+  if (s.charCodeAt(j) === 45 /* - */) {
+    const n = s.charCodeAt(j + 1);
+    const n2 = s.charCodeAt(j + 2);
+    if (!(isDigit(n) || (n === 46 && isDigit(n2)))) {
+      return null;
+    }
+    j += 1;
+  }
+  const digitsStart = j;
   while (j < s.length && s.charCodeAt(j) >= 48 && s.charCodeAt(j) <= 57) {
     j += 1;
   }
@@ -130,7 +144,7 @@ export function takeNumber(s: string, i: number): { value: number; next: number 
       j += 1;
     }
   }
-  if (j === i) {
+  if (j === digitsStart || (j === digitsStart + 1 && s[digitsStart] === '.')) {
     return null;
   }
   return { value: Number(s.slice(i, j)), next: j };

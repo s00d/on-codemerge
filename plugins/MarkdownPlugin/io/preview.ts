@@ -3,9 +3,6 @@ import type { MdElementRegistry } from '../elements/types';
 import { defaultMdElementRegistry } from '../elements/registry';
 import { projectPreviewHtml } from './projectPreview';
 
-export { escapeHtml } from './escape';
-export { projectPreviewHtml } from './projectPreview';
-
 export type RenderMarkdownPreviewOptions = {
   elements?: MdElementRegistry;
 };

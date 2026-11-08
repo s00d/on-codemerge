@@ -9,6 +9,8 @@ const VIEWPORT_SIZES = {
   responsive: '100%',
 };
 
+const STORAGE_KEY = 'responsive-viewport';
+
 function isViewport(value: string): value is Viewport {
   return value in VIEWPORT_SIZES;
 }
@@ -16,15 +18,17 @@ function isViewport(value: string): value is Viewport {
 export class ViewportManager {
   private currentViewport: Viewport;
   private container: HTMLElement | null = null;
-  private resizeObserver: ResizeObserver | null = null;
-  private changeHandlers: ((viewport: Viewport, width: number) => void)[] = [];
 
   constructor() {
     // responsive по умолчанию, desktop игнорируем как дефолт
     let initial: Viewport = 'responsive';
-    const savedRaw = localStorage.getItem('responsive-viewport');
-    if (savedRaw !== null && savedRaw !== 'desktop' && isViewport(savedRaw)) {
-      initial = savedRaw;
+    try {
+      const savedRaw = localStorage.getItem(STORAGE_KEY);
+      if (savedRaw !== null && savedRaw !== 'desktop' && isViewport(savedRaw)) {
+        initial = savedRaw;
+      }
+    } catch {
+      /* storage blocked (sandboxed iframe / privacy mode) */
     }
     this.currentViewport = initial;
   }
@@ -33,8 +37,11 @@ export class ViewportManager {
     this.container = container;
     this.currentViewport = viewport;
 
-    // Сохраняем в localStorage
-    localStorage.setItem('responsive-viewport', viewport);
+    try {
+      localStorage.setItem(STORAGE_KEY, viewport);
+    } catch {
+      /* storage blocked */
+    }
 
     const size = VIEWPORT_SIZES[viewport];
 
@@ -51,92 +58,20 @@ export class ViewportManager {
       container.style.margin = '0 auto';
       container.style.maxWidth = width;
     }
-
-    // Уведомляем об изменении
-    this.notifyChange(viewport, typeof size === 'number' ? size : window.innerWidth);
-
-    // Устанавливаем ResizeObserver для responsive режима
-    this.setupResizeObserver();
   }
 
   public getCurrentViewport(): Viewport {
     return this.currentViewport;
   }
 
-  public getCurrentWidth(): number {
-    if (!this.container) {
-      return window.innerWidth;
-    }
-    return this.container.offsetWidth;
-  }
-
-  public onViewportChange(handler: (viewport: Viewport, width: number) => void): void {
-    this.changeHandlers.push(handler);
-  }
-
-  private notifyChange(viewport: Viewport, width: number): void {
-    this.changeHandlers.forEach((handler) => {
-      handler(viewport, width);
-    });
-  }
-
-  private setupResizeObserver(): void {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-    }
-
-    if (this.currentViewport === 'responsive' && this.container) {
-      this.resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const width = entry.contentRect.width;
-          this.notifyChange('responsive', width);
-        }
-      });
-      this.resizeObserver.observe(this.container);
-    }
-  }
-
+  /** Plugin teardown — give the host its own sizing back. */
   public destroy(): void {
-    if (this.resizeObserver) {
-      this.resizeObserver.disconnect();
-      this.resizeObserver = null;
+    const el = this.container;
+    if (el) {
+      for (const prop of ['transition', 'width', 'margin', 'max-width']) {
+        el.style.removeProperty(prop);
+      }
     }
-    this.changeHandlers = [];
     this.container = null;
-  }
-
-  // Методы для быстрого переключения
-  public nextViewport(): void {
-    const viewports: Viewport[] = [
-      'mobile',
-      'tablet',
-      'desktop',
-      'largeDesktop',
-      'ultraWide',
-      'responsive',
-    ];
-    const currentIndex = viewports.indexOf(this.currentViewport);
-    const nextIndex = (currentIndex + 1) % viewports.length;
-
-    if (this.container) {
-      this.setViewport(this.container, viewports[nextIndex]);
-    }
-  }
-
-  public previousViewport(): void {
-    const viewports: Viewport[] = [
-      'mobile',
-      'tablet',
-      'desktop',
-      'largeDesktop',
-      'ultraWide',
-      'responsive',
-    ];
-    const currentIndex = viewports.indexOf(this.currentViewport);
-    const previousIndex = currentIndex === 0 ? viewports.length - 1 : currentIndex - 1;
-
-    if (this.container) {
-      this.setViewport(this.container, viewports[previousIndex]);
-    }
   }
 }

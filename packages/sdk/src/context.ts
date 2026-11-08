@@ -113,8 +113,16 @@ export function createPluginContext(opts: CreatePluginContextOptions): PluginCon
     },
     popup: {
       open(options) {
-        const handle = editor.ui.popup.open(options);
-        scope.disposable(() => {
+        // Unregister on close so repeated opens don't pile disposers on the plugin scope.
+        let off: (() => void) | undefined;
+        const handle = editor.ui.popup.open({
+          ...options,
+          onClose: () => {
+            off?.();
+            options.onClose?.();
+          },
+        });
+        off = scope.disposable(() => {
           handle.hide();
         });
         return handle;
@@ -159,20 +167,8 @@ export function createPluginContext(opts: CreatePluginContextOptions): PluginCon
       return handle;
     },
     insertSibling(position, spec) {
-      const parent = editor.host.parentElement;
       const holder = document.createElement('div');
-      if (parent) {
-        if (position === 'before') {
-          editor.host.before(holder);
-        } else {
-          editor.host.after(holder);
-        }
-      } else {
-        editor.host.insertAdjacentElement(
-          position === 'before' ? 'beforebegin' : 'afterend',
-          holder
-        );
-      }
+      editor.host.insertAdjacentElement(position === 'before' ? 'beforebegin' : 'afterend', holder);
       const handle = mountView(holder, spec);
       scope.disposable(() => {
         handle.destroy();

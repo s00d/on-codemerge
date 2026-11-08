@@ -80,6 +80,7 @@ export function parseXyChart(source: string): { ir: XyChartIR; diagnostics: Pars
   let yMax = 0;
   let yLabel: string | undefined;
   let yMaxSet = false;
+  let yMinSet = false;
   const series: XySeries[] = [];
 
   for (const raw of source.split('\n')) {
@@ -118,6 +119,7 @@ export function parseXyChart(source: string): { ir: XyChartIR; diagnostics: Pars
       const minTok = takeNumber(line, i);
       if (minTok !== null) {
         yMin = minTok.value;
+        yMinSet = true;
         i = skipWs(line, minTok.next);
         if (line.startsWith('-->', i)) {
           i = skipWs(line, i + 3);
@@ -143,14 +145,21 @@ export function parseXyChart(source: string): { ir: XyChartIR; diagnostics: Pars
     }
   }
 
-  if (!yMaxSet) {
+  if (!yMaxSet || !yMinSet) {
     let maxV = 0;
+    let minV = 0;
     for (const s of series) {
       for (const v of s.values) {
         maxV = Math.max(maxV, v);
+        minV = Math.min(minV, v);
       }
     }
-    yMax = maxV === 0 ? 1 : maxV;
+    if (!yMinSet) {
+      yMin = minV;
+    }
+    if (!yMaxSet) {
+      yMax = maxV === 0 && minV === 0 ? 1 : maxV;
+    }
   }
   if (categories.length === 0 && series[0] !== undefined) {
     categories = series[0].values.map((_, i) => String(i + 1));

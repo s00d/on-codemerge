@@ -23,11 +23,6 @@ export class YouTubeVideoMenu {
     this.openDialog('', this.editor.t('youtube.insert'), this.editor.t('common.insert'));
   }
 
-  edit(currentUrl: string, callback: (videoUrl: string) => void): void {
-    this.callback = callback;
-    this.openDialog(currentUrl, this.editor.t('common.edit'), this.editor.t('common.save'));
-  }
-
   private openDialog(value: string, title: string, primaryLabel: string): void {
     const t = (k: string) => this.editor.t(k) || k;
     this.popups.open({

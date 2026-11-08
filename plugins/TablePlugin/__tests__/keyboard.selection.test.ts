@@ -2,12 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { TableStore } from '../grid/TableStore';
 import { handleGridKeydown } from '../grid/keyboard';
 import { toggleRowSelection } from '../grid/selection';
-import {
-  heightForLineCount,
-  offsetsFromHeights,
-  visibleRangeFromOffsets,
-  visibleWindow,
-} from '../grid/viewport';
+import { heightForLineCount, offsetsFromHeights, visibleRangeFromOffsets } from '../grid/viewport';
 import { selectionToTsv, pasteTsv } from '../grid/clipboard';
 
 function store3x2(): TableStore {
@@ -125,13 +120,6 @@ describe('selection + clipboard', () => {
 });
 
 describe('viewport', () => {
-  it('visibleWindow clamps and overscans', () => {
-    const w = visibleWindow(100, 200, 1000, 20, 2);
-    expect(w.start).toBeGreaterThanOrEqual(0);
-    expect(w.end).toBeLessThanOrEqual(50);
-    expect(w.end - w.start).toBeGreaterThan(10);
-  });
-
   it('grows height with line count and windows from offsets', () => {
     expect(heightForLineCount(1)).toBe(32);
     expect(heightForLineCount(3)).toBeGreaterThan(32);

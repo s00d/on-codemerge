@@ -1,35 +1,7 @@
-import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'node:fs';
-import { dirname, relative, resolve } from 'node:path';
+import { copyFileSync, existsSync, readFileSync } from 'node:fs';
+import { resolve } from 'node:path';
 import type { Plugin } from 'vite';
-
-const CTS_ENTRIES = [
-  'dist/app.d.ts',
-  'dist/plugins.d.ts',
-  'dist/json.d.ts',
-  'dist/markdown.d.ts',
-  'dist/code.d.ts',
-  'dist/forms.d.ts',
-  'dist/charts.d.ts',
-  'dist/calendar.d.ts',
-  'dist/tables.d.ts',
-  'dist/packages/sdk/src/index.d.ts',
-  'dist/packages/kernel/src/index.d.ts',
-  'dist/packages/view/src/index.d.ts',
-] as const;
-
-function emitCtsTypes(root: string): void {
-  for (const rel of CTS_ENTRIES) {
-    const src = resolve(root, rel);
-    if (!existsSync(src)) {
-      console.warn(`[ocm-package] skip cts: missing ${rel}`);
-      continue;
-    }
-    const dest = src.replace(/\.d\.ts$/, '.d.cts');
-    mkdirSync(dirname(dest), { recursive: true });
-    copyFileSync(src, dest);
-    console.log(`[ocm-package] cts ${rel} -> ${relative(root, dest)}`);
-  }
-}
+import { emitDualDeclarations } from './vite-plugin-emit-d-cts.ts';
 
 /** Ship Typo.js BSD attribution with published dist (hunspell is bundled). */
 function emitThirdPartyNotices(root: string): void {
@@ -45,7 +17,7 @@ function emitThirdPartyNotices(root: string): void {
 
 /**
  * Post-build packaging for the library dist:
- * dual `.d.cts` entry types + third-party notices.
+ * node16-resolvable `.d.ts` + dual `.d.cts` types + third-party notices.
  * CSS emit lives in `vite.styles.config.ts`; hygiene gates in `check-dist-package`.
  */
 export function ocmPackagePlugin(root = process.cwd()): Plugin {
@@ -62,7 +34,7 @@ export function ocmPackagePlugin(root = process.cwd()): Plugin {
           return;
         }
 
-        emitCtsTypes(root);
+        emitDualDeclarations(resolve(root, 'dist'));
         emitThirdPartyNotices(root);
 
         // Guard: packaging must not silently rewrite JS/CSS. Fail loud if regress.

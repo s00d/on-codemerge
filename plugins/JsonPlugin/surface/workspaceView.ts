@@ -8,15 +8,14 @@ import { serializeDoc } from '../io/text';
 import { parseText } from '../io/text';
 import {
   deleteNode,
-  deleteNodeCommand,
   duplicateNode,
-  duplicateNodeCommand,
   insertItem,
   insertProperty,
-  pathToDot,
   renameKey,
   setValue,
-} from '../commands/jsonCommands';
+} from '../commands/mutate';
+import { pathToDot } from '../commands/path';
+import { deleteNodeCommand, duplicateNodeCommand } from '../commands/selection';
 import { JsonNodeMenu } from '../components/JsonNodeMenu';
 import { mountRawEditor } from '../widgets/rawEditor';
 import type { RawEditorHandle } from '../widgets/rawEditor';

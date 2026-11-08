@@ -7,6 +7,7 @@
     "timeExpired": "Zeit abgelaufen",
     "editTimer": "Zeitgeber bearbeiten",
     "copyTimer": "Zeitgeber kopieren",
+    "copySuffix": "(Kopie)",
     "exportTimer": "Zeitgeber exportieren",
     "importTimer": "Zeitgeber importieren",
     "deleteTimer": "Zeitgeber löschen",

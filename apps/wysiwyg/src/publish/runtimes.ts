@@ -19,5 +19,3 @@ export function ensurePublishRuntimesRegistered(): void {
   }
   registered = true;
 }
-
-export { publishRuntimes };

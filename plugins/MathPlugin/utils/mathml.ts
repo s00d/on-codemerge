@@ -125,8 +125,3 @@ function emit(node: MathNode): Node {
 export function astToMathML(ast: MathNode, display: 'block' | 'inline' = 'block'): Element {
   return el('math', { display, xmlns: NS }, emit(ast));
 }
-
-/** Escape text for error fallback. */
-export function escapeText(s: string): string {
-  return s.replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;');
-}

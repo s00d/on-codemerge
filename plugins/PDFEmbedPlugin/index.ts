@@ -13,6 +13,24 @@ import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@cod
 
 import { editIcon, deleteIcon, linkIcon, pdfIcon } from '@codemerge/sdk/icons';
 
+/**
+ * iframe `src` from doc attrs (paste / import / JSON) — allow only http(s), blob,
+ * `data:application/pdf` and scheme-less relative URLs; anything else (javascript:, data:text/html…) → ''.
+ */
+export function safePdfUrl(raw: string): string {
+  // Browsers drop ASCII tab/newline inside URLs (`java\tscript:`), so test the stripped form.
+  // oxlint-disable-next-line no-control-regex -- intentional: strip C0 controls
+  const url = raw.replaceAll(/[\u0000-\u001F\u007F]/g, '').trim();
+  const scheme = /^([a-z][a-z0-9+.-]*):/i.exec(url)?.[1]?.toLowerCase();
+  if (!scheme) {
+    return url;
+  }
+  if (scheme === 'http' || scheme === 'https' || scheme === 'blob') {
+    return url;
+  }
+  return /^data:application\/pdf[;,]/i.test(url) ? url : '';
+}
+
 function openPdfProps(
   editor: EditorAPI,
   attrs: Record<string, unknown>,
@@ -53,14 +71,14 @@ function openPdfProps(
           const url = String(values['pdf-url'] ?? '').trim();
           if (!url) {
             editor.notify(t('pdf.pdfUrlIsRequired'));
-            return false;
+            return true;
           }
           updateAttrs({
             url,
             width: Number(values['pdf-width']) || 800,
             height: Number(values['pdf-height']) || 600,
           });
-          return true;
+          return false;
         },
       },
     ],
@@ -70,7 +88,7 @@ function openPdfProps(
 function renderPdf(attrs: Record<string, unknown>, wctx: WidgetContext): ViewSpec {
   const resizer = wctx.scope.slot<Resizer>();
   const align = attrString(attrs.align, '');
-  const url = attrString(attrs.url, '');
+  const url = safePdfUrl(attrString(attrs.url, ''));
 
   return h(
     'div',
@@ -211,7 +229,7 @@ export function PDFEmbedPlugin(opts?: PluginToolbarOpts) {
                 const url = String(values['pdf-url'] ?? '').trim();
                 if (!url) {
                   editor.notify(editor.t('pdf.pdfUrlIsRequired'));
-                  return;
+                  return true;
                 }
                 editor.run(
                   insertAtomAfter('pdf', {
@@ -221,6 +239,7 @@ export function PDFEmbedPlugin(opts?: PluginToolbarOpts) {
                     align: '',
                   })
                 );
+                return false;
               },
             },
           ],
@@ -240,7 +259,7 @@ export function PDFEmbedPlugin(opts?: PluginToolbarOpts) {
     publish: {
       node: 'pdf',
       render: (attrs) => {
-        const url = attrString(attrs.url, '');
+        const url = safePdfUrl(attrString(attrs.url, ''));
         const align = attrString(attrs.align, '');
         const width = Number(attrs.width) || 800;
         const height = Number(attrs.height) || 600;

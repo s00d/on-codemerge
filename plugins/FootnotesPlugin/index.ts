@@ -52,8 +52,8 @@ export function FootnotesPlugin(opts?: PluginToolbarOpts) {
         attrs: { items: [] },
       },
     ],
-    // Unique vs FormBuilder (Mod-Alt-f)
-    hotkeys: [{ keys: 'Mod-Alt-j', command: 'addFootnote', description: 'Add footnote' }],
+    // Unique: Mod-Alt-j = JSON embed, Mod-Alt-f = FormBuilder
+    hotkeys: [{ keys: 'Mod-Alt-x', command: 'addFootnote', description: 'Add footnote' }],
     commands: {
       addFootnote: () => {
         openFootnote?.();

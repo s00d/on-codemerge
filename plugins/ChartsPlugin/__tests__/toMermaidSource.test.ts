@@ -81,4 +81,33 @@ describe('toMermaidSource', () => {
     expect(src).toContain('curve s0["S1"]');
     expect(src).toContain('curve s1["S2"]');
   });
+
+  it('y-axis spans negative values (min(0,min) → max(0,max)) and parses back', () => {
+    const neg: ChartSeries[] = [
+      {
+        name: 'P',
+        data: [
+          { label: 'A', value: -4 },
+          { label: 'B', value: 6 },
+        ],
+      },
+    ];
+    const src = toMermaidSource('bar', neg, { width: 400, height: 240 });
+    expect(src).toContain('y-axis -4 --> 6');
+    const r = parse(src);
+    expect(r.ir?.type === 'xychart' && [r.ir.yMin, r.ir.yMax]).toStrictEqual([-4, 6]);
+  });
+
+  it('keeps titles and labels on one line with no breaking quotes', () => {
+    const opts = { width: 400, height: 240, title: 'Line1\nslice "x" : 99' };
+    const pie = toMermaidSource('pie', sample, opts);
+    expect(pie).toContain('title Line1 slice "x" : 99\n');
+    expect(pie.split('\n').filter((l) => l.includes(':'))).toHaveLength(3);
+    const radar = toMermaidSource('radar', sample, opts);
+    expect(radar).toContain('title Line1 slice "x" : 99\n');
+    const bar = toMermaidSource('bar', sample, opts);
+    expect(bar).toContain(`title "Line1 slice 'x' : 99"`);
+    const r = parse(bar);
+    expect(r.ir?.type === 'xychart' && r.ir.title).toBe("Line1 slice 'x' : 99");
+  });
 });

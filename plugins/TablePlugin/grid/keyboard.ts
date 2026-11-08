@@ -46,8 +46,8 @@ export function moveActiveDownAndEdit(store: TableStore): void {
   if (!sel) {
     return;
   }
-  const rowIds = store.getSheetRowIds().filter((id) => !isGroupRowId(id));
-  const ri = rowIds.indexOf(sel.rowId);
+  // ensureCell takes a sheet index (group header rows included), not a data-row index.
+  const ri = store.getSheetRowIds().indexOf(sel.rowId);
   if (ri < 0) {
     return;
   }
@@ -119,12 +119,12 @@ export function handleGridKeydown(store: TableStore, ev: KeyboardEvent): KeyNavR
         moveActiveDownAndEdit(store);
         return { handled: true };
       }
-      store.ensureCell(ri, colIds[ci] ?? colId);
+      store.ensureCell(store.getSheetRowIds().indexOf(rowId), colId);
       store.setEditing(true);
       return { handled: true };
     case 'F2':
       ev.preventDefault();
-      store.ensureCell(ri, colIds[ci] ?? colId);
+      store.ensureCell(store.getSheetRowIds().indexOf(rowId), colId);
       store.setEditing(true);
       return { handled: true };
     case 'Escape':

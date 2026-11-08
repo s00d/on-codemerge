@@ -259,9 +259,10 @@ export class Resizer {
     if (e.key !== 'Escape') {
       return;
     }
-    e.preventDefault();
-    e.stopPropagation();
+    // Only swallow Escape while dragging; otherwise popups / menus still need it.
     if (this.dragging) {
+      e.preventDefault();
+      e.stopPropagation();
       this.applySize(this.startWidth, this.startHeight);
       this.finishDrag(true);
       this.options.onCancel?.();

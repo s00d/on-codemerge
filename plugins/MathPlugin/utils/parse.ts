@@ -12,7 +12,11 @@ class Parser {
   }
 
   parse(): MathNode {
-    const row = this.parseRow('rbrace');
+    const row = this.parseRow();
+    const stray = this.peek();
+    if (stray) {
+      throw new Error(`Unexpected ${stray.kind}`);
+    }
     return row.children.length === 1 ? row.children[0] : row;
   }
 
@@ -42,10 +46,8 @@ class Parser {
       if (stop === 'right' && t.kind === 'command' && t.name === 'right') {
         break;
       }
-      if (stop && t.kind === stop) {
-        break;
-      }
-      if (t.kind === 'rbrace' || t.kind === 'rbrack') {
+      // `]` only closes a `\sqrt[…]` index; elsewhere it is a plain bracket (`[0, 1]`).
+      if (t.kind === 'rbrace' || (stop === 'rbrack' && t.kind === 'rbrack')) {
         break;
       }
       if (t.kind === 'space') {
@@ -124,6 +126,13 @@ class Parser {
     if (SPACES[name]) {
       return { type: 'space', width: SPACES[name] };
     }
+    // Escaped punctuation: `\{` `\}` `\|` `\%` … render the glyph; `\ ` is a space, `\!` a no-op.
+    if (name.length === 1 && !/[A-Za-z]/.test(name)) {
+      if (name === '!') {
+        return { type: 'row', children: [] };
+      }
+      return /\s/.test(name) ? { type: 'space', width: 'med' } : atomFromChar(name);
+    }
     // Unknown command → show as text
     return { type: 'atom', kind: 'ord', text: `\\${name}` };
   }
@@ -181,6 +190,11 @@ class Parser {
     if (t.kind === 'char') {
       this.next();
       return atomFromChar(t.value);
+    }
+
+    if (t.kind === 'lbrack' || t.kind === 'rbrack') {
+      this.next();
+      return atomFromChar(t.kind === 'lbrack' ? '[' : ']');
     }
 
     if (t.kind === 'command') {

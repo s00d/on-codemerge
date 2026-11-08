@@ -132,7 +132,7 @@ export class TimerManager {
       targetDate = new Date(`${String(timer.targetDate)}T${timer.targetTime}`);
     }
 
-    const formattedTargetDate = targetDate.toLocaleDateString('ru-RU', {
+    const formattedTargetDate = targetDate.toLocaleDateString(this.editor.getLocale(), {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
@@ -260,11 +260,16 @@ export class TimerManager {
       if (timer === null || timer === undefined) {
         throw new Error('Invalid timer data format');
       }
+      // JSON round-trip turns the Date into an ISO string.
+      const targetDate = new Date(timer.targetDate);
+      if (Number.isNaN(targetDate.getTime())) {
+        throw new Error('Invalid timer data format');
+      }
 
       return this.createTimer({
         title: timer.title,
         description: timer.description,
-        targetDate: timer.targetDate,
+        targetDate,
         targetTime: timer.targetTime,
         color: timer.color,
         category: timer.category,
@@ -282,7 +287,7 @@ export class TimerManager {
     }
 
     return this.createTimer({
-      title: `${originalTimer.title} (Копия)`,
+      title: `${originalTimer.title} ${this.editor.t('timer.copySuffix') || '(Copy)'}`,
       description: originalTimer.description,
       targetDate: originalTimer.targetDate,
       targetTime: originalTimer.targetTime,

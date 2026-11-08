@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import { parseText, serializeText, MAX_TABLE_BYTES } from '../io/text';
+import { MAX_TABLE_BYTES } from '../io/constants';
+import { parseText, serializeText } from '../io/text';
 import { gridFromDoc } from '../io/adapters';
 
 describe('TablePlugin io/text', () => {

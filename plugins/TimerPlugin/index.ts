@@ -7,6 +7,7 @@ import {
   pluginToolbarPlacement,
   pathFromEl,
   queryAtomHosts,
+  removeAtomAt,
   attrToHtmlValue,
   readJsonAttr,
 } from '@codemerge/sdk';
@@ -124,7 +125,15 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
     }
   };
 
-  const handleContextAction = (action: string, target: Timer) => {
+  /** Put a timer into the doc (insert flow) — the manager alone is in-memory only. */
+  const insertTimer = (timer: Timer) => {
+    manager.ensureTimer(timer);
+    editor.run(
+      insertAtomAfter('timer', { payload: timerPayload(timer), title: timer.title, align: '' })
+    );
+  };
+
+  const handleContextAction = (action: string, target: Timer, widget: HTMLElement) => {
     switch (action) {
       case 'edit-timer': {
         menu.showEditTimerForm(target);
@@ -132,7 +141,7 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
       }
       case 'copy-timer': {
         try {
-          manager.copyTimer(target.id);
+          insertTimer(manager.copyTimer(target.id));
           editor.notify(editor.t('timer.timerCopiedSuccessfully'));
           refreshTimers();
         } catch {
@@ -142,7 +151,7 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
       }
       case 'export-timer': {
         try {
-          downloadJson(`timer-${target.id}.json`, JSON.stringify(target, null, 2));
+          downloadJson(`timer-${target.id}.json`, manager.exportTimer(target.id));
         } catch {
           editor.notify(editor.t('export.exportFailed'));
         }
@@ -151,7 +160,7 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
       case 'import-timer': {
         pickJsonFile((text) => {
           try {
-            manager.importTimer(text);
+            insertTimer(manager.importTimer(text));
             editor.notify(editor.t('timer.timerImportedSuccessfully'));
             refreshTimers();
           } catch {
@@ -162,7 +171,7 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
       }
       case 'delete-timer': {
         manager.deleteTimer(target.id);
-        refreshTimers();
+        removeAtomAt(widget, (cmd) => editor.run(cmd));
         break;
       }
     }
@@ -191,19 +200,12 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
       );
       editor = ctx.editor;
       manager = new TimerManager(editor);
-      menu = new TimerMenu(manager, editor, ctx.scope);
+      menu = new TimerMenu(manager, editor, ctx.scope, persistTimer);
       contextMenu = ctx.own(new TimerContextMenu(manager, editor));
 
       openTimerMenu = () => {
         menu.show((timerData: Timer) => {
-          manager.ensureTimer(timerData);
-          editor.run(
-            insertAtomAfter('timer', {
-              payload: timerPayload(timerData),
-              title: timerData.title,
-              align: '',
-            })
-          );
+          insertTimer(timerData);
           persistTimer(timerData);
         });
       };
@@ -248,7 +250,7 @@ export function TimerPlugin(opts?: PluginToolbarOpts) {
           return;
         }
         contextMenu.show(e, timer, (action) => {
-          handleContextAction(action, timer);
+          handleContextAction(action, timer, timerElement);
         });
       });
 

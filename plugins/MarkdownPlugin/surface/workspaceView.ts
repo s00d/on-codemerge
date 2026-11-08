@@ -10,7 +10,7 @@ import type { DocNode, EditorState, JSONDoc, Operation } from '@codemerge/kernel
 
 import { defaultMdElementRegistry } from '../elements/registry';
 import type { MdElementRegistry } from '../elements/types';
-import { docToText, emptyEditorDoc } from '../io/adapters';
+import { docToText } from '../io/adapters';
 import { escapeHtml } from '../io/escape';
 import { parseText } from '../io/text';
 import { projectPreviewHtml } from '../io/projectPreview';
@@ -380,6 +380,9 @@ async function paintPreviewRemote(
 
   // Same markdown: skip network, but finish hydrate if a prior pass left pending hosts.
   if (markdown === ctl.lastFetched) {
+    // Drop an in-flight fetch for newer text that was since reverted — it would paint stale HTML.
+    ctl.fetchAbort?.abort();
+    ctl.fetchAbort = null;
     if (pending()) {
       hydrateMermaidBlocks(slot);
       sync?.alignPreviewToEditor();
@@ -837,9 +840,4 @@ export function mountMdWorkspace(
       mdHandle?.focus();
     },
   };
-}
-
-/** Seed helper for tests. */
-export function seedMdDoc(text: string): DocNode {
-  return emptyEditorDoc(text);
 }

@@ -23,14 +23,17 @@ function paintSv(el: HTMLCanvasElement, hue: number): void {
     return;
   }
   const { width: w, height: ht } = el;
-  for (let y = 0; y < ht; y++) {
-    const v = 1 - y / Math.max(1, ht - 1);
-    for (let x = 0; x < w; x++) {
-      const s = x / Math.max(1, w - 1);
-      ctx.fillStyle = hsvToHex(hue, s, v);
-      ctx.fillRect(x, y, 1, 1);
-    }
-  }
+  // Standard SV square: white→hue (saturation) then transparent→black (value).
+  const sat = ctx.createLinearGradient(0, 0, w, 0);
+  sat.addColorStop(0, '#ffffff');
+  sat.addColorStop(1, hsvToHex(hue, 1, 1));
+  ctx.fillStyle = sat;
+  ctx.fillRect(0, 0, w, ht);
+  const val = ctx.createLinearGradient(0, 0, 0, ht);
+  val.addColorStop(0, 'rgba(0,0,0,0)');
+  val.addColorStop(1, '#000000');
+  ctx.fillStyle = val;
+  ctx.fillRect(0, 0, w, ht);
 }
 
 function paintHue(el: HTMLCanvasElement): void {

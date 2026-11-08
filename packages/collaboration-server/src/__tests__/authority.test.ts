@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { createDoc, createParagraph, createText, resetIdCounter } from '@codemerge/kernel';
-import { acceptSubmit } from '../authority.ts';
-import { emptyRoom } from '../store/memory.ts';
+import { acceptSubmit } from '../authority';
+import { emptyRoom } from '../store/memory';
 
 describe('acceptSubmit', () => {
   it('accepts ops on empty room', () => {
@@ -38,6 +38,30 @@ describe('acceptSubmit', () => {
     if (second.ok) {
       expect(second.ops[0]).toMatchObject({ type: 'insert_text', offset: 3 });
     }
+  });
+
+  it('rebases against a compacted op-log by version offset', () => {
+    resetIdCounter();
+    const room = emptyRoom('d1', createDoc([createParagraph([createText('ab')])]));
+    // Version 10, only the last op (v10: insert X at 0) kept after compaction.
+    const compacted = {
+      ...room,
+      version: 10,
+      ops: [{ type: 'insert_text' as const, path: [0], offset: 0, text: 'X' }],
+    };
+    const r = acceptSubmit(compacted, 9, [
+      { type: 'insert_text', path: [0], offset: 1, text: 'Y' },
+    ]);
+    expect(r.ok && r.ops[0]).toMatchObject({ offset: 2 });
+    const old = acceptSubmit(compacted, 5, [
+      { type: 'insert_text', path: [0], offset: 0, text: 'Z' },
+    ]);
+    expect(old).toMatchObject({ ok: false, reason: 'base_compacted' });
+    expect(
+      acceptSubmit(compacted, Number.NaN, [
+        { type: 'insert_text', path: [0], offset: 0, text: 'Z' },
+      ])
+    ).toMatchObject({ ok: false, reason: 'bad_base' });
   });
 
   it('rejects empty ops', () => {

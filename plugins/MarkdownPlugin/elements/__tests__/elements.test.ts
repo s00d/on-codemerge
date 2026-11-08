@@ -19,7 +19,8 @@ describe('Markdown custom elements', () => {
     expect(callout?.attrs?.title).toBe('Hello');
     expect(callout?.attrs?.actions).toStrictEqual([
       { label: 'Go', href: 'https://example.com' },
-      { label: 'Skip', href: 'data:text/plain,x' },
+      // Non-http(s)/mailto schemes are dropped on import (allowedLinkHref); the button stays.
+      { label: 'Skip', href: '' },
     ]);
   });
 

@@ -1,6 +1,6 @@
 import { h, renderDetached } from '@codemerge/sdk';
 import { parseMath } from '../utils/parse';
-import { astToMathML, escapeText } from '../utils/mathml';
+import { astToMathML } from '../utils/mathml';
 
 export type MathRenderOptions = {
   width?: number;
@@ -27,7 +27,8 @@ export class MathRenderer {
               'ocm-math-content ocm-math-error font-mono text-sm text-red-600 whitespace-pre-wrap p-2',
             attrs: { role: 'alert', title: parsed.error },
           },
-          escapeText(expression || parsed.error)
+          // Text child — h() sets textContent, so no manual HTML escaping.
+          expression || parsed.error
         )
       );
       return el;

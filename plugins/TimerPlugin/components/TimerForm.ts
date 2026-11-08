@@ -1,7 +1,16 @@
-import { h, mount } from '@codemerge/sdk';
+import { colorWellView, h, mount } from '@codemerge/sdk';
 import type { EditorAPI, ViewSpec, MountHandle } from '@codemerge/sdk';
 
 import type { Timer, CreateTimerData } from '../types';
+
+function pad2(n: number): string {
+  return String(n).padStart(2, '0');
+}
+
+/** `YYYY-MM-DD` in local time (the form builds the target as local `${date}T${time}`). */
+export function localDateInputValue(d: Date): string {
+  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+}
 
 /** Timer form — ViewSpec only (no helpers / getElement). */
 export class TimerForm {
@@ -24,7 +33,7 @@ export class TimerForm {
     this.draft = {
       title: timer?.title ?? '',
       description: timer?.description ?? '',
-      date: timer?.targetDate ? timer.targetDate.toISOString().slice(0, 10) : '',
+      date: timer?.targetDate ? localDateInputValue(timer.targetDate) : '',
       time: timer?.targetTime ?? '',
       color: timer?.color ?? '#3b82f6',
       category: timer?.category ?? '',
@@ -89,9 +98,18 @@ export class TimerForm {
       this.field('targetTime', t('common.targetTime'), 'time', this.draft.time, (v) => {
         this.draft.time = v;
       }),
-      this.field('color', t('common.color'), 'color', this.draft.color, (v) => {
-        this.draft.color = v;
-      }),
+      h('div', { class: 'form-group mb-3' }, [
+        h('label', null, t('common.color')),
+        colorWellView(
+          {
+            initial: this.draft.color,
+            onPick: (v) => {
+              this.draft.color = v;
+            },
+          },
+          t
+        ),
+      ]),
       this.field('category', t('common.category'), 'text', this.draft.category, (v) => {
         this.draft.category = v;
       }),

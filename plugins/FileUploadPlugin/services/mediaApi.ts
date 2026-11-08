@@ -97,8 +97,17 @@ export function parseMediaUploadResult(raw: unknown, fallbackName: string): Medi
   };
 }
 
+/** Exact mime or `type/*` wildcard (same values the picker's `accept` takes). */
 export function isFileTypeAllowed(file: File, allowedTypes: string[]): boolean {
-  return allowedTypes.includes('*/*') || allowedTypes.includes(file.type);
+  const type = file.type.toLowerCase();
+  return allowedTypes.some((raw) => {
+    const allowed = raw.trim().toLowerCase();
+    return (
+      allowed === '*/*' ||
+      allowed === type ||
+      (allowed.endsWith('/*') && type.startsWith(allowed.slice(0, -1)))
+    );
+  });
 }
 
 export function assertFileAllowed(

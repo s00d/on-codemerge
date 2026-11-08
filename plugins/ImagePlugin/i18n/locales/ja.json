@@ -31,6 +31,7 @@
     "galleryDeleteConfirm": "Delete “{name}” from the gallery?",
     "galleryDeleting": "Deleting…",
     "galleryDeleteFailed": "Failed to delete image",
-    "browse": "参照"
+    "browse": "参照",
+    "copyFailed": "画像をコピーできませんでした"
   }
 }

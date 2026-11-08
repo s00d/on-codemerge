@@ -1,11 +1,13 @@
 # DOCS_PROFILE
 
-Product documentation profile for **on-codemerge** (VitePress site).
+Product documentation profile for **on-codemerge** (Nuxt + Nuxt Content + Nuxt UI site).
 
 ## Doc root
 
-- `docs/` — VitePress sources (`docs/.vitepress/config.ts`)
-- Site sections: `guide/`, `plugins/`, `integrate/`
+- `docs/` — Nuxt app (`docs/nuxt.config.ts`, private workspace package `on-codemerge-docs`)
+- `docs/content/` — pages; numeric prefixes set order and are stripped from URLs; `.navigation.yml` names a section
+- Sections: `getting-started/`, `editors/`, `plugins/<group>/`, `integrate/<group>/`, `architecture/`, `changelog` (synced from `CHANGELOG.md`, gitignored)
+- `docs/app/components/content/` — live demo components, usable in Markdown as `::editor-component{:active-plugins='["ColorPlugin"]' :show-results='false'}`
 
 ## Code roots (truth for drift checks)
 
@@ -28,25 +30,17 @@ Product documentation profile for **on-codemerge** (VitePress site).
 
 ## Entry points
 
-| User need         | Doc                                   |
-| ----------------- | ------------------------------------- |
-| Home / live demos | `docs/index.md` (+ `HomeEditorsDemo`) |
-| Install / API     | `docs/guide/editor.md`                |
-| Editors matrix    | `docs/guide/editors.md`               |
-| JSON Editor       | `docs/guide/json-editor.md`           |
-| Markdown Editor   | `docs/guide/markdown-editor.md`       |
-| Code Editor       | `docs/guide/code-editor.md`           |
-| Forms Editor      | `docs/guide/forms-editor.md`          |
-| Charts Editor     | `docs/guide/charts-editor.md`         |
-| Calendar Editor   | `docs/guide/calendar-editor.md`       |
-| Tables Editor     | `docs/guide/tables-editor.md`         |
-| Mermaid subset    | `docs/guide/mermaid.md`               |
-| Document model    | `docs/guide/document-model.md`        |
-| Write a plugin    | `docs/guide/authoring-plugins.md`     |
-| ViewSpec runtime  | `docs/guide/view.md`                  |
-| Plugin catalog    | `docs/plugins/`                       |
-| Framework / host  | `docs/integrate/`                     |
-| v1 upgrade        | `docs/guide/migration-v1-to-v2.md`    |
+| User need         | Doc                                                      |
+| ----------------- | -------------------------------------------------------- |
+| Home / live demos | `docs/app/pages/index.vue` (+ `HomeEditorsDemo`)         |
+| Introduction      | `docs/content/1.getting-started/1.introduction.md`       |
+| Editors matrix    | `docs/content/1.getting-started/2.editors.md`            |
+| Install / API     | `docs/content/1.getting-started/3.editor-api.md`         |
+| v1 upgrade        | `docs/content/1.getting-started/4.migration-v1-to-v2.md` |
+| Product editors   | `docs/content/2.editors/*.md`                            |
+| Plugin catalog    | `docs/content/3.plugins/`                                |
+| Framework / host  | `docs/content/4.integrate/`                              |
+| Model, SDK, view  | `docs/content/5.architecture/`                           |
 
 ## Verify
 
@@ -58,9 +52,9 @@ pnpm run check
 ## Rules of thumb
 
 - Integrations and per-plugin pages keep their substance; prefer restructuring and fixing drift over deleting recipes.
-- Shared install/CSS lives in Guide — plugin pages link there instead of repeating install snippets.
+- Shared install/CSS lives in Getting started — plugin pages link there instead of repeating install snippets.
 - This repo is pnpm-only (`pnpm install` / `pnpm run …` / `pnpm run release`). Do not document npm CLI for maintainers.
 - Do not document unwired APIs (`EditorOptions.mode` was removed for this reason).
-- Live demos mount once on the home page tabs (`HomeEditorsDemo`); `guide/editors.md` is the matrix + launch recipes only.
-- JSON / Markdown / Code product surfaces are `guide/{json,markdown,code}-editor.md` — not separate design/phases trees.
+- Live demos mount once on the home page tabs (`HomeEditorsDemo`); `getting-started/editors` is the matrix + launch recipes only.
+- Product surfaces are `editors/{json,markdown,code,forms,charts,calendar,tables}` — not separate design/phases trees.
 - `packages/editor` is a **private** workspace package (shared Editor facade + source contour). Public docs cite product entries (`on-codemerge`, `on-codemerge/code`, …), not `@codemerge/editor` as a published import.

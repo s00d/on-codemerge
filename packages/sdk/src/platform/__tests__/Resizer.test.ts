@@ -147,6 +147,19 @@ describe('resizer', () => {
     expect(document.documentElement.classList.contains('ocm-resizing')).toBe(false);
   });
 
+  it('escape when idle fires onBlur but does not swallow the event', () => {
+    const onBlur = vi.fn();
+    mount({ onBlur });
+    const ev = new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true });
+    const later = vi.fn();
+    window.addEventListener('keydown', later);
+    document.dispatchEvent(ev);
+    window.removeEventListener('keydown', later);
+    expect(onBlur).toHaveBeenCalledTimes(1);
+    expect(ev.defaultPrevented).toBe(false);
+    expect(later).toHaveBeenCalledTimes(1);
+  });
+
   it('outside pointerdown fires onBlur', () => {
     const onBlur = vi.fn();
     mount({ onBlur });

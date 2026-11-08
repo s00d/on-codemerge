@@ -4,7 +4,8 @@ import type { DisposableScope, EditorAPI, ViewSpec } from '@codemerge/sdk';
 import { MathRenderer } from '../services/MathRenderer';
 import type { MathExpression } from '../types';
 import { MATH_TEMPLATES } from '../constants/templates';
-import { mathBuildPanel, insertWithHoles } from './MathBuildPanel';
+import { mathBuildPanel } from './MathBuildPanel';
+import { insertWithHoles } from '../utils/insertTemplate';
 
 type EditorMode = 'build' | 'source';
 
@@ -215,6 +216,13 @@ export class MathMenu {
       className: 'math-menu',
       size: 'md',
       closeOnClickOutside: true,
+      // Any close path (cancel / outside click / submit / remount) drops a pending preview.
+      onClose: () => {
+        if (this.previewTimer) {
+          globalThis.clearTimeout(this.previewTimer);
+          this.previewTimer = null;
+        }
+      },
       items: [{ type: 'view', id: 'math-editor', view: () => this.editorView() }],
       buttons: [
         {

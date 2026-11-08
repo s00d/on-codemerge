@@ -7,6 +7,7 @@
     "timeExpired": "시간 만료",
     "editTimer": "타이머 편집",
     "copyTimer": "타이머 복사",
+    "copySuffix": "(복사본)",
     "exportTimer": "타이머 내보내기",
     "importTimer": "타이머 가져오기",
     "deleteTimer": "타이머 삭제",

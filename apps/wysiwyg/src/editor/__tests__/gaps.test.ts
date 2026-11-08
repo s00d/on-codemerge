@@ -4,13 +4,13 @@ import { Editor } from '../Editor';
 import { InputBridge, selectionFromOffsets } from '../../view/InputBridge';
 import { docToHTML, htmlToDoc } from '../../io/html';
 import { parseJSON, serializeJSON } from '../../io/json';
-import { sanitizeHTML } from '../../io/sanitize';
+import { sanitizeHTML } from '@codemerge/sdk';
 import {
   createPlatform,
   destroyPlatform,
   registerPlugin,
   runExtensionSetup,
-} from '../../platform/Extension';
+} from '@codemerge/editor';
 import { TrackChangesPlugin } from '@ocm/track-changes-plugin';
 
 function mount() {

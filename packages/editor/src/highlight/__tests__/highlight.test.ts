@@ -2,13 +2,9 @@
  * @jest-environment jsdom
  */
 import { describe, expect, it } from 'vitest';
-import {
-  highlightHtml,
-  lex,
-  tokensToHtml,
-  HIGHLIGHT_MAX_CHARS,
-  HIGHLIGHT_MAX_TOKENS,
-} from '../index';
+import { highlightHtml, tokensToHtml } from '../render';
+import { lex } from '../lex';
+import { HIGHLIGHT_MAX_CHARS, HIGHLIGHT_MAX_TOKENS } from '../types';
 
 describe('universal highlight engine', () => {
   it('returns empty for empty input', () => {

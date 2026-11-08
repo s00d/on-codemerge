@@ -1,16 +1,26 @@
-/** IndexedDB queue for unacked local ops while offline. */
+/** IndexedDB copy of the unconfirmed local edits, so a reload / crash while offline keeps them. */
 
 const DB_NAME = 'ocm-collab-offline';
 const STORE = 'pending';
 
-export type PendingBatch = {
+/**
+ * One record per `docId` + `clientId`. `outstanding` was sent and is unacked; `buffer` is
+ * not sent yet. Both are relative to the server doc at `baseVersion` (buffer after outstanding).
+ */
+export type PendingState = {
   id: string;
   docId: string;
+  clientId: string;
   baseVersion: number;
-  ops: unknown[];
+  outstanding: { seq: number; ops: unknown[] } | null;
+  buffer: unknown[];
   clientSeq: number;
   at: number;
 };
+
+export function pendingId(docId: string, clientId: string): string {
+  return `p_${docId}_${clientId}`;
+}
 
 function openDb(): Promise<IDBDatabase> {
   return new Promise((resolve, reject) => {
@@ -30,53 +40,38 @@ function openDb(): Promise<IDBDatabase> {
   });
 }
 
-export async function enqueuePending(batch: PendingBatch): Promise<void> {
+async function withStore<T>(
+  mode: IDBTransactionMode,
+  run: (store: IDBObjectStore) => IDBRequest | undefined
+): Promise<T | undefined> {
   try {
     const db = await openDb();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).put(batch);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error ?? new Error('idb_put'));
+    const result = await new Promise<T | undefined>((resolve, reject) => {
+      const tx = db.transaction(STORE, mode);
+      const req = run(tx.objectStore(STORE));
+      tx.oncomplete = () => resolve(req?.result as T | undefined);
+      tx.onerror = () => reject(tx.error ?? new Error('idb_tx'));
     });
     db.close();
+    return result;
   } catch {
-    /* ignore when IDB unavailable */
+    // IndexedDB unavailable (SSR, private mode): the queue is best-effort.
+    return undefined;
   }
 }
 
-export async function listPending(docId: string): Promise<PendingBatch[]> {
-  try {
-    const db = await openDb();
-    const all = await new Promise<PendingBatch[]>((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readonly');
-      const req = tx.objectStore(STORE).getAll();
-      req.onsuccess = () => resolve((req.result as PendingBatch[]) ?? []);
-      req.onerror = () => reject(req.error ?? new Error('idb_get'));
-    });
-    db.close();
-    return all.filter((b) => b.docId === docId).sort((a, b) => a.clientSeq - b.clientSeq);
-  } catch {
-    return [];
-  }
+export async function savePending(state: PendingState): Promise<void> {
+  await withStore('readwrite', (s) => s.put(state));
 }
 
-export async function removePending(id: string): Promise<void> {
-  try {
-    const db = await openDb();
-    await new Promise<void>((resolve, reject) => {
-      const tx = db.transaction(STORE, 'readwrite');
-      tx.objectStore(STORE).delete(id);
-      tx.oncomplete = () => resolve();
-      tx.onerror = () => reject(tx.error ?? new Error('idb_del'));
-    });
-    db.close();
-  } catch {
-    /* ignore */
-  }
+export async function loadPending(id: string): Promise<PendingState | null> {
+  const row = await withStore<PendingState>('readonly', (s) => s.get(id));
+  return row && Array.isArray(row.buffer) ? row : null;
 }
 
-export async function clearPending(docId: string): Promise<void> {
-  const list = await listPending(docId);
-  await Promise.all(list.map((b) => removePending(b.id)));
+export async function clearPending(id: string): Promise<void> {
+  await withStore('readwrite', (s) => {
+    s.delete(id);
+    return undefined;
+  });
 }

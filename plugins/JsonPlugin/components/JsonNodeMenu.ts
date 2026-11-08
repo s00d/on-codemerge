@@ -3,7 +3,7 @@ import type { EditorAPI, MenuItem } from '@codemerge/sdk';
 import { getNodeAt } from '@codemerge/kernel';
 
 import { copyIcon, deleteIcon, duplicateIcon, insertIcon, moveIcon } from '@codemerge/sdk/icons';
-import type { JsonLeafType } from '../commands/jsonCommands';
+import type { JsonLeafType } from '../commands/types';
 import {
   changeType,
   deleteNode,
@@ -11,10 +11,8 @@ import {
   insertItem,
   insertProperty,
   moveItem,
-  pathToDot,
-  pathToJsonPointer,
-  valueAtDocPath,
-} from '../commands/jsonCommands';
+} from '../commands/mutate';
+import { pathToDot, pathToJsonPointer, valueAtDocPath } from '../commands/path';
 import { allJsonLeafTypes, getDriver } from '../drivers/registry';
 
 export type JsonNodeMenuTarget = {

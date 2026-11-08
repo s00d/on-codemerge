@@ -18,8 +18,23 @@ export type PresenceState = {
 export type ClientMessage =
   | { type: 'hello'; protocolVersion: number }
   | { type: 'auth'; token: string; userId?: string }
-  | { type: 'join'; docId: string; snapshot?: unknown }
-  | { type: 'submit'; docId: string; baseVersion: number; ops: unknown[]; clientSeq?: number }
+  | {
+      type: 'join';
+      docId: string;
+      snapshot?: unknown;
+      /** Client's last confirmed version: `init` then carries the ops since it (catch-up). */
+      sinceVersion?: number;
+      clientId?: string;
+    }
+  | {
+      type: 'submit';
+      docId: string;
+      baseVersion: number;
+      ops: unknown[];
+      clientSeq?: number;
+      /** Stable per client instance (survives reload via the offline queue); enables resubmit dedupe. */
+      clientId?: string;
+    }
   | { type: 'presence'; docId: string; state: Omit<PresenceState, 'userId' | 'updatedAt'> }
   | { type: 'ping'; ts?: number }
   | { type: 'leave'; docId: string }
@@ -36,6 +51,9 @@ export type ClientMessage =
         resolved?: boolean;
       };
     };
+
+/** Ops `(from, to]` of the op-log came from the batch with this clientSeq. */
+export type AckedBatch = { seq: number; from: number; to: number };
 
 /** Server → client */
 export type ServerMessage =
@@ -56,6 +74,10 @@ export type ServerMessage =
       version: number;
       snapshot: unknown;
       peers?: PresenceState[];
+      /** Ops `(sinceVersion, version]` when the join asked for them and the log still has them. */
+      ops?: unknown[];
+      /** Last batch applied for the joiner's `clientId` (ack may have been lost on a dropped socket). */
+      acked?: AckedBatch;
     }
   | {
       type: 'ack';
@@ -92,13 +114,72 @@ export type ServerMessage =
       }>;
     };
 
+const isObj = (v: unknown): v is object => typeof v === 'object' && v !== null;
+const isStr = (v: unknown): v is string => typeof v === 'string';
+
+/** Shape-check untrusted client JSON: every field the server dereferences must be present. */
 export function parseClientMessage(raw: unknown): ClientMessage | null {
-  if (typeof raw !== 'object' || raw === null || !('type' in raw)) {
+  if (!isObj(raw)) {
     return null;
   }
-  const type = Reflect.get(raw, 'type');
-  if (typeof type !== 'string') {
-    return null;
+  const get = (k: string): unknown => Reflect.get(raw, k);
+  switch (get('type')) {
+    case 'hello':
+    case 'ping':
+      break;
+    case 'auth':
+      if (!isStr(get('token'))) {
+        return null;
+      }
+      break;
+    case 'join':
+      if (!isStr(get('docId'))) {
+        return null;
+      }
+      if (get('sinceVersion') !== undefined && typeof get('sinceVersion') !== 'number') {
+        return null;
+      }
+      if (get('clientId') !== undefined && !isStr(get('clientId'))) {
+        return null;
+      }
+      break;
+    case 'leave':
+      if (!isStr(get('docId'))) {
+        return null;
+      }
+      break;
+    case 'submit':
+      if (!isStr(get('docId')) || typeof get('baseVersion') !== 'number') {
+        return null;
+      }
+      if (!Array.isArray(get('ops'))) {
+        return null;
+      }
+      if (get('clientSeq') !== undefined && typeof get('clientSeq') !== 'number') {
+        return null;
+      }
+      if (get('clientId') !== undefined && !isStr(get('clientId'))) {
+        return null;
+      }
+      break;
+    case 'presence':
+      if (!isStr(get('docId')) || !isObj(get('state'))) {
+        return null;
+      }
+      break;
+    case 'comment': {
+      const thread = get('thread');
+      const action = get('action');
+      if (!isStr(get('docId')) || !isObj(thread) || !isStr(Reflect.get(thread, 'id'))) {
+        return null;
+      }
+      if (action !== 'add' && action !== 'resolve' && action !== 'remove') {
+        return null;
+      }
+      break;
+    }
+    default:
+      return null;
   }
   return raw as ClientMessage;
 }

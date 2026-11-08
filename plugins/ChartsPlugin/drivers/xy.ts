@@ -1,8 +1,8 @@
 import type { ChartSeries } from '../types';
 import type { ChartOptions } from '../types/ChartOptions';
 import type { ChartI18n } from './types';
+import { colorWithOpacity } from '../utils/colors';
 import {
-  colorWithOpacity,
   drawAxisLabels,
   drawBackground,
   drawLegend,
@@ -11,6 +11,15 @@ import {
   plotBox,
   themeColors,
 } from '../canvas/kit';
+
+function finite(v: number | undefined): v is number {
+  return v !== undefined && Number.isFinite(v);
+}
+
+/** Up to 2 decimals so 0..1 ranges don't collapse to 0/1 ticks. */
+function tickLabel(v: number): string {
+  return String(Math.round(v * 100) / 100);
+}
 
 export function paintXy(
   ctx: CanvasRenderingContext2D,
@@ -26,8 +35,13 @@ export function paintXy(
     drawNoData(ctx, options, i18n);
     return;
   }
-  const xMax = Math.max(1, ...all.map((p) => p.x ?? 0));
-  const yMax = Math.max(1, ...all.map((p) => p.y ?? 0));
+  // Axes include 0 and extend to negatives so points never land outside the plot box.
+  const xs = all.map((p) => p.x).filter(finite);
+  const ys = all.map((p) => p.y).filter(finite);
+  const xMin = Math.min(0, ...xs);
+  const yMin = Math.min(0, ...ys);
+  const xMax = Math.max(xMin + 1, ...xs);
+  const yMax = Math.max(yMin + 1, ...ys);
   const rMax = withR ? Math.max(1, ...all.map((p) => p.r ?? 0)) : 1;
   const { padding, height, plotW, plotH } = plotBox(options);
   const colors = themeColors(options);
@@ -39,10 +53,10 @@ export function paintXy(
   for (let i = 0; i <= 5; i++) {
     const x = padding + (plotW * i) / 5;
     ctx.textAlign = 'center';
-    ctx.fillText(String(Math.round((xMax * i) / 5)), x, height - padding + 20);
+    ctx.fillText(tickLabel(xMin + ((xMax - xMin) * i) / 5), x, height - padding + 20);
     const y = height - padding - (plotH * i) / 5;
     ctx.textAlign = 'right';
-    ctx.fillText(String(Math.round((yMax * i) / 5)), padding - 10, y + 4);
+    ctx.fillText(tickLabel(yMin + ((yMax - yMin) * i) / 5), padding - 10, y + 4);
   }
   ctx.restore();
 
@@ -60,18 +74,18 @@ export function paintXy(
     ctx.restore();
   }
 
-  const xScale = plotW / xMax;
-  const yScale = plotH / yMax;
+  const xScale = plotW / (xMax - xMin);
+  const yScale = plotH / (yMax - yMin);
   const rScale = Math.min(plotW, plotH) / (rMax * 20);
 
   series.forEach((s, si) => {
     const base = s.color ?? colors[si % colors.length] ?? '#888';
     s.data.forEach((p) => {
-      if (p.x === undefined || p.y === undefined) {
+      if (!finite(p.x) || !finite(p.y)) {
         return;
       }
-      const x = padding + p.x * xScale;
-      const y = height - padding - p.y * yScale;
+      const x = padding + (p.x - xMin) * xScale;
+      const y = height - padding - (p.y - yMin) * yScale;
       const color = p.color ?? base;
       if (withR) {
         const radius = Math.max(4, (p.r ?? 5) * rScale);

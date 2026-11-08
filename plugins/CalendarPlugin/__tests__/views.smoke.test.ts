@@ -85,4 +85,33 @@ describe('views.smoke', () => {
     expect(patched?.allDay).toBe(true);
     expect(String(patched?.start)).toBe('2026-10-02');
   });
+
+  it('timed event crossing midnight renders a segment on each day', () => {
+    const doc = emptyCalendarDoc({
+      view: 'week',
+      cursor: '2026-10-01',
+      calendars: [{ id: 'c', title: 'C', color: '#3b82f6', visible: true }],
+      events: [
+        {
+          id: 'late',
+          calendarId: 'c',
+          title: 'Late',
+          start: '2026-10-01T22:00',
+          end: '2026-10-02T02:00',
+          allDay: false,
+        },
+      ],
+    });
+    const { el } = renderDetached(renderView(doc, stub));
+    const seg = (day: string) =>
+      el.querySelector<HTMLElement>(
+        `.cal-timed__col[data-ocm-day="${day}"] [data-ocm-event-id="late"]`
+      );
+    expect(seg('2026-10-01')?.style.top).toBe(`${22 * 48}px`);
+    expect(seg('2026-10-01')?.style.height).toBe(`${2 * 48}px`);
+    expect(seg('2026-10-01')?.querySelector('.cal-timed__resize')).toBeNull();
+    expect(seg('2026-10-02')?.style.top).toBe('0px');
+    expect(seg('2026-10-02')?.style.height).toBe(`${2 * 48}px`);
+    expect(seg('2026-10-02')?.querySelector('.cal-timed__resize')).not.toBeNull();
+  });
 });

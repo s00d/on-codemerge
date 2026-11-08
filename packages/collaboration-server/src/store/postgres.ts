@@ -1,6 +1,6 @@
 import type { CollabStore, NamedVersion, RoomRecord } from './types';
 import type { DocNode, Operation } from '@codemerge/kernel';
-import { ensureNodeIds, createDoc } from '@codemerge/kernel';
+import { ensureNodeIds } from '@codemerge/kernel';
 
 /**
  * Postgres store adapter (optional peer `pg`).
@@ -80,7 +80,9 @@ export function postgresStore(pool: PostgresPool): CollabStore {
     },
     async listOpsSince(docId, sinceVersion) {
       const room = await this.loadRoom(docId);
-      return room ? room.ops.slice(sinceVersion) : [];
+      return room
+        ? room.ops.slice(Math.max(0, sinceVersion - (room.version - room.ops.length)))
+        : [];
     },
     async compactSnapshot(docId, keepLastOps = 100) {
       const room = await this.loadRoom(docId);
@@ -138,8 +140,4 @@ export function postgresStore(pool: PostgresPool): CollabStore {
       await pool.end?.();
     },
   };
-}
-
-export function postgresEmptyDoc(): DocNode {
-  return ensureNodeIds(createDoc());
 }

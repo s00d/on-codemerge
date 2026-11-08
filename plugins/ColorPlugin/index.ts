@@ -1,7 +1,13 @@
-import { definePlugin, withMarkTarget, setMarkAttrs, core, ColorWell } from '@codemerge/sdk';
+import {
+  definePlugin,
+  withMarkTarget,
+  setMarkAttrs,
+  removeMarkType,
+  core,
+  ColorWell,
+} from '@codemerge/sdk';
 import type { EditorAPI } from '@codemerge/sdk';
 
-import type { Command, EditorState } from '@codemerge/kernel';
 import { textColorIcon, backgroundColorIcon } from '@codemerge/sdk/icons';
 
 function markColorAtSelection(editor: EditorAPI, markType: string): string | null {
@@ -31,24 +37,6 @@ function markColorAtSelection(editor: EditorAPI, markType: string): string | nul
     pos += len;
   }
   return null;
-}
-
-function removeMarkType(markType: string): Command {
-  return (state: EditorState) => {
-    const range = core.selectionTextRange(state.selection);
-    if (!range || range.from === range.to) {
-      return null;
-    }
-    return [
-      {
-        type: 'remove_mark',
-        path: range.path,
-        from: range.from,
-        to: range.to,
-        markType,
-      },
-    ];
-  };
 }
 
 export function ColorPlugin() {

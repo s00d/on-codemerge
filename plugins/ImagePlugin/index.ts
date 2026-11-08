@@ -1,4 +1,5 @@
 import {
+  copyBlob,
   copyText,
   definePlugin,
   insertAtomAfter,
@@ -7,7 +8,7 @@ import {
   img,
   pluginToolbarPlacement,
   Resizer,
-  atomAlignStyle,
+  mediaFloatAlign,
   removeAtomAt,
 } from '@codemerge/sdk';
 import type { WidgetContext, ViewSpec, EditorAPI, PluginToolbarOpts } from '@codemerge/sdk';
@@ -18,25 +19,29 @@ import type { UploadConfig } from '@ocm/file-upload-plugin/config/UploadConfig';
 import { ImageInsertModal } from './components/ImageInsertModal';
 import { copyIcon, editIcon, deleteIcon, imageIcon, uploadIcon } from '@codemerge/sdk/icons';
 
+/** data:/blob: → image bytes on the clipboard (fallback: the URL text); http(s) → URL text. */
+async function copyImageSource(src: string): Promise<boolean> {
+  if (!src) {
+    return false;
+  }
+  if (src.startsWith('data:') || src.startsWith('blob:')) {
+    try {
+      if (await copyBlob(await (await fetch(src)).blob())) {
+        return true;
+      }
+    } catch {
+      // fall through to URL text
+    }
+  }
+  return copyText(src);
+}
+
 const pluginLocaleModules = import.meta.glob<{ default: Record<string, unknown> }>([
   './i18n/locales/*.json',
   '!./i18n/locales/en.json',
 ]);
 
 export type ImagePluginOptions = Partial<UploadConfig> & PluginToolbarOpts;
-
-function alignStyle(align: string): Record<string, string> {
-  if (align === 'left') {
-    return { float: 'left', marginRight: '1rem', display: '', marginLeft: '' };
-  }
-  if (align === 'right') {
-    return { float: 'right', marginLeft: '1rem', display: '', marginRight: '' };
-  }
-  if (align === 'center' || align === 'justify') {
-    return atomAlignStyle('center');
-  }
-  return {};
-}
 
 function dimPx(v: unknown): string | undefined {
   const n = typeof v === 'number' ? v : Number(v);
@@ -84,14 +89,9 @@ function renderImage(
           label: t('common.copy'),
           icon: copyIcon,
           onClick: () => {
-            if (!src || src.startsWith('data:')) {
-              wctx.editor.notify(t('common.copied'));
-              return;
-            }
             void (async () => {
-              if (await copyText(src)) {
-                wctx.editor.notify(t('common.copied'));
-              }
+              const ok = await copyImageSource(src);
+              wctx.editor.notify(ok ? t('common.copied') : t('image.copyFailed'));
             })();
           },
         },
@@ -162,7 +162,7 @@ function renderImage(
       style: {
         ...(width ? { width } : {}),
         ...(height ? { height } : {}),
-        ...alignStyle(align),
+        ...mediaFloatAlign(align),
       },
     })
   );

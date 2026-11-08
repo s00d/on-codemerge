@@ -15,6 +15,7 @@ export interface PopupItem {
     | 'color'
     | 'file'
     | 'url'
+    | 'password'
     | 'text'
     | 'view'
     | 'divider';
@@ -42,6 +43,8 @@ export interface PopupOptions {
   items?: PopupItem[];
   buttons?: PopupButton[];
   closeOnClickOutside?: boolean;
+  /** Fires once when this popup is torn down (button, ×, Escape, overlay, replaced by another open). */
+  onClose?: () => void;
 }
 
 export interface PopupHandle {
@@ -225,13 +228,12 @@ export class PopupService {
     }
 
     const inputType =
-      item.type === 'number'
-        ? 'number'
-        : item.type === 'color'
-          ? 'color'
-          : item.type === 'url'
-            ? 'url'
-            : 'text';
+      item.type === 'number' ||
+      item.type === 'color' ||
+      item.type === 'url' ||
+      item.type === 'password'
+        ? item.type
+        : 'text';
     const initial = String(item.value ?? '');
     values[item.id] = item.type === 'number' ? Number(initial) || 0 : initial;
     return h('input', {
@@ -359,7 +361,7 @@ export class PopupService {
     this.hide();
     const values: Values = {};
     const scope = new DisposableScope();
-    const id = this.nextId++;
+    let id = this.nextId++;
     const hide = () => {
       // Only tear down if this handle still owns the active popup.
       if (this.active?.id === id) {
@@ -371,6 +373,9 @@ export class PopupService {
       to: this.portalTo,
       className: 'ocm-popup-root',
     });
+    if (options.onClose) {
+      scope.disposable(options.onClose);
+    }
     scope.own(portal);
     scope.on(document, 'keydown', (e) => {
       if (e.key === 'Escape') {
@@ -386,7 +391,9 @@ export class PopupService {
       hide,
       update: (next) => {
         if (!this.active || this.active.id !== id) {
+          // Stale handle: reopen and re-bind so later updates patch in place.
           this.open(next);
+          id = this.active?.id ?? id;
           return;
         }
         const fresh: Values = {};

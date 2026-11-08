@@ -10,10 +10,17 @@ export class TimerMenu {
   private readonly popups: PopupController;
   private readonly editor: EditorAPI;
   private readonly manager: TimerManager;
+  private readonly onUpdated: (timer: Timer) => void;
   private onSelect: ((timer: Timer) => void) | null = null;
 
-  constructor(manager: TimerManager, editor: EditorAPI, scope: DisposableScope) {
+  constructor(
+    manager: TimerManager,
+    editor: EditorAPI,
+    scope: DisposableScope,
+    onUpdated: (timer: Timer) => void
+  ) {
     this.editor = editor;
+    this.onUpdated = onUpdated;
     this.popups = new PopupController((o) => editor.ui.popup.open(o), scope);
     this.manager = manager;
   }
@@ -174,7 +181,7 @@ export class TimerMenu {
     const form = new TimerForm(
       this.editor,
       (data) => {
-        this.manager.updateTimer(timer.id, data);
+        this.onUpdated(this.manager.updateTimer(timer.id, data));
         this.popups.close();
         this.openMainPopup();
       },

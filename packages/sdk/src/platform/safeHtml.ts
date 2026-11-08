@@ -188,7 +188,9 @@ function isAllowedTag(name: string, svg: boolean): boolean {
 }
 
 function isSafeUrl(value: string): boolean {
-  const v = value.trim().toLowerCase();
+  // Browsers drop tab/newline (and C0/space at the ends) before scheme parsing — `java\tscript:`.
+  // oxlint-disable-next-line no-control-regex -- intentional C0 strip
+  const v = value.replaceAll(/[\u0000- ]/g, '').toLowerCase();
   // eslint-disable-next-line no-script-url -- allowlist reject, not navigate
   if (v.startsWith('javascript:') || v.startsWith('vbscript:') || v.startsWith('data:text/html')) {
     return false;

@@ -3,11 +3,11 @@ import type { EditorAPI, LocaleMessages } from '@codemerge/sdk';
 type LocaleModuleMap = Record<string, () => Promise<{ default: LocaleMessages }>>;
 
 /** Load a non-en locale JSON from a Vite `import.meta.glob` map (paths like `./locales/ru.json`). */
-export async function loadLocaleFromGlob(
-  modules: LocaleModuleMap,
+export async function loadLocaleFromGlob<T = LocaleMessages>(
+  modules: Record<string, () => Promise<{ default: T }>>,
   locale: string,
   pathPrefix = './locales'
-): Promise<LocaleMessages | null> {
+): Promise<T | null> {
   if (locale === 'en') {
     return null;
   }

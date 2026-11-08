@@ -28,7 +28,7 @@ if (existsSync(mermaidJs)) {
 }
 
 const body = readFileSync(publicJs, 'utf8');
-if (!body.includes('data-ocm-mermaid') && !body.includes('mermaid')) {
+if (!body.includes('data-ocm-mermaid')) {
   console.error('[check-public-bundle] public.js missing mermaid hydrate markers');
   process.exit(1);
 }

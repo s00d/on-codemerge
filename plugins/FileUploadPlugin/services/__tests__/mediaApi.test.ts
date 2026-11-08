@@ -50,6 +50,12 @@ describe('mediaApi', () => {
     expect(() =>
       assertFileAllowed(file, { maxFileSize: 100, allowedTypes: ['*/*'] })
     ).not.toThrow();
+    expect(() =>
+      assertFileAllowed(file, { maxFileSize: 100, allowedTypes: ['image/*'] })
+    ).not.toThrow();
+    expect(() => assertFileAllowed(file, { maxFileSize: 100, allowedTypes: ['video/*'] })).toThrow(
+      /not allowed/
+    );
   });
 
   it('listMedia GETs with headers', async () => {

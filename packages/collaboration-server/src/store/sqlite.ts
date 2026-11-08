@@ -1,6 +1,6 @@
 import { mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
-import { createDoc, ensureNodeIds } from '@codemerge/kernel';
+import { ensureNodeIds } from '@codemerge/kernel';
 import type { DocNode, Operation } from '@codemerge/kernel';
 import type { CollabStore, NamedVersion, RoomRecord } from './types';
 
@@ -131,7 +131,7 @@ export function sqliteStore(opts: SqliteStoreOptions): CollabStore {
       if (!room) {
         return [];
       }
-      return room.ops.slice(sinceVersion);
+      return room.ops.slice(Math.max(0, sinceVersion - (room.version - room.ops.length)));
     },
     async compactSnapshot(docId, keepLastOps = 100) {
       const room = await this.loadRoom(docId);
@@ -197,8 +197,4 @@ export function sqliteStore(opts: SqliteStoreOptions): CollabStore {
       db.close();
     },
   };
-}
-
-export function defaultEmptySnapshot(): DocNode {
-  return ensureNodeIds(createDoc());
 }

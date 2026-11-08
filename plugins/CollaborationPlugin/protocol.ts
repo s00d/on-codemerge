@@ -42,8 +42,23 @@ export type CommentThread = {
 export type ClientWire =
   | { type: 'hello'; protocolVersion: number }
   | { type: 'auth'; token: string; userId?: string }
-  | { type: 'join'; docId: string; snapshot?: unknown }
-  | { type: 'submit'; docId: string; baseVersion: number; ops: unknown[]; clientSeq?: number }
+  | {
+      type: 'join';
+      docId: string;
+      snapshot?: unknown;
+      /** Last confirmed version: `init` then carries the ops since it (catch-up, no snapshot reset). */
+      sinceVersion?: number;
+      clientId?: string;
+    }
+  | {
+      type: 'submit';
+      docId: string;
+      baseVersion: number;
+      ops: unknown[];
+      clientSeq?: number;
+      /** Stable per client instance (survives reload via the offline queue); enables resubmit dedupe. */
+      clientId?: string;
+    }
   | { type: 'presence'; docId: string; state: Omit<PresencePeer, 'userId' | 'updatedAt'> }
   | { type: 'ping'; ts?: number }
   | { type: 'leave'; docId: string }
@@ -58,7 +73,16 @@ export type ServerWire =
   | { type: 'hello_ok'; protocolVersion: number; caps?: string[] }
   | { type: 'auth_ok'; userId: string; role: string }
   | { type: 'auth_fail'; reason: string }
-  | { type: 'init'; docId: string; version: number; snapshot: unknown; peers?: PresencePeer[] }
+  | {
+      type: 'init';
+      docId: string;
+      version: number;
+      snapshot: unknown;
+      peers?: PresencePeer[];
+      ops?: unknown[];
+      /** Last batch the server applied for our clientId: op-log range `(from, to]`. */
+      acked?: { seq: number; from: number; to: number };
+    }
   | {
       type: 'ack';
       docId: string;

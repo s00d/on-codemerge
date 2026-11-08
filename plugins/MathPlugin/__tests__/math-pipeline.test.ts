@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { tokenize } from '../utils/tokenize';
 import { parseMath } from '../utils/parse';
 import { astToMathML } from '../utils/mathml';
+import { MathRenderer } from '../services/MathRenderer';
 
 describe('math tokenize', () => {
   it('splits commands and scripts', () => {
@@ -74,5 +75,32 @@ describe('math mathml', () => {
       const m = astToMathML(pow.ast);
       expect(m.querySelector('msup')).toBeTruthy();
     }
+  });
+});
+
+describe('math parse edge cases', () => {
+  it('plain brackets outside \\sqrt index parse as fences', () => {
+    const r = parseMath(String.raw`x \in [0, 1]`);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(astToMathML(r.ast).textContent).toContain('[0,1]');
+    }
+    const root = parseMath(String.raw`\sqrt[3]{x}`);
+    expect(root.ok && root.ast.type === 'sqrt' && root.ast.index).toBeTruthy();
+  });
+
+  it('escaped braces render as glyphs, stray } is an error', () => {
+    const r = parseMath(String.raw`\{x\}`);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(astToMathML(r.ast).textContent).toBe('{x}');
+    }
+    expect(parseMath('a}b').ok).toBe(false);
+  });
+
+  it('error fallback shows the raw expression (no double escaping)', () => {
+    const el = new MathRenderer().renderMath('a<b}');
+    expect(el.classList.contains('ocm-math-error')).toBe(true);
+    expect(el.textContent).toBe('a<b}');
   });
 });

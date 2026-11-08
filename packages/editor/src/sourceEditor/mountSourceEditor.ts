@@ -1,6 +1,6 @@
 import { createFrameScheduler, h, mount } from '@codemerge/sdk';
 import type { MountHandle } from '@codemerge/sdk';
-import { highlightHtml } from '../highlight';
+import { highlightHtml } from '../highlight/render';
 
 export type SourceEditorHandle = {
   getText(): string;
