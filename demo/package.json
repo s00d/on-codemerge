@@ -17,7 +17,7 @@
   "dependencies": {
     "@codemerge/integrate": "2.9.1",
     "jquery": "^3.7.1",
-    "on-codemerge": "2.9.1",
+    "on-codemerge": "2.9.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vue": "^3.5.0"

@@ -10,13 +10,13 @@ importers:
     dependencies:
       '@codemerge/integrate':
         specifier: 2.9.1
-        version: 2.9.1(jquery@3.7.1)(on-codemerge@2.9.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vue@3.5.43(typescript@5.9.3))
+        version: 2.9.1(jquery@3.7.1)(on-codemerge@2.9.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vue@3.5.43(typescript@5.9.3))
       jquery:
         specifier: ^3.7.1
         version: 3.7.1
       on-codemerge:
-        specifier: 2.9.1
-        version: 2.9.1
+        specifier: 2.9.2
+        version: 2.9.2
       react:
         specifier: ^19.0.0
         version: 19.3.0
@@ -491,8 +491,8 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
-  on-codemerge@2.9.1:
-    resolution: {integrity: sha512-O3JHghnNUlwkLQcSqbokwcsYbi4ps78eOzfdNucJ7/1+YaoueVKXL6ULZecVewW5G0Ci69JR8548a2rDkemhvg==}
+  on-codemerge@2.9.2:
+    resolution: {integrity: sha512-rbP4ld2YcfkIC6XvSJwKn5RPhGYUzbYqoR2Yz4IVveMorUe8dRd1UeZNw/MxAz3AZU0NEo3ohPWkm5rj9aLpYA==}
     engines: {node: '>=20'}
 
   picocolors@1.1.1:
@@ -624,9 +624,9 @@ snapshots:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
 
-  '@codemerge/integrate@2.9.1(jquery@3.7.1)(on-codemerge@2.9.1)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vue@3.5.43(typescript@5.9.3))':
+  '@codemerge/integrate@2.9.1(jquery@3.7.1)(on-codemerge@2.9.2)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vue@3.5.43(typescript@5.9.3))':
     dependencies:
-      on-codemerge: 2.9.1
+      on-codemerge: 2.9.2
     optionalDependencies:
       jquery: 3.7.1
       react: 19.3.0
@@ -928,7 +928,7 @@ snapshots:
 
   nanoid@3.3.19: {}
 
-  on-codemerge@2.9.1:
+  on-codemerge@2.9.2:
     dependencies:
       '@codemerge/mermaid': 2.9.0
       '@i18n-micro/runtime': 2.1.0
