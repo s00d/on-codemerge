@@ -69,7 +69,7 @@ export class FieldInspector {
     const typeSelect = h('div', { class: 'setting-group mb-3' }, [
       h(
         'label',
-        { class: 'block text-sm text-gray-700 mb-1' },
+        { class: 'block text-sm text-ocm-text mb-1' },
         this.t('formBuilder.fieldType') || 'Type'
       ),
       h(
@@ -103,7 +103,7 @@ export class FieldInspector {
     const labelField = h('div', { class: 'setting-group mb-3' }, [
       h(
         'label',
-        { class: 'block text-sm text-gray-700 mb-1' },
+        { class: 'block text-sm text-ocm-text mb-1' },
         this.t('formBuilder.label') || 'Label'
       ),
       h('input', {
@@ -124,7 +124,7 @@ export class FieldInspector {
     const nameField = h('div', { class: 'setting-group mb-3' }, [
       h(
         'label',
-        { class: 'block text-sm text-gray-700 mb-1' },
+        { class: 'block text-sm text-ocm-text mb-1' },
         this.t('formBuilder.name') || 'Name'
       ),
       h('input', {
@@ -162,7 +162,7 @@ export class FieldInspector {
     const pattern = h('div', { class: 'setting-group mb-3' }, [
       h(
         'label',
-        { class: 'block text-sm text-gray-700 mb-1' },
+        { class: 'block text-sm text-ocm-text mb-1' },
         this.t('formBuilder.pattern') || 'Pattern'
       ),
       h('input', {
@@ -182,7 +182,7 @@ export class FieldInspector {
 
     const lengths = h('div', { class: 'setting-group mb-3 grid grid-cols-2 gap-2' }, [
       h('div', null, [
-        h('label', { class: 'block text-sm text-gray-700 mb-1' }, 'Min length'),
+        h('label', { class: 'block text-sm text-ocm-text mb-1' }, 'Min length'),
         h('input', {
           class: 'form-input w-full p-2 border border-gray-300 rounded-md',
           attrs: { type: 'number', min: '0' },
@@ -199,7 +199,7 @@ export class FieldInspector {
         }),
       ]),
       h('div', null, [
-        h('label', { class: 'block text-sm text-gray-700 mb-1' }, 'Max length'),
+        h('label', { class: 'block text-sm text-ocm-text mb-1' }, 'Max length'),
         h('input', {
           class: 'form-input w-full p-2 border border-gray-300 rounded-md',
           attrs: { type: 'number', min: '0' },

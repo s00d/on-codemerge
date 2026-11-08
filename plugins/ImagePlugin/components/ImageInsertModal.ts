@@ -230,20 +230,20 @@ export class ImageInsertModal {
                 e.preventDefault();
                 const el = e.currentTarget;
                 if (el instanceof HTMLElement) {
-                  el.classList.add('border-sky-500', 'bg-sky-50');
+                  el.classList.add('border-sky-500', 'bg-ocm-accent-soft');
                 }
               },
               dragleave: (e) => {
                 const el = e.currentTarget;
                 if (el instanceof HTMLElement) {
-                  el.classList.remove('border-sky-500', 'bg-sky-50');
+                  el.classList.remove('border-sky-500', 'bg-ocm-accent-soft');
                 }
               },
               drop: (e) => {
                 e.preventDefault();
                 const el = e.currentTarget;
                 if (el instanceof HTMLElement) {
-                  el.classList.remove('border-sky-500', 'bg-sky-50');
+                  el.classList.remove('border-sky-500', 'bg-ocm-accent-soft');
                 }
                 const file = e.dataTransfer?.files?.[0];
                 if (file) {
@@ -472,7 +472,7 @@ export class ImageInsertModal {
                 {
                   class: `rounded-md border px-2 py-1 text-[11px] ${
                     aspect === p
-                      ? 'border-sky-500 bg-sky-50 text-sky-700'
+                      ? 'border-sky-500 bg-ocm-accent-soft text-ocm-accent'
                       : 'border-ocm-border text-ocm-text-muted hover:bg-ocm-surface-muted'
                   }`,
                   attrs: { type: 'button' },

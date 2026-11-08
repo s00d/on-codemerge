@@ -44,7 +44,7 @@ export const imageDriver: FieldDriver = {
     const opts = ctx.field.options ?? {};
     return h('div', null, [
       h('div', { class: 'setting-group mb-3' }, [
-        h('label', { class: 'block text-sm text-gray-700 mb-1' }, 'Src'),
+        h('label', { class: 'block text-sm text-ocm-text mb-1' }, 'Src'),
         h('input', {
           class: 'form-input w-full p-2 border border-gray-300 rounded-md',
           attrs: { type: 'url' },
@@ -60,7 +60,7 @@ export const imageDriver: FieldDriver = {
         }),
       ]),
       h('div', { class: 'setting-group mb-3' }, [
-        h('label', { class: 'block text-sm text-gray-700 mb-1' }, 'Alt'),
+        h('label', { class: 'block text-sm text-ocm-text mb-1' }, 'Alt'),
         h('input', {
           class: 'form-input w-full p-2 border border-gray-300 rounded-md',
           attrs: { type: 'text' },

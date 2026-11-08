@@ -1,9 +1,10 @@
 import { canvas, renderDetached, cssColorToHex } from '@codemerge/sdk';
-import { render as renderMermaid } from '@codemerge/mermaid';
+import { DARK, render as renderMermaid } from '@codemerge/mermaid';
 
 import type { ChartPoint, ChartSeries, ChartType } from '../types';
 import type { ChartOptions } from '../types/ChartOptions';
 import { CHART_COLORS } from '../utils/colors';
+import { isDarkChart } from '../canvas/kit';
 import { normalizeChartData } from '../utils/validation';
 import { getDriver } from './registry';
 import { isMermaidChartType, toMermaidSource } from './toMermaidSource';
@@ -19,6 +20,9 @@ function themeFromOptions(options: ChartOptions): {
   border?: string;
   line?: string;
 } {
+  if (isDarkChart(options)) {
+    return { ...DARK, accent: options.colors?.[0] ?? '#d4d4d8' };
+  }
   return {
     bg: '#ffffff',
     fg: '#18181b',

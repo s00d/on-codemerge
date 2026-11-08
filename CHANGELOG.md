@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.2] - 2026-11-08
+
+`on-codemerge` 2.9.2 and `@codemerge/sdk` 2.9.1; the other packages are unchanged.
+
+### Fixed
+
+- Dark theme gaps: Markdown preview text (`prose-invert`), info / warn / error callouts, chart images and mermaid diagrams (baked light palette), track-changes and mention marks, `<mark>`, danger buttons in Charts / Calendar, plus FormBuilder, Language, Responsive, Templates, File upload, Image and Collaboration panels that used fixed gray / blue classes instead of `ocm-*` tokens
+- Tailwind `dark:` variants follow the host `html.dark` (`@custom-variant`), not the OS setting
+- Chart previews, chart widgets and mermaid diagrams repaint when the host flips `html.dark`; published HTML keeps the light chart
+
+### Added
+
+- `@codemerge/sdk`: `isDarkHost()` and `onColorSchemeChange(cb)`
+- `demo/`: dark theme and `pnpm screenshots` (light + dark README images from the real stand)
+
+### Changed
+
+- README rewritten: all eight editors, light/dark screenshots, packages, develop flow
+
 ## [2.9.1] - 2026-11-08
 
 `on-codemerge` and `@codemerge/integrate` 2.9.1; the other packages stay 2.9.0 / 3.0.0.

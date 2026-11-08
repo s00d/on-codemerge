@@ -24,7 +24,7 @@ export class TemplatesMenu {
     if (templates.length === 0) {
       return h(
         'div',
-        { class: 'text-center text-gray-500 py-4' },
+        { class: 'text-center text-ocm-text-muted py-4' },
         this.editor.t('templates.noTemplatesYetClickNewTemplateToCreateOne') ||
           'No templates yet. Click "New Template" to create one.'
       );
@@ -50,13 +50,13 @@ export class TemplatesMenu {
               h('div', { class: 'font-medium' }, template.name),
               h(
                 'div',
-                { class: 'text-xs text-gray-500' },
+                { class: 'text-xs text-ocm-text-muted' },
                 `${this.editor.t('common.updated')} ${formatDate(template.updatedAt)}`
               ),
             ]),
             h('div', { class: 'flex items-center gap-2' }, [
               h('button', {
-                class: 'edit-button p-1 text-gray-500 hover:text-gray-700 rounded',
+                class: 'edit-button p-1 text-ocm-text-muted hover:text-ocm-text rounded',
                 attrs: { type: 'button', title: this.editor.t('common.edit') },
                 props: { innerHTML: editIcon },
                 on: {
@@ -67,7 +67,7 @@ export class TemplatesMenu {
                 },
               }),
               h('button', {
-                class: 'delete-button p-1 text-gray-500 hover:text-red-600 rounded',
+                class: 'delete-button p-1 text-ocm-text-muted hover:text-ocm-danger rounded',
                 attrs: { type: 'button', title: this.editor.t('common.delete') },
                 props: { innerHTML: deleteIcon },
                 on: {

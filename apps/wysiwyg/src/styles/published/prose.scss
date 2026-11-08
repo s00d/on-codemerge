@@ -14,4 +14,9 @@
 
 html.dark .ocm-content {
   @apply prose-invert;
+
+  /* UA <mark> is yellow-on-black in every theme; soften it on dark surfaces. */
+  mark {
+    @apply bg-yellow-400/30 text-inherit;
+  }
 }

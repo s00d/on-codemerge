@@ -1,3 +1,4 @@
+import { isDarkHost } from '@codemerge/sdk';
 import { CHART_COLORS, colorWithOpacity } from '../utils/colors';
 import type { ChartOptions } from '../types/ChartOptions';
 import type { ChartI18n } from '../drivers/types';
@@ -24,12 +25,25 @@ export function themeColors(options: ChartOptions): string[] {
   return CHART_COLORS;
 }
 
-export function textColor(_options: ChartOptions): string {
-  return '#222';
+// Colors are baked into the PNG, so they follow the host scheme at paint time.
+export function isDarkChart(options: ChartOptions): boolean {
+  return options.dark ?? isDarkHost();
 }
 
-export function bgColor(_options: ChartOptions): string {
-  return '#fff';
+export function textColor(options: ChartOptions): string {
+  return isDarkChart(options) ? '#fafafa' : '#222';
+}
+
+export function bgColor(options: ChartOptions): string {
+  return isDarkChart(options) ? '#18181b' : '#fff';
+}
+
+export function mutedColor(options: ChartOptions): string {
+  return isDarkChart(options) ? '#a1a1aa' : '#6b7280';
+}
+
+export function gridColor(options: ChartOptions): string {
+  return isDarkChart(options) ? '#3f3f46' : '#e5e7eb';
 }
 
 export function drawBackground(ctx: CanvasRenderingContext2D, options: ChartOptions): void {
@@ -58,7 +72,7 @@ export function drawNoData(
   i18n: ChartI18n
 ): void {
   ctx.save();
-  ctx.fillStyle = '#6b7280';
+  ctx.fillStyle = mutedColor(options);
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.font = '14px Inter, system-ui, sans-serif';

@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "typecheck": "tsc -p .",
+    "screenshots": "playwright test -c playwright.screens.config.ts && sh screens/to-webp.sh",
     "preview": "vite preview --host 127.0.0.1 --port 4177",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",

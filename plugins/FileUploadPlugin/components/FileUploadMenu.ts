@@ -145,9 +145,9 @@ export class FileUploadMenu {
             ),
             busy
               ? h('div', { class: 'mt-3' }, [
-                  h('div', { class: 'h-2 overflow-hidden rounded-full bg-zinc-200' }, [
+                  h('div', { class: 'h-2 overflow-hidden rounded-full bg-ocm-surface-hover' }, [
                     h('div', {
-                      class: 'h-full bg-sky-500 transition-all',
+                      class: 'h-full bg-ocm-accent-soft0 transition-all',
                       style: { width: `${progress}%` },
                     }),
                   ]),

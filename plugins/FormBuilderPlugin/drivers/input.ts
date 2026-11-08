@@ -108,7 +108,7 @@ export function inputDriver(type: NativeInputType): FieldDriver {
         h('div', { class: 'setting-group mb-3' }, [
           h(
             'label',
-            { class: 'block text-sm text-gray-700 mb-1' },
+            { class: 'block text-sm text-ocm-text mb-1' },
             ctx.i18n.t('formBuilder.defaultValue') || 'Default value'
           ),
           h('input', {
@@ -128,7 +128,7 @@ export function inputDriver(type: NativeInputType): FieldDriver {
         h('div', { class: 'setting-group mb-3' }, [
           h(
             'label',
-            { class: 'block text-sm text-gray-700 mb-1' },
+            { class: 'block text-sm text-ocm-text mb-1' },
             ctx.i18n.t('formBuilder.placeholder') || 'Placeholder'
           ),
           h('input', {
@@ -150,7 +150,7 @@ export function inputDriver(type: NativeInputType): FieldDriver {
         rows.push(
           h('div', { class: 'setting-group mb-3 grid grid-cols-2 gap-2' }, [
             h('div', null, [
-              h('label', { class: 'block text-sm text-gray-700 mb-1' }, 'Min'),
+              h('label', { class: 'block text-sm text-ocm-text mb-1' }, 'Min'),
               h('input', {
                 class: 'form-input w-full p-2 border border-gray-300 rounded-md',
                 attrs: { type: type === 'number' || type === 'range' ? 'number' : type },
@@ -166,7 +166,7 @@ export function inputDriver(type: NativeInputType): FieldDriver {
               }),
             ]),
             h('div', null, [
-              h('label', { class: 'block text-sm text-gray-700 mb-1' }, 'Max'),
+              h('label', { class: 'block text-sm text-ocm-text mb-1' }, 'Max'),
               h('input', {
                 class: 'form-input w-full p-2 border border-gray-300 rounded-md',
                 attrs: { type: type === 'number' || type === 'range' ? 'number' : type },

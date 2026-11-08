@@ -18,6 +18,8 @@ export interface ChartGridOptions {
 }
 
 export interface ChartOptions {
+  /** Paint for a dark surface. Unset: follow the host `html.dark` at paint time. */
+  dark?: boolean;
   title?: string;
   width: number;
   height: number;

@@ -32,7 +32,7 @@ export function choiceListEditor(ctx: FieldInspectorCtx): ViewSpec {
   return h('div', { class: 'setting-group mb-3' }, [
     h(
       'label',
-      { class: 'block text-sm text-gray-700 mb-1' },
+      { class: 'block text-sm text-ocm-text mb-1' },
       ctx.i18n.t('formBuilder.options') || 'Options (one per line)'
     ),
     h('textarea', {
@@ -102,7 +102,7 @@ export const selectDriver: FieldDriver = {
       h('div', { class: 'setting-group mb-3' }, [
         h(
           'label',
-          { class: 'block text-sm text-gray-700 mb-1' },
+          { class: 'block text-sm text-ocm-text mb-1' },
           ctx.i18n.t('formBuilder.defaultValue') || 'Default value'
         ),
         h(
@@ -187,7 +187,7 @@ export const radioDriver: FieldDriver = {
       h('div', { class: 'setting-group mb-3' }, [
         h(
           'label',
-          { class: 'block text-sm text-gray-700 mb-1' },
+          { class: 'block text-sm text-ocm-text mb-1' },
           ctx.i18n.t('formBuilder.defaultValue') || 'Default value'
         ),
         h(

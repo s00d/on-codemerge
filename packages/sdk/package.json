@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/sdk",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "Plugin API and UI primitives for CodeMerge editors",
   "license": "MIT",
   "author": "Pavel Kuzmin",

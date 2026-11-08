@@ -48,8 +48,8 @@ export class LanguageMenu {
           {
             class: `language-option w-full text-left px-3 py-2 rounded-lg transition-colors ${
               active
-                ? 'bg-blue-100 text-blue-700 border border-blue-300'
-                : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border border-transparent'
+                ? 'bg-ocm-accent-soft text-ocm-accent border border-ocm-accent'
+                : 'bg-ocm-surface-muted text-ocm-text hover:bg-ocm-surface-hover border border-transparent'
             }`,
             attrs: { type: 'button' },
             on: {
@@ -61,7 +61,7 @@ export class LanguageMenu {
           },
           h('div', { class: 'flex items-center justify-between' }, [
             h('span', { class: 'font-medium' }, LANGUAGE_NAMES[code] || code),
-            h('span', { class: 'text-sm text-gray-500' }, code.toUpperCase()),
+            h('span', { class: 'text-sm text-ocm-text-muted' }, code.toUpperCase()),
           ])
         );
       })

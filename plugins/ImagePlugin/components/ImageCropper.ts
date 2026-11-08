@@ -143,7 +143,7 @@ export function imageCropperView(opts: CropperOpts): ViewSpec {
 
     const handle = (pos: NonNullable<typeof drag>['mode'], cls: string, size = 'h-3 w-3') =>
       h('div', {
-        class: `absolute z-20 ${size} rounded-sm border-2 border-white bg-sky-500 shadow ${cls}`,
+        class: `absolute z-20 ${size} rounded-sm border-2 border-white bg-ocm-accent-soft0 shadow ${cls}`,
         style: { touchAction: 'none' },
         on: {
           pointerdown: startDrag(pos),

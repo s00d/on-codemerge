@@ -1,4 +1,7 @@
 /* Shared OCM design tokens — imported by src/tailwind.css and referenced from sdk.scss */
+
+/* `dark:` follows the host's `html.dark` (same switch as the tokens below), not the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
 @theme {
   --radius-ocm: 0.75rem;
   --radius-ocm-sm: 0.5rem;

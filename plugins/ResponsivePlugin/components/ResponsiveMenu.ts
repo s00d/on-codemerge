@@ -89,7 +89,7 @@ export class ResponsiveMenu {
     return h('div', { class: 'p-6 space-y-6' }, [
       h('div', { class: 'flex items-center justify-between' }, [
         h('span', { class: 'text-lg font-semibold' }, this.editor.t('responsive.selectViewport')),
-        h('span', { class: 'text-sm text-gray-500' }, `${current?.label} (${current?.size})`),
+        h('span', { class: 'text-sm text-ocm-text-muted' }, `${current?.label} (${current?.size})`),
       ]),
       h(
         'div',
@@ -101,8 +101,8 @@ export class ResponsiveMenu {
             {
               class: `viewport-btn w-full p-4 border-2 rounded-lg transition-all duration-200 ${
                 isActive
-                  ? 'border-blue-500 bg-blue-50 shadow-md'
-                  : 'border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                  ? 'border-ocm-accent bg-ocm-accent-soft shadow-md'
+                  : 'border-ocm-border hover:border-ocm-accent hover:shadow-sm'
               }`,
               attrs: { type: 'button', 'data-viewport': viewport.name },
               on: {
@@ -115,19 +115,23 @@ export class ResponsiveMenu {
             h('div', { class: 'flex flex-col items-center gap-3' }, [
               h('span', { class: 'text-2xl', props: { innerHTML: viewport.icon } }),
               h('div', { class: 'text-center' }, [
-                h('span', { class: 'block text-sm font-medium text-gray-900' }, viewport.label),
-                h('span', { class: 'block text-xs text-gray-500 mt-1' }, viewport.size),
+                h('span', { class: 'block text-sm font-medium text-ocm-text' }, viewport.label),
+                h('span', { class: 'block text-xs text-ocm-text-muted mt-1' }, viewport.size),
                 h('span', { class: 'block text-xs text-gray-400 mt-1' }, viewport.description),
-                h('span', { class: 'block text-xs text-blue-500 mt-1 font-mono' }, viewport.hotkey),
+                h(
+                  'span',
+                  { class: 'block text-xs text-ocm-accent mt-1 font-mono' },
+                  viewport.hotkey
+                ),
               ]),
             ])
           );
         })
       ),
-      h('div', { class: 'mt-6 p-4 bg-gray-50 rounded-lg border' }, [
+      h('div', { class: 'mt-6 p-4 bg-ocm-surface-muted rounded-lg border border-ocm-border' }, [
         h(
           'span',
-          { class: 'block text-sm font-medium text-gray-900 mb-2' },
+          { class: 'block text-sm font-medium text-ocm-text mb-2' },
           this.editor.t('common.tips')
         ),
         h('div', { class: 'space-y-1' }, [

@@ -30,17 +30,21 @@ export function renderChartPublish(
     const el = renderChart(
       type,
       data,
-      optionsFromAttrs({
-        title,
-        width,
-        height,
-        showLegend: attrs.showLegend !== false,
-        showGrid: attrs.showGrid !== false,
-        mode: parseChartMode(attrString(attrs.mode, 'default')),
-        orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
-        xAxisLabel: attrString(attrs.xAxisLabel),
-        yAxisLabel: attrString(attrs.yAxisLabel),
-      }),
+      {
+        // Published HTML is read on a page of unknown theme: always the light chart.
+        dark: false,
+        ...optionsFromAttrs({
+          title,
+          width,
+          height,
+          showLegend: attrs.showLegend !== false,
+          showGrid: attrs.showGrid !== false,
+          mode: parseChartMode(attrString(attrs.mode, 'default')),
+          orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
+          xAxisLabel: attrString(attrs.xAxisLabel),
+          yAxisLabel: attrString(attrs.yAxisLabel),
+        }),
+      },
       editor
     );
     src = el.src;

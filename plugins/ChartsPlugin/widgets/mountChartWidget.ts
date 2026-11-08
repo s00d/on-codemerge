@@ -1,4 +1,11 @@
-import { attrString, Resizer, atomAlignStyle, attrToHtmlValue, pathFromEl } from '@codemerge/sdk';
+import {
+  attrString,
+  Resizer,
+  atomAlignStyle,
+  attrToHtmlValue,
+  onColorSchemeChange,
+  pathFromEl,
+} from '@codemerge/sdk';
 import type { EditorAPI, DisposableScope } from '@codemerge/sdk';
 
 import { ChartMenu } from '../components/ChartMenu';
@@ -54,23 +61,33 @@ export function mountChartWidget(
   el.dataset.xAxisLabel = attrString(attrs.xAxisLabel);
   el.dataset.yAxisLabel = attrString(attrs.yAxisLabel);
 
-  const img = renderChart(
-    type,
-    data,
-    optionsFromAttrs({
-      title: attrString(attrs.title),
-      width,
-      height,
-      showLegend: attrs.showLegend !== false,
-      showGrid: attrs.showGrid !== false,
-      mode: parseChartMode(attrString(attrs.mode, 'default')),
-      orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
-      xAxisLabel: attrString(attrs.xAxisLabel),
-      yAxisLabel: attrString(attrs.yAxisLabel),
-    }),
-    api
-  );
+  const paint = (): HTMLImageElement =>
+    renderChart(
+      type,
+      data,
+      optionsFromAttrs({
+        title: attrString(attrs.title),
+        width,
+        height,
+        showLegend: attrs.showLegend !== false,
+        showGrid: attrs.showGrid !== false,
+        mode: parseChartMode(attrString(attrs.mode, 'default')),
+        orientation: parseChartOrientation(attrString(attrs.orientation, 'vertical')),
+        xAxisLabel: attrString(attrs.xAxisLabel),
+        yAxisLabel: attrString(attrs.yAxisLabel),
+      }),
+      api
+    );
+  let img = paint();
   el.append(img);
+  // The image bakes the palette: repaint when the host flips `html.dark`.
+  scope.disposable(
+    onColorSchemeChange(() => {
+      const next = paint();
+      img.replaceWith(next);
+      img = next;
+    })
+  );
 
   const resizer = scope.slot<Resizer>();
   const menu = new ChartMenu(api, scope);

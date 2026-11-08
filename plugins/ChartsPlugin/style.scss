@@ -286,7 +286,7 @@
 }
 
 .chart-series-icon-btn--danger:hover:not(:disabled) {
-  @apply bg-red-50 text-red-600;
+  @apply bg-ocm-danger-soft text-ocm-danger;
 }
 
 .chart-series-add-point,

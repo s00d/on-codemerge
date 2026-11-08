@@ -15,4 +15,8 @@
 .mention {
   /* legacy alias — export uses .ocm-mention (published/atoms.scss) */
   @apply rounded-ocm-sm bg-indigo-50 px-1 text-indigo-800;
+
+  html.dark & {
+    @apply bg-indigo-500/20 text-indigo-200;
+  }
 }

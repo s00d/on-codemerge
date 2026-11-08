@@ -3,6 +3,7 @@ import {
   foreign,
   h,
   mount,
+  onColorSchemeChange,
   replaceChildrenWithSafeHtml,
 } from '@codemerge/sdk';
 import type { EditorAPI, MountHandle } from '@codemerge/sdk';
@@ -19,6 +20,7 @@ import type { SourceEditorHandle } from '@codemerge/editor';
 import {
   hydrateMermaidBlocks,
   MERMAID_PENDING_SEL,
+  repaintMermaidBlocks,
   restoreMermaidHosts,
   salvageMermaidHosts,
 } from '../widgets/mermaidHydrate';
@@ -752,6 +754,11 @@ export function mountMdWorkspace(
   }
   schedulePreviewPaint(editor.getState(), true);
   paintStatus();
+  const offScheme = onColorSchemeChange(() => {
+    if (previewSlot instanceof HTMLElement) {
+      repaintMermaidBlocks(previewSlot);
+    }
+  });
 
   return {
     update(state: EditorState): void {
@@ -800,6 +807,7 @@ export function mountMdWorkspace(
       commitLiveSoT(mdHandle?.getText() ?? '');
     },
     destroy(): void {
+      offScheme();
       hydrateAbort?.abort();
       hydrateAbort = null;
       remoteCtl.fetchAbort?.abort();

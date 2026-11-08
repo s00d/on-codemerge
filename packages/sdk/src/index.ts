@@ -168,6 +168,7 @@ export {
 export { createFrameScheduler, type FrameScheduler } from './platform/scheduleFrame';
 export { bindWindowDrag, type WindowDragHandlers } from './platform/bindWindowDrag';
 export { isEditingInside } from './platform/isEditingInside';
+export { isDarkHost, onColorSchemeChange } from './platform/colorScheme';
 export { createEmbedSessionStore, type EmbedSessionStore } from './platform/embedSessions';
 export {
   createEmbedWorkspaceHost,

@@ -13,7 +13,7 @@
 
 /* Comment marker */
 .comment-marker {
-  @apply inline-flex items-center justify-center w-4 h-4 text-blue-500 cursor-pointer hover:text-blue-600 transition-colors;
+  @apply inline-flex items-center justify-center w-4 h-4 text-ocm-accent cursor-pointer hover:opacity-80 transition-colors;
   vertical-align: super;
   font-size: 0.75em;
 

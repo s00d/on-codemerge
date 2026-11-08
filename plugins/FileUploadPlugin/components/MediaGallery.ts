@@ -426,7 +426,7 @@ function listView(items: MediaListItem[], opts: GalleryPaintOpts): ViewSpec {
                 'button',
                 {
                   class:
-                    'inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-ocm-border text-ocm-text-muted hover:border-red-300 hover:bg-red-50 hover:text-red-600 disabled:opacity-50',
+                    'inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-ocm-border text-ocm-text-muted hover:border-red-300 hover:bg-red-50 hover:text-ocm-danger disabled:opacity-50',
                   attrs: {
                     type: 'button',
                     title: opts.labels.delete,
@@ -469,7 +469,7 @@ function statusCard(
       h('div', {
         class: `flex h-12 w-12 items-center justify-center rounded-2xl ${
           kind === 'error'
-            ? 'bg-red-100 text-red-600'
+            ? 'bg-ocm-danger-soft text-ocm-danger'
             : 'bg-ocm-surface text-ocm-text-muted shadow-sm'
         } [&>svg]:h-6 [&>svg]:w-6 ${kind === 'loading' ? 'animate-pulse' : ''}`,
         props: { innerHTML: icon },

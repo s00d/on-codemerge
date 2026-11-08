@@ -156,7 +156,7 @@ function headerSpec(store: TableStore): ViewSpec {
                 'button',
                 {
                   class:
-                    'min-w-0 flex-1 truncate text-left font-mono text-[12px] font-semibold text-ocm-text hover:text-sky-700',
+                    'min-w-0 flex-1 truncate text-left font-mono text-[12px] font-semibold text-ocm-text hover:text-ocm-accent',
                   attrs: { type: 'button', title: ghost ? 'Column' : 'Rename column' },
                   on: {
                     click: (ev) => {
@@ -181,7 +181,7 @@ function headerSpec(store: TableStore): ViewSpec {
                 h(
                   'button',
                   {
-                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-ocm-accent',
                     attrs: {
                       type: 'button',
                       title: 'Sort',
@@ -201,7 +201,7 @@ function headerSpec(store: TableStore): ViewSpec {
                 h(
                   'button',
                   {
-                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-ocm-accent',
                     attrs: { type: 'button', title: 'Move left' },
                     on: {
                       click: (ev) => {
@@ -222,7 +222,7 @@ function headerSpec(store: TableStore): ViewSpec {
                 h(
                   'button',
                   {
-                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-ocm-accent',
                     attrs: { type: 'button', title: 'Move right' },
                     on: {
                       click: (ev) => {
@@ -243,7 +243,7 @@ function headerSpec(store: TableStore): ViewSpec {
                 h(
                   'button',
                   {
-                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-sky-700',
+                    class: 'px-0.5 font-mono text-[10px] text-ocm-text-muted hover:text-ocm-accent',
                     attrs: { type: 'button', title: 'Toggle pin left' },
                     on: {
                       click: (ev) => {
@@ -286,7 +286,7 @@ function headerSpec(store: TableStore): ViewSpec {
       'button',
       {
         class:
-          'flex w-8 shrink-0 items-center justify-center border-r border-ocm-border font-mono text-[16px] leading-none text-ocm-text-muted hover:bg-ocm-surface-hover hover:text-sky-700',
+          'flex w-8 shrink-0 items-center justify-center border-r border-ocm-border font-mono text-[16px] leading-none text-ocm-text-muted hover:bg-ocm-surface-hover hover:text-ocm-accent',
         attrs: { type: 'button', title: 'Add column' },
         on: {
           click: (ev) => {

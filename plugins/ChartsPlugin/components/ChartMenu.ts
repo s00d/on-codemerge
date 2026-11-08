@@ -4,6 +4,7 @@ import {
   foreign,
   h,
   mount,
+  onColorSchemeChange,
   studioPaneTabs,
   syncStudioPanel,
 } from '@codemerge/sdk';
@@ -75,6 +76,7 @@ export class ChartMenu {
       this.schedulePreview(series);
     });
     scope.disposable(() => this.clearTimers());
+    scope.disposable(onColorSchemeChange(() => this.bumpPreview()));
   }
 
   private clearTimers(): void {
@@ -242,7 +244,7 @@ export class ChartMenu {
     return h('div', { class: 'chart-type-selector' }, [
       h(
         'div',
-        { class: 'text-sm font-medium text-gray-700 mb-4 block' },
+        { class: 'text-sm font-medium text-ocm-text mb-4 block' },
         this.editor.t('charts.chartType')
       ),
       h(

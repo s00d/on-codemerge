@@ -231,7 +231,7 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
                   h(
                     'a',
                     {
-                      class: 'text-sm text-sky-700 underline break-all',
+                      class: 'text-sm text-ocm-accent underline break-all',
                       attrs: {
                         href: buildShareUrl(docId),
                         target: '_blank',
@@ -242,12 +242,12 @@ export function CollaborationPlugin(options: CollaborationPluginOptions = {}) {
                   ),
                   h(
                     'p',
-                    { class: 'text-xs text-gray-500 break-all' },
+                    { class: 'text-xs text-ocm-text-muted break-all' },
                     docId ? buildShareUrl(docId) : '—'
                   ),
                   h(
                     'p',
-                    { class: 'text-sm text-gray-500' },
+                    { class: 'text-sm text-ocm-text-muted' },
                     editor.t('collaboration.localDemoOnlyPassToken')
                   ),
                 ]),

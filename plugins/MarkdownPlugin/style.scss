@@ -73,6 +73,10 @@
 .ocm-md-preview {
   @apply prose prose-sm max-w-none;
 
+  html.dark & {
+    @apply prose-invert;
+  }
+
   pre {
     @apply overflow-x-auto rounded-ocm-sm border border-ocm-border bg-ocm-surface-muted p-2 text-[12px];
   }
@@ -124,6 +128,14 @@
   .ocm-md-callout__title {
     @apply text-sky-800;
   }
+
+  html.dark & {
+    @apply border-sky-500/40 bg-sky-500/10 text-sky-100;
+
+    .ocm-md-callout__title {
+      @apply text-sky-300;
+    }
+  }
 }
 
 .ocm-md-callout--warn {
@@ -132,6 +144,14 @@
   .ocm-md-callout__title {
     @apply text-amber-800;
   }
+
+  html.dark & {
+    @apply border-amber-500/40 bg-amber-500/10 text-amber-100;
+
+    .ocm-md-callout__title {
+      @apply text-amber-300;
+    }
+  }
 }
 
 .ocm-md-callout--error {
@@ -139,6 +159,14 @@
 
   .ocm-md-callout__title {
     @apply text-red-800;
+  }
+
+  html.dark & {
+    @apply border-red-500/40 bg-red-500/10 text-red-100;
+
+    .ocm-md-callout__title {
+      @apply text-red-300;
+    }
   }
 }
 

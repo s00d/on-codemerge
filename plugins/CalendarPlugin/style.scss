@@ -134,7 +134,7 @@
 }
 
 .cal-ws-add--danger {
-  @apply border-red-300 text-red-600;
+  @apply border-ocm-danger text-ocm-danger;
 }
 
 .cal-ws-event-list {
@@ -363,7 +363,7 @@
 }
 
 .cal-insp__danger {
-  @apply mt-2 rounded border border-red-300 px-2 py-1.5 text-sm text-red-600 hover:bg-red-50;
+  @apply mt-2 rounded border border-ocm-danger px-2 py-1.5 text-sm text-ocm-danger hover:bg-ocm-danger-soft;
 }
 
 .ocm-calendar-publish {

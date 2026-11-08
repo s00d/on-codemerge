@@ -1,5 +1,5 @@
-import { render as renderMermaidSvg } from '@codemerge/mermaid';
-import { mountTrustedSvg } from '@codemerge/sdk';
+import { DARK, render as renderMermaidSvg } from '@codemerge/mermaid';
+import { isDarkHost, mountTrustedSvg } from '@codemerge/sdk';
 
 export const MERMAID_HOST_SEL = 'div[data-node="mermaid"], .ocm-md-mermaid';
 export const MERMAID_PENDING_SEL =
@@ -69,8 +69,15 @@ export function hydrateMermaidBlocks(root: HTMLElement, opts: { signal?: AbortSi
     }
     const source = readSource(host);
     const prev = host.getAttribute('data-ocm-mermaid-hash');
-    // After SVG replaceChildren, code DOM is gone — keep SVG when hash matches or source unreadable.
-    if (prev !== null && host.querySelector('svg') && (source === '' || prev === source)) {
+    const scheme = isDarkHost() ? 'dark' : 'light';
+    // After SVG replaceChildren, code DOM is gone — keep SVG when hash and scheme match
+    // (or the source is unreadable).
+    if (
+      prev !== null &&
+      host.querySelector('svg') &&
+      host.getAttribute('data-ocm-mermaid-scheme') === scheme &&
+      (source === '' || prev === source)
+    ) {
       host.setAttribute('data-ocm-mermaid-ready', '1');
       continue;
     }
@@ -79,8 +86,10 @@ export function hydrateMermaidBlocks(root: HTMLElement, opts: { signal?: AbortSi
       continue;
     }
     host.setAttribute('data-ocm-mermaid-hash', source);
+    host.setAttribute('data-ocm-mermaid-scheme', scheme);
     try {
-      const svg = renderMermaidSvg(source);
+      // SVG colors are presentation attributes: pick the palette for the host scheme now.
+      const svg = renderMermaidSvg(source, scheme === 'dark' ? { theme: DARK } : {});
       if (opts.signal?.aborted) {
         return;
       }
@@ -98,4 +107,12 @@ export function hydrateMermaidBlocks(root: HTMLElement, opts: { signal?: AbortSi
       host.setAttribute('data-ocm-mermaid-error', '1');
     }
   }
+}
+
+/** Repaint every hydrated diagram (after the host flips `html.dark`). */
+export function repaintMermaidBlocks(root: HTMLElement): void {
+  for (const host of root.querySelectorAll<HTMLElement>(MERMAID_READY_SEL)) {
+    host.removeAttribute('data-ocm-mermaid-ready');
+  }
+  hydrateMermaidBlocks(root);
 }

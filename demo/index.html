@@ -16,6 +16,24 @@
         --text: #18181b;
         --muted: #71717a;
         --accent: #0284c7;
+        --chip-bg: #eef2ff;
+        --chip-text: #3730a3;
+        --surface: #fff;
+        --surface-muted: #fafafa;
+      }
+      /* Same switch as the editor tokens: the host owns html.dark. */
+      html.dark {
+        color-scheme: dark;
+        --bg: #09090b;
+        --card: #18181b;
+        --border: #3f3f46;
+        --text: #fafafa;
+        --muted: #a1a1aa;
+        --accent: #38bdf8;
+        --chip-bg: rgb(99 102 241 / 0.18);
+        --chip-text: #c7d2fe;
+        --surface: #18181b;
+        --surface-muted: #27272a;
       }
       * {
         box-sizing: border-box;
@@ -53,8 +71,8 @@
         font-size: 12px;
       }
       .meta span {
-        background: #eef2ff;
-        color: #3730a3;
+        background: var(--chip-bg);
+        color: var(--chip-text);
         border-radius: 999px;
         padding: 4px 10px;
       }
@@ -66,14 +84,14 @@
       }
       .modes button {
         border: 1px solid var(--border);
-        background: #fff;
+        background: var(--surface);
         border-radius: 999px;
         padding: 8px 14px;
         cursor: pointer;
         font: inherit;
       }
       .modes button:hover {
-        background: #fafafa;
+        background: var(--surface-muted);
       }
       .modes button.active {
         background: var(--accent);
@@ -125,14 +143,14 @@
       }
       .actions button {
         border: 1px solid var(--border);
-        background: #fff;
+        background: var(--surface);
         border-radius: 8px;
         padding: 8px 12px;
         cursor: pointer;
         font: inherit;
       }
       .actions button:hover {
-        background: #fafafa;
+        background: var(--surface-muted);
       }
       .actions button.primary {
         background: var(--accent);
@@ -142,7 +160,7 @@
       pre.out {
         margin: 0;
         padding: 12px;
-        background: #fafafa;
+        background: var(--surface-muted);
         border: 1px solid var(--border);
         border-radius: 8px;
         font-size: 12px;
@@ -155,7 +173,7 @@
         min-height: 240px;
         border: 1px solid var(--border);
         border-radius: 8px;
-        background: #fff;
+        background: var(--surface);
       }
       #publish-card[hidden] {
         display: none;

@@ -35,3 +35,4 @@ pids
 *.pid
 *.seed
 *.pid.lock
+screens/out

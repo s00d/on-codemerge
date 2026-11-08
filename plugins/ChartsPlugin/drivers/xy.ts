@@ -8,6 +8,8 @@ import {
   drawLegend,
   drawNoData,
   drawTitle,
+  gridColor,
+  mutedColor,
   plotBox,
   themeColors,
 } from '../canvas/kit';
@@ -48,7 +50,7 @@ export function paintXy(
 
   // axes ticks
   ctx.save();
-  ctx.fillStyle = '#6b7280';
+  ctx.fillStyle = mutedColor(options);
   ctx.font = '12px Inter, system-ui, sans-serif';
   for (let i = 0; i <= 5; i++) {
     const x = padding + (plotW * i) / 5;
@@ -62,7 +64,7 @@ export function paintXy(
 
   if (options.grid?.show !== false) {
     ctx.save();
-    ctx.strokeStyle = '#e5e7eb';
+    ctx.strokeStyle = gridColor(options);
     ctx.globalAlpha = 0.3;
     for (let i = 0; i <= 5; i++) {
       const y = height - padding - (plotH * i) / 5;

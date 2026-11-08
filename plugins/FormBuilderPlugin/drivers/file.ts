@@ -34,7 +34,7 @@ export const fileDriver: FieldDriver = {
     const opts = ctx.field.options ?? {};
     return h('div', null, [
       h('div', { class: 'setting-group mb-3' }, [
-        h('label', { class: 'block text-sm text-gray-700 mb-1' }, 'Accept'),
+        h('label', { class: 'block text-sm text-ocm-text mb-1' }, 'Accept'),
         h('input', {
           class: 'form-input w-full p-2 border border-gray-300 rounded-md',
           attrs: { type: 'text', placeholder: 'image/*,.pdf' },
