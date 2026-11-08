@@ -8,7 +8,7 @@ packages:
 
 catalog:
   '@arethetypeswrong/cli': ^0.18.5
-  '@i18n-micro/runtime': ^1.0.0
+  '@i18n-micro/runtime': ^2.1.0
   '@playwright/test': ^1.63.0
   '@tailwindcss/postcss': ^4.3.3
   '@tailwindcss/typography': ^0.5.20

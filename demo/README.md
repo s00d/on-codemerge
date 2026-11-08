@@ -14,7 +14,8 @@ cd demo
 pnpm install
 pnpm exec playwright install chromium   # once
 pnpm dev                                # http://localhost:3001/integrate.html
-pnpm build && pnpm test:e2e:integrate   # preview + adapter e2e
+pnpm typecheck                          # published types, skipLibCheck: false
+pnpm build && pnpm test:e2e             # preview + stand + adapter e2e
 ```
 
 ## From monorepo (local `dist` only)

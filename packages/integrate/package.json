@@ -1,6 +1,6 @@
 {
   "name": "@codemerge/integrate",
-  "version": "2.9.0",
+  "version": "2.9.1",
   "description": "Universal host adapters for on-codemerge (UI frameworks, Web Component)",
   "keywords": [
     "codemerge",

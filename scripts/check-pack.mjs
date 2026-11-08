@@ -5,10 +5,13 @@
  *  - every `exports` / `main` / `module` / `types` / `bin` target is inside it;
  *  - no `workspace:` / `catalog:` specifiers survive in the packed package.json;
  *  - no tests, fixtures or source maps of tests leak in;
- *  - types resolve for ESM + CJS consumers (`attw`, node16 + bundler).
+ *  - types resolve for ESM + CJS consumers (`attw`, node16 + bundler);
+ *  - a consumer project importing every typed entrypoint of the unpacked tarballs passes
+ *    `tsc` with `skipLibCheck: false` under nodenext and bundler (catches broken or cyclic
+ *    declarations that attw only resolves, never checks).
  */
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,6 +59,11 @@ function hasTarget(files, target) {
 }
 
 const out = mkdtempSync(join(tmpdir(), 'ocm-pack-'));
+// Inside the repo so third-party types (and installed optional peers) resolve from the root
+// node_modules, while our own packages resolve from the unpacked tarballs next to it.
+const consumer = resolve(root, 'node_modules/.cache/ocm-pack-consumer');
+rmSync(consumer, { recursive: true, force: true });
+const entrypoints = [];
 const errors = [];
 try {
   for (const dir of PACKAGES) {
@@ -121,10 +129,80 @@ try {
       errors.push(`${label}: attw failed\n${e.stdout ?? ''}${e.stderr ?? ''}`);
     }
 
+    const into = resolve(consumer, 'node_modules', pkg.name);
+    mkdirSync(into, { recursive: true });
+    run('tar', ['-xzf', tgz, '-C', into, '--strip-components', '1'], out);
+    for (const [key, value] of Object.entries(pkg.exports ?? {})) {
+      if (JSON.stringify(value).includes('"types"')) {
+        entrypoints.push(`${pkg.name}${key.slice(1)}`);
+      }
+    }
+
     console.log(`ok ${label} (${files.size} files)`);
+  }
+
+  // Own package.json: otherwise the repo root's `on-codemerge` would satisfy imports of
+  // `on-codemerge` as a self-reference instead of the unpacked tarball.
+  writeFileSync(
+    resolve(consumer, 'package.json'),
+    JSON.stringify({ name: 'ocm-pack-consumer', private: true, type: 'module' })
+  );
+  writeFileSync(
+    resolve(consumer, 'index.ts'),
+    `${entrypoints.map((e, i) => `import type * as e${i} from '${e}';`).join('\n')}\nexport type All = [${entrypoints.map((_, i) => `typeof e${i}`).join(', ')}];\n`
+  );
+  const ours = new Set(
+    PACKAGES.map((d) => JSON.parse(readFileSync(resolve(root, d, 'package.json'), 'utf8')).name)
+  );
+  for (const [module, moduleResolution] of [
+    ['nodenext', 'nodenext'],
+    ['esnext', 'bundler'],
+  ]) {
+    writeFileSync(
+      resolve(consumer, 'tsconfig.json'),
+      JSON.stringify({
+        compilerOptions: {
+          module,
+          moduleResolution,
+          target: 'es2022',
+          lib: ['es2022', 'dom', 'dom.iterable'],
+          types: ['node'],
+          strict: true,
+          noEmit: true,
+          skipLibCheck: false,
+        },
+        files: ['index.ts'],
+      })
+    );
+    let output = '';
+    try {
+      run(resolve(root, 'node_modules/.bin/tsc'), ['-p', consumer], root);
+    } catch (e) {
+      output = `${e.stdout ?? ''}${e.stderr ?? ''}`;
+    }
+    // An optional peer that is not installed here (react, vue, …) is the consumer's business.
+    const real = output
+      .split('\n')
+      .filter((line) => /error TS/.test(line))
+      .filter((line) => {
+        const missing = line.match(/TS2307: Cannot find module '([^']+)'/);
+        if (!missing) {
+          return true;
+        }
+        const name = missing[1].startsWith('@')
+          ? missing[1].split('/').slice(0, 2).join('/')
+          : missing[1].split('/')[0];
+        return ours.has(name) || missing[1].startsWith('.');
+      });
+    if (real.length > 0) {
+      errors.push(`consumer tsc (${moduleResolution}) failed:\n${real.slice(0, 40).join('\n')}`);
+    } else {
+      console.log(`ok consumer tsc (${moduleResolution}, ${entrypoints.length} entrypoints)`);
+    }
   }
 } finally {
   rmSync(out, { recursive: true, force: true });
+  rmSync(consumer, { recursive: true, force: true });
 }
 
 if (errors.length > 0) {

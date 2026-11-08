@@ -17,9 +17,9 @@ const externalEl = document.querySelector('#external-value') as HTMLPreElement;
 const lastEventEl = document.querySelector('#last-event') as HTMLPreElement;
 const errorsEl = document.querySelector('#errors') as HTMLDivElement;
 const statusEl = document.querySelector('#status') as HTMLSpanElement;
-const adapterLabelEl = document.querySelector('#adapter-label') as HTMLStrongElement;
-const ocmVersionEl = document.querySelector('#ocm-version') as HTMLStrongElement;
-const intVersionEl = document.querySelector('#int-version') as HTMLStrongElement;
+const adapterLabelEl = document.querySelector('#adapter-label') as HTMLElement;
+const ocmVersionEl = document.querySelector('#ocm-version') as HTMLElement;
+const intVersionEl = document.querySelector('#int-version') as HTMLElement;
 
 ocmVersionEl.textContent = String(import.meta.env.VITE_OCM_VERSION ?? 'unknown');
 intVersionEl.textContent = String(import.meta.env.VITE_INTEGRATE_VERSION ?? 'unknown');
@@ -152,7 +152,7 @@ function mountMount(): void {
   });
 }
 
-type Jq = typeof import('jquery').default;
+type Jq = JQueryStatic;
 
 async function ensureJQuery(): Promise<Jq> {
   const mod = await import('jquery');

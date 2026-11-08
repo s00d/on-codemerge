@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.9.1] - 2026-11-08
+
+`on-codemerge` and `@codemerge/integrate` 2.9.1; the other packages stay 2.9.0 / 3.0.0.
+
+### Fixed
+
+- `on-codemerge/plugins` types: `dist/apps/wysiwyg/src/plugins.d.ts` re-exported itself (`Circular definition of import alias` with `skipLibCheck: false`)
+- `@codemerge/integrate/jquery`: `registerJQueryPlugin($)` accepts a real `JQueryStatic` without a cast
+- `@i18n-micro/runtime` ^2.1.0: its declarations resolve under `moduleResolution: nodenext`
+- Docs: sidebar no longer stacks above the page on the built site; long words wrap on phones
+
+### Changed
+
+- `check:pack` also type-checks a consumer project that imports every typed entrypoint of the unpacked tarballs (`skipLibCheck: false`, nodenext + bundler)
+- `demo/`: real Vite tsconfig and a `typecheck` script
+
 ## [2.9.0] - 2026-11-08
 
 `@codemerge/collaboration-server` 3.0.0 (breaking, see below); everything else 2.9.0.

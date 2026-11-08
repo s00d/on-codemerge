@@ -7,15 +7,16 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "typecheck": "tsc -p .",
     "preview": "vite preview --host 127.0.0.1 --port 4177",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:integrate": "playwright test e2e/integrate.spec.ts"
   },
   "dependencies": {
-    "@codemerge/integrate": "2.8.0",
+    "@codemerge/integrate": "2.9.1",
     "jquery": "^3.7.1",
-    "on-codemerge": "2.8.0",
+    "on-codemerge": "2.9.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "vue": "^3.5.0"

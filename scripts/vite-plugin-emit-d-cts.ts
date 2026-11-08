@@ -36,13 +36,28 @@ function withExtension(file: string, spec: string): string {
     return spec;
   }
   const base = resolve(dirname(file), spec);
-  if (existsSync(`${base}.d.ts`)) {
+  const asFile = existsSync(`${base}.d.ts`);
+  const asDir = existsSync(join(base, 'index.d.ts'));
+  // `dist/plugins.d.ts` (entry) and `dist/plugins/index.d.ts` (aliased `@ocm/plugins`) share a
+  // name; the entry re-exports the importer, so picking the file would be a cycle.
+  if (asFile && !(asDir && reexports(`${base}.d.ts`, file))) {
     return `${spec}.js`;
   }
-  if (existsSync(join(base, 'index.d.ts'))) {
+  if (asDir) {
     return `${spec.replace(/\/$/, '')}/index.js`;
   }
   return spec;
+}
+
+/** Does declaration `from` import `target` (by any relative specifier)? */
+function reexports(from: string, target: string): boolean {
+  const want = target.replace(/\.d\.ts$/, '');
+  for (const m of readFileSync(from, 'utf8').matchAll(SPECIFIER)) {
+    if (resolve(dirname(from), m[3]).replace(/\.js$/, '') === want) {
+      return true;
+    }
+  }
+  return false;
 }
 
 /** Rewrite every `.d.ts` under `distDir` and emit its `.d.cts` twin. */

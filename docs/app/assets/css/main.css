@@ -22,3 +22,9 @@
   overflow: hidden;
   background: var(--ui-bg);
 }
+
+/* Long slash-joined words (`Calendar/Charts/Forms/…`) must wrap on phones, not widen the page. */
+main p,
+main li {
+  overflow-wrap: break-word;
+}
